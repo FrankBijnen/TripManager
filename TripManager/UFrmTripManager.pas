@@ -3,13 +3,15 @@
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.WebView2, Winapi.ActiveX,
+  Winapi.Windows, Winapi.Messages, Winapi.WebView2,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
+  WinApi.ShlObj, System.Win.ComObj,
+
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ImgList, Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls,
   Vcl.ToolWin,
   TripManager_ShellList,
-  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, Vcl.ButtonGroup;
+  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, Vcl.ButtonGroup, Winapi.ActiveX;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -229,6 +231,7 @@ type
     WarnRecalc: integer; // MrNone, MrYes, MrNo, mrIgnore
     WarnModel: boolean;
     WarnOverWrite: integer;  // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
+
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     procedure ClearSelHexEdit;
     procedure SyncHexEdit(Sender: TObject);
@@ -918,6 +921,7 @@ begin
   HexEdit.Align := alClient;
   HexEdit.OnKeyPress := HexEditKeyPress;
 
+  ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
   ReadSettings;
@@ -2613,3 +2617,4 @@ begin
 end;
 
 end.
+

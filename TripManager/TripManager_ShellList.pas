@@ -9,7 +9,7 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.Types,
-  Winapi.Windows, Winapi.Messages, Winapi.CommCtrl, Winapi.ShlObj,
+  Winapi.Windows, Winapi.Messages, Winapi.CommCtrl, Winapi.ShlObj, WinApi.ActiveX,
   Vcl.Shell.ShellCtrls, Vcl.Shell.ShellConsts, Vcl.ComCtrls, Vcl.Controls;
 
 // Extend ShellListview, keeping the same Type. So we dont have to register it in the IDE
@@ -20,16 +20,23 @@ uses
 type
   THeaderSortState = (hssNone, hssAscending, hssDescending);
 
-  TShellListView = class(Vcl.Shell.ShellCtrls.TShellListView)
+  TShellListView = class(Vcl.Shell.ShellCtrls.TShellListView, IDropSource)
   private
     FColumnSorted: boolean;
     FSortColumn: integer;
     FSortState: THeaderSortState;
 
     ICM2: IContextMenu2;
+    FDragStartPos: TPoint;
+    FDragSource: boolean;
+    function GiveFeedback(dwEffect: Longint): HResult; stdcall;
+    function QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Longint): HResult; stdcall;
     procedure SetColumnSorted(AValue: boolean);
     function CreateSelectedFileList: TStringList;
   protected
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+
     procedure InitSortSpec(SortColumn: integer; SortState: THeaderSortState);
     procedure Populate; override;
     procedure ColumnSort; virtual;
@@ -53,6 +60,7 @@ type
     property SortColumn: integer read FSortColumn write FSortColumn;
     property SortState: THeaderSortState read FSortState write FSortState;
     property OnMouseWheel;
+    property DragSource: boolean read FDragSource write FDragSource;
   end;
 
 implementation
@@ -267,6 +275,7 @@ begin
 
   DoubleBuffered := true;
   StyleElements := [seFont, seBorder];
+  FDragSource := false;
   InitSortSpec(0, THeaderSortState.hssNone);
 end;
 
@@ -329,6 +338,72 @@ begin
 // Avoid cannot focus a disabled or invisible window
   if Enabled then
     inherited SetFocus;
+end;
+
+function TShellListView.GiveFeedback(dwEffect: Longint): HResult; stdcall;
+begin
+  Result := DRAGDROP_S_USEDEFAULTCURSORS;
+end;
+
+function TShellListView.QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Longint): HResult; stdcall;
+begin
+  if fEscapePressed or (grfKeyState and MK_RBUTTON = MK_RBUTTON) then
+    Result := DRAGDROP_S_CANCEL
+  else if grfKeyState and MK_LBUTTON = 0 then
+    Result := DRAGDROP_S_DROP
+  else
+    Result := S_OK;
+end;
+
+procedure TShellListView.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (FDragSource) and
+     (Button = mbLeft) then
+  begin
+    FDragStartPos.X := X;
+    FDragStartPos.Y := Y;
+  end;
+  inherited MouseDown(Button, Shift, X, Y);
+end;
+
+procedure TShellListView.MouseMove(Shift: TShiftState; X, Y: Integer);
+const
+  Threshold = 3;
+var
+  HR: HResult;
+  ItemIDListArray: array of PItemIDList;
+  Index, Cnt: integer;
+  DataObject: IDataObject;
+  Effect: Longint;
+begin
+  inherited MouseMove(Shift, X, Y);
+
+  if (FDragSource = false) then
+    exit;
+
+  if (SelCount > 0) and
+     (csLButtonDown in ControlState) and
+     ((Abs(X - FDragStartPos.X) >= Threshold) or (Abs(Y - FDragStartPos.Y) >= Threshold)) then
+  begin
+    Perform(WM_LBUTTONUP, 0, MakeLong(X, Y));
+    SetLength(ItemIDListArray, SelCount);
+    Cnt := 0;
+    for Index := 0 to Items.Count - 1 do
+    begin
+      if (ListView_GetItemState(Handle, Index, LVIS_SELECTED) = LVIS_SELECTED) then
+      begin
+        ItemIDListArray[Cnt] := Folders[Index].RelativeID;
+        Inc(Cnt);
+      end;
+    end;
+
+    HR := RootFolder.ShellFolder.GetUIObjectOf(0, SelCount, ItemIDListArray[0], IDataObject, nil, DataObject);
+    if (HR = S_OK) then
+    begin
+      Effect := DROPEFFECT_NONE;
+      DoDragDrop(DataObject, Self, DROPEFFECT_COPY, Effect);
+    end;
+  end;
 end;
 
 end.
