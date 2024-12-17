@@ -5,13 +5,12 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, Winapi.WebView2,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
-  WinApi.ShlObj, System.Win.ComObj,
-
+  WinApi.ShlObj, System.Win.ComObj, Winapi.ActiveX,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ImgList, Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls,
-  Vcl.ToolWin,
+  Vcl.ToolWin, Vcl.ButtonGroup,
   TripManager_ShellList,
-  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, Vcl.ButtonGroup, Winapi.ActiveX;
+  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, Monitor;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -147,6 +146,8 @@ type
     PnlTripInfo: TPanel;
     CmbModel: TComboBox;
     BtnPostProcess: TButton;
+    ChkWatch: TCheckBox;
+    PostProcessTimer: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -208,6 +209,8 @@ type
     procedure BtnTransferToDeviceClick(Sender: TObject);
     procedure ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
     procedure LstFilesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure ChkWatchClick(Sender: TObject);
+    procedure PostProcessTimerTimer(Sender: TObject);
 
   private
     { Private declarations }
@@ -231,6 +234,9 @@ type
     WarnRecalc: integer; // MrNone, MrYes, MrNo, mrIgnore
     WarnModel: boolean;
     WarnOverWrite: integer;  // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
+    ModifiedList: TStringList;
+    DirectoryMonitor: TDirectoryMonitor;
+    procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
 
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     procedure ClearSelHexEdit;
@@ -288,7 +294,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, winapi.ShellAPI, Vcl.Clipbrd,
-  UnitStringUtils, UnitOSMMap, UnitGpx, UnitGpi,
+  UnitStringUtils, UnitOSMMap, UnitGpx, UnitGpi, MsgLoop,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions;
 
 const
@@ -781,6 +787,51 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.PostProcessTimerTimer(Sender: TObject);
+var
+  ProcessModified: TStringList;
+  AGpx: string;
+begin
+  TTimer(Sender).Enabled := false;
+
+  // Stop directory monitor.
+  // If not we will get an event when postprocessing.
+  DirectoryMonitor.Stop;
+  while DirectoryMonitor.Active do
+  begin
+    Sleep(50);
+    ProcessMessages;
+  end;
+
+  ProcessModified := TStringList.Create;
+  try
+    // Copy the modified list
+    System.TMonitor.Enter(ModifiedList);
+    try
+      ProcessModified.Text := ModifiedList.Text;
+      ModifiedList.Clear;
+    finally
+      System.TMonitor.Exit(ModifiedList);
+    end;
+
+    // Bring to front by switching FormStyle
+    Self.FormStyle := fsStayOnTop;
+//    Application.BringToFront;
+    Self.FormStyle := fsNormal;
+
+    // PostProcess
+    if FrmPostProcess.ShowModal <> ID_OK then
+      exit;
+    for AGpx in ProcessModified do
+      DoFunction([Unglitch], AGpx);
+
+  finally
+    ProcessModified.Free;
+//    ShellListView1.Refresh;  // Clear selection
+    DirectoryMonitor.Start;
+  end;
+end;
+
 procedure TFrmTripManager.BtnSaveTripFileClick(Sender: TObject);
 begin
   HexEdit.SaveToFile(HexEditFile);
@@ -916,6 +967,14 @@ procedure TFrmTripManager.FormCreate(Sender: TObject);
 var
   AFilePath: string;
 begin
+  DirectoryMonitor := TDirectoryMonitor.Create;
+  DirectoryMonitor.Subdirectories := false;
+  DirectoryMonitor.Actions := [awChangeCreation, awChangeLastWrite];
+  DirectoryMonitor.OnChange := DirectoryEvent;
+  ModifiedList := TStringList.Create;
+  ModifiedList.Sorted := true;
+  ModifiedList.Duplicates := TDuplicates.dupIgnore;
+
   HexEdit := TBCHexEditor.Create(Self);
   HexEdit.Parent := HexPanel;
   HexEdit.Align := alClient;
@@ -943,6 +1002,11 @@ end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
 begin
+  if (DirectoryMonitor.Active) then
+    DirectoryMonitor.Stop;
+  DirectoryMonitor.Free;
+  ModifiedList.Free;
+
   FreeDevices;
   ATripList.Free;
   ClearTripInfo;
@@ -1186,6 +1250,9 @@ begin
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefFileSysFolder_Key, ShellTreeView1.Path);
   EdFileSysFolder.Text := ShellTreeView1.Path;
   ShellListView1Click(ShellListView1);
+  ChkWatch.Checked := false;
+  if (DirectoryMonitor <> nil) then
+    DirectoryMonitor.Directory := ShellTreeView1.Path;
 end;
 
 procedure TFrmTripManager.ShellTreeView1CustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState;
@@ -1278,6 +1345,14 @@ begin
   finally
     SetCursor(CrNormal);
   end;
+end;
+
+procedure TFrmTripManager.ChkWatchClick(Sender: TObject);
+begin
+  if (DirectoryMonitor <> nil) then
+    DirectoryMonitor.Active := ChkWatch.Checked;
+  if (DirectoryMonitor.Active) then
+    ShellListView1.ClearSelection;
 end;
 
 procedure TFrmTripManager.ClearSelHexEdit;
@@ -2614,6 +2689,42 @@ begin
   PostProcessClick(Self);
   if (CheckDevice(false)) then
     BtnTransferToDeviceClick(Self);
+end;
+
+procedure TFrmTripManager.DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
+var
+  Index: integer;
+  Ext: string;
+  FileFound: boolean;
+begin
+  Ext := ExtractFileExt(Filename);
+  if not (ContainsText(Ext, GpxExtension)) then
+    exit;
+
+  System.TMonitor.Enter(ModifiedList);
+  try
+    ModifiedList.Add(IncludeTrailingPathDelimiter(DirectoryMonitor.Directory) + FileName);
+  finally
+    System.TMonitor.Exit(ModifiedList);
+  end;
+
+  FileFound := false;
+  for Index := 0 to ShellListView1.Items.Count -1 do
+  begin
+    if (ShellListView1.Folders[Index].IsFolder) then
+      continue;
+
+    if SameText(FileName, ExtractFileName(ShellListView1.Folders[Index].PathName)) then
+    begin
+      ShellListView1.Items[Index].Selected := true;
+      FileFound := true;
+    end;
+  end;
+  if (FileFound = false) then
+    ShellListView1.Refresh;
+
+  PostProcessTimer.Enabled := false;
+  PostProcessTimer.Enabled := true;
 end;
 
 end.

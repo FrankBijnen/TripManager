@@ -41,7 +41,6 @@ object FrmTripManager: TFrmTripManager
     Height = 245
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 1295
     object VSplitterDev_Files: TSplitter
       Left = 631
       Top = 1
@@ -218,7 +217,6 @@ object FrmTripManager: TFrmTripManager
       Height = 243
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 658
       object VSplitterFile_Sys: TSplitter
         Left = 247
         Top = 33
@@ -267,8 +265,6 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 1
         ViewStyle = vsReport
         OnKeyUp = ShellListView1KeyUp
-        ExplicitLeft = 253
-        ExplicitTop = 31
       end
       object PnlXt2FileSys: TPanel
         Left = 1
@@ -307,7 +303,6 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 4
-        ExplicitWidth = 656
         object BtnAddToMap: TButton
           AlignWithMargins = True
           Left = 170
@@ -337,6 +332,16 @@ object FrmTripManager: TFrmTripManager
           Height = 30
           Align = alLeft
           TabOrder = 5
+          object ChkWatch: TCheckBox
+            Left = 1
+            Top = 1
+            Width = 63
+            Height = 28
+            Align = alClient
+            Caption = 'Watch'
+            TabOrder = 0
+            OnClick = ChkWatchClick
+          end
         end
         object BtnRefreshFileSys: TButton
           AlignWithMargins = True
@@ -724,8 +729,8 @@ object FrmTripManager: TFrmTripManager
     end
   end
   object ImageList: TImageList
-    Left = 127
-    Top = 67
+    Left = 124
+    Top = 66
     Bitmap = {
       494C010102000800040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
@@ -870,7 +875,7 @@ object FrmTripManager: TFrmTripManager
     OwnerDraw = True
     OnPopup = DeviceMenuPopup
     Left = 34
-    Top = 67
+    Top = 66
     object FileFunctions1: TMenuItem
       Caption = 'File Functions'
       GroupIndex = 1
@@ -993,14 +998,20 @@ object FrmTripManager: TFrmTripManager
     Enabled = False
     Interval = 100
     OnTimer = TripTimerTimer
-    Left = 226
+    Left = 214
     Top = 66
   end
   object MapTimer: TTimer
     Enabled = False
     Interval = 100
     OnTimer = MapTimerTimer
-    Left = 305
-    Top = 67
+    Left = 304
+    Top = 66
+  end
+  object PostProcessTimer: TTimer
+    Enabled = False
+    OnTimer = PostProcessTimerTimer
+    Left = 397
+    Top = 68
   end
 end

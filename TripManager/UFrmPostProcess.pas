@@ -49,6 +49,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    procedure SetPreferences;
   end;
 
 var
@@ -218,6 +219,12 @@ end;
 procedure TFrmPostProcess.FormShow(Sender: TObject);
 begin
   LoadSymbols;
+  SetFixedPrefs;
+  SetPrefs;
+end;
+
+procedure TFrmPostProcess.SetPreferences;
+begin
   SetFixedPrefs;
   SetPrefs;
 end;
