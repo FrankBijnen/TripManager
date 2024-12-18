@@ -408,12 +408,13 @@ end;
 procedure TFrmTripManager.CloseDevice;
 begin
   try
-  if Assigned(CurrentDevice) and
-     Assigned(CurrentDevice.PortableDev) then
-    CurrentDevice.PortableDev.Close;
-  finally
-    CurrentDevice := nil;
+    if Assigned(CurrentDevice) and
+       Assigned(CurrentDevice.PortableDev) then
+      CurrentDevice.PortableDev.Close;
+  except
+
   end;
+  CurrentDevice := nil;
 end;
 
 function TFrmTripManager.CheckDevice(RaiseException: boolean = true): boolean;
@@ -662,13 +663,23 @@ begin
 end;
 
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
+var
+  ConnectionOK: boolean;
 begin
-  if (CurrentDevice = nil) or
-     (CurrentDevice.PortableDev = nil) or
-     (GetFirstStorageID(CurrentDevice.PortableDev) = '') then
-    GetDeviceList
+  try
+    ConnectionOK := (CurrentDevice <> nil) and
+                    (CurrentDevice.PortableDev <> nil);
+    ConnectionOK := ConnectionOK and
+                    (GetFirstStorageID(CurrentDevice.PortableDev) <> '');
+  except
+    CurrentDevice := nil; // Prevent needless tries
+    ConnectionOK := false;
+  end;
+
+  if (ConnectionOK) then
+    ReloadFileList
   else
-    ReloadFileList;
+    GetDeviceList;
 end;
 
 function TFrmTripManager.GetSelectedFile: string;

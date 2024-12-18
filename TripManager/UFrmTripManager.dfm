@@ -41,6 +41,7 @@ object FrmTripManager: TFrmTripManager
     Height = 245
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 1295
     object VSplitterDev_Files: TSplitter
       Left = 631
       Top = 1
@@ -217,6 +218,7 @@ object FrmTripManager: TFrmTripManager
       Height = 243
       Align = alClient
       TabOrder = 1
+      ExplicitWidth = 658
       object VSplitterFile_Sys: TSplitter
         Left = 247
         Top = 33
@@ -303,6 +305,7 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 4
+        ExplicitWidth = 656
         object BtnAddToMap: TButton
           AlignWithMargins = True
           Left = 170
