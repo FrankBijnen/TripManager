@@ -211,6 +211,7 @@ type
     procedure LstFilesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ChkWatchClick(Sender: TObject);
     procedure PostProcessTimerTimer(Sender: TObject);
+    procedure ShellListView1DblClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -1245,6 +1246,16 @@ end;
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   ShellListView1.ColumnClick(Column);
+end;
+
+procedure TFrmTripManager.ShellListView1DblClick(Sender: TObject);
+begin
+  if (ShellListView1.SelectedFolder = nil) then
+    exit;
+  if (ShellListView1.SelectedFolder.IsFolder) then
+    ShellTreeView1.Path := ShellListView1.SelectedFolder.PathName
+  else
+    ShellExecute(0, 'OPEN', PWideChar(ShellListView1.SelectedFolder.PathName), '' ,'', SW_SHOWNORMAL);
 end;
 
 procedure TFrmTripManager.ShellListView1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);

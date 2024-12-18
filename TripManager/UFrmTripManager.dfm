@@ -251,6 +251,7 @@ object FrmTripManager: TFrmTripManager
         Top = 33
         Width = 409
         Height = 184
+        AutoNavigate = False
         ObjectTypes = [otFolders, otNonFolders]
         Root = 'rfDesktop'
         ShellTreeView = ShellTreeView1
@@ -258,6 +259,7 @@ object FrmTripManager: TFrmTripManager
         OnAddFolder = ShellListView1AddFolder
         Align = alClient
         OnClick = ShellListView1Click
+        OnDblClick = ShellListView1DblClick
         ReadOnly = False
         GridLines = True
         HideSelection = False
@@ -267,6 +269,8 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 1
         ViewStyle = vsReport
         OnKeyUp = ShellListView1KeyUp
+        ExplicitLeft = 246
+        ExplicitTop = 31
       end
       object PnlXt2FileSys: TPanel
         Left = 1
