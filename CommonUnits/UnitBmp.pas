@@ -55,58 +55,59 @@ end;
 implementation
 
 constructor TBitMapReader.Create(ABitMap: UTF8String);
-var f: file;
-    idstr:TIDString;
-    y, RowLength: integer;
+var F: file;
+    Idstr: TIDString;
+    Y, RowLength: integer;
     Red, Blue: byte;
 begin
   if (not FileExists(string(ABitMap))) then
     raise exception.Create(string(ABitMap) + ' not found');
 
-  AssignFile(f, string(ABitMap));
-  Reset(f, 1);
+  FileMode := 0;
+  AssignFile(F, string(ABitMap));
+  Reset(F, 1);
   try
-    idstr := '';
+    Idstr := '';
 
     {a bitmap file starts with the id 'BM'}
-    BlockRead(f, AChar, 1, amt);
-    idstr := TIDString(Achar);
-    BlockRead(f, Achar, 1, amt);
-    idstr := idstr + TIDString(Achar);
-    if idstr <> 'BM' then
+    BlockRead(F, AChar, 1, amt);
+    Idstr := TIDString(Achar);
+    BlockRead(F, Achar, 1, amt);
+    Idstr := Idstr + TIDString(Achar);
+    if Idstr <> 'BM' then
       raise exception.Create(string(ABitMap) + ' is not a valid bitmap');
 
     {read the file header info}
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapFileHeader.bmfFileSize := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapFileHeader.bmfReserved := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapFileHeader.bmfBitMapDataOffset := Alongint;
 
     {read the bitmap info header}
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biSize := Alongint; {size of header itself}
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biWidth := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biHeight :=  Alongint;
-    Blockread(f, AWord, 2, amt);
+    Blockread(F, AWord, 2, amt);
     BitmapInfoHeader.biPlanes := Aword;
-    Blockread(f, AWord, 2, amt);
+    Blockread(F, AWord, 2, amt);
     BitmapInfoHeader.biBitCount := Aword;  {bits per pixel}
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biCompression := Alongint;
 
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biSizeImage := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biXPelsPerMeter := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biYPelsPerMeter := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biClrUsed := Alongint;
-    BlockRead(f, Alongint, 4, amt);
+    BlockRead(F, Alongint, 4, amt);
     BitmapInfoHeader.biClrImportant := Alongint;
 
     {get the color palette}
@@ -115,27 +116,27 @@ begin
 
     PalCount := BitmapInfoHeader.biClrUsed;
     SetLength(ColPat, sizeof(TPaletteEntry) * PalCount);
-    BlockRead(f, ColPat[0], sizeof(TPaletteEntry) * PalCount, Amt);
+    BlockRead(F, ColPat[0], sizeof(TPaletteEntry) * PalCount, Amt);
 
     {Swap Blue and Red}
-    for y := 0 to PalCount-1 do
+    for Y := 0 to PalCount-1 do
     begin
-      Red := ColPat[ (y*4) ];
-      Blue := ColPat[ (y*4) + 2 ];
-      ColPat[ (y*4) + 2 ] := Red;
-      ColPat[ (y*4) ] := Blue;
+      Red := ColPat[ (Y*4) ];
+      Blue := ColPat[ (Y*4) + 2 ];
+      ColPat[ (Y*4) + 2 ] := Red;
+      ColPat[ (Y*4) ] := Blue;
     end;
 
     {get the pixel data of the bitmap}
     RowLength := (BitmapInfoHeader.biWidth * BitmapInfoHeader.biBitCount) div 8;
     SetLength(ScanLines, BitmapInfoHeader.biHeight * RowLength);
-    for y := BitmapInfoHeader.biHeight - 1 downto 0 do
+    for Y := BitmapInfoHeader.biHeight - 1 downto 0 do
     begin
-      BlockRead(f, ScanLines[y * RowLength], RowLength, amt);
+      BlockRead(F, ScanLines[Y * RowLength], RowLength, amt);
     end;
 
   finally
-    CloseFile(f);
+    CloseFile(F);
   end;
 end;
 
