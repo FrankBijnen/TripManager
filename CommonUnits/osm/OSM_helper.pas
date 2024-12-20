@@ -93,6 +93,7 @@ begin
   Html.Add('var lineFeature;');
   Html.Add('var po;');
   Html.Add('var op;');
+  Html.Add('var cacheRead, cacheWrite;');
   Html.Add('');
   Html.Add('  function initialize()');
   Html.Add('  {');
@@ -108,6 +109,11 @@ begin
   Html.Add('           units:            ''m'',');
   Html.Add('           projection:       new OpenLayers.Projection("EPSG:900913"),');
   Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
+  Html.Add('');
+  Html.Add('     cacheWrite = new OpenLayers.Control.CacheWrite();');
+  Html.Add('     map.addControl(cacheWrite);');
+  Html.Add('     cacheRead = new OpenLayers.Control.CacheRead();');
+  Html.Add('     map.addControl(cacheRead);');
   Html.Add('');
   Html.Add('     map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));');
   Html.Add('     map.addLayer(new OpenLayers.Layer.OSM("Wikimedia",');

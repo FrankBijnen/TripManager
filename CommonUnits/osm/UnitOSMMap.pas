@@ -100,6 +100,7 @@ begin
   Html.Add('var style;');
   Html.Add('var po;');
   Html.Add('var op;');
+  Html.Add('var cacheWrite, cacheRead;');
 
   Html.Add('');
   Html.Add('  function initialize()');
@@ -119,12 +120,16 @@ begin
   Html.Add('              featureover: function(e) {');
   Html.Add('              e.feature.renderIntent = "select";');
   Html.Add('              e.feature.layer.drawFeature(e.feature);');
-  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", e.feature.layer.name, e.feature.layer.displayInLayerSwitcher);');
-//  Html.Add('              alert("Map says: Pointer entered " + e.feature.id + " on " + e.feature.layer.name);');
-  Html.Add('              }');
+  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", e.feature.layer.name, e.feature.layer.displayInLayerSwitcher);');  Html.Add('              }');
   Html.Add('           },');
   Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
   Html.Add('');
+
+  Html.Add('     cacheWrite = new OpenLayers.Control.CacheWrite();');
+  Html.Add('     map.addControl(cacheWrite);');
+  Html.Add('     cacheRead = new OpenLayers.Control.CacheRead();');
+  Html.Add('     map.addControl(cacheRead);');
+
   Html.Add('     map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));');
   Html.Add('     po = map.getProjectionObject();');
   Html.Add('     op = new OpenLayers.Projection("EPSG:4326");');
