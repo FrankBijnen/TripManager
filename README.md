@@ -5,8 +5,7 @@ This program has been tested on the XT, but many functions should work on the XT
 Modifying and or creating trip files will likely not work on the XT2.
 
 # Documentation available
-See [Overview](TripManager/docs/Tripmanager%20Overview.pdf)<br><br>
-[Walk throughs](TripManager/docs/WalkThroughs)<br>
-Some common tasks with screenshots showing the available functions.
+ - [Documentation html](https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md)
+ - [Documentation md](TripManager/docs/README.md)
 
 Frank
