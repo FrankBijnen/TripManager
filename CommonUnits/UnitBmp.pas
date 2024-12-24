@@ -115,8 +115,8 @@ begin
       raise exception.Create(string(ABitMap) + ' #Colors should be 256');
 
     PalCount := BitmapInfoHeader.biClrUsed;
-    SetLength(ColPat, sizeof(TPaletteEntry) * PalCount);
-    BlockRead(F, ColPat[0], sizeof(TPaletteEntry) * PalCount, Amt);
+    SetLength(ColPat, SizeOf(TPaletteEntry) * PalCount);
+    BlockRead(F, ColPat[0], SizeOf(TPaletteEntry) * PalCount, Amt);
 
     {Swap Blue and Red}
     for Y := 0 to PalCount-1 do
