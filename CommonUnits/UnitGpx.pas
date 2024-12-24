@@ -1044,6 +1044,22 @@ end;
 function GPXWayPoint(CatId, BmpId: integer; WayPoint: TXmlVSNode): TGPXWayPoint;
 var ExtensionsNode, AddressNode: TXmlVSNode;
     ProximityStr: TGPXString;
+
+    function GetSpeedFromName(WptName: string): integer;
+    var
+      SpeedStr: string;
+      SpeedPos: integer;
+    begin
+      result := 0;
+      SpeedPos := LastDelimiter('@', WptName);
+      if (SpeedPos > 0) then
+      begin
+        SpeedStr := Copy(WptName, SpeedPos +1);
+        if (TryStrToInt(SpeedStr, Integer(SpeedPos))) then
+          result := SpeedPos;
+      end;
+    end;
+
 begin
   result := TGPXWayPoint.Create;
   with result do
@@ -1052,9 +1068,13 @@ begin
     Comment     := TGPXString(FindSubNodeValue(WayPoint, 'cmt'));
     Lat         := TGPXString(WayPoint.AttributeList.Find('lat').Value);
     Lon         := TGPXString(WayPoint.AttributeList.Find('lon').Value);
+
     Proximity   := 0;
     if (IniProximityStr <> '') then // From INI file
       Proximity := StrToInt(string(IniProximityStr));
+
+    Speed       := GetSpeedFromName(string(result.Name));
+
     ExtensionsNode := WayPoint.Find('extensions');
     if (ExtensionsNode <> nil) then
       ExtensionsNode := ExtensionsNode.Find('gpxx:WaypointExtension');
@@ -1193,14 +1213,13 @@ var Func: TGPXFunc;
         RouteWayPoints, WayPoint: TXmlVSNode;
         GPIFile: TGPI;
         POIGroup: TPOIGroup;
-        S: TFileStream;
+        S: TBufferedFileStream;
         CatId: integer;
         BmpId: integer;
     begin
 
-      UnitGPI.FormatSettings := GetLocaleSetting;
       OutFile := ChangeFileExt(OutDir + BaseFile, '.gpi');
-      S := TFileStream.Create(OutFile, fmCreate);
+      S := TBufferedFileStream.Create(OutFile, fmCreate);
       GPIFile := TGPI.Create(GPIVersion);
       GPIFile.WriteHeader(S);
       PoiGroup := GPIFile.CreatePOIGroup(TGPXString(BaseFile));

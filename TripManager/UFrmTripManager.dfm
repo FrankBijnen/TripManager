@@ -269,8 +269,6 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 1
         ViewStyle = vsReport
         OnKeyUp = ShellListView1KeyUp
-        ExplicitLeft = 246
-        ExplicitTop = 31
       end
       object PnlXt2FileSys: TPanel
         Left = 1

@@ -1822,7 +1822,7 @@ begin
   if (Key = Ord('C')) and
      (ssCtrl in Shift) then
     with TValueListEditor(Sender) do
-      Clipboard.AsText :=  Cells[Col, Row];
+      Clipboard.AsText := Cells[Col, Row];
 end;
 
 procedure TFrmTripManager.VlTripInfoEditButtonClick(Sender: TObject);

@@ -1,9 +1,11 @@
 unit UnitGpi;
+{$WARN SYMBOL_PLATFORM OFF}
+
 interface
 
 uses
   System.Classes, System.Types, System.SysUtils, System.AnsiStrings, System.DateUtils, System.Generics.Collections,
-  Vcl.Dialogs, UnitBmp;
+  Vcl.Dialogs, Vcl.Graphics, UnitBmp;
 
 type
   TGPXString = UTF8String;
@@ -27,6 +29,7 @@ type
     City: TGPXString;
     Street: TGPXString;
     HouseNbr: TGPXString;
+    Category: TGPXString;
     Speed: Word;
     Proximity: Word;
     BitmapId: integer;
@@ -34,6 +37,7 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
+  TPOIList = Tlist<TGPXWayPoint>;
 
   TGPXCategory = class
     Category: TGPXString;
@@ -53,7 +57,8 @@ type
     LChars:     Word;
     Chars:      array of AnsiChar;
     constructor Create(AChars: TGPXString);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Read(S: TBufferedFileStream);
     function Size: integer;
   end;
 
@@ -63,16 +68,9 @@ type
     LChars:     Word;
     Chars:      array of AnsiChar;
     constructor Create(AChars: TGPXString);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Read(S: TBufferedFileStream);
     function Size: integer;
-  end;
-
-  TMainRec = packed record
-    RecType:    Word;
-    Flags:      Word;
-    Length:     DWord;
-    constructor Create(AVersion, ARecType: Word);
-    procedure Write(S: TFileStream; ALength: Dword);
   end;
 
   TExtraRec = packed record
@@ -81,14 +79,29 @@ type
     TotalLength:DWord;
     MainLength: DWord;
     constructor Create(AVersion, ARecType: Word);
-    procedure Write(S: TFileStream; ATotalLength, AExtra: Dword);
+    procedure Write(S: TBufferedFileStream; ATotalLength, AExtra: Dword);
+    procedure Read(S: TBufferedFileStream);
+    function Assign(var Dest: TExtraRec): boolean;
+  end;
+
+  TMainRec = packed record
+    RecType:    Word;
+    Flags:      Word;
+    Length:     DWord;
+    constructor Create(AVersion, ARecType: Word);
+    procedure Write(S: TBufferedFileStream; ALength: Dword);
+    procedure Read(S: TBufferedFileStream); overload;
+    procedure Read(S: TBufferedFileStream; var ExtraRec: TExtraRec); overload;
+    procedure Assign(var Dest: TMainRec);
   end;
 
   TCategoryRef = packed record
     MainRec:  TMainRec;
     Id:       SmallInt;
     constructor Create(AVersion: Word; AId: SmallInt);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
 
@@ -97,7 +110,9 @@ type
     Id:       SmallInt;
     Name:     TPLString;
     constructor Create(AVersion: Word; GPXCategory: TGPXCategory);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
 
@@ -105,7 +120,9 @@ type
     MainRec:  TMainRec;
     Id:       SmallInt;
     constructor Create(AVersion: Word; AId: SmallInt);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
 
@@ -127,7 +144,10 @@ type
     ColPat:   array of byte;
     BitMapRd: TBitMapReader;
     constructor Create(AVersion: Word; GPXBitMap: TGPXBitmap);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
+    function Bitmap: Vcl.Graphics.TBitMap;
     function Size: integer;
   end;
 
@@ -140,7 +160,8 @@ type
     Flag2:      byte;
     Name:       TPstring;
     constructor Create(AVersion: Word);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Read(S: TBufferedFileStream);
     function Size: integer;
   end;
 
@@ -152,7 +173,8 @@ type
     CodePage:   Word;
     CopyRight:  Word;
     constructor Create(AVersion: Word);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Read(S: TBufferedFileStream);
     function Size: integer;
   end;
 
@@ -168,14 +190,18 @@ type
     SoundNbr:   Byte;
     AudioAlert: Byte;
     constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
   end;
 
   TComment = packed record
     MainRec:    TMainRec;
     Comment:    TPLString;
     constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
 
@@ -189,7 +215,9 @@ type
     Street:     TPLString;
     HouseNbr:   TPString;
     constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
 
@@ -199,13 +227,15 @@ type
     Phone:      TPString;
     Email:      TPString;
     constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
 // Until here
 
   TWayPt = packed record
-    Extra:      boolean;
+    Extra:      boolean;                    // Internal variable, dont write
     ExtraRec:   TExtraRec;
     MainRec:    TMainRec;
     Lat:        LongInt;
@@ -220,13 +250,15 @@ type
     Contact:    TContact;
     Address:    TAddress;
     constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
     function Size: integer;
     function ExtraSize: integer;
   end;
 
   TArea = packed record
-    Extra:      boolean;
+    Extra:      boolean;                   // Internal variable, dont write
     ExtraSize:  integer;
     ExtraRec:   TExtraRec;
     MaxLat:     LongInt;
@@ -239,14 +271,16 @@ type
     WayPts:     TObjectlist<TGPXWayPoint>; // Internal variable, dont write
     constructor Create(AVersion: Word; AExtra: boolean);
     procedure AddWpt(GPXWayPt: TGPXWayPoint);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(ExtraRec: TExtraRec);
+    procedure Read(S: TBufferedFileStream; ExtraRec: TExtraRec);
     function Size: integer;
   end;
 
   TEndx = packed record
     MainRec:    TMainRec;
     constructor Create(AVersion: Word);
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
     function Size: integer;
   end;
 
@@ -263,7 +297,9 @@ type
     procedure AddWpt(GPXWayPt: TGPXWayPoint);
     function AddCat(GPXCategory: TGPXCategory): integer;
     function AddBmp(GPXBitMap: TGPXBitMap): integer;
-    procedure Write(S: TFileStream);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
     function Size: integer;
   end;
 
@@ -275,9 +311,11 @@ type
     POIGroup:       TPOIGroup;
     Endx:           TEndx;
     constructor Create(AVersion: Word; AExtra: boolean = true);
-    procedure WriteHeader(S: TFileStream);
+    procedure WriteHeader(S: TBufferedFileStream);
     function CreatePOIGroup(Category: TGPXString): TPOIGroup;
-    procedure WriteEnd(S: TFileStream);
+    procedure WriteEnd(S: TBufferedFileStream);
+    function Read(S: TBufferedFileStream; BitmapDir: string = ''): TPOIList;
+
   end;
 
 const HasPhone:   Word = $0001;
@@ -289,9 +327,13 @@ const HasPhone:   Word = $0001;
       HasStreet:  Word = $0010;
       HasHouseNbr:Word = $0020;
 
-var FormatSettings: TFormatSettings;
-
 implementation
+
+uses
+  System.Math,
+  Winapi.Windows;
+
+var FormatSettings: TFormatSettings;
 
 // Need separate class
 constructor TGPXWayPoint.Create;
@@ -358,6 +400,17 @@ begin
   end;
 end;
 
+function Coord2Str(ACoord: LongInt): TGPXString;
+var HCoord: Double;
+begin
+  try
+    HCoord := SimpleRoundTo(ACoord / 4294967296 * 360, -6);
+    result := TGPXString(Format('%1.5f', [HCoord], FormatSettings));
+  except
+    result := '';
+  end;
+end;
+
 constructor TPString.Create(AChars: TGPXString);
 begin
   LChars := length(AChars);
@@ -365,10 +418,17 @@ begin
   Move(Achars[1], Chars[0], LChars);
 end;
 
-procedure TPString.Write(S: TFileStream);
+procedure TPString.Write(S: TBufferedFileStream);
 begin
   S.Write(LChars, SizeOf(LChars));
   S.Write(Chars[0], LChars);
+end;
+
+procedure TPString.Read(S: TBufferedFileStream);
+begin
+  S.Read(LChars, SizeOf(LChars));
+  SetLength(Chars, LChars +1); // Null terminator
+  S.Read(Chars[0], LChars);
 end;
 
 function TPString.Size: Integer;
@@ -385,12 +445,21 @@ begin
   Move(Achars[1], Chars[0], LChars);
 end;
 
-procedure TPLString.Write(S: TFileStream);
+procedure TPLString.Write(S: TBufferedFileStream);
 begin
   S.Write(LCountry, SizeOf(LCountry));
   S.Write(Country[0], SizeOf(Country));
   S.Write(LChars, SizeOf(LChars));
   S.Write(Chars[0], LChars);
+end;
+
+procedure TPLString.Read(S: TBufferedFileStream);
+begin
+  S.Read(LCountry, SizeOf(LCountry));
+  S.Read(Country[0], SizeOf(Country));
+  S.Read(LChars, SizeOf(LChars));
+  SetLength(Chars, LChars +1); // null terminator
+  S.Read(Chars[0], LChars);
 end;
 
 function TPLString.Size: Integer;
@@ -405,10 +474,39 @@ begin
   Length := 0;
 end;
 
-procedure TMainRec.Write(S: TFileStream; ALength: Dword);
+procedure TMainRec.Write(S: TBufferedFileStream; ALength: Dword);
 begin
   Length := ALength - SizeOf(Self);
-  S.Write(Self, SizeOf(Self));
+  S.Write(RecType, SizeOf(RecType));
+  S.Write(Flags, SizeOf(Flags));
+  S.Write(Length, SizeOf(Length));
+end;
+
+procedure TMainRec.Read(S: TBufferedFileStream);
+begin
+  S.Read(RecType, SizeOf(RecType));
+  S.Read(Flags, SizeOf(Flags));
+  S.Read(Length, SizeOf(Length));
+end;
+
+procedure TMainRec.Read(S: TBufferedFileStream; var ExtraRec: TExtraRec);
+begin
+  FillChar(ExtraRec, SizeOf(ExtraRec), 0);
+
+  Read(S);
+
+  if ((Flags and $08) = $08) then
+  begin
+    ExtraRec.RecType := RecType;
+    ExtraRec.Flags := Flags;
+    ExtraRec.TotalLength := Length;
+    S.Read(ExtraRec.MainLength, SizeOf(ExtraRec.MainLength));
+  end;
+end;
+
+procedure TMainRec.Assign(var Dest: TMainRec);
+begin
+  Move(Self, Dest, Sizeof(Dest));
 end;
 
 constructor TExtraRec.Create(AVersion, ARecType: Word);
@@ -419,11 +517,28 @@ begin
   TotalLength := 0;
 end;
 
-procedure TExtraRec.Write(S: TFileStream; ATotalLength, AExtra: Dword);
+procedure TExtraRec.Write(S: TBufferedFileStream; ATotalLength, AExtra: Dword);
 begin
   TotalLength := ATotalLength - SizeOf(Self);
   MainLength := TotalLength - AExtra;
-  S.Write(Self, SizeOf(Self));
+  S.Write(RecType, SizeOf(RecType));
+  S.Write(Flags, SizeOf(Flags));
+  S.Write(TotalLength, SizeOf(TotalLength));
+  S.Write(MainLength, SizeOf(MainLength));
+end;
+
+procedure TExtraRec.Read(S: TBufferedFileStream);
+begin
+  S.Read(RecType, SizeOf(RecType));
+  S.Read(Flags, SizeOf(Flags));
+  S.Read(TotalLength, SizeOf(TotalLength));
+  S.Read(MainLength, SizeOf(MainLength));
+end;
+
+function TExtraRec.Assign(var Dest: TExtraRec): boolean;
+begin
+  result := ((Flags and $08) = $08);
+  Move(Self, Dest, SizeOf(Dest));
 end;
 
 // Recordtype 0
@@ -438,7 +553,7 @@ begin
   Name.Create(GpiName);
 end;
 
-procedure THeader1.Write(S: TFileStream);
+procedure THeader1.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(GrmRec, SizeOf(Grmrec));
@@ -447,6 +562,19 @@ begin
   S.Write(Flag1, SizeOf(Flag1));
   S.Write(Flag2, SizeOf(Flag2));
   Name.Write(S);
+end;
+
+procedure THeader1.Read(S: TBufferedFileStream);
+begin
+  MainRec.Read(S);
+  S.Read(GrmRec, SizeOf(Grmrec));
+  if (GrmRec <> 'GRMREC') then
+    raise exception.Create('No valid GPI. GRMREC missing');
+  S.Read(Version, SizeOf(Version));
+  S.Read(TimeStamp, SizeOf(TimeStamp));
+  S.Read(Flag1, SizeOf(Flag1));
+  S.Read(Flag2, SizeOf(Flag2));
+  Name.Read(S);
 end;
 
 function THeader1.Size: integer;
@@ -465,7 +593,7 @@ begin
   CopyRight := $0000;
 end;
 
-procedure THeader2.Write(S: TFileStream);
+procedure THeader2.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(PoiRec, SizeOf(PoiRec));
@@ -473,6 +601,18 @@ begin
   S.Write(Version, SizeOf(Version));
   S.Write(CodePage, SizeOf(CodePage));
   S.Write(CopyRight, SizeOf(CopyRight));
+end;
+
+procedure THeader2.Read(S: TBufferedFileStream);
+begin
+  MainRec.Read(S);
+  S.Read(PoiRec, SizeOf(PoiRec));
+  if (PoiRec <> 'POI') then
+    raise exception.Create('No valid GPI. POI missing');
+  S.Read(Dummy, SizeOf(Dummy));
+  S.Read(Version, SizeOf(Version));
+  S.Read(CodePage, SizeOf(CodePage));
+  S.Read(CopyRight, SizeOf(CopyRight));
 end;
 
 function THeader2.Size: integer;
@@ -508,7 +648,7 @@ begin
   end;
 end;
 
-procedure TWayPt.Write(S: TFileStream);
+procedure TWayPt.Write(S: TBufferedFileStream);
 begin
   if (Extra) then
     ExtraRec.Write(S, Size, ExtraSize)
@@ -535,6 +675,24 @@ begin
       Address.Write(S);
   end;
 end;
+
+procedure TWayPt.Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+begin
+  MainRec.Assign(Self.MainRec);
+  Extra := ExtraRec.Assign(Self.ExtraRec);
+end;
+
+procedure TWayPt.Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
+begin
+  Assign(MainRec, ExtraRec);
+
+  S.Read(Lat, SizeOf(Lat));
+  S.Read(Lon, SizeOf(Lon));
+  S.Read(Dummy1, Sizeof(Dummy1));
+  S.Read(HasAlert, Sizeof(HasAlert));
+  Name.Read(S);
+end;
+
 
 function TWayPt.Size: integer;
 begin
@@ -588,7 +746,7 @@ begin
   AudioAlert := $10;
 end;
 
-procedure TAlert.Write(S: TFileStream);
+procedure TAlert.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, SizeOf(Talert));
   S.Write(Proximity, SizeOf(Proximity));
@@ -601,6 +759,25 @@ begin
   S.Write(AudioAlert, SizeOf(AudioAlert));
 end;
 
+procedure TAlert.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TAlert.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Proximity, SizeOf(Proximity));
+  S.Read(Speed, SizeOf(Speed));
+  S.Read(Dummy1, SizeOf(Dummy1));
+  S.Read(Dummy2, SizeOf(Dummy2));
+  S.Read(Alert, SizeOf(Alert));
+  S.Read(AlertType, SizeOf(AlertType));
+  S.Read(SoundNbr, SizeOf(SoundNbr));
+  S.Read(AudioAlert, SizeOf(AudioAlert));
+end;
+
 // Recordtype 4
 constructor TPoiBitmapRef.Create(AVersion: Word; AId: SmallInt);
 begin
@@ -608,10 +785,22 @@ begin
   Id := Aid;
 end;
 
-procedure TPoiBitmapRef.Write(S: TFileStream);
+procedure TPoiBitmapRef.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, size);
   S.Write(Id, SizeOf(Id));
+end;
+
+procedure TPoiBitmapRef.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TPoiBitmapRef.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Id, SizeOf(Id));
 end;
 
 function TPoiBitmapRef.Size: Integer;
@@ -661,7 +850,7 @@ begin
   end;
 end;
 
-procedure TPoiBitMap.Write(S: TFileStream);
+procedure TPoiBitMap.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(Id, Sizeof(Id));
@@ -681,6 +870,72 @@ begin
 
   SetLength(ScanLines, 0);
   SetLength(Colpat, 0);
+end;
+
+procedure TPoiBitMap.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TPoiBitMap.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+
+  S.Read(Id, Sizeof(Id));
+  S.Read(Height, SizeOf(Height));
+  S.Read(Width, SizeOf(Width));
+  S.Read(LineSize, SizeOf(LineSize));
+  S.Read(BPP, SizeOf(BPP));
+  S.Read(Dummy1, SizeOf(Dummy1));
+  S.Read(ImageSize, SizeOf(ImageSize));
+  S.Read(Dummy2, SizeOf(Dummy2));
+  S.Read(CntColPat, SizeOf(CntColPat));
+  S.Read(TranspCol, SizeOf(TranspCol));
+  S.Read(Flags2, SizeOf(Flags2));
+  S.Read(Dummy3, SizeOf(Dummy3));
+
+  SetLength(ScanLines, ImageSize);
+  S.Read(ScanLines[0], Length(ScanLines));
+
+  SetLength(ColPat, CntColPat * SizeOf(TPaletteEntry));
+  S.Read(ColPat[0], Length(ColPat));
+end;
+
+function TPoiBitmap.Bitmap: Vcl.Graphics.TBitMap;
+var
+  ScanIndx, Indx, Y: integer;
+  LogPal: TMaxLogPalette;
+  Red, Blue: byte;
+begin
+  if (BPP <> 8) then
+    exit(nil);
+
+  result := Vcl.Graphics.TBitmap.Create(Width, Height);
+  result.PixelFormat := pf8bit;
+
+  LogPal.palVersion := $300;
+  LogPal.palNumEntries := CntColPat;
+  CopyMemory(@LogPal.palPalEntry, @ColPat[0], CntColPat * SizeOf(TPaletteEntry));
+
+  {Swap Blue and Red}
+  for Y := 0 to CntColPat-1 do
+  begin
+    Red := LogPal.palPalEntry[Y].peRed;
+    Blue := LogPal.palPalEntry[Y].peBlue;
+    LogPal.palPalEntry[Y].peRed := Blue ;
+    LogPal.palPalEntry[Y].peBlue := Red;
+  end;
+  Bitmap.Palette := CreatePalette(pLogPalette(@LogPal)^);
+
+  result.TransparentMode := TTransparentMode.tmFixed;
+  result.TransparentColor := TranspCol;
+
+  ScanIndx := 0;
+  for Indx := 0 to Height -1 do
+  begin
+    CopyMemory(result.ScanLine[Indx], @ScanLines[ScanIndx], LineSize);
+    Inc(ScanIndx, LineSize);
+  end;
 end;
 
 function TPoiBitMap.Size: integer;
@@ -709,10 +964,22 @@ begin
   MainRec.Create(AVersion, $0006);
 end;
 
-procedure TCategoryRef.Write(S: TFileStream);
+procedure TCategoryRef.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(Id, Sizeof(Id));
+end;
+
+procedure TCategoryRef.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TCategoryRef.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Id, Sizeof(Id));
 end;
 
 function TCategoryRef.Size: integer;
@@ -728,11 +995,24 @@ begin
   MainRec.Create(AVersion, $0007);
 end;
 
-procedure TCategory.Write(S: TFileStream);
+procedure TCategory.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(Id, Sizeof(Id));
   Name.Write(S);
+end;
+
+procedure TCategory.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TCategory.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Id, Sizeof(Id));
+  Name.Read(S);
 end;
 
 function TCategory.Size: integer;
@@ -775,7 +1055,7 @@ begin
   WayPts.Add(GPXWayPt);
 end;
 
-procedure TArea.Write(S: TFileStream);
+procedure TArea.Write(S: TBufferedFileStream);
 var GPXWayPt: TGPXWayPoint;
     WayPt: TWayPt;
 begin
@@ -793,6 +1073,24 @@ begin
     WayPt.Write(S);
   end;
   WayPts.Free;
+end;
+
+procedure TArea.Assign(ExtraRec: TExtraRec);
+begin
+  Extra := ExtraRec.Assign(Self.ExtraRec);
+end;
+
+procedure TArea.Read(S: TBufferedFileStream; ExtraRec: TExtraRec);
+begin
+  Assign(ExtraRec);
+
+  S.Read(MaxLat, SizeOf(MaxLat));
+  S.Read(MaxLon, SizeOf(MaxLon));
+  S.Read(MinLat, SizeOf(MinLat));
+  S.Read(MinLon, SizeOf(MinLon));
+  S.Read(Dummy1, Sizeof(Dummy1));
+  S.Read(Dummy2, Sizeof(Dummy2));
+  S.Read(Alert, Sizeof(Alert));
 end;
 
 function TArea.Size: integer;
@@ -871,7 +1169,7 @@ begin
   end;
 end;
 
-procedure TPOIGroup.Write(S: TFileStream);
+procedure TPOIGroup.Write(S: TBufferedFileStream);
 var GPXCategory: TGPXCategory;
     Category: TCategory;
     GPXBitMap: TGPXBitMap;
@@ -901,6 +1199,19 @@ begin
   end;
 end;
 
+procedure TPOIGroup.Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+begin
+  MainRec.Assign(Self.MainRec);
+  Extra := ExtraRec.Assign(Self.ExtraRec);
+end;
+
+procedure TPOIGroup.Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
+begin
+  Assign(MainRec, ExtraRec);
+
+  Name.Read(S);
+end;
+
 function TPOIGroup.Size: integer;
 begin
   if (Extra) then
@@ -919,10 +1230,22 @@ begin
   Comment.Create(GPXWayPoint.Comment);
 end;
 
-procedure TComment.Write(S: TFileStream);
+procedure TComment.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   Comment.Write(S);
+end;
+
+procedure TComment.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TComment.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  Comment.Read(S);
 end;
 
 function TComment.Size: integer;
@@ -968,7 +1291,7 @@ begin
   end;
 end;
 
-procedure TAddress.Write(S: TFileStream);
+procedure TAddress.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(Flags, SizeOf(Flags));
@@ -984,6 +1307,30 @@ begin
     Street.Write(S);
   if (Flags and HasHouseNbr <> 0) then
     HouseNbr.Write(S);
+end;
+
+procedure TAddress.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TAddress.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Flags, SizeOf(Flags));
+  if (Flags and HasCity <> 0) then
+    City.Read(S);
+  if (Flags and HasCountry <> 0) then
+    Country.Read(S);
+  if (Flags and HasState <> 0) then
+    State.Read(S);
+  if (Flags and HasPostal <> 0) then
+    PostalCode.Read(S);
+  if (Flags and HasStreet <> 0) then
+    Street.Read(S);
+  if (Flags and HasHouseNbr <> 0) then
+    HouseNbr.Read(S);
 end;
 
 function TAddress.Size: integer;
@@ -1021,7 +1368,7 @@ begin
   end;
 end;
 
-procedure TContact.Write(S: TFileStream);
+procedure TContact.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
   S.Write(Flags, SizeOf(Flags));
@@ -1029,6 +1376,22 @@ begin
     Phone.Write(S);
   if (Flags and HasEmail <> 0) then
     Email.Write(S);
+end;
+
+procedure TContact.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TContact.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Flags, SizeOf(Flags));
+  if (Flags and HasPhone <> 0) then
+    Phone.Read(S);
+  if (Flags and HasEmail <> 0) then
+    Email.Read(S);
 end;
 
 function TContact.Size: integer;
@@ -1046,7 +1409,7 @@ begin
   MainRec.Create(AVersion, $ffff);
 end;
 
-procedure TEndx.Write(S: TFileStream);
+procedure TEndx.Write(S: TBufferedFileStream);
 begin
   MainRec.Write(S, Size);
 end;
@@ -1066,7 +1429,7 @@ begin
   Endx.Create(AVersion);
 end;
 
-procedure TGPI.WriteHeader(S: TFileStream);
+procedure TGPI.WriteHeader(S: TBufferedFileStream);
 begin
   Header1.Write(S);
   Header2.Write(S);
@@ -1078,9 +1441,174 @@ begin
   result := POIGroup;
 end;
 
-procedure TGPI.WriteEnd(S: TFileStream);
+procedure TGPI.WriteEnd(S: TBufferedFileStream);
 begin
   Endx.Write(S);
 end;
 
+function TGPI.Read(S: TBufferedFileStream; BitmapDir: string = ''): TPOIList;
+var
+  MainRec: TMainRec;
+  ExtraRec: TExtraRec;
+  PoiGroup: TPOIGroup;
+  Area: TArea;
+  WayPt: TWayPt;
+  CategoryRef: TCategoryRef;
+  Category: TCategory;
+  Alert: TAlert;
+  PoiBitmap: TPoiBitmap;
+  PoiBitmapRef: TPoiBitmapRef;
+  Comment: TComment;
+  Address: TAddress;
+  Contact: TContact;
+  BitMap: Vcl.Graphics.TBitmap;
+  GPXWayPoint: TGPXWayPoint;
+  CategoryList: TStringList;
+
+  procedure ReadHeader(S: TbufferedFileStream);
+  var
+    Header1: THeader1;
+    Header2: THeader2;
+  begin
+    Header1.Read(S);
+    Header2.Read(S);
+  end;
+
+begin
+  ReadHeader(S);
+  CategoryList := TStringList.Create;
+  result := TPOIList.Create;
+  GPXWayPoint := nil;
+
+  try
+    repeat
+      MainRec.Read(S, ExtraRec);
+      case MainRec.RecType of
+        $02:
+          begin
+            WayPt.Read(S, MainRec, ExtraRec);
+            GPXWayPoint := TGPXWayPoint.Create;
+            result.Add(GPXWayPoint);
+
+            GPXWayPoint.Name := PAnsiChar(WayPt.Name.Chars);
+            GPXWayPoint.Lat := Coord2Str(WayPt.Lat);
+            GPXWayPoint.Lon := Coord2Str(WayPt.Lon);
+            continue;
+          end;
+        $03:
+          begin
+            Alert.Read(S, MainRec);
+            GPXWayPoint.Proximity := Alert.Proximity;
+            GPXWayPoint.Speed := Round((Alert.Speed * 60 * 60) / 1000 / 100);
+            continue;
+          end;
+        $04:
+          begin
+            PoiBitmapRef.Read(S, MainRec);
+            GPXWayPoint.Symbol := TGPXString(IntToStr(PoiBitmapRef.Id));
+            continue;
+          end;
+        $05:
+          begin
+            PoiBitmap.Read(S, MainRec);
+
+            if (BitmapDir <> '') then
+            begin
+              Bitmap := PoiBitmap.Bitmap;
+              try
+                if Assigned(Bitmap) then
+                  BitMap.SaveToFile(Format(IncludeTrailingPathDelimiter(BitmapDir) + '%d.bmp', [PoiBitmap.Id]));
+              finally
+                Bitmap.Free;
+              end;
+            end;
+
+            continue;
+          end;
+        $06:
+          begin
+            CategoryRef.Read(S, MainRec);
+            GPXWayPoint.CategoryId := CategoryRef.Id;
+            continue;
+          end;
+        $07:
+          begin
+            Category.Read(S, MainRec);
+            CategoryList.AddPair(IntToStr(Category.Id), String(PAnsiChar(Category.Name.Chars)));
+            continue;
+          end;
+        $08:
+          begin
+            Area.Read(S, ExtraRec);
+            continue;
+          end;
+        $09:
+          begin
+            PoiGroup.Read(S, MainRec, ExtraRec);
+            continue;
+          end;
+        $0a:
+          begin
+            Comment.Read(S, MainRec);
+            GPXWayPoint.Comment := PAnsiChar(Comment.Comment.Chars);
+            continue;
+          end;
+        $0b:
+          begin
+            Address.Read(S, MainRec);
+            GPXWayPoint.Country := PAnsiChar(Address.Country.Chars);
+            GPXWayPoint.State := PAnsiChar(Address.State.Chars);
+            GPXWayPoint.PostalCode := PAnsiChar(Address.PostalCode.Chars);
+            GPXWayPoint.City := PAnsiChar(Address.City.Chars);
+            GPXWayPoint.HouseNbr := PAnsiChar(Address.HouseNbr.Chars);
+            continue;
+          end;
+        $0c:
+          begin
+            Contact.Read(S, MainRec);
+            GPXWayPoint.Phone := PAnsiChar(Contact.Phone.Chars);
+            GPXWayPoint.Email := PAnsiChar(Contact.Email.Chars);
+            continue;
+          end;
+        $ffff:
+          break;
+        else
+          // Unknown Type
+      end;
+
+      if (MainRec.Length = 0) or
+         (S.Position + MainRec.Length > S.Size) then
+        break;
+
+      S.Seek(MainRec.Length, TSeekOrigin.soCurrent);
+
+    until (false);
+
+    for GPXWayPoint in result do
+    begin
+      if (GPXWayPoint.CategoryId > -1) then
+        GPXWayPoint.Category := TGPXString(CategoryList.Values[IntToStr(GPXWayPoint.CategoryId)]);
+    end;
+
+  finally
+    CategoryList.Free;
+  end;
+end;
+
+function GetLocaleSetting: TFormatSettings;
+begin
+  // Get Windows settings, and modify decimal separator and negcurr
+  Result := TFormatSettings.Create(GetThreadLocale);
+  with Result do
+  begin
+    DecimalSeparator := '.'; // The decimal separator is a . PERIOD!
+    NegCurrFormat := 11;
+  end;
+end;
+
+initialization
+  FormatSettings := GetLocaleSetting;
+
 end.
+
+
