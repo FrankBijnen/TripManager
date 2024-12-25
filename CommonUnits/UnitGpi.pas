@@ -69,7 +69,7 @@ type
     LCountry:   DWord;
     Country:    array[0..1] of AnsiChar;
     LChars:     Word;
-    Chars:      array of AnsiChar;
+    Chars:      array of AnsiChar; // Defined as AnsiChar, but can contain UTF8
     constructor Create(AChars: TGPXString);
     procedure Write(S: TBufferedFileStream);
     procedure Read(S: TBufferedFileStream);
@@ -333,6 +333,7 @@ implementation
 
 uses
   System.Math,
+  System.WideStrUtils,
   Vcl.Imaging.pngimage,
   Winapi.Windows;
 
@@ -375,10 +376,27 @@ begin
   inherited;
 end;
 
-//TODO: Correctly handle UTF8 strings
-function UTF8PCopy(Dest: PAnsiChar; const Source: AnsiString): PAnsiChar;
+function ConvertToUtf8(const Chars: PAnsiChar; Cp: integer): TGPXString; overload;
 begin
-  result := System.AnsiStrings.StrPCopy(Dest, Source);
+  if (Cp = CP_UTF8) then
+    result := Chars
+  else
+    result := AnsiToUtf8Ex(Chars, Cp);
+end;
+
+function ConvertToUtf8(const Source: TPString; Cp: integer): TGPXString; overload;
+begin
+  result := ConvertToUtf8(PAnsiChar(Source.Chars), Cp);
+end;
+
+function ConvertToUtf8(const Source: TPLString; Cp: integer): TGPXString; overload;
+begin
+  result := ConvertToUtf8(PAnsiChar(Source.Chars), Cp);
+end;
+
+function ConvertToString(const Source: TPLString; Cp: integer): string;
+begin
+  result := string(ConvertToUtf8(Source, Cp));
 end;
 
 function GetTimeStamp: DWord;
@@ -441,9 +459,9 @@ end;
 
 constructor TPLString.Create(AChars: TGPXString);
 begin
-  LCountry := SizeOf(LChars) + length(AChars) +  SizeOf(Country);
-  UTF8PCopy(Country, 'EN');
-  LChars := length(AChars);
+  LCountry := SizeOf(LChars) + Length(AChars) +  SizeOf(Country);
+  Country := 'EN';
+  LChars := Length(AChars);
   SetLength(Chars, LChars);
   Move(Achars[1], Chars[0], LChars);
 end;
@@ -549,8 +567,8 @@ end;
 constructor THeader1.Create(AVersion: Word);
 begin
   MainRec.Create(AVersion, $0000);
-  UTF8PCopy(GrmRec, 'GRMREC');
-  UTF8PCopy(Version, '00');
+  GrmRec := 'GRMREC';
+  Version := '00';
   TimeStamp := GetTimeStamp;
   Flag1 := $00;
   Flag2 := $00;
@@ -590,9 +608,9 @@ end;
 constructor THeader2.Create(AVersion: Word);
 begin
   MainRec.Create(AVersion, $0001);
-  UTF8PCopy(PoiRec, 'POI');
+  PoiRec := 'POI';
   Dummy := $0000;
-  UTF8PCopy(Version, '00');
+  Version := '00';
   CodePage := $FDE9;          // UTF8
   CopyRight := $0000;
 end;
@@ -825,7 +843,7 @@ begin
                       ChangeFileExt(
                         StringReplace(String(GPXBitMap.Bitmap), '/', '_', [rfReplaceAll]),
                         '.bmp')));
-    except on e:Exception do
+    except on E:Exception do
       begin
         ShowMessage(E.Message);
         exit;
@@ -846,9 +864,9 @@ begin
       Dummy3 := ImageSize + Dummy2;     // ???
     end;
     SetLength(ColPat, length(BitMapRd.ColPat));
-    move(BitMapRd.ColPat[0], ColPat[0], length(BitMapRd.ColPat));
+    Move(BitMapRd.ColPat[0], ColPat[0], length(BitMapRd.ColPat));
     SetLength(ScanLines, length(BitMapRd.ScanLines));
-    move(BitMapRd.ScanLines[0], ScanLines[0], length(BitMapRd.ScanLines));
+    Move(BitMapRd.ScanLines[0], ScanLines[0], length(BitMapRd.ScanLines));
   finally
     BitMapRd.Free;
   end;
@@ -907,9 +925,8 @@ end;
 
 function TPoiBitmap.Bitmap: Vcl.Graphics.TBitMap;
 var
-  ScanIndx, Indx, Y: integer;
+  ScanIndx, Indx: integer;
   LogPal: TMaxLogPalette;
-  Red, Blue: byte;
 begin
   if (BPP <> 8) then
     exit(nil);
@@ -920,19 +937,7 @@ begin
   LogPal.palVersion := $300;
   LogPal.palNumEntries := CntColPat;
   CopyMemory(@LogPal.palPalEntry, @ColPat[0], CntColPat * SizeOf(TPaletteEntry));
-
-  {Swap Blue and Red}
-  for Y := 0 to CntColPat-1 do
-  begin
-    Red := LogPal.palPalEntry[Y].peRed;
-    Blue := LogPal.palPalEntry[Y].peBlue;
-    LogPal.palPalEntry[Y].peRed := Blue ;
-    LogPal.palPalEntry[Y].peBlue := Red;
-  end;
   Bitmap.Palette := CreatePalette(pLogPalette(@LogPal)^);
-
-  result.TransparentMode := TTransparentMode.tmFixed;
-  result.TransparentColor := TranspCol;
 
   ScanIndx := 0;
   for Indx := 0 to Height -1 do
@@ -1043,8 +1048,8 @@ end;
 procedure TArea.AddWpt(GPXWayPt: TGPXWayPoint);
 var WayPt: TWayPt;
 begin
-  WayPt.Create(GPIVersion, GPXWayPt, Extra); // Just temporary, to calculate
-  ExtraSize := ExtraSize + WayPt.Size;    // If waypoint has extra records like area, this is computed
+  WayPt.Create(GPIVersion, GPXWayPt, Extra);  // Just temporary, to calculate
+  ExtraSize := ExtraSize + WayPt.Size;        // If waypoint has extra records like area, this is computed
   if (WayPt.Lat > MaxLat) then
     MaxLat := WayPt.Lat;
   if (WayPt.Lat < MinLat) then
@@ -1452,6 +1457,8 @@ end;
 
 procedure TGPI.Read(S: TBufferedFileStream; APOIList: TPOIList; ImageDir: string = '');
 var
+  Header1: THeader1;
+  Header2: THeader2;
   MainRec: TMainRec;
   ExtraRec: TExtraRec;
   PoiGroup: TPOIGroup;
@@ -1473,9 +1480,6 @@ var
   StartPos: int64;
 
   procedure ReadHeader(S: TbufferedFileStream);
-  var
-    Header1: THeader1;
-    Header2: THeader2;
   begin
     Header1.Read(S);
     Header2.Read(S);
@@ -1500,7 +1504,7 @@ begin
             GPXWayPoint.SelStart := StartPos;
 
             WayPt.Read(S, MainRec, ExtraRec);
-            GPXWayPoint.Name := PAnsiChar(WayPt.Name.Chars);
+            GPXWayPoint.Name := ConvertToUtf8(WayPt.Name, Header2.CodePage);
             GPXWayPoint.Lat := Coord2Str(WayPt.Lat);
             GPXWayPoint.Lon := Coord2Str(WayPt.Lon);
             continue;
@@ -1555,7 +1559,7 @@ begin
         $07:
           begin
             Category.Read(S, MainRec);
-            CategoryList.AddPair(IntToStr(Category.Id), String(PAnsiChar(Category.Name.Chars)));
+            CategoryList.AddPair(IntToStr(Category.Id), ConvertToString(Category.Name, Header2.CodePage));
             continue;
           end;
         $08:
@@ -1572,26 +1576,26 @@ begin
           begin
             Comment.Read(S, MainRec);
             GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
-            GPXWayPoint.Comment := PAnsiChar(Comment.Comment.Chars);
+            GPXWayPoint.Comment := ConvertToUtf8(Comment.Comment, Header2.CodePage);
             continue;
           end;
         $0b:
           begin
             Address.Read(S, MainRec);
             GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
-            GPXWayPoint.Country := PAnsiChar(Address.Country.Chars);
-            GPXWayPoint.State := PAnsiChar(Address.State.Chars);
-            GPXWayPoint.PostalCode := PAnsiChar(Address.PostalCode.Chars);
-            GPXWayPoint.City := PAnsiChar(Address.City.Chars);
-            GPXWayPoint.HouseNbr := PAnsiChar(Address.HouseNbr.Chars);
+            GPXWayPoint.Country := ConvertToUtf8(Address.Country, Header2.CodePage);
+            GPXWayPoint.State := ConvertToUtf8(Address.State, Header2.CodePage);
+            GPXWayPoint.PostalCode := ConvertToUtf8(Address.PostalCode, Header2.CodePage);
+            GPXWayPoint.City := ConvertToUtf8(Address.City, Header2.CodePage);
+            GPXWayPoint.HouseNbr := ConvertToUtf8(Address.HouseNbr, Header2.CodePage);
             continue;
           end;
         $0c:
           begin
             Contact.Read(S, MainRec);
             GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
-            GPXWayPoint.Phone := PAnsiChar(Contact.Phone.Chars);
-            GPXWayPoint.Email := PAnsiChar(Contact.Email.Chars);
+            GPXWayPoint.Phone := ConvertToUtf8(Contact.Phone, Header2.CodePage);
+            GPXWayPoint.Email := ConvertToUtf8(Contact.Email, Header2.CodePage);
             continue;
           end;
         $ffff:

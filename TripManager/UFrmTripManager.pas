@@ -1815,18 +1815,22 @@ var
   begin
     VlTripInfo.Strings.AddPair('Name', string(AGPXWayPoint.Name),
       TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Category),
-      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%s.png', [AGPXWayPoint.Symbol])),
-      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Category <> '') then
+      VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Category),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Symbol <> '') then
+      VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%s.png', [AGPXWayPoint.Symbol])),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
 
     VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
       TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Speed <> 0) then
+      VlTripInfo.Strings.AddPair('Speed', Format('%d Km', [AGPXWayPoint.Speed]),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
 
-    VlTripInfo.Strings.AddPair('Speed', Format('%d Km', [AGPXWayPoint.Speed]),
-      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    VlTripInfo.Strings.AddPair('Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]),
-      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Proximity <> 0) then
+      VlTripInfo.Strings.AddPair('Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
 
     if (AGPXWayPoint.Phone <> '') then
       VlTripInfo.Strings.AddPair('Phone', string(AGPXWayPoint.Phone),
