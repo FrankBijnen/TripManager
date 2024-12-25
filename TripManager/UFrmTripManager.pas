@@ -10,7 +10,7 @@ uses
   Vcl.ImgList, Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls,
   Vcl.ToolWin, Vcl.ButtonGroup,
   TripManager_ShellList,
-  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, Monitor;
+  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, UnitGpi, Monitor;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -32,7 +32,8 @@ const
   DefaultCoordinates      = '48.854918, 2.346558'; // Somewhere in Paris
   SavedMapPosition_Key    = 'SavedMapPosition';
 
-  CurrentTrip             = 'Current';
+  CurrentTrip             = 'CurrentTrip';
+  CurrentGPI              = 'CurrentGPI';
   FileSysTrip             = 'FileSys';
 
   TripManagerReg_Key      = 'Software\TDBware\TripManager';
@@ -67,7 +68,7 @@ type
     LstFiles: TListView;
     VSplitterDev_Files: TSplitter;
     PageControl1: TPageControl;
-    TsTripInfo: TTabSheet;
+    TsTripGpiInfo: TTabSheet;
     VSplitterTree_Grid: TSplitter;
     TvTrip: TTreeView;
     VlTripInfo: TValueListEditor;
@@ -88,7 +89,7 @@ type
     PnlXt2FileSys: TPanel;
     PnlFileSysFunc: TPanel;
     BtnAddToMap: TButton;
-    BtnSaveTripFile: TButton;
+    BtnSaveTripGpiFile: TButton;
     PnlVlTripInfo: TPanel;
     PnlVlTripInfoTop: TPanel;
     BtnSaveTripValues: TButton;
@@ -116,7 +117,7 @@ type
     Delete1: TMenuItem;
     N2: TMenuItem;
     Rename1: TMenuItem;
-    TripTimer: TTimer;
+    TripGpiTimer: TTimer;
     N4: TMenuItem;
     Setdeparturedatetimeofselected1: TMenuItem;
     N5: TMenuItem;
@@ -143,7 +144,7 @@ type
     BtnOpenTemp: TButton;
     MapTimer: TTimer;
     BtnCreateAdditional: TButton;
-    PnlTripInfo: TPanel;
+    PnlTripGpiInfo: TPanel;
     CmbModel: TComboBox;
     BtnPostProcess: TButton;
     ChkWatch: TCheckBox;
@@ -158,7 +159,7 @@ type
     procedure LstFilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure LstFilesItemChecked(Sender: TObject; Item: TListItem);
     procedure FormShow(Sender: TObject);
-    procedure BtnSaveTripFileClick(Sender: TObject);
+    procedure BtnSaveTripGpiFileClick(Sender: TObject);
     procedure ValueListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TvTripChange(Sender: TObject; Node: TTreeNode);
     procedure VlTripInfoSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -182,7 +183,7 @@ type
     procedure BtnFunctionsMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SetSelectedTrips(Sender: TObject);
     procedure BtnSetDeviceDefaultClick(Sender: TObject);
-    procedure TripTimerTimer(Sender: TObject);
+    procedure TripGpiTimerTimer(Sender: TObject);
     procedure Delete1Click(Sender: TObject);
     procedure RenameFile(Sender: TObject);
     procedure Setdeparturedatetimeofselected1Click(Sender: TObject);
@@ -228,6 +229,7 @@ type
     FSortSpecification: TSortSpecification;
     HexEdit: TBCHexEditor;
     ATripList: TTripList;
+    APOIList: TPOIList;
 
     FMapReq: TMapReq;
 
@@ -244,11 +246,13 @@ type
     procedure SyncHexEdit(Sender: TObject);
     procedure HexEditKeyPress(Sender: TObject; var Key: Char);
     procedure LoadHex(const FileName: string);
-    procedure LoadMap(CurrentTrip: TTripList; Id: string);
+    procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
+    procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
     procedure MapRequest(const Coords, Desc, Zoom: string);
 
-    procedure SaveTripFile;
+    procedure SaveTripGpiFile;
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
+    procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
 
     procedure FreeCustomData(const ACustomData: pointer);
     procedure FreeDevices;
@@ -295,7 +299,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, winapi.ShellAPI, Vcl.Clipbrd,
-  UnitStringUtils, UnitOSMMap, UnitGpx, UnitGpi, MsgLoop,
+  UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions;
 
 const
@@ -312,7 +316,8 @@ type
   public
     constructor Create(ABaseItem: TBaseItem;
                        ASelLength: integer = -1;
-                       ASelStart: integer = -1);
+                       ASelStart: integer = -1); overload;
+    constructor Create(ASelLength, ASelStart: integer); overload;
     property BaseItem: TBaseItem read FBaseItem;
     property SelStart: integer read FSelStart;
     property SelLength: integer read FSelLength;
@@ -335,6 +340,15 @@ begin
   if (FSelLength = -1) then
     FSelLength := integer(FBaseItem.SelEnd) - FSelStart;
 end;
+
+constructor TGridSelItem.Create(ASelLength, ASelStart: integer);
+begin
+  inherited Create;
+  FBaseItem := nil;
+  FSelStart := ASelStart;
+  FSelLength := ASelLength;
+end;
+
 
 class function TGridSelItem.GridSelItem(AValueListEditor: TValueListEditor; ARow: integer): TGridSelItem;
 begin
@@ -728,14 +742,20 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.SaveTripFile;
+procedure TFrmTripManager.SaveTripGpiFile;
+var
+  Ext: string;
 begin
   // Only if loaded from device
   if (DeviceFile) then
     CopyFileFromTmp(HexEditFile, LstFiles.Selected);
 
   // Reload changes
-  LoadTripFile(HexEditFile, DeviceFile);
+  Ext := ExtractFileExt(HexEditFile);
+  if (ContainsText(Ext, TripExtension)) then
+    LoadTripFile(HexEditFile, DeviceFile)
+  else if (ContainsText(Ext, GPIExtension)) then
+    LoadGpiFile(HexEditFile, DeviceFile);
 end;
 
 procedure TFrmTripManager.BtnSaveTripValuesClick(Sender: TObject);
@@ -746,7 +766,7 @@ begin
 
   ATripList.ForceRecalc;
   ATripList.SaveToFile(HexEditFile);
-  SaveTripFile;
+  SaveTripGpiFile;
 end;
 
 procedure TFrmTripManager.BtnSetDeviceDefaultClick(Sender: TObject);
@@ -828,7 +848,6 @@ begin
 
     // Bring to front by switching FormStyle
     Self.FormStyle := fsStayOnTop;
-//    Application.BringToFront;
     Self.FormStyle := fsNormal;
 
     // PostProcess
@@ -839,15 +858,14 @@ begin
 
   finally
     ProcessModified.Free;
-//    ShellListView1.Refresh;  // Clear selection
     DirectoryMonitor.Start;
   end;
 end;
 
-procedure TFrmTripManager.BtnSaveTripFileClick(Sender: TObject);
+procedure TFrmTripManager.BtnSaveTripGpiFileClick(Sender: TObject);
 begin
   HexEdit.SaveToFile(HexEditFile);
-  SaveTripFile;
+  SaveTripGpiFile;
 end;
 
 procedure TFrmTripManager.ClearTripInfo;
@@ -999,6 +1017,7 @@ begin
 
   EdgeBrowser1.UserDataFolder := CreatedTempPath;
   ATripList := TTripList.Create;
+  APOIList := TPOIList.Create;
 
   try
     AFilePath := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefFileSysFolder_Key);
@@ -1021,6 +1040,7 @@ begin
 
   FreeDevices;
   ATripList.Free;
+  APOIList.Free;
   ClearTripInfo;
 end;
 
@@ -1241,6 +1261,8 @@ begin
 
   if (ContainsText(Ext, TripExtension)) then
     LoadTripFile(ShellListView1.SelectedFolder.PathName, false);
+  if (ContainsText(Ext, GPIExtension)) then
+    LoadGPiFile(ShellListView1.SelectedFolder.PathName, false);
 end;
 
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
@@ -1316,7 +1338,7 @@ begin
         finally
           MemStream.Free;
         end;
-        LoadMap(MapTrip, Format('%s%s', [FileSysTrip, ExtractFileName(ShellListView1.SelectedFolder.PathName)]));
+        LoadTripOnMap(MapTrip, Format('%s%s', [FileSysTrip, ExtractFileName(ShellListView1.SelectedFolder.PathName)]));
       finally
         MapTrip.Free;
         AStream.Free;
@@ -1339,7 +1361,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.LoadMap(CurrentTrip: TTripList; Id: string);
+procedure TFrmTripManager.LoadTripOnMap(CurrentTrip: TTripList; Id: string);
 var
   OsmTrack: TStringList;
 begin
@@ -1348,6 +1370,31 @@ begin
   OsmTrack := TStringList.Create;
   try
     CurrentTrip.CreateOSMPoints(OsmTrack);
+    OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
+    ShowPointsOnMap(EdgeBrowser1);
+  finally
+    OsmTrack.Free;
+  end;
+end;
+
+procedure TFrmTripManager.LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
+var
+  OsmTrack: TStringList;
+  AGPXwayPoint: TGPXWayPoint;
+  Cnt: integer;
+begin
+  if not Assigned(CurrentGpi) then
+    exit;
+
+  OsmTrack := TStringList.Create;
+  try
+    Cnt := 0;
+    for AGPXwayPoint in CurrentGpi do
+    begin
+      Inc(Cnt);
+      OsmTrack.Add(Format('AddPOI(%d, ''%s'', %s, %s, ''./%s.bmp'');',
+                          [Cnt, AGPXwayPoint.Name, AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
+    end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     ShowPointsOnMap(EdgeBrowser1);
   finally
@@ -1392,19 +1439,32 @@ var
 begin
   ClearSelHexEdit;
 
+  ANode := nil;
+  SelStart := -1;
+  SelEnd := -1;
+
   if (Sender is TGridSelItem) then
   begin
     ANode := TGridSelItem(Sender).BaseItem;
     SelStart := TGridSelItem(Sender).SelStart;
     SelEnd := SelStart + TGridSelItem(Sender).SelLength;
-  end
-  else
+  end;
+
+  if (Sender is TBaseItem) then
   begin
     ANode := TBaseItem(Sender);
     SelStart := ANode.SelStart;
     SelEnd := ANode.SelEnd;
   end;
-  if (ANode is THeader) then
+
+  if (Sender is TGPXWayPoint) then
+  begin
+    SelStart := TGPXWayPoint(Sender).SelStart;
+    SelEnd := SelStart + TGPXWayPoint(Sender).SelLength;
+  end;
+
+  if (ANode = nil) or
+     (ANode is THeader) then
     HeaderOffset := 0
   else
     HeaderOffset := SizeOf(THeaderValue);
@@ -1431,7 +1491,7 @@ begin
 end;
 
 // Defer loading trips. Speeds up selecting files
-procedure TFrmTripManager.TripTimerTimer(Sender: TObject);
+procedure TFrmTripManager.TripGpiTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
 
@@ -1439,11 +1499,16 @@ begin
     exit;
   if TBASE_Data(LstFiles.Selected.Data).IsFolder then
     exit;
-  if not (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) then
-    exit;
 
-  CopyFileToTmp(LstFiles.Selected);
-  LoadTripFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true);
+  if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) or
+     (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
+  begin
+    CopyFileToTmp(LstFiles.Selected);
+    if (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
+      LoadGpiFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
+    else
+      LoadTripFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true);
+  end;
 end;
 
 procedure TFrmTripManager.TvTripChange(Sender: TObject; Node: TTreeNode);
@@ -1746,11 +1811,73 @@ var
     end;
   end;
 
+  procedure AddGPXWayPoint(AGPXWayPoint: TGPXWayPoint);
+  begin
+    VlTripInfo.Strings.AddPair('Name', string(AGPXWayPoint.Name),
+      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Category),
+      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%s.bmp', [AGPXWayPoint.Symbol])),
+      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+
+    VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
+      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+
+    VlTripInfo.Strings.AddPair('Speed', Format('%d Km', [AGPXWayPoint.Speed]),
+      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    VlTripInfo.Strings.AddPair('Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]),
+      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+
+    if (AGPXWayPoint.Phone <> '') then
+      VlTripInfo.Strings.AddPair('Phone', string(AGPXWayPoint.Phone),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Email <> '') then
+      VlTripInfo.Strings.AddPair('Email', string(AGPXWayPoint.Email),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Comment <> '') then
+      VlTripInfo.Strings.AddPair('Comment', ReplaceAll(string(AGPXWayPoint.Comment), [#10, #13], ['_','']),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Country <> '') then
+      VlTripInfo.Strings.AddPair('Country', string(AGPXWayPoint.Country),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.State <> '') then
+      VlTripInfo.Strings.AddPair('State', string(AGPXWayPoint.State),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.PostalCode <> '') then
+      VlTripInfo.Strings.AddPair('PostalCode', string(AGPXWayPoint.PostalCode),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.City <> '') then
+      VlTripInfo.Strings.AddPair('City', string(AGPXWayPoint.City),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    if (AGPXWayPoint.Street <> '') or
+       (AGPXWayPoint.HouseNbr <> '') then
+      VlTripInfo.Strings.AddPair('Street', string(Format('%s %s', [AGPXWayPoint.Street, AGPXWayPoint.HouseNbr])),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+
+    MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
+               Format('%s', [AGPXWayPoint.Name]),
+               InitialZoom_Point);
+
+  end;
+
+  procedure AddPOIList(APOIList: TPOIList);
+  var
+    AGPXWayPoint: TGPXWayPoint;
+  begin
+    for AGPXWayPoint in APOIList do
+    begin
+      VlTripInfo.Strings.AddPair('*** Begin POI', DupeString('-', DupeCount),
+        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+      AddGPXWayPoint(AGPXWayPoint);
+    end;
+  end;
+
 begin
   VlTripInfo.Strings.BeginUpdate;
   ClearTripInfo;
   VlTripInfo.Tag := 1;
   try
+// Trip Data
     if (TObject(Node.Data) is TTripList) then
       AddTrip(TTripList(Node.Data))
 
@@ -1773,8 +1900,14 @@ begin
       AddBaseData(TBaseDataItem(Node.Data))
 
     else if (TObject(Node.Data) is THeader) then
-      AddHeader(THeader(Node.Data));
+      AddHeader(THeader(Node.Data))
+// GPI data
+    else if (TObject(Node.Data) is TPOIList) then
+      AddPOIList(TPOIList(Node.Data))
+    else if (TObject(Node.Data) is TGPXWayPoint) then
+      AddGPXWayPoint(TGPXWayPoint(Node.Data));
 
+// Prepare TripInfo
     for Index := 0 to VlTripInfo.Strings.Count -1 do
     begin
       AnItem := TGridSelItem.BaseDataItem(VlTripInfo, Index);
@@ -1803,6 +1936,8 @@ begin
   end;
   if (TObject(Node.Data) is TBaseItem) then
     SyncHexEdit(TBaseItem(Node.Data))
+  else if (TObject(Node.Data) is TGPXWayPoint) then
+    SyncHexEdit(TGPXWayPoint(Node.Data))
   else
     ClearSelHexEdit;
 end;
@@ -1858,7 +1993,7 @@ end;
 
 procedure TFrmTripManager.HexEditKeyPress(Sender: TObject; var Key: Char);
 begin
-  BtnSaveTripFile.Enabled := true;
+  BtnSaveTripGpiFile.Enabled := true;
 end;
 
 procedure TFrmTripManager.VlTripInfoSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -2351,8 +2486,8 @@ end;
 
 procedure TFrmTripManager.LstFilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
-  TripTimer.Enabled := false;
-  TripTimer.Enabled := true;
+  TripGpiTimer.Enabled := false;
+  TripGpiTimer.Enabled := true;
 end;
 
 procedure TFrmTripManager.MapRequest(const Coords, Desc, Zoom: string);
@@ -2408,7 +2543,7 @@ end;
 procedure TFrmTripManager.LoadHex(const FileName: string);
 begin
   HexEdit.LoadFromFile(FileName);
-  BtnSaveTripFile.Enabled := true;
+  BtnSaveTripGpiFile.Enabled := true;
 end;
 
 procedure TFrmTripManager.LoadTripFile(const FileName: string; const FromDevice: boolean);
@@ -2444,7 +2579,7 @@ var
         begin
           FirstLocation := false;
           if (TmArrival(ANItem).AsUnixDateTime <> 0) then
-            PnlTripInfo.Caption := PnlTripInfo.Caption + ', Departure:' + TmArrival(ANItem).AsString;
+            PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Departure:' + TmArrival(ANItem).AsString;
         end;
         TvTrip.Items.AddChildObject(CurrentLocation, TBaseDataItem(ANItem).DisplayName, ANItem);
         if (ANItem is TmName) then
@@ -2470,6 +2605,8 @@ var
   end;
 
 begin
+  TsTripGpiInfo.Caption := 'Trip info';
+
   AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
   ATripList.Clear;
   TvTrip.LockDrawing;
@@ -2497,17 +2634,17 @@ begin
     TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
     if (DeviceFile) then
-      PnlTripInfo.Color := clLime
+      PnlTripGpiInfo.Color := clLime
     else
-      PnlTripInfo.Color := clAqua;
-    PnlTripInfo.Caption := ExtractFileName(FileName);
+      PnlTripGpiInfo.Color := clAqua;
+    PnlTripGpiInfo.Caption := ExtractFileName(FileName);
 
     TripName := ATripList.GetValue('mTripName');
     ParentTripName := ATripList.GetValue('mParentTripName');
 
-    PnlTripInfo.Caption := PnlTripInfo.Caption + ', Trip:' + TripName;
+    PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
     if (TripName <> ParentTripName) then
-      PnlTripInfo.Caption := PnlTripInfo.Caption + ' (' + ParentTripName + ')';
+      PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
 
     for ANItem in ATripList.ItemList do
     begin
@@ -2531,10 +2668,61 @@ begin
     AStream.Free;
   end;
   LoadHex(FileName);
-  LoadMap(ATripList, CurrentTrip);
+  LoadTripOnMap(ATripList, CurrentTrip);
   RootNode.Selected := true;
   BtnSaveTripValues.Enabled := false;
-  BtnSaveTripFile.Enabled := false;
+  BtnSaveTripGpiFile.Enabled := false;
+end;
+
+procedure TFrmTripManager.LoadGpiFile(const FileName: string; const FromDevice: boolean);
+var
+  AStream: TBufferedFileStream;
+  AGPXWayPoint: TGPXWayPoint;
+  RootNode: TTreeNode;
+  GPIRec: TGPI;
+
+begin
+  TsTripGpiInfo.Caption := 'POI(gpi) info';
+  AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
+
+  TvTrip.LockDrawing;
+  TvTrip.items.BeginUpdate;
+  TvTrip.Items.Clear;
+  VlTripInfo.Strings.BeginUpdate;
+  ClearTripInfo;
+  DeviceFile := FromDevice;
+  HexEditFile := FileName;
+
+  try
+    GPIRec.Read(AStream, APOIList, GetOSMTemp);
+
+    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), APOIList);
+    TvTrip.ShowRoot := true;
+
+    if (DeviceFile) then
+      PnlTripGpiInfo.Color := clLime
+    else
+      PnlTripGpiInfo.Color := clAqua;
+    PnlTripGpiInfo.Caption := '';
+    for AGPXWayPoint in APOIList do
+    begin
+      if (PnlTripGpiInfo.Caption = '') then
+        PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
+      TvTrip.Items.AddChildObject(RootNode, String(AGPXWayPoint.Name), AGPXWayPoint);
+    end;
+
+    RootNode.Expand(false);
+  finally
+    TvTrip.Items.EndUpdate;
+    TvTrip.UnlockDrawing;
+    VlTripInfo.Strings.EndUpdate;
+    AStream.Free;
+  end;
+  LoadHex(FileName);
+  LoadGpiOnMap(APOIList, CurrentGpi);
+  RootNode.Selected := true;
+  BtnSaveTripValues.Enabled := false;
+  BtnSaveTripGpiFile.Enabled := false;
 end;
 
 procedure TFrmTripManager.SetCheckMark(const AListItem: TListItem; const NewValue: boolean);

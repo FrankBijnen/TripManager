@@ -1,4 +1,4 @@
-# TripManager
+﻿# TripManager
 Manage the trips on the z&#0361;mo XT(2).
 
 This program has been tested on the XT, but many functions should work on the XT2 also.<br>

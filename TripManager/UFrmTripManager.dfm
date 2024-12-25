@@ -431,7 +431,7 @@ object FrmTripManager: TFrmTripManager
     Top = 250
     Width = 661
     Height = 367
-    ActivePage = TsOSMMap
+    ActivePage = TsHex
     Align = alClient
     TabOrder = 1
     ExplicitWidth = 659
@@ -447,6 +447,8 @@ object FrmTripManager: TFrmTripManager
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
+        ExplicitWidth = 651
+        ExplicitHeight = 335
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1
@@ -455,16 +457,17 @@ object FrmTripManager: TFrmTripManager
           Align = alTop
           ParentBackground = False
           TabOrder = 0
-          object BtnSaveTripFile: TButton
+          ExplicitWidth = 649
+          object BtnSaveTripGpiFile: TButton
             Left = 1
             Top = 1
             Width = 131
             Height = 23
             Align = alLeft
-            Caption = 'Save Trip File (From Hex)'
+            Caption = 'Save File (From Hex)'
             Enabled = False
             TabOrder = 0
-            OnClick = BtnSaveTripFileClick
+            OnClick = BtnSaveTripGpiFileClick
           end
         end
       end
@@ -487,7 +490,6 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 0
         OnResize = AdvPanel_MapTopResize
-        ExplicitWidth = 651
         object SpeedBtn_MapClear: TSpeedButton
           Left = 0
           Top = 0
@@ -540,7 +542,6 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           TabOrder = 2
           Text = '-'
-          ExplicitWidth = 64
           ExplicitHeight = 21
         end
         object PnlCoordinates: TPanel
@@ -589,8 +590,6 @@ object FrmTripManager: TFrmTripManager
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitTop = 298
-        ExplicitWidth = 651
         object EditMapBounds: TLabeledEdit
           AlignWithMargins = True
           Left = 50
@@ -612,7 +611,6 @@ object FrmTripManager: TFrmTripManager
           ShowHint = True
           TabOrder = 0
           Text = ''
-          ExplicitWidth = 598
           ExplicitHeight = 21
         end
       end
@@ -628,8 +626,6 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
-        ExplicitWidth = 651
-        ExplicitHeight = 276
       end
     end
   end
@@ -638,11 +634,11 @@ object FrmTripManager: TFrmTripManager
     Top = 250
     Width = 631
     Height = 367
-    ActivePage = TsTripInfo
+    ActivePage = TsTripGpiInfo
     Align = alLeft
     TabOrder = 2
     ExplicitHeight = 363
-    object TsTripInfo: TTabSheet
+    object TsTripGpiInfo: TTabSheet
       Caption = 'Trip info'
       object VSplitterTree_Grid: TSplitter
         Left = 241
@@ -652,7 +648,7 @@ object FrmTripManager: TFrmTripManager
         ExplicitTop = 0
         ExplicitHeight = 383
       end
-      object PnlTripInfo: TPanel
+      object PnlTripGpiInfo: TPanel
         Left = 0
         Top = 0
         Width = 623
@@ -999,10 +995,10 @@ object FrmTripManager: TFrmTripManager
       end
     end
   end
-  object TripTimer: TTimer
+  object TripGpiTimer: TTimer
     Enabled = False
     Interval = 100
-    OnTimer = TripTimerTimer
+    OnTimer = TripGpiTimerTimer
     Left = 214
     Top = 66
   end

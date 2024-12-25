@@ -1,1 +1,1 @@
-Unit Monitor.pas taken from: https://github.com/bero/DirMonitorDemo/tree/master
+Unit Monitor.pas taken (and modified) from: https://github.com/bero/DirMonitorDemo/tree/master

@@ -2426,7 +2426,7 @@ begin
   if (not Assigned(TripName)) then
     exit;
 
-//TODO
+//TODO Add option
   DisplayColor := 'magenta';
   AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
   if (Assigned(AllRoutes)) then

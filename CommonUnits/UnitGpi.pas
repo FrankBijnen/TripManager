@@ -34,10 +34,12 @@ type
     Proximity: Word;
     BitmapId: integer;
     CategoryId: integer;
+    SelStart: int64;
+    SelLength: int64;
     constructor Create;
     destructor Destroy; override;
   end;
-  TPOIList = Tlist<TGPXWayPoint>;
+  TPOIList = TObjectlist<TGPXWayPoint>;
 
   TGPXCategory = class
     Category: TGPXString;
@@ -314,8 +316,7 @@ type
     procedure WriteHeader(S: TBufferedFileStream);
     function CreatePOIGroup(Category: TGPXString): TPOIGroup;
     procedure WriteEnd(S: TBufferedFileStream);
-    function Read(S: TBufferedFileStream; BitmapDir: string = ''): TPOIList;
-
+    procedure Read(S: TBufferedFileStream; APOIList: TPOIList; BitmapDir: string = '');
   end;
 
 const HasPhone:   Word = $0001;
@@ -458,7 +459,8 @@ begin
   S.Read(LCountry, SizeOf(LCountry));
   S.Read(Country[0], SizeOf(Country));
   S.Read(LChars, SizeOf(LChars));
-  SetLength(Chars, LChars +1); // null terminator
+  SetLength(Chars, 0);          // Force zeroes
+  SetLength(Chars, LChars +1);  // +1 for null terminator
   S.Read(Chars[0], LChars);
 end;
 
@@ -569,7 +571,7 @@ begin
   MainRec.Read(S);
   S.Read(GrmRec, SizeOf(Grmrec));
   if (GrmRec <> 'GRMREC') then
-    raise exception.Create('No valid GPI. GRMREC missing');
+    raise exception.Create('GPI format not supported! GRMREC not on expected location.');
   S.Read(Version, SizeOf(Version));
   S.Read(TimeStamp, SizeOf(TimeStamp));
   S.Read(Flag1, SizeOf(Flag1));
@@ -608,7 +610,7 @@ begin
   MainRec.Read(S);
   S.Read(PoiRec, SizeOf(PoiRec));
   if (PoiRec <> 'POI') then
-    raise exception.Create('No valid GPI. POI missing');
+    raise exception.Create('GPI format not supported! POI not on expected location.');
   S.Read(Dummy, SizeOf(Dummy));
   S.Read(Version, SizeOf(Version));
   S.Read(CodePage, SizeOf(CodePage));
@@ -1446,7 +1448,7 @@ begin
   Endx.Write(S);
 end;
 
-function TGPI.Read(S: TBufferedFileStream; BitmapDir: string = ''): TPOIList;
+procedure TGPI.Read(S: TBufferedFileStream; APOIList: TPOIList; BitmapDir: string = '');
 var
   MainRec: TMainRec;
   ExtraRec: TExtraRec;
@@ -1464,6 +1466,7 @@ var
   BitMap: Vcl.Graphics.TBitmap;
   GPXWayPoint: TGPXWayPoint;
   CategoryList: TStringList;
+  StartPos: int64;
 
   procedure ReadHeader(S: TbufferedFileStream);
   var
@@ -1477,19 +1480,21 @@ var
 begin
   ReadHeader(S);
   CategoryList := TStringList.Create;
-  result := TPOIList.Create;
+  APOIList.Clear;
   GPXWayPoint := nil;
 
   try
     repeat
+      StartPos := S.Position;
       MainRec.Read(S, ExtraRec);
       case MainRec.RecType of
         $02:
           begin
-            WayPt.Read(S, MainRec, ExtraRec);
             GPXWayPoint := TGPXWayPoint.Create;
-            result.Add(GPXWayPoint);
+            APOIList.Add(GPXWayPoint);
+            GPXWayPoint.SelStart := StartPos;
 
+            WayPt.Read(S, MainRec, ExtraRec);
             GPXWayPoint.Name := PAnsiChar(WayPt.Name.Chars);
             GPXWayPoint.Lat := Coord2Str(WayPt.Lat);
             GPXWayPoint.Lon := Coord2Str(WayPt.Lon);
@@ -1498,6 +1503,7 @@ begin
         $03:
           begin
             Alert.Read(S, MainRec);
+            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Proximity := Alert.Proximity;
             GPXWayPoint.Speed := Round((Alert.Speed * 60 * 60) / 1000 / 100);
             continue;
@@ -1505,6 +1511,7 @@ begin
         $04:
           begin
             PoiBitmapRef.Read(S, MainRec);
+            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Symbol := TGPXString(IntToStr(PoiBitmapRef.Id));
             continue;
           end;
@@ -1528,6 +1535,7 @@ begin
         $06:
           begin
             CategoryRef.Read(S, MainRec);
+            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.CategoryId := CategoryRef.Id;
             continue;
           end;
@@ -1550,12 +1558,14 @@ begin
         $0a:
           begin
             Comment.Read(S, MainRec);
+            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Comment := PAnsiChar(Comment.Comment.Chars);
             continue;
           end;
         $0b:
           begin
             Address.Read(S, MainRec);
+            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Country := PAnsiChar(Address.Country.Chars);
             GPXWayPoint.State := PAnsiChar(Address.State.Chars);
             GPXWayPoint.PostalCode := PAnsiChar(Address.PostalCode.Chars);
@@ -1566,6 +1576,7 @@ begin
         $0c:
           begin
             Contact.Read(S, MainRec);
+            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Phone := PAnsiChar(Contact.Phone.Chars);
             GPXWayPoint.Email := PAnsiChar(Contact.Email.Chars);
             continue;
@@ -1584,12 +1595,11 @@ begin
 
     until (false);
 
-    for GPXWayPoint in result do
+    for GPXWayPoint in APOIList do
     begin
       if (GPXWayPoint.CategoryId > -1) then
         GPXWayPoint.Category := TGPXString(CategoryList.Values[IntToStr(GPXWayPoint.CategoryId)]);
     end;
-
   finally
     CategoryList.Free;
   end;

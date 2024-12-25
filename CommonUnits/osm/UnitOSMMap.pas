@@ -94,9 +94,11 @@ begin
   Html.Add('var popuppoints;');     // All points for Images
   Html.Add('var ipopupcoords;');    // Including href
   Html.Add('var RoutePointsLayer;');
+  Html.Add('var POILayer;');
   Html.Add('var routepoints;');     // All route points
   Html.Add('var alltrackpoints;');  // Trackpoints
   Html.Add('var trackpoints;');     // Trackpoints
+  Html.Add('var poipoints;');       // All POIs
   Html.Add('var style;');
   Html.Add('var po;');
   Html.Add('var op;');
@@ -155,6 +157,8 @@ begin
   Html.Add('     popupcoords = new Array();');
   Html.Add('     RtePts = new Array();');
   Html.Add('     RoutePointsLayer = new Array();');
+  Html.Add('     POILayer = new Array();');
+  Html.Add('     poipoints = new Array();');
   Html.Add('');
   Html.Add('     AddTrackPoints();');
   Html.Add('     AddPopupPoints();');
@@ -182,6 +186,7 @@ begin
     Html.Add('     allpoints = allpoints.concat(routepoints);');
   end;
   Html.Add('     allpoints = allpoints.concat(popuppoints);');
+  Html.Add('     allpoints = allpoints.concat(poipoints);');
 
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(allpoints);');
   Html.Add('     allpoints = new Array();'); // Remove from memory
@@ -196,15 +201,13 @@ begin
 
   // OpenLayers uses LonLat, not LatLon. Confusing maybe,
   Html.Add('  function AddPopupPoint(Id, Href, PointLat, PointLon){');
-  Html.Add('     var lonlat;');
-  Html.Add('     lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
+  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
   Html.Add('     popuppoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('     popupcoords[Id] = [lonlat, Href];');
   Html.Add('  }');
 
   Html.Add('  function AddRoutePoint(Id, RoutePoint, PointLat, PointLon, Color){');
-  Html.Add('     var lonlat;');
-  Html.Add('     lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
+  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
   Html.Add('     var feature = new OpenLayers.Feature.Vector(');
   Html.Add('         new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat))');
   Html.Add('     RoutePointsLayer[Id] = new OpenLayers.Layer.Vector(RoutePoint,');
@@ -217,9 +220,28 @@ begin
   Html.Add('     routepoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  }');
 
+  Html.Add('  function AddPOI(Id, PoiName, PointLat, PointLon, ImageFile){');
+  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
+  Html.Add('     POILayer[Id] = new OpenLayers.Layer.Vector(PoiName, {');
+  Html.Add('         styleMap: new OpenLayers.StyleMap({');
+  Html.Add('             externalGraphic: ImageFile,');
+  Html.Add('             graphicWidth: 20, graphicHeight: 20, graphicYOffset: -20,');
+  Html.Add('             title: PoiName');
+  Html.Add('         })');
+  Html.Add('     });');
+  Html.Add('');
+  Html.Add('     var myLocation = new OpenLayers.Geometry.Point(PointLon, PointLat)');
+  Html.Add('         .transform(''EPSG:4326'', ''EPSG:3857'');');
+  Html.Add('');
+  Html.Add('     POILayer[Id].addFeatures([new OpenLayers.Feature.Vector(myLocation, {tooltip: ''OpenLayers''})]);');
+  Html.Add('     map.addLayer(POILayer[Id]);');
+
+  // poipoints needed for CreateExtent
+  Html.Add('     poipoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
+  Html.Add('  };');
+
   Html.Add('  function AddTrkPoint(Id, PointLat, PointLon){');
-  Html.Add('     var lonlat;');
-  Html.Add('     lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
+  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
   Html.Add('     trackpoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  }');
 
