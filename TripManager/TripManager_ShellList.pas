@@ -29,6 +29,7 @@ type
     ICM2: IContextMenu2;
     FDragStartPos: TPoint;
     FDragSource: boolean;
+    FDragStarted: boolean;
     function GiveFeedback(dwEffect: Longint): HResult; stdcall;
     function QueryContinueDrag(fEscapePressed: BOOL; grfKeyState: Longint): HResult; stdcall;
     procedure SetColumnSorted(AValue: boolean);
@@ -36,6 +37,7 @@ type
   protected
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
 
     procedure InitSortSpec(SortColumn: integer; SortState: THeaderSortState);
     procedure Populate; override;
@@ -155,7 +157,6 @@ begin
     SetListHeaderSortState(Self, Columns[LocalCompareColumn], FSortState);
   LocalDescending := (SortState = THeaderSortState.hssDescending);
 
-
   // Use an anonymous method. So we can test for FDoDefault, CompareColumn and SortState
   // Use only 'local variables' within this procedure
   // See also method ListSortFunc in Vcl.Shell.ShellCtrls.pas
@@ -182,6 +183,7 @@ begin
       if (LocalDescending) then
         result := result * -1;
     end);
+
 end;
 
 procedure TShellListView.ShowMultiContextMenu(MousePos: TPoint);
@@ -276,6 +278,7 @@ begin
   DoubleBuffered := true;
   StyleElements := [seFont, seBorder];
   FDragSource := false;
+  FDragStarted := false;
   InitSortSpec(0, THeaderSortState.hssNone);
 end;
 
@@ -358,11 +361,14 @@ end;
 procedure TShellListView.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (FDragSource) and
+     not (ssDouble in Shift) and
      (Button = mbLeft) then
   begin
     FDragStartPos.X := X;
     FDragStartPos.Y := Y;
+    FDragStarted := true;
   end;
+
   inherited MouseDown(Button, Shift, X, Y);
 end;
 
@@ -378,7 +384,8 @@ var
 begin
   inherited MouseMove(Shift, X, Y);
 
-  if (FDragSource = false) then
+  if (FDragSource = false) or
+     (FDragStarted = false) then
     exit;
 
   if (SelCount > 0) and
@@ -404,6 +411,12 @@ begin
       DoDragDrop(DataObject, Self, DROPEFFECT_COPY, Effect);
     end;
   end;
+end;
+
+procedure TShellListView.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  FDragStarted := false;
+  inherited MouseUp(Button, Shift, X, Y);;
 end;
 
 end.
