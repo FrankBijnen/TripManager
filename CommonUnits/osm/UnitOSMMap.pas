@@ -299,7 +299,7 @@ begin
   PointCnt := 0;
   for Place in RoutePointsDict do
   begin
-    Html.Add(Format('AddPopupPoint(%d, "%s", %s, %s);',
+    Html.Add(Format('AddPopupPoint(%d, "<br><a>%s</a>", %s, %s);',  // Need some HTML for the CloseBox to work.
               [PointCnt, EscapeDQuote(Place.Key), Place.Value[0], Place.Value[1] ] ));
     Inc(PointCnt);
   end;
