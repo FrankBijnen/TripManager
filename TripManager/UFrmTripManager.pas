@@ -1392,7 +1392,7 @@ begin
     for AGPXwayPoint in CurrentGpi do
     begin
       Inc(Cnt);
-      OsmTrack.Add(Format('AddPOI(%d, ''%s'', %s, %s, ''./%s.bmp'');',
+      OsmTrack.Add(Format('AddPOI(%d, ''%s'', %s, %s, ''./%s.png'');',
                           [Cnt, AGPXwayPoint.Name, AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
     end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
@@ -1817,7 +1817,7 @@ var
       TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
     VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Category),
       TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%s.bmp', [AGPXWayPoint.Symbol])),
+    VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%s.png', [AGPXWayPoint.Symbol])),
       TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
 
     VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]),

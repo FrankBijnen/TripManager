@@ -13,6 +13,7 @@ type
 const GpiName: TGPXString = 'my.gpi';
       GpiVersion: Word = 0;
       GpiSymbolsDir: TGPXString = 'Symbols\24x24\';
+      DefTransparentColor: DWORD = $00ff00ff;
 type
 
   TGPXWayPoint = class
@@ -316,7 +317,7 @@ type
     procedure WriteHeader(S: TBufferedFileStream);
     function CreatePOIGroup(Category: TGPXString): TPOIGroup;
     procedure WriteEnd(S: TBufferedFileStream);
-    procedure Read(S: TBufferedFileStream; APOIList: TPOIList; BitmapDir: string = '');
+    procedure Read(S: TBufferedFileStream; APOIList: TPOIList; ImageDir: string = '');
   end;
 
 const HasPhone:   Word = $0001;
@@ -332,6 +333,7 @@ implementation
 
 uses
   System.Math,
+  Vcl.Imaging.pngimage,
   Winapi.Windows;
 
 var FormatSettings: TFormatSettings;
@@ -837,11 +839,11 @@ begin
       BPP := biBitCount;
       Dummy1 := 0;
       ImageSize := LineSize * Height;
-      Dummy2 := 44;                 // ???
+      Dummy2 := 44;                     // ???
       CntColPat := PalCount;
-      TranspCol := $00ff00ff;       // Magenta
-      Flags2 := $0001;              // Transparent
-      Dummy3 := ImageSize + Dummy2; // ???
+      TranspCol := DefTransparentColor; // Magenta
+      Flags2 := $0001;                  // Transparent
+      Dummy3 := ImageSize + Dummy2;     // ???
     end;
     SetLength(ColPat, length(BitMapRd.ColPat));
     move(BitMapRd.ColPat[0], ColPat[0], length(BitMapRd.ColPat));
@@ -1448,7 +1450,7 @@ begin
   Endx.Write(S);
 end;
 
-procedure TGPI.Read(S: TBufferedFileStream; APOIList: TPOIList; BitmapDir: string = '');
+procedure TGPI.Read(S: TBufferedFileStream; APOIList: TPOIList; ImageDir: string = '');
 var
   MainRec: TMainRec;
   ExtraRec: TExtraRec;
@@ -1464,8 +1466,10 @@ var
   Address: TAddress;
   Contact: TContact;
   BitMap: Vcl.Graphics.TBitmap;
+  PNGImage: Vcl.Imaging.pngimage.TPngImage;
   GPXWayPoint: TGPXWayPoint;
   CategoryList: TStringList;
+  BitMapList: TList;
   StartPos: int64;
 
   procedure ReadHeader(S: TbufferedFileStream);
@@ -1480,6 +1484,7 @@ var
 begin
   ReadHeader(S);
   CategoryList := TStringList.Create;
+  BitMapList := TList.Create;
   APOIList.Clear;
   GPXWayPoint := nil;
 
@@ -1519,12 +1524,20 @@ begin
           begin
             PoiBitmap.Read(S, MainRec);
 
-            if (BitmapDir <> '') then
+            if (ImageDir <> '') and
+               (BitMapList.IndexOf(Pointer(PoiBitmap.Id)) = -1) then
             begin
+              BitMapList.Add(Pointer(PoiBitmap.Id));
               Bitmap := PoiBitmap.Bitmap;
               try
-                if Assigned(Bitmap) then
-                  BitMap.SaveToFile(Format(IncludeTrailingPathDelimiter(BitmapDir) + '%d.bmp', [PoiBitmap.Id]));
+                PNGImage := TPngImage.Create;
+                try
+                  PNGImage.Assign(BitMap);
+                  PNGImage.TransparentColor := PoiBitmap.TranspCol;
+                  PNGImage.SaveToFile(Format(IncludeTrailingPathDelimiter(ImageDir) + '%d.png', [PoiBitmap.Id]));
+                finally
+                  PNGImage.Free;
+                end;
               finally
                 Bitmap.Free;
               end;
@@ -1602,6 +1615,7 @@ begin
     end;
   finally
     CategoryList.Free;
+    BitMapList.Free;
   end;
 end;
 
