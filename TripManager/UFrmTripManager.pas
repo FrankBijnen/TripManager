@@ -1916,7 +1916,10 @@ begin
     begin
       AnItem := TGridSelItem.BaseDataItem(VlTripInfo, Index);
       if (AnItem = nil) then
+      begin
+        VlTripInfo.ItemProps[Index].ReadOnly := true;
         continue;
+      end;
 
       case (AnItem.EditMode) of
         TEditMode.emNone:
