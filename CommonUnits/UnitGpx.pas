@@ -1526,7 +1526,7 @@ var Func: TGPXFunc;
             Inc(TrackPoints);
             OutStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
           end;
-          OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [Trackname, OSMColor(DisplayColor)]));
+          OutStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
           if (ProcessViaPts) then
           begin
@@ -1554,7 +1554,7 @@ var Func: TGPXFunc;
                   color := 'blue';
                 OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s");',
                                          [RoutePoints,
-                                          FindSubNodeValue(WayPoint, 'name'),
+                                          EscapeDQuote(FindSubNodeValue(WayPoint, 'name')),
                                           lat,
                                           lon,
                                           Color]));

@@ -31,7 +31,9 @@ function OSMColor(GPXColor: string): string;
 
 implementation
 
-uses Winapi.ShellAPI, WinApi.Windows, Soap.HTTPUtil;
+uses
+  Winapi.ShellAPI, WinApi.Windows, Soap.HTTPUtil,
+  UnitStringUtils;
 
 const OSMHtmlName = 'OSM.Html';
 
@@ -191,16 +193,14 @@ procedure TOSMHelper.WritePlace(ACoordinates: string;
                                 ADescription: string = '');
 var EscapedWayPoint, EscapedDescription: string;
 begin
-  EscapedWayPoint := StringReplace(HTMLEscape(AWayPoint), '''', '&#39; ', [rfReplaceAll]); // Single quote left out!
-  EscapedDescription := StringReplace(HTMLEscape(ADescription), '''', '&#39; ', [rfReplaceAll]);
+  EscapedWayPoint := EscapeHtml(AWayPoint); // Single quote left out!
+  EscapedDescription := EscapeHtml(ADescription);
   Html.Add(Format('    var vectorLayer = new OpenLayers.Layer.Vector("%s", ' +
                     '{ styleMap: new OpenLayers.StyleMap( { pointRadius: 6, fillColor: "red", fillOpacity: 0.5 } ) });',
                   [EscapedWayPoint]));
-//  Html.Add(Format('    vectorLayer.setVisibility(false)',[]));
   Html.Add(Format('    var feature = new OpenLayers.Feature.Vector(',[]));
   Html.Add(Format('            new OpenLayers.Geometry.Point(%s).transform(op, po),',[ACoordinates]));
   Html.Add(Format('            { description: "%s" } );',[EscapedDescription]));
-//  Html.Add(Format('    feature.display(false);',[]));
   Html.Add(Format('    vectorLayer.addFeatures(feature);',[]));
   Html.Add(Format('    map.addLayer(vectorLayer);',[]));
 end;

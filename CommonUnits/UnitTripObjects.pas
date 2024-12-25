@@ -2440,7 +2440,7 @@ begin
         OutStringList.Add(Format('AddTrkPoint(%d,%.7g,%.7g);', [TrackPoints, UdbDir.Lat, UdbDir.Lon], FloatFormatSettings ) );
       end;
     end;
-    OutStringList.Add(Format('CreateTrack(''%s'', ''%s'');', [TripName.AsString, OSMColor(DisplayColor)]));
+    OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));
   end;
 
   Locations := TmLocations(GetItem('mLocations'));
@@ -2472,7 +2472,7 @@ begin
 
         OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, "%s");',
                                  [RoutePoints,
-                                  PointName,
+                                  EscapeDQuote(PointName),
                                   Coords,
                                   Color]));
       end;

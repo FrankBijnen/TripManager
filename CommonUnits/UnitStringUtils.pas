@@ -22,7 +22,8 @@ procedure DebugMsg(const Msg: array of variant);
 function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
 procedure SetRegistryValue(const ARootKey: HKEY; const KeyName, Name, Value: string);
 function TempFilename(const Prefix: string): string;
-function HtmlEscape(const HTML: string): string;
+function EscapeHtml(const HTML: string): string;
+function EscapeDQuote(const HTML: string): string;
 function EscapeFileName(InFile: string): string;
 function CreateTempPath(const Prefix: string): string;
 function GetHtmlTmp: string;
@@ -252,7 +253,12 @@ begin
   result := CreatedTempPath + RoutesDir;
 end;
 
-function HtmlEscape(const HTML: string): string;
+function EscapeDQuote(const HTML: string): string;
+begin
+  result := ReplaceAll(HTML, ['"'], ['\"']);
+end;
+
+function EscapeHtml(const HTML: string): string;
 begin
   result := ReplaceAll(HTML,
                        ['&',     '<',    '>',    '"',      '''',    ' ',      '-'],

@@ -1392,8 +1392,8 @@ begin
     for AGPXwayPoint in CurrentGpi do
     begin
       Inc(Cnt);
-      OsmTrack.Add(Format('AddPOI(%d, ''%s'', %s, %s, ''./%s.png'');',
-                          [Cnt, AGPXwayPoint.Name, AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
+      OsmTrack.Add(Format('AddPOI(%d, "%s", %s, %s, "./%s.png");',
+                          [Cnt, EscapeDQuote(string(AGPXwayPoint.Name)), AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
     end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     ShowPointsOnMap(EdgeBrowser1);

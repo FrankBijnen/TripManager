@@ -299,8 +299,8 @@ begin
   PointCnt := 0;
   for Place in RoutePointsDict do
   begin
-    Html.Add(Format('AddPopupPoint(%d, ''%s'', %s, %s);',
-              [PointCnt, HtmlEscape(Place.Key), Place.Value[0], Place.Value[1] ] ));
+    Html.Add(Format('AddPopupPoint(%d, "%s", %s, %s);',
+              [PointCnt, EscapeDQuote(Place.Key), Place.Value[0], Place.Value[1] ] ));
     Inc(PointCnt);
   end;
   Html.Add('  }');
