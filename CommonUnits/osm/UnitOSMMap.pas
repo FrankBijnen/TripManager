@@ -86,13 +86,13 @@ begin
   Html.Add('<head>');
   Html.Add('<title></title>');
 //TODO Create resources
-  Html.Add('<script type="text/javascript"  src="http://openlayers.org/api/OpenLayers.js"></script>');
-  Html.Add('<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
+  Html.Add('<script type="text/javascript"  src="https://openlayers.org/api/OpenLayers.js"></script>');
+  Html.Add('<script src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
   Html.Add('<script type="text/javascript">');
   Html.Add('var map;');
   Html.Add('var allpoints;');       // Needed for CreateExtent
   Html.Add('var popuppoints;');     // All points for Images
-  Html.Add('var ipopupcoords;');    // Including href
+  Html.Add('var popupcoords;');     // Including href
   Html.Add('var RoutePointsLayer;');
   Html.Add('var POILayer;');
   Html.Add('var routepoints;');     // All route points
@@ -122,7 +122,8 @@ begin
   Html.Add('              featureover: function(e) {');
   Html.Add('              e.feature.renderIntent = "select";');
   Html.Add('              e.feature.layer.drawFeature(e.feature);');
-  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", e.feature.layer.name, e.feature.layer.displayInLayerSwitcher);');  Html.Add('              }');
+  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", e.feature.layer.name, e.feature.layer.displayInLayerSwitcher);');
+  Html.Add('              }');
   Html.Add('           },');
   Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
   Html.Add('');
@@ -229,6 +230,8 @@ begin
   Html.Add('             title: PoiName');
   Html.Add('         })');
   Html.Add('     });');
+  Html.Add('     POILayer[Id].displayInLayerSwitcher = false;');
+
   Html.Add('');
   Html.Add('     var myLocation = new OpenLayers.Geometry.Point(PointLon, PointLat)');
   Html.Add('         .transform(''EPSG:4326'', ''EPSG:3857'');');
@@ -251,7 +254,9 @@ begin
 
   Html.Add('  function CreatePopups(){');
   Html.Add('     for (let i = 0; i < popupcoords.length; i++) {');
-  Html.Add('       var popup = new OpenLayers.Popup.FramedCloud("Popup", popupcoords[i][0], null, popupcoords[i][1], null, true);');
+  Html.Add('       var html = popupcoords[i][1];');
+  Html.Add('       if (html != "") { html = "<br>" + html };');
+  Html.Add('       var popup = new OpenLayers.Popup.FramedCloud("Popup", popupcoords[i][0], null, html, null, true);');
   Html.Add('       map.addPopup(popup);');
   Html.Add('     }');
   Html.Add('  }');
@@ -299,7 +304,7 @@ begin
   PointCnt := 0;
   for Place in RoutePointsDict do
   begin
-    Html.Add(Format('AddPopupPoint(%d, "<br><a>%s</a>", %s, %s);',  // Need some HTML for the CloseBox to work.
+    Html.Add(Format('AddPopupPoint(%d, "%s", %s, %s);',  // Need some HTML for the CloseBox to work.
               [PointCnt, EscapeDQuote(Place.Key), Place.Value[0], Place.Value[1] ] ));
     Inc(PointCnt);
   end;

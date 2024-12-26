@@ -431,7 +431,7 @@ object FrmTripManager: TFrmTripManager
     Top = 250
     Width = 661
     Height = 367
-    ActivePage = TsHex
+    ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
     ExplicitWidth = 659

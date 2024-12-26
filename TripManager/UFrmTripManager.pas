@@ -1391,9 +1391,9 @@ begin
     Cnt := 0;
     for AGPXwayPoint in CurrentGpi do
     begin
-      Inc(Cnt);
       OsmTrack.Add(Format('AddPOI(%d, "%s", %s, %s, "./%s.png");',
                           [Cnt, EscapeDQuote(string(AGPXwayPoint.Name)), AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
+	  Inc(Cnt);	
     end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     ShowPointsOnMap(EdgeBrowser1);
@@ -1811,7 +1811,7 @@ var
     end;
   end;
 
-  procedure AddGPXWayPoint(AGPXWayPoint: TGPXWayPoint);
+  procedure AddGPXWayPoint(AGPXWayPoint: TGPXWayPoint; ZoomRequest: boolean);
   begin
     VlTripInfo.Strings.AddPair('Name', string(AGPXWayPoint.Name),
       TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
@@ -1858,9 +1858,10 @@ var
       VlTripInfo.Strings.AddPair('Street', string(Format('%s %s', [AGPXWayPoint.Street, AGPXWayPoint.HouseNbr])),
         TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
 
-    MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-               Format('%s', [AGPXWayPoint.Name]),
-               InitialZoom_Point);
+    if (ZoomRequest) then
+      MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
+                 Format('%s', [AGPXWayPoint.Name]),
+                 InitialZoom_Point);
 
   end;
 
@@ -1872,7 +1873,7 @@ var
     begin
       VlTripInfo.Strings.AddPair('*** Begin POI', DupeString('-', DupeCount),
         TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-      AddGPXWayPoint(AGPXWayPoint);
+      AddGPXWayPoint(AGPXWayPoint, false);
     end;
   end;
 
@@ -1909,7 +1910,7 @@ begin
     else if (TObject(Node.Data) is TPOIList) then
       AddPOIList(TPOIList(Node.Data))
     else if (TObject(Node.Data) is TGPXWayPoint) then
-      AddGPXWayPoint(TGPXWayPoint(Node.Data));
+      AddGPXWayPoint(TGPXWayPoint(Node.Data), true);
 
 // Prepare TripInfo
     for Index := 0 to VlTripInfo.Strings.Count -1 do
