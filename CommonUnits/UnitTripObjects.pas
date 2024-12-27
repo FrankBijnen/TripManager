@@ -2436,8 +2436,8 @@ begin
     begin
       for UdbDir in UdbDataHndl.Items do
       begin
-        Inc(TrackPoints);
         OutStringList.Add(Format('AddTrkPoint(%d,%.7g,%.7g);', [TrackPoints, UdbDir.Lat, UdbDir.Lon], FloatFormatSettings ) );
+        Inc(TrackPoints);
       end;
     end;
     OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));

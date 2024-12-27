@@ -6,28 +6,19 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
   Vcl.Edge;
 
-type
-  TRoutePointsDict = TObjectDictionary<string, TStringList>;
-  TPlace = TPair<string, TStringList>;
-
-procedure OsmMapInit(Browser: TEdgeBrowser; const Lat, Lon, Desc, InitialZoom: string);
-procedure ShowPointsOnMap(Browser: TEdgeBrowser; Points: TRoutePointsDict = nil);
-function MapGoToPlace(Browser: TEdgeBrowser; Place, Desc, InitialZoom: string): string;
+procedure ShowMap(Browser: TEdgeBrowser);
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
 
 const
-  Coord_Decimals = 6;
-  Place_Decimals = 4;
-  CRLF = #13#10;
-  OSMStart = 'Start';
-  OSMEnd = 'End';
-  OSMCtrlClick = 'Ctrl Click';
-  OSMGetBounds = 'GetBounds';
-  OSMGetRoutePoint = 'GetRoutePoint';
-  InitialZoom_Saved = '8';
+  Coord_Decimals    = 6;
+  Place_Decimals    = 4;
+  OSMCtrlClick      = 'Ctrl Click';
+  OSMGetBounds      = 'GetBounds';
+  OSMGetRoutePoint  = 'GetRoutePoint';
   InitialZoom_Point = '15';
-  InitialZoom_Out = '16';
-  InitialZoom_In = '20';
+  InitialZoom_Out   = '16';
+  InitialZoom_In    = '20';
+  PopupTimeout      = '3000';
 
 type
   TOSMHelper = class(TObject)
@@ -37,12 +28,7 @@ type
     Html: TStringList;
     FInitialZoom: string;
     FPathName: string;
-    RoutePointsDict: TRoutePointsDict;
     procedure WriteHeader;
-    procedure WritePointsStart;
-    procedure WritePoint(const AName, ALat, ALon, AColor: string); overload;
-    procedure WritePoint(const APlace: TPlace); overload;
-    procedure WritePointsEnd;
     procedure WriteTrackPoints;
     procedure WriteFooter;
   public
@@ -66,14 +52,12 @@ begin
   FPathName := APathName;
   FInitialZoom := AInitialZoom;
   Html := TStringList.Create;
-  RoutePointsDict := TRoutePointsDict.Create([doOwnsValues]);
 end;
 
 destructor TOSMHelper.Destroy;
 begin
   FPathName := '';
   Html.Free;
-  RoutePointsDict.Free;
 
   inherited Destroy;
 end;
@@ -85,21 +69,19 @@ begin
   Html.Add('<Html>');
   Html.Add('<head>');
   Html.Add('<title></title>');
-//TODO Create resources
   Html.Add('<script type="text/javascript"  src="https://openlayers.org/api/OpenLayers.js"></script>');
   Html.Add('<script src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
   Html.Add('<script type="text/javascript">');
   Html.Add('var map;');
-  Html.Add('var allpoints;');       // Needed for CreateExtent
-  Html.Add('var popuppoints;');     // All points for Images
-  Html.Add('var popupcoords;');     // Including href
   Html.Add('var RoutePointsLayer;');
   Html.Add('var POILayer;');
+  Html.Add('var allpoints;');       // Needed for CreateExtent
   Html.Add('var routepoints;');     // All route points
-  Html.Add('var alltrackpoints;');  // Trackpoints
   Html.Add('var trackpoints;');     // Trackpoints
   Html.Add('var poipoints;');       // All POIs
+  Html.Add('var popup;');
   Html.Add('var style;');
+
   Html.Add('var po;');
   Html.Add('var op;');
   Html.Add('var cacheWrite, cacheRead;');
@@ -152,19 +134,18 @@ begin
 
   Html.Add('     allpoints = new Array();');
   Html.Add('     routepoints = new Array();');
-  Html.Add('     alltrackpoints = new Array();');
   Html.Add('     trackpoints = new Array();');
-  Html.Add('     popuppoints = new Array();');
-  Html.Add('     popupcoords = new Array();');
   Html.Add('     RtePts = new Array();');
   Html.Add('     RoutePointsLayer = new Array();');
   Html.Add('     POILayer = new Array();');
   Html.Add('     poipoints = new Array();');
   Html.Add('');
   Html.Add('     AddTrackPoints();');
-  Html.Add('     AddPopupPoints();');
   Html.Add('     CreateExtent(' + FInitialZoom + ');');
-  Html.Add('     CreatePopups();');
+  Html.Add('  }');
+
+  Html.Add('  function SendMessage(msg, parm1, parm2){');
+  Html.Add('     window.chrome.webview.postMessage({ msg: msg, parm1: parm1, parm2: parm2});');
   Html.Add('  }');
 
   Html.Add('  function GetLocation(Func){');
@@ -181,16 +162,12 @@ begin
   Html.Add('  }');
 
   Html.Add('  function CreateExtent(ZoomLevel){');
-  if (FInitialZoom <> InitialZoom_Point) then
-  begin
-    Html.Add('     allpoints = allpoints.concat(alltrackpoints);');
-    Html.Add('     allpoints = allpoints.concat(routepoints);');
-  end;
-  Html.Add('     allpoints = allpoints.concat(popuppoints);');
+  Html.Add('     allpoints = allpoints.concat(trackpoints);');
+  Html.Add('     allpoints = allpoints.concat(routepoints);');
   Html.Add('     allpoints = allpoints.concat(poipoints);');
-
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(allpoints);');
   Html.Add('     allpoints = new Array();'); // Remove from memory
+
   Html.Add('     var bounds = new OpenLayers.Bounds();');
   Html.Add('     line_string.calculateBounds();');
   Html.Add('     bounds.extend(line_string.bounds);');
@@ -201,10 +178,23 @@ begin
   Html.Add('  }');
 
   // OpenLayers uses LonLat, not LatLon. Confusing maybe,
-  Html.Add('  function AddPopupPoint(Id, Href, PointLat, PointLon){');
+  Html.Add('  function PopupAtPoint(Href, PointLat, PointLon){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     popuppoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
-  Html.Add('     popupcoords[Id] = [lonlat, Href];');
+  Html.Add('     var line_string = new OpenLayers.Geometry.LineString(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
+  Html.Add('     line_string.calculateBounds();');
+  Html.Add('     var bounds = new OpenLayers.Bounds();');
+  Html.Add('     bounds.extend(line_string.bounds);');
+  Html.Add('     map.zoomToExtent(bounds);');
+  Html.Add('     map.zoomTo(' + InitialZoom_Point + ');');
+  Html.Add('     if (Href) {');
+  Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
+  Html.Add('       map.addPopup(popup, true);');
+  Html.Add('       setTimeout(RemovePopup, ' + PopupTimeout + ');');
+  Html.Add('     };');
+  Html.Add('  }');
+
+  Html.Add('  function RemovePopup(){');
+  Html.Add('     map.removePopup(popup);');
   Html.Add('  }');
 
   Html.Add('  function AddRoutePoint(Id, RoutePoint, PointLat, PointLon, Color){');
@@ -248,19 +238,6 @@ begin
   Html.Add('     trackpoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  }');
 
-  Html.Add('  function SendMessage(msg, parm1, parm2){');
-  Html.Add('     window.chrome.webview.postMessage({ msg: msg, parm1: parm1, parm2: parm2});');
-  Html.Add('  }');
-
-  Html.Add('  function CreatePopups(){');
-  Html.Add('     for (let i = 0; i < popupcoords.length; i++) {');
-  Html.Add('       var html = popupcoords[i][1];');
-  Html.Add('       if (html != "") { html = "<br>" + html };');
-  Html.Add('       var popup = new OpenLayers.Popup.FramedCloud("Popup", popupcoords[i][0], null, html, null, true);');
-  Html.Add('       map.addPopup(popup);');
-  Html.Add('     }');
-  Html.Add('  }');
-
   Html.Add('  function CreateTrack(linename, color){');
   Html.Add('     linelayer = new OpenLayers.Layer.Vector(linename);');
   Html.Add('     style = {strokeColor: color, strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: 5};');
@@ -270,44 +247,8 @@ begin
   Html.Add('     map.addLayer(linelayer);');
 
   // Add trackpoints to allpoints. Needed for CreateExtent
-  Html.Add('     alltrackpoints = alltrackpoints.concat(trackpoints);');
+  Html.Add('     allpoints = allpoints.concat(trackpoints);');
   Html.Add('     trackpoints = new Array();');
-  Html.Add('  }');
-end;
-
-procedure TOSMHelper.WritePointsStart;
-begin
-  Html.Add('  function AddPopupPoints(){');
-end;
-
-// Only keeps unique AName
-procedure TOSMHelper.WritePoint(const AName, ALat, ALon, AColor: string);
-begin
-  if (not RoutePointsDict.ContainsKey(AName)) then
-    RoutePointsDict.Add(AName, TStringList.Create);
-  RoutePointsDict.Items[AName].Clear;
-  RoutePointsDict.Items[AName].Add(ALat);
-  RoutePointsDict.Items[AName].Add(ALon);
-  RoutePointsDict.Items[AName].Add(AColor);
-end;
-
-procedure TOSMHelper.WritePoint(const APlace: TPlace);
-begin
-  WritePoint(APlace.Key, APlace.Value[0], APlace.Value[1], APlace.Value[2]);
-end;
-
-procedure TOSMHelper.WritePointsEnd;
-var
-  Place: TPair<string, TStringList>;
-  PointCnt: integer;
-begin
-  PointCnt := 0;
-  for Place in RoutePointsDict do
-  begin
-    Html.Add(Format('AddPopupPoint(%d, "%s", %s, %s);',  // Need some HTML for the CloseBox to work.
-              [PointCnt, EscapeDQuote(Place.Key), Place.Value[0], Place.Value[1] ] ));
-    Inc(PointCnt);
-  end;
   Html.Add('  }');
 end;
 
@@ -348,54 +289,19 @@ begin
   Html.SaveToFile(FPathName, TEncoding.UTF8);
 end;
 
-procedure OsmMapInit(Browser: TEdgeBrowser; const Lat, Lon, Desc, InitialZoom: string);
+procedure ShowMap(Browser: TEdgeBrowser);
 var
   OsmHelper: TOSMHelper;
-begin
-  OsmHelper := TOSMHelper.Create(GetHtmlTmp, InitialZoom);
-  try
-    OsmHelper.Scaled := Browser.ScaleValue(100);
-    OsmHelper.WriteHeader;
-    OsmHelper.WritePointsStart;
-    OsmHelper.WritePoint(Desc, Lat, Lon, 'red');
-    OsmHelper.WritePointsEnd;
-    OsmHelper.WriteFooter;
-  finally
-    OsmHelper.Free;
-  end;
-  Browser.Navigate(GetHtmlTmp);
-end;
-
-procedure ShowPointsOnMap(Browser: TEdgeBrowser; Points: TRoutePointsDict = nil);
-var
-  OsmHelper: TOSMHelper;
-  Place: TPair<string, TStringList>;
 begin
   OsmHelper := TOSMHelper.Create(GetHtmlTmp, InitialZoom_Out);
   try
     OsmHelper.Scaled := Browser.ScaleValue(100);
     OsmHelper.WriteHeader;
-    OsmHelper.WritePointsStart;
-    if (Assigned(Points)) then
-    begin
-      for Place in Points do
-        OsmHelper.WritePoint(Place);
-    end;
-    OsmHelper.WritePointsEnd;
     OsmHelper.WriteFooter;
   finally
     OsmHelper.Free;
   end;
   Browser.Navigate(GetHtmlTmp);
-end;
-
-function MapGoToPlace(Browser: TEdgeBrowser; Place, Desc, InitialZoom: string): string;
-var
-  Lat, Lon: string;
-begin
-  result := Place;
-  ParseLatLon(Place, Lat, Lon);
-  OsmMapInit(Browser, Lat, Lon, Desc, InitialZoom);
 end;
 
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);

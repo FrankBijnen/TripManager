@@ -248,7 +248,7 @@ type
     procedure LoadHex(const FileName: string);
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
-    procedure MapRequest(const Coords, Desc, Zoom: string);
+    procedure MapRequest(const Coords, Desc: string);
 
     procedure SaveTripGpiFile;
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
@@ -968,7 +968,7 @@ begin
   EditMapCoords.Text := Parm1 + ', ' + Parm2;
   if (Msg = OSMCtrlClick) then
   begin
-    MapRequest(EditMapCoords.Text, OSMCtrlClick, InitialZoom_Point);
+    MapRequest(EditMapCoords.Text, OSMCtrlClick);
     exit;
   end;
 
@@ -983,7 +983,7 @@ procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; S
 begin
   if (Key = VK_Return) and
      (EditMapCoords.Text <> '') then
-    MapRequest(EditMapCoords.Text, EditMapCoords.Text, InitialZoom_Out);
+    MapRequest(EditMapCoords.Text, EditMapCoords.Text);
 end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -1309,7 +1309,7 @@ end;
 procedure TFrmTripManager.SpeedBtn_MapClearClick(Sender: TObject);
 begin
   DeleteTempFiles(GetOSMTemp, GetTracksMask);
-  MapRequest(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates), '', InitialZoom_Saved);
+  MapRequest(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates), '');
 end;
 
 procedure TFrmTripManager.BtnAddToMapClick(Sender: TObject);
@@ -1355,7 +1355,7 @@ begin
                                               ExtractFileName(ShellListView1.SelectedFolder.PathName),
                                               GetTracksExt]));
     end;
-    ShowPointsOnMap(EdgeBrowser1);
+    ShowMap(EdgeBrowser1);
   finally
     OsmTrack.Free;
   end;
@@ -1371,7 +1371,7 @@ begin
   try
     CurrentTrip.CreateOSMPoints(OsmTrack);
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
-    ShowPointsOnMap(EdgeBrowser1);
+    ShowMap(EdgeBrowser1);
   finally
     OsmTrack.Free;
   end;
@@ -1396,7 +1396,7 @@ begin
 	  Inc(Cnt);	
     end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
-    ShowPointsOnMap(EdgeBrowser1);
+    ShowMap(EdgeBrowser1);
   finally
     OsmTrack.Free;
   end;
@@ -1537,7 +1537,7 @@ var
         GpsCoords := TmScPosn(ANitem).MapCoords;
     end;
     if (ZoomToPoint) then
-      MapRequest(GpsCoords, LocationName, InitialZoom_Point);
+      MapRequest(GpsCoords, LocationName);
 
     with ALocation do
     begin
@@ -1623,8 +1623,7 @@ var
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s Type:%d', [AnUdbDir.DisplayName,
-                                       AnUdbDir.UdbDirValue.SubClass.PointType]),
-                 InitialZoom_Point);
+                                       AnUdbDir.UdbDirValue.SubClass.PointType]));
   end;
 
 
@@ -1860,8 +1859,7 @@ var
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-                 Format('%s', [AGPXWayPoint.Name]),
-                 InitialZoom_Point);
+                 Format('%s', [AGPXWayPoint.Name]));
 
   end;
 
@@ -2498,11 +2496,10 @@ begin
   TripGpiTimer.Enabled := true;
 end;
 
-procedure TFrmTripManager.MapRequest(const Coords, Desc, Zoom: string);
+procedure TFrmTripManager.MapRequest(const Coords, Desc: string);
 begin
   FMapReq.Coords := Coords;
   FMapReq.Desc := Desc;
-  FMapReq.Zoom := Zoom;
   MapTimer.Enabled := false;
   MapTimer.Enabled := true;
 end;
@@ -2510,7 +2507,7 @@ end;
 procedure TFrmTripManager.MapTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
-  MapGoToPlace(EdgeBrowser1, FMapReq.Coords, FMapReq.Desc, FMapReq.Zoom);
+  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s);', [FMapReq.Desc, FMapReq.Coords]));
 end;
 
 procedure TFrmTripManager.CreateAdditionalClick(Sender: TObject);

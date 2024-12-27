@@ -1523,8 +1523,8 @@ var Func: TGPXFunc;
               if (TrackPointAttribute.Name = 'lat') then
                 Lat := TrackPointAttribute.Value;
             end;
-            Inc(TrackPoints);
             OutStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
+            Inc(TrackPoints);
           end;
           OutStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
