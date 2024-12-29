@@ -1738,7 +1738,7 @@ var Func: TGPXFunc;
 
                 if (ZumoModel = TZumoModel.XT2) then
                 begin
-                  PrepStream(TmpStream, [$00000008, $00000080, $00000080]);
+                  PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
                   Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
                 end;
 
@@ -1839,7 +1839,7 @@ var Func: TGPXFunc;
 
             SetLength(RoutePreferences, ViaPointCount -1);
             for Index := 0 to High(RoutePreferences) do
-              RoutePreferences[Index] := $0001;
+              RoutePreferences[Index] := Swap($0100);
             PrepStream(TmpStream, ViaPointCount -1, RoutePreferences);
             Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferences', TmpStream.Size, $80, TmpStream);
 
