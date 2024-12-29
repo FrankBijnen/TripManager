@@ -1640,7 +1640,6 @@ var Func: TGPXFunc;
         end;
       end;
 
-
     begin
       GpxNode := Xml.ChildNodes.find(GpxNodename);  // Look for <gpx> node
       if (GpxNode = nil) or
@@ -1675,6 +1674,24 @@ var Func: TGPXFunc;
         ParentTripId: Cardinal;
         RteNode, GpxNode: TXmlVSNode;
 
+      procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal); overload;
+      begin
+        TmpStream.Clear;
+        TmpStream.Write(Buffer, SizeOf(Buffer));
+        TmpStream.Position := 0;
+      end;
+
+      procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD); overload;
+      var
+        SwapCount: Cardinal;
+      begin
+        SwapCount := Swap32(Count);
+        TmpStream.Clear;
+        TmpStream.Write(SwapCount, SizeOf(SwapCount));
+        TmpStream.Write(Buffer, SizeOf(Buffer));
+        TmpStream.Position := 0;
+      end;
+
       procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
       var RtePtNode: TXmlVSNode;
           RtePts: TXmlVSNodeList;
@@ -1685,6 +1702,179 @@ var Func: TGPXFunc;
           Coords: TCoord;
           TripList: TTripList;
           Locations: TmLocations;
+          ViaPointCount: integer;
+
+          procedure CreateLocations;
+          var
+            RtePtNode: TXmlVSNode;
+            TmpStream : TMemoryStream;
+          begin
+            TmpStream := TMemoryStream.Create;
+            try
+              Locations := TmLocations.Create;
+              for RtePtNode in RtePts do
+              begin
+                // Get Data from RtePt
+                RtePtName := FindSubNodeValue(RtePtNode, 'name');
+                Coords := CoordFromAttribute(RtePtNode.AttributeList);
+
+                RtePtExtensions := RtePtNode.Find('extensions');
+                if (RtePtExtensions = nil) then
+                  continue;
+                RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
+
+                RtePtDesc := FindSubNodeValue(RtePtNode, 'desc');
+                if (RtePtDesc = '') then
+                  RtePtDesc := Format('%s, %s', [FormatFloat('##0.00000', Coords.Lat, FormatSettings),
+                                                 FormatFloat('##0.00000', Coords.Lon, FormatSettings)]
+                                      );
+                DepartureDateString := '';
+                if (RtePtViaPoint <> nil) then
+                  DepartureDateString := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
+                // Have all we need.
+
+                // Create Location
+                Locations.AddLocatIon(TLocation.Create);
+
+                if (ZumoModel = TZumoModel.XT2) then
+                begin
+                  PrepStream(TmpStream, [$00000008, $00000080, $00000080]);
+                  Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
+                end;
+
+                if (RtePtViaPoint <> nil) then
+                  Locations.Add(TmAttr.Create(TRoutePoint.rpVia))
+                else
+                  Locations.Add(TmAttr.Create(TRoutePoint.rpShaping));
+                Locations.Add(TmIsDFSPoint.Create);
+                Locations.Add(TmDuration.Create);
+
+                if (DepartureDateString <> '') and
+                  TryISO8601ToDate(DepartureDateString, DepartureDate, false) then
+                  Locations.Add(TmArrival.Create(DepartureDate))
+                else
+                  Locations.Add(TmArrival.Create);
+
+                Locations.Add(TmScPosn.Create(Coords.Lat, Coords.Lon));
+                Locations.Add(TmAddress.Create(RtePtDesc));
+                Locations.Add(TmisTravelapseDestination.Create);
+                Locations.Add(TmShapingRadius.Create);
+                Locations.Add(TmName.Create(RtePtName));
+              end;
+              TripList.Add(Locations);
+            finally
+              TmpStream.Free;
+            end;
+          end;
+
+          procedure CreateTrip_XT;
+          begin
+            TripList.AddHeader(THeader.Create);
+            TripList.Add(TmPreserveTrackToRoute.Create);
+            TripList.Add(TmParentTripId.Create(ParentTripId));
+            TripList.Add(TmDayNumber.Create);
+            TripList.Add(TmTripDate.Create);
+            TripList.Add(TmIsDisplayable.Create);
+            TripList.Add(TmAvoidancesChanged.Create);
+            TripList.Add(TmIsRoundTrip.Create);
+            TripList.Add(TmParentTripName.Create(BaseFile));
+            TripList.Add(TmOptimized.Create);
+            TripList.Add(TmTotalTripTime.Create);
+            TripList.Add(TmImported.Create);
+            TripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+            TripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+            TripList.Add(TmTotalTripDistance.Create);
+            TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+
+            CreateLocations;
+
+            TripList.Add(TmPartOfSplitRoute.Create);
+            TripList.Add(TmVersionNumber.Create);
+
+            // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
+            // Todo add param viapointcount
+            TripList.ForceRecalc(ZumoModel);
+
+            TripList.Add(TmTripName.Create(TripName));
+          end;
+
+          // Note: Not indented Items need verification
+          procedure CreateTrip_XT2;
+          var
+            TmpStream: TMemoryStream;
+            RoutePreferences: array of WORD;
+            Index: integer;
+          begin
+            TmpStream := TMemoryStream.Create;
+            try
+              TripList.AddHeader(THeader.Create);
+
+              //Note: TRawDataItem used for unknown (XT2) types. Need investigating
+            PrepStream(TmpStream, [$0000]);
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
+
+            Triplist.Add(TCardinalItem.Create('mAvoidancesChangedTimeAtSave', 0));
+
+            PrepStream(TmpStream, [$0000]);
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
+
+              TripList.Add(TmIsDisplayable.Create);
+              TripList.Add(TBooleanItem.Create('mIsDeviceRoute', true));
+              TripList.Add(TmDayNumber.Create);
+              TripList.Add(TmTripDate.Create);
+              TripList.Add(TmOptimized.Create);
+              TripList.Add(TmTotalTripTime.Create);
+              TripList.Add(TmTripName.Create(TripName));
+
+            TripList.Add(TStringItem.Create('mVehicleProfileGuid', '00000000-0000-0000-0000-000000000000'));
+
+              TripList.Add(TmParentTripId.Create(ParentTripId));
+              TripList.Add(TmIsRoundTrip.Create);
+
+            TripList.Add(TStringItem.Create('mVehicleProfileName', 'z' + #0361 + 'mo Motorcycle'));
+              TripList.Add(TmAvoidancesChanged.Create);
+              TripList.Add(TmParentTripName.Create(BaseFile));
+            TripList.Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
+            TripList.Add(TCardinalItem.Create('mVehicleProfileHash', 0));
+
+            SetLength(RoutePreferences, ViaPointCount -1);
+            for Index := 0 to High(RoutePreferences) do
+              RoutePreferences[Index] := $0001;
+            PrepStream(TmpStream, ViaPointCount -1, RoutePreferences);
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferences', TmpStream.Size, $80, TmpStream);
+
+              TripList.Add(TmImported.Create);
+              TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+              TripList.Add(TStringItem.Create('mExploreUuid', '00000000-0000-0000-0000-000000000000'));
+              TripList.Add(TmVersionNumber.Create(4, $10));
+
+            TmpStream.Position := 0;
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousHillsAndCurves', TmpStream.Size, $80, TmpStream);
+              TripList.Add(TmTotalTripDistance.Create);
+            TripList.Add(TByteItem.Create('mVehicleId', 1)); // ?
+            TmpStream.Position := 0;
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousScenicRoads', TmpStream.Size, $80, TmpStream);
+
+              // Create Dummy AllRoutes, to force recalc on the XT2. Just an entry for every Via.
+              TripList.ForceRecalc(ZumoModel, ViaPointCount);
+            TmpStream.Position := 0;
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousPopularPaths', TmpStream.Size, $80, TmpStream);
+              TripList.Add(TmPartOfSplitRoute.Create);
+              TripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+              TripList.Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
+
+            TmpStream.Position := 0;
+            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousMode', TmpStream.Size, $80, TmpStream);
+
+              TripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+
+              CreateLocations;
+
+            finally
+              TmpStream.Free;
+            end;
+          end;
+
       begin
         RtePts := RteNode.FindNodes(RtePtNodename);
         if (RtePts = nil) then
@@ -1707,6 +1897,7 @@ var Func: TGPXFunc;
 
           // Scan for CalculationMode
           CalculationMode := '';
+          ViaPointCount := 0;
           for RtePtNode in RtePts do
           begin
             RtePtExtensions := RtePtNode.Find('extensions');
@@ -1715,81 +1906,20 @@ var Func: TGPXFunc;
             RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
             if (RtePtViaPoint <> nil) then
             begin
+              Inc(ViaPointCount);
               if (CalculationMode = '') then
                 CalculationMode := FindSubNodeValue(RtePtViaPoint,'trp:CalculationMode');
             end;
           end;
 
-          TripList.AddHeader(THeader.Create);
-          TripList.Add(TmPreserveTrackToRoute.Create);
-          TripList.Add(TmParentTripId.Create(ParentTripId));
-          TripList.Add(TmDayNumber.Create);
-          TripList.Add(TmTripDate.Create);
-          TripList.Add(TmIsDisplayable.Create);
-          TripList.Add(TmAvoidancesChanged.Create);
-          TripList.Add(TmIsRoundTrip.Create);
-          TripList.Add(TmParentTripName.Create(BaseFile));
-          TripList.Add(TmOptimized.Create);
-          TripList.Add(TmTotalTripTime.Create);
-          TripList.Add(TmImported.Create);
-          TripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
-          TripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-          TripList.Add(TmTotalTripDistance.Create);
-          TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
-
-          Locations := TmLocations.Create;
-          for RtePtNode in RtePts do
-          begin
-            // Get Data from RtePt
-            RtePtName := FindSubNodeValue(RtePtNode, 'name');
-            Coords := CoordFromAttribute(RtePtNode.AttributeList);
-
-            RtePtExtensions := RtePtNode.Find('extensions');
-            if (RtePtExtensions = nil) then
-              continue;
-            RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
-
-            RtePtDesc := FindSubNodeValue(RtePtNode, 'desc');
-            if (RtePtDesc = '') then
-              RtePtDesc := Format('%s, %s', [FormatFloat('##0.00000', Coords.Lat, FormatSettings),
-                                             FormatFloat('##0.00000', Coords.Lon, FormatSettings)]
-                                  );
-            DepartureDateString := '';
-            if (RtePtViaPoint <> nil) then
-              DepartureDateString := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
-            // Have all we need.
-
-            // Create Location
-            Locations.AddLocatIon(TLocation.Create);
-
-            if (RtePtViaPoint <> nil) then
-              Locations.Add(TmAttr.Create(TRoutePoint.rpVia))
+          case ZumoModel of
+            TZumoModel.XT:
+              CreateTrip_XT;
+            TZumoModel.XT2:
+              CreateTrip_XT2;
             else
-              Locations.Add(TmAttr.Create(TRoutePoint.rpShaping));
-            Locations.Add(TmIsDFSPoint.Create);
-            Locations.Add(TmDuration.Create);
-
-            if (DepartureDateString <> '') and
-              TryISO8601ToDate(DepartureDateString, DepartureDate, false) then
-              Locations.Add(TmArrival.Create(DepartureDate))
-            else
-              Locations.Add(TmArrival.Create);
-
-            Locations.Add(TmScPosn.Create(Coords.Lat, Coords.Lon));
-            Locations.Add(TmAddress.Create(RtePtDesc));
-            Locations.Add(TmisTravelapseDestination.Create);
-            Locations.Add(TmShapingRadius.Create);
-            Locations.Add(TmName.Create(RtePtName));
+              CreateTrip_XT; // Unknown model, default to XT
           end;
-          TripList.Add(Locations);
-
-          TripList.Add(TmPartOfSplitRoute.Create);
-          TripList.Add(TmVersionNumber.Create);
-
-          // Create Dummy AllRoutes, to force recalc on the XT(2). Just an entry for every Via.
-          TripList.ForceRecalc(ZumoModel);
-
-          TripList.Add(TmTripName.Create(TripName));
 
           // Write to File
           TripList.SaveToFile(OutFile);

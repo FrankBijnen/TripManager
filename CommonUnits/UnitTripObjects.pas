@@ -461,7 +461,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure AddLocatIon(ALocation: TLocation);
-    procedure Add(ANItem: TBaseItem);
+    function Add(ANItem: TBaseItem): TBaseItem;
     property Locations: TItemList read FItemList;
     property LocationCount: Cardinal read FItemCount;
   end;
@@ -590,7 +590,7 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure AddHeader(AHeader: THeader);
-    procedure Add(ANItem: TBaseItem);
+    function Add(ANItem: TBaseItem): TBaseItem;
     procedure SaveToStream(AStream: TMemoryStream);
     procedure SaveToFile(AFile: string);
     function LoadFromStream(AStream: TBufferedFileStream): boolean;
@@ -602,7 +602,7 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList);
-    procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown);
+    procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
 
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
@@ -625,32 +625,6 @@ asm int 3
   {$ELSE}
 begin
 {$ENDIF}
-end;
-
-type
-  T4Bytes = array[0..3] of byte;
-
-function Swap32(I: T4Bytes): T4Bytes; overload;
-begin
-  result[0] := I[3];
-  result[1] := I[2];
-  result[2] := I[1];
-  result[3] := I[0];
-end;
-
-function Swap32(I: Cardinal): Cardinal; overload;
-begin
-  result := Cardinal(Swap32(T4BYtes(I)));
-end;
-
-function Swap32(I: integer): integer; overload;
-begin
-  result := Cardinal(Swap32(T4BYtes(I)));
-end;
-
-function Swap32(I: single): single; overload;
-begin
-  result := Single(Swap32(T4BYtes(I)));
 end;
 
 procedure WriteSwap32(AStream: TMemoryStream; I: Cardinal); overload;
@@ -1770,10 +1744,11 @@ begin
   FItemCount := FItemCount +1;
 end;
 
-procedure TmLocations.Add(ANItem: TBaseItem);
+function TmLocations.Add(ANItem: TBaseItem): TBaseItem;
 begin
   FItemList.Add(ANItem);
   FLocation.Add(ANItem);
+  result := ANItem;
 end;
 
 procedure TmLocations.Calculate(AStream: TMemoryStream);
@@ -2166,9 +2141,10 @@ begin
   FHeader := AHeader;
 end;
 
-procedure TTripList.Add(ANItem: TBaseItem);
+function TTripList.Add(ANItem: TBaseItem): TBaseItem;
 begin
   ItemList.Add(ANItem);
+  result := ANItem;
 end;
 
 procedure TTripList.ResetCalculation;
@@ -2480,7 +2456,7 @@ begin
   end;
 end;
 
-procedure TTripList.ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown);
+procedure TTripList.ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
 var
   CalcModel: TZumoModel;
   AllRoutes: TBaseItem;
@@ -2511,16 +2487,19 @@ begin
   end;
 
   // Count Via points
-  Locations := GetItem('mLocations');
-  if not Assigned(Locations) then
-    exit;
-
-  ViaCount := 0;
-  for Location in TmLocations(Locations).Locations do
+  ViaCount := ViaPointCount;
+  if (ViaCount = 0) then  // Count from already assigned Locations
   begin
-    if (Location is TmAttr) and
-       (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
-      Inc(ViaCount);
+    Locations := GetItem('mLocations');
+    if not Assigned(Locations) then
+      exit;
+
+    for Location in TmLocations(Locations).Locations do
+    begin
+      if (Location is TmAttr) and
+         (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
+        Inc(ViaCount);
+    end;
   end;
 
   // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.

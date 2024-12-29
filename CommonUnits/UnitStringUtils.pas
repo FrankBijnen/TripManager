@@ -6,6 +6,10 @@ uses
   System.Sysutils, System.Variants, Winapi.ShellAPI, System.Win.Registry,
   Winapi.Windows;
 
+
+type
+  T4Bytes = array[0..3] of byte;
+
 function SenSize(const S: int64): string;
 function Intd(const N: Integer; const D: Integer): string;
 function Spc(const Cnt: integer): string;
@@ -13,6 +17,10 @@ function NextField(var AString: string; const ADelimiter: string): string;
 function ReplaceAll(const AString: string;
                     const OldPatterns, NewPatterns: array of string;
                     Flags: TReplaceFlags = [rfReplaceAll]): string;
+function Swap32(I: T4Bytes): T4Bytes; overload;
+function Swap32(I: Cardinal): Cardinal; overload;
+function Swap32(I: integer): integer; overload;
+function Swap32(I: single): single; overload;
 function CoordAsDec(const ACoord: string): double;
 function ValidLatLon(const Lat, Lon: string): boolean;
 procedure ParseLatLon(const LatLon: string; var Lat, Lon: string);
@@ -115,6 +123,29 @@ begin
   result := StringReplace(AString, OldPatterns[0], NewPatterns[0], Flags);
   for Index := 1 to PatternHigh do
     result := StringReplace(result, OldPatterns[Index], NewPatterns[Index], Flags);
+end;
+
+function Swap32(I: T4Bytes): T4Bytes;
+begin
+  result[0] := I[3];
+  result[1] := I[2];
+  result[2] := I[1];
+  result[3] := I[0];
+end;
+
+function Swap32(I: Cardinal): Cardinal;
+begin
+  result := Cardinal(Swap32(T4BYtes(I)));
+end;
+
+function Swap32(I: integer): integer;
+begin
+  result := Cardinal(Swap32(T4BYtes(I)));
+end;
+
+function Swap32(I: single): single;
+begin
+  result := Single(Swap32(T4BYtes(I)));
 end;
 
 function CoordAsDec(const ACoord: string): double;
