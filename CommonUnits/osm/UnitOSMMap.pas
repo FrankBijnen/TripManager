@@ -189,7 +189,7 @@ begin
   Html.Add('     map.zoomTo(' + InitialZoom_Point + ');');
   Html.Add('     if (Href) {');
   Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
-  Html.Add('       map.addPopup(popup);');
+  Html.Add('       map.addPopup(popup, true);');
   Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
   Html.Add('       timeoutId = setTimeout(RemovePopup, ' + PopupTimeout + ');');
   Html.Add('     };');
