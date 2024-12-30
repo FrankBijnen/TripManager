@@ -2810,6 +2810,11 @@ begin
   GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
   IniProximityStr := '500';
 
+  ProcessBegin := false;
+  ProcessEnd := false;
+  ProcessShape := false;
+  ProcessVia := false;
+
   WayPtList := TStringList.Create;
   try
     WayPtList.Text := ProcessCategoryPick;

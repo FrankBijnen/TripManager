@@ -79,7 +79,8 @@ begin
   Html.Add('var routepoints;');     // All route points
   Html.Add('var trackpoints;');     // Trackpoints
   Html.Add('var poipoints;');       // All POIs
-  Html.Add('var popup;');
+  Html.Add('var timeoutId = null;');
+  Html.Add('var popup = null;');
   Html.Add('var style;');
 
   Html.Add('var po;');
@@ -188,13 +189,14 @@ begin
   Html.Add('     map.zoomTo(' + InitialZoom_Point + ');');
   Html.Add('     if (Href) {');
   Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
-  Html.Add('       map.addPopup(popup, true);');
-  Html.Add('       setTimeout(RemovePopup, ' + PopupTimeout + ');');
+  Html.Add('       map.addPopup(popup);');
+  Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
+  Html.Add('       timeoutId = setTimeout(RemovePopup, ' + PopupTimeout + ');');
   Html.Add('     };');
   Html.Add('  }');
 
   Html.Add('  function RemovePopup(){');
-  Html.Add('     map.removePopup(popup);');
+  Html.Add('     if (popup) { map.removePopup(popup); popup = null};');
   Html.Add('  }');
 
   Html.Add('  function AddRoutePoint(Id, RoutePoint, PointLat, PointLon, Color){');

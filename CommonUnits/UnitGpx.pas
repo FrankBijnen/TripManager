@@ -1044,6 +1044,7 @@ end;
 function GPXWayPoint(CatId, BmpId: integer; WayPoint: TXmlVSNode): TGPXWayPoint;
 var ExtensionsNode, AddressNode: TXmlVSNode;
     ProximityStr: TGPXString;
+    ProximityFloat: single;
 
     function GetSpeedFromName(WptName: string): integer;
     var
@@ -1082,8 +1083,9 @@ begin
     begin
       Phone         := TGPXString(FindSubNodeValue(ExtensionsNode, 'gpxx:PhoneNumber'));
       ProximityStr  := TGPXString(FindSubNodeValue(ExtensionsNode, 'gpxx:Proximity'));
-      if (ProximityStr <> '') then
-        Proximity := StrToInt(string(ProximityStr));
+      if (ProximityStr <> '') and
+         (TryStrToFloat(string(ProximityStr), ProximityFloat, FormatSettings)) then
+        Proximity := Trunc(ProximityFloat);
       AddressNode := ExtensionsNode.Find('gpxx:Address');
       if (AddressNode <> nil) then
       begin
