@@ -6409,8 +6409,11 @@ end;
 
 procedure TCustomBCHexEditor.PrepareOverwriteDiskFile;
 begin
-  if FIsFileReadonly then
-    raise EFOpenError.CreateFmt(ERR_FILE_READONLY, [FileName]);
+// Dont care if the file appears to be read-only.
+// Saving the stream will report an error.
+//
+//  if FIsFileReadonly then
+//    raise EFOpenError.CreateFmt(ERR_FILE_READONLY, [FileName]);
 end;
 
 procedure TCustomBCHexEditor.Changed;
