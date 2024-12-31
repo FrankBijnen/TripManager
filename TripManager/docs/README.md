@@ -24,6 +24,12 @@
      <li><a href="WalkThroughs/7%20Post%20processing%20a%20GPX%20file.pdf">Post processing a GPX file</a></li>
      <li><a href="WalkThroughs/8%20Creating%20Additional%20files.pdf">Creating Additional files</a></li>
      <li><a href="WalkThroughs/9%20Using%20POI%20files.pdf">Using POI files</a></li>
+</ol><br>
+
+<h4>Technical info on the data formats.</h4>
+<ol>
+     <li><a href="DataFormats/Subclass%20for%20RoutePoints%20in%20Garmin%20GPX.pdf">Subclass field</a></li>
+     <li><a href="DataFormats/DataFormats%20used.pdf">Data format used in TripManager</a></li>
 </ol>
 </body>
 </html>
