@@ -67,7 +67,7 @@
         <SanitizedProjectName>TripManager_CBuilder</SanitizedProjectName>
         <VerInfo_Locale>1043</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <IncludePath>..\TripManager\;..\CommonUnits;$(IncludePath)</IncludePath>
+        <IncludePath>..\TripManager\;$(IncludePath)</IncludePath>
         <DCC_UnitSearchPath>..\CommonUnits;..\CommonUnits\BCHex;..\CommonUnits\DirMon;..\CommonUnits\kml;..\CommonUnits\LVSort;..\CommonUnits\Mtp;..\CommonUnits\osm;..\CommonUnits\VerySimpleXml;..\TripManager;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <ILINK_LibraryPath>..\TripManager\;..\CommonUnits;..\CommonUnits\BCHex;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
@@ -125,6 +125,8 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
         <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi</LinkPackageImports>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="..\TripManager\TripManager_MultiContext.pas">

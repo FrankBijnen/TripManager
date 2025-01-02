@@ -7,7 +7,7 @@
 #pragma link "soaprtl.bpi"
 #pragma hdrstop
 #include <tchar.h>
-#include "UnitStringUtils.hpp"
+#include "..\CommonUnits\UnitStringUtils.hpp"
 
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
