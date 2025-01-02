@@ -16,6 +16,7 @@
 #include <SysInit.hpp>
 #include <System.Classes.hpp>
 #include <Vcl.ComCtrls.hpp>
+#include <PortableDeviceApiLib_TLB.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -26,6 +27,8 @@ class DELPHICLASS TBASE_Data;
 class DELPHICLASS TMTP_Data;
 class DELPHICLASS TMTP_Device;
 //-- type declarations -------------------------------------------------------
+typedef Portabledeviceapilib_tlb::_di_IPortableDevice IMTPDevice;
+
 class PASCALIMPLEMENTATION TBASE_Data : public System::TObject
 {
 	typedef System::TObject inherited;
@@ -66,6 +69,7 @@ public:
 	System::UnicodeString Device;
 	System::UnicodeString Description;
 	System::UnicodeString FriendlyName;
+	Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev;
 public:
 	/* TObject.Create */ inline __fastcall TMTP_Device() : System::TObject() { }
 	/* TObject.Destroy */ inline __fastcall virtual ~TMTP_Device() { }

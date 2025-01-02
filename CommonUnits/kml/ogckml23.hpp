@@ -1,0 +1,12483 @@
+﻿// CodeGear C++Builder
+// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// All rights reserved
+
+// (DO NOT EDIT: machine generated header) 'ogckml23.pas' rev: 35.00 (Windows)
+
+#ifndef Ogckml23HPP
+#define Ogckml23HPP
+
+#pragma delphiheader begin
+#pragma option push
+#pragma option -w-      // All warnings off
+#pragma option -Vx      // Zero-length empty class member 
+#pragma pack(push,8)
+#include <System.hpp>
+#include <SysInit.hpp>
+#include <Xml.xmldom.hpp>
+#include <Xml.XMLDoc.hpp>
+#include <Xml.XMLIntf.hpp>
+
+//-- user supplied -----------------------------------------------------------
+
+namespace Ogckml23
+{
+//-- forward type declarations -----------------------------------------------
+__interface DELPHIINTERFACE IXMLAbstractObjectType;
+typedef System::DelphiInterface<IXMLAbstractObjectType> _di_IXMLAbstractObjectType;
+__interface DELPHIINTERFACE IXMLVec2Type;
+typedef System::DelphiInterface<IXMLVec2Type> _di_IXMLVec2Type;
+__interface DELPHIINTERFACE IXMLSnippetType;
+typedef System::DelphiInterface<IXMLSnippetType> _di_IXMLSnippetType;
+__interface DELPHIINTERFACE IXMLAbstractFeatureType;
+typedef System::DelphiInterface<IXMLAbstractFeatureType> _di_IXMLAbstractFeatureType;
+__interface DELPHIINTERFACE IXMLAbstractFeatureTypeList;
+typedef System::DelphiInterface<IXMLAbstractFeatureTypeList> _di_IXMLAbstractFeatureTypeList;
+__interface DELPHIINTERFACE IXMLAtomPersonConstruct_atom;
+typedef System::DelphiInterface<IXMLAtomPersonConstruct_atom> _di_IXMLAtomPersonConstruct_atom;
+__interface DELPHIINTERFACE IXMLLink_atom;
+typedef System::DelphiInterface<IXMLLink_atom> _di_IXMLLink_atom;
+__interface DELPHIINTERFACE IXMLAddressDetails_xal;
+typedef System::DelphiInterface<IXMLAddressDetails_xal> _di_IXMLAddressDetails_xal;
+__interface DELPHIINTERFACE IXMLPostalServiceElements_xal;
+typedef System::DelphiInterface<IXMLPostalServiceElements_xal> _di_IXMLPostalServiceElements_xal;
+__interface DELPHIINTERFACE IXMLAddressIdentifier_xal;
+typedef System::DelphiInterface<IXMLAddressIdentifier_xal> _di_IXMLAddressIdentifier_xal;
+__interface DELPHIINTERFACE IXMLAddressIdentifier_xalList;
+typedef System::DelphiInterface<IXMLAddressIdentifier_xalList> _di_IXMLAddressIdentifier_xalList;
+__interface DELPHIINTERFACE IXMLEndorsementLineCode_xal;
+typedef System::DelphiInterface<IXMLEndorsementLineCode_xal> _di_IXMLEndorsementLineCode_xal;
+__interface DELPHIINTERFACE IXMLKeyLineCode_xal;
+typedef System::DelphiInterface<IXMLKeyLineCode_xal> _di_IXMLKeyLineCode_xal;
+__interface DELPHIINTERFACE IXMLBarcode_xal;
+typedef System::DelphiInterface<IXMLBarcode_xal> _di_IXMLBarcode_xal;
+__interface DELPHIINTERFACE IXMLSortingCode_xal;
+typedef System::DelphiInterface<IXMLSortingCode_xal> _di_IXMLSortingCode_xal;
+__interface DELPHIINTERFACE IXMLAddressLatitude_xal;
+typedef System::DelphiInterface<IXMLAddressLatitude_xal> _di_IXMLAddressLatitude_xal;
+__interface DELPHIINTERFACE IXMLAddressLatitudeDirection_xal;
+typedef System::DelphiInterface<IXMLAddressLatitudeDirection_xal> _di_IXMLAddressLatitudeDirection_xal;
+__interface DELPHIINTERFACE IXMLAddressLongitude_xal;
+typedef System::DelphiInterface<IXMLAddressLongitude_xal> _di_IXMLAddressLongitude_xal;
+__interface DELPHIINTERFACE IXMLAddressLongitudeDirection_xal;
+typedef System::DelphiInterface<IXMLAddressLongitudeDirection_xal> _di_IXMLAddressLongitudeDirection_xal;
+__interface DELPHIINTERFACE IXMLSupplementaryPostalServiceData_xal;
+typedef System::DelphiInterface<IXMLSupplementaryPostalServiceData_xal> _di_IXMLSupplementaryPostalServiceData_xal;
+__interface DELPHIINTERFACE IXMLSupplementaryPostalServiceData_xalList;
+typedef System::DelphiInterface<IXMLSupplementaryPostalServiceData_xalList> _di_IXMLSupplementaryPostalServiceData_xalList;
+__interface DELPHIINTERFACE IXMLAddress_xal;
+typedef System::DelphiInterface<IXMLAddress_xal> _di_IXMLAddress_xal;
+__interface DELPHIINTERFACE IXMLAddressLinesType_xal;
+typedef System::DelphiInterface<IXMLAddressLinesType_xal> _di_IXMLAddressLinesType_xal;
+__interface DELPHIINTERFACE IXMLAddressLine_xal;
+typedef System::DelphiInterface<IXMLAddressLine_xal> _di_IXMLAddressLine_xal;
+__interface DELPHIINTERFACE IXMLAddressLine_xalList;
+typedef System::DelphiInterface<IXMLAddressLine_xalList> _di_IXMLAddressLine_xalList;
+__interface DELPHIINTERFACE IXMLCountry_xal;
+typedef System::DelphiInterface<IXMLCountry_xal> _di_IXMLCountry_xal;
+__interface DELPHIINTERFACE IXMLCountryNameCode_xal;
+typedef System::DelphiInterface<IXMLCountryNameCode_xal> _di_IXMLCountryNameCode_xal;
+__interface DELPHIINTERFACE IXMLCountryNameCode_xalList;
+typedef System::DelphiInterface<IXMLCountryNameCode_xalList> _di_IXMLCountryNameCode_xalList;
+__interface DELPHIINTERFACE IXMLCountryName_xal;
+typedef System::DelphiInterface<IXMLCountryName_xal> _di_IXMLCountryName_xal;
+__interface DELPHIINTERFACE IXMLCountryName_xalList;
+typedef System::DelphiInterface<IXMLCountryName_xalList> _di_IXMLCountryName_xalList;
+__interface DELPHIINTERFACE IXMLAdministrativeArea_xal;
+typedef System::DelphiInterface<IXMLAdministrativeArea_xal> _di_IXMLAdministrativeArea_xal;
+__interface DELPHIINTERFACE IXMLAdministrativeAreaName_xal;
+typedef System::DelphiInterface<IXMLAdministrativeAreaName_xal> _di_IXMLAdministrativeAreaName_xal;
+__interface DELPHIINTERFACE IXMLAdministrativeAreaName_xalList;
+typedef System::DelphiInterface<IXMLAdministrativeAreaName_xalList> _di_IXMLAdministrativeAreaName_xalList;
+__interface DELPHIINTERFACE IXMLSubAdministrativeArea_xal;
+typedef System::DelphiInterface<IXMLSubAdministrativeArea_xal> _di_IXMLSubAdministrativeArea_xal;
+__interface DELPHIINTERFACE IXMLSubAdministrativeAreaName_xal;
+typedef System::DelphiInterface<IXMLSubAdministrativeAreaName_xal> _di_IXMLSubAdministrativeAreaName_xal;
+__interface DELPHIINTERFACE IXMLSubAdministrativeAreaName_xalList;
+typedef System::DelphiInterface<IXMLSubAdministrativeAreaName_xalList> _di_IXMLSubAdministrativeAreaName_xalList;
+__interface DELPHIINTERFACE IXMLLocality_xal;
+typedef System::DelphiInterface<IXMLLocality_xal> _di_IXMLLocality_xal;
+__interface DELPHIINTERFACE IXMLLocalityName_xal;
+typedef System::DelphiInterface<IXMLLocalityName_xal> _di_IXMLLocalityName_xal;
+__interface DELPHIINTERFACE IXMLLocalityName_xalList;
+typedef System::DelphiInterface<IXMLLocalityName_xalList> _di_IXMLLocalityName_xalList;
+__interface DELPHIINTERFACE IXMLPostBox_xal;
+typedef System::DelphiInterface<IXMLPostBox_xal> _di_IXMLPostBox_xal;
+__interface DELPHIINTERFACE IXMLPostBoxNumber_xal;
+typedef System::DelphiInterface<IXMLPostBoxNumber_xal> _di_IXMLPostBoxNumber_xal;
+__interface DELPHIINTERFACE IXMLPostBoxNumberPrefix_xal;
+typedef System::DelphiInterface<IXMLPostBoxNumberPrefix_xal> _di_IXMLPostBoxNumberPrefix_xal;
+__interface DELPHIINTERFACE IXMLPostBoxNumberSuffix_xal;
+typedef System::DelphiInterface<IXMLPostBoxNumberSuffix_xal> _di_IXMLPostBoxNumberSuffix_xal;
+__interface DELPHIINTERFACE IXMLPostBoxNumberExtension_xal;
+typedef System::DelphiInterface<IXMLPostBoxNumberExtension_xal> _di_IXMLPostBoxNumberExtension_xal;
+__interface DELPHIINTERFACE IXMLFirmType_xal;
+typedef System::DelphiInterface<IXMLFirmType_xal> _di_IXMLFirmType_xal;
+__interface DELPHIINTERFACE IXMLFirmName_xal;
+typedef System::DelphiInterface<IXMLFirmName_xal> _di_IXMLFirmName_xal;
+__interface DELPHIINTERFACE IXMLFirmName_xalList;
+typedef System::DelphiInterface<IXMLFirmName_xalList> _di_IXMLFirmName_xalList;
+__interface DELPHIINTERFACE IXMLDepartment_xal;
+typedef System::DelphiInterface<IXMLDepartment_xal> _di_IXMLDepartment_xal;
+__interface DELPHIINTERFACE IXMLDepartment_xalList;
+typedef System::DelphiInterface<IXMLDepartment_xalList> _di_IXMLDepartment_xalList;
+__interface DELPHIINTERFACE IXMLDepartmentName_xal;
+typedef System::DelphiInterface<IXMLDepartmentName_xal> _di_IXMLDepartmentName_xal;
+__interface DELPHIINTERFACE IXMLDepartmentName_xalList;
+typedef System::DelphiInterface<IXMLDepartmentName_xalList> _di_IXMLDepartmentName_xalList;
+__interface DELPHIINTERFACE IXMLMailStopType_xal;
+typedef System::DelphiInterface<IXMLMailStopType_xal> _di_IXMLMailStopType_xal;
+__interface DELPHIINTERFACE IXMLMailStopName_xal;
+typedef System::DelphiInterface<IXMLMailStopName_xal> _di_IXMLMailStopName_xal;
+__interface DELPHIINTERFACE IXMLMailStopNumber_xal;
+typedef System::DelphiInterface<IXMLMailStopNumber_xal> _di_IXMLMailStopNumber_xal;
+__interface DELPHIINTERFACE IXMLPostalCode_xal;
+typedef System::DelphiInterface<IXMLPostalCode_xal> _di_IXMLPostalCode_xal;
+__interface DELPHIINTERFACE IXMLPostalCodeNumber_xal;
+typedef System::DelphiInterface<IXMLPostalCodeNumber_xal> _di_IXMLPostalCodeNumber_xal;
+__interface DELPHIINTERFACE IXMLPostalCodeNumber_xalList;
+typedef System::DelphiInterface<IXMLPostalCodeNumber_xalList> _di_IXMLPostalCodeNumber_xalList;
+__interface DELPHIINTERFACE IXMLPostalCodeNumberExtension_xal;
+typedef System::DelphiInterface<IXMLPostalCodeNumberExtension_xal> _di_IXMLPostalCodeNumberExtension_xal;
+__interface DELPHIINTERFACE IXMLPostalCodeNumberExtension_xalList;
+typedef System::DelphiInterface<IXMLPostalCodeNumberExtension_xalList> _di_IXMLPostalCodeNumberExtension_xalList;
+__interface DELPHIINTERFACE IXMLPostTown_xal;
+typedef System::DelphiInterface<IXMLPostTown_xal> _di_IXMLPostTown_xal;
+__interface DELPHIINTERFACE IXMLPostTownName_xal;
+typedef System::DelphiInterface<IXMLPostTownName_xal> _di_IXMLPostTownName_xal;
+__interface DELPHIINTERFACE IXMLPostTownName_xalList;
+typedef System::DelphiInterface<IXMLPostTownName_xalList> _di_IXMLPostTownName_xalList;
+__interface DELPHIINTERFACE IXMLPostTownSuffix_xal;
+typedef System::DelphiInterface<IXMLPostTownSuffix_xal> _di_IXMLPostTownSuffix_xal;
+__interface DELPHIINTERFACE IXMLLargeMailUserType_xal;
+typedef System::DelphiInterface<IXMLLargeMailUserType_xal> _di_IXMLLargeMailUserType_xal;
+__interface DELPHIINTERFACE IXMLLargeMailUserName_xal;
+typedef System::DelphiInterface<IXMLLargeMailUserName_xal> _di_IXMLLargeMailUserName_xal;
+__interface DELPHIINTERFACE IXMLLargeMailUserName_xalList;
+typedef System::DelphiInterface<IXMLLargeMailUserName_xalList> _di_IXMLLargeMailUserName_xalList;
+__interface DELPHIINTERFACE IXMLLargeMailUserIdentifier_xal;
+typedef System::DelphiInterface<IXMLLargeMailUserIdentifier_xal> _di_IXMLLargeMailUserIdentifier_xal;
+__interface DELPHIINTERFACE IXMLBuildingNameType_xal;
+typedef System::DelphiInterface<IXMLBuildingNameType_xal> _di_IXMLBuildingNameType_xal;
+__interface DELPHIINTERFACE IXMLBuildingNameType_xalList;
+typedef System::DelphiInterface<IXMLBuildingNameType_xalList> _di_IXMLBuildingNameType_xalList;
+__interface DELPHIINTERFACE IXMLThoroughfare_xal;
+typedef System::DelphiInterface<IXMLThoroughfare_xal> _di_IXMLThoroughfare_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNumber_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNumber_xal> _di_IXMLThoroughfareNumber_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNumber_xalList;
+typedef System::DelphiInterface<IXMLThoroughfareNumber_xalList> _di_IXMLThoroughfareNumber_xalList;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberRange_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNumberRange_xal> _di_IXMLThoroughfareNumberRange_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberRange_xalList;
+typedef System::DelphiInterface<IXMLThoroughfareNumberRange_xalList> _di_IXMLThoroughfareNumberRange_xalList;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberFrom_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNumberFrom_xal> _di_IXMLThoroughfareNumberFrom_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberPrefix_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNumberPrefix_xal> _di_IXMLThoroughfareNumberPrefix_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberPrefix_xalList;
+typedef System::DelphiInterface<IXMLThoroughfareNumberPrefix_xalList> _di_IXMLThoroughfareNumberPrefix_xalList;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberSuffix_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNumberSuffix_xal> _di_IXMLThoroughfareNumberSuffix_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberSuffix_xalList;
+typedef System::DelphiInterface<IXMLThoroughfareNumberSuffix_xalList> _di_IXMLThoroughfareNumberSuffix_xalList;
+__interface DELPHIINTERFACE IXMLThoroughfareNumberTo_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNumberTo_xal> _di_IXMLThoroughfareNumberTo_xal;
+__interface DELPHIINTERFACE IXMLThoroughfarePreDirectionType_xal;
+typedef System::DelphiInterface<IXMLThoroughfarePreDirectionType_xal> _di_IXMLThoroughfarePreDirectionType_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareLeadingTypeType_xal;
+typedef System::DelphiInterface<IXMLThoroughfareLeadingTypeType_xal> _di_IXMLThoroughfareLeadingTypeType_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNameType_xal;
+typedef System::DelphiInterface<IXMLThoroughfareNameType_xal> _di_IXMLThoroughfareNameType_xal;
+__interface DELPHIINTERFACE IXMLThoroughfareNameType_xalList;
+typedef System::DelphiInterface<IXMLThoroughfareNameType_xalList> _di_IXMLThoroughfareNameType_xalList;
+__interface DELPHIINTERFACE IXMLThoroughfareTrailingTypeType_xal;
+typedef System::DelphiInterface<IXMLThoroughfareTrailingTypeType_xal> _di_IXMLThoroughfareTrailingTypeType_xal;
+__interface DELPHIINTERFACE IXMLThoroughfarePostDirectionType_xal;
+typedef System::DelphiInterface<IXMLThoroughfarePostDirectionType_xal> _di_IXMLThoroughfarePostDirectionType_xal;
+__interface DELPHIINTERFACE IXMLDependentThoroughfare_xal;
+typedef System::DelphiInterface<IXMLDependentThoroughfare_xal> _di_IXMLDependentThoroughfare_xal;
+__interface DELPHIINTERFACE IXMLDependentLocalityType_xal;
+typedef System::DelphiInterface<IXMLDependentLocalityType_xal> _di_IXMLDependentLocalityType_xal;
+__interface DELPHIINTERFACE IXMLDependentLocalityName_xal;
+typedef System::DelphiInterface<IXMLDependentLocalityName_xal> _di_IXMLDependentLocalityName_xal;
+__interface DELPHIINTERFACE IXMLDependentLocalityName_xalList;
+typedef System::DelphiInterface<IXMLDependentLocalityName_xalList> _di_IXMLDependentLocalityName_xalList;
+__interface DELPHIINTERFACE IXMLDependentLocalityNumber_xal;
+typedef System::DelphiInterface<IXMLDependentLocalityNumber_xal> _di_IXMLDependentLocalityNumber_xal;
+__interface DELPHIINTERFACE IXMLPostOffice_xal;
+typedef System::DelphiInterface<IXMLPostOffice_xal> _di_IXMLPostOffice_xal;
+__interface DELPHIINTERFACE IXMLPostOfficeName_xal;
+typedef System::DelphiInterface<IXMLPostOfficeName_xal> _di_IXMLPostOfficeName_xal;
+__interface DELPHIINTERFACE IXMLPostOfficeName_xalList;
+typedef System::DelphiInterface<IXMLPostOfficeName_xalList> _di_IXMLPostOfficeName_xalList;
+__interface DELPHIINTERFACE IXMLPostOfficeNumber_xal;
+typedef System::DelphiInterface<IXMLPostOfficeNumber_xal> _di_IXMLPostOfficeNumber_xal;
+__interface DELPHIINTERFACE IXMLPostalRouteType_xal;
+typedef System::DelphiInterface<IXMLPostalRouteType_xal> _di_IXMLPostalRouteType_xal;
+__interface DELPHIINTERFACE IXMLPostalRouteName_xal;
+typedef System::DelphiInterface<IXMLPostalRouteName_xal> _di_IXMLPostalRouteName_xal;
+__interface DELPHIINTERFACE IXMLPostalRouteName_xalList;
+typedef System::DelphiInterface<IXMLPostalRouteName_xalList> _di_IXMLPostalRouteName_xalList;
+__interface DELPHIINTERFACE IXMLPostalRouteNumber_xal;
+typedef System::DelphiInterface<IXMLPostalRouteNumber_xal> _di_IXMLPostalRouteNumber_xal;
+__interface DELPHIINTERFACE IXMLPremise_xal;
+typedef System::DelphiInterface<IXMLPremise_xal> _di_IXMLPremise_xal;
+__interface DELPHIINTERFACE IXMLPremiseName_xal;
+typedef System::DelphiInterface<IXMLPremiseName_xal> _di_IXMLPremiseName_xal;
+__interface DELPHIINTERFACE IXMLPremiseName_xalList;
+typedef System::DelphiInterface<IXMLPremiseName_xalList> _di_IXMLPremiseName_xalList;
+__interface DELPHIINTERFACE IXMLPremiseLocation_xal;
+typedef System::DelphiInterface<IXMLPremiseLocation_xal> _di_IXMLPremiseLocation_xal;
+__interface DELPHIINTERFACE IXMLPremiseNumber_xal;
+typedef System::DelphiInterface<IXMLPremiseNumber_xal> _di_IXMLPremiseNumber_xal;
+__interface DELPHIINTERFACE IXMLPremiseNumber_xalList;
+typedef System::DelphiInterface<IXMLPremiseNumber_xalList> _di_IXMLPremiseNumber_xalList;
+__interface DELPHIINTERFACE IXMLPremiseNumberRange_xal;
+typedef System::DelphiInterface<IXMLPremiseNumberRange_xal> _di_IXMLPremiseNumberRange_xal;
+__interface DELPHIINTERFACE IXMLPremiseNumberRangeFrom_xal;
+typedef System::DelphiInterface<IXMLPremiseNumberRangeFrom_xal> _di_IXMLPremiseNumberRangeFrom_xal;
+__interface DELPHIINTERFACE IXMLPremiseNumberPrefix_xal;
+typedef System::DelphiInterface<IXMLPremiseNumberPrefix_xal> _di_IXMLPremiseNumberPrefix_xal;
+__interface DELPHIINTERFACE IXMLPremiseNumberPrefix_xalList;
+typedef System::DelphiInterface<IXMLPremiseNumberPrefix_xalList> _di_IXMLPremiseNumberPrefix_xalList;
+__interface DELPHIINTERFACE IXMLPremiseNumberSuffix_xal;
+typedef System::DelphiInterface<IXMLPremiseNumberSuffix_xal> _di_IXMLPremiseNumberSuffix_xal;
+__interface DELPHIINTERFACE IXMLPremiseNumberSuffix_xalList;
+typedef System::DelphiInterface<IXMLPremiseNumberSuffix_xalList> _di_IXMLPremiseNumberSuffix_xalList;
+__interface DELPHIINTERFACE IXMLPremiseNumberRangeTo_xal;
+typedef System::DelphiInterface<IXMLPremiseNumberRangeTo_xal> _di_IXMLPremiseNumberRangeTo_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseType_xal;
+typedef System::DelphiInterface<IXMLSubPremiseType_xal> _di_IXMLSubPremiseType_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseType_xalList;
+typedef System::DelphiInterface<IXMLSubPremiseType_xalList> _di_IXMLSubPremiseType_xalList;
+__interface DELPHIINTERFACE IXMLSubPremiseName_xal;
+typedef System::DelphiInterface<IXMLSubPremiseName_xal> _di_IXMLSubPremiseName_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseName_xalList;
+typedef System::DelphiInterface<IXMLSubPremiseName_xalList> _di_IXMLSubPremiseName_xalList;
+__interface DELPHIINTERFACE IXMLSubPremiseLocation_xal;
+typedef System::DelphiInterface<IXMLSubPremiseLocation_xal> _di_IXMLSubPremiseLocation_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseNumber_xal;
+typedef System::DelphiInterface<IXMLSubPremiseNumber_xal> _di_IXMLSubPremiseNumber_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseNumber_xalList;
+typedef System::DelphiInterface<IXMLSubPremiseNumber_xalList> _di_IXMLSubPremiseNumber_xalList;
+__interface DELPHIINTERFACE IXMLSubPremiseNumberPrefix_xal;
+typedef System::DelphiInterface<IXMLSubPremiseNumberPrefix_xal> _di_IXMLSubPremiseNumberPrefix_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseNumberPrefix_xalList;
+typedef System::DelphiInterface<IXMLSubPremiseNumberPrefix_xalList> _di_IXMLSubPremiseNumberPrefix_xalList;
+__interface DELPHIINTERFACE IXMLSubPremiseNumberSuffix_xal;
+typedef System::DelphiInterface<IXMLSubPremiseNumberSuffix_xal> _di_IXMLSubPremiseNumberSuffix_xal;
+__interface DELPHIINTERFACE IXMLSubPremiseNumberSuffix_xalList;
+typedef System::DelphiInterface<IXMLSubPremiseNumberSuffix_xalList> _di_IXMLSubPremiseNumberSuffix_xalList;
+__interface DELPHIINTERFACE IXMLAbstractViewType;
+typedef System::DelphiInterface<IXMLAbstractViewType> _di_IXMLAbstractViewType;
+__interface DELPHIINTERFACE IXMLAbstractTimePrimitiveType;
+typedef System::DelphiInterface<IXMLAbstractTimePrimitiveType> _di_IXMLAbstractTimePrimitiveType;
+__interface DELPHIINTERFACE IXMLAbstractStyleSelectorType;
+typedef System::DelphiInterface<IXMLAbstractStyleSelectorType> _di_IXMLAbstractStyleSelectorType;
+__interface DELPHIINTERFACE IXMLAbstractStyleSelectorTypeList;
+typedef System::DelphiInterface<IXMLAbstractStyleSelectorTypeList> _di_IXMLAbstractStyleSelectorTypeList;
+__interface DELPHIINTERFACE IXMLRegionType;
+typedef System::DelphiInterface<IXMLRegionType> _di_IXMLRegionType;
+__interface DELPHIINTERFACE IXMLAbstractExtentType;
+typedef System::DelphiInterface<IXMLAbstractExtentType> _di_IXMLAbstractExtentType;
+__interface DELPHIINTERFACE IXMLLodType;
+typedef System::DelphiInterface<IXMLLodType> _di_IXMLLodType;
+__interface DELPHIINTERFACE IXMLLookAtType;
+typedef System::DelphiInterface<IXMLLookAtType> _di_IXMLLookAtType;
+__interface DELPHIINTERFACE IXMLCameraType;
+typedef System::DelphiInterface<IXMLCameraType> _di_IXMLCameraType;
+__interface DELPHIINTERFACE IXMLMetadataType;
+typedef System::DelphiInterface<IXMLMetadataType> _di_IXMLMetadataType;
+__interface DELPHIINTERFACE IXMLExtendedDataType;
+typedef System::DelphiInterface<IXMLExtendedDataType> _di_IXMLExtendedDataType;
+__interface DELPHIINTERFACE IXMLDataType;
+typedef System::DelphiInterface<IXMLDataType> _di_IXMLDataType;
+__interface DELPHIINTERFACE IXMLDataTypeList;
+typedef System::DelphiInterface<IXMLDataTypeList> _di_IXMLDataTypeList;
+__interface DELPHIINTERFACE IXMLSchemaDataType;
+typedef System::DelphiInterface<IXMLSchemaDataType> _di_IXMLSchemaDataType;
+__interface DELPHIINTERFACE IXMLSchemaDataTypeList;
+typedef System::DelphiInterface<IXMLSchemaDataTypeList> _di_IXMLSchemaDataTypeList;
+__interface DELPHIINTERFACE IXMLSimpleDataType;
+typedef System::DelphiInterface<IXMLSimpleDataType> _di_IXMLSimpleDataType;
+__interface DELPHIINTERFACE IXMLSimpleDataTypeList;
+typedef System::DelphiInterface<IXMLSimpleDataTypeList> _di_IXMLSimpleDataTypeList;
+__interface DELPHIINTERFACE IXMLSimpleArrayDataType;
+typedef System::DelphiInterface<IXMLSimpleArrayDataType> _di_IXMLSimpleArrayDataType;
+__interface DELPHIINTERFACE IXMLSimpleArrayDataTypeList;
+typedef System::DelphiInterface<IXMLSimpleArrayDataTypeList> _di_IXMLSimpleArrayDataTypeList;
+__interface DELPHIINTERFACE IXMLAbstractContainerType;
+typedef System::DelphiInterface<IXMLAbstractContainerType> _di_IXMLAbstractContainerType;
+__interface DELPHIINTERFACE IXMLAbstractContainerTypeList;
+typedef System::DelphiInterface<IXMLAbstractContainerTypeList> _di_IXMLAbstractContainerTypeList;
+__interface DELPHIINTERFACE IXMLAbstractGeometryType;
+typedef System::DelphiInterface<IXMLAbstractGeometryType> _di_IXMLAbstractGeometryType;
+__interface DELPHIINTERFACE IXMLAbstractGeometryTypeList;
+typedef System::DelphiInterface<IXMLAbstractGeometryTypeList> _di_IXMLAbstractGeometryTypeList;
+__interface DELPHIINTERFACE IXMLAbstractOverlayType;
+typedef System::DelphiInterface<IXMLAbstractOverlayType> _di_IXMLAbstractOverlayType;
+__interface DELPHIINTERFACE IXMLBasicLinkType;
+typedef System::DelphiInterface<IXMLBasicLinkType> _di_IXMLBasicLinkType;
+__interface DELPHIINTERFACE IXMLLinkType;
+typedef System::DelphiInterface<IXMLLinkType> _di_IXMLLinkType;
+__interface DELPHIINTERFACE IXMLKmlType;
+typedef System::DelphiInterface<IXMLKmlType> _di_IXMLKmlType;
+__interface DELPHIINTERFACE IXMLNetworkLinkControlType;
+typedef System::DelphiInterface<IXMLNetworkLinkControlType> _di_IXMLNetworkLinkControlType;
+__interface DELPHIINTERFACE IXMLUpdateType;
+typedef System::DelphiInterface<IXMLUpdateType> _di_IXMLUpdateType;
+__interface DELPHIINTERFACE IXMLDocumentType;
+typedef System::DelphiInterface<IXMLDocumentType> _di_IXMLDocumentType;
+__interface DELPHIINTERFACE IXMLSchemaType;
+typedef System::DelphiInterface<IXMLSchemaType> _di_IXMLSchemaType;
+__interface DELPHIINTERFACE IXMLSchemaTypeList;
+typedef System::DelphiInterface<IXMLSchemaTypeList> _di_IXMLSchemaTypeList;
+__interface DELPHIINTERFACE IXMLSimpleFieldType;
+typedef System::DelphiInterface<IXMLSimpleFieldType> _di_IXMLSimpleFieldType;
+__interface DELPHIINTERFACE IXMLSimpleFieldTypeList;
+typedef System::DelphiInterface<IXMLSimpleFieldTypeList> _di_IXMLSimpleFieldTypeList;
+__interface DELPHIINTERFACE IXMLSimpleArrayFieldType;
+typedef System::DelphiInterface<IXMLSimpleArrayFieldType> _di_IXMLSimpleArrayFieldType;
+__interface DELPHIINTERFACE IXMLSimpleArrayFieldTypeList;
+typedef System::DelphiInterface<IXMLSimpleArrayFieldTypeList> _di_IXMLSimpleArrayFieldTypeList;
+__interface DELPHIINTERFACE IXMLFolderType;
+typedef System::DelphiInterface<IXMLFolderType> _di_IXMLFolderType;
+__interface DELPHIINTERFACE IXMLPlacemarkType;
+typedef System::DelphiInterface<IXMLPlacemarkType> _di_IXMLPlacemarkType;
+__interface DELPHIINTERFACE IXMLNetworkLinkType;
+typedef System::DelphiInterface<IXMLNetworkLinkType> _di_IXMLNetworkLinkType;
+__interface DELPHIINTERFACE IXMLAbstractLatLonBoxType;
+typedef System::DelphiInterface<IXMLAbstractLatLonBoxType> _di_IXMLAbstractLatLonBoxType;
+__interface DELPHIINTERFACE IXMLLatLonAltBoxType;
+typedef System::DelphiInterface<IXMLLatLonAltBoxType> _di_IXMLLatLonAltBoxType;
+__interface DELPHIINTERFACE IXMLMultiGeometryType;
+typedef System::DelphiInterface<IXMLMultiGeometryType> _di_IXMLMultiGeometryType;
+__interface DELPHIINTERFACE IXMLMultiGeometryTypeList;
+typedef System::DelphiInterface<IXMLMultiGeometryTypeList> _di_IXMLMultiGeometryTypeList;
+__interface DELPHIINTERFACE IXMLPointType;
+typedef System::DelphiInterface<IXMLPointType> _di_IXMLPointType;
+__interface DELPHIINTERFACE IXMLLineStringType;
+typedef System::DelphiInterface<IXMLLineStringType> _di_IXMLLineStringType;
+__interface DELPHIINTERFACE IXMLLinearRingType;
+typedef System::DelphiInterface<IXMLLinearRingType> _di_IXMLLinearRingType;
+__interface DELPHIINTERFACE IXMLPolygonType;
+typedef System::DelphiInterface<IXMLPolygonType> _di_IXMLPolygonType;
+__interface DELPHIINTERFACE IXMLBoundaryType;
+typedef System::DelphiInterface<IXMLBoundaryType> _di_IXMLBoundaryType;
+__interface DELPHIINTERFACE IXMLBoundaryTypeList;
+typedef System::DelphiInterface<IXMLBoundaryTypeList> _di_IXMLBoundaryTypeList;
+__interface DELPHIINTERFACE IXMLModelType;
+typedef System::DelphiInterface<IXMLModelType> _di_IXMLModelType;
+__interface DELPHIINTERFACE IXMLLocationType;
+typedef System::DelphiInterface<IXMLLocationType> _di_IXMLLocationType;
+__interface DELPHIINTERFACE IXMLOrientationType;
+typedef System::DelphiInterface<IXMLOrientationType> _di_IXMLOrientationType;
+__interface DELPHIINTERFACE IXMLScaleType;
+typedef System::DelphiInterface<IXMLScaleType> _di_IXMLScaleType;
+__interface DELPHIINTERFACE IXMLResourceMapType;
+typedef System::DelphiInterface<IXMLResourceMapType> _di_IXMLResourceMapType;
+__interface DELPHIINTERFACE IXMLAliasType;
+typedef System::DelphiInterface<IXMLAliasType> _di_IXMLAliasType;
+__interface DELPHIINTERFACE IXMLAliasTypeList;
+typedef System::DelphiInterface<IXMLAliasTypeList> _di_IXMLAliasTypeList;
+__interface DELPHIINTERFACE IXMLTrackType;
+typedef System::DelphiInterface<IXMLTrackType> _di_IXMLTrackType;
+__interface DELPHIINTERFACE IXMLTrackTypeList;
+typedef System::DelphiInterface<IXMLTrackTypeList> _di_IXMLTrackTypeList;
+__interface DELPHIINTERFACE IXMLMultiTrackType;
+typedef System::DelphiInterface<IXMLMultiTrackType> _di_IXMLMultiTrackType;
+__interface DELPHIINTERFACE IXMLMultiTrackTypeList;
+typedef System::DelphiInterface<IXMLMultiTrackTypeList> _di_IXMLMultiTrackTypeList;
+__interface DELPHIINTERFACE IXMLGroundOverlayType;
+typedef System::DelphiInterface<IXMLGroundOverlayType> _di_IXMLGroundOverlayType;
+__interface DELPHIINTERFACE IXMLLatLonQuadType;
+typedef System::DelphiInterface<IXMLLatLonQuadType> _di_IXMLLatLonQuadType;
+__interface DELPHIINTERFACE IXMLLatLonBoxType;
+typedef System::DelphiInterface<IXMLLatLonBoxType> _di_IXMLLatLonBoxType;
+__interface DELPHIINTERFACE IXMLScreenOverlayType;
+typedef System::DelphiInterface<IXMLScreenOverlayType> _di_IXMLScreenOverlayType;
+__interface DELPHIINTERFACE IXMLPhotoOverlayType;
+typedef System::DelphiInterface<IXMLPhotoOverlayType> _di_IXMLPhotoOverlayType;
+__interface DELPHIINTERFACE IXMLViewVolumeType;
+typedef System::DelphiInterface<IXMLViewVolumeType> _di_IXMLViewVolumeType;
+__interface DELPHIINTERFACE IXMLImagePyramidType;
+typedef System::DelphiInterface<IXMLImagePyramidType> _di_IXMLImagePyramidType;
+__interface DELPHIINTERFACE IXMLStyleType;
+typedef System::DelphiInterface<IXMLStyleType> _di_IXMLStyleType;
+__interface DELPHIINTERFACE IXMLAbstractSubStyleType;
+typedef System::DelphiInterface<IXMLAbstractSubStyleType> _di_IXMLAbstractSubStyleType;
+__interface DELPHIINTERFACE IXMLAbstractColorStyleType;
+typedef System::DelphiInterface<IXMLAbstractColorStyleType> _di_IXMLAbstractColorStyleType;
+__interface DELPHIINTERFACE IXMLIconStyleType;
+typedef System::DelphiInterface<IXMLIconStyleType> _di_IXMLIconStyleType;
+__interface DELPHIINTERFACE IXMLLabelStyleType;
+typedef System::DelphiInterface<IXMLLabelStyleType> _di_IXMLLabelStyleType;
+__interface DELPHIINTERFACE IXMLLineStyleType;
+typedef System::DelphiInterface<IXMLLineStyleType> _di_IXMLLineStyleType;
+__interface DELPHIINTERFACE IXMLPolyStyleType;
+typedef System::DelphiInterface<IXMLPolyStyleType> _di_IXMLPolyStyleType;
+__interface DELPHIINTERFACE IXMLBalloonStyleType;
+typedef System::DelphiInterface<IXMLBalloonStyleType> _di_IXMLBalloonStyleType;
+__interface DELPHIINTERFACE IXMLListStyleType;
+typedef System::DelphiInterface<IXMLListStyleType> _di_IXMLListStyleType;
+__interface DELPHIINTERFACE IXMLItemIconType;
+typedef System::DelphiInterface<IXMLItemIconType> _di_IXMLItemIconType;
+__interface DELPHIINTERFACE IXMLItemIconTypeList;
+typedef System::DelphiInterface<IXMLItemIconTypeList> _di_IXMLItemIconTypeList;
+__interface DELPHIINTERFACE IXMLStyleMapType;
+typedef System::DelphiInterface<IXMLStyleMapType> _di_IXMLStyleMapType;
+__interface DELPHIINTERFACE IXMLPairType;
+typedef System::DelphiInterface<IXMLPairType> _di_IXMLPairType;
+__interface DELPHIINTERFACE IXMLPairTypeList;
+typedef System::DelphiInterface<IXMLPairTypeList> _di_IXMLPairTypeList;
+__interface DELPHIINTERFACE IXMLTimeStampType;
+typedef System::DelphiInterface<IXMLTimeStampType> _di_IXMLTimeStampType;
+__interface DELPHIINTERFACE IXMLTimeSpanType;
+typedef System::DelphiInterface<IXMLTimeSpanType> _di_IXMLTimeSpanType;
+__interface DELPHIINTERFACE IXMLCreateType;
+typedef System::DelphiInterface<IXMLCreateType> _di_IXMLCreateType;
+__interface DELPHIINTERFACE IXMLDeleteType;
+typedef System::DelphiInterface<IXMLDeleteType> _di_IXMLDeleteType;
+__interface DELPHIINTERFACE IXMLChangeType;
+typedef System::DelphiInterface<IXMLChangeType> _di_IXMLChangeType;
+__interface DELPHIINTERFACE IXMLAbstractTourPrimitiveType;
+typedef System::DelphiInterface<IXMLAbstractTourPrimitiveType> _di_IXMLAbstractTourPrimitiveType;
+__interface DELPHIINTERFACE IXMLAbstractTourPrimitiveTypeList;
+typedef System::DelphiInterface<IXMLAbstractTourPrimitiveTypeList> _di_IXMLAbstractTourPrimitiveTypeList;
+__interface DELPHIINTERFACE IXMLAnimatedUpdateType;
+typedef System::DelphiInterface<IXMLAnimatedUpdateType> _di_IXMLAnimatedUpdateType;
+__interface DELPHIINTERFACE IXMLFlyToType;
+typedef System::DelphiInterface<IXMLFlyToType> _di_IXMLFlyToType;
+__interface DELPHIINTERFACE IXMLPlaylistType;
+typedef System::DelphiInterface<IXMLPlaylistType> _di_IXMLPlaylistType;
+__interface DELPHIINTERFACE IXMLSoundCueType;
+typedef System::DelphiInterface<IXMLSoundCueType> _di_IXMLSoundCueType;
+__interface DELPHIINTERFACE IXMLTourType;
+typedef System::DelphiInterface<IXMLTourType> _di_IXMLTourType;
+__interface DELPHIINTERFACE IXMLTourControlType;
+typedef System::DelphiInterface<IXMLTourControlType> _di_IXMLTourControlType;
+__interface DELPHIINTERFACE IXMLWaitType;
+typedef System::DelphiInterface<IXMLWaitType> _di_IXMLWaitType;
+__interface DELPHIINTERFACE IXMLAtomEmailAddressList;
+typedef System::DelphiInterface<IXMLAtomEmailAddressList> _di_IXMLAtomEmailAddressList;
+__interface DELPHIINTERFACE IXMLDateTimeTypeList;
+typedef System::DelphiInterface<IXMLDateTimeTypeList> _di_IXMLDateTimeTypeList;
+__interface DELPHIINTERFACE IXMLAnyTypeList;
+typedef System::DelphiInterface<IXMLAnyTypeList> _di_IXMLAnyTypeList;
+__interface DELPHIINTERFACE IXMLAnySimpleTypeList;
+typedef System::DelphiInterface<IXMLAnySimpleTypeList> _di_IXMLAnySimpleTypeList;
+__interface DELPHIINTERFACE IXMLString_List;
+typedef System::DelphiInterface<IXMLString_List> _di_IXMLString_List;
+class DELPHICLASS TXMLAbstractObjectType;
+class DELPHICLASS TXMLVec2Type;
+class DELPHICLASS TXMLSnippetType;
+class DELPHICLASS TXMLAbstractFeatureType;
+class DELPHICLASS TXMLAbstractFeatureTypeList;
+class DELPHICLASS TXMLAtomPersonConstruct_atom;
+class DELPHICLASS TXMLLink_atom;
+class DELPHICLASS TXMLAddressDetails_xal;
+class DELPHICLASS TXMLPostalServiceElements_xal;
+class DELPHICLASS TXMLAddressIdentifier_xal;
+class DELPHICLASS TXMLAddressIdentifier_xalList;
+class DELPHICLASS TXMLEndorsementLineCode_xal;
+class DELPHICLASS TXMLKeyLineCode_xal;
+class DELPHICLASS TXMLBarcode_xal;
+class DELPHICLASS TXMLSortingCode_xal;
+class DELPHICLASS TXMLAddressLatitude_xal;
+class DELPHICLASS TXMLAddressLatitudeDirection_xal;
+class DELPHICLASS TXMLAddressLongitude_xal;
+class DELPHICLASS TXMLAddressLongitudeDirection_xal;
+class DELPHICLASS TXMLSupplementaryPostalServiceData_xal;
+class DELPHICLASS TXMLSupplementaryPostalServiceData_xalList;
+class DELPHICLASS TXMLAddress_xal;
+class DELPHICLASS TXMLAddressLinesType_xal;
+class DELPHICLASS TXMLAddressLine_xal;
+class DELPHICLASS TXMLAddressLine_xalList;
+class DELPHICLASS TXMLCountry_xal;
+class DELPHICLASS TXMLCountryNameCode_xal;
+class DELPHICLASS TXMLCountryNameCode_xalList;
+class DELPHICLASS TXMLCountryName_xal;
+class DELPHICLASS TXMLCountryName_xalList;
+class DELPHICLASS TXMLAdministrativeArea_xal;
+class DELPHICLASS TXMLAdministrativeAreaName_xal;
+class DELPHICLASS TXMLAdministrativeAreaName_xalList;
+class DELPHICLASS TXMLSubAdministrativeArea_xal;
+class DELPHICLASS TXMLSubAdministrativeAreaName_xal;
+class DELPHICLASS TXMLSubAdministrativeAreaName_xalList;
+class DELPHICLASS TXMLLocality_xal;
+class DELPHICLASS TXMLLocalityName_xal;
+class DELPHICLASS TXMLLocalityName_xalList;
+class DELPHICLASS TXMLPostBox_xal;
+class DELPHICLASS TXMLPostBoxNumber_xal;
+class DELPHICLASS TXMLPostBoxNumberPrefix_xal;
+class DELPHICLASS TXMLPostBoxNumberSuffix_xal;
+class DELPHICLASS TXMLPostBoxNumberExtension_xal;
+class DELPHICLASS TXMLFirmType_xal;
+class DELPHICLASS TXMLFirmName_xal;
+class DELPHICLASS TXMLFirmName_xalList;
+class DELPHICLASS TXMLDepartment_xal;
+class DELPHICLASS TXMLDepartment_xalList;
+class DELPHICLASS TXMLDepartmentName_xal;
+class DELPHICLASS TXMLDepartmentName_xalList;
+class DELPHICLASS TXMLMailStopType_xal;
+class DELPHICLASS TXMLMailStopName_xal;
+class DELPHICLASS TXMLMailStopNumber_xal;
+class DELPHICLASS TXMLPostalCode_xal;
+class DELPHICLASS TXMLPostalCodeNumber_xal;
+class DELPHICLASS TXMLPostalCodeNumber_xalList;
+class DELPHICLASS TXMLPostalCodeNumberExtension_xal;
+class DELPHICLASS TXMLPostalCodeNumberExtension_xalList;
+class DELPHICLASS TXMLPostTown_xal;
+class DELPHICLASS TXMLPostTownName_xal;
+class DELPHICLASS TXMLPostTownName_xalList;
+class DELPHICLASS TXMLPostTownSuffix_xal;
+class DELPHICLASS TXMLLargeMailUserType_xal;
+class DELPHICLASS TXMLLargeMailUserName_xal;
+class DELPHICLASS TXMLLargeMailUserName_xalList;
+class DELPHICLASS TXMLLargeMailUserIdentifier_xal;
+class DELPHICLASS TXMLBuildingNameType_xal;
+class DELPHICLASS TXMLBuildingNameType_xalList;
+class DELPHICLASS TXMLThoroughfare_xal;
+class DELPHICLASS TXMLThoroughfareNumber_xal;
+class DELPHICLASS TXMLThoroughfareNumber_xalList;
+class DELPHICLASS TXMLThoroughfareNumberRange_xal;
+class DELPHICLASS TXMLThoroughfareNumberRange_xalList;
+class DELPHICLASS TXMLThoroughfareNumberFrom_xal;
+class DELPHICLASS TXMLThoroughfareNumberPrefix_xal;
+class DELPHICLASS TXMLThoroughfareNumberPrefix_xalList;
+class DELPHICLASS TXMLThoroughfareNumberSuffix_xal;
+class DELPHICLASS TXMLThoroughfareNumberSuffix_xalList;
+class DELPHICLASS TXMLThoroughfareNumberTo_xal;
+class DELPHICLASS TXMLThoroughfarePreDirectionType_xal;
+class DELPHICLASS TXMLThoroughfareLeadingTypeType_xal;
+class DELPHICLASS TXMLThoroughfareNameType_xal;
+class DELPHICLASS TXMLThoroughfareNameType_xalList;
+class DELPHICLASS TXMLThoroughfareTrailingTypeType_xal;
+class DELPHICLASS TXMLThoroughfarePostDirectionType_xal;
+class DELPHICLASS TXMLDependentThoroughfare_xal;
+class DELPHICLASS TXMLDependentLocalityType_xal;
+class DELPHICLASS TXMLDependentLocalityName_xal;
+class DELPHICLASS TXMLDependentLocalityName_xalList;
+class DELPHICLASS TXMLDependentLocalityNumber_xal;
+class DELPHICLASS TXMLPostOffice_xal;
+class DELPHICLASS TXMLPostOfficeName_xal;
+class DELPHICLASS TXMLPostOfficeName_xalList;
+class DELPHICLASS TXMLPostOfficeNumber_xal;
+class DELPHICLASS TXMLPostalRouteType_xal;
+class DELPHICLASS TXMLPostalRouteName_xal;
+class DELPHICLASS TXMLPostalRouteName_xalList;
+class DELPHICLASS TXMLPostalRouteNumber_xal;
+class DELPHICLASS TXMLPremise_xal;
+class DELPHICLASS TXMLPremiseName_xal;
+class DELPHICLASS TXMLPremiseName_xalList;
+class DELPHICLASS TXMLPremiseLocation_xal;
+class DELPHICLASS TXMLPremiseNumber_xal;
+class DELPHICLASS TXMLPremiseNumber_xalList;
+class DELPHICLASS TXMLPremiseNumberRange_xal;
+class DELPHICLASS TXMLPremiseNumberRangeFrom_xal;
+class DELPHICLASS TXMLPremiseNumberPrefix_xal;
+class DELPHICLASS TXMLPremiseNumberPrefix_xalList;
+class DELPHICLASS TXMLPremiseNumberSuffix_xal;
+class DELPHICLASS TXMLPremiseNumberSuffix_xalList;
+class DELPHICLASS TXMLPremiseNumberRangeTo_xal;
+class DELPHICLASS TXMLSubPremiseType_xal;
+class DELPHICLASS TXMLSubPremiseType_xalList;
+class DELPHICLASS TXMLSubPremiseName_xal;
+class DELPHICLASS TXMLSubPremiseName_xalList;
+class DELPHICLASS TXMLSubPremiseLocation_xal;
+class DELPHICLASS TXMLSubPremiseNumber_xal;
+class DELPHICLASS TXMLSubPremiseNumber_xalList;
+class DELPHICLASS TXMLSubPremiseNumberPrefix_xal;
+class DELPHICLASS TXMLSubPremiseNumberPrefix_xalList;
+class DELPHICLASS TXMLSubPremiseNumberSuffix_xal;
+class DELPHICLASS TXMLSubPremiseNumberSuffix_xalList;
+class DELPHICLASS TXMLAbstractViewType;
+class DELPHICLASS TXMLAbstractTimePrimitiveType;
+class DELPHICLASS TXMLAbstractStyleSelectorType;
+class DELPHICLASS TXMLAbstractStyleSelectorTypeList;
+class DELPHICLASS TXMLRegionType;
+class DELPHICLASS TXMLAbstractExtentType;
+class DELPHICLASS TXMLLodType;
+class DELPHICLASS TXMLLookAtType;
+class DELPHICLASS TXMLCameraType;
+class DELPHICLASS TXMLMetadataType;
+class DELPHICLASS TXMLExtendedDataType;
+class DELPHICLASS TXMLDataType;
+class DELPHICLASS TXMLDataTypeList;
+class DELPHICLASS TXMLSchemaDataType;
+class DELPHICLASS TXMLSchemaDataTypeList;
+class DELPHICLASS TXMLSimpleDataType;
+class DELPHICLASS TXMLSimpleDataTypeList;
+class DELPHICLASS TXMLSimpleArrayDataType;
+class DELPHICLASS TXMLSimpleArrayDataTypeList;
+class DELPHICLASS TXMLAbstractContainerType;
+class DELPHICLASS TXMLAbstractContainerTypeList;
+class DELPHICLASS TXMLAbstractGeometryType;
+class DELPHICLASS TXMLAbstractGeometryTypeList;
+class DELPHICLASS TXMLAbstractOverlayType;
+class DELPHICLASS TXMLBasicLinkType;
+class DELPHICLASS TXMLLinkType;
+class DELPHICLASS TXMLKmlType;
+class DELPHICLASS TXMLNetworkLinkControlType;
+class DELPHICLASS TXMLUpdateType;
+class DELPHICLASS TXMLDocumentType;
+class DELPHICLASS TXMLSchemaType;
+class DELPHICLASS TXMLSchemaTypeList;
+class DELPHICLASS TXMLSimpleFieldType;
+class DELPHICLASS TXMLSimpleFieldTypeList;
+class DELPHICLASS TXMLSimpleArrayFieldType;
+class DELPHICLASS TXMLSimpleArrayFieldTypeList;
+class DELPHICLASS TXMLFolderType;
+class DELPHICLASS TXMLPlacemarkType;
+class DELPHICLASS TXMLNetworkLinkType;
+class DELPHICLASS TXMLAbstractLatLonBoxType;
+class DELPHICLASS TXMLLatLonAltBoxType;
+class DELPHICLASS TXMLMultiGeometryType;
+class DELPHICLASS TXMLMultiGeometryTypeList;
+class DELPHICLASS TXMLPointType;
+class DELPHICLASS TXMLLineStringType;
+class DELPHICLASS TXMLLinearRingType;
+class DELPHICLASS TXMLPolygonType;
+class DELPHICLASS TXMLBoundaryType;
+class DELPHICLASS TXMLBoundaryTypeList;
+class DELPHICLASS TXMLModelType;
+class DELPHICLASS TXMLLocationType;
+class DELPHICLASS TXMLOrientationType;
+class DELPHICLASS TXMLScaleType;
+class DELPHICLASS TXMLResourceMapType;
+class DELPHICLASS TXMLAliasType;
+class DELPHICLASS TXMLAliasTypeList;
+class DELPHICLASS TXMLTrackType;
+class DELPHICLASS TXMLTrackTypeList;
+class DELPHICLASS TXMLMultiTrackType;
+class DELPHICLASS TXMLMultiTrackTypeList;
+class DELPHICLASS TXMLGroundOverlayType;
+class DELPHICLASS TXMLLatLonQuadType;
+class DELPHICLASS TXMLLatLonBoxType;
+class DELPHICLASS TXMLScreenOverlayType;
+class DELPHICLASS TXMLPhotoOverlayType;
+class DELPHICLASS TXMLViewVolumeType;
+class DELPHICLASS TXMLImagePyramidType;
+class DELPHICLASS TXMLStyleType;
+class DELPHICLASS TXMLAbstractSubStyleType;
+class DELPHICLASS TXMLAbstractColorStyleType;
+class DELPHICLASS TXMLIconStyleType;
+class DELPHICLASS TXMLLabelStyleType;
+class DELPHICLASS TXMLLineStyleType;
+class DELPHICLASS TXMLPolyStyleType;
+class DELPHICLASS TXMLBalloonStyleType;
+class DELPHICLASS TXMLListStyleType;
+class DELPHICLASS TXMLItemIconType;
+class DELPHICLASS TXMLItemIconTypeList;
+class DELPHICLASS TXMLStyleMapType;
+class DELPHICLASS TXMLPairType;
+class DELPHICLASS TXMLPairTypeList;
+class DELPHICLASS TXMLTimeStampType;
+class DELPHICLASS TXMLTimeSpanType;
+class DELPHICLASS TXMLCreateType;
+class DELPHICLASS TXMLDeleteType;
+class DELPHICLASS TXMLChangeType;
+class DELPHICLASS TXMLAbstractTourPrimitiveType;
+class DELPHICLASS TXMLAbstractTourPrimitiveTypeList;
+class DELPHICLASS TXMLAnimatedUpdateType;
+class DELPHICLASS TXMLFlyToType;
+class DELPHICLASS TXMLPlaylistType;
+class DELPHICLASS TXMLSoundCueType;
+class DELPHICLASS TXMLTourType;
+class DELPHICLASS TXMLTourControlType;
+class DELPHICLASS TXMLWaitType;
+class DELPHICLASS TXMLAtomEmailAddressList;
+class DELPHICLASS TXMLDateTimeTypeList;
+class DELPHICLASS TXMLAnyTypeList;
+class DELPHICLASS TXMLAnySimpleTypeList;
+class DELPHICLASS TXMLString_List;
+//-- type declarations -------------------------------------------------------
+__interface  INTERFACE_UUID("{54C0A6CE-16B3-44AC-9EAC-987B9A6F741E}") IXMLAbstractObjectType  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	System::Variant operator[](int Index) { return this->ObjectSimpleExtensionGroup[Index]; }
+	virtual System::UnicodeString __fastcall Get_Id() = 0 ;
+	virtual System::UnicodeString __fastcall Get_TargetId() = 0 ;
+	virtual System::Variant __fastcall Get_ObjectSimpleExtensionGroup(int Index) = 0 ;
+	virtual void __fastcall Set_Id(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_TargetId(System::UnicodeString Value) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::Variant &ObjectSimpleExtensionGroup) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::Variant &ObjectSimpleExtensionGroup) = 0 ;
+	__property System::UnicodeString Id = {read=Get_Id, write=Set_Id};
+	__property System::UnicodeString TargetId = {read=Get_TargetId, write=Set_TargetId};
+	__property System::Variant ObjectSimpleExtensionGroup[int Index] = {read=Get_ObjectSimpleExtensionGroup/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{2FF6245C-4C97-42E3-B661-0D2808443E7E}") IXMLVec2Type  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual double __fastcall Get_X() = 0 ;
+	virtual double __fastcall Get_Y() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Xunits() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Yunits() = 0 ;
+	virtual void __fastcall Set_X(double Value) = 0 ;
+	virtual void __fastcall Set_Y(double Value) = 0 ;
+	virtual void __fastcall Set_Xunits(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Yunits(System::UnicodeString Value) = 0 ;
+	__property double X = {read=Get_X, write=Set_X};
+	__property double Y = {read=Get_Y, write=Set_Y};
+	__property System::UnicodeString Xunits = {read=Get_Xunits, write=Set_Xunits};
+	__property System::UnicodeString Yunits = {read=Get_Yunits, write=Set_Yunits};
+};
+
+__interface  INTERFACE_UUID("{5E431E90-0927-4801-8E1E-757FFEFD8417}") IXMLSnippetType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual int __fastcall Get_MaxLines() = 0 ;
+	virtual void __fastcall Set_MaxLines(int Value) = 0 ;
+	__property int MaxLines = {read=Get_MaxLines, write=Set_MaxLines};
+};
+
+__interface  INTERFACE_UUID("{B4039B56-D29C-4356-9460-285D9F69304F}") IXMLAbstractFeatureType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual bool __fastcall Get_Visibility() = 0 ;
+	virtual bool __fastcall Get_BalloonVisibility() = 0 ;
+	virtual bool __fastcall Get_Open() = 0 ;
+	virtual _di_IXMLAtomPersonConstruct_atom __fastcall Get_Author() = 0 ;
+	virtual _di_IXMLLink_atom __fastcall Get_Link() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Address() = 0 ;
+	virtual _di_IXMLAddressDetails_xal __fastcall Get_AddressDetails() = 0 ;
+	virtual System::UnicodeString __fastcall Get_PhoneNumber() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractSnippetGroup() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Description() = 0 ;
+	virtual _di_IXMLAbstractViewType __fastcall Get_AbstractViewGroup() = 0 ;
+	virtual _di_IXMLAbstractTimePrimitiveType __fastcall Get_AbstractTimePrimitiveGroup() = 0 ;
+	virtual System::UnicodeString __fastcall Get_StyleUrl() = 0 ;
+	virtual _di_IXMLAbstractStyleSelectorTypeList __fastcall Get_AbstractStyleSelectorGroup() = 0 ;
+	virtual _di_IXMLRegionType __fastcall Get_Region() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractExtendedDataGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractFeatureSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractFeatureObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Visibility(bool Value) = 0 ;
+	virtual void __fastcall Set_BalloonVisibility(bool Value) = 0 ;
+	virtual void __fastcall Set_Open(bool Value) = 0 ;
+	virtual void __fastcall Set_Address(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_PhoneNumber(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AbstractSnippetGroup(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Description(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_StyleUrl(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AbstractExtendedDataGroup(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+	__property bool Visibility = {read=Get_Visibility, write=Set_Visibility};
+	__property bool BalloonVisibility = {read=Get_BalloonVisibility, write=Set_BalloonVisibility};
+	__property bool Open = {read=Get_Open, write=Set_Open};
+	__property _di_IXMLAtomPersonConstruct_atom Author = {read=Get_Author};
+	__property _di_IXMLLink_atom Link = {read=Get_Link};
+	__property System::UnicodeString Address = {read=Get_Address, write=Set_Address};
+	__property _di_IXMLAddressDetails_xal AddressDetails = {read=Get_AddressDetails};
+	__property System::UnicodeString PhoneNumber = {read=Get_PhoneNumber, write=Set_PhoneNumber};
+	__property System::UnicodeString AbstractSnippetGroup = {read=Get_AbstractSnippetGroup, write=Set_AbstractSnippetGroup};
+	__property System::UnicodeString Description = {read=Get_Description, write=Set_Description};
+	__property _di_IXMLAbstractViewType AbstractViewGroup = {read=Get_AbstractViewGroup};
+	__property _di_IXMLAbstractTimePrimitiveType AbstractTimePrimitiveGroup = {read=Get_AbstractTimePrimitiveGroup};
+	__property System::UnicodeString StyleUrl = {read=Get_StyleUrl, write=Set_StyleUrl};
+	__property _di_IXMLAbstractStyleSelectorTypeList AbstractStyleSelectorGroup = {read=Get_AbstractStyleSelectorGroup};
+	__property _di_IXMLRegionType Region = {read=Get_Region};
+	__property System::UnicodeString AbstractExtendedDataGroup = {read=Get_AbstractExtendedDataGroup, write=Set_AbstractExtendedDataGroup};
+	__property _di_IXMLAnySimpleTypeList AbstractFeatureSimpleExtensionGroup = {read=Get_AbstractFeatureSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractFeatureObjectExtensionGroup = {read=Get_AbstractFeatureObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{5C140788-2955-48BF-AC67-8B820789DC70}") IXMLAbstractFeatureTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAbstractFeatureType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAbstractFeatureType __fastcall Add() = 0 ;
+	virtual _di_IXMLAbstractFeatureType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAbstractFeatureType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAbstractFeatureType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{7B97392E-A428-4BE5-8457-7DD8D72A5BE6}") IXMLAtomPersonConstruct_atom  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLString_List __fastcall Get_Name() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_Uri() = 0 ;
+	virtual _di_IXMLAtomEmailAddressList __fastcall Get_Email() = 0 ;
+	__property _di_IXMLString_List Name = {read=Get_Name};
+	__property _di_IXMLString_List Uri = {read=Get_Uri};
+	__property _di_IXMLAtomEmailAddressList Email = {read=Get_Email};
+};
+
+__interface  INTERFACE_UUID("{B5F67EB6-A6CC-44EA-B19E-584AD5606C12}") IXMLLink_atom  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Href() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Rel() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Hreflang() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Title() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Length() = 0 ;
+	virtual void __fastcall Set_Href(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Rel(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Hreflang(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Title(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Length(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Href = {read=Get_Href, write=Set_Href};
+	__property System::UnicodeString Rel = {read=Get_Rel, write=Set_Rel};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Hreflang = {read=Get_Hreflang, write=Set_Hreflang};
+	__property System::UnicodeString Title = {read=Get_Title, write=Set_Title};
+	__property System::UnicodeString Length = {read=Get_Length, write=Set_Length};
+};
+
+__interface  INTERFACE_UUID("{CA68ADFD-519F-4655-B300-212408CC474C}") IXMLAddressDetails_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_AddressType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_CurrentStatus() = 0 ;
+	virtual System::UnicodeString __fastcall Get_ValidFromDate() = 0 ;
+	virtual System::UnicodeString __fastcall Get_ValidToDate() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Usage() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AddressDetailsKey() = 0 ;
+	virtual _di_IXMLPostalServiceElements_xal __fastcall Get_PostalServiceElements() = 0 ;
+	virtual _di_IXMLAddress_xal __fastcall Get_Address() = 0 ;
+	virtual _di_IXMLAddressLinesType_xal __fastcall Get_AddressLines() = 0 ;
+	virtual _di_IXMLCountry_xal __fastcall Get_Country() = 0 ;
+	virtual _di_IXMLAdministrativeArea_xal __fastcall Get_AdministrativeArea() = 0 ;
+	virtual _di_IXMLLocality_xal __fastcall Get_Locality() = 0 ;
+	virtual _di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare() = 0 ;
+	virtual void __fastcall Set_AddressType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_CurrentStatus(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_ValidFromDate(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_ValidToDate(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Usage(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AddressDetailsKey(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString AddressType = {read=Get_AddressType, write=Set_AddressType};
+	__property System::UnicodeString CurrentStatus = {read=Get_CurrentStatus, write=Set_CurrentStatus};
+	__property System::UnicodeString ValidFromDate = {read=Get_ValidFromDate, write=Set_ValidFromDate};
+	__property System::UnicodeString ValidToDate = {read=Get_ValidToDate, write=Set_ValidToDate};
+	__property System::UnicodeString Usage = {read=Get_Usage, write=Set_Usage};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+	__property System::UnicodeString AddressDetailsKey = {read=Get_AddressDetailsKey, write=Set_AddressDetailsKey};
+	__property _di_IXMLPostalServiceElements_xal PostalServiceElements = {read=Get_PostalServiceElements};
+	__property _di_IXMLAddress_xal Address = {read=Get_Address};
+	__property _di_IXMLAddressLinesType_xal AddressLines = {read=Get_AddressLines};
+	__property _di_IXMLCountry_xal Country = {read=Get_Country};
+	__property _di_IXMLAdministrativeArea_xal AdministrativeArea = {read=Get_AdministrativeArea};
+	__property _di_IXMLLocality_xal Locality = {read=Get_Locality};
+	__property _di_IXMLThoroughfare_xal Thoroughfare = {read=Get_Thoroughfare};
+};
+
+__interface  INTERFACE_UUID("{F9CF356F-695A-4C81-B8A0-8C1AB520355E}") IXMLPostalServiceElements_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressIdentifier_xalList __fastcall Get_AddressIdentifier() = 0 ;
+	virtual _di_IXMLEndorsementLineCode_xal __fastcall Get_EndorsementLineCode() = 0 ;
+	virtual _di_IXMLKeyLineCode_xal __fastcall Get_KeyLineCode() = 0 ;
+	virtual _di_IXMLBarcode_xal __fastcall Get_Barcode() = 0 ;
+	virtual _di_IXMLSortingCode_xal __fastcall Get_SortingCode() = 0 ;
+	virtual _di_IXMLAddressLatitude_xal __fastcall Get_AddressLatitude() = 0 ;
+	virtual _di_IXMLAddressLatitudeDirection_xal __fastcall Get_AddressLatitudeDirection() = 0 ;
+	virtual _di_IXMLAddressLongitude_xal __fastcall Get_AddressLongitude() = 0 ;
+	virtual _di_IXMLAddressLongitudeDirection_xal __fastcall Get_AddressLongitudeDirection() = 0 ;
+	virtual _di_IXMLSupplementaryPostalServiceData_xalList __fastcall Get_SupplementaryPostalServiceData() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressIdentifier_xalList AddressIdentifier = {read=Get_AddressIdentifier};
+	__property _di_IXMLEndorsementLineCode_xal EndorsementLineCode = {read=Get_EndorsementLineCode};
+	__property _di_IXMLKeyLineCode_xal KeyLineCode = {read=Get_KeyLineCode};
+	__property _di_IXMLBarcode_xal Barcode = {read=Get_Barcode};
+	__property _di_IXMLSortingCode_xal SortingCode = {read=Get_SortingCode};
+	__property _di_IXMLAddressLatitude_xal AddressLatitude = {read=Get_AddressLatitude};
+	__property _di_IXMLAddressLatitudeDirection_xal AddressLatitudeDirection = {read=Get_AddressLatitudeDirection};
+	__property _di_IXMLAddressLongitude_xal AddressLongitude = {read=Get_AddressLongitude};
+	__property _di_IXMLAddressLongitudeDirection_xal AddressLongitudeDirection = {read=Get_AddressLongitudeDirection};
+	__property _di_IXMLSupplementaryPostalServiceData_xalList SupplementaryPostalServiceData = {read=Get_SupplementaryPostalServiceData};
+};
+
+__interface  INTERFACE_UUID("{75D3DAA2-2A0B-44EF-AC0E-FDDC4FE0E2F3}") IXMLAddressIdentifier_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_IdentifierType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_IdentifierType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString IdentifierType = {read=Get_IdentifierType, write=Set_IdentifierType};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{2191B7C1-DE28-4535-A7B7-213E023A056A}") IXMLAddressIdentifier_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAddressIdentifier_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAddressIdentifier_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLAddressIdentifier_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAddressIdentifier_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAddressIdentifier_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{36777523-1D8F-44F1-87BE-E8474EE770EB}") IXMLEndorsementLineCode_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{A3DD86A9-4E51-4CA7-8877-8939AFCF9D9D}") IXMLKeyLineCode_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{69009496-CFC5-4701-897B-7025388E5CC8}") IXMLBarcode_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{A9898F8E-177E-47C1-9329-DB7CDD53DAAF}") IXMLSortingCode_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{5EB24BD2-DE3B-48C7-91DE-242A022B9067}") IXMLAddressLatitude_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{08A870F2-02C3-451E-B7A4-DD2E6CB043F0}") IXMLAddressLatitudeDirection_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{413AC196-7E70-49C4-97A8-B2BCCECB4BE2}") IXMLAddressLongitude_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{98B6CD5C-6EDF-453D-9023-CE15A5392585}") IXMLAddressLongitudeDirection_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{F0CC5626-68F8-4871-9B98-0BC08948434A}") IXMLSupplementaryPostalServiceData_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{8BFB3D5D-4AD6-4329-B2C0-BFD8B535F719}") IXMLSupplementaryPostalServiceData_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSupplementaryPostalServiceData_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSupplementaryPostalServiceData_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSupplementaryPostalServiceData_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSupplementaryPostalServiceData_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSupplementaryPostalServiceData_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{B93D7489-427A-493F-BCF2-00487A351F35}") IXMLAddress_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{26973AF0-AFC2-4C2D-9024-DB6F189A6F3B}") IXMLAddressLinesType_xal  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAddressLine_xal operator[](int Index) { return this->AddressLine[Index]; }
+	virtual _di_IXMLAddressLine_xal __fastcall Get_AddressLine(int Index) = 0 ;
+	virtual _di_IXMLAddressLine_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLAddressLine_xal __fastcall Insert(const int Index) = 0 ;
+	__property _di_IXMLAddressLine_xal AddressLine[int Index] = {read=Get_AddressLine/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{0B0542DB-20CC-4050-B1BB-BB5AED0E62CB}") IXMLAddressLine_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{E49AFF36-F31D-4D3F-8D72-0EA411145044}") IXMLAddressLine_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAddressLine_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAddressLine_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLAddressLine_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAddressLine_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAddressLine_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{888DEFD2-E216-4728-A2DA-62E8C4657349}") IXMLCountry_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLCountryNameCode_xalList __fastcall Get_CountryNameCode() = 0 ;
+	virtual _di_IXMLCountryName_xalList __fastcall Get_CountryName() = 0 ;
+	virtual _di_IXMLAdministrativeArea_xal __fastcall Get_AdministrativeArea() = 0 ;
+	virtual _di_IXMLLocality_xal __fastcall Get_Locality() = 0 ;
+	virtual _di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare() = 0 ;
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLCountryNameCode_xalList CountryNameCode = {read=Get_CountryNameCode};
+	__property _di_IXMLCountryName_xalList CountryName = {read=Get_CountryName};
+	__property _di_IXMLAdministrativeArea_xal AdministrativeArea = {read=Get_AdministrativeArea};
+	__property _di_IXMLLocality_xal Locality = {read=Get_Locality};
+	__property _di_IXMLThoroughfare_xal Thoroughfare = {read=Get_Thoroughfare};
+};
+
+__interface  INTERFACE_UUID("{E8959FE9-D551-472C-83CB-9961FA517E13}") IXMLCountryNameCode_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Scheme() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Scheme(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Scheme = {read=Get_Scheme, write=Set_Scheme};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{C05C0854-C3E6-4CF9-91CA-161B5186C05C}") IXMLCountryNameCode_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLCountryNameCode_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLCountryNameCode_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLCountryNameCode_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLCountryNameCode_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLCountryNameCode_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{F62163F6-33EA-4F9D-B3BF-B9390615EE8E}") IXMLCountryName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{94A162D9-8943-40D3-B408-8842DA290484}") IXMLCountryName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLCountryName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLCountryName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLCountryName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLCountryName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLCountryName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{AD8B0DDA-6AB8-4605-8DF8-FDDA1375874E}") IXMLAdministrativeArea_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_UsageType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLAdministrativeAreaName_xalList __fastcall Get_AdministrativeAreaName() = 0 ;
+	virtual _di_IXMLSubAdministrativeArea_xal __fastcall Get_SubAdministrativeArea() = 0 ;
+	virtual _di_IXMLLocality_xal __fastcall Get_Locality() = 0 ;
+	virtual _di_IXMLPostOffice_xal __fastcall Get_PostOffice() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_UsageType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString UsageType = {read=Get_UsageType, write=Set_UsageType};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLAdministrativeAreaName_xalList AdministrativeAreaName = {read=Get_AdministrativeAreaName};
+	__property _di_IXMLSubAdministrativeArea_xal SubAdministrativeArea = {read=Get_SubAdministrativeArea};
+	__property _di_IXMLLocality_xal Locality = {read=Get_Locality};
+	__property _di_IXMLPostOffice_xal PostOffice = {read=Get_PostOffice};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{17C9AA29-AB29-4CFE-973E-64906673FC69}") IXMLAdministrativeAreaName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{1F6A8E69-F135-4BED-9A9B-8A5C83042B6D}") IXMLAdministrativeAreaName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAdministrativeAreaName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAdministrativeAreaName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLAdministrativeAreaName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAdministrativeAreaName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAdministrativeAreaName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{5C1CD25C-23C0-4B37-9A80-A5B347BA7E32}") IXMLSubAdministrativeArea_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_UsageType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLSubAdministrativeAreaName_xalList __fastcall Get_SubAdministrativeAreaName() = 0 ;
+	virtual _di_IXMLLocality_xal __fastcall Get_Locality() = 0 ;
+	virtual _di_IXMLPostOffice_xal __fastcall Get_PostOffice() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_UsageType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString UsageType = {read=Get_UsageType, write=Set_UsageType};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLSubAdministrativeAreaName_xalList SubAdministrativeAreaName = {read=Get_SubAdministrativeAreaName};
+	__property _di_IXMLLocality_xal Locality = {read=Get_Locality};
+	__property _di_IXMLPostOffice_xal PostOffice = {read=Get_PostOffice};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{948C7105-8687-48A5-9C43-5A3796E088BE}") IXMLSubAdministrativeAreaName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{B97B2E63-AEBC-4307-A12E-7D35DED04EE1}") IXMLSubAdministrativeAreaName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSubAdministrativeAreaName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSubAdministrativeAreaName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSubAdministrativeAreaName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSubAdministrativeAreaName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSubAdministrativeAreaName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{7CF5C6DC-A34E-431C-A9A3-1FC9761F4796}") IXMLLocality_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_UsageType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLLocalityName_xalList __fastcall Get_LocalityName() = 0 ;
+	virtual _di_IXMLPostBox_xal __fastcall Get_PostBox() = 0 ;
+	virtual _di_IXMLLargeMailUserType_xal __fastcall Get_LargeMailUser() = 0 ;
+	virtual _di_IXMLPostOffice_xal __fastcall Get_PostOffice() = 0 ;
+	virtual _di_IXMLPostalRouteType_xal __fastcall Get_PostalRoute() = 0 ;
+	virtual _di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare() = 0 ;
+	virtual _di_IXMLPremise_xal __fastcall Get_Premise() = 0 ;
+	virtual _di_IXMLDependentLocalityType_xal __fastcall Get_DependentLocality() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_UsageType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString UsageType = {read=Get_UsageType, write=Set_UsageType};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLLocalityName_xalList LocalityName = {read=Get_LocalityName};
+	__property _di_IXMLPostBox_xal PostBox = {read=Get_PostBox};
+	__property _di_IXMLLargeMailUserType_xal LargeMailUser = {read=Get_LargeMailUser};
+	__property _di_IXMLPostOffice_xal PostOffice = {read=Get_PostOffice};
+	__property _di_IXMLPostalRouteType_xal PostalRoute = {read=Get_PostalRoute};
+	__property _di_IXMLThoroughfare_xal Thoroughfare = {read=Get_Thoroughfare};
+	__property _di_IXMLPremise_xal Premise = {read=Get_Premise};
+	__property _di_IXMLDependentLocalityType_xal DependentLocality = {read=Get_DependentLocality};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{F15FD55F-6EAB-43EA-89F6-CB250CE496B0}") IXMLLocalityName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{07D2084D-1008-49C9-A9E1-A10B079FE6C1}") IXMLLocalityName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLLocalityName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLLocalityName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLLocalityName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLLocalityName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLLocalityName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{6FEF0F14-9C8F-46EF-A38C-200BC9E2AC95}") IXMLPostBox_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPostBoxNumber_xal __fastcall Get_PostBoxNumber() = 0 ;
+	virtual _di_IXMLPostBoxNumberPrefix_xal __fastcall Get_PostBoxNumberPrefix() = 0 ;
+	virtual _di_IXMLPostBoxNumberSuffix_xal __fastcall Get_PostBoxNumberSuffix() = 0 ;
+	virtual _di_IXMLPostBoxNumberExtension_xal __fastcall Get_PostBoxNumberExtension() = 0 ;
+	virtual _di_IXMLFirmType_xal __fastcall Get_Firm() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPostBoxNumber_xal PostBoxNumber = {read=Get_PostBoxNumber};
+	__property _di_IXMLPostBoxNumberPrefix_xal PostBoxNumberPrefix = {read=Get_PostBoxNumberPrefix};
+	__property _di_IXMLPostBoxNumberSuffix_xal PostBoxNumberSuffix = {read=Get_PostBoxNumberSuffix};
+	__property _di_IXMLPostBoxNumberExtension_xal PostBoxNumberExtension = {read=Get_PostBoxNumberExtension};
+	__property _di_IXMLFirmType_xal Firm = {read=Get_Firm};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{CF8DEA4E-606B-4615-A0A1-7DF43B2E0FE4}") IXMLPostBoxNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{5F4313B0-556E-41DD-AB47-B73432E00462}") IXMLPostBoxNumberPrefix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberPrefixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberPrefixSeparator = {read=Get_NumberPrefixSeparator, write=Set_NumberPrefixSeparator};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{4D0ED476-0C1B-4821-B441-FE6354C6BEB7}") IXMLPostBoxNumberSuffix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberSuffixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberSuffixSeparator = {read=Get_NumberSuffixSeparator, write=Set_NumberSuffixSeparator};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{E6900EE3-FE3D-4EB6-89CF-EF72524AD509}") IXMLPostBoxNumberExtension_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberExtensionSeparator() = 0 ;
+	virtual void __fastcall Set_NumberExtensionSeparator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberExtensionSeparator = {read=Get_NumberExtensionSeparator, write=Set_NumberExtensionSeparator};
+};
+
+__interface  INTERFACE_UUID("{B69D2302-B0EB-4A33-898C-E952ED8B76D5}") IXMLFirmType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLFirmName_xalList __fastcall Get_FirmName() = 0 ;
+	virtual _di_IXMLDepartment_xalList __fastcall Get_Department() = 0 ;
+	virtual _di_IXMLMailStopType_xal __fastcall Get_MailStop() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLFirmName_xalList FirmName = {read=Get_FirmName};
+	__property _di_IXMLDepartment_xalList Department = {read=Get_Department};
+	__property _di_IXMLMailStopType_xal MailStop = {read=Get_MailStop};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{DCE70C93-E4E1-402E-93B8-8B36BC0207F7}") IXMLFirmName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{423518F3-654D-469B-A04B-C98A848DD75F}") IXMLFirmName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLFirmName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLFirmName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLFirmName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLFirmName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLFirmName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{644CD814-4517-4FCD-AC38-E00A09D2CF20}") IXMLDepartment_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLDepartmentName_xalList __fastcall Get_DepartmentName() = 0 ;
+	virtual _di_IXMLMailStopType_xal __fastcall Get_MailStop() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLDepartmentName_xalList DepartmentName = {read=Get_DepartmentName};
+	__property _di_IXMLMailStopType_xal MailStop = {read=Get_MailStop};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{954C16C5-5443-493F-A3AC-1F29250D39F0}") IXMLDepartment_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLDepartment_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLDepartment_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLDepartment_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLDepartment_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLDepartment_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{4C5AA098-77C0-498C-8F44-ACB52C36D4B1}") IXMLDepartmentName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{1AB26A9D-4AC9-4169-A7DB-7C0D4E701201}") IXMLDepartmentName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLDepartmentName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLDepartmentName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLDepartmentName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLDepartmentName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLDepartmentName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{C1CECDC3-05CC-4877-89D3-A4AF33003832}") IXMLMailStopType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLMailStopName_xal __fastcall Get_MailStopName() = 0 ;
+	virtual _di_IXMLMailStopNumber_xal __fastcall Get_MailStopNumber() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLMailStopName_xal MailStopName = {read=Get_MailStopName};
+	__property _di_IXMLMailStopNumber_xal MailStopNumber = {read=Get_MailStopNumber};
+};
+
+__interface  INTERFACE_UUID("{A31E57B8-6AC7-424A-9340-77B4AAEAC402}") IXMLMailStopName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{898EE005-E878-4AF4-B07A-41D5CD2C00DC}") IXMLMailStopNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NameNumberSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NameNumberSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NameNumberSeparator = {read=Get_NameNumberSeparator, write=Set_NameNumberSeparator};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{F79CFFBD-76F7-488F-8881-F3D3C9FFB4D5}") IXMLPostalCode_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPostalCodeNumber_xalList __fastcall Get_PostalCodeNumber() = 0 ;
+	virtual _di_IXMLPostalCodeNumberExtension_xalList __fastcall Get_PostalCodeNumberExtension() = 0 ;
+	virtual _di_IXMLPostTown_xal __fastcall Get_PostTown() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPostalCodeNumber_xalList PostalCodeNumber = {read=Get_PostalCodeNumber};
+	__property _di_IXMLPostalCodeNumberExtension_xalList PostalCodeNumberExtension = {read=Get_PostalCodeNumberExtension};
+	__property _di_IXMLPostTown_xal PostTown = {read=Get_PostTown};
+};
+
+__interface  INTERFACE_UUID("{ED28A83E-9D88-4EA2-A68E-DED11AC67126}") IXMLPostalCodeNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{A4DF90BA-8A7A-44C6-8703-51EB0955F227}") IXMLPostalCodeNumber_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPostalCodeNumber_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPostalCodeNumber_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPostalCodeNumber_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPostalCodeNumber_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPostalCodeNumber_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{9E3DB2ED-EAAE-4E45-9ABF-E2FA6D6BE907}") IXMLPostalCodeNumberExtension_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_NumberExtensionSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_NumberExtensionSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString NumberExtensionSeparator = {read=Get_NumberExtensionSeparator, write=Set_NumberExtensionSeparator};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{4C846B95-6443-49E1-9541-11ED675BBAA4}") IXMLPostalCodeNumberExtension_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPostalCodeNumberExtension_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPostalCodeNumberExtension_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPostalCodeNumberExtension_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPostalCodeNumberExtension_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPostalCodeNumberExtension_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{EBF91EBF-41E2-4858-A588-8322FF0CD831}") IXMLPostTown_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPostTownName_xalList __fastcall Get_PostTownName() = 0 ;
+	virtual _di_IXMLPostTownSuffix_xal __fastcall Get_PostTownSuffix() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPostTownName_xalList PostTownName = {read=Get_PostTownName};
+	__property _di_IXMLPostTownSuffix_xal PostTownSuffix = {read=Get_PostTownSuffix};
+};
+
+__interface  INTERFACE_UUID("{3479E249-6059-4979-91B9-C4E6C946EA26}") IXMLPostTownName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{DC980148-46BD-4209-B1D9-4CAC910B6052}") IXMLPostTownName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPostTownName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPostTownName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPostTownName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPostTownName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPostTownName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{FA37C5EE-D128-4AC0-B4EA-6454231A4DB0}") IXMLPostTownSuffix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{2BDEA9C6-88CB-42A7-850C-0E7DE467A3B0}") IXMLLargeMailUserType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLLargeMailUserName_xalList __fastcall Get_LargeMailUserName() = 0 ;
+	virtual _di_IXMLLargeMailUserIdentifier_xal __fastcall Get_LargeMailUserIdentifier() = 0 ;
+	virtual _di_IXMLBuildingNameType_xalList __fastcall Get_BuildingName() = 0 ;
+	virtual _di_IXMLDepartment_xal __fastcall Get_Department() = 0 ;
+	virtual _di_IXMLPostBox_xal __fastcall Get_PostBox() = 0 ;
+	virtual _di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLLargeMailUserName_xalList LargeMailUserName = {read=Get_LargeMailUserName};
+	__property _di_IXMLLargeMailUserIdentifier_xal LargeMailUserIdentifier = {read=Get_LargeMailUserIdentifier};
+	__property _di_IXMLBuildingNameType_xalList BuildingName = {read=Get_BuildingName};
+	__property _di_IXMLDepartment_xal Department = {read=Get_Department};
+	__property _di_IXMLPostBox_xal PostBox = {read=Get_PostBox};
+	__property _di_IXMLThoroughfare_xal Thoroughfare = {read=Get_Thoroughfare};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{09ECAFF7-48A2-4067-BD2B-6C501C0550D9}") IXMLLargeMailUserName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{4CE92882-DFA8-44BE-A87C-0B1F5659246A}") IXMLLargeMailUserName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLLargeMailUserName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLLargeMailUserName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLLargeMailUserName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLLargeMailUserName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLLargeMailUserName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{DC283EAE-99BA-4192-A065-2AC75F6D65D1}") IXMLLargeMailUserIdentifier_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{3D531A2A-F3C7-4E2B-A0EC-662F993A182E}") IXMLBuildingNameType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_TypeOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_TypeOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString TypeOccurrence = {read=Get_TypeOccurrence, write=Set_TypeOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{CEB3F42F-E6ED-4817-8135-15BE5AB88ED4}") IXMLBuildingNameType_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLBuildingNameType_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLBuildingNameType_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLBuildingNameType_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLBuildingNameType_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLBuildingNameType_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{5EA472B8-8591-488D-92D0-7E6B5CD02034}") IXMLThoroughfare_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DependentThoroughfares() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DependentThoroughfaresIndicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DependentThoroughfaresConnector() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DependentThoroughfaresType() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLThoroughfareNumber_xalList __fastcall Get_ThoroughfareNumber() = 0 ;
+	virtual _di_IXMLThoroughfareNumberRange_xalList __fastcall Get_ThoroughfareNumberRange() = 0 ;
+	virtual _di_IXMLThoroughfareNumberPrefix_xalList __fastcall Get_ThoroughfareNumberPrefix() = 0 ;
+	virtual _di_IXMLThoroughfareNumberSuffix_xalList __fastcall Get_ThoroughfareNumberSuffix() = 0 ;
+	virtual _di_IXMLThoroughfarePreDirectionType_xal __fastcall Get_ThoroughfarePreDirection() = 0 ;
+	virtual _di_IXMLThoroughfareLeadingTypeType_xal __fastcall Get_ThoroughfareLeadingType() = 0 ;
+	virtual _di_IXMLThoroughfareNameType_xalList __fastcall Get_ThoroughfareName() = 0 ;
+	virtual _di_IXMLThoroughfareTrailingTypeType_xal __fastcall Get_ThoroughfareTrailingType() = 0 ;
+	virtual _di_IXMLThoroughfarePostDirectionType_xal __fastcall Get_ThoroughfarePostDirection() = 0 ;
+	virtual _di_IXMLDependentThoroughfare_xal __fastcall Get_DependentThoroughfare() = 0 ;
+	virtual _di_IXMLDependentLocalityType_xal __fastcall Get_DependentLocality() = 0 ;
+	virtual _di_IXMLPremise_xal __fastcall Get_Premise() = 0 ;
+	virtual _di_IXMLFirmType_xal __fastcall Get_Firm() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DependentThoroughfares(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DependentThoroughfaresIndicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DependentThoroughfaresConnector(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DependentThoroughfaresType(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString DependentThoroughfares = {read=Get_DependentThoroughfares, write=Set_DependentThoroughfares};
+	__property System::UnicodeString DependentThoroughfaresIndicator = {read=Get_DependentThoroughfaresIndicator, write=Set_DependentThoroughfaresIndicator};
+	__property System::UnicodeString DependentThoroughfaresConnector = {read=Get_DependentThoroughfaresConnector, write=Set_DependentThoroughfaresConnector};
+	__property System::UnicodeString DependentThoroughfaresType = {read=Get_DependentThoroughfaresType, write=Set_DependentThoroughfaresType};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLThoroughfareNumber_xalList ThoroughfareNumber = {read=Get_ThoroughfareNumber};
+	__property _di_IXMLThoroughfareNumberRange_xalList ThoroughfareNumberRange = {read=Get_ThoroughfareNumberRange};
+	__property _di_IXMLThoroughfareNumberPrefix_xalList ThoroughfareNumberPrefix = {read=Get_ThoroughfareNumberPrefix};
+	__property _di_IXMLThoroughfareNumberSuffix_xalList ThoroughfareNumberSuffix = {read=Get_ThoroughfareNumberSuffix};
+	__property _di_IXMLThoroughfarePreDirectionType_xal ThoroughfarePreDirection = {read=Get_ThoroughfarePreDirection};
+	__property _di_IXMLThoroughfareLeadingTypeType_xal ThoroughfareLeadingType = {read=Get_ThoroughfareLeadingType};
+	__property _di_IXMLThoroughfareNameType_xalList ThoroughfareName = {read=Get_ThoroughfareName};
+	__property _di_IXMLThoroughfareTrailingTypeType_xal ThoroughfareTrailingType = {read=Get_ThoroughfareTrailingType};
+	__property _di_IXMLThoroughfarePostDirectionType_xal ThoroughfarePostDirection = {read=Get_ThoroughfarePostDirection};
+	__property _di_IXMLDependentThoroughfare_xal DependentThoroughfare = {read=Get_DependentThoroughfare};
+	__property _di_IXMLDependentLocalityType_xal DependentLocality = {read=Get_DependentLocality};
+	__property _di_IXMLPremise_xal Premise = {read=Get_Premise};
+	__property _di_IXMLFirmType_xal Firm = {read=Get_Firm};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{9A524DE1-4AAE-47E0-B656-DD7293B9386B}") IXMLThoroughfareNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_IndicatorOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_NumberOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_NumberOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberType = {read=Get_NumberType, write=Set_NumberType};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString IndicatorOccurrence = {read=Get_IndicatorOccurrence, write=Set_IndicatorOccurrence};
+	__property System::UnicodeString NumberOccurrence = {read=Get_NumberOccurrence, write=Set_NumberOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{F9EF6232-6DC6-4878-97AD-32790B87F6CA}") IXMLThoroughfareNumber_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLThoroughfareNumber_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLThoroughfareNumber_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLThoroughfareNumber_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLThoroughfareNumber_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLThoroughfareNumber_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{C7346513-22A2-46D6-AE38-51599DF9BEC0}") IXMLThoroughfareNumberRange_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_RangeType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Separator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_IndicatorOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_NumberRangeOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLThoroughfareNumberFrom_xal __fastcall Get_ThoroughfareNumberFrom() = 0 ;
+	virtual _di_IXMLThoroughfareNumberTo_xal __fastcall Get_ThoroughfareNumberTo() = 0 ;
+	virtual void __fastcall Set_RangeType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Separator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_NumberRangeOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString RangeType = {read=Get_RangeType, write=Set_RangeType};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString Separator = {read=Get_Separator, write=Set_Separator};
+	__property System::UnicodeString IndicatorOccurrence = {read=Get_IndicatorOccurrence, write=Set_IndicatorOccurrence};
+	__property System::UnicodeString NumberRangeOccurrence = {read=Get_NumberRangeOccurrence, write=Set_NumberRangeOccurrence};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLThoroughfareNumberFrom_xal ThoroughfareNumberFrom = {read=Get_ThoroughfareNumberFrom};
+	__property _di_IXMLThoroughfareNumberTo_xal ThoroughfareNumberTo = {read=Get_ThoroughfareNumberTo};
+};
+
+__interface  INTERFACE_UUID("{E4578FC4-EF28-4201-A9B3-4B51FFF851E7}") IXMLThoroughfareNumberRange_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLThoroughfareNumberRange_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLThoroughfareNumberRange_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLThoroughfareNumberRange_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLThoroughfareNumberRange_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLThoroughfareNumberRange_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{7EE93840-B677-40CC-B03C-49A38D5B0883}") IXMLThoroughfareNumberFrom_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLThoroughfareNumberPrefix_xalList __fastcall Get_ThoroughfareNumberPrefix() = 0 ;
+	virtual _di_IXMLThoroughfareNumber_xalList __fastcall Get_ThoroughfareNumber() = 0 ;
+	virtual _di_IXMLThoroughfareNumberSuffix_xalList __fastcall Get_ThoroughfareNumberSuffix() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLThoroughfareNumberPrefix_xalList ThoroughfareNumberPrefix = {read=Get_ThoroughfareNumberPrefix};
+	__property _di_IXMLThoroughfareNumber_xalList ThoroughfareNumber = {read=Get_ThoroughfareNumber};
+	__property _di_IXMLThoroughfareNumberSuffix_xalList ThoroughfareNumberSuffix = {read=Get_ThoroughfareNumberSuffix};
+};
+
+__interface  INTERFACE_UUID("{3B5DDA52-8FB8-465B-858D-BF832AB60759}") IXMLThoroughfareNumberPrefix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberPrefixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberPrefixSeparator = {read=Get_NumberPrefixSeparator, write=Set_NumberPrefixSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{A36186B4-8685-487D-9606-ADFE739FBEDB}") IXMLThoroughfareNumberPrefix_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLThoroughfareNumberPrefix_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLThoroughfareNumberPrefix_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLThoroughfareNumberPrefix_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLThoroughfareNumberPrefix_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLThoroughfareNumberPrefix_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{B1165CD2-F3E2-413E-8009-E6C68B6F76AB}") IXMLThoroughfareNumberSuffix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberSuffixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberSuffixSeparator = {read=Get_NumberSuffixSeparator, write=Set_NumberSuffixSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{BF27972E-3A4E-4814-8771-E0CC5481CF03}") IXMLThoroughfareNumberSuffix_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLThoroughfareNumberSuffix_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLThoroughfareNumberSuffix_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLThoroughfareNumberSuffix_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLThoroughfareNumberSuffix_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLThoroughfareNumberSuffix_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{EC588CBD-F0E8-4ECC-AC59-251104E041E3}") IXMLThoroughfareNumberTo_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLThoroughfareNumberPrefix_xalList __fastcall Get_ThoroughfareNumberPrefix() = 0 ;
+	virtual _di_IXMLThoroughfareNumber_xalList __fastcall Get_ThoroughfareNumber() = 0 ;
+	virtual _di_IXMLThoroughfareNumberSuffix_xalList __fastcall Get_ThoroughfareNumberSuffix() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLThoroughfareNumberPrefix_xalList ThoroughfareNumberPrefix = {read=Get_ThoroughfareNumberPrefix};
+	__property _di_IXMLThoroughfareNumber_xalList ThoroughfareNumber = {read=Get_ThoroughfareNumber};
+	__property _di_IXMLThoroughfareNumberSuffix_xalList ThoroughfareNumberSuffix = {read=Get_ThoroughfareNumberSuffix};
+};
+
+__interface  INTERFACE_UUID("{E1D90ACA-7584-4F78-8D61-636536D734E8}") IXMLThoroughfarePreDirectionType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{18BA5EE3-587B-4642-9AA3-B827474C27BE}") IXMLThoroughfareLeadingTypeType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{CE960F48-EC67-48C2-9B5B-42ED8010634A}") IXMLThoroughfareNameType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{F2935E08-B4B6-4237-ABAB-B92A7737F48B}") IXMLThoroughfareNameType_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLThoroughfareNameType_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLThoroughfareNameType_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLThoroughfareNameType_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLThoroughfareNameType_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLThoroughfareNameType_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{0FA81B9E-1FA9-4CCE-9F34-844CFC1D426E}") IXMLThoroughfareTrailingTypeType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{A822F642-0E67-4ACF-B2C3-4D314B1BB961}") IXMLThoroughfarePostDirectionType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{019679F0-5ADA-4F33-9450-FE1E07431ECD}") IXMLDependentThoroughfare_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLThoroughfarePreDirectionType_xal __fastcall Get_ThoroughfarePreDirection() = 0 ;
+	virtual _di_IXMLThoroughfareLeadingTypeType_xal __fastcall Get_ThoroughfareLeadingType() = 0 ;
+	virtual _di_IXMLThoroughfareNameType_xalList __fastcall Get_ThoroughfareName() = 0 ;
+	virtual _di_IXMLThoroughfareTrailingTypeType_xal __fastcall Get_ThoroughfareTrailingType() = 0 ;
+	virtual _di_IXMLThoroughfarePostDirectionType_xal __fastcall Get_ThoroughfarePostDirection() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLThoroughfarePreDirectionType_xal ThoroughfarePreDirection = {read=Get_ThoroughfarePreDirection};
+	__property _di_IXMLThoroughfareLeadingTypeType_xal ThoroughfareLeadingType = {read=Get_ThoroughfareLeadingType};
+	__property _di_IXMLThoroughfareNameType_xalList ThoroughfareName = {read=Get_ThoroughfareName};
+	__property _di_IXMLThoroughfareTrailingTypeType_xal ThoroughfareTrailingType = {read=Get_ThoroughfareTrailingType};
+	__property _di_IXMLThoroughfarePostDirectionType_xal ThoroughfarePostDirection = {read=Get_ThoroughfarePostDirection};
+};
+
+__interface  INTERFACE_UUID("{CC5D9FF6-1526-4801-B8C2-4E3C1CF18994}") IXMLDependentLocalityType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_UsageType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Connector() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLDependentLocalityName_xalList __fastcall Get_DependentLocalityName() = 0 ;
+	virtual _di_IXMLDependentLocalityNumber_xal __fastcall Get_DependentLocalityNumber() = 0 ;
+	virtual _di_IXMLPostBox_xal __fastcall Get_PostBox() = 0 ;
+	virtual _di_IXMLLargeMailUserType_xal __fastcall Get_LargeMailUser() = 0 ;
+	virtual _di_IXMLPostOffice_xal __fastcall Get_PostOffice() = 0 ;
+	virtual _di_IXMLPostalRouteType_xal __fastcall Get_PostalRoute() = 0 ;
+	virtual _di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare() = 0 ;
+	virtual _di_IXMLPremise_xal __fastcall Get_Premise() = 0 ;
+	virtual _di_IXMLDependentLocalityType_xal __fastcall Get_DependentLocality() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_UsageType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Connector(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString UsageType = {read=Get_UsageType, write=Set_UsageType};
+	__property System::UnicodeString Connector = {read=Get_Connector, write=Set_Connector};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLDependentLocalityName_xalList DependentLocalityName = {read=Get_DependentLocalityName};
+	__property _di_IXMLDependentLocalityNumber_xal DependentLocalityNumber = {read=Get_DependentLocalityNumber};
+	__property _di_IXMLPostBox_xal PostBox = {read=Get_PostBox};
+	__property _di_IXMLLargeMailUserType_xal LargeMailUser = {read=Get_LargeMailUser};
+	__property _di_IXMLPostOffice_xal PostOffice = {read=Get_PostOffice};
+	__property _di_IXMLPostalRouteType_xal PostalRoute = {read=Get_PostalRoute};
+	__property _di_IXMLThoroughfare_xal Thoroughfare = {read=Get_Thoroughfare};
+	__property _di_IXMLPremise_xal Premise = {read=Get_Premise};
+	__property _di_IXMLDependentLocalityType_xal DependentLocality = {read=Get_DependentLocality};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{987415C1-9E2B-4FFD-970C-5A7BB9E17F45}") IXMLDependentLocalityName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{75E93FD9-222F-4736-9BA6-0418F10E4346}") IXMLDependentLocalityName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLDependentLocalityName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLDependentLocalityName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLDependentLocalityName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLDependentLocalityName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLDependentLocalityName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{6574AC07-4C34-4CE8-977B-236950A034E2}") IXMLDependentLocalityNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NameNumberOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NameNumberOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NameNumberOccurrence = {read=Get_NameNumberOccurrence, write=Set_NameNumberOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{E9035DB6-1E30-4AC1-96B0-CB673749F4DD}") IXMLPostOffice_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPostOfficeName_xalList __fastcall Get_PostOfficeName() = 0 ;
+	virtual _di_IXMLPostOfficeNumber_xal __fastcall Get_PostOfficeNumber() = 0 ;
+	virtual _di_IXMLPostalRouteType_xal __fastcall Get_PostalRoute() = 0 ;
+	virtual _di_IXMLPostBox_xal __fastcall Get_PostBox() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPostOfficeName_xalList PostOfficeName = {read=Get_PostOfficeName};
+	__property _di_IXMLPostOfficeNumber_xal PostOfficeNumber = {read=Get_PostOfficeNumber};
+	__property _di_IXMLPostalRouteType_xal PostalRoute = {read=Get_PostalRoute};
+	__property _di_IXMLPostBox_xal PostBox = {read=Get_PostBox};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+};
+
+__interface  INTERFACE_UUID("{95FFD9CB-AED9-407A-A47F-9E74539A3A69}") IXMLPostOfficeName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{14C1AEB7-FFBC-4E2B-893B-D1470AB63897}") IXMLPostOfficeName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPostOfficeName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPostOfficeName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPostOfficeName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPostOfficeName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPostOfficeName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{BB397936-3F2D-435C-8885-3EEB676264E6}") IXMLPostOfficeNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_IndicatorOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString IndicatorOccurrence = {read=Get_IndicatorOccurrence, write=Set_IndicatorOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{34CBB400-7983-47E9-9ACD-E4B87E66EF6A}") IXMLPostalRouteType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPostalRouteName_xalList __fastcall Get_PostalRouteName() = 0 ;
+	virtual _di_IXMLPostalRouteNumber_xal __fastcall Get_PostalRouteNumber() = 0 ;
+	virtual _di_IXMLPostBox_xal __fastcall Get_PostBox() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPostalRouteName_xalList PostalRouteName = {read=Get_PostalRouteName};
+	__property _di_IXMLPostalRouteNumber_xal PostalRouteNumber = {read=Get_PostalRouteNumber};
+	__property _di_IXMLPostBox_xal PostBox = {read=Get_PostBox};
+};
+
+__interface  INTERFACE_UUID("{D741C430-7A0E-4E9D-A647-7FBE3723EAD0}") IXMLPostalRouteName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{5C9FED93-DCD9-4E98-9C37-220ECA1B1B70}") IXMLPostalRouteName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPostalRouteName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPostalRouteName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPostalRouteName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPostalRouteName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPostalRouteName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{BB0527B0-A0B1-41ED-85CB-C545A15CEAA4}") IXMLPostalRouteNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{AD83D9FD-B1D8-4B61-B104-16413F6A02AD}") IXMLPremise_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_PremiseDependency() = 0 ;
+	virtual System::UnicodeString __fastcall Get_PremiseDependencyType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_PremiseThoroughfareConnector() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPremiseName_xalList __fastcall Get_PremiseName() = 0 ;
+	virtual _di_IXMLPremiseLocation_xal __fastcall Get_PremiseLocation() = 0 ;
+	virtual _di_IXMLPremiseNumber_xalList __fastcall Get_PremiseNumber() = 0 ;
+	virtual _di_IXMLPremiseNumberRange_xal __fastcall Get_PremiseNumberRange() = 0 ;
+	virtual _di_IXMLPremiseNumberPrefix_xalList __fastcall Get_PremiseNumberPrefix() = 0 ;
+	virtual _di_IXMLPremiseNumberSuffix_xalList __fastcall Get_PremiseNumberSuffix() = 0 ;
+	virtual _di_IXMLBuildingNameType_xalList __fastcall Get_BuildingName() = 0 ;
+	virtual _di_IXMLSubPremiseType_xalList __fastcall Get_SubPremise() = 0 ;
+	virtual _di_IXMLFirmType_xal __fastcall Get_Firm() = 0 ;
+	virtual _di_IXMLMailStopType_xal __fastcall Get_MailStop() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual _di_IXMLPremise_xal __fastcall Get_Premise() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_PremiseDependency(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_PremiseDependencyType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_PremiseThoroughfareConnector(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString PremiseDependency = {read=Get_PremiseDependency, write=Set_PremiseDependency};
+	__property System::UnicodeString PremiseDependencyType = {read=Get_PremiseDependencyType, write=Set_PremiseDependencyType};
+	__property System::UnicodeString PremiseThoroughfareConnector = {read=Get_PremiseThoroughfareConnector, write=Set_PremiseThoroughfareConnector};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPremiseName_xalList PremiseName = {read=Get_PremiseName};
+	__property _di_IXMLPremiseLocation_xal PremiseLocation = {read=Get_PremiseLocation};
+	__property _di_IXMLPremiseNumber_xalList PremiseNumber = {read=Get_PremiseNumber};
+	__property _di_IXMLPremiseNumberRange_xal PremiseNumberRange = {read=Get_PremiseNumberRange};
+	__property _di_IXMLPremiseNumberPrefix_xalList PremiseNumberPrefix = {read=Get_PremiseNumberPrefix};
+	__property _di_IXMLPremiseNumberSuffix_xalList PremiseNumberSuffix = {read=Get_PremiseNumberSuffix};
+	__property _di_IXMLBuildingNameType_xalList BuildingName = {read=Get_BuildingName};
+	__property _di_IXMLSubPremiseType_xalList SubPremise = {read=Get_SubPremise};
+	__property _di_IXMLFirmType_xal Firm = {read=Get_Firm};
+	__property _di_IXMLMailStopType_xal MailStop = {read=Get_MailStop};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+	__property _di_IXMLPremise_xal Premise = {read=Get_Premise};
+};
+
+__interface  INTERFACE_UUID("{2517A210-7480-4D7F-BE15-E6716C373620}") IXMLPremiseName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_TypeOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_TypeOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString TypeOccurrence = {read=Get_TypeOccurrence, write=Set_TypeOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{153A74F1-7198-436D-9A35-78344B8998EF}") IXMLPremiseName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPremiseName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPremiseName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPremiseName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPremiseName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPremiseName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{F21FD5FE-A999-471B-8823-5C0F155667B5}") IXMLPremiseLocation_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{3AA5CFC6-3E4E-40BA-877B-4CFFA5A7E192}") IXMLPremiseNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_IndicatorOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_NumberTypeOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_NumberTypeOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberType = {read=Get_NumberType, write=Set_NumberType};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString IndicatorOccurrence = {read=Get_IndicatorOccurrence, write=Set_IndicatorOccurrence};
+	__property System::UnicodeString NumberTypeOccurrence = {read=Get_NumberTypeOccurrence, write=Set_NumberTypeOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{F0F3152E-4474-4553-B88A-ED0001C3C2FD}") IXMLPremiseNumber_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPremiseNumber_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPremiseNumber_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPremiseNumber_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPremiseNumber_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPremiseNumber_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{BE1FEF36-DC89-41AA-8558-C6AC55316B73}") IXMLPremiseNumberRange_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_RangeType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Separator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_IndicatorOccurence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_NumberRangeOccurence() = 0 ;
+	virtual _di_IXMLPremiseNumberRangeFrom_xal __fastcall Get_PremiseNumberRangeFrom() = 0 ;
+	virtual _di_IXMLPremiseNumberRangeTo_xal __fastcall Get_PremiseNumberRangeTo() = 0 ;
+	virtual void __fastcall Set_RangeType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Separator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_IndicatorOccurence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_NumberRangeOccurence(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString RangeType = {read=Get_RangeType, write=Set_RangeType};
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString Separator = {read=Get_Separator, write=Set_Separator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString IndicatorOccurence = {read=Get_IndicatorOccurence, write=Set_IndicatorOccurence};
+	__property System::UnicodeString NumberRangeOccurence = {read=Get_NumberRangeOccurence, write=Set_NumberRangeOccurence};
+	__property _di_IXMLPremiseNumberRangeFrom_xal PremiseNumberRangeFrom = {read=Get_PremiseNumberRangeFrom};
+	__property _di_IXMLPremiseNumberRangeTo_xal PremiseNumberRangeTo = {read=Get_PremiseNumberRangeTo};
+};
+
+__interface  INTERFACE_UUID("{89C6F667-8D89-49E7-A32A-24FFF461FE4A}") IXMLPremiseNumberRangeFrom_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPremiseNumberPrefix_xalList __fastcall Get_PremiseNumberPrefix() = 0 ;
+	virtual _di_IXMLPremiseNumber_xalList __fastcall Get_PremiseNumber() = 0 ;
+	virtual _di_IXMLPremiseNumberSuffix_xalList __fastcall Get_PremiseNumberSuffix() = 0 ;
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPremiseNumberPrefix_xalList PremiseNumberPrefix = {read=Get_PremiseNumberPrefix};
+	__property _di_IXMLPremiseNumber_xalList PremiseNumber = {read=Get_PremiseNumber};
+	__property _di_IXMLPremiseNumberSuffix_xalList PremiseNumberSuffix = {read=Get_PremiseNumberSuffix};
+};
+
+__interface  INTERFACE_UUID("{5C810ADA-60A5-4A13-9D83-5A504A12276F}") IXMLPremiseNumberPrefix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberPrefixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberPrefixSeparator = {read=Get_NumberPrefixSeparator, write=Set_NumberPrefixSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{0E70328E-9883-46A3-9152-024A60C97E10}") IXMLPremiseNumberPrefix_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPremiseNumberPrefix_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPremiseNumberPrefix_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPremiseNumberPrefix_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPremiseNumberPrefix_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPremiseNumberPrefix_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{E367DE35-FBCA-40F2-83E6-1CF122F40620}") IXMLPremiseNumberSuffix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberSuffixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberSuffixSeparator = {read=Get_NumberSuffixSeparator, write=Set_NumberSuffixSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{20047C3F-E697-4370-81E4-0399D68BB583}") IXMLPremiseNumberSuffix_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPremiseNumberSuffix_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPremiseNumberSuffix_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLPremiseNumberSuffix_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPremiseNumberSuffix_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPremiseNumberSuffix_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{ADBECD95-A452-4226-A626-81FBFECA5BA5}") IXMLPremiseNumberRangeTo_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLPremiseNumberPrefix_xalList __fastcall Get_PremiseNumberPrefix() = 0 ;
+	virtual _di_IXMLPremiseNumber_xalList __fastcall Get_PremiseNumber() = 0 ;
+	virtual _di_IXMLPremiseNumberSuffix_xalList __fastcall Get_PremiseNumberSuffix() = 0 ;
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLPremiseNumberPrefix_xalList PremiseNumberPrefix = {read=Get_PremiseNumberPrefix};
+	__property _di_IXMLPremiseNumber_xalList PremiseNumber = {read=Get_PremiseNumber};
+	__property _di_IXMLPremiseNumberSuffix_xalList PremiseNumberSuffix = {read=Get_PremiseNumberSuffix};
+};
+
+__interface  INTERFACE_UUID("{71D85ABA-F34E-4908-8715-9CBE99585624}") IXMLSubPremiseType_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual _di_IXMLAddressLine_xalList __fastcall Get_AddressLine() = 0 ;
+	virtual _di_IXMLSubPremiseName_xalList __fastcall Get_SubPremiseName() = 0 ;
+	virtual _di_IXMLSubPremiseLocation_xal __fastcall Get_SubPremiseLocation() = 0 ;
+	virtual _di_IXMLSubPremiseNumber_xalList __fastcall Get_SubPremiseNumber() = 0 ;
+	virtual _di_IXMLSubPremiseNumberPrefix_xalList __fastcall Get_SubPremiseNumberPrefix() = 0 ;
+	virtual _di_IXMLSubPremiseNumberSuffix_xalList __fastcall Get_SubPremiseNumberSuffix() = 0 ;
+	virtual _di_IXMLBuildingNameType_xalList __fastcall Get_BuildingName() = 0 ;
+	virtual _di_IXMLFirmType_xal __fastcall Get_Firm() = 0 ;
+	virtual _di_IXMLMailStopType_xal __fastcall Get_MailStop() = 0 ;
+	virtual _di_IXMLPostalCode_xal __fastcall Get_PostalCode() = 0 ;
+	virtual _di_IXMLSubPremiseType_xal __fastcall Get_SubPremise() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property _di_IXMLAddressLine_xalList AddressLine = {read=Get_AddressLine};
+	__property _di_IXMLSubPremiseName_xalList SubPremiseName = {read=Get_SubPremiseName};
+	__property _di_IXMLSubPremiseLocation_xal SubPremiseLocation = {read=Get_SubPremiseLocation};
+	__property _di_IXMLSubPremiseNumber_xalList SubPremiseNumber = {read=Get_SubPremiseNumber};
+	__property _di_IXMLSubPremiseNumberPrefix_xalList SubPremiseNumberPrefix = {read=Get_SubPremiseNumberPrefix};
+	__property _di_IXMLSubPremiseNumberSuffix_xalList SubPremiseNumberSuffix = {read=Get_SubPremiseNumberSuffix};
+	__property _di_IXMLBuildingNameType_xalList BuildingName = {read=Get_BuildingName};
+	__property _di_IXMLFirmType_xal Firm = {read=Get_Firm};
+	__property _di_IXMLMailStopType_xal MailStop = {read=Get_MailStop};
+	__property _di_IXMLPostalCode_xal PostalCode = {read=Get_PostalCode};
+	__property _di_IXMLSubPremiseType_xal SubPremise = {read=Get_SubPremise};
+};
+
+__interface  INTERFACE_UUID("{3C978D92-9B3E-484C-A5C1-B7CAF458BA9E}") IXMLSubPremiseType_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSubPremiseType_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSubPremiseType_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSubPremiseType_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSubPremiseType_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSubPremiseType_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{62421AEE-951C-40D5-9B36-BF9776171F1C}") IXMLSubPremiseName_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_TypeOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_TypeOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString TypeOccurrence = {read=Get_TypeOccurrence, write=Set_TypeOccurrence};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{88B6277B-2D5C-4374-A370-FB581C01B344}") IXMLSubPremiseName_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSubPremiseName_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSubPremiseName_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSubPremiseName_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSubPremiseName_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSubPremiseName_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{31DC9415-5641-4A2A-8B9D-24B9F653D81A}") IXMLSubPremiseLocation_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{030C1160-C13C-4F7D-AE0D-17ED599B76B2}") IXMLSubPremiseNumber_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Indicator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_IndicatorOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_NumberTypeOccurrence() = 0 ;
+	virtual System::UnicodeString __fastcall Get_PremiseNumberSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_Indicator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_NumberTypeOccurrence(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_PremiseNumberSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Indicator = {read=Get_Indicator, write=Set_Indicator};
+	__property System::UnicodeString IndicatorOccurrence = {read=Get_IndicatorOccurrence, write=Set_IndicatorOccurrence};
+	__property System::UnicodeString NumberTypeOccurrence = {read=Get_NumberTypeOccurrence, write=Set_NumberTypeOccurrence};
+	__property System::UnicodeString PremiseNumberSeparator = {read=Get_PremiseNumberSeparator, write=Set_PremiseNumberSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{77EACF64-945D-47F5-80E0-FCAF6F18511D}") IXMLSubPremiseNumber_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSubPremiseNumber_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSubPremiseNumber_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSubPremiseNumber_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSubPremiseNumber_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSubPremiseNumber_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{26F14F36-78D7-42F0-A492-FA701B0172D4}") IXMLSubPremiseNumberPrefix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberPrefixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberPrefixSeparator = {read=Get_NumberPrefixSeparator, write=Set_NumberPrefixSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{4B9E5591-1DF3-4A99-8F61-96C8EF8A38C1}") IXMLSubPremiseNumberPrefix_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSubPremiseNumberPrefix_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSubPremiseNumberPrefix_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSubPremiseNumberPrefix_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSubPremiseNumberPrefix_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSubPremiseNumberPrefix_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{15C79FF8-F423-401E-B8F7-88F997B1FEAD}") IXMLSubPremiseNumberSuffix_xal  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_NumberSuffixSeparator() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Code() = 0 ;
+	virtual void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Code(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString NumberSuffixSeparator = {read=Get_NumberSuffixSeparator, write=Set_NumberSuffixSeparator};
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Code = {read=Get_Code, write=Set_Code};
+};
+
+__interface  INTERFACE_UUID("{AB16447A-010D-45AE-A0AB-A96843B58D4E}") IXMLSubPremiseNumberSuffix_xalList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSubPremiseNumberSuffix_xal operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSubPremiseNumberSuffix_xal __fastcall Add() = 0 ;
+	virtual _di_IXMLSubPremiseNumberSuffix_xal __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSubPremiseNumberSuffix_xal __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSubPremiseNumberSuffix_xal Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{EFAFE1AC-2802-4C9E-95E7-340CB8D1A52A}") IXMLAbstractViewType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAbstractTimePrimitiveType __fastcall Get_AbstractTimePrimitiveGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractViewSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractViewObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAbstractTimePrimitiveType AbstractTimePrimitiveGroup = {read=Get_AbstractTimePrimitiveGroup};
+	__property _di_IXMLAnySimpleTypeList AbstractViewSimpleExtensionGroup = {read=Get_AbstractViewSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractViewObjectExtensionGroup = {read=Get_AbstractViewObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{AFBB647F-1F15-44F5-B7EC-0FDBDB90268B}") IXMLAbstractTimePrimitiveType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractTimePrimitiveSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractTimePrimitiveObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractTimePrimitiveSimpleExtensionGroup = {read=Get_AbstractTimePrimitiveSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractTimePrimitiveObjectExtensionGroup = {read=Get_AbstractTimePrimitiveObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{AB0BD903-B5FF-48CA-AC2D-C569441D2C2B}") IXMLAbstractStyleSelectorType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractStyleSelectorSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractStyleSelectorObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractStyleSelectorSimpleExtensionGroup = {read=Get_AbstractStyleSelectorSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractStyleSelectorObjectExtensionGroup = {read=Get_AbstractStyleSelectorObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{C761AF4A-35F3-4F72-8F86-5C8A67B05A7C}") IXMLAbstractStyleSelectorTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAbstractStyleSelectorType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAbstractStyleSelectorType __fastcall Add() = 0 ;
+	virtual _di_IXMLAbstractStyleSelectorType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAbstractStyleSelectorType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAbstractStyleSelectorType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{0FA847CB-2451-45A9-AD8C-89C8E947E6AB}") IXMLRegionType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAbstractExtentType __fastcall Get_AbstractExtentGroup() = 0 ;
+	virtual _di_IXMLLodType __fastcall Get_Lod() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_RegionSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_RegionObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAbstractExtentType AbstractExtentGroup = {read=Get_AbstractExtentGroup};
+	__property _di_IXMLLodType Lod = {read=Get_Lod};
+	__property _di_IXMLAnySimpleTypeList RegionSimpleExtensionGroup = {read=Get_RegionSimpleExtensionGroup};
+	__property _di_IXMLString_List RegionObjectExtensionGroup = {read=Get_RegionObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{F3C23758-2FA5-4DCE-A15E-FF66BAB8F250}") IXMLAbstractExtentType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractExtentSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractExtentObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractExtentSimpleExtensionGroup = {read=Get_AbstractExtentSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractExtentObjectExtensionGroup = {read=Get_AbstractExtentObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{CB27F3FF-A35F-43E1-9DAC-2FB548AD3F5C}") IXMLLodType  : public IXMLAbstractObjectType 
+{
+	virtual double __fastcall Get_MinLodPixels() = 0 ;
+	virtual double __fastcall Get_MaxLodPixels() = 0 ;
+	virtual double __fastcall Get_MinFadeExtent() = 0 ;
+	virtual double __fastcall Get_MaxFadeExtent() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LodSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LodObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_MinLodPixels(double Value) = 0 ;
+	virtual void __fastcall Set_MaxLodPixels(double Value) = 0 ;
+	virtual void __fastcall Set_MinFadeExtent(double Value) = 0 ;
+	virtual void __fastcall Set_MaxFadeExtent(double Value) = 0 ;
+	__property double MinLodPixels = {read=Get_MinLodPixels, write=Set_MinLodPixels};
+	__property double MaxLodPixels = {read=Get_MaxLodPixels, write=Set_MaxLodPixels};
+	__property double MinFadeExtent = {read=Get_MinFadeExtent, write=Set_MinFadeExtent};
+	__property double MaxFadeExtent = {read=Get_MaxFadeExtent, write=Set_MaxFadeExtent};
+	__property _di_IXMLAnySimpleTypeList LodSimpleExtensionGroup = {read=Get_LodSimpleExtensionGroup};
+	__property _di_IXMLString_List LodObjectExtensionGroup = {read=Get_LodObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{16EA1449-AF86-4447-B7DF-23817D4B98F5}") IXMLLookAtType  : public IXMLAbstractViewType 
+{
+	virtual double __fastcall Get_Longitude() = 0 ;
+	virtual double __fastcall Get_Latitude() = 0 ;
+	virtual double __fastcall Get_Altitude() = 0 ;
+	virtual double __fastcall Get_Heading() = 0 ;
+	virtual double __fastcall Get_Tilt() = 0 ;
+	virtual double __fastcall Get_Range() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual double __fastcall Get_HorizFov() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LookAtSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LookAtObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Longitude(double Value) = 0 ;
+	virtual void __fastcall Set_Latitude(double Value) = 0 ;
+	virtual void __fastcall Set_Altitude(double Value) = 0 ;
+	virtual void __fastcall Set_Heading(double Value) = 0 ;
+	virtual void __fastcall Set_Tilt(double Value) = 0 ;
+	virtual void __fastcall Set_Range(double Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_HorizFov(double Value) = 0 ;
+	__property double Longitude = {read=Get_Longitude, write=Set_Longitude};
+	__property double Latitude = {read=Get_Latitude, write=Set_Latitude};
+	__property double Altitude = {read=Get_Altitude, write=Set_Altitude};
+	__property double Heading = {read=Get_Heading, write=Set_Heading};
+	__property double Tilt = {read=Get_Tilt, write=Set_Tilt};
+	__property double Range = {read=Get_Range, write=Set_Range};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property double HorizFov = {read=Get_HorizFov, write=Set_HorizFov};
+	__property _di_IXMLAnySimpleTypeList LookAtSimpleExtensionGroup = {read=Get_LookAtSimpleExtensionGroup};
+	__property _di_IXMLString_List LookAtObjectExtensionGroup = {read=Get_LookAtObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{6065D5AD-C02E-4ABC-989E-741DF6261779}") IXMLCameraType  : public IXMLAbstractViewType 
+{
+	virtual double __fastcall Get_Longitude() = 0 ;
+	virtual double __fastcall Get_Latitude() = 0 ;
+	virtual double __fastcall Get_Altitude() = 0 ;
+	virtual double __fastcall Get_Heading() = 0 ;
+	virtual double __fastcall Get_Tilt() = 0 ;
+	virtual double __fastcall Get_Roll() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual double __fastcall Get_HorizFov() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_CameraSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_CameraObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Longitude(double Value) = 0 ;
+	virtual void __fastcall Set_Latitude(double Value) = 0 ;
+	virtual void __fastcall Set_Altitude(double Value) = 0 ;
+	virtual void __fastcall Set_Heading(double Value) = 0 ;
+	virtual void __fastcall Set_Tilt(double Value) = 0 ;
+	virtual void __fastcall Set_Roll(double Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_HorizFov(double Value) = 0 ;
+	__property double Longitude = {read=Get_Longitude, write=Set_Longitude};
+	__property double Latitude = {read=Get_Latitude, write=Set_Latitude};
+	__property double Altitude = {read=Get_Altitude, write=Set_Altitude};
+	__property double Heading = {read=Get_Heading, write=Set_Heading};
+	__property double Tilt = {read=Get_Tilt, write=Set_Tilt};
+	__property double Roll = {read=Get_Roll, write=Set_Roll};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property double HorizFov = {read=Get_HorizFov, write=Set_HorizFov};
+	__property _di_IXMLAnySimpleTypeList CameraSimpleExtensionGroup = {read=Get_CameraSimpleExtensionGroup};
+	__property _di_IXMLString_List CameraObjectExtensionGroup = {read=Get_CameraObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{E12B1CC7-0D05-4A6D-8B29-7C41FB2DA1FE}") IXMLMetadataType  : public Xml::Xmlintf::IXMLNode 
+{
+	
+};
+
+__interface  INTERFACE_UUID("{3C2BB89D-4675-4525-9978-6BB1FB2CEAE1}") IXMLExtendedDataType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLDataTypeList __fastcall Get_Data() = 0 ;
+	virtual _di_IXMLSchemaDataTypeList __fastcall Get_SchemaData() = 0 ;
+	__property _di_IXMLDataTypeList Data = {read=Get_Data};
+	__property _di_IXMLSchemaDataTypeList SchemaData = {read=Get_SchemaData};
+};
+
+__interface  INTERFACE_UUID("{0A3C8260-CF4B-4DF8-9AC4-796FB917906E}") IXMLDataType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Uom() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DisplayName() = 0 ;
+	virtual System::Variant __fastcall Get_Value() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_DataExtension() = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Uom(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DisplayName(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Value(const System::Variant &Value) = 0 ;
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+	__property System::UnicodeString Uom = {read=Get_Uom, write=Set_Uom};
+	__property System::UnicodeString DisplayName = {read=Get_DisplayName, write=Set_DisplayName};
+	__property System::Variant Value = {read=Get_Value, write=Set_Value};
+	__property _di_IXMLString_List DataExtension = {read=Get_DataExtension};
+};
+
+__interface  INTERFACE_UUID("{94628520-4E36-44A8-8FD4-601A0EBBB96A}") IXMLDataTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLDataType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLDataType __fastcall Add() = 0 ;
+	virtual _di_IXMLDataType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLDataType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLDataType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{659E9EAF-CA4D-4F85-AE6A-C74A3D023969}") IXMLSchemaDataType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_SchemaUrl() = 0 ;
+	virtual _di_IXMLSimpleDataTypeList __fastcall Get_SimpleData() = 0 ;
+	virtual _di_IXMLSimpleArrayDataTypeList __fastcall Get_SimpleArrayData() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_SchemaDataExtension() = 0 ;
+	virtual void __fastcall Set_SchemaUrl(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString SchemaUrl = {read=Get_SchemaUrl, write=Set_SchemaUrl};
+	__property _di_IXMLSimpleDataTypeList SimpleData = {read=Get_SimpleData};
+	__property _di_IXMLSimpleArrayDataTypeList SimpleArrayData = {read=Get_SimpleArrayData};
+	__property _di_IXMLString_List SchemaDataExtension = {read=Get_SchemaDataExtension};
+};
+
+__interface  INTERFACE_UUID("{E42E15EA-FB01-4C69-90D9-565995B2E829}") IXMLSchemaDataTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSchemaDataType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSchemaDataType __fastcall Add() = 0 ;
+	virtual _di_IXMLSchemaDataType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSchemaDataType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSchemaDataType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{5D512302-2B70-4DA9-9B75-CD7349F932F0}") IXMLSimpleDataType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+};
+
+__interface  INTERFACE_UUID("{BED6EE3D-F8A6-4D7E-84B4-B9FDE7E39AAA}") IXMLSimpleDataTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSimpleDataType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSimpleDataType __fastcall Add() = 0 ;
+	virtual _di_IXMLSimpleDataType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSimpleDataType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSimpleDataType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{2F27E2AE-4519-4106-87CB-FD7231360CC7}") IXMLSimpleArrayDataType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_Value() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_SimpleArrayDataExtension() = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+	__property _di_IXMLAnySimpleTypeList Value = {read=Get_Value};
+	__property _di_IXMLString_List SimpleArrayDataExtension = {read=Get_SimpleArrayDataExtension};
+};
+
+__interface  INTERFACE_UUID("{04925349-2663-4E82-80E4-598D16440C9C}") IXMLSimpleArrayDataTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSimpleArrayDataType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSimpleArrayDataType __fastcall Add() = 0 ;
+	virtual _di_IXMLSimpleArrayDataType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSimpleArrayDataType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSimpleArrayDataType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{76FA95EE-756B-454C-A921-362C0AFD8F81}") IXMLAbstractContainerType  : public IXMLAbstractFeatureType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractContainerSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractContainerObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractContainerSimpleExtensionGroup = {read=Get_AbstractContainerSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractContainerObjectExtensionGroup = {read=Get_AbstractContainerObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{1CFE0546-2084-4959-84B5-AB99C5CBEA6E}") IXMLAbstractContainerTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAbstractContainerType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAbstractContainerType __fastcall Add() = 0 ;
+	virtual _di_IXMLAbstractContainerType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAbstractContainerType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAbstractContainerType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{19E45C2C-B332-45A8-9778-3D5101CEB81E}") IXMLAbstractGeometryType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractGeometrySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractGeometryObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractGeometrySimpleExtensionGroup = {read=Get_AbstractGeometrySimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractGeometryObjectExtensionGroup = {read=Get_AbstractGeometryObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{F8DBAEA0-A88B-4988-AB33-A8B1626FF66E}") IXMLAbstractGeometryTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAbstractGeometryType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAbstractGeometryType __fastcall Add() = 0 ;
+	virtual _di_IXMLAbstractGeometryType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAbstractGeometryType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAbstractGeometryType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{0659BFA5-DFE1-4876-9D11-5DF79A14FCEE}") IXMLAbstractOverlayType  : public IXMLAbstractFeatureType 
+{
+	virtual System::UnicodeString __fastcall Get_Color() = 0 ;
+	virtual int __fastcall Get_DrawOrder() = 0 ;
+	virtual _di_IXMLLinkType __fastcall Get_Icon() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractOverlaySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractOverlayObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Color(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DrawOrder(int Value) = 0 ;
+	__property System::UnicodeString Color = {read=Get_Color, write=Set_Color};
+	__property int DrawOrder = {read=Get_DrawOrder, write=Set_DrawOrder};
+	__property _di_IXMLLinkType Icon = {read=Get_Icon};
+	__property _di_IXMLAnySimpleTypeList AbstractOverlaySimpleExtensionGroup = {read=Get_AbstractOverlaySimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractOverlayObjectExtensionGroup = {read=Get_AbstractOverlayObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{5D8EF127-C233-4092-8765-CA5D04CFFC41}") IXMLBasicLinkType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_Href() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_BasicLinkSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_BasicLinkObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Href(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Href = {read=Get_Href, write=Set_Href};
+	__property _di_IXMLAnySimpleTypeList BasicLinkSimpleExtensionGroup = {read=Get_BasicLinkSimpleExtensionGroup};
+	__property _di_IXMLString_List BasicLinkObjectExtensionGroup = {read=Get_BasicLinkObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{517F13BB-87CF-4437-A1B1-922989D6498E}") IXMLLinkType  : public IXMLBasicLinkType 
+{
+	virtual System::UnicodeString __fastcall Get_AbstractRefreshMode() = 0 ;
+	virtual double __fastcall Get_RefreshInterval() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractViewRefreshMode() = 0 ;
+	virtual double __fastcall Get_ViewRefreshTime() = 0 ;
+	virtual double __fastcall Get_ViewBoundScale() = 0 ;
+	virtual System::UnicodeString __fastcall Get_ViewFormat() = 0 ;
+	virtual System::UnicodeString __fastcall Get_HttpQuery() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LinkSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LinkObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AbstractRefreshMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_RefreshInterval(double Value) = 0 ;
+	virtual void __fastcall Set_AbstractViewRefreshMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_ViewRefreshTime(double Value) = 0 ;
+	virtual void __fastcall Set_ViewBoundScale(double Value) = 0 ;
+	virtual void __fastcall Set_ViewFormat(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_HttpQuery(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString AbstractRefreshMode = {read=Get_AbstractRefreshMode, write=Set_AbstractRefreshMode};
+	__property double RefreshInterval = {read=Get_RefreshInterval, write=Set_RefreshInterval};
+	__property System::UnicodeString AbstractViewRefreshMode = {read=Get_AbstractViewRefreshMode, write=Set_AbstractViewRefreshMode};
+	__property double ViewRefreshTime = {read=Get_ViewRefreshTime, write=Set_ViewRefreshTime};
+	__property double ViewBoundScale = {read=Get_ViewBoundScale, write=Set_ViewBoundScale};
+	__property System::UnicodeString ViewFormat = {read=Get_ViewFormat, write=Set_ViewFormat};
+	__property System::UnicodeString HttpQuery = {read=Get_HttpQuery, write=Set_HttpQuery};
+	__property _di_IXMLAnySimpleTypeList LinkSimpleExtensionGroup = {read=Get_LinkSimpleExtensionGroup};
+	__property _di_IXMLString_List LinkObjectExtensionGroup = {read=Get_LinkObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{62A1DDA6-91A4-49F3-905E-35B6EF02D4D7}") IXMLKmlType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Hint() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Version() = 0 ;
+	virtual _di_IXMLNetworkLinkControlType __fastcall Get_NetworkLinkControl() = 0 ;
+	virtual _di_IXMLAbstractFeatureType __fastcall Get_AbstractFeatureGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_KmlSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_KmlObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Hint(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Version(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Hint = {read=Get_Hint, write=Set_Hint};
+	__property System::UnicodeString Version = {read=Get_Version, write=Set_Version};
+	__property _di_IXMLNetworkLinkControlType NetworkLinkControl = {read=Get_NetworkLinkControl};
+	__property _di_IXMLAbstractFeatureType AbstractFeatureGroup = {read=Get_AbstractFeatureGroup};
+	__property _di_IXMLAnySimpleTypeList KmlSimpleExtensionGroup = {read=Get_KmlSimpleExtensionGroup};
+	__property _di_IXMLString_List KmlObjectExtensionGroup = {read=Get_KmlObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{27308C58-5B74-4C6E-A357-E49BF4F49CA7}") IXMLNetworkLinkControlType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual double __fastcall Get_MinRefreshPeriod() = 0 ;
+	virtual double __fastcall Get_MaxSessionLength() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Cookie() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Message() = 0 ;
+	virtual System::UnicodeString __fastcall Get_LinkName() = 0 ;
+	virtual System::UnicodeString __fastcall Get_LinkDescription() = 0 ;
+	virtual _di_IXMLSnippetType __fastcall Get_LinkSnippet() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Expires() = 0 ;
+	virtual _di_IXMLUpdateType __fastcall Get_Update() = 0 ;
+	virtual _di_IXMLAbstractViewType __fastcall Get_AbstractViewGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_NetworkLinkControlSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_NetworkLinkControlObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_MinRefreshPeriod(double Value) = 0 ;
+	virtual void __fastcall Set_MaxSessionLength(double Value) = 0 ;
+	virtual void __fastcall Set_Cookie(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Message(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_LinkName(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_LinkDescription(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Expires(System::UnicodeString Value) = 0 ;
+	__property double MinRefreshPeriod = {read=Get_MinRefreshPeriod, write=Set_MinRefreshPeriod};
+	__property double MaxSessionLength = {read=Get_MaxSessionLength, write=Set_MaxSessionLength};
+	__property System::UnicodeString Cookie = {read=Get_Cookie, write=Set_Cookie};
+	__property System::UnicodeString Message = {read=Get_Message, write=Set_Message};
+	__property System::UnicodeString LinkName = {read=Get_LinkName, write=Set_LinkName};
+	__property System::UnicodeString LinkDescription = {read=Get_LinkDescription, write=Set_LinkDescription};
+	__property _di_IXMLSnippetType LinkSnippet = {read=Get_LinkSnippet};
+	__property System::UnicodeString Expires = {read=Get_Expires, write=Set_Expires};
+	__property _di_IXMLUpdateType Update = {read=Get_Update};
+	__property _di_IXMLAbstractViewType AbstractViewGroup = {read=Get_AbstractViewGroup};
+	__property _di_IXMLAnySimpleTypeList NetworkLinkControlSimpleExtensionGroup = {read=Get_NetworkLinkControlSimpleExtensionGroup};
+	__property _di_IXMLString_List NetworkLinkControlObjectExtensionGroup = {read=Get_NetworkLinkControlObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{14639648-7797-4B0E-9779-330E646B944C}") IXMLUpdateType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_TargetHref() = 0 ;
+	virtual _di_IXMLAnyTypeList __fastcall Get_AbstractUpdateOptionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_UpdateExtensionGroup() = 0 ;
+	virtual void __fastcall Set_TargetHref(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString TargetHref = {read=Get_TargetHref, write=Set_TargetHref};
+	__property _di_IXMLAnyTypeList AbstractUpdateOptionGroup = {read=Get_AbstractUpdateOptionGroup};
+	__property _di_IXMLString_List UpdateExtensionGroup = {read=Get_UpdateExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{2FCA9F10-BB3B-44BC-A020-4D446260552D}") IXMLDocumentType  : public IXMLAbstractContainerType 
+{
+	virtual _di_IXMLSchemaTypeList __fastcall Get_Schema() = 0 ;
+	virtual _di_IXMLAbstractFeatureTypeList __fastcall Get_AbstractFeatureGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_DocumentSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_DocumentObjectExtensionGroup() = 0 ;
+	__property _di_IXMLSchemaTypeList Schema = {read=Get_Schema};
+	__property _di_IXMLAbstractFeatureTypeList AbstractFeatureGroup = {read=Get_AbstractFeatureGroup};
+	__property _di_IXMLAnySimpleTypeList DocumentSimpleExtensionGroup = {read=Get_DocumentSimpleExtensionGroup};
+	__property _di_IXMLString_List DocumentObjectExtensionGroup = {read=Get_DocumentObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{38F32EC9-5B1F-476A-BCB8-4E08562AA03A}") IXMLSchemaType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Id() = 0 ;
+	virtual _di_IXMLSimpleFieldTypeList __fastcall Get_SimpleField() = 0 ;
+	virtual _di_IXMLSimpleArrayFieldTypeList __fastcall Get_SimpleArrayField() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_SchemaExtension() = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Id(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+	__property System::UnicodeString Id = {read=Get_Id, write=Set_Id};
+	__property _di_IXMLSimpleFieldTypeList SimpleField = {read=Get_SimpleField};
+	__property _di_IXMLSimpleArrayFieldTypeList SimpleArrayField = {read=Get_SimpleArrayField};
+	__property _di_IXMLString_List SchemaExtension = {read=Get_SchemaExtension};
+};
+
+__interface  INTERFACE_UUID("{B7569CB6-6C35-4E77-802D-D60CE2EEE4FE}") IXMLSchemaTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSchemaType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSchemaType __fastcall Add() = 0 ;
+	virtual _di_IXMLSchemaType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSchemaType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSchemaType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{66E26818-ECA4-4692-A808-3EF63B03A112}") IXMLSimpleFieldType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Uom() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DisplayName() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_SimpleFieldExtension() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Uom(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DisplayName(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+	__property System::UnicodeString Uom = {read=Get_Uom, write=Set_Uom};
+	__property System::UnicodeString DisplayName = {read=Get_DisplayName, write=Set_DisplayName};
+	__property _di_IXMLString_List SimpleFieldExtension = {read=Get_SimpleFieldExtension};
+};
+
+__interface  INTERFACE_UUID("{9726D6D7-6D0F-4F14-A74B-33F7AD7EA730}") IXMLSimpleFieldTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSimpleFieldType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSimpleFieldType __fastcall Add() = 0 ;
+	virtual _di_IXMLSimpleFieldType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSimpleFieldType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSimpleFieldType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{43D7A07D-6F40-46C0-BCFC-BD9A5EBF0288}") IXMLSimpleArrayFieldType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual System::UnicodeString __fastcall Get_Type_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Name() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Uom() = 0 ;
+	virtual System::UnicodeString __fastcall Get_DisplayName() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_SimpleArrayFieldExtension() = 0 ;
+	virtual void __fastcall Set_Type_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Name(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Uom(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DisplayName(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Type_ = {read=Get_Type_, write=Set_Type_};
+	__property System::UnicodeString Name = {read=Get_Name, write=Set_Name};
+	__property System::UnicodeString Uom = {read=Get_Uom, write=Set_Uom};
+	__property System::UnicodeString DisplayName = {read=Get_DisplayName, write=Set_DisplayName};
+	__property _di_IXMLString_List SimpleArrayFieldExtension = {read=Get_SimpleArrayFieldExtension};
+};
+
+__interface  INTERFACE_UUID("{9B457560-1EE2-4B80-9725-63029FBD4517}") IXMLSimpleArrayFieldTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLSimpleArrayFieldType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLSimpleArrayFieldType __fastcall Add() = 0 ;
+	virtual _di_IXMLSimpleArrayFieldType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLSimpleArrayFieldType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLSimpleArrayFieldType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{C07ACB6F-442B-48B1-9F98-803B1F6D270C}") IXMLFolderType  : public IXMLAbstractContainerType 
+{
+	virtual _di_IXMLAbstractFeatureTypeList __fastcall Get_AbstractFeatureGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_FolderSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_FolderObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAbstractFeatureTypeList AbstractFeatureGroup = {read=Get_AbstractFeatureGroup};
+	__property _di_IXMLAnySimpleTypeList FolderSimpleExtensionGroup = {read=Get_FolderSimpleExtensionGroup};
+	__property _di_IXMLString_List FolderObjectExtensionGroup = {read=Get_FolderObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{688A89FE-B2CD-4216-BA74-DAB169D2E4E8}") IXMLPlacemarkType  : public IXMLAbstractFeatureType 
+{
+	virtual _di_IXMLAbstractGeometryType __fastcall Get_AbstractGeometryGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PlacemarkSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PlacemarkObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAbstractGeometryType AbstractGeometryGroup = {read=Get_AbstractGeometryGroup};
+	__property _di_IXMLAnySimpleTypeList PlacemarkSimpleExtensionGroup = {read=Get_PlacemarkSimpleExtensionGroup};
+	__property _di_IXMLString_List PlacemarkObjectExtensionGroup = {read=Get_PlacemarkObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{04539327-28A8-453D-9D30-75DD5B1CF633}") IXMLNetworkLinkType  : public IXMLAbstractFeatureType 
+{
+	virtual bool __fastcall Get_RefreshVisibility() = 0 ;
+	virtual bool __fastcall Get_FlyToView() = 0 ;
+	virtual _di_IXMLAbstractObjectType __fastcall Get_AbstractLinkGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_NetworkLinkSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_NetworkLinkObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_RefreshVisibility(bool Value) = 0 ;
+	virtual void __fastcall Set_FlyToView(bool Value) = 0 ;
+	__property bool RefreshVisibility = {read=Get_RefreshVisibility, write=Set_RefreshVisibility};
+	__property bool FlyToView = {read=Get_FlyToView, write=Set_FlyToView};
+	__property _di_IXMLAbstractObjectType AbstractLinkGroup = {read=Get_AbstractLinkGroup};
+	__property _di_IXMLAnySimpleTypeList NetworkLinkSimpleExtensionGroup = {read=Get_NetworkLinkSimpleExtensionGroup};
+	__property _di_IXMLString_List NetworkLinkObjectExtensionGroup = {read=Get_NetworkLinkObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{CA9E39A7-0FEB-48ED-9DD6-3FD770DDE3D2}") IXMLAbstractLatLonBoxType  : public IXMLAbstractExtentType 
+{
+	virtual double __fastcall Get_North() = 0 ;
+	virtual double __fastcall Get_South() = 0 ;
+	virtual double __fastcall Get_East() = 0 ;
+	virtual double __fastcall Get_West() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractLatLonBoxSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractLatLonBoxObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_North(double Value) = 0 ;
+	virtual void __fastcall Set_South(double Value) = 0 ;
+	virtual void __fastcall Set_East(double Value) = 0 ;
+	virtual void __fastcall Set_West(double Value) = 0 ;
+	__property double North = {read=Get_North, write=Set_North};
+	__property double South = {read=Get_South, write=Set_South};
+	__property double East = {read=Get_East, write=Set_East};
+	__property double West = {read=Get_West, write=Set_West};
+	__property _di_IXMLAnySimpleTypeList AbstractLatLonBoxSimpleExtensionGroup = {read=Get_AbstractLatLonBoxSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractLatLonBoxObjectExtensionGroup = {read=Get_AbstractLatLonBoxObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{B5ECA08B-D025-4354-AD3A-B713DB27C414}") IXMLLatLonAltBoxType  : public IXMLAbstractLatLonBoxType 
+{
+	virtual double __fastcall Get_MinAltitude() = 0 ;
+	virtual double __fastcall Get_MaxAltitude() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LatLonAltBoxSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LatLonAltBoxObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_MinAltitude(double Value) = 0 ;
+	virtual void __fastcall Set_MaxAltitude(double Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	__property double MinAltitude = {read=Get_MinAltitude, write=Set_MinAltitude};
+	__property double MaxAltitude = {read=Get_MaxAltitude, write=Set_MaxAltitude};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property _di_IXMLAnySimpleTypeList LatLonAltBoxSimpleExtensionGroup = {read=Get_LatLonAltBoxSimpleExtensionGroup};
+	__property _di_IXMLString_List LatLonAltBoxObjectExtensionGroup = {read=Get_LatLonAltBoxObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{C94380A7-9D40-430E-A992-A26EA4ED8448}") IXMLMultiGeometryType  : public IXMLAbstractGeometryType 
+{
+	virtual _di_IXMLAbstractGeometryTypeList __fastcall Get_AbstractGeometryGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_MultiGeometrySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_MultiGeometryObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAbstractGeometryTypeList AbstractGeometryGroup = {read=Get_AbstractGeometryGroup};
+	__property _di_IXMLAnySimpleTypeList MultiGeometrySimpleExtensionGroup = {read=Get_MultiGeometrySimpleExtensionGroup};
+	__property _di_IXMLString_List MultiGeometryObjectExtensionGroup = {read=Get_MultiGeometryObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{154A8CF9-8078-4716-95B3-E526201117EF}") IXMLMultiGeometryTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLMultiGeometryType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLMultiGeometryType __fastcall Add() = 0 ;
+	virtual _di_IXMLMultiGeometryType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLMultiGeometryType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLMultiGeometryType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{8FA3A519-BF7E-48EB-BCEF-9853DE73A202}") IXMLPointType  : public IXMLAbstractGeometryType 
+{
+	virtual bool __fastcall Get_Extrude() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Coordinates() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PointSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PointObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Extrude(bool Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Coordinates(System::UnicodeString Value) = 0 ;
+	__property bool Extrude = {read=Get_Extrude, write=Set_Extrude};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property System::UnicodeString Coordinates = {read=Get_Coordinates, write=Set_Coordinates};
+	__property _di_IXMLAnySimpleTypeList PointSimpleExtensionGroup = {read=Get_PointSimpleExtensionGroup};
+	__property _di_IXMLString_List PointObjectExtensionGroup = {read=Get_PointObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{38720908-B88E-45E5-8006-BB92536DF66E}") IXMLLineStringType  : public IXMLAbstractGeometryType 
+{
+	virtual bool __fastcall Get_Extrude() = 0 ;
+	virtual bool __fastcall Get_Tessellate() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Coordinates() = 0 ;
+	virtual double __fastcall Get_AltitudeOffset() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LineStringSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LineStringObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Extrude(bool Value) = 0 ;
+	virtual void __fastcall Set_Tessellate(bool Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Coordinates(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AltitudeOffset(double Value) = 0 ;
+	__property bool Extrude = {read=Get_Extrude, write=Set_Extrude};
+	__property bool Tessellate = {read=Get_Tessellate, write=Set_Tessellate};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property System::UnicodeString Coordinates = {read=Get_Coordinates, write=Set_Coordinates};
+	__property double AltitudeOffset = {read=Get_AltitudeOffset, write=Set_AltitudeOffset};
+	__property _di_IXMLAnySimpleTypeList LineStringSimpleExtensionGroup = {read=Get_LineStringSimpleExtensionGroup};
+	__property _di_IXMLString_List LineStringObjectExtensionGroup = {read=Get_LineStringObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{6B6299A8-82D0-4826-A481-895BFFC9037A}") IXMLLinearRingType  : public IXMLAbstractGeometryType 
+{
+	virtual bool __fastcall Get_Extrude() = 0 ;
+	virtual bool __fastcall Get_Tessellate() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Coordinates() = 0 ;
+	virtual double __fastcall Get_AltitudeOffset() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LinearRingSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LinearRingObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Extrude(bool Value) = 0 ;
+	virtual void __fastcall Set_Tessellate(bool Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Coordinates(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AltitudeOffset(double Value) = 0 ;
+	__property bool Extrude = {read=Get_Extrude, write=Set_Extrude};
+	__property bool Tessellate = {read=Get_Tessellate, write=Set_Tessellate};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property System::UnicodeString Coordinates = {read=Get_Coordinates, write=Set_Coordinates};
+	__property double AltitudeOffset = {read=Get_AltitudeOffset, write=Set_AltitudeOffset};
+	__property _di_IXMLAnySimpleTypeList LinearRingSimpleExtensionGroup = {read=Get_LinearRingSimpleExtensionGroup};
+	__property _di_IXMLString_List LinearRingObjectExtensionGroup = {read=Get_LinearRingObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{8A789FD7-7115-42C9-BBEA-0F30085BB0A9}") IXMLPolygonType  : public IXMLAbstractGeometryType 
+{
+	virtual bool __fastcall Get_Extrude() = 0 ;
+	virtual bool __fastcall Get_Tessellate() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual _di_IXMLBoundaryType __fastcall Get_OuterBoundaryIs() = 0 ;
+	virtual _di_IXMLBoundaryTypeList __fastcall Get_InnerBoundaryIs() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PolygonSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PolygonObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Extrude(bool Value) = 0 ;
+	virtual void __fastcall Set_Tessellate(bool Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	__property bool Extrude = {read=Get_Extrude, write=Set_Extrude};
+	__property bool Tessellate = {read=Get_Tessellate, write=Set_Tessellate};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property _di_IXMLBoundaryType OuterBoundaryIs = {read=Get_OuterBoundaryIs};
+	__property _di_IXMLBoundaryTypeList InnerBoundaryIs = {read=Get_InnerBoundaryIs};
+	__property _di_IXMLAnySimpleTypeList PolygonSimpleExtensionGroup = {read=Get_PolygonSimpleExtensionGroup};
+	__property _di_IXMLString_List PolygonObjectExtensionGroup = {read=Get_PolygonObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{6160E555-7B5E-4152-A745-F81315934480}") IXMLBoundaryType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLLinearRingType __fastcall Get_LinearRing() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_BoundarySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_BoundaryObjectExtensionGroup() = 0 ;
+	__property _di_IXMLLinearRingType LinearRing = {read=Get_LinearRing};
+	__property _di_IXMLAnySimpleTypeList BoundarySimpleExtensionGroup = {read=Get_BoundarySimpleExtensionGroup};
+	__property _di_IXMLString_List BoundaryObjectExtensionGroup = {read=Get_BoundaryObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{CAFBCB74-21DD-4F84-A106-B87CFCA6EFEE}") IXMLBoundaryTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLBoundaryType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLBoundaryType __fastcall Add() = 0 ;
+	virtual _di_IXMLBoundaryType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLBoundaryType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLBoundaryType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{E19FF118-0BD9-4D0A-A0C2-4F3A0B9F4A56}") IXMLModelType  : public IXMLAbstractGeometryType 
+{
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual _di_IXMLLocationType __fastcall Get_Location() = 0 ;
+	virtual _di_IXMLOrientationType __fastcall Get_Orientation() = 0 ;
+	virtual _di_IXMLScaleType __fastcall Get_Scale() = 0 ;
+	virtual _di_IXMLLinkType __fastcall Get_Link() = 0 ;
+	virtual _di_IXMLResourceMapType __fastcall Get_ResourceMap() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ModelSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ModelObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property _di_IXMLLocationType Location = {read=Get_Location};
+	__property _di_IXMLOrientationType Orientation = {read=Get_Orientation};
+	__property _di_IXMLScaleType Scale = {read=Get_Scale};
+	__property _di_IXMLLinkType Link = {read=Get_Link};
+	__property _di_IXMLResourceMapType ResourceMap = {read=Get_ResourceMap};
+	__property _di_IXMLAnySimpleTypeList ModelSimpleExtensionGroup = {read=Get_ModelSimpleExtensionGroup};
+	__property _di_IXMLString_List ModelObjectExtensionGroup = {read=Get_ModelObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{80002AFE-A9FA-4E6A-8CEE-F8A61E95E271}") IXMLLocationType  : public IXMLAbstractObjectType 
+{
+	virtual double __fastcall Get_Longitude() = 0 ;
+	virtual double __fastcall Get_Latitude() = 0 ;
+	virtual double __fastcall Get_Altitude() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LocationSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LocationObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Longitude(double Value) = 0 ;
+	virtual void __fastcall Set_Latitude(double Value) = 0 ;
+	virtual void __fastcall Set_Altitude(double Value) = 0 ;
+	__property double Longitude = {read=Get_Longitude, write=Set_Longitude};
+	__property double Latitude = {read=Get_Latitude, write=Set_Latitude};
+	__property double Altitude = {read=Get_Altitude, write=Set_Altitude};
+	__property _di_IXMLAnySimpleTypeList LocationSimpleExtensionGroup = {read=Get_LocationSimpleExtensionGroup};
+	__property _di_IXMLString_List LocationObjectExtensionGroup = {read=Get_LocationObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{1154CBB8-29F9-4F04-9E4B-213D1AF024B1}") IXMLOrientationType  : public IXMLAbstractObjectType 
+{
+	virtual double __fastcall Get_Heading() = 0 ;
+	virtual double __fastcall Get_Tilt() = 0 ;
+	virtual double __fastcall Get_Roll() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_OrientationSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_OrientationObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Heading(double Value) = 0 ;
+	virtual void __fastcall Set_Tilt(double Value) = 0 ;
+	virtual void __fastcall Set_Roll(double Value) = 0 ;
+	__property double Heading = {read=Get_Heading, write=Set_Heading};
+	__property double Tilt = {read=Get_Tilt, write=Set_Tilt};
+	__property double Roll = {read=Get_Roll, write=Set_Roll};
+	__property _di_IXMLAnySimpleTypeList OrientationSimpleExtensionGroup = {read=Get_OrientationSimpleExtensionGroup};
+	__property _di_IXMLString_List OrientationObjectExtensionGroup = {read=Get_OrientationObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{0991064D-95D5-44C8-8E7F-CCFE8404A005}") IXMLScaleType  : public IXMLAbstractObjectType 
+{
+	virtual double __fastcall Get_X() = 0 ;
+	virtual double __fastcall Get_Y() = 0 ;
+	virtual double __fastcall Get_Z() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ScaleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ScaleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_X(double Value) = 0 ;
+	virtual void __fastcall Set_Y(double Value) = 0 ;
+	virtual void __fastcall Set_Z(double Value) = 0 ;
+	__property double X = {read=Get_X, write=Set_X};
+	__property double Y = {read=Get_Y, write=Set_Y};
+	__property double Z = {read=Get_Z, write=Set_Z};
+	__property _di_IXMLAnySimpleTypeList ScaleSimpleExtensionGroup = {read=Get_ScaleSimpleExtensionGroup};
+	__property _di_IXMLString_List ScaleObjectExtensionGroup = {read=Get_ScaleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{9A151333-66E5-4D03-8FA6-02A176979A4E}") IXMLResourceMapType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAliasTypeList __fastcall Get_Alias() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ResourceMapSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ResourceMapObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAliasTypeList Alias = {read=Get_Alias};
+	__property _di_IXMLAnySimpleTypeList ResourceMapSimpleExtensionGroup = {read=Get_ResourceMapSimpleExtensionGroup};
+	__property _di_IXMLString_List ResourceMapObjectExtensionGroup = {read=Get_ResourceMapObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{65F6CFAE-A764-48A7-82E1-C1C6D4236E51}") IXMLAliasType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_TargetHref() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SourceHref() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AliasSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AliasObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_TargetHref(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SourceHref(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString TargetHref = {read=Get_TargetHref, write=Set_TargetHref};
+	__property System::UnicodeString SourceHref = {read=Get_SourceHref, write=Set_SourceHref};
+	__property _di_IXMLAnySimpleTypeList AliasSimpleExtensionGroup = {read=Get_AliasSimpleExtensionGroup};
+	__property _di_IXMLString_List AliasObjectExtensionGroup = {read=Get_AliasObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{46FDB5A4-DFA9-49AF-BC21-D8E6A8E5A3C7}") IXMLAliasTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAliasType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAliasType __fastcall Add() = 0 ;
+	virtual _di_IXMLAliasType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAliasType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAliasType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{3E4FE52A-8268-4741-84DD-E5D840983579}") IXMLTrackType  : public IXMLAbstractGeometryType 
+{
+	virtual bool __fastcall Get_Extrude() = 0 ;
+	virtual bool __fastcall Get_Tessellate() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual _di_IXMLDateTimeTypeList __fastcall Get_When() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_Coord() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_Angles() = 0 ;
+	virtual _di_IXMLModelType __fastcall Get_Model() = 0 ;
+	virtual _di_IXMLExtendedDataType __fastcall Get_ExtendedData() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_TrackSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_TrackObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Extrude(bool Value) = 0 ;
+	virtual void __fastcall Set_Tessellate(bool Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	__property bool Extrude = {read=Get_Extrude, write=Set_Extrude};
+	__property bool Tessellate = {read=Get_Tessellate, write=Set_Tessellate};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property _di_IXMLDateTimeTypeList When = {read=Get_When};
+	__property _di_IXMLString_List Coord = {read=Get_Coord};
+	__property _di_IXMLString_List Angles = {read=Get_Angles};
+	__property _di_IXMLModelType Model = {read=Get_Model};
+	__property _di_IXMLExtendedDataType ExtendedData = {read=Get_ExtendedData};
+	__property _di_IXMLAnySimpleTypeList TrackSimpleExtensionGroup = {read=Get_TrackSimpleExtensionGroup};
+	__property _di_IXMLString_List TrackObjectExtensionGroup = {read=Get_TrackObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{D057F6A3-905A-4AAE-B38E-9404D43E53CF}") IXMLTrackTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLTrackType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLTrackType __fastcall Add() = 0 ;
+	virtual _di_IXMLTrackType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLTrackType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLTrackType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{BB14C902-0764-49AB-89A4-1372950E8CB4}") IXMLMultiTrackType  : public IXMLAbstractGeometryType 
+{
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual bool __fastcall Get_Interpolate() = 0 ;
+	virtual _di_IXMLTrackTypeList __fastcall Get_Track() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_MultiTrackSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_MultiTrackObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Interpolate(bool Value) = 0 ;
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property bool Interpolate = {read=Get_Interpolate, write=Set_Interpolate};
+	__property _di_IXMLTrackTypeList Track = {read=Get_Track};
+	__property _di_IXMLAnySimpleTypeList MultiTrackSimpleExtensionGroup = {read=Get_MultiTrackSimpleExtensionGroup};
+	__property _di_IXMLString_List MultiTrackObjectExtensionGroup = {read=Get_MultiTrackObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{7DB204D6-1E58-4634-BD7A-5F83F8AB8028}") IXMLMultiTrackTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLMultiTrackType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLMultiTrackType __fastcall Add() = 0 ;
+	virtual _di_IXMLMultiTrackType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLMultiTrackType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLMultiTrackType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{C202AB50-E9DA-457A-A437-E1295214DE1A}") IXMLGroundOverlayType  : public IXMLAbstractOverlayType 
+{
+	virtual double __fastcall Get_Altitude() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AltitudeMode() = 0 ;
+	virtual System::UnicodeString __fastcall Get_SeaFloorAltitudeMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup() = 0 ;
+	virtual _di_IXMLAbstractExtentType __fastcall Get_AbstractExtentGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_GroundOverlaySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_GroundOverlayObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Altitude(double Value) = 0 ;
+	virtual void __fastcall Set_AltitudeMode(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value) = 0 ;
+	__property double Altitude = {read=Get_Altitude, write=Set_Altitude};
+	__property System::UnicodeString AltitudeMode = {read=Get_AltitudeMode, write=Set_AltitudeMode};
+	__property System::UnicodeString SeaFloorAltitudeMode = {read=Get_SeaFloorAltitudeMode, write=Set_SeaFloorAltitudeMode};
+	__property _di_IXMLAnySimpleTypeList AltitudeModeSimpleExtensionGroup = {read=Get_AltitudeModeSimpleExtensionGroup};
+	__property _di_IXMLString_List AltitudeModeObjectExtensionGroup = {read=Get_AltitudeModeObjectExtensionGroup};
+	__property _di_IXMLAbstractExtentType AbstractExtentGroup = {read=Get_AbstractExtentGroup};
+	__property _di_IXMLAnySimpleTypeList GroundOverlaySimpleExtensionGroup = {read=Get_GroundOverlaySimpleExtensionGroup};
+	__property _di_IXMLString_List GroundOverlayObjectExtensionGroup = {read=Get_GroundOverlayObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{3072F19A-A1B3-4DFA-A9FD-3DD3F3D037D7}") IXMLLatLonQuadType  : public IXMLAbstractExtentType 
+{
+	virtual System::UnicodeString __fastcall Get_Coordinates() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LatLonQuadSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LatLonQuadObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Coordinates(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Coordinates = {read=Get_Coordinates, write=Set_Coordinates};
+	__property _di_IXMLAnySimpleTypeList LatLonQuadSimpleExtensionGroup = {read=Get_LatLonQuadSimpleExtensionGroup};
+	__property _di_IXMLString_List LatLonQuadObjectExtensionGroup = {read=Get_LatLonQuadObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{FABAF8DB-CC6F-43CE-830F-468F8BE12603}") IXMLLatLonBoxType  : public IXMLAbstractLatLonBoxType 
+{
+	virtual double __fastcall Get_Rotation() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LatLonBoxSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LatLonBoxObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Rotation(double Value) = 0 ;
+	__property double Rotation = {read=Get_Rotation, write=Set_Rotation};
+	__property _di_IXMLAnySimpleTypeList LatLonBoxSimpleExtensionGroup = {read=Get_LatLonBoxSimpleExtensionGroup};
+	__property _di_IXMLString_List LatLonBoxObjectExtensionGroup = {read=Get_LatLonBoxObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{6A9594C6-A182-4A93-9983-869AD7152938}") IXMLScreenOverlayType  : public IXMLAbstractOverlayType 
+{
+	virtual _di_IXMLVec2Type __fastcall Get_OverlayXY() = 0 ;
+	virtual _di_IXMLVec2Type __fastcall Get_ScreenXY() = 0 ;
+	virtual _di_IXMLVec2Type __fastcall Get_RotationXY() = 0 ;
+	virtual _di_IXMLVec2Type __fastcall Get_Size() = 0 ;
+	virtual double __fastcall Get_Rotation() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ScreenOverlaySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ScreenOverlayObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Rotation(double Value) = 0 ;
+	__property _di_IXMLVec2Type OverlayXY = {read=Get_OverlayXY};
+	__property _di_IXMLVec2Type ScreenXY = {read=Get_ScreenXY};
+	__property _di_IXMLVec2Type RotationXY = {read=Get_RotationXY};
+	__property _di_IXMLVec2Type Size = {read=Get_Size};
+	__property double Rotation = {read=Get_Rotation, write=Set_Rotation};
+	__property _di_IXMLAnySimpleTypeList ScreenOverlaySimpleExtensionGroup = {read=Get_ScreenOverlaySimpleExtensionGroup};
+	__property _di_IXMLString_List ScreenOverlayObjectExtensionGroup = {read=Get_ScreenOverlayObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{9D087264-99C3-4F68-A484-6F446D089BC0}") IXMLPhotoOverlayType  : public IXMLAbstractOverlayType 
+{
+	virtual double __fastcall Get_Rotation() = 0 ;
+	virtual _di_IXMLViewVolumeType __fastcall Get_ViewVolume() = 0 ;
+	virtual _di_IXMLImagePyramidType __fastcall Get_ImagePyramid() = 0 ;
+	virtual _di_IXMLPointType __fastcall Get_Point() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractShape() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PhotoOverlaySimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PhotoOverlayObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Rotation(double Value) = 0 ;
+	virtual void __fastcall Set_AbstractShape(System::UnicodeString Value) = 0 ;
+	__property double Rotation = {read=Get_Rotation, write=Set_Rotation};
+	__property _di_IXMLViewVolumeType ViewVolume = {read=Get_ViewVolume};
+	__property _di_IXMLImagePyramidType ImagePyramid = {read=Get_ImagePyramid};
+	__property _di_IXMLPointType Point = {read=Get_Point};
+	__property System::UnicodeString AbstractShape = {read=Get_AbstractShape, write=Set_AbstractShape};
+	__property _di_IXMLAnySimpleTypeList PhotoOverlaySimpleExtensionGroup = {read=Get_PhotoOverlaySimpleExtensionGroup};
+	__property _di_IXMLString_List PhotoOverlayObjectExtensionGroup = {read=Get_PhotoOverlayObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{7D57D47D-7724-4FDB-98BB-A39DF12AF9A3}") IXMLViewVolumeType  : public IXMLAbstractObjectType 
+{
+	virtual double __fastcall Get_LeftFov() = 0 ;
+	virtual double __fastcall Get_RightFov() = 0 ;
+	virtual double __fastcall Get_BottomFov() = 0 ;
+	virtual double __fastcall Get_TopFov() = 0 ;
+	virtual double __fastcall Get_Near() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ViewVolumeSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ViewVolumeObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_LeftFov(double Value) = 0 ;
+	virtual void __fastcall Set_RightFov(double Value) = 0 ;
+	virtual void __fastcall Set_BottomFov(double Value) = 0 ;
+	virtual void __fastcall Set_TopFov(double Value) = 0 ;
+	virtual void __fastcall Set_Near(double Value) = 0 ;
+	__property double LeftFov = {read=Get_LeftFov, write=Set_LeftFov};
+	__property double RightFov = {read=Get_RightFov, write=Set_RightFov};
+	__property double BottomFov = {read=Get_BottomFov, write=Set_BottomFov};
+	__property double TopFov = {read=Get_TopFov, write=Set_TopFov};
+	__property double Near = {read=Get_Near, write=Set_Near};
+	__property _di_IXMLAnySimpleTypeList ViewVolumeSimpleExtensionGroup = {read=Get_ViewVolumeSimpleExtensionGroup};
+	__property _di_IXMLString_List ViewVolumeObjectExtensionGroup = {read=Get_ViewVolumeObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{826FEBB3-4505-4BD7-A6C8-AB5137636150}") IXMLImagePyramidType  : public IXMLAbstractObjectType 
+{
+	virtual int __fastcall Get_TileSize() = 0 ;
+	virtual int __fastcall Get_MaxWidth() = 0 ;
+	virtual int __fastcall Get_MaxHeight() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractGridOrigin() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ImagePyramidSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ImagePyramidObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_TileSize(int Value) = 0 ;
+	virtual void __fastcall Set_MaxWidth(int Value) = 0 ;
+	virtual void __fastcall Set_MaxHeight(int Value) = 0 ;
+	virtual void __fastcall Set_AbstractGridOrigin(System::UnicodeString Value) = 0 ;
+	__property int TileSize = {read=Get_TileSize, write=Set_TileSize};
+	__property int MaxWidth = {read=Get_MaxWidth, write=Set_MaxWidth};
+	__property int MaxHeight = {read=Get_MaxHeight, write=Set_MaxHeight};
+	__property System::UnicodeString AbstractGridOrigin = {read=Get_AbstractGridOrigin, write=Set_AbstractGridOrigin};
+	__property _di_IXMLAnySimpleTypeList ImagePyramidSimpleExtensionGroup = {read=Get_ImagePyramidSimpleExtensionGroup};
+	__property _di_IXMLString_List ImagePyramidObjectExtensionGroup = {read=Get_ImagePyramidObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{70C5DFE5-F2A6-48EA-AF32-549F55A1F380}") IXMLStyleType  : public IXMLAbstractStyleSelectorType 
+{
+	virtual _di_IXMLIconStyleType __fastcall Get_IconStyle() = 0 ;
+	virtual _di_IXMLLabelStyleType __fastcall Get_LabelStyle() = 0 ;
+	virtual _di_IXMLLineStyleType __fastcall Get_LineStyle() = 0 ;
+	virtual _di_IXMLPolyStyleType __fastcall Get_PolyStyle() = 0 ;
+	virtual _di_IXMLBalloonStyleType __fastcall Get_BalloonStyle() = 0 ;
+	virtual _di_IXMLListStyleType __fastcall Get_ListStyle() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_StyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_StyleObjectExtensionGroup() = 0 ;
+	__property _di_IXMLIconStyleType IconStyle = {read=Get_IconStyle};
+	__property _di_IXMLLabelStyleType LabelStyle = {read=Get_LabelStyle};
+	__property _di_IXMLLineStyleType LineStyle = {read=Get_LineStyle};
+	__property _di_IXMLPolyStyleType PolyStyle = {read=Get_PolyStyle};
+	__property _di_IXMLBalloonStyleType BalloonStyle = {read=Get_BalloonStyle};
+	__property _di_IXMLListStyleType ListStyle = {read=Get_ListStyle};
+	__property _di_IXMLAnySimpleTypeList StyleSimpleExtensionGroup = {read=Get_StyleSimpleExtensionGroup};
+	__property _di_IXMLString_List StyleObjectExtensionGroup = {read=Get_StyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{90DF9175-C839-4C9C-9F59-E9F38AD3DFD6}") IXMLAbstractSubStyleType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractSubStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractSubStyleObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractSubStyleSimpleExtensionGroup = {read=Get_AbstractSubStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractSubStyleObjectExtensionGroup = {read=Get_AbstractSubStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{2161172A-82B3-4C87-9F88-D013FC470663}") IXMLAbstractColorStyleType  : public IXMLAbstractSubStyleType 
+{
+	virtual System::UnicodeString __fastcall Get_Color() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractColorMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractColorStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractColorStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Color(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AbstractColorMode(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Color = {read=Get_Color, write=Set_Color};
+	__property System::UnicodeString AbstractColorMode = {read=Get_AbstractColorMode, write=Set_AbstractColorMode};
+	__property _di_IXMLAnySimpleTypeList AbstractColorStyleSimpleExtensionGroup = {read=Get_AbstractColorStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractColorStyleObjectExtensionGroup = {read=Get_AbstractColorStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{371862ED-403E-4A27-A0B7-14224B2B2141}") IXMLIconStyleType  : public IXMLAbstractColorStyleType 
+{
+	virtual double __fastcall Get_Scale() = 0 ;
+	virtual double __fastcall Get_Heading() = 0 ;
+	virtual _di_IXMLBasicLinkType __fastcall Get_Icon() = 0 ;
+	virtual _di_IXMLVec2Type __fastcall Get_HotSpot() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_IconStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_IconStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Scale(double Value) = 0 ;
+	virtual void __fastcall Set_Heading(double Value) = 0 ;
+	__property double Scale = {read=Get_Scale, write=Set_Scale};
+	__property double Heading = {read=Get_Heading, write=Set_Heading};
+	__property _di_IXMLBasicLinkType Icon = {read=Get_Icon};
+	__property _di_IXMLVec2Type HotSpot = {read=Get_HotSpot};
+	__property _di_IXMLAnySimpleTypeList IconStyleSimpleExtensionGroup = {read=Get_IconStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List IconStyleObjectExtensionGroup = {read=Get_IconStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{4C037FDB-A61D-4EBB-BDFC-3D4D10C68D5F}") IXMLLabelStyleType  : public IXMLAbstractColorStyleType 
+{
+	virtual double __fastcall Get_Scale() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LabelStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LabelStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Scale(double Value) = 0 ;
+	__property double Scale = {read=Get_Scale, write=Set_Scale};
+	__property _di_IXMLAnySimpleTypeList LabelStyleSimpleExtensionGroup = {read=Get_LabelStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List LabelStyleObjectExtensionGroup = {read=Get_LabelStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{B424E89E-FB41-45DB-AEF1-5A6CA2FABC32}") IXMLLineStyleType  : public IXMLAbstractColorStyleType 
+{
+	virtual double __fastcall Get_Width() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_LineStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_LineStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Width(double Value) = 0 ;
+	__property double Width = {read=Get_Width, write=Set_Width};
+	__property _di_IXMLAnySimpleTypeList LineStyleSimpleExtensionGroup = {read=Get_LineStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List LineStyleObjectExtensionGroup = {read=Get_LineStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{2BFF5803-0FD2-4B73-BDCE-5488B31601BA}") IXMLPolyStyleType  : public IXMLAbstractColorStyleType 
+{
+	virtual bool __fastcall Get_Fill() = 0 ;
+	virtual bool __fastcall Get_Outline() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PolyStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PolyStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Fill(bool Value) = 0 ;
+	virtual void __fastcall Set_Outline(bool Value) = 0 ;
+	__property bool Fill = {read=Get_Fill, write=Set_Fill};
+	__property bool Outline = {read=Get_Outline, write=Set_Outline};
+	__property _di_IXMLAnySimpleTypeList PolyStyleSimpleExtensionGroup = {read=Get_PolyStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List PolyStyleObjectExtensionGroup = {read=Get_PolyStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{52F071F4-9F9D-46C8-B636-8BDA72A3B28A}") IXMLBalloonStyleType  : public IXMLAbstractSubStyleType 
+{
+	virtual System::UnicodeString __fastcall Get_AbstractBgColorGroup() = 0 ;
+	virtual System::UnicodeString __fastcall Get_TextColor() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Text() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractDisplayMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_BalloonStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_BalloonStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AbstractBgColorGroup(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_TextColor(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_Text(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_AbstractDisplayMode(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString AbstractBgColorGroup = {read=Get_AbstractBgColorGroup, write=Set_AbstractBgColorGroup};
+	__property System::UnicodeString TextColor = {read=Get_TextColor, write=Set_TextColor};
+	__property System::UnicodeString Text = {read=Get_Text, write=Set_Text};
+	__property System::UnicodeString AbstractDisplayMode = {read=Get_AbstractDisplayMode, write=Set_AbstractDisplayMode};
+	__property _di_IXMLAnySimpleTypeList BalloonStyleSimpleExtensionGroup = {read=Get_BalloonStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List BalloonStyleObjectExtensionGroup = {read=Get_BalloonStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{F0620F3C-DE18-4A57-AA29-C73AD94FA46D}") IXMLListStyleType  : public IXMLAbstractSubStyleType 
+{
+	virtual System::UnicodeString __fastcall Get_AbstractListItemType() = 0 ;
+	virtual System::UnicodeString __fastcall Get_BgColor() = 0 ;
+	virtual _di_IXMLItemIconTypeList __fastcall Get_ItemIcon() = 0 ;
+	virtual int __fastcall Get_MaxSnippetLines() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ListStyleSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ListStyleObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AbstractListItemType(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_BgColor(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_MaxSnippetLines(int Value) = 0 ;
+	__property System::UnicodeString AbstractListItemType = {read=Get_AbstractListItemType, write=Set_AbstractListItemType};
+	__property System::UnicodeString BgColor = {read=Get_BgColor, write=Set_BgColor};
+	__property _di_IXMLItemIconTypeList ItemIcon = {read=Get_ItemIcon};
+	__property int MaxSnippetLines = {read=Get_MaxSnippetLines, write=Set_MaxSnippetLines};
+	__property _di_IXMLAnySimpleTypeList ListStyleSimpleExtensionGroup = {read=Get_ListStyleSimpleExtensionGroup};
+	__property _di_IXMLString_List ListStyleObjectExtensionGroup = {read=Get_ListStyleObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{55E9B6B5-BEC2-4CA4-9539-809880A83376}") IXMLItemIconType  : public IXMLAbstractObjectType 
+{
+	virtual System::Variant __fastcall Get_AbstractState() = 0 ;
+	virtual System::UnicodeString __fastcall Get_Href() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_ItemIconSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_ItemIconObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AbstractState(const System::Variant &Value) = 0 ;
+	virtual void __fastcall Set_Href(System::UnicodeString Value) = 0 ;
+	__property System::Variant AbstractState = {read=Get_AbstractState, write=Set_AbstractState};
+	__property System::UnicodeString Href = {read=Get_Href, write=Set_Href};
+	__property _di_IXMLAnySimpleTypeList ItemIconSimpleExtensionGroup = {read=Get_ItemIconSimpleExtensionGroup};
+	__property _di_IXMLString_List ItemIconObjectExtensionGroup = {read=Get_ItemIconObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{E5BA16ED-1763-4831-9C93-CFB3B7133E69}") IXMLItemIconTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLItemIconType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLItemIconType __fastcall Add() = 0 ;
+	virtual _di_IXMLItemIconType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLItemIconType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLItemIconType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{5EE14F99-5B3E-4D52-91BF-CD9A1218F46B}") IXMLStyleMapType  : public IXMLAbstractStyleSelectorType 
+{
+	virtual _di_IXMLPairTypeList __fastcall Get_Pair() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_StyleMapSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_StyleMapObjectExtensionGroup() = 0 ;
+	__property _di_IXMLPairTypeList Pair = {read=Get_Pair};
+	__property _di_IXMLAnySimpleTypeList StyleMapSimpleExtensionGroup = {read=Get_StyleMapSimpleExtensionGroup};
+	__property _di_IXMLString_List StyleMapObjectExtensionGroup = {read=Get_StyleMapObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{DD667253-92A4-4F3D-9073-0263AB7EFCD4}") IXMLPairType  : public IXMLAbstractObjectType 
+{
+	virtual System::UnicodeString __fastcall Get_key() = 0 ;
+	virtual System::UnicodeString __fastcall Get_StyleUrl() = 0 ;
+	virtual _di_IXMLAbstractStyleSelectorType __fastcall Get_AbstractStyleSelectorGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PairSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PairObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_key(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_StyleUrl(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString key = {read=Get_key, write=Set_key};
+	__property System::UnicodeString StyleUrl = {read=Get_StyleUrl, write=Set_StyleUrl};
+	__property _di_IXMLAbstractStyleSelectorType AbstractStyleSelectorGroup = {read=Get_AbstractStyleSelectorGroup};
+	__property _di_IXMLAnySimpleTypeList PairSimpleExtensionGroup = {read=Get_PairSimpleExtensionGroup};
+	__property _di_IXMLString_List PairObjectExtensionGroup = {read=Get_PairObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{D4EB0FA1-DFAC-4AC4-8E8D-C3EA0F0F2222}") IXMLPairTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLPairType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLPairType __fastcall Add() = 0 ;
+	virtual _di_IXMLPairType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLPairType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLPairType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{CC90F04B-3024-43D9-806B-C2B0A7C8BD10}") IXMLTimeStampType  : public IXMLAbstractTimePrimitiveType 
+{
+	virtual System::UnicodeString __fastcall Get_When() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_TimeStampSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_TimeStampObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_When(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString When = {read=Get_When, write=Set_When};
+	__property _di_IXMLAnySimpleTypeList TimeStampSimpleExtensionGroup = {read=Get_TimeStampSimpleExtensionGroup};
+	__property _di_IXMLString_List TimeStampObjectExtensionGroup = {read=Get_TimeStampObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{B1F50CB2-E906-451C-B12E-0F317AA62FA8}") IXMLTimeSpanType  : public IXMLAbstractTimePrimitiveType 
+{
+	virtual System::UnicodeString __fastcall Get_Begin_() = 0 ;
+	virtual System::UnicodeString __fastcall Get_End_() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_TimeSpanSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_TimeSpanObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Begin_(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_End_(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString Begin_ = {read=Get_Begin_, write=Set_Begin_};
+	__property System::UnicodeString End_ = {read=Get_End_, write=Set_End_};
+	__property _di_IXMLAnySimpleTypeList TimeSpanSimpleExtensionGroup = {read=Get_TimeSpanSimpleExtensionGroup};
+	__property _di_IXMLString_List TimeSpanObjectExtensionGroup = {read=Get_TimeSpanObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{F5A67F77-BEEA-44B4-A20C-D37761AB337F}") IXMLCreateType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLAbstractContainerTypeList __fastcall Get_AbstractContainerGroup() = 0 ;
+	virtual _di_IXMLMultiTrackTypeList __fastcall Get_MultiTrack() = 0 ;
+	virtual _di_IXMLMultiGeometryTypeList __fastcall Get_MultiGeometry() = 0 ;
+	__property _di_IXMLAbstractContainerTypeList AbstractContainerGroup = {read=Get_AbstractContainerGroup};
+	__property _di_IXMLMultiTrackTypeList MultiTrack = {read=Get_MultiTrack};
+	__property _di_IXMLMultiGeometryTypeList MultiGeometry = {read=Get_MultiGeometry};
+};
+
+__interface  INTERFACE_UUID("{E776C6C5-67E3-49BF-8D38-EE7E4539086F}") IXMLDeleteType  : public Xml::Xmlintf::IXMLNode 
+{
+	virtual _di_IXMLAbstractFeatureTypeList __fastcall Get_AbstractFeatureGroup() = 0 ;
+	virtual _di_IXMLAbstractGeometryTypeList __fastcall Get_AbstractGeometryGroup() = 0 ;
+	__property _di_IXMLAbstractFeatureTypeList AbstractFeatureGroup = {read=Get_AbstractFeatureGroup};
+	__property _di_IXMLAbstractGeometryTypeList AbstractGeometryGroup = {read=Get_AbstractGeometryGroup};
+};
+
+__interface  INTERFACE_UUID("{1EDDB85E-088C-4E2B-A79D-5ACCBB1B9791}") IXMLChangeType  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAbstractObjectType operator[](int Index) { return this->AbstractObjectGroup[Index]; }
+	virtual _di_IXMLAbstractObjectType __fastcall Get_AbstractObjectGroup(int Index) = 0 ;
+	virtual _di_IXMLAbstractObjectType __fastcall Add() = 0 ;
+	virtual _di_IXMLAbstractObjectType __fastcall Insert(const int Index) = 0 ;
+	__property _di_IXMLAbstractObjectType AbstractObjectGroup[int Index] = {read=Get_AbstractObjectGroup/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{67BC8B37-70E0-445D-A9F5-38E779D405F1}") IXMLAbstractTourPrimitiveType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AbstractTourPrimitiveSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AbstractTourPrimitiveObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAnySimpleTypeList AbstractTourPrimitiveSimpleExtensionGroup = {read=Get_AbstractTourPrimitiveSimpleExtensionGroup};
+	__property _di_IXMLString_List AbstractTourPrimitiveObjectExtensionGroup = {read=Get_AbstractTourPrimitiveObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{B4E8F7FC-50D6-4AC9-B70A-2F7FB6D6AB32}") IXMLAbstractTourPrimitiveTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	_di_IXMLAbstractTourPrimitiveType operator[](int Index) { return this->Items[Index]; }
+	virtual _di_IXMLAbstractTourPrimitiveType __fastcall Add() = 0 ;
+	virtual _di_IXMLAbstractTourPrimitiveType __fastcall Insert(const int Index) = 0 ;
+	virtual _di_IXMLAbstractTourPrimitiveType __fastcall Get_Item(int Index) = 0 ;
+	__property _di_IXMLAbstractTourPrimitiveType Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{A2E28A24-55F9-4316-B9EB-A80961013A93}") IXMLAnimatedUpdateType  : public IXMLAbstractTourPrimitiveType 
+{
+	virtual double __fastcall Get_Duration() = 0 ;
+	virtual _di_IXMLUpdateType __fastcall Get_Update() = 0 ;
+	virtual double __fastcall Get_DelayedStart() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_AnimatedUpdateSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_AnimatedUpdateObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Duration(double Value) = 0 ;
+	virtual void __fastcall Set_DelayedStart(double Value) = 0 ;
+	__property double Duration = {read=Get_Duration, write=Set_Duration};
+	__property _di_IXMLUpdateType Update = {read=Get_Update};
+	__property double DelayedStart = {read=Get_DelayedStart, write=Set_DelayedStart};
+	__property _di_IXMLAnySimpleTypeList AnimatedUpdateSimpleExtensionGroup = {read=Get_AnimatedUpdateSimpleExtensionGroup};
+	__property _di_IXMLString_List AnimatedUpdateObjectExtensionGroup = {read=Get_AnimatedUpdateObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{20346892-9E03-4DC7-B32A-33A4B57E6351}") IXMLFlyToType  : public IXMLAbstractTourPrimitiveType 
+{
+	virtual double __fastcall Get_Duration() = 0 ;
+	virtual System::UnicodeString __fastcall Get_AbstractFlyToMode() = 0 ;
+	virtual _di_IXMLAbstractViewType __fastcall Get_AbstractViewGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_FlyToSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_FlyToObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Duration(double Value) = 0 ;
+	virtual void __fastcall Set_AbstractFlyToMode(System::UnicodeString Value) = 0 ;
+	__property double Duration = {read=Get_Duration, write=Set_Duration};
+	__property System::UnicodeString AbstractFlyToMode = {read=Get_AbstractFlyToMode, write=Set_AbstractFlyToMode};
+	__property _di_IXMLAbstractViewType AbstractViewGroup = {read=Get_AbstractViewGroup};
+	__property _di_IXMLAnySimpleTypeList FlyToSimpleExtensionGroup = {read=Get_FlyToSimpleExtensionGroup};
+	__property _di_IXMLString_List FlyToObjectExtensionGroup = {read=Get_FlyToObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{76A25037-10AA-46C3-A93B-1F7DB48724B6}") IXMLPlaylistType  : public IXMLAbstractObjectType 
+{
+	virtual _di_IXMLAbstractTourPrimitiveTypeList __fastcall Get_AbstractTourPrimitiveGroup() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_PlaylistSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_PlaylistObjectExtensionGroup() = 0 ;
+	__property _di_IXMLAbstractTourPrimitiveTypeList AbstractTourPrimitiveGroup = {read=Get_AbstractTourPrimitiveGroup};
+	__property _di_IXMLAnySimpleTypeList PlaylistSimpleExtensionGroup = {read=Get_PlaylistSimpleExtensionGroup};
+	__property _di_IXMLString_List PlaylistObjectExtensionGroup = {read=Get_PlaylistObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{1F00D1E3-1E49-41E2-A589-CF62763FDC2A}") IXMLSoundCueType  : public IXMLAbstractTourPrimitiveType 
+{
+	virtual System::UnicodeString __fastcall Get_Href() = 0 ;
+	virtual double __fastcall Get_DelayedStart() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_SoundCueSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_SoundCueObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Href(System::UnicodeString Value) = 0 ;
+	virtual void __fastcall Set_DelayedStart(double Value) = 0 ;
+	__property System::UnicodeString Href = {read=Get_Href, write=Set_Href};
+	__property double DelayedStart = {read=Get_DelayedStart, write=Set_DelayedStart};
+	__property _di_IXMLAnySimpleTypeList SoundCueSimpleExtensionGroup = {read=Get_SoundCueSimpleExtensionGroup};
+	__property _di_IXMLString_List SoundCueObjectExtensionGroup = {read=Get_SoundCueObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{C9604741-720D-48CD-BAC0-B0E463BA0575}") IXMLTourType  : public IXMLAbstractFeatureType 
+{
+	virtual _di_IXMLPlaylistType __fastcall Get_Playlist() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_TourSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_TourObjectExtensionGroup() = 0 ;
+	__property _di_IXMLPlaylistType Playlist = {read=Get_Playlist};
+	__property _di_IXMLAnySimpleTypeList TourSimpleExtensionGroup = {read=Get_TourSimpleExtensionGroup};
+	__property _di_IXMLString_List TourObjectExtensionGroup = {read=Get_TourObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{C8D65235-A748-4A70-B619-C20392CF34B3}") IXMLTourControlType  : public IXMLAbstractTourPrimitiveType 
+{
+	virtual System::UnicodeString __fastcall Get_AbstractPlayMode() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_TourControlSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_TourControlObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_AbstractPlayMode(System::UnicodeString Value) = 0 ;
+	__property System::UnicodeString AbstractPlayMode = {read=Get_AbstractPlayMode, write=Set_AbstractPlayMode};
+	__property _di_IXMLAnySimpleTypeList TourControlSimpleExtensionGroup = {read=Get_TourControlSimpleExtensionGroup};
+	__property _di_IXMLString_List TourControlObjectExtensionGroup = {read=Get_TourControlObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{52291C56-803A-43ED-94C5-615AAC3FD535}") IXMLWaitType  : public IXMLAbstractTourPrimitiveType 
+{
+	virtual double __fastcall Get_Duration() = 0 ;
+	virtual _di_IXMLAnySimpleTypeList __fastcall Get_WaitSimpleExtensionGroup() = 0 ;
+	virtual _di_IXMLString_List __fastcall Get_WaitObjectExtensionGroup() = 0 ;
+	virtual void __fastcall Set_Duration(double Value) = 0 ;
+	__property double Duration = {read=Get_Duration, write=Set_Duration};
+	__property _di_IXMLAnySimpleTypeList WaitSimpleExtensionGroup = {read=Get_WaitSimpleExtensionGroup};
+	__property _di_IXMLString_List WaitObjectExtensionGroup = {read=Get_WaitObjectExtensionGroup};
+};
+
+__interface  INTERFACE_UUID("{12CE633A-830D-4486-BE75-3DE29B8664FD}") IXMLAtomEmailAddressList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	System::UnicodeString operator[](int Index) { return this->Items[Index]; }
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value) = 0 ;
+	virtual System::UnicodeString __fastcall Get_Item(int Index) = 0 ;
+	__property System::UnicodeString Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{4D6C626A-3F8D-4047-9327-2B18D9FB1C7E}") IXMLDateTimeTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	System::UnicodeString operator[](int Index) { return this->Items[Index]; }
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value) = 0 ;
+	virtual System::UnicodeString __fastcall Get_Item(int Index) = 0 ;
+	__property System::UnicodeString Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{3FECD960-D93B-4175-9026-8A52984D5237}") IXMLAnyTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	System::UnicodeString operator[](int Index) { return this->Items[Index]; }
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value) = 0 ;
+	virtual System::UnicodeString __fastcall Get_Item(int Index) = 0 ;
+	__property System::UnicodeString Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{E97AC6F8-4CBE-4061-84C9-1757B822493A}") IXMLAnySimpleTypeList  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	System::Variant operator[](int Index) { return this->Items[Index]; }
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::Variant &Value) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::Variant &Value) = 0 ;
+	virtual System::Variant __fastcall Get_Item(int Index) = 0 ;
+	__property System::Variant Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+__interface  INTERFACE_UUID("{E88ECD2F-A6AA-4919-85FE-75E723DFF2B6}") IXMLString_List  : public Xml::Xmlintf::IXMLNodeCollection 
+{
+	
+public:
+	System::UnicodeString operator[](int Index) { return this->Items[Index]; }
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value) = 0 ;
+	virtual Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value) = 0 ;
+	virtual System::UnicodeString __fastcall Get_Item(int Index) = 0 ;
+	__property System::UnicodeString Items[int Index] = {read=Get_Item/*, default*/};
+};
+
+class PASCALIMPLEMENTATION TXMLAbstractObjectType : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Id();
+	System::UnicodeString __fastcall Get_TargetId();
+	System::Variant __fastcall Get_ObjectSimpleExtensionGroup(int Index);
+	void __fastcall Set_Id(System::UnicodeString Value);
+	void __fastcall Set_TargetId(System::UnicodeString Value);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::Variant &ObjectSimpleExtensionGroup);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::Variant &ObjectSimpleExtensionGroup);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractObjectType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractObjectType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractObjectType() { }
+	
+private:
+	void *__IXMLAbstractObjectType;	// IXMLAbstractObjectType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {54C0A6CE-16B3-44AC-9EAC-987B9A6F741E}
+	operator _di_IXMLAbstractObjectType()
+	{
+		_di_IXMLAbstractObjectType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractObjectType*(void) { return (IXMLAbstractObjectType*)&__IXMLAbstractObjectType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLVec2Type : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	double __fastcall Get_X();
+	double __fastcall Get_Y();
+	System::UnicodeString __fastcall Get_Xunits();
+	System::UnicodeString __fastcall Get_Yunits();
+	void __fastcall Set_X(double Value);
+	void __fastcall Set_Y(double Value);
+	void __fastcall Set_Xunits(System::UnicodeString Value);
+	void __fastcall Set_Yunits(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLVec2Type(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLVec2Type(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLVec2Type() { }
+	
+private:
+	void *__IXMLVec2Type;	// IXMLVec2Type 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2FF6245C-4C97-42E3-B661-0D2808443E7E}
+	operator _di_IXMLVec2Type()
+	{
+		_di_IXMLVec2Type intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLVec2Type*(void) { return (IXMLVec2Type*)&__IXMLVec2Type; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSnippetType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	int __fastcall Get_MaxLines();
+	void __fastcall Set_MaxLines(int Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSnippetType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSnippetType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSnippetType() { }
+	
+private:
+	void *__IXMLSnippetType;	// IXMLSnippetType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5E431E90-0927-4801-8E1E-757FFEFD8417}
+	operator _di_IXMLSnippetType()
+	{
+		_di_IXMLSnippetType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSnippetType*(void) { return (IXMLSnippetType*)&__IXMLSnippetType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractFeatureType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAbstractStyleSelectorTypeList FAbstractStyleSelectorGroup;
+	_di_IXMLAnySimpleTypeList FAbstractFeatureSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractFeatureObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Name();
+	bool __fastcall Get_Visibility();
+	bool __fastcall Get_BalloonVisibility();
+	bool __fastcall Get_Open();
+	_di_IXMLAtomPersonConstruct_atom __fastcall Get_Author();
+	_di_IXMLLink_atom __fastcall Get_Link();
+	System::UnicodeString __fastcall Get_Address();
+	_di_IXMLAddressDetails_xal __fastcall Get_AddressDetails();
+	System::UnicodeString __fastcall Get_PhoneNumber();
+	System::UnicodeString __fastcall Get_AbstractSnippetGroup();
+	System::UnicodeString __fastcall Get_Description();
+	_di_IXMLAbstractViewType __fastcall Get_AbstractViewGroup();
+	_di_IXMLAbstractTimePrimitiveType __fastcall Get_AbstractTimePrimitiveGroup();
+	System::UnicodeString __fastcall Get_StyleUrl();
+	_di_IXMLAbstractStyleSelectorTypeList __fastcall Get_AbstractStyleSelectorGroup();
+	_di_IXMLRegionType __fastcall Get_Region();
+	System::UnicodeString __fastcall Get_AbstractExtendedDataGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractFeatureSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractFeatureObjectExtensionGroup();
+	void __fastcall Set_Name(System::UnicodeString Value);
+	void __fastcall Set_Visibility(bool Value);
+	void __fastcall Set_BalloonVisibility(bool Value);
+	void __fastcall Set_Open(bool Value);
+	void __fastcall Set_Address(System::UnicodeString Value);
+	void __fastcall Set_PhoneNumber(System::UnicodeString Value);
+	void __fastcall Set_AbstractSnippetGroup(System::UnicodeString Value);
+	void __fastcall Set_Description(System::UnicodeString Value);
+	void __fastcall Set_StyleUrl(System::UnicodeString Value);
+	void __fastcall Set_AbstractExtendedDataGroup(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractFeatureType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractFeatureType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractFeatureType() { }
+	
+private:
+	void *__IXMLAbstractFeatureType;	// IXMLAbstractFeatureType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B4039B56-D29C-4356-9460-285D9F69304F}
+	operator _di_IXMLAbstractFeatureType()
+	{
+		_di_IXMLAbstractFeatureType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractFeatureType*(void) { return (IXMLAbstractFeatureType*)&__IXMLAbstractFeatureType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractFeatureTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAbstractFeatureType __fastcall Add();
+	_di_IXMLAbstractFeatureType __fastcall Insert(const int Index);
+	_di_IXMLAbstractFeatureType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractFeatureTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractFeatureTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractFeatureTypeList() { }
+	
+private:
+	void *__IXMLAbstractFeatureTypeList;	// IXMLAbstractFeatureTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5C140788-2955-48BF-AC67-8B820789DC70}
+	operator _di_IXMLAbstractFeatureTypeList()
+	{
+		_di_IXMLAbstractFeatureTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractFeatureTypeList*(void) { return (IXMLAbstractFeatureTypeList*)&__IXMLAbstractFeatureTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAtomPersonConstruct_atom : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLString_List FName;
+	_di_IXMLString_List FUri;
+	_di_IXMLAtomEmailAddressList FEmail;
+	
+protected:
+	_di_IXMLString_List __fastcall Get_Name();
+	_di_IXMLString_List __fastcall Get_Uri();
+	_di_IXMLAtomEmailAddressList __fastcall Get_Email();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAtomPersonConstruct_atom(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAtomPersonConstruct_atom(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAtomPersonConstruct_atom() { }
+	
+private:
+	void *__IXMLAtomPersonConstruct_atom;	// IXMLAtomPersonConstruct_atom 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {7B97392E-A428-4BE5-8457-7DD8D72A5BE6}
+	operator _di_IXMLAtomPersonConstruct_atom()
+	{
+		_di_IXMLAtomPersonConstruct_atom intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAtomPersonConstruct_atom*(void) { return (IXMLAtomPersonConstruct_atom*)&__IXMLAtomPersonConstruct_atom; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLink_atom : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Href();
+	System::UnicodeString __fastcall Get_Rel();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Hreflang();
+	System::UnicodeString __fastcall Get_Title();
+	System::UnicodeString __fastcall Get_Length();
+	void __fastcall Set_Href(System::UnicodeString Value);
+	void __fastcall Set_Rel(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Hreflang(System::UnicodeString Value);
+	void __fastcall Set_Title(System::UnicodeString Value);
+	void __fastcall Set_Length(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLink_atom(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLink_atom(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLink_atom() { }
+	
+private:
+	void *__IXMLLink_atom;	// IXMLLink_atom 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B5F67EB6-A6CC-44EA-B19E-584AD5606C12}
+	operator _di_IXMLLink_atom()
+	{
+		_di_IXMLLink_atom intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLink_atom*(void) { return (IXMLLink_atom*)&__IXMLLink_atom; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressDetails_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_AddressType();
+	System::UnicodeString __fastcall Get_CurrentStatus();
+	System::UnicodeString __fastcall Get_ValidFromDate();
+	System::UnicodeString __fastcall Get_ValidToDate();
+	System::UnicodeString __fastcall Get_Usage();
+	System::UnicodeString __fastcall Get_Code();
+	System::UnicodeString __fastcall Get_AddressDetailsKey();
+	_di_IXMLPostalServiceElements_xal __fastcall Get_PostalServiceElements();
+	_di_IXMLAddress_xal __fastcall Get_Address();
+	_di_IXMLAddressLinesType_xal __fastcall Get_AddressLines();
+	_di_IXMLCountry_xal __fastcall Get_Country();
+	_di_IXMLAdministrativeArea_xal __fastcall Get_AdministrativeArea();
+	_di_IXMLLocality_xal __fastcall Get_Locality();
+	_di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare();
+	void __fastcall Set_AddressType(System::UnicodeString Value);
+	void __fastcall Set_CurrentStatus(System::UnicodeString Value);
+	void __fastcall Set_ValidFromDate(System::UnicodeString Value);
+	void __fastcall Set_ValidToDate(System::UnicodeString Value);
+	void __fastcall Set_Usage(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+	void __fastcall Set_AddressDetailsKey(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressDetails_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressDetails_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressDetails_xal() { }
+	
+private:
+	void *__IXMLAddressDetails_xal;	// IXMLAddressDetails_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CA68ADFD-519F-4655-B300-212408CC474C}
+	operator _di_IXMLAddressDetails_xal()
+	{
+		_di_IXMLAddressDetails_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressDetails_xal*(void) { return (IXMLAddressDetails_xal*)&__IXMLAddressDetails_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalServiceElements_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressIdentifier_xalList FAddressIdentifier;
+	_di_IXMLSupplementaryPostalServiceData_xalList FSupplementaryPostalServiceData;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressIdentifier_xalList __fastcall Get_AddressIdentifier();
+	_di_IXMLEndorsementLineCode_xal __fastcall Get_EndorsementLineCode();
+	_di_IXMLKeyLineCode_xal __fastcall Get_KeyLineCode();
+	_di_IXMLBarcode_xal __fastcall Get_Barcode();
+	_di_IXMLSortingCode_xal __fastcall Get_SortingCode();
+	_di_IXMLAddressLatitude_xal __fastcall Get_AddressLatitude();
+	_di_IXMLAddressLatitudeDirection_xal __fastcall Get_AddressLatitudeDirection();
+	_di_IXMLAddressLongitude_xal __fastcall Get_AddressLongitude();
+	_di_IXMLAddressLongitudeDirection_xal __fastcall Get_AddressLongitudeDirection();
+	_di_IXMLSupplementaryPostalServiceData_xalList __fastcall Get_SupplementaryPostalServiceData();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalServiceElements_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalServiceElements_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalServiceElements_xal() { }
+	
+private:
+	void *__IXMLPostalServiceElements_xal;	// IXMLPostalServiceElements_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F9CF356F-695A-4C81-B8A0-8C1AB520355E}
+	operator _di_IXMLPostalServiceElements_xal()
+	{
+		_di_IXMLPostalServiceElements_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalServiceElements_xal*(void) { return (IXMLPostalServiceElements_xal*)&__IXMLPostalServiceElements_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressIdentifier_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_IdentifierType();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_IdentifierType(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressIdentifier_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressIdentifier_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressIdentifier_xal() { }
+	
+private:
+	void *__IXMLAddressIdentifier_xal;	// IXMLAddressIdentifier_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {75D3DAA2-2A0B-44EF-AC0E-FDDC4FE0E2F3}
+	operator _di_IXMLAddressIdentifier_xal()
+	{
+		_di_IXMLAddressIdentifier_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressIdentifier_xal*(void) { return (IXMLAddressIdentifier_xal*)&__IXMLAddressIdentifier_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressIdentifier_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAddressIdentifier_xal __fastcall Add();
+	_di_IXMLAddressIdentifier_xal __fastcall Insert(const int Index);
+	_di_IXMLAddressIdentifier_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressIdentifier_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressIdentifier_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressIdentifier_xalList() { }
+	
+private:
+	void *__IXMLAddressIdentifier_xalList;	// IXMLAddressIdentifier_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2191B7C1-DE28-4535-A7B7-213E023A056A}
+	operator _di_IXMLAddressIdentifier_xalList()
+	{
+		_di_IXMLAddressIdentifier_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressIdentifier_xalList*(void) { return (IXMLAddressIdentifier_xalList*)&__IXMLAddressIdentifier_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLEndorsementLineCode_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLEndorsementLineCode_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLEndorsementLineCode_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLEndorsementLineCode_xal() { }
+	
+private:
+	void *__IXMLEndorsementLineCode_xal;	// IXMLEndorsementLineCode_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {36777523-1D8F-44F1-87BE-E8474EE770EB}
+	operator _di_IXMLEndorsementLineCode_xal()
+	{
+		_di_IXMLEndorsementLineCode_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLEndorsementLineCode_xal*(void) { return (IXMLEndorsementLineCode_xal*)&__IXMLEndorsementLineCode_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLKeyLineCode_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLKeyLineCode_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLKeyLineCode_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLKeyLineCode_xal() { }
+	
+private:
+	void *__IXMLKeyLineCode_xal;	// IXMLKeyLineCode_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A3DD86A9-4E51-4CA7-8877-8939AFCF9D9D}
+	operator _di_IXMLKeyLineCode_xal()
+	{
+		_di_IXMLKeyLineCode_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLKeyLineCode_xal*(void) { return (IXMLKeyLineCode_xal*)&__IXMLKeyLineCode_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBarcode_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBarcode_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBarcode_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBarcode_xal() { }
+	
+private:
+	void *__IXMLBarcode_xal;	// IXMLBarcode_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {69009496-CFC5-4701-897B-7025388E5CC8}
+	operator _di_IXMLBarcode_xal()
+	{
+		_di_IXMLBarcode_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBarcode_xal*(void) { return (IXMLBarcode_xal*)&__IXMLBarcode_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSortingCode_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSortingCode_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSortingCode_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSortingCode_xal() { }
+	
+private:
+	void *__IXMLSortingCode_xal;	// IXMLSortingCode_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A9898F8E-177E-47C1-9329-DB7CDD53DAAF}
+	operator _di_IXMLSortingCode_xal()
+	{
+		_di_IXMLSortingCode_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSortingCode_xal*(void) { return (IXMLSortingCode_xal*)&__IXMLSortingCode_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLatitude_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLatitude_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLatitude_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLatitude_xal() { }
+	
+private:
+	void *__IXMLAddressLatitude_xal;	// IXMLAddressLatitude_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5EB24BD2-DE3B-48C7-91DE-242A022B9067}
+	operator _di_IXMLAddressLatitude_xal()
+	{
+		_di_IXMLAddressLatitude_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLatitude_xal*(void) { return (IXMLAddressLatitude_xal*)&__IXMLAddressLatitude_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLatitudeDirection_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLatitudeDirection_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLatitudeDirection_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLatitudeDirection_xal() { }
+	
+private:
+	void *__IXMLAddressLatitudeDirection_xal;	// IXMLAddressLatitudeDirection_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {08A870F2-02C3-451E-B7A4-DD2E6CB043F0}
+	operator _di_IXMLAddressLatitudeDirection_xal()
+	{
+		_di_IXMLAddressLatitudeDirection_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLatitudeDirection_xal*(void) { return (IXMLAddressLatitudeDirection_xal*)&__IXMLAddressLatitudeDirection_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLongitude_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLongitude_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLongitude_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLongitude_xal() { }
+	
+private:
+	void *__IXMLAddressLongitude_xal;	// IXMLAddressLongitude_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {413AC196-7E70-49C4-97A8-B2BCCECB4BE2}
+	operator _di_IXMLAddressLongitude_xal()
+	{
+		_di_IXMLAddressLongitude_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLongitude_xal*(void) { return (IXMLAddressLongitude_xal*)&__IXMLAddressLongitude_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLongitudeDirection_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLongitudeDirection_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLongitudeDirection_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLongitudeDirection_xal() { }
+	
+private:
+	void *__IXMLAddressLongitudeDirection_xal;	// IXMLAddressLongitudeDirection_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {98B6CD5C-6EDF-453D-9023-CE15A5392585}
+	operator _di_IXMLAddressLongitudeDirection_xal()
+	{
+		_di_IXMLAddressLongitudeDirection_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLongitudeDirection_xal*(void) { return (IXMLAddressLongitudeDirection_xal*)&__IXMLAddressLongitudeDirection_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSupplementaryPostalServiceData_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSupplementaryPostalServiceData_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSupplementaryPostalServiceData_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSupplementaryPostalServiceData_xal() { }
+	
+private:
+	void *__IXMLSupplementaryPostalServiceData_xal;	// IXMLSupplementaryPostalServiceData_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F0CC5626-68F8-4871-9B98-0BC08948434A}
+	operator _di_IXMLSupplementaryPostalServiceData_xal()
+	{
+		_di_IXMLSupplementaryPostalServiceData_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSupplementaryPostalServiceData_xal*(void) { return (IXMLSupplementaryPostalServiceData_xal*)&__IXMLSupplementaryPostalServiceData_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSupplementaryPostalServiceData_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSupplementaryPostalServiceData_xal __fastcall Add();
+	_di_IXMLSupplementaryPostalServiceData_xal __fastcall Insert(const int Index);
+	_di_IXMLSupplementaryPostalServiceData_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSupplementaryPostalServiceData_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSupplementaryPostalServiceData_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSupplementaryPostalServiceData_xalList() { }
+	
+private:
+	void *__IXMLSupplementaryPostalServiceData_xalList;	// IXMLSupplementaryPostalServiceData_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {8BFB3D5D-4AD6-4329-B2C0-BFD8B535F719}
+	operator _di_IXMLSupplementaryPostalServiceData_xalList()
+	{
+		_di_IXMLSupplementaryPostalServiceData_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSupplementaryPostalServiceData_xalList*(void) { return (IXMLSupplementaryPostalServiceData_xalList*)&__IXMLSupplementaryPostalServiceData_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddress_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddress_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddress_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddress_xal() { }
+	
+private:
+	void *__IXMLAddress_xal;	// IXMLAddress_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B93D7489-427A-493F-BCF2-00487A351F35}
+	operator _di_IXMLAddress_xal()
+	{
+		_di_IXMLAddress_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddress_xal*(void) { return (IXMLAddress_xal*)&__IXMLAddress_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLinesType_xal : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAddressLine_xal __fastcall Get_AddressLine(int Index);
+	_di_IXMLAddressLine_xal __fastcall Add();
+	_di_IXMLAddressLine_xal __fastcall Insert(const int Index);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLinesType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLinesType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLinesType_xal() { }
+	
+private:
+	void *__IXMLAddressLinesType_xal;	// IXMLAddressLinesType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {26973AF0-AFC2-4C2D-9024-DB6F189A6F3B}
+	operator _di_IXMLAddressLinesType_xal()
+	{
+		_di_IXMLAddressLinesType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLinesType_xal*(void) { return (IXMLAddressLinesType_xal*)&__IXMLAddressLinesType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLine_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLine_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLine_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLine_xal() { }
+	
+private:
+	void *__IXMLAddressLine_xal;	// IXMLAddressLine_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0B0542DB-20CC-4050-B1BB-BB5AED0E62CB}
+	operator _di_IXMLAddressLine_xal()
+	{
+		_di_IXMLAddressLine_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLine_xal*(void) { return (IXMLAddressLine_xal*)&__IXMLAddressLine_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAddressLine_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAddressLine_xal __fastcall Add();
+	_di_IXMLAddressLine_xal __fastcall Insert(const int Index);
+	_di_IXMLAddressLine_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAddressLine_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAddressLine_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAddressLine_xalList() { }
+	
+private:
+	void *__IXMLAddressLine_xalList;	// IXMLAddressLine_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E49AFF36-F31D-4D3F-8D72-0EA411145044}
+	operator _di_IXMLAddressLine_xalList()
+	{
+		_di_IXMLAddressLine_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAddressLine_xalList*(void) { return (IXMLAddressLine_xalList*)&__IXMLAddressLine_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCountry_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLCountryNameCode_xalList FCountryNameCode;
+	_di_IXMLCountryName_xalList FCountryName;
+	
+protected:
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLCountryNameCode_xalList __fastcall Get_CountryNameCode();
+	_di_IXMLCountryName_xalList __fastcall Get_CountryName();
+	_di_IXMLAdministrativeArea_xal __fastcall Get_AdministrativeArea();
+	_di_IXMLLocality_xal __fastcall Get_Locality();
+	_di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCountry_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCountry_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCountry_xal() { }
+	
+private:
+	void *__IXMLCountry_xal;	// IXMLCountry_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {888DEFD2-E216-4728-A2DA-62E8C4657349}
+	operator _di_IXMLCountry_xal()
+	{
+		_di_IXMLCountry_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCountry_xal*(void) { return (IXMLCountry_xal*)&__IXMLCountry_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCountryNameCode_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Scheme();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Scheme(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCountryNameCode_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCountryNameCode_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCountryNameCode_xal() { }
+	
+private:
+	void *__IXMLCountryNameCode_xal;	// IXMLCountryNameCode_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E8959FE9-D551-472C-83CB-9961FA517E13}
+	operator _di_IXMLCountryNameCode_xal()
+	{
+		_di_IXMLCountryNameCode_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCountryNameCode_xal*(void) { return (IXMLCountryNameCode_xal*)&__IXMLCountryNameCode_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCountryNameCode_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLCountryNameCode_xal __fastcall Add();
+	_di_IXMLCountryNameCode_xal __fastcall Insert(const int Index);
+	_di_IXMLCountryNameCode_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCountryNameCode_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCountryNameCode_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCountryNameCode_xalList() { }
+	
+private:
+	void *__IXMLCountryNameCode_xalList;	// IXMLCountryNameCode_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C05C0854-C3E6-4CF9-91CA-161B5186C05C}
+	operator _di_IXMLCountryNameCode_xalList()
+	{
+		_di_IXMLCountryNameCode_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCountryNameCode_xalList*(void) { return (IXMLCountryNameCode_xalList*)&__IXMLCountryNameCode_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCountryName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCountryName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCountryName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCountryName_xal() { }
+	
+private:
+	void *__IXMLCountryName_xal;	// IXMLCountryName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F62163F6-33EA-4F9D-B3BF-B9390615EE8E}
+	operator _di_IXMLCountryName_xal()
+	{
+		_di_IXMLCountryName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCountryName_xal*(void) { return (IXMLCountryName_xal*)&__IXMLCountryName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCountryName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLCountryName_xal __fastcall Add();
+	_di_IXMLCountryName_xal __fastcall Insert(const int Index);
+	_di_IXMLCountryName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCountryName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCountryName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCountryName_xalList() { }
+	
+private:
+	void *__IXMLCountryName_xalList;	// IXMLCountryName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {94A162D9-8943-40D3-B408-8842DA290484}
+	operator _di_IXMLCountryName_xalList()
+	{
+		_di_IXMLCountryName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCountryName_xalList*(void) { return (IXMLCountryName_xalList*)&__IXMLCountryName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAdministrativeArea_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLAdministrativeAreaName_xalList FAdministrativeAreaName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_UsageType();
+	System::UnicodeString __fastcall Get_Indicator();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLAdministrativeAreaName_xalList __fastcall Get_AdministrativeAreaName();
+	_di_IXMLSubAdministrativeArea_xal __fastcall Get_SubAdministrativeArea();
+	_di_IXMLLocality_xal __fastcall Get_Locality();
+	_di_IXMLPostOffice_xal __fastcall Get_PostOffice();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_UsageType(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAdministrativeArea_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAdministrativeArea_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAdministrativeArea_xal() { }
+	
+private:
+	void *__IXMLAdministrativeArea_xal;	// IXMLAdministrativeArea_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {AD8B0DDA-6AB8-4605-8DF8-FDDA1375874E}
+	operator _di_IXMLAdministrativeArea_xal()
+	{
+		_di_IXMLAdministrativeArea_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAdministrativeArea_xal*(void) { return (IXMLAdministrativeArea_xal*)&__IXMLAdministrativeArea_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAdministrativeAreaName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAdministrativeAreaName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAdministrativeAreaName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAdministrativeAreaName_xal() { }
+	
+private:
+	void *__IXMLAdministrativeAreaName_xal;	// IXMLAdministrativeAreaName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {17C9AA29-AB29-4CFE-973E-64906673FC69}
+	operator _di_IXMLAdministrativeAreaName_xal()
+	{
+		_di_IXMLAdministrativeAreaName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAdministrativeAreaName_xal*(void) { return (IXMLAdministrativeAreaName_xal*)&__IXMLAdministrativeAreaName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAdministrativeAreaName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAdministrativeAreaName_xal __fastcall Add();
+	_di_IXMLAdministrativeAreaName_xal __fastcall Insert(const int Index);
+	_di_IXMLAdministrativeAreaName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAdministrativeAreaName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAdministrativeAreaName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAdministrativeAreaName_xalList() { }
+	
+private:
+	void *__IXMLAdministrativeAreaName_xalList;	// IXMLAdministrativeAreaName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {1F6A8E69-F135-4BED-9A9B-8A5C83042B6D}
+	operator _di_IXMLAdministrativeAreaName_xalList()
+	{
+		_di_IXMLAdministrativeAreaName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAdministrativeAreaName_xalList*(void) { return (IXMLAdministrativeAreaName_xalList*)&__IXMLAdministrativeAreaName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubAdministrativeArea_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLSubAdministrativeAreaName_xalList FSubAdministrativeAreaName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_UsageType();
+	System::UnicodeString __fastcall Get_Indicator();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLSubAdministrativeAreaName_xalList __fastcall Get_SubAdministrativeAreaName();
+	_di_IXMLLocality_xal __fastcall Get_Locality();
+	_di_IXMLPostOffice_xal __fastcall Get_PostOffice();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_UsageType(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubAdministrativeArea_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubAdministrativeArea_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubAdministrativeArea_xal() { }
+	
+private:
+	void *__IXMLSubAdministrativeArea_xal;	// IXMLSubAdministrativeArea_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5C1CD25C-23C0-4B37-9A80-A5B347BA7E32}
+	operator _di_IXMLSubAdministrativeArea_xal()
+	{
+		_di_IXMLSubAdministrativeArea_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubAdministrativeArea_xal*(void) { return (IXMLSubAdministrativeArea_xal*)&__IXMLSubAdministrativeArea_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubAdministrativeAreaName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubAdministrativeAreaName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubAdministrativeAreaName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubAdministrativeAreaName_xal() { }
+	
+private:
+	void *__IXMLSubAdministrativeAreaName_xal;	// IXMLSubAdministrativeAreaName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {948C7105-8687-48A5-9C43-5A3796E088BE}
+	operator _di_IXMLSubAdministrativeAreaName_xal()
+	{
+		_di_IXMLSubAdministrativeAreaName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubAdministrativeAreaName_xal*(void) { return (IXMLSubAdministrativeAreaName_xal*)&__IXMLSubAdministrativeAreaName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubAdministrativeAreaName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSubAdministrativeAreaName_xal __fastcall Add();
+	_di_IXMLSubAdministrativeAreaName_xal __fastcall Insert(const int Index);
+	_di_IXMLSubAdministrativeAreaName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubAdministrativeAreaName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubAdministrativeAreaName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubAdministrativeAreaName_xalList() { }
+	
+private:
+	void *__IXMLSubAdministrativeAreaName_xalList;	// IXMLSubAdministrativeAreaName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B97B2E63-AEBC-4307-A12E-7D35DED04EE1}
+	operator _di_IXMLSubAdministrativeAreaName_xalList()
+	{
+		_di_IXMLSubAdministrativeAreaName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubAdministrativeAreaName_xalList*(void) { return (IXMLSubAdministrativeAreaName_xalList*)&__IXMLSubAdministrativeAreaName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLocality_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLLocalityName_xalList FLocalityName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_UsageType();
+	System::UnicodeString __fastcall Get_Indicator();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLLocalityName_xalList __fastcall Get_LocalityName();
+	_di_IXMLPostBox_xal __fastcall Get_PostBox();
+	_di_IXMLLargeMailUserType_xal __fastcall Get_LargeMailUser();
+	_di_IXMLPostOffice_xal __fastcall Get_PostOffice();
+	_di_IXMLPostalRouteType_xal __fastcall Get_PostalRoute();
+	_di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare();
+	_di_IXMLPremise_xal __fastcall Get_Premise();
+	_di_IXMLDependentLocalityType_xal __fastcall Get_DependentLocality();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_UsageType(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLocality_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLocality_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLocality_xal() { }
+	
+private:
+	void *__IXMLLocality_xal;	// IXMLLocality_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {7CF5C6DC-A34E-431C-A9A3-1FC9761F4796}
+	operator _di_IXMLLocality_xal()
+	{
+		_di_IXMLLocality_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLocality_xal*(void) { return (IXMLLocality_xal*)&__IXMLLocality_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLocalityName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLocalityName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLocalityName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLocalityName_xal() { }
+	
+private:
+	void *__IXMLLocalityName_xal;	// IXMLLocalityName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F15FD55F-6EAB-43EA-89F6-CB250CE496B0}
+	operator _di_IXMLLocalityName_xal()
+	{
+		_di_IXMLLocalityName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLocalityName_xal*(void) { return (IXMLLocalityName_xal*)&__IXMLLocalityName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLocalityName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLLocalityName_xal __fastcall Add();
+	_di_IXMLLocalityName_xal __fastcall Insert(const int Index);
+	_di_IXMLLocalityName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLocalityName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLocalityName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLocalityName_xalList() { }
+	
+private:
+	void *__IXMLLocalityName_xalList;	// IXMLLocalityName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {07D2084D-1008-49C9-A9E1-A10B079FE6C1}
+	operator _di_IXMLLocalityName_xalList()
+	{
+		_di_IXMLLocalityName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLocalityName_xalList*(void) { return (IXMLLocalityName_xalList*)&__IXMLLocalityName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostBox_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Indicator();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPostBoxNumber_xal __fastcall Get_PostBoxNumber();
+	_di_IXMLPostBoxNumberPrefix_xal __fastcall Get_PostBoxNumberPrefix();
+	_di_IXMLPostBoxNumberSuffix_xal __fastcall Get_PostBoxNumberSuffix();
+	_di_IXMLPostBoxNumberExtension_xal __fastcall Get_PostBoxNumberExtension();
+	_di_IXMLFirmType_xal __fastcall Get_Firm();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostBox_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostBox_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostBox_xal() { }
+	
+private:
+	void *__IXMLPostBox_xal;	// IXMLPostBox_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {6FEF0F14-9C8F-46EF-A38C-200BC9E2AC95}
+	operator _di_IXMLPostBox_xal()
+	{
+		_di_IXMLPostBox_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostBox_xal*(void) { return (IXMLPostBox_xal*)&__IXMLPostBox_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostBoxNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostBoxNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostBoxNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostBoxNumber_xal() { }
+	
+private:
+	void *__IXMLPostBoxNumber_xal;	// IXMLPostBoxNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CF8DEA4E-606B-4615-A0A1-7DF43B2E0FE4}
+	operator _di_IXMLPostBoxNumber_xal()
+	{
+		_di_IXMLPostBoxNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostBoxNumber_xal*(void) { return (IXMLPostBoxNumber_xal*)&__IXMLPostBoxNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostBoxNumberPrefix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberPrefixSeparator();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostBoxNumberPrefix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostBoxNumberPrefix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostBoxNumberPrefix_xal() { }
+	
+private:
+	void *__IXMLPostBoxNumberPrefix_xal;	// IXMLPostBoxNumberPrefix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5F4313B0-556E-41DD-AB47-B73432E00462}
+	operator _di_IXMLPostBoxNumberPrefix_xal()
+	{
+		_di_IXMLPostBoxNumberPrefix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostBoxNumberPrefix_xal*(void) { return (IXMLPostBoxNumberPrefix_xal*)&__IXMLPostBoxNumberPrefix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostBoxNumberSuffix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberSuffixSeparator();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostBoxNumberSuffix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostBoxNumberSuffix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostBoxNumberSuffix_xal() { }
+	
+private:
+	void *__IXMLPostBoxNumberSuffix_xal;	// IXMLPostBoxNumberSuffix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4D0ED476-0C1B-4821-B441-FE6354C6BEB7}
+	operator _di_IXMLPostBoxNumberSuffix_xal()
+	{
+		_di_IXMLPostBoxNumberSuffix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostBoxNumberSuffix_xal*(void) { return (IXMLPostBoxNumberSuffix_xal*)&__IXMLPostBoxNumberSuffix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostBoxNumberExtension_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberExtensionSeparator();
+	void __fastcall Set_NumberExtensionSeparator(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostBoxNumberExtension_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostBoxNumberExtension_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostBoxNumberExtension_xal() { }
+	
+private:
+	void *__IXMLPostBoxNumberExtension_xal;	// IXMLPostBoxNumberExtension_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E6900EE3-FE3D-4EB6-89CF-EF72524AD509}
+	operator _di_IXMLPostBoxNumberExtension_xal()
+	{
+		_di_IXMLPostBoxNumberExtension_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostBoxNumberExtension_xal*(void) { return (IXMLPostBoxNumberExtension_xal*)&__IXMLPostBoxNumberExtension_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLFirmType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLFirmName_xalList FFirmName;
+	_di_IXMLDepartment_xalList FDepartment;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLFirmName_xalList __fastcall Get_FirmName();
+	_di_IXMLDepartment_xalList __fastcall Get_Department();
+	_di_IXMLMailStopType_xal __fastcall Get_MailStop();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLFirmType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLFirmType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLFirmType_xal() { }
+	
+private:
+	void *__IXMLFirmType_xal;	// IXMLFirmType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B69D2302-B0EB-4A33-898C-E952ED8B76D5}
+	operator _di_IXMLFirmType_xal()
+	{
+		_di_IXMLFirmType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLFirmType_xal*(void) { return (IXMLFirmType_xal*)&__IXMLFirmType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLFirmName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLFirmName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLFirmName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLFirmName_xal() { }
+	
+private:
+	void *__IXMLFirmName_xal;	// IXMLFirmName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {DCE70C93-E4E1-402E-93B8-8B36BC0207F7}
+	operator _di_IXMLFirmName_xal()
+	{
+		_di_IXMLFirmName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLFirmName_xal*(void) { return (IXMLFirmName_xal*)&__IXMLFirmName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLFirmName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLFirmName_xal __fastcall Add();
+	_di_IXMLFirmName_xal __fastcall Insert(const int Index);
+	_di_IXMLFirmName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLFirmName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLFirmName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLFirmName_xalList() { }
+	
+private:
+	void *__IXMLFirmName_xalList;	// IXMLFirmName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {423518F3-654D-469B-A04B-C98A848DD75F}
+	operator _di_IXMLFirmName_xalList()
+	{
+		_di_IXMLFirmName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLFirmName_xalList*(void) { return (IXMLFirmName_xalList*)&__IXMLFirmName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDepartment_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLDepartmentName_xalList FDepartmentName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLDepartmentName_xalList __fastcall Get_DepartmentName();
+	_di_IXMLMailStopType_xal __fastcall Get_MailStop();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDepartment_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDepartment_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDepartment_xal() { }
+	
+private:
+	void *__IXMLDepartment_xal;	// IXMLDepartment_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {644CD814-4517-4FCD-AC38-E00A09D2CF20}
+	operator _di_IXMLDepartment_xal()
+	{
+		_di_IXMLDepartment_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDepartment_xal*(void) { return (IXMLDepartment_xal*)&__IXMLDepartment_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDepartment_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLDepartment_xal __fastcall Add();
+	_di_IXMLDepartment_xal __fastcall Insert(const int Index);
+	_di_IXMLDepartment_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDepartment_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDepartment_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDepartment_xalList() { }
+	
+private:
+	void *__IXMLDepartment_xalList;	// IXMLDepartment_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {954C16C5-5443-493F-A3AC-1F29250D39F0}
+	operator _di_IXMLDepartment_xalList()
+	{
+		_di_IXMLDepartment_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDepartment_xalList*(void) { return (IXMLDepartment_xalList*)&__IXMLDepartment_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDepartmentName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDepartmentName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDepartmentName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDepartmentName_xal() { }
+	
+private:
+	void *__IXMLDepartmentName_xal;	// IXMLDepartmentName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4C5AA098-77C0-498C-8F44-ACB52C36D4B1}
+	operator _di_IXMLDepartmentName_xal()
+	{
+		_di_IXMLDepartmentName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDepartmentName_xal*(void) { return (IXMLDepartmentName_xal*)&__IXMLDepartmentName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDepartmentName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLDepartmentName_xal __fastcall Add();
+	_di_IXMLDepartmentName_xal __fastcall Insert(const int Index);
+	_di_IXMLDepartmentName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDepartmentName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDepartmentName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDepartmentName_xalList() { }
+	
+private:
+	void *__IXMLDepartmentName_xalList;	// IXMLDepartmentName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {1AB26A9D-4AC9-4169-A7DB-7C0D4E701201}
+	operator _di_IXMLDepartmentName_xalList()
+	{
+		_di_IXMLDepartmentName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDepartmentName_xalList*(void) { return (IXMLDepartmentName_xalList*)&__IXMLDepartmentName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMailStopType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLMailStopName_xal __fastcall Get_MailStopName();
+	_di_IXMLMailStopNumber_xal __fastcall Get_MailStopNumber();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMailStopType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMailStopType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMailStopType_xal() { }
+	
+private:
+	void *__IXMLMailStopType_xal;	// IXMLMailStopType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C1CECDC3-05CC-4877-89D3-A4AF33003832}
+	operator _di_IXMLMailStopType_xal()
+	{
+		_di_IXMLMailStopType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMailStopType_xal*(void) { return (IXMLMailStopType_xal*)&__IXMLMailStopType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMailStopName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMailStopName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMailStopName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMailStopName_xal() { }
+	
+private:
+	void *__IXMLMailStopName_xal;	// IXMLMailStopName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A31E57B8-6AC7-424A-9340-77B4AAEAC402}
+	operator _di_IXMLMailStopName_xal()
+	{
+		_di_IXMLMailStopName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMailStopName_xal*(void) { return (IXMLMailStopName_xal*)&__IXMLMailStopName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMailStopNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NameNumberSeparator();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NameNumberSeparator(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMailStopNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMailStopNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMailStopNumber_xal() { }
+	
+private:
+	void *__IXMLMailStopNumber_xal;	// IXMLMailStopNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {898EE005-E878-4AF4-B07A-41D5CD2C00DC}
+	operator _di_IXMLMailStopNumber_xal()
+	{
+		_di_IXMLMailStopNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMailStopNumber_xal*(void) { return (IXMLMailStopNumber_xal*)&__IXMLMailStopNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalCode_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPostalCodeNumber_xalList FPostalCodeNumber;
+	_di_IXMLPostalCodeNumberExtension_xalList FPostalCodeNumberExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPostalCodeNumber_xalList __fastcall Get_PostalCodeNumber();
+	_di_IXMLPostalCodeNumberExtension_xalList __fastcall Get_PostalCodeNumberExtension();
+	_di_IXMLPostTown_xal __fastcall Get_PostTown();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalCode_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalCode_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalCode_xal() { }
+	
+private:
+	void *__IXMLPostalCode_xal;	// IXMLPostalCode_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F79CFFBD-76F7-488F-8881-F3D3C9FFB4D5}
+	operator _di_IXMLPostalCode_xal()
+	{
+		_di_IXMLPostalCode_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalCode_xal*(void) { return (IXMLPostalCode_xal*)&__IXMLPostalCode_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalCodeNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalCodeNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalCodeNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalCodeNumber_xal() { }
+	
+private:
+	void *__IXMLPostalCodeNumber_xal;	// IXMLPostalCodeNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {ED28A83E-9D88-4EA2-A68E-DED11AC67126}
+	operator _di_IXMLPostalCodeNumber_xal()
+	{
+		_di_IXMLPostalCodeNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalCodeNumber_xal*(void) { return (IXMLPostalCodeNumber_xal*)&__IXMLPostalCodeNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalCodeNumber_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPostalCodeNumber_xal __fastcall Add();
+	_di_IXMLPostalCodeNumber_xal __fastcall Insert(const int Index);
+	_di_IXMLPostalCodeNumber_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalCodeNumber_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalCodeNumber_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalCodeNumber_xalList() { }
+	
+private:
+	void *__IXMLPostalCodeNumber_xalList;	// IXMLPostalCodeNumber_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A4DF90BA-8A7A-44C6-8703-51EB0955F227}
+	operator _di_IXMLPostalCodeNumber_xalList()
+	{
+		_di_IXMLPostalCodeNumber_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalCodeNumber_xalList*(void) { return (IXMLPostalCodeNumber_xalList*)&__IXMLPostalCodeNumber_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalCodeNumberExtension_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_NumberExtensionSeparator();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_NumberExtensionSeparator(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalCodeNumberExtension_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalCodeNumberExtension_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalCodeNumberExtension_xal() { }
+	
+private:
+	void *__IXMLPostalCodeNumberExtension_xal;	// IXMLPostalCodeNumberExtension_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {9E3DB2ED-EAAE-4E45-9ABF-E2FA6D6BE907}
+	operator _di_IXMLPostalCodeNumberExtension_xal()
+	{
+		_di_IXMLPostalCodeNumberExtension_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalCodeNumberExtension_xal*(void) { return (IXMLPostalCodeNumberExtension_xal*)&__IXMLPostalCodeNumberExtension_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalCodeNumberExtension_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPostalCodeNumberExtension_xal __fastcall Add();
+	_di_IXMLPostalCodeNumberExtension_xal __fastcall Insert(const int Index);
+	_di_IXMLPostalCodeNumberExtension_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalCodeNumberExtension_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalCodeNumberExtension_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalCodeNumberExtension_xalList() { }
+	
+private:
+	void *__IXMLPostalCodeNumberExtension_xalList;	// IXMLPostalCodeNumberExtension_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4C846B95-6443-49E1-9541-11ED675BBAA4}
+	operator _di_IXMLPostalCodeNumberExtension_xalList()
+	{
+		_di_IXMLPostalCodeNumberExtension_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalCodeNumberExtension_xalList*(void) { return (IXMLPostalCodeNumberExtension_xalList*)&__IXMLPostalCodeNumberExtension_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostTown_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPostTownName_xalList FPostTownName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPostTownName_xalList __fastcall Get_PostTownName();
+	_di_IXMLPostTownSuffix_xal __fastcall Get_PostTownSuffix();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostTown_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostTown_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostTown_xal() { }
+	
+private:
+	void *__IXMLPostTown_xal;	// IXMLPostTown_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {EBF91EBF-41E2-4858-A588-8322FF0CD831}
+	operator _di_IXMLPostTown_xal()
+	{
+		_di_IXMLPostTown_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostTown_xal*(void) { return (IXMLPostTown_xal*)&__IXMLPostTown_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostTownName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostTownName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostTownName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostTownName_xal() { }
+	
+private:
+	void *__IXMLPostTownName_xal;	// IXMLPostTownName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3479E249-6059-4979-91B9-C4E6C946EA26}
+	operator _di_IXMLPostTownName_xal()
+	{
+		_di_IXMLPostTownName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostTownName_xal*(void) { return (IXMLPostTownName_xal*)&__IXMLPostTownName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostTownName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPostTownName_xal __fastcall Add();
+	_di_IXMLPostTownName_xal __fastcall Insert(const int Index);
+	_di_IXMLPostTownName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostTownName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostTownName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostTownName_xalList() { }
+	
+private:
+	void *__IXMLPostTownName_xalList;	// IXMLPostTownName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {DC980148-46BD-4209-B1D9-4CAC910B6052}
+	operator _di_IXMLPostTownName_xalList()
+	{
+		_di_IXMLPostTownName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostTownName_xalList*(void) { return (IXMLPostTownName_xalList*)&__IXMLPostTownName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostTownSuffix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostTownSuffix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostTownSuffix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostTownSuffix_xal() { }
+	
+private:
+	void *__IXMLPostTownSuffix_xal;	// IXMLPostTownSuffix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {FA37C5EE-D128-4AC0-B4EA-6454231A4DB0}
+	operator _di_IXMLPostTownSuffix_xal()
+	{
+		_di_IXMLPostTownSuffix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostTownSuffix_xal*(void) { return (IXMLPostTownSuffix_xal*)&__IXMLPostTownSuffix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLargeMailUserType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLLargeMailUserName_xalList FLargeMailUserName;
+	_di_IXMLBuildingNameType_xalList FBuildingName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLLargeMailUserName_xalList __fastcall Get_LargeMailUserName();
+	_di_IXMLLargeMailUserIdentifier_xal __fastcall Get_LargeMailUserIdentifier();
+	_di_IXMLBuildingNameType_xalList __fastcall Get_BuildingName();
+	_di_IXMLDepartment_xal __fastcall Get_Department();
+	_di_IXMLPostBox_xal __fastcall Get_PostBox();
+	_di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLargeMailUserType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLargeMailUserType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLargeMailUserType_xal() { }
+	
+private:
+	void *__IXMLLargeMailUserType_xal;	// IXMLLargeMailUserType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2BDEA9C6-88CB-42A7-850C-0E7DE467A3B0}
+	operator _di_IXMLLargeMailUserType_xal()
+	{
+		_di_IXMLLargeMailUserType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLargeMailUserType_xal*(void) { return (IXMLLargeMailUserType_xal*)&__IXMLLargeMailUserType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLargeMailUserName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLargeMailUserName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLargeMailUserName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLargeMailUserName_xal() { }
+	
+private:
+	void *__IXMLLargeMailUserName_xal;	// IXMLLargeMailUserName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {09ECAFF7-48A2-4067-BD2B-6C501C0550D9}
+	operator _di_IXMLLargeMailUserName_xal()
+	{
+		_di_IXMLLargeMailUserName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLargeMailUserName_xal*(void) { return (IXMLLargeMailUserName_xal*)&__IXMLLargeMailUserName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLargeMailUserName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLLargeMailUserName_xal __fastcall Add();
+	_di_IXMLLargeMailUserName_xal __fastcall Insert(const int Index);
+	_di_IXMLLargeMailUserName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLargeMailUserName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLargeMailUserName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLargeMailUserName_xalList() { }
+	
+private:
+	void *__IXMLLargeMailUserName_xalList;	// IXMLLargeMailUserName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4CE92882-DFA8-44BE-A87C-0B1F5659246A}
+	operator _di_IXMLLargeMailUserName_xalList()
+	{
+		_di_IXMLLargeMailUserName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLargeMailUserName_xalList*(void) { return (IXMLLargeMailUserName_xalList*)&__IXMLLargeMailUserName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLargeMailUserIdentifier_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLargeMailUserIdentifier_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLargeMailUserIdentifier_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLargeMailUserIdentifier_xal() { }
+	
+private:
+	void *__IXMLLargeMailUserIdentifier_xal;	// IXMLLargeMailUserIdentifier_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {DC283EAE-99BA-4192-A065-2AC75F6D65D1}
+	operator _di_IXMLLargeMailUserIdentifier_xal()
+	{
+		_di_IXMLLargeMailUserIdentifier_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLargeMailUserIdentifier_xal*(void) { return (IXMLLargeMailUserIdentifier_xal*)&__IXMLLargeMailUserIdentifier_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBuildingNameType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_TypeOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_TypeOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBuildingNameType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBuildingNameType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBuildingNameType_xal() { }
+	
+private:
+	void *__IXMLBuildingNameType_xal;	// IXMLBuildingNameType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3D531A2A-F3C7-4E2B-A0EC-662F993A182E}
+	operator _di_IXMLBuildingNameType_xal()
+	{
+		_di_IXMLBuildingNameType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBuildingNameType_xal*(void) { return (IXMLBuildingNameType_xal*)&__IXMLBuildingNameType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBuildingNameType_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLBuildingNameType_xal __fastcall Add();
+	_di_IXMLBuildingNameType_xal __fastcall Insert(const int Index);
+	_di_IXMLBuildingNameType_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBuildingNameType_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBuildingNameType_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBuildingNameType_xalList() { }
+	
+private:
+	void *__IXMLBuildingNameType_xalList;	// IXMLBuildingNameType_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CEB3F42F-E6ED-4817-8135-15BE5AB88ED4}
+	operator _di_IXMLBuildingNameType_xalList()
+	{
+		_di_IXMLBuildingNameType_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBuildingNameType_xalList*(void) { return (IXMLBuildingNameType_xalList*)&__IXMLBuildingNameType_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfare_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLThoroughfareNumber_xalList FThoroughfareNumber;
+	_di_IXMLThoroughfareNumberRange_xalList FThoroughfareNumberRange;
+	_di_IXMLThoroughfareNumberPrefix_xalList FThoroughfareNumberPrefix;
+	_di_IXMLThoroughfareNumberSuffix_xalList FThoroughfareNumberSuffix;
+	_di_IXMLThoroughfareNameType_xalList FThoroughfareName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_DependentThoroughfares();
+	System::UnicodeString __fastcall Get_DependentThoroughfaresIndicator();
+	System::UnicodeString __fastcall Get_DependentThoroughfaresConnector();
+	System::UnicodeString __fastcall Get_DependentThoroughfaresType();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLThoroughfareNumber_xalList __fastcall Get_ThoroughfareNumber();
+	_di_IXMLThoroughfareNumberRange_xalList __fastcall Get_ThoroughfareNumberRange();
+	_di_IXMLThoroughfareNumberPrefix_xalList __fastcall Get_ThoroughfareNumberPrefix();
+	_di_IXMLThoroughfareNumberSuffix_xalList __fastcall Get_ThoroughfareNumberSuffix();
+	_di_IXMLThoroughfarePreDirectionType_xal __fastcall Get_ThoroughfarePreDirection();
+	_di_IXMLThoroughfareLeadingTypeType_xal __fastcall Get_ThoroughfareLeadingType();
+	_di_IXMLThoroughfareNameType_xalList __fastcall Get_ThoroughfareName();
+	_di_IXMLThoroughfareTrailingTypeType_xal __fastcall Get_ThoroughfareTrailingType();
+	_di_IXMLThoroughfarePostDirectionType_xal __fastcall Get_ThoroughfarePostDirection();
+	_di_IXMLDependentThoroughfare_xal __fastcall Get_DependentThoroughfare();
+	_di_IXMLDependentLocalityType_xal __fastcall Get_DependentLocality();
+	_di_IXMLPremise_xal __fastcall Get_Premise();
+	_di_IXMLFirmType_xal __fastcall Get_Firm();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_DependentThoroughfares(System::UnicodeString Value);
+	void __fastcall Set_DependentThoroughfaresIndicator(System::UnicodeString Value);
+	void __fastcall Set_DependentThoroughfaresConnector(System::UnicodeString Value);
+	void __fastcall Set_DependentThoroughfaresType(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfare_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfare_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfare_xal() { }
+	
+private:
+	void *__IXMLThoroughfare_xal;	// IXMLThoroughfare_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5EA472B8-8591-488D-92D0-7E6B5CD02034}
+	operator _di_IXMLThoroughfare_xal()
+	{
+		_di_IXMLThoroughfare_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfare_xal*(void) { return (IXMLThoroughfare_xal*)&__IXMLThoroughfare_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberType();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_IndicatorOccurrence();
+	System::UnicodeString __fastcall Get_NumberOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberType(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value);
+	void __fastcall Set_NumberOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumber_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNumber_xal;	// IXMLThoroughfareNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {9A524DE1-4AAE-47E0-B656-DD7293B9386B}
+	operator _di_IXMLThoroughfareNumber_xal()
+	{
+		_di_IXMLThoroughfareNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumber_xal*(void) { return (IXMLThoroughfareNumber_xal*)&__IXMLThoroughfareNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumber_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLThoroughfareNumber_xal __fastcall Add();
+	_di_IXMLThoroughfareNumber_xal __fastcall Insert(const int Index);
+	_di_IXMLThoroughfareNumber_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumber_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumber_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumber_xalList() { }
+	
+private:
+	void *__IXMLThoroughfareNumber_xalList;	// IXMLThoroughfareNumber_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F9EF6232-6DC6-4878-97AD-32790B87F6CA}
+	operator _di_IXMLThoroughfareNumber_xalList()
+	{
+		_di_IXMLThoroughfareNumber_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumber_xalList*(void) { return (IXMLThoroughfareNumber_xalList*)&__IXMLThoroughfareNumber_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberRange_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	
+protected:
+	System::UnicodeString __fastcall Get_RangeType();
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_Separator();
+	System::UnicodeString __fastcall Get_IndicatorOccurrence();
+	System::UnicodeString __fastcall Get_NumberRangeOccurrence();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLThoroughfareNumberFrom_xal __fastcall Get_ThoroughfareNumberFrom();
+	_di_IXMLThoroughfareNumberTo_xal __fastcall Get_ThoroughfareNumberTo();
+	void __fastcall Set_RangeType(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_Separator(System::UnicodeString Value);
+	void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value);
+	void __fastcall Set_NumberRangeOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberRange_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberRange_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberRange_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNumberRange_xal;	// IXMLThoroughfareNumberRange_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C7346513-22A2-46D6-AE38-51599DF9BEC0}
+	operator _di_IXMLThoroughfareNumberRange_xal()
+	{
+		_di_IXMLThoroughfareNumberRange_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberRange_xal*(void) { return (IXMLThoroughfareNumberRange_xal*)&__IXMLThoroughfareNumberRange_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberRange_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLThoroughfareNumberRange_xal __fastcall Add();
+	_di_IXMLThoroughfareNumberRange_xal __fastcall Insert(const int Index);
+	_di_IXMLThoroughfareNumberRange_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberRange_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberRange_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberRange_xalList() { }
+	
+private:
+	void *__IXMLThoroughfareNumberRange_xalList;	// IXMLThoroughfareNumberRange_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E4578FC4-EF28-4201-A9B3-4B51FFF851E7}
+	operator _di_IXMLThoroughfareNumberRange_xalList()
+	{
+		_di_IXMLThoroughfareNumberRange_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberRange_xalList*(void) { return (IXMLThoroughfareNumberRange_xalList*)&__IXMLThoroughfareNumberRange_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberFrom_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLThoroughfareNumberPrefix_xalList FThoroughfareNumberPrefix;
+	_di_IXMLThoroughfareNumber_xalList FThoroughfareNumber;
+	_di_IXMLThoroughfareNumberSuffix_xalList FThoroughfareNumberSuffix;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLThoroughfareNumberPrefix_xalList __fastcall Get_ThoroughfareNumberPrefix();
+	_di_IXMLThoroughfareNumber_xalList __fastcall Get_ThoroughfareNumber();
+	_di_IXMLThoroughfareNumberSuffix_xalList __fastcall Get_ThoroughfareNumberSuffix();
+	void __fastcall Set_Code(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberFrom_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberFrom_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberFrom_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNumberFrom_xal;	// IXMLThoroughfareNumberFrom_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {7EE93840-B677-40CC-B03C-49A38D5B0883}
+	operator _di_IXMLThoroughfareNumberFrom_xal()
+	{
+		_di_IXMLThoroughfareNumberFrom_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberFrom_xal*(void) { return (IXMLThoroughfareNumberFrom_xal*)&__IXMLThoroughfareNumberFrom_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberPrefix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberPrefixSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberPrefix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberPrefix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberPrefix_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNumberPrefix_xal;	// IXMLThoroughfareNumberPrefix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3B5DDA52-8FB8-465B-858D-BF832AB60759}
+	operator _di_IXMLThoroughfareNumberPrefix_xal()
+	{
+		_di_IXMLThoroughfareNumberPrefix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberPrefix_xal*(void) { return (IXMLThoroughfareNumberPrefix_xal*)&__IXMLThoroughfareNumberPrefix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberPrefix_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLThoroughfareNumberPrefix_xal __fastcall Add();
+	_di_IXMLThoroughfareNumberPrefix_xal __fastcall Insert(const int Index);
+	_di_IXMLThoroughfareNumberPrefix_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberPrefix_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberPrefix_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberPrefix_xalList() { }
+	
+private:
+	void *__IXMLThoroughfareNumberPrefix_xalList;	// IXMLThoroughfareNumberPrefix_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A36186B4-8685-487D-9606-ADFE739FBEDB}
+	operator _di_IXMLThoroughfareNumberPrefix_xalList()
+	{
+		_di_IXMLThoroughfareNumberPrefix_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberPrefix_xalList*(void) { return (IXMLThoroughfareNumberPrefix_xalList*)&__IXMLThoroughfareNumberPrefix_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberSuffix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberSuffixSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberSuffix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberSuffix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberSuffix_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNumberSuffix_xal;	// IXMLThoroughfareNumberSuffix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B1165CD2-F3E2-413E-8009-E6C68B6F76AB}
+	operator _di_IXMLThoroughfareNumberSuffix_xal()
+	{
+		_di_IXMLThoroughfareNumberSuffix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberSuffix_xal*(void) { return (IXMLThoroughfareNumberSuffix_xal*)&__IXMLThoroughfareNumberSuffix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberSuffix_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLThoroughfareNumberSuffix_xal __fastcall Add();
+	_di_IXMLThoroughfareNumberSuffix_xal __fastcall Insert(const int Index);
+	_di_IXMLThoroughfareNumberSuffix_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberSuffix_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberSuffix_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberSuffix_xalList() { }
+	
+private:
+	void *__IXMLThoroughfareNumberSuffix_xalList;	// IXMLThoroughfareNumberSuffix_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {BF27972E-3A4E-4814-8771-E0CC5481CF03}
+	operator _di_IXMLThoroughfareNumberSuffix_xalList()
+	{
+		_di_IXMLThoroughfareNumberSuffix_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberSuffix_xalList*(void) { return (IXMLThoroughfareNumberSuffix_xalList*)&__IXMLThoroughfareNumberSuffix_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNumberTo_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLThoroughfareNumberPrefix_xalList FThoroughfareNumberPrefix;
+	_di_IXMLThoroughfareNumber_xalList FThoroughfareNumber;
+	_di_IXMLThoroughfareNumberSuffix_xalList FThoroughfareNumberSuffix;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLThoroughfareNumberPrefix_xalList __fastcall Get_ThoroughfareNumberPrefix();
+	_di_IXMLThoroughfareNumber_xalList __fastcall Get_ThoroughfareNumber();
+	_di_IXMLThoroughfareNumberSuffix_xalList __fastcall Get_ThoroughfareNumberSuffix();
+	void __fastcall Set_Code(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNumberTo_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNumberTo_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNumberTo_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNumberTo_xal;	// IXMLThoroughfareNumberTo_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {EC588CBD-F0E8-4ECC-AC59-251104E041E3}
+	operator _di_IXMLThoroughfareNumberTo_xal()
+	{
+		_di_IXMLThoroughfareNumberTo_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNumberTo_xal*(void) { return (IXMLThoroughfareNumberTo_xal*)&__IXMLThoroughfareNumberTo_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfarePreDirectionType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfarePreDirectionType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfarePreDirectionType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfarePreDirectionType_xal() { }
+	
+private:
+	void *__IXMLThoroughfarePreDirectionType_xal;	// IXMLThoroughfarePreDirectionType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E1D90ACA-7584-4F78-8D61-636536D734E8}
+	operator _di_IXMLThoroughfarePreDirectionType_xal()
+	{
+		_di_IXMLThoroughfarePreDirectionType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfarePreDirectionType_xal*(void) { return (IXMLThoroughfarePreDirectionType_xal*)&__IXMLThoroughfarePreDirectionType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareLeadingTypeType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareLeadingTypeType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareLeadingTypeType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareLeadingTypeType_xal() { }
+	
+private:
+	void *__IXMLThoroughfareLeadingTypeType_xal;	// IXMLThoroughfareLeadingTypeType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {18BA5EE3-587B-4642-9AA3-B827474C27BE}
+	operator _di_IXMLThoroughfareLeadingTypeType_xal()
+	{
+		_di_IXMLThoroughfareLeadingTypeType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareLeadingTypeType_xal*(void) { return (IXMLThoroughfareLeadingTypeType_xal*)&__IXMLThoroughfareLeadingTypeType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNameType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNameType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNameType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNameType_xal() { }
+	
+private:
+	void *__IXMLThoroughfareNameType_xal;	// IXMLThoroughfareNameType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CE960F48-EC67-48C2-9B5B-42ED8010634A}
+	operator _di_IXMLThoroughfareNameType_xal()
+	{
+		_di_IXMLThoroughfareNameType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNameType_xal*(void) { return (IXMLThoroughfareNameType_xal*)&__IXMLThoroughfareNameType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareNameType_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLThoroughfareNameType_xal __fastcall Add();
+	_di_IXMLThoroughfareNameType_xal __fastcall Insert(const int Index);
+	_di_IXMLThoroughfareNameType_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareNameType_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareNameType_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareNameType_xalList() { }
+	
+private:
+	void *__IXMLThoroughfareNameType_xalList;	// IXMLThoroughfareNameType_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F2935E08-B4B6-4237-ABAB-B92A7737F48B}
+	operator _di_IXMLThoroughfareNameType_xalList()
+	{
+		_di_IXMLThoroughfareNameType_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareNameType_xalList*(void) { return (IXMLThoroughfareNameType_xalList*)&__IXMLThoroughfareNameType_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfareTrailingTypeType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfareTrailingTypeType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfareTrailingTypeType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfareTrailingTypeType_xal() { }
+	
+private:
+	void *__IXMLThoroughfareTrailingTypeType_xal;	// IXMLThoroughfareTrailingTypeType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0FA81B9E-1FA9-4CCE-9F34-844CFC1D426E}
+	operator _di_IXMLThoroughfareTrailingTypeType_xal()
+	{
+		_di_IXMLThoroughfareTrailingTypeType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfareTrailingTypeType_xal*(void) { return (IXMLThoroughfareTrailingTypeType_xal*)&__IXMLThoroughfareTrailingTypeType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLThoroughfarePostDirectionType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLThoroughfarePostDirectionType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLThoroughfarePostDirectionType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLThoroughfarePostDirectionType_xal() { }
+	
+private:
+	void *__IXMLThoroughfarePostDirectionType_xal;	// IXMLThoroughfarePostDirectionType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A822F642-0E67-4ACF-B2C3-4D314B1BB961}
+	operator _di_IXMLThoroughfarePostDirectionType_xal()
+	{
+		_di_IXMLThoroughfarePostDirectionType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLThoroughfarePostDirectionType_xal*(void) { return (IXMLThoroughfarePostDirectionType_xal*)&__IXMLThoroughfarePostDirectionType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDependentThoroughfare_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLThoroughfareNameType_xalList FThoroughfareName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLThoroughfarePreDirectionType_xal __fastcall Get_ThoroughfarePreDirection();
+	_di_IXMLThoroughfareLeadingTypeType_xal __fastcall Get_ThoroughfareLeadingType();
+	_di_IXMLThoroughfareNameType_xalList __fastcall Get_ThoroughfareName();
+	_di_IXMLThoroughfareTrailingTypeType_xal __fastcall Get_ThoroughfareTrailingType();
+	_di_IXMLThoroughfarePostDirectionType_xal __fastcall Get_ThoroughfarePostDirection();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDependentThoroughfare_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDependentThoroughfare_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDependentThoroughfare_xal() { }
+	
+private:
+	void *__IXMLDependentThoroughfare_xal;	// IXMLDependentThoroughfare_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {019679F0-5ADA-4F33-9450-FE1E07431ECD}
+	operator _di_IXMLDependentThoroughfare_xal()
+	{
+		_di_IXMLDependentThoroughfare_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDependentThoroughfare_xal*(void) { return (IXMLDependentThoroughfare_xal*)&__IXMLDependentThoroughfare_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDependentLocalityType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLDependentLocalityName_xalList FDependentLocalityName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_UsageType();
+	System::UnicodeString __fastcall Get_Connector();
+	System::UnicodeString __fastcall Get_Indicator();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLDependentLocalityName_xalList __fastcall Get_DependentLocalityName();
+	_di_IXMLDependentLocalityNumber_xal __fastcall Get_DependentLocalityNumber();
+	_di_IXMLPostBox_xal __fastcall Get_PostBox();
+	_di_IXMLLargeMailUserType_xal __fastcall Get_LargeMailUser();
+	_di_IXMLPostOffice_xal __fastcall Get_PostOffice();
+	_di_IXMLPostalRouteType_xal __fastcall Get_PostalRoute();
+	_di_IXMLThoroughfare_xal __fastcall Get_Thoroughfare();
+	_di_IXMLPremise_xal __fastcall Get_Premise();
+	_di_IXMLDependentLocalityType_xal __fastcall Get_DependentLocality();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_UsageType(System::UnicodeString Value);
+	void __fastcall Set_Connector(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDependentLocalityType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDependentLocalityType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDependentLocalityType_xal() { }
+	
+private:
+	void *__IXMLDependentLocalityType_xal;	// IXMLDependentLocalityType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CC5D9FF6-1526-4801-B8C2-4E3C1CF18994}
+	operator _di_IXMLDependentLocalityType_xal()
+	{
+		_di_IXMLDependentLocalityType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDependentLocalityType_xal*(void) { return (IXMLDependentLocalityType_xal*)&__IXMLDependentLocalityType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDependentLocalityName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDependentLocalityName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDependentLocalityName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDependentLocalityName_xal() { }
+	
+private:
+	void *__IXMLDependentLocalityName_xal;	// IXMLDependentLocalityName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {987415C1-9E2B-4FFD-970C-5A7BB9E17F45}
+	operator _di_IXMLDependentLocalityName_xal()
+	{
+		_di_IXMLDependentLocalityName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDependentLocalityName_xal*(void) { return (IXMLDependentLocalityName_xal*)&__IXMLDependentLocalityName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDependentLocalityName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLDependentLocalityName_xal __fastcall Add();
+	_di_IXMLDependentLocalityName_xal __fastcall Insert(const int Index);
+	_di_IXMLDependentLocalityName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDependentLocalityName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDependentLocalityName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDependentLocalityName_xalList() { }
+	
+private:
+	void *__IXMLDependentLocalityName_xalList;	// IXMLDependentLocalityName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {75E93FD9-222F-4736-9BA6-0418F10E4346}
+	operator _di_IXMLDependentLocalityName_xalList()
+	{
+		_di_IXMLDependentLocalityName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDependentLocalityName_xalList*(void) { return (IXMLDependentLocalityName_xalList*)&__IXMLDependentLocalityName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDependentLocalityNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NameNumberOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NameNumberOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDependentLocalityNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDependentLocalityNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDependentLocalityNumber_xal() { }
+	
+private:
+	void *__IXMLDependentLocalityNumber_xal;	// IXMLDependentLocalityNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {6574AC07-4C34-4CE8-977B-236950A034E2}
+	operator _di_IXMLDependentLocalityNumber_xal()
+	{
+		_di_IXMLDependentLocalityNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDependentLocalityNumber_xal*(void) { return (IXMLDependentLocalityNumber_xal*)&__IXMLDependentLocalityNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostOffice_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPostOfficeName_xalList FPostOfficeName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Indicator();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPostOfficeName_xalList __fastcall Get_PostOfficeName();
+	_di_IXMLPostOfficeNumber_xal __fastcall Get_PostOfficeNumber();
+	_di_IXMLPostalRouteType_xal __fastcall Get_PostalRoute();
+	_di_IXMLPostBox_xal __fastcall Get_PostBox();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostOffice_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostOffice_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostOffice_xal() { }
+	
+private:
+	void *__IXMLPostOffice_xal;	// IXMLPostOffice_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E9035DB6-1E30-4AC1-96B0-CB673749F4DD}
+	operator _di_IXMLPostOffice_xal()
+	{
+		_di_IXMLPostOffice_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostOffice_xal*(void) { return (IXMLPostOffice_xal*)&__IXMLPostOffice_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostOfficeName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostOfficeName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostOfficeName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostOfficeName_xal() { }
+	
+private:
+	void *__IXMLPostOfficeName_xal;	// IXMLPostOfficeName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {95FFD9CB-AED9-407A-A47F-9E74539A3A69}
+	operator _di_IXMLPostOfficeName_xal()
+	{
+		_di_IXMLPostOfficeName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostOfficeName_xal*(void) { return (IXMLPostOfficeName_xal*)&__IXMLPostOfficeName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostOfficeName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPostOfficeName_xal __fastcall Add();
+	_di_IXMLPostOfficeName_xal __fastcall Insert(const int Index);
+	_di_IXMLPostOfficeName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostOfficeName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostOfficeName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostOfficeName_xalList() { }
+	
+private:
+	void *__IXMLPostOfficeName_xalList;	// IXMLPostOfficeName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {14C1AEB7-FFBC-4E2B-893B-D1470AB63897}
+	operator _di_IXMLPostOfficeName_xalList()
+	{
+		_di_IXMLPostOfficeName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostOfficeName_xalList*(void) { return (IXMLPostOfficeName_xalList*)&__IXMLPostOfficeName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostOfficeNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_IndicatorOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostOfficeNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostOfficeNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostOfficeNumber_xal() { }
+	
+private:
+	void *__IXMLPostOfficeNumber_xal;	// IXMLPostOfficeNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {BB397936-3F2D-435C-8885-3EEB676264E6}
+	operator _di_IXMLPostOfficeNumber_xal()
+	{
+		_di_IXMLPostOfficeNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostOfficeNumber_xal*(void) { return (IXMLPostOfficeNumber_xal*)&__IXMLPostOfficeNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalRouteType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPostalRouteName_xalList FPostalRouteName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPostalRouteName_xalList __fastcall Get_PostalRouteName();
+	_di_IXMLPostalRouteNumber_xal __fastcall Get_PostalRouteNumber();
+	_di_IXMLPostBox_xal __fastcall Get_PostBox();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalRouteType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalRouteType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalRouteType_xal() { }
+	
+private:
+	void *__IXMLPostalRouteType_xal;	// IXMLPostalRouteType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {34CBB400-7983-47E9-9ACD-E4B87E66EF6A}
+	operator _di_IXMLPostalRouteType_xal()
+	{
+		_di_IXMLPostalRouteType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalRouteType_xal*(void) { return (IXMLPostalRouteType_xal*)&__IXMLPostalRouteType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalRouteName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalRouteName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalRouteName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalRouteName_xal() { }
+	
+private:
+	void *__IXMLPostalRouteName_xal;	// IXMLPostalRouteName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {D741C430-7A0E-4E9D-A647-7FBE3723EAD0}
+	operator _di_IXMLPostalRouteName_xal()
+	{
+		_di_IXMLPostalRouteName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalRouteName_xal*(void) { return (IXMLPostalRouteName_xal*)&__IXMLPostalRouteName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalRouteName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPostalRouteName_xal __fastcall Add();
+	_di_IXMLPostalRouteName_xal __fastcall Insert(const int Index);
+	_di_IXMLPostalRouteName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalRouteName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalRouteName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalRouteName_xalList() { }
+	
+private:
+	void *__IXMLPostalRouteName_xalList;	// IXMLPostalRouteName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5C9FED93-DCD9-4E98-9C37-220ECA1B1B70}
+	operator _di_IXMLPostalRouteName_xalList()
+	{
+		_di_IXMLPostalRouteName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalRouteName_xalList*(void) { return (IXMLPostalRouteName_xalList*)&__IXMLPostalRouteName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPostalRouteNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPostalRouteNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPostalRouteNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPostalRouteNumber_xal() { }
+	
+private:
+	void *__IXMLPostalRouteNumber_xal;	// IXMLPostalRouteNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {BB0527B0-A0B1-41ED-85CB-C545A15CEAA4}
+	operator _di_IXMLPostalRouteNumber_xal()
+	{
+		_di_IXMLPostalRouteNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPostalRouteNumber_xal*(void) { return (IXMLPostalRouteNumber_xal*)&__IXMLPostalRouteNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremise_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPremiseName_xalList FPremiseName;
+	_di_IXMLPremiseNumber_xalList FPremiseNumber;
+	_di_IXMLPremiseNumberPrefix_xalList FPremiseNumberPrefix;
+	_di_IXMLPremiseNumberSuffix_xalList FPremiseNumberSuffix;
+	_di_IXMLBuildingNameType_xalList FBuildingName;
+	_di_IXMLSubPremiseType_xalList FSubPremise;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_PremiseDependency();
+	System::UnicodeString __fastcall Get_PremiseDependencyType();
+	System::UnicodeString __fastcall Get_PremiseThoroughfareConnector();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPremiseName_xalList __fastcall Get_PremiseName();
+	_di_IXMLPremiseLocation_xal __fastcall Get_PremiseLocation();
+	_di_IXMLPremiseNumber_xalList __fastcall Get_PremiseNumber();
+	_di_IXMLPremiseNumberRange_xal __fastcall Get_PremiseNumberRange();
+	_di_IXMLPremiseNumberPrefix_xalList __fastcall Get_PremiseNumberPrefix();
+	_di_IXMLPremiseNumberSuffix_xalList __fastcall Get_PremiseNumberSuffix();
+	_di_IXMLBuildingNameType_xalList __fastcall Get_BuildingName();
+	_di_IXMLSubPremiseType_xalList __fastcall Get_SubPremise();
+	_di_IXMLFirmType_xal __fastcall Get_Firm();
+	_di_IXMLMailStopType_xal __fastcall Get_MailStop();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	_di_IXMLPremise_xal __fastcall Get_Premise();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_PremiseDependency(System::UnicodeString Value);
+	void __fastcall Set_PremiseDependencyType(System::UnicodeString Value);
+	void __fastcall Set_PremiseThoroughfareConnector(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremise_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremise_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremise_xal() { }
+	
+private:
+	void *__IXMLPremise_xal;	// IXMLPremise_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {AD83D9FD-B1D8-4B61-B104-16413F6A02AD}
+	operator _di_IXMLPremise_xal()
+	{
+		_di_IXMLPremise_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremise_xal*(void) { return (IXMLPremise_xal*)&__IXMLPremise_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_TypeOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_TypeOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseName_xal() { }
+	
+private:
+	void *__IXMLPremiseName_xal;	// IXMLPremiseName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2517A210-7480-4D7F-BE15-E6716C373620}
+	operator _di_IXMLPremiseName_xal()
+	{
+		_di_IXMLPremiseName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseName_xal*(void) { return (IXMLPremiseName_xal*)&__IXMLPremiseName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPremiseName_xal __fastcall Add();
+	_di_IXMLPremiseName_xal __fastcall Insert(const int Index);
+	_di_IXMLPremiseName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseName_xalList() { }
+	
+private:
+	void *__IXMLPremiseName_xalList;	// IXMLPremiseName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {153A74F1-7198-436D-9A35-78344B8998EF}
+	operator _di_IXMLPremiseName_xalList()
+	{
+		_di_IXMLPremiseName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseName_xalList*(void) { return (IXMLPremiseName_xalList*)&__IXMLPremiseName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseLocation_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseLocation_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseLocation_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseLocation_xal() { }
+	
+private:
+	void *__IXMLPremiseLocation_xal;	// IXMLPremiseLocation_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F21FD5FE-A999-471B-8823-5C0F155667B5}
+	operator _di_IXMLPremiseLocation_xal()
+	{
+		_di_IXMLPremiseLocation_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseLocation_xal*(void) { return (IXMLPremiseLocation_xal*)&__IXMLPremiseLocation_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberType();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_IndicatorOccurrence();
+	System::UnicodeString __fastcall Get_NumberTypeOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberType(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value);
+	void __fastcall Set_NumberTypeOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumber_xal() { }
+	
+private:
+	void *__IXMLPremiseNumber_xal;	// IXMLPremiseNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3AA5CFC6-3E4E-40BA-877B-4CFFA5A7E192}
+	operator _di_IXMLPremiseNumber_xal()
+	{
+		_di_IXMLPremiseNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumber_xal*(void) { return (IXMLPremiseNumber_xal*)&__IXMLPremiseNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumber_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPremiseNumber_xal __fastcall Add();
+	_di_IXMLPremiseNumber_xal __fastcall Insert(const int Index);
+	_di_IXMLPremiseNumber_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumber_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumber_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumber_xalList() { }
+	
+private:
+	void *__IXMLPremiseNumber_xalList;	// IXMLPremiseNumber_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F0F3152E-4474-4553-B88A-ED0001C3C2FD}
+	operator _di_IXMLPremiseNumber_xalList()
+	{
+		_di_IXMLPremiseNumber_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumber_xalList*(void) { return (IXMLPremiseNumber_xalList*)&__IXMLPremiseNumber_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberRange_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_RangeType();
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_Separator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_IndicatorOccurence();
+	System::UnicodeString __fastcall Get_NumberRangeOccurence();
+	_di_IXMLPremiseNumberRangeFrom_xal __fastcall Get_PremiseNumberRangeFrom();
+	_di_IXMLPremiseNumberRangeTo_xal __fastcall Get_PremiseNumberRangeTo();
+	void __fastcall Set_RangeType(System::UnicodeString Value);
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_Separator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_IndicatorOccurence(System::UnicodeString Value);
+	void __fastcall Set_NumberRangeOccurence(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberRange_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberRange_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberRange_xal() { }
+	
+private:
+	void *__IXMLPremiseNumberRange_xal;	// IXMLPremiseNumberRange_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {BE1FEF36-DC89-41AA-8558-C6AC55316B73}
+	operator _di_IXMLPremiseNumberRange_xal()
+	{
+		_di_IXMLPremiseNumberRange_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberRange_xal*(void) { return (IXMLPremiseNumberRange_xal*)&__IXMLPremiseNumberRange_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberRangeFrom_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPremiseNumberPrefix_xalList FPremiseNumberPrefix;
+	_di_IXMLPremiseNumber_xalList FPremiseNumber;
+	_di_IXMLPremiseNumberSuffix_xalList FPremiseNumberSuffix;
+	
+protected:
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPremiseNumberPrefix_xalList __fastcall Get_PremiseNumberPrefix();
+	_di_IXMLPremiseNumber_xalList __fastcall Get_PremiseNumber();
+	_di_IXMLPremiseNumberSuffix_xalList __fastcall Get_PremiseNumberSuffix();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberRangeFrom_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberRangeFrom_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberRangeFrom_xal() { }
+	
+private:
+	void *__IXMLPremiseNumberRangeFrom_xal;	// IXMLPremiseNumberRangeFrom_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {89C6F667-8D89-49E7-A32A-24FFF461FE4A}
+	operator _di_IXMLPremiseNumberRangeFrom_xal()
+	{
+		_di_IXMLPremiseNumberRangeFrom_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberRangeFrom_xal*(void) { return (IXMLPremiseNumberRangeFrom_xal*)&__IXMLPremiseNumberRangeFrom_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberPrefix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberPrefixSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberPrefix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberPrefix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberPrefix_xal() { }
+	
+private:
+	void *__IXMLPremiseNumberPrefix_xal;	// IXMLPremiseNumberPrefix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5C810ADA-60A5-4A13-9D83-5A504A12276F}
+	operator _di_IXMLPremiseNumberPrefix_xal()
+	{
+		_di_IXMLPremiseNumberPrefix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberPrefix_xal*(void) { return (IXMLPremiseNumberPrefix_xal*)&__IXMLPremiseNumberPrefix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberPrefix_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPremiseNumberPrefix_xal __fastcall Add();
+	_di_IXMLPremiseNumberPrefix_xal __fastcall Insert(const int Index);
+	_di_IXMLPremiseNumberPrefix_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberPrefix_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberPrefix_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberPrefix_xalList() { }
+	
+private:
+	void *__IXMLPremiseNumberPrefix_xalList;	// IXMLPremiseNumberPrefix_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0E70328E-9883-46A3-9152-024A60C97E10}
+	operator _di_IXMLPremiseNumberPrefix_xalList()
+	{
+		_di_IXMLPremiseNumberPrefix_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberPrefix_xalList*(void) { return (IXMLPremiseNumberPrefix_xalList*)&__IXMLPremiseNumberPrefix_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberSuffix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberSuffixSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberSuffix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberSuffix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberSuffix_xal() { }
+	
+private:
+	void *__IXMLPremiseNumberSuffix_xal;	// IXMLPremiseNumberSuffix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E367DE35-FBCA-40F2-83E6-1CF122F40620}
+	operator _di_IXMLPremiseNumberSuffix_xal()
+	{
+		_di_IXMLPremiseNumberSuffix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberSuffix_xal*(void) { return (IXMLPremiseNumberSuffix_xal*)&__IXMLPremiseNumberSuffix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberSuffix_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPremiseNumberSuffix_xal __fastcall Add();
+	_di_IXMLPremiseNumberSuffix_xal __fastcall Insert(const int Index);
+	_di_IXMLPremiseNumberSuffix_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberSuffix_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberSuffix_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberSuffix_xalList() { }
+	
+private:
+	void *__IXMLPremiseNumberSuffix_xalList;	// IXMLPremiseNumberSuffix_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {20047C3F-E697-4370-81E4-0399D68BB583}
+	operator _di_IXMLPremiseNumberSuffix_xalList()
+	{
+		_di_IXMLPremiseNumberSuffix_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberSuffix_xalList*(void) { return (IXMLPremiseNumberSuffix_xalList*)&__IXMLPremiseNumberSuffix_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPremiseNumberRangeTo_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLPremiseNumberPrefix_xalList FPremiseNumberPrefix;
+	_di_IXMLPremiseNumber_xalList FPremiseNumber;
+	_di_IXMLPremiseNumberSuffix_xalList FPremiseNumberSuffix;
+	
+protected:
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLPremiseNumberPrefix_xalList __fastcall Get_PremiseNumberPrefix();
+	_di_IXMLPremiseNumber_xalList __fastcall Get_PremiseNumber();
+	_di_IXMLPremiseNumberSuffix_xalList __fastcall Get_PremiseNumberSuffix();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPremiseNumberRangeTo_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPremiseNumberRangeTo_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPremiseNumberRangeTo_xal() { }
+	
+private:
+	void *__IXMLPremiseNumberRangeTo_xal;	// IXMLPremiseNumberRangeTo_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {ADBECD95-A452-4226-A626-81FBFECA5BA5}
+	operator _di_IXMLPremiseNumberRangeTo_xal()
+	{
+		_di_IXMLPremiseNumberRangeTo_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPremiseNumberRangeTo_xal*(void) { return (IXMLPremiseNumberRangeTo_xal*)&__IXMLPremiseNumberRangeTo_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseType_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAddressLine_xalList FAddressLine;
+	_di_IXMLSubPremiseName_xalList FSubPremiseName;
+	_di_IXMLSubPremiseNumber_xalList FSubPremiseNumber;
+	_di_IXMLSubPremiseNumberPrefix_xalList FSubPremiseNumberPrefix;
+	_di_IXMLSubPremiseNumberSuffix_xalList FSubPremiseNumberSuffix;
+	_di_IXMLBuildingNameType_xalList FBuildingName;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	_di_IXMLAddressLine_xalList __fastcall Get_AddressLine();
+	_di_IXMLSubPremiseName_xalList __fastcall Get_SubPremiseName();
+	_di_IXMLSubPremiseLocation_xal __fastcall Get_SubPremiseLocation();
+	_di_IXMLSubPremiseNumber_xalList __fastcall Get_SubPremiseNumber();
+	_di_IXMLSubPremiseNumberPrefix_xalList __fastcall Get_SubPremiseNumberPrefix();
+	_di_IXMLSubPremiseNumberSuffix_xalList __fastcall Get_SubPremiseNumberSuffix();
+	_di_IXMLBuildingNameType_xalList __fastcall Get_BuildingName();
+	_di_IXMLFirmType_xal __fastcall Get_Firm();
+	_di_IXMLMailStopType_xal __fastcall Get_MailStop();
+	_di_IXMLPostalCode_xal __fastcall Get_PostalCode();
+	_di_IXMLSubPremiseType_xal __fastcall Get_SubPremise();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseType_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseType_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseType_xal() { }
+	
+private:
+	void *__IXMLSubPremiseType_xal;	// IXMLSubPremiseType_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {71D85ABA-F34E-4908-8715-9CBE99585624}
+	operator _di_IXMLSubPremiseType_xal()
+	{
+		_di_IXMLSubPremiseType_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseType_xal*(void) { return (IXMLSubPremiseType_xal*)&__IXMLSubPremiseType_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseType_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSubPremiseType_xal __fastcall Add();
+	_di_IXMLSubPremiseType_xal __fastcall Insert(const int Index);
+	_di_IXMLSubPremiseType_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseType_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseType_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseType_xalList() { }
+	
+private:
+	void *__IXMLSubPremiseType_xalList;	// IXMLSubPremiseType_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3C978D92-9B3E-484C-A5C1-B7CAF458BA9E}
+	operator _di_IXMLSubPremiseType_xalList()
+	{
+		_di_IXMLSubPremiseType_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseType_xalList*(void) { return (IXMLSubPremiseType_xalList*)&__IXMLSubPremiseType_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseName_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_TypeOccurrence();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_TypeOccurrence(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseName_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseName_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseName_xal() { }
+	
+private:
+	void *__IXMLSubPremiseName_xal;	// IXMLSubPremiseName_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {62421AEE-951C-40D5-9B36-BF9776171F1C}
+	operator _di_IXMLSubPremiseName_xal()
+	{
+		_di_IXMLSubPremiseName_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseName_xal*(void) { return (IXMLSubPremiseName_xal*)&__IXMLSubPremiseName_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseName_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSubPremiseName_xal __fastcall Add();
+	_di_IXMLSubPremiseName_xal __fastcall Insert(const int Index);
+	_di_IXMLSubPremiseName_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseName_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseName_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseName_xalList() { }
+	
+private:
+	void *__IXMLSubPremiseName_xalList;	// IXMLSubPremiseName_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {88B6277B-2D5C-4374-A370-FB581C01B344}
+	operator _di_IXMLSubPremiseName_xalList()
+	{
+		_di_IXMLSubPremiseName_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseName_xalList*(void) { return (IXMLSubPremiseName_xalList*)&__IXMLSubPremiseName_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseLocation_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseLocation_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseLocation_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseLocation_xal() { }
+	
+private:
+	void *__IXMLSubPremiseLocation_xal;	// IXMLSubPremiseLocation_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {31DC9415-5641-4A2A-8B9D-24B9F653D81A}
+	operator _di_IXMLSubPremiseLocation_xal()
+	{
+		_di_IXMLSubPremiseLocation_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseLocation_xal*(void) { return (IXMLSubPremiseLocation_xal*)&__IXMLSubPremiseLocation_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseNumber_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Indicator();
+	System::UnicodeString __fastcall Get_IndicatorOccurrence();
+	System::UnicodeString __fastcall Get_NumberTypeOccurrence();
+	System::UnicodeString __fastcall Get_PremiseNumberSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_Indicator(System::UnicodeString Value);
+	void __fastcall Set_IndicatorOccurrence(System::UnicodeString Value);
+	void __fastcall Set_NumberTypeOccurrence(System::UnicodeString Value);
+	void __fastcall Set_PremiseNumberSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseNumber_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseNumber_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseNumber_xal() { }
+	
+private:
+	void *__IXMLSubPremiseNumber_xal;	// IXMLSubPremiseNumber_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {030C1160-C13C-4F7D-AE0D-17ED599B76B2}
+	operator _di_IXMLSubPremiseNumber_xal()
+	{
+		_di_IXMLSubPremiseNumber_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseNumber_xal*(void) { return (IXMLSubPremiseNumber_xal*)&__IXMLSubPremiseNumber_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseNumber_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSubPremiseNumber_xal __fastcall Add();
+	_di_IXMLSubPremiseNumber_xal __fastcall Insert(const int Index);
+	_di_IXMLSubPremiseNumber_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseNumber_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseNumber_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseNumber_xalList() { }
+	
+private:
+	void *__IXMLSubPremiseNumber_xalList;	// IXMLSubPremiseNumber_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {77EACF64-945D-47F5-80E0-FCAF6F18511D}
+	operator _di_IXMLSubPremiseNumber_xalList()
+	{
+		_di_IXMLSubPremiseNumber_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseNumber_xalList*(void) { return (IXMLSubPremiseNumber_xalList*)&__IXMLSubPremiseNumber_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseNumberPrefix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberPrefixSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberPrefixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseNumberPrefix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseNumberPrefix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseNumberPrefix_xal() { }
+	
+private:
+	void *__IXMLSubPremiseNumberPrefix_xal;	// IXMLSubPremiseNumberPrefix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {26F14F36-78D7-42F0-A492-FA701B0172D4}
+	operator _di_IXMLSubPremiseNumberPrefix_xal()
+	{
+		_di_IXMLSubPremiseNumberPrefix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseNumberPrefix_xal*(void) { return (IXMLSubPremiseNumberPrefix_xal*)&__IXMLSubPremiseNumberPrefix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseNumberPrefix_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSubPremiseNumberPrefix_xal __fastcall Add();
+	_di_IXMLSubPremiseNumberPrefix_xal __fastcall Insert(const int Index);
+	_di_IXMLSubPremiseNumberPrefix_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseNumberPrefix_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseNumberPrefix_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseNumberPrefix_xalList() { }
+	
+private:
+	void *__IXMLSubPremiseNumberPrefix_xalList;	// IXMLSubPremiseNumberPrefix_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4B9E5591-1DF3-4A99-8F61-96C8EF8A38C1}
+	operator _di_IXMLSubPremiseNumberPrefix_xalList()
+	{
+		_di_IXMLSubPremiseNumberPrefix_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseNumberPrefix_xalList*(void) { return (IXMLSubPremiseNumberPrefix_xalList*)&__IXMLSubPremiseNumberPrefix_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseNumberSuffix_xal : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_NumberSuffixSeparator();
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Code();
+	void __fastcall Set_NumberSuffixSeparator(System::UnicodeString Value);
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Code(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseNumberSuffix_xal(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseNumberSuffix_xal(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseNumberSuffix_xal() { }
+	
+private:
+	void *__IXMLSubPremiseNumberSuffix_xal;	// IXMLSubPremiseNumberSuffix_xal 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {15C79FF8-F423-401E-B8F7-88F997B1FEAD}
+	operator _di_IXMLSubPremiseNumberSuffix_xal()
+	{
+		_di_IXMLSubPremiseNumberSuffix_xal intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseNumberSuffix_xal*(void) { return (IXMLSubPremiseNumberSuffix_xal*)&__IXMLSubPremiseNumberSuffix_xal; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSubPremiseNumberSuffix_xalList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSubPremiseNumberSuffix_xal __fastcall Add();
+	_di_IXMLSubPremiseNumberSuffix_xal __fastcall Insert(const int Index);
+	_di_IXMLSubPremiseNumberSuffix_xal __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSubPremiseNumberSuffix_xalList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSubPremiseNumberSuffix_xalList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSubPremiseNumberSuffix_xalList() { }
+	
+private:
+	void *__IXMLSubPremiseNumberSuffix_xalList;	// IXMLSubPremiseNumberSuffix_xalList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {AB16447A-010D-45AE-A0AB-A96843B58D4E}
+	operator _di_IXMLSubPremiseNumberSuffix_xalList()
+	{
+		_di_IXMLSubPremiseNumberSuffix_xalList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSubPremiseNumberSuffix_xalList*(void) { return (IXMLSubPremiseNumberSuffix_xalList*)&__IXMLSubPremiseNumberSuffix_xalList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractViewType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractViewSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractViewObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAbstractTimePrimitiveType __fastcall Get_AbstractTimePrimitiveGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractViewSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractViewObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractViewType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractViewType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractViewType() { }
+	
+private:
+	void *__IXMLAbstractViewType;	// IXMLAbstractViewType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {EFAFE1AC-2802-4C9E-95E7-340CB8D1A52A}
+	operator _di_IXMLAbstractViewType()
+	{
+		_di_IXMLAbstractViewType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractViewType*(void) { return (IXMLAbstractViewType*)&__IXMLAbstractViewType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractTimePrimitiveType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractTimePrimitiveSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractTimePrimitiveObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractTimePrimitiveSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractTimePrimitiveObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractTimePrimitiveType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractTimePrimitiveType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractTimePrimitiveType() { }
+	
+private:
+	void *__IXMLAbstractTimePrimitiveType;	// IXMLAbstractTimePrimitiveType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {AFBB647F-1F15-44F5-B7EC-0FDBDB90268B}
+	operator _di_IXMLAbstractTimePrimitiveType()
+	{
+		_di_IXMLAbstractTimePrimitiveType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractTimePrimitiveType*(void) { return (IXMLAbstractTimePrimitiveType*)&__IXMLAbstractTimePrimitiveType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractStyleSelectorType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractStyleSelectorSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractStyleSelectorObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractStyleSelectorSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractStyleSelectorObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractStyleSelectorType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractStyleSelectorType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractStyleSelectorType() { }
+	
+private:
+	void *__IXMLAbstractStyleSelectorType;	// IXMLAbstractStyleSelectorType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {AB0BD903-B5FF-48CA-AC2D-C569441D2C2B}
+	operator _di_IXMLAbstractStyleSelectorType()
+	{
+		_di_IXMLAbstractStyleSelectorType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractStyleSelectorType*(void) { return (IXMLAbstractStyleSelectorType*)&__IXMLAbstractStyleSelectorType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractStyleSelectorTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAbstractStyleSelectorType __fastcall Add();
+	_di_IXMLAbstractStyleSelectorType __fastcall Insert(const int Index);
+	_di_IXMLAbstractStyleSelectorType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractStyleSelectorTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractStyleSelectorTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractStyleSelectorTypeList() { }
+	
+private:
+	void *__IXMLAbstractStyleSelectorTypeList;	// IXMLAbstractStyleSelectorTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C761AF4A-35F3-4F72-8F86-5C8A67B05A7C}
+	operator _di_IXMLAbstractStyleSelectorTypeList()
+	{
+		_di_IXMLAbstractStyleSelectorTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractStyleSelectorTypeList*(void) { return (IXMLAbstractStyleSelectorTypeList*)&__IXMLAbstractStyleSelectorTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLRegionType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FRegionSimpleExtensionGroup;
+	_di_IXMLString_List FRegionObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAbstractExtentType __fastcall Get_AbstractExtentGroup();
+	_di_IXMLLodType __fastcall Get_Lod();
+	_di_IXMLAnySimpleTypeList __fastcall Get_RegionSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_RegionObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLRegionType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLRegionType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLRegionType() { }
+	
+private:
+	void *__IXMLRegionType;	// IXMLRegionType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0FA847CB-2451-45A9-AD8C-89C8E947E6AB}
+	operator _di_IXMLRegionType()
+	{
+		_di_IXMLRegionType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLRegionType*(void) { return (IXMLRegionType*)&__IXMLRegionType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractExtentType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractExtentSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractExtentObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractExtentSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractExtentObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractExtentType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractExtentType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractExtentType() { }
+	
+private:
+	void *__IXMLAbstractExtentType;	// IXMLAbstractExtentType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F3C23758-2FA5-4DCE-A15E-FF66BAB8F250}
+	operator _di_IXMLAbstractExtentType()
+	{
+		_di_IXMLAbstractExtentType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractExtentType*(void) { return (IXMLAbstractExtentType*)&__IXMLAbstractExtentType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLodType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLodSimpleExtensionGroup;
+	_di_IXMLString_List FLodObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_MinLodPixels();
+	double __fastcall Get_MaxLodPixels();
+	double __fastcall Get_MinFadeExtent();
+	double __fastcall Get_MaxFadeExtent();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LodSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LodObjectExtensionGroup();
+	void __fastcall Set_MinLodPixels(double Value);
+	void __fastcall Set_MaxLodPixels(double Value);
+	void __fastcall Set_MinFadeExtent(double Value);
+	void __fastcall Set_MaxFadeExtent(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLodType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLodType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLodType() { }
+	
+private:
+	void *__IXMLLodType;	// IXMLLodType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CB27F3FF-A35F-43E1-9DAC-2FB548AD3F5C}
+	operator _di_IXMLLodType()
+	{
+		_di_IXMLLodType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLodType*(void) { return (IXMLLodType*)&__IXMLLodType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLookAtType : public TXMLAbstractViewType
+{
+	typedef TXMLAbstractViewType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FLookAtSimpleExtensionGroup;
+	_di_IXMLString_List FLookAtObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Longitude();
+	double __fastcall Get_Latitude();
+	double __fastcall Get_Altitude();
+	double __fastcall Get_Heading();
+	double __fastcall Get_Tilt();
+	double __fastcall Get_Range();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	double __fastcall Get_HorizFov();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LookAtSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LookAtObjectExtensionGroup();
+	void __fastcall Set_Longitude(double Value);
+	void __fastcall Set_Latitude(double Value);
+	void __fastcall Set_Altitude(double Value);
+	void __fastcall Set_Heading(double Value);
+	void __fastcall Set_Tilt(double Value);
+	void __fastcall Set_Range(double Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_HorizFov(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLookAtType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractViewType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLookAtType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractViewType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLookAtType() { }
+	
+private:
+	void *__IXMLLookAtType;	// IXMLLookAtType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {16EA1449-AF86-4447-B7DF-23817D4B98F5}
+	operator _di_IXMLLookAtType()
+	{
+		_di_IXMLLookAtType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLookAtType*(void) { return (IXMLLookAtType*)&__IXMLLookAtType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCameraType : public TXMLAbstractViewType
+{
+	typedef TXMLAbstractViewType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FCameraSimpleExtensionGroup;
+	_di_IXMLString_List FCameraObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Longitude();
+	double __fastcall Get_Latitude();
+	double __fastcall Get_Altitude();
+	double __fastcall Get_Heading();
+	double __fastcall Get_Tilt();
+	double __fastcall Get_Roll();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	double __fastcall Get_HorizFov();
+	_di_IXMLAnySimpleTypeList __fastcall Get_CameraSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_CameraObjectExtensionGroup();
+	void __fastcall Set_Longitude(double Value);
+	void __fastcall Set_Latitude(double Value);
+	void __fastcall Set_Altitude(double Value);
+	void __fastcall Set_Heading(double Value);
+	void __fastcall Set_Tilt(double Value);
+	void __fastcall Set_Roll(double Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_HorizFov(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCameraType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractViewType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCameraType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractViewType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCameraType() { }
+	
+private:
+	void *__IXMLCameraType;	// IXMLCameraType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {6065D5AD-C02E-4ABC-989E-741DF6261779}
+	operator _di_IXMLCameraType()
+	{
+		_di_IXMLCameraType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCameraType*(void) { return (IXMLCameraType*)&__IXMLCameraType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMetadataType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMetadataType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMetadataType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMetadataType() { }
+	
+private:
+	void *__IXMLMetadataType;	// IXMLMetadataType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E12B1CC7-0D05-4A6D-8B29-7C41FB2DA1FE}
+	operator _di_IXMLMetadataType()
+	{
+		_di_IXMLMetadataType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMetadataType*(void) { return (IXMLMetadataType*)&__IXMLMetadataType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLExtendedDataType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLDataTypeList FData;
+	_di_IXMLSchemaDataTypeList FSchemaData;
+	
+protected:
+	_di_IXMLDataTypeList __fastcall Get_Data();
+	_di_IXMLSchemaDataTypeList __fastcall Get_SchemaData();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLExtendedDataType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLExtendedDataType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLExtendedDataType() { }
+	
+private:
+	void *__IXMLExtendedDataType;	// IXMLExtendedDataType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3C2BB89D-4675-4525-9978-6BB1FB2CEAE1}
+	operator _di_IXMLExtendedDataType()
+	{
+		_di_IXMLExtendedDataType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLExtendedDataType*(void) { return (IXMLExtendedDataType*)&__IXMLExtendedDataType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDataType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLString_List FDataExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_Name();
+	System::UnicodeString __fastcall Get_Uom();
+	System::UnicodeString __fastcall Get_DisplayName();
+	System::Variant __fastcall Get_Value();
+	_di_IXMLString_List __fastcall Get_DataExtension();
+	void __fastcall Set_Name(System::UnicodeString Value);
+	void __fastcall Set_Uom(System::UnicodeString Value);
+	void __fastcall Set_DisplayName(System::UnicodeString Value);
+	void __fastcall Set_Value(const System::Variant &Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDataType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDataType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDataType() { }
+	
+private:
+	void *__IXMLDataType;	// IXMLDataType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0A3C8260-CF4B-4DF8-9AC4-796FB917906E}
+	operator _di_IXMLDataType()
+	{
+		_di_IXMLDataType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDataType*(void) { return (IXMLDataType*)&__IXMLDataType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDataTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLDataType __fastcall Add();
+	_di_IXMLDataType __fastcall Insert(const int Index);
+	_di_IXMLDataType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDataTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDataTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDataTypeList() { }
+	
+private:
+	void *__IXMLDataTypeList;	// IXMLDataTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {94628520-4E36-44A8-8FD4-601A0EBBB96A}
+	operator _di_IXMLDataTypeList()
+	{
+		_di_IXMLDataTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDataTypeList*(void) { return (IXMLDataTypeList*)&__IXMLDataTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSchemaDataType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLSimpleDataTypeList FSimpleData;
+	_di_IXMLSimpleArrayDataTypeList FSimpleArrayData;
+	_di_IXMLString_List FSchemaDataExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_SchemaUrl();
+	_di_IXMLSimpleDataTypeList __fastcall Get_SimpleData();
+	_di_IXMLSimpleArrayDataTypeList __fastcall Get_SimpleArrayData();
+	_di_IXMLString_List __fastcall Get_SchemaDataExtension();
+	void __fastcall Set_SchemaUrl(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSchemaDataType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSchemaDataType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSchemaDataType() { }
+	
+private:
+	void *__IXMLSchemaDataType;	// IXMLSchemaDataType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {659E9EAF-CA4D-4F85-AE6A-C74A3D023969}
+	operator _di_IXMLSchemaDataType()
+	{
+		_di_IXMLSchemaDataType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSchemaDataType*(void) { return (IXMLSchemaDataType*)&__IXMLSchemaDataType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSchemaDataTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSchemaDataType __fastcall Add();
+	_di_IXMLSchemaDataType __fastcall Insert(const int Index);
+	_di_IXMLSchemaDataType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSchemaDataTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSchemaDataTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSchemaDataTypeList() { }
+	
+private:
+	void *__IXMLSchemaDataTypeList;	// IXMLSchemaDataTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E42E15EA-FB01-4C69-90D9-565995B2E829}
+	operator _di_IXMLSchemaDataTypeList()
+	{
+		_di_IXMLSchemaDataTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSchemaDataTypeList*(void) { return (IXMLSchemaDataTypeList*)&__IXMLSchemaDataTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleDataType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+protected:
+	System::UnicodeString __fastcall Get_Name();
+	void __fastcall Set_Name(System::UnicodeString Value);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleDataType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleDataType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleDataType() { }
+	
+private:
+	void *__IXMLSimpleDataType;	// IXMLSimpleDataType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5D512302-2B70-4DA9-9B75-CD7349F932F0}
+	operator _di_IXMLSimpleDataType()
+	{
+		_di_IXMLSimpleDataType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleDataType*(void) { return (IXMLSimpleDataType*)&__IXMLSimpleDataType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleDataTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSimpleDataType __fastcall Add();
+	_di_IXMLSimpleDataType __fastcall Insert(const int Index);
+	_di_IXMLSimpleDataType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleDataTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleDataTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleDataTypeList() { }
+	
+private:
+	void *__IXMLSimpleDataTypeList;	// IXMLSimpleDataTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {BED6EE3D-F8A6-4D7E-84B4-B9FDE7E39AAA}
+	operator _di_IXMLSimpleDataTypeList()
+	{
+		_di_IXMLSimpleDataTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleDataTypeList*(void) { return (IXMLSimpleDataTypeList*)&__IXMLSimpleDataTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleArrayDataType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FValue;
+	_di_IXMLString_List FSimpleArrayDataExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_Name();
+	_di_IXMLAnySimpleTypeList __fastcall Get_Value();
+	_di_IXMLString_List __fastcall Get_SimpleArrayDataExtension();
+	void __fastcall Set_Name(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleArrayDataType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleArrayDataType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleArrayDataType() { }
+	
+private:
+	void *__IXMLSimpleArrayDataType;	// IXMLSimpleArrayDataType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2F27E2AE-4519-4106-87CB-FD7231360CC7}
+	operator _di_IXMLSimpleArrayDataType()
+	{
+		_di_IXMLSimpleArrayDataType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleArrayDataType*(void) { return (IXMLSimpleArrayDataType*)&__IXMLSimpleArrayDataType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleArrayDataTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSimpleArrayDataType __fastcall Add();
+	_di_IXMLSimpleArrayDataType __fastcall Insert(const int Index);
+	_di_IXMLSimpleArrayDataType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleArrayDataTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleArrayDataTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleArrayDataTypeList() { }
+	
+private:
+	void *__IXMLSimpleArrayDataTypeList;	// IXMLSimpleArrayDataTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {04925349-2663-4E82-80E4-598D16440C9C}
+	operator _di_IXMLSimpleArrayDataTypeList()
+	{
+		_di_IXMLSimpleArrayDataTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleArrayDataTypeList*(void) { return (IXMLSimpleArrayDataTypeList*)&__IXMLSimpleArrayDataTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractContainerType : public TXMLAbstractFeatureType
+{
+	typedef TXMLAbstractFeatureType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractContainerSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractContainerObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractContainerSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractContainerObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractContainerType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractFeatureType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractContainerType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractFeatureType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractContainerType() { }
+	
+private:
+	void *__IXMLAbstractContainerType;	// IXMLAbstractContainerType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {76FA95EE-756B-454C-A921-362C0AFD8F81}
+	operator _di_IXMLAbstractContainerType()
+	{
+		_di_IXMLAbstractContainerType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractContainerType*(void) { return (IXMLAbstractContainerType*)&__IXMLAbstractContainerType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractContainerTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAbstractContainerType __fastcall Add();
+	_di_IXMLAbstractContainerType __fastcall Insert(const int Index);
+	_di_IXMLAbstractContainerType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractContainerTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractContainerTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractContainerTypeList() { }
+	
+private:
+	void *__IXMLAbstractContainerTypeList;	// IXMLAbstractContainerTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {1CFE0546-2084-4959-84B5-AB99C5CBEA6E}
+	operator _di_IXMLAbstractContainerTypeList()
+	{
+		_di_IXMLAbstractContainerTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractContainerTypeList*(void) { return (IXMLAbstractContainerTypeList*)&__IXMLAbstractContainerTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractGeometryType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractGeometrySimpleExtensionGroup;
+	_di_IXMLString_List FAbstractGeometryObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractGeometrySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractGeometryObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractGeometryType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractGeometryType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractGeometryType() { }
+	
+private:
+	void *__IXMLAbstractGeometryType;	// IXMLAbstractGeometryType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {19E45C2C-B332-45A8-9778-3D5101CEB81E}
+	operator _di_IXMLAbstractGeometryType()
+	{
+		_di_IXMLAbstractGeometryType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractGeometryType*(void) { return (IXMLAbstractGeometryType*)&__IXMLAbstractGeometryType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractGeometryTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAbstractGeometryType __fastcall Add();
+	_di_IXMLAbstractGeometryType __fastcall Insert(const int Index);
+	_di_IXMLAbstractGeometryType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractGeometryTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractGeometryTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractGeometryTypeList() { }
+	
+private:
+	void *__IXMLAbstractGeometryTypeList;	// IXMLAbstractGeometryTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F8DBAEA0-A88B-4988-AB33-A8B1626FF66E}
+	operator _di_IXMLAbstractGeometryTypeList()
+	{
+		_di_IXMLAbstractGeometryTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractGeometryTypeList*(void) { return (IXMLAbstractGeometryTypeList*)&__IXMLAbstractGeometryTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractOverlayType : public TXMLAbstractFeatureType
+{
+	typedef TXMLAbstractFeatureType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractOverlaySimpleExtensionGroup;
+	_di_IXMLString_List FAbstractOverlayObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Color();
+	int __fastcall Get_DrawOrder();
+	_di_IXMLLinkType __fastcall Get_Icon();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractOverlaySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractOverlayObjectExtensionGroup();
+	void __fastcall Set_Color(System::UnicodeString Value);
+	void __fastcall Set_DrawOrder(int Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractOverlayType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractFeatureType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractOverlayType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractFeatureType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractOverlayType() { }
+	
+private:
+	void *__IXMLAbstractOverlayType;	// IXMLAbstractOverlayType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0659BFA5-DFE1-4876-9D11-5DF79A14FCEE}
+	operator _di_IXMLAbstractOverlayType()
+	{
+		_di_IXMLAbstractOverlayType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractOverlayType*(void) { return (IXMLAbstractOverlayType*)&__IXMLAbstractOverlayType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBasicLinkType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FBasicLinkSimpleExtensionGroup;
+	_di_IXMLString_List FBasicLinkObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Href();
+	_di_IXMLAnySimpleTypeList __fastcall Get_BasicLinkSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_BasicLinkObjectExtensionGroup();
+	void __fastcall Set_Href(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBasicLinkType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBasicLinkType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBasicLinkType() { }
+	
+private:
+	void *__IXMLBasicLinkType;	// IXMLBasicLinkType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5D8EF127-C233-4092-8765-CA5D04CFFC41}
+	operator _di_IXMLBasicLinkType()
+	{
+		_di_IXMLBasicLinkType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBasicLinkType*(void) { return (IXMLBasicLinkType*)&__IXMLBasicLinkType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLinkType : public TXMLBasicLinkType
+{
+	typedef TXMLBasicLinkType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLinkSimpleExtensionGroup;
+	_di_IXMLString_List FLinkObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_AbstractRefreshMode();
+	double __fastcall Get_RefreshInterval();
+	System::UnicodeString __fastcall Get_AbstractViewRefreshMode();
+	double __fastcall Get_ViewRefreshTime();
+	double __fastcall Get_ViewBoundScale();
+	System::UnicodeString __fastcall Get_ViewFormat();
+	System::UnicodeString __fastcall Get_HttpQuery();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LinkSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LinkObjectExtensionGroup();
+	void __fastcall Set_AbstractRefreshMode(System::UnicodeString Value);
+	void __fastcall Set_RefreshInterval(double Value);
+	void __fastcall Set_AbstractViewRefreshMode(System::UnicodeString Value);
+	void __fastcall Set_ViewRefreshTime(double Value);
+	void __fastcall Set_ViewBoundScale(double Value);
+	void __fastcall Set_ViewFormat(System::UnicodeString Value);
+	void __fastcall Set_HttpQuery(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLinkType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLBasicLinkType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLinkType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLBasicLinkType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLinkType() { }
+	
+private:
+	void *__IXMLLinkType;	// IXMLLinkType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {517F13BB-87CF-4437-A1B1-922989D6498E}
+	operator _di_IXMLLinkType()
+	{
+		_di_IXMLLinkType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLinkType*(void) { return (IXMLLinkType*)&__IXMLLinkType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLKmlType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FKmlSimpleExtensionGroup;
+	_di_IXMLString_List FKmlObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Hint();
+	System::UnicodeString __fastcall Get_Version();
+	_di_IXMLNetworkLinkControlType __fastcall Get_NetworkLinkControl();
+	_di_IXMLAbstractFeatureType __fastcall Get_AbstractFeatureGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_KmlSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_KmlObjectExtensionGroup();
+	void __fastcall Set_Hint(System::UnicodeString Value);
+	void __fastcall Set_Version(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLKmlType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLKmlType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLKmlType() { }
+	
+private:
+	void *__IXMLKmlType;	// IXMLKmlType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {62A1DDA6-91A4-49F3-905E-35B6EF02D4D7}
+	operator _di_IXMLKmlType()
+	{
+		_di_IXMLKmlType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLKmlType*(void) { return (IXMLKmlType*)&__IXMLKmlType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLNetworkLinkControlType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FNetworkLinkControlSimpleExtensionGroup;
+	_di_IXMLString_List FNetworkLinkControlObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_MinRefreshPeriod();
+	double __fastcall Get_MaxSessionLength();
+	System::UnicodeString __fastcall Get_Cookie();
+	System::UnicodeString __fastcall Get_Message();
+	System::UnicodeString __fastcall Get_LinkName();
+	System::UnicodeString __fastcall Get_LinkDescription();
+	_di_IXMLSnippetType __fastcall Get_LinkSnippet();
+	System::UnicodeString __fastcall Get_Expires();
+	_di_IXMLUpdateType __fastcall Get_Update();
+	_di_IXMLAbstractViewType __fastcall Get_AbstractViewGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_NetworkLinkControlSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_NetworkLinkControlObjectExtensionGroup();
+	void __fastcall Set_MinRefreshPeriod(double Value);
+	void __fastcall Set_MaxSessionLength(double Value);
+	void __fastcall Set_Cookie(System::UnicodeString Value);
+	void __fastcall Set_Message(System::UnicodeString Value);
+	void __fastcall Set_LinkName(System::UnicodeString Value);
+	void __fastcall Set_LinkDescription(System::UnicodeString Value);
+	void __fastcall Set_Expires(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLNetworkLinkControlType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLNetworkLinkControlType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLNetworkLinkControlType() { }
+	
+private:
+	void *__IXMLNetworkLinkControlType;	// IXMLNetworkLinkControlType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {27308C58-5B74-4C6E-A357-E49BF4F49CA7}
+	operator _di_IXMLNetworkLinkControlType()
+	{
+		_di_IXMLNetworkLinkControlType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLNetworkLinkControlType*(void) { return (IXMLNetworkLinkControlType*)&__IXMLNetworkLinkControlType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLUpdateType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAnyTypeList FAbstractUpdateOptionGroup;
+	_di_IXMLString_List FUpdateExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_TargetHref();
+	_di_IXMLAnyTypeList __fastcall Get_AbstractUpdateOptionGroup();
+	_di_IXMLString_List __fastcall Get_UpdateExtensionGroup();
+	void __fastcall Set_TargetHref(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLUpdateType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLUpdateType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLUpdateType() { }
+	
+private:
+	void *__IXMLUpdateType;	// IXMLUpdateType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {14639648-7797-4B0E-9779-330E646B944C}
+	operator _di_IXMLUpdateType()
+	{
+		_di_IXMLUpdateType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLUpdateType*(void) { return (IXMLUpdateType*)&__IXMLUpdateType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDocumentType : public TXMLAbstractContainerType
+{
+	typedef TXMLAbstractContainerType inherited;
+	
+private:
+	_di_IXMLSchemaTypeList FSchema;
+	_di_IXMLAbstractFeatureTypeList FAbstractFeatureGroup;
+	_di_IXMLAnySimpleTypeList FDocumentSimpleExtensionGroup;
+	_di_IXMLString_List FDocumentObjectExtensionGroup;
+	
+protected:
+	_di_IXMLSchemaTypeList __fastcall Get_Schema();
+	_di_IXMLAbstractFeatureTypeList __fastcall Get_AbstractFeatureGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_DocumentSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_DocumentObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDocumentType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractContainerType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDocumentType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractContainerType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDocumentType() { }
+	
+private:
+	void *__IXMLDocumentType;	// IXMLDocumentType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2FCA9F10-BB3B-44BC-A020-4D446260552D}
+	operator _di_IXMLDocumentType()
+	{
+		_di_IXMLDocumentType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDocumentType*(void) { return (IXMLDocumentType*)&__IXMLDocumentType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSchemaType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLSimpleFieldTypeList FSimpleField;
+	_di_IXMLSimpleArrayFieldTypeList FSimpleArrayField;
+	_di_IXMLString_List FSchemaExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_Name();
+	System::UnicodeString __fastcall Get_Id();
+	_di_IXMLSimpleFieldTypeList __fastcall Get_SimpleField();
+	_di_IXMLSimpleArrayFieldTypeList __fastcall Get_SimpleArrayField();
+	_di_IXMLString_List __fastcall Get_SchemaExtension();
+	void __fastcall Set_Name(System::UnicodeString Value);
+	void __fastcall Set_Id(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSchemaType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSchemaType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSchemaType() { }
+	
+private:
+	void *__IXMLSchemaType;	// IXMLSchemaType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {38F32EC9-5B1F-476A-BCB8-4E08562AA03A}
+	operator _di_IXMLSchemaType()
+	{
+		_di_IXMLSchemaType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSchemaType*(void) { return (IXMLSchemaType*)&__IXMLSchemaType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSchemaTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSchemaType __fastcall Add();
+	_di_IXMLSchemaType __fastcall Insert(const int Index);
+	_di_IXMLSchemaType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSchemaTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSchemaTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSchemaTypeList() { }
+	
+private:
+	void *__IXMLSchemaTypeList;	// IXMLSchemaTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B7569CB6-6C35-4E77-802D-D60CE2EEE4FE}
+	operator _di_IXMLSchemaTypeList()
+	{
+		_di_IXMLSchemaTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSchemaTypeList*(void) { return (IXMLSchemaTypeList*)&__IXMLSchemaTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleFieldType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLString_List FSimpleFieldExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Name();
+	System::UnicodeString __fastcall Get_Uom();
+	System::UnicodeString __fastcall Get_DisplayName();
+	_di_IXMLString_List __fastcall Get_SimpleFieldExtension();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Name(System::UnicodeString Value);
+	void __fastcall Set_Uom(System::UnicodeString Value);
+	void __fastcall Set_DisplayName(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleFieldType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleFieldType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleFieldType() { }
+	
+private:
+	void *__IXMLSimpleFieldType;	// IXMLSimpleFieldType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {66E26818-ECA4-4692-A808-3EF63B03A112}
+	operator _di_IXMLSimpleFieldType()
+	{
+		_di_IXMLSimpleFieldType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleFieldType*(void) { return (IXMLSimpleFieldType*)&__IXMLSimpleFieldType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleFieldTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSimpleFieldType __fastcall Add();
+	_di_IXMLSimpleFieldType __fastcall Insert(const int Index);
+	_di_IXMLSimpleFieldType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleFieldTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleFieldTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleFieldTypeList() { }
+	
+private:
+	void *__IXMLSimpleFieldTypeList;	// IXMLSimpleFieldTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {9726D6D7-6D0F-4F14-A74B-33F7AD7EA730}
+	operator _di_IXMLSimpleFieldTypeList()
+	{
+		_di_IXMLSimpleFieldTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleFieldTypeList*(void) { return (IXMLSimpleFieldTypeList*)&__IXMLSimpleFieldTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleArrayFieldType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLString_List FSimpleArrayFieldExtension;
+	
+protected:
+	System::UnicodeString __fastcall Get_Type_();
+	System::UnicodeString __fastcall Get_Name();
+	System::UnicodeString __fastcall Get_Uom();
+	System::UnicodeString __fastcall Get_DisplayName();
+	_di_IXMLString_List __fastcall Get_SimpleArrayFieldExtension();
+	void __fastcall Set_Type_(System::UnicodeString Value);
+	void __fastcall Set_Name(System::UnicodeString Value);
+	void __fastcall Set_Uom(System::UnicodeString Value);
+	void __fastcall Set_DisplayName(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleArrayFieldType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleArrayFieldType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleArrayFieldType() { }
+	
+private:
+	void *__IXMLSimpleArrayFieldType;	// IXMLSimpleArrayFieldType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {43D7A07D-6F40-46C0-BCFC-BD9A5EBF0288}
+	operator _di_IXMLSimpleArrayFieldType()
+	{
+		_di_IXMLSimpleArrayFieldType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleArrayFieldType*(void) { return (IXMLSimpleArrayFieldType*)&__IXMLSimpleArrayFieldType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSimpleArrayFieldTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLSimpleArrayFieldType __fastcall Add();
+	_di_IXMLSimpleArrayFieldType __fastcall Insert(const int Index);
+	_di_IXMLSimpleArrayFieldType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSimpleArrayFieldTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSimpleArrayFieldTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSimpleArrayFieldTypeList() { }
+	
+private:
+	void *__IXMLSimpleArrayFieldTypeList;	// IXMLSimpleArrayFieldTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {9B457560-1EE2-4B80-9725-63029FBD4517}
+	operator _di_IXMLSimpleArrayFieldTypeList()
+	{
+		_di_IXMLSimpleArrayFieldTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSimpleArrayFieldTypeList*(void) { return (IXMLSimpleArrayFieldTypeList*)&__IXMLSimpleArrayFieldTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLFolderType : public TXMLAbstractContainerType
+{
+	typedef TXMLAbstractContainerType inherited;
+	
+private:
+	_di_IXMLAbstractFeatureTypeList FAbstractFeatureGroup;
+	_di_IXMLAnySimpleTypeList FFolderSimpleExtensionGroup;
+	_di_IXMLString_List FFolderObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAbstractFeatureTypeList __fastcall Get_AbstractFeatureGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_FolderSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_FolderObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLFolderType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractContainerType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLFolderType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractContainerType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLFolderType() { }
+	
+private:
+	void *__IXMLFolderType;	// IXMLFolderType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C07ACB6F-442B-48B1-9F98-803B1F6D270C}
+	operator _di_IXMLFolderType()
+	{
+		_di_IXMLFolderType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLFolderType*(void) { return (IXMLFolderType*)&__IXMLFolderType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPlacemarkType : public TXMLAbstractFeatureType
+{
+	typedef TXMLAbstractFeatureType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FPlacemarkSimpleExtensionGroup;
+	_di_IXMLString_List FPlacemarkObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAbstractGeometryType __fastcall Get_AbstractGeometryGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PlacemarkSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PlacemarkObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPlacemarkType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractFeatureType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPlacemarkType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractFeatureType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPlacemarkType() { }
+	
+private:
+	void *__IXMLPlacemarkType;	// IXMLPlacemarkType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {688A89FE-B2CD-4216-BA74-DAB169D2E4E8}
+	operator _di_IXMLPlacemarkType()
+	{
+		_di_IXMLPlacemarkType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPlacemarkType*(void) { return (IXMLPlacemarkType*)&__IXMLPlacemarkType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLNetworkLinkType : public TXMLAbstractFeatureType
+{
+	typedef TXMLAbstractFeatureType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FNetworkLinkSimpleExtensionGroup;
+	_di_IXMLString_List FNetworkLinkObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_RefreshVisibility();
+	bool __fastcall Get_FlyToView();
+	_di_IXMLAbstractObjectType __fastcall Get_AbstractLinkGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_NetworkLinkSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_NetworkLinkObjectExtensionGroup();
+	void __fastcall Set_RefreshVisibility(bool Value);
+	void __fastcall Set_FlyToView(bool Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLNetworkLinkType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractFeatureType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLNetworkLinkType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractFeatureType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLNetworkLinkType() { }
+	
+private:
+	void *__IXMLNetworkLinkType;	// IXMLNetworkLinkType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {04539327-28A8-453D-9D30-75DD5B1CF633}
+	operator _di_IXMLNetworkLinkType()
+	{
+		_di_IXMLNetworkLinkType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLNetworkLinkType*(void) { return (IXMLNetworkLinkType*)&__IXMLNetworkLinkType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractLatLonBoxType : public TXMLAbstractExtentType
+{
+	typedef TXMLAbstractExtentType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractLatLonBoxSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractLatLonBoxObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_North();
+	double __fastcall Get_South();
+	double __fastcall Get_East();
+	double __fastcall Get_West();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractLatLonBoxSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractLatLonBoxObjectExtensionGroup();
+	void __fastcall Set_North(double Value);
+	void __fastcall Set_South(double Value);
+	void __fastcall Set_East(double Value);
+	void __fastcall Set_West(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractLatLonBoxType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractExtentType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractLatLonBoxType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractExtentType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractLatLonBoxType() { }
+	
+private:
+	void *__IXMLAbstractLatLonBoxType;	// IXMLAbstractLatLonBoxType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CA9E39A7-0FEB-48ED-9DD6-3FD770DDE3D2}
+	operator _di_IXMLAbstractLatLonBoxType()
+	{
+		_di_IXMLAbstractLatLonBoxType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractLatLonBoxType*(void) { return (IXMLAbstractLatLonBoxType*)&__IXMLAbstractLatLonBoxType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLatLonAltBoxType : public TXMLAbstractLatLonBoxType
+{
+	typedef TXMLAbstractLatLonBoxType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FLatLonAltBoxSimpleExtensionGroup;
+	_di_IXMLString_List FLatLonAltBoxObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_MinAltitude();
+	double __fastcall Get_MaxAltitude();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LatLonAltBoxSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LatLonAltBoxObjectExtensionGroup();
+	void __fastcall Set_MinAltitude(double Value);
+	void __fastcall Set_MaxAltitude(double Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLatLonAltBoxType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractLatLonBoxType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLatLonAltBoxType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractLatLonBoxType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLatLonAltBoxType() { }
+	
+private:
+	void *__IXMLLatLonAltBoxType;	// IXMLLatLonAltBoxType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B5ECA08B-D025-4354-AD3A-B713DB27C414}
+	operator _di_IXMLLatLonAltBoxType()
+	{
+		_di_IXMLLatLonAltBoxType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLatLonAltBoxType*(void) { return (IXMLLatLonAltBoxType*)&__IXMLLatLonAltBoxType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMultiGeometryType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAbstractGeometryTypeList FAbstractGeometryGroup;
+	_di_IXMLAnySimpleTypeList FMultiGeometrySimpleExtensionGroup;
+	_di_IXMLString_List FMultiGeometryObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAbstractGeometryTypeList __fastcall Get_AbstractGeometryGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_MultiGeometrySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_MultiGeometryObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMultiGeometryType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMultiGeometryType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMultiGeometryType() { }
+	
+private:
+	void *__IXMLMultiGeometryType;	// IXMLMultiGeometryType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C94380A7-9D40-430E-A992-A26EA4ED8448}
+	operator _di_IXMLMultiGeometryType()
+	{
+		_di_IXMLMultiGeometryType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMultiGeometryType*(void) { return (IXMLMultiGeometryType*)&__IXMLMultiGeometryType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMultiGeometryTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLMultiGeometryType __fastcall Add();
+	_di_IXMLMultiGeometryType __fastcall Insert(const int Index);
+	_di_IXMLMultiGeometryType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMultiGeometryTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMultiGeometryTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMultiGeometryTypeList() { }
+	
+private:
+	void *__IXMLMultiGeometryTypeList;	// IXMLMultiGeometryTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {154A8CF9-8078-4716-95B3-E526201117EF}
+	operator _di_IXMLMultiGeometryTypeList()
+	{
+		_di_IXMLMultiGeometryTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMultiGeometryTypeList*(void) { return (IXMLMultiGeometryTypeList*)&__IXMLMultiGeometryTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPointType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FPointSimpleExtensionGroup;
+	_di_IXMLString_List FPointObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_Extrude();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	System::UnicodeString __fastcall Get_Coordinates();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PointSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PointObjectExtensionGroup();
+	void __fastcall Set_Extrude(bool Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_Coordinates(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPointType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPointType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPointType() { }
+	
+private:
+	void *__IXMLPointType;	// IXMLPointType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {8FA3A519-BF7E-48EB-BCEF-9853DE73A202}
+	operator _di_IXMLPointType()
+	{
+		_di_IXMLPointType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPointType*(void) { return (IXMLPointType*)&__IXMLPointType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLineStringType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FLineStringSimpleExtensionGroup;
+	_di_IXMLString_List FLineStringObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_Extrude();
+	bool __fastcall Get_Tessellate();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	System::UnicodeString __fastcall Get_Coordinates();
+	double __fastcall Get_AltitudeOffset();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LineStringSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LineStringObjectExtensionGroup();
+	void __fastcall Set_Extrude(bool Value);
+	void __fastcall Set_Tessellate(bool Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_Coordinates(System::UnicodeString Value);
+	void __fastcall Set_AltitudeOffset(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLineStringType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLineStringType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLineStringType() { }
+	
+private:
+	void *__IXMLLineStringType;	// IXMLLineStringType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {38720908-B88E-45E5-8006-BB92536DF66E}
+	operator _di_IXMLLineStringType()
+	{
+		_di_IXMLLineStringType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLineStringType*(void) { return (IXMLLineStringType*)&__IXMLLineStringType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLinearRingType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FLinearRingSimpleExtensionGroup;
+	_di_IXMLString_List FLinearRingObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_Extrude();
+	bool __fastcall Get_Tessellate();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	System::UnicodeString __fastcall Get_Coordinates();
+	double __fastcall Get_AltitudeOffset();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LinearRingSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LinearRingObjectExtensionGroup();
+	void __fastcall Set_Extrude(bool Value);
+	void __fastcall Set_Tessellate(bool Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_Coordinates(System::UnicodeString Value);
+	void __fastcall Set_AltitudeOffset(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLinearRingType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLinearRingType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLinearRingType() { }
+	
+private:
+	void *__IXMLLinearRingType;	// IXMLLinearRingType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {6B6299A8-82D0-4826-A481-895BFFC9037A}
+	operator _di_IXMLLinearRingType()
+	{
+		_di_IXMLLinearRingType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLinearRingType*(void) { return (IXMLLinearRingType*)&__IXMLLinearRingType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPolygonType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLBoundaryTypeList FInnerBoundaryIs;
+	_di_IXMLAnySimpleTypeList FPolygonSimpleExtensionGroup;
+	_di_IXMLString_List FPolygonObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_Extrude();
+	bool __fastcall Get_Tessellate();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	_di_IXMLBoundaryType __fastcall Get_OuterBoundaryIs();
+	_di_IXMLBoundaryTypeList __fastcall Get_InnerBoundaryIs();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PolygonSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PolygonObjectExtensionGroup();
+	void __fastcall Set_Extrude(bool Value);
+	void __fastcall Set_Tessellate(bool Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPolygonType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPolygonType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPolygonType() { }
+	
+private:
+	void *__IXMLPolygonType;	// IXMLPolygonType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {8A789FD7-7115-42C9-BBEA-0F30085BB0A9}
+	operator _di_IXMLPolygonType()
+	{
+		_di_IXMLPolygonType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPolygonType*(void) { return (IXMLPolygonType*)&__IXMLPolygonType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBoundaryType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FBoundarySimpleExtensionGroup;
+	_di_IXMLString_List FBoundaryObjectExtensionGroup;
+	
+protected:
+	_di_IXMLLinearRingType __fastcall Get_LinearRing();
+	_di_IXMLAnySimpleTypeList __fastcall Get_BoundarySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_BoundaryObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBoundaryType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBoundaryType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBoundaryType() { }
+	
+private:
+	void *__IXMLBoundaryType;	// IXMLBoundaryType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {6160E555-7B5E-4152-A745-F81315934480}
+	operator _di_IXMLBoundaryType()
+	{
+		_di_IXMLBoundaryType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBoundaryType*(void) { return (IXMLBoundaryType*)&__IXMLBoundaryType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBoundaryTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLBoundaryType __fastcall Add();
+	_di_IXMLBoundaryType __fastcall Insert(const int Index);
+	_di_IXMLBoundaryType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBoundaryTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBoundaryTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBoundaryTypeList() { }
+	
+private:
+	void *__IXMLBoundaryTypeList;	// IXMLBoundaryTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CAFBCB74-21DD-4F84-A106-B87CFCA6EFEE}
+	operator _di_IXMLBoundaryTypeList()
+	{
+		_di_IXMLBoundaryTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBoundaryTypeList*(void) { return (IXMLBoundaryTypeList*)&__IXMLBoundaryTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLModelType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FModelSimpleExtensionGroup;
+	_di_IXMLString_List FModelObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	_di_IXMLLocationType __fastcall Get_Location();
+	_di_IXMLOrientationType __fastcall Get_Orientation();
+	_di_IXMLScaleType __fastcall Get_Scale();
+	_di_IXMLLinkType __fastcall Get_Link();
+	_di_IXMLResourceMapType __fastcall Get_ResourceMap();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ModelSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ModelObjectExtensionGroup();
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLModelType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLModelType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLModelType() { }
+	
+private:
+	void *__IXMLModelType;	// IXMLModelType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E19FF118-0BD9-4D0A-A0C2-4F3A0B9F4A56}
+	operator _di_IXMLModelType()
+	{
+		_di_IXMLModelType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLModelType*(void) { return (IXMLModelType*)&__IXMLModelType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLocationType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLocationSimpleExtensionGroup;
+	_di_IXMLString_List FLocationObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Longitude();
+	double __fastcall Get_Latitude();
+	double __fastcall Get_Altitude();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LocationSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LocationObjectExtensionGroup();
+	void __fastcall Set_Longitude(double Value);
+	void __fastcall Set_Latitude(double Value);
+	void __fastcall Set_Altitude(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLocationType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLocationType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLocationType() { }
+	
+private:
+	void *__IXMLLocationType;	// IXMLLocationType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {80002AFE-A9FA-4E6A-8CEE-F8A61E95E271}
+	operator _di_IXMLLocationType()
+	{
+		_di_IXMLLocationType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLocationType*(void) { return (IXMLLocationType*)&__IXMLLocationType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLOrientationType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FOrientationSimpleExtensionGroup;
+	_di_IXMLString_List FOrientationObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Heading();
+	double __fastcall Get_Tilt();
+	double __fastcall Get_Roll();
+	_di_IXMLAnySimpleTypeList __fastcall Get_OrientationSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_OrientationObjectExtensionGroup();
+	void __fastcall Set_Heading(double Value);
+	void __fastcall Set_Tilt(double Value);
+	void __fastcall Set_Roll(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLOrientationType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLOrientationType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLOrientationType() { }
+	
+private:
+	void *__IXMLOrientationType;	// IXMLOrientationType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {1154CBB8-29F9-4F04-9E4B-213D1AF024B1}
+	operator _di_IXMLOrientationType()
+	{
+		_di_IXMLOrientationType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLOrientationType*(void) { return (IXMLOrientationType*)&__IXMLOrientationType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLScaleType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FScaleSimpleExtensionGroup;
+	_di_IXMLString_List FScaleObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_X();
+	double __fastcall Get_Y();
+	double __fastcall Get_Z();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ScaleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ScaleObjectExtensionGroup();
+	void __fastcall Set_X(double Value);
+	void __fastcall Set_Y(double Value);
+	void __fastcall Set_Z(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLScaleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLScaleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLScaleType() { }
+	
+private:
+	void *__IXMLScaleType;	// IXMLScaleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {0991064D-95D5-44C8-8E7F-CCFE8404A005}
+	operator _di_IXMLScaleType()
+	{
+		_di_IXMLScaleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLScaleType*(void) { return (IXMLScaleType*)&__IXMLScaleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLResourceMapType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAliasTypeList FAlias;
+	_di_IXMLAnySimpleTypeList FResourceMapSimpleExtensionGroup;
+	_di_IXMLString_List FResourceMapObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAliasTypeList __fastcall Get_Alias();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ResourceMapSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ResourceMapObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLResourceMapType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLResourceMapType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLResourceMapType() { }
+	
+private:
+	void *__IXMLResourceMapType;	// IXMLResourceMapType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {9A151333-66E5-4D03-8FA6-02A176979A4E}
+	operator _di_IXMLResourceMapType()
+	{
+		_di_IXMLResourceMapType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLResourceMapType*(void) { return (IXMLResourceMapType*)&__IXMLResourceMapType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAliasType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAliasSimpleExtensionGroup;
+	_di_IXMLString_List FAliasObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_TargetHref();
+	System::UnicodeString __fastcall Get_SourceHref();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AliasSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AliasObjectExtensionGroup();
+	void __fastcall Set_TargetHref(System::UnicodeString Value);
+	void __fastcall Set_SourceHref(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAliasType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAliasType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAliasType() { }
+	
+private:
+	void *__IXMLAliasType;	// IXMLAliasType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {65F6CFAE-A764-48A7-82E1-C1C6D4236E51}
+	operator _di_IXMLAliasType()
+	{
+		_di_IXMLAliasType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAliasType*(void) { return (IXMLAliasType*)&__IXMLAliasType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAliasTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAliasType __fastcall Add();
+	_di_IXMLAliasType __fastcall Insert(const int Index);
+	_di_IXMLAliasType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAliasTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAliasTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAliasTypeList() { }
+	
+private:
+	void *__IXMLAliasTypeList;	// IXMLAliasTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {46FDB5A4-DFA9-49AF-BC21-D8E6A8E5A3C7}
+	operator _di_IXMLAliasTypeList()
+	{
+		_di_IXMLAliasTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAliasTypeList*(void) { return (IXMLAliasTypeList*)&__IXMLAliasTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLTrackType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLDateTimeTypeList FWhen;
+	_di_IXMLString_List FCoord;
+	_di_IXMLString_List FAngles;
+	_di_IXMLAnySimpleTypeList FTrackSimpleExtensionGroup;
+	_di_IXMLString_List FTrackObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_Extrude();
+	bool __fastcall Get_Tessellate();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	_di_IXMLDateTimeTypeList __fastcall Get_When();
+	_di_IXMLString_List __fastcall Get_Coord();
+	_di_IXMLString_List __fastcall Get_Angles();
+	_di_IXMLModelType __fastcall Get_Model();
+	_di_IXMLExtendedDataType __fastcall Get_ExtendedData();
+	_di_IXMLAnySimpleTypeList __fastcall Get_TrackSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_TrackObjectExtensionGroup();
+	void __fastcall Set_Extrude(bool Value);
+	void __fastcall Set_Tessellate(bool Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLTrackType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLTrackType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLTrackType() { }
+	
+private:
+	void *__IXMLTrackType;	// IXMLTrackType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3E4FE52A-8268-4741-84DD-E5D840983579}
+	operator _di_IXMLTrackType()
+	{
+		_di_IXMLTrackType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLTrackType*(void) { return (IXMLTrackType*)&__IXMLTrackType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLTrackTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLTrackType __fastcall Add();
+	_di_IXMLTrackType __fastcall Insert(const int Index);
+	_di_IXMLTrackType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLTrackTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLTrackTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLTrackTypeList() { }
+	
+private:
+	void *__IXMLTrackTypeList;	// IXMLTrackTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {D057F6A3-905A-4AAE-B38E-9404D43E53CF}
+	operator _di_IXMLTrackTypeList()
+	{
+		_di_IXMLTrackTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLTrackTypeList*(void) { return (IXMLTrackTypeList*)&__IXMLTrackTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMultiTrackType : public TXMLAbstractGeometryType
+{
+	typedef TXMLAbstractGeometryType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLTrackTypeList FTrack;
+	_di_IXMLAnySimpleTypeList FMultiTrackSimpleExtensionGroup;
+	_di_IXMLString_List FMultiTrackObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	bool __fastcall Get_Interpolate();
+	_di_IXMLTrackTypeList __fastcall Get_Track();
+	_di_IXMLAnySimpleTypeList __fastcall Get_MultiTrackSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_MultiTrackObjectExtensionGroup();
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_Interpolate(bool Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMultiTrackType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractGeometryType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMultiTrackType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractGeometryType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMultiTrackType() { }
+	
+private:
+	void *__IXMLMultiTrackType;	// IXMLMultiTrackType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {BB14C902-0764-49AB-89A4-1372950E8CB4}
+	operator _di_IXMLMultiTrackType()
+	{
+		_di_IXMLMultiTrackType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMultiTrackType*(void) { return (IXMLMultiTrackType*)&__IXMLMultiTrackType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLMultiTrackTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLMultiTrackType __fastcall Add();
+	_di_IXMLMultiTrackType __fastcall Insert(const int Index);
+	_di_IXMLMultiTrackType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLMultiTrackTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLMultiTrackTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLMultiTrackTypeList() { }
+	
+private:
+	void *__IXMLMultiTrackTypeList;	// IXMLMultiTrackTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {7DB204D6-1E58-4634-BD7A-5F83F8AB8028}
+	operator _di_IXMLMultiTrackTypeList()
+	{
+		_di_IXMLMultiTrackTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLMultiTrackTypeList*(void) { return (IXMLMultiTrackTypeList*)&__IXMLMultiTrackTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLGroundOverlayType : public TXMLAbstractOverlayType
+{
+	typedef TXMLAbstractOverlayType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAltitudeModeSimpleExtensionGroup;
+	_di_IXMLString_List FAltitudeModeObjectExtensionGroup;
+	_di_IXMLAnySimpleTypeList FGroundOverlaySimpleExtensionGroup;
+	_di_IXMLString_List FGroundOverlayObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Altitude();
+	System::UnicodeString __fastcall Get_AltitudeMode();
+	System::UnicodeString __fastcall Get_SeaFloorAltitudeMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AltitudeModeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AltitudeModeObjectExtensionGroup();
+	_di_IXMLAbstractExtentType __fastcall Get_AbstractExtentGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_GroundOverlaySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_GroundOverlayObjectExtensionGroup();
+	void __fastcall Set_Altitude(double Value);
+	void __fastcall Set_AltitudeMode(System::UnicodeString Value);
+	void __fastcall Set_SeaFloorAltitudeMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLGroundOverlayType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractOverlayType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLGroundOverlayType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractOverlayType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLGroundOverlayType() { }
+	
+private:
+	void *__IXMLGroundOverlayType;	// IXMLGroundOverlayType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C202AB50-E9DA-457A-A437-E1295214DE1A}
+	operator _di_IXMLGroundOverlayType()
+	{
+		_di_IXMLGroundOverlayType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLGroundOverlayType*(void) { return (IXMLGroundOverlayType*)&__IXMLGroundOverlayType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLatLonQuadType : public TXMLAbstractExtentType
+{
+	typedef TXMLAbstractExtentType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLatLonQuadSimpleExtensionGroup;
+	_di_IXMLString_List FLatLonQuadObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Coordinates();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LatLonQuadSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LatLonQuadObjectExtensionGroup();
+	void __fastcall Set_Coordinates(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLatLonQuadType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractExtentType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLatLonQuadType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractExtentType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLatLonQuadType() { }
+	
+private:
+	void *__IXMLLatLonQuadType;	// IXMLLatLonQuadType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3072F19A-A1B3-4DFA-A9FD-3DD3F3D037D7}
+	operator _di_IXMLLatLonQuadType()
+	{
+		_di_IXMLLatLonQuadType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLatLonQuadType*(void) { return (IXMLLatLonQuadType*)&__IXMLLatLonQuadType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLatLonBoxType : public TXMLAbstractLatLonBoxType
+{
+	typedef TXMLAbstractLatLonBoxType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLatLonBoxSimpleExtensionGroup;
+	_di_IXMLString_List FLatLonBoxObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Rotation();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LatLonBoxSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LatLonBoxObjectExtensionGroup();
+	void __fastcall Set_Rotation(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLatLonBoxType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractLatLonBoxType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLatLonBoxType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractLatLonBoxType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLatLonBoxType() { }
+	
+private:
+	void *__IXMLLatLonBoxType;	// IXMLLatLonBoxType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {FABAF8DB-CC6F-43CE-830F-468F8BE12603}
+	operator _di_IXMLLatLonBoxType()
+	{
+		_di_IXMLLatLonBoxType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLatLonBoxType*(void) { return (IXMLLatLonBoxType*)&__IXMLLatLonBoxType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLScreenOverlayType : public TXMLAbstractOverlayType
+{
+	typedef TXMLAbstractOverlayType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FScreenOverlaySimpleExtensionGroup;
+	_di_IXMLString_List FScreenOverlayObjectExtensionGroup;
+	
+protected:
+	_di_IXMLVec2Type __fastcall Get_OverlayXY();
+	_di_IXMLVec2Type __fastcall Get_ScreenXY();
+	_di_IXMLVec2Type __fastcall Get_RotationXY();
+	_di_IXMLVec2Type __fastcall Get_Size();
+	double __fastcall Get_Rotation();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ScreenOverlaySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ScreenOverlayObjectExtensionGroup();
+	void __fastcall Set_Rotation(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLScreenOverlayType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractOverlayType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLScreenOverlayType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractOverlayType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLScreenOverlayType() { }
+	
+private:
+	void *__IXMLScreenOverlayType;	// IXMLScreenOverlayType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {6A9594C6-A182-4A93-9983-869AD7152938}
+	operator _di_IXMLScreenOverlayType()
+	{
+		_di_IXMLScreenOverlayType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLScreenOverlayType*(void) { return (IXMLScreenOverlayType*)&__IXMLScreenOverlayType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPhotoOverlayType : public TXMLAbstractOverlayType
+{
+	typedef TXMLAbstractOverlayType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FPhotoOverlaySimpleExtensionGroup;
+	_di_IXMLString_List FPhotoOverlayObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Rotation();
+	_di_IXMLViewVolumeType __fastcall Get_ViewVolume();
+	_di_IXMLImagePyramidType __fastcall Get_ImagePyramid();
+	_di_IXMLPointType __fastcall Get_Point();
+	System::UnicodeString __fastcall Get_AbstractShape();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PhotoOverlaySimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PhotoOverlayObjectExtensionGroup();
+	void __fastcall Set_Rotation(double Value);
+	void __fastcall Set_AbstractShape(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPhotoOverlayType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractOverlayType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPhotoOverlayType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractOverlayType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPhotoOverlayType() { }
+	
+private:
+	void *__IXMLPhotoOverlayType;	// IXMLPhotoOverlayType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {9D087264-99C3-4F68-A484-6F446D089BC0}
+	operator _di_IXMLPhotoOverlayType()
+	{
+		_di_IXMLPhotoOverlayType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPhotoOverlayType*(void) { return (IXMLPhotoOverlayType*)&__IXMLPhotoOverlayType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLViewVolumeType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FViewVolumeSimpleExtensionGroup;
+	_di_IXMLString_List FViewVolumeObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_LeftFov();
+	double __fastcall Get_RightFov();
+	double __fastcall Get_BottomFov();
+	double __fastcall Get_TopFov();
+	double __fastcall Get_Near();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ViewVolumeSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ViewVolumeObjectExtensionGroup();
+	void __fastcall Set_LeftFov(double Value);
+	void __fastcall Set_RightFov(double Value);
+	void __fastcall Set_BottomFov(double Value);
+	void __fastcall Set_TopFov(double Value);
+	void __fastcall Set_Near(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLViewVolumeType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLViewVolumeType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLViewVolumeType() { }
+	
+private:
+	void *__IXMLViewVolumeType;	// IXMLViewVolumeType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {7D57D47D-7724-4FDB-98BB-A39DF12AF9A3}
+	operator _di_IXMLViewVolumeType()
+	{
+		_di_IXMLViewVolumeType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLViewVolumeType*(void) { return (IXMLViewVolumeType*)&__IXMLViewVolumeType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLImagePyramidType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FImagePyramidSimpleExtensionGroup;
+	_di_IXMLString_List FImagePyramidObjectExtensionGroup;
+	
+protected:
+	int __fastcall Get_TileSize();
+	int __fastcall Get_MaxWidth();
+	int __fastcall Get_MaxHeight();
+	System::UnicodeString __fastcall Get_AbstractGridOrigin();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ImagePyramidSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ImagePyramidObjectExtensionGroup();
+	void __fastcall Set_TileSize(int Value);
+	void __fastcall Set_MaxWidth(int Value);
+	void __fastcall Set_MaxHeight(int Value);
+	void __fastcall Set_AbstractGridOrigin(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLImagePyramidType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLImagePyramidType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLImagePyramidType() { }
+	
+private:
+	void *__IXMLImagePyramidType;	// IXMLImagePyramidType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {826FEBB3-4505-4BD7-A6C8-AB5137636150}
+	operator _di_IXMLImagePyramidType()
+	{
+		_di_IXMLImagePyramidType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLImagePyramidType*(void) { return (IXMLImagePyramidType*)&__IXMLImagePyramidType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLStyleType : public TXMLAbstractStyleSelectorType
+{
+	typedef TXMLAbstractStyleSelectorType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FStyleSimpleExtensionGroup;
+	_di_IXMLString_List FStyleObjectExtensionGroup;
+	
+protected:
+	_di_IXMLIconStyleType __fastcall Get_IconStyle();
+	_di_IXMLLabelStyleType __fastcall Get_LabelStyle();
+	_di_IXMLLineStyleType __fastcall Get_LineStyle();
+	_di_IXMLPolyStyleType __fastcall Get_PolyStyle();
+	_di_IXMLBalloonStyleType __fastcall Get_BalloonStyle();
+	_di_IXMLListStyleType __fastcall Get_ListStyle();
+	_di_IXMLAnySimpleTypeList __fastcall Get_StyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_StyleObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractStyleSelectorType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractStyleSelectorType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLStyleType() { }
+	
+private:
+	void *__IXMLStyleType;	// IXMLStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {70C5DFE5-F2A6-48EA-AF32-549F55A1F380}
+	operator _di_IXMLStyleType()
+	{
+		_di_IXMLStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLStyleType*(void) { return (IXMLStyleType*)&__IXMLStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractSubStyleType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractSubStyleSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractSubStyleObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractSubStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractSubStyleObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractSubStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractSubStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractSubStyleType() { }
+	
+private:
+	void *__IXMLAbstractSubStyleType;	// IXMLAbstractSubStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {90DF9175-C839-4C9C-9F59-E9F38AD3DFD6}
+	operator _di_IXMLAbstractSubStyleType()
+	{
+		_di_IXMLAbstractSubStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractSubStyleType*(void) { return (IXMLAbstractSubStyleType*)&__IXMLAbstractSubStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractColorStyleType : public TXMLAbstractSubStyleType
+{
+	typedef TXMLAbstractSubStyleType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractColorStyleSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractColorStyleObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Color();
+	System::UnicodeString __fastcall Get_AbstractColorMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractColorStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractColorStyleObjectExtensionGroup();
+	void __fastcall Set_Color(System::UnicodeString Value);
+	void __fastcall Set_AbstractColorMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractColorStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractSubStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractColorStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractSubStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractColorStyleType() { }
+	
+private:
+	void *__IXMLAbstractColorStyleType;	// IXMLAbstractColorStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2161172A-82B3-4C87-9F88-D013FC470663}
+	operator _di_IXMLAbstractColorStyleType()
+	{
+		_di_IXMLAbstractColorStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractColorStyleType*(void) { return (IXMLAbstractColorStyleType*)&__IXMLAbstractColorStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLIconStyleType : public TXMLAbstractColorStyleType
+{
+	typedef TXMLAbstractColorStyleType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FIconStyleSimpleExtensionGroup;
+	_di_IXMLString_List FIconStyleObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Scale();
+	double __fastcall Get_Heading();
+	_di_IXMLBasicLinkType __fastcall Get_Icon();
+	_di_IXMLVec2Type __fastcall Get_HotSpot();
+	_di_IXMLAnySimpleTypeList __fastcall Get_IconStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_IconStyleObjectExtensionGroup();
+	void __fastcall Set_Scale(double Value);
+	void __fastcall Set_Heading(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLIconStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractColorStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLIconStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractColorStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLIconStyleType() { }
+	
+private:
+	void *__IXMLIconStyleType;	// IXMLIconStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {371862ED-403E-4A27-A0B7-14224B2B2141}
+	operator _di_IXMLIconStyleType()
+	{
+		_di_IXMLIconStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLIconStyleType*(void) { return (IXMLIconStyleType*)&__IXMLIconStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLabelStyleType : public TXMLAbstractColorStyleType
+{
+	typedef TXMLAbstractColorStyleType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLabelStyleSimpleExtensionGroup;
+	_di_IXMLString_List FLabelStyleObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Scale();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LabelStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LabelStyleObjectExtensionGroup();
+	void __fastcall Set_Scale(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLabelStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractColorStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLabelStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractColorStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLabelStyleType() { }
+	
+private:
+	void *__IXMLLabelStyleType;	// IXMLLabelStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4C037FDB-A61D-4EBB-BDFC-3D4D10C68D5F}
+	operator _di_IXMLLabelStyleType()
+	{
+		_di_IXMLLabelStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLabelStyleType*(void) { return (IXMLLabelStyleType*)&__IXMLLabelStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLLineStyleType : public TXMLAbstractColorStyleType
+{
+	typedef TXMLAbstractColorStyleType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FLineStyleSimpleExtensionGroup;
+	_di_IXMLString_List FLineStyleObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Width();
+	_di_IXMLAnySimpleTypeList __fastcall Get_LineStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_LineStyleObjectExtensionGroup();
+	void __fastcall Set_Width(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLLineStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractColorStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLLineStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractColorStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLLineStyleType() { }
+	
+private:
+	void *__IXMLLineStyleType;	// IXMLLineStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B424E89E-FB41-45DB-AEF1-5A6CA2FABC32}
+	operator _di_IXMLLineStyleType()
+	{
+		_di_IXMLLineStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLLineStyleType*(void) { return (IXMLLineStyleType*)&__IXMLLineStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPolyStyleType : public TXMLAbstractColorStyleType
+{
+	typedef TXMLAbstractColorStyleType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FPolyStyleSimpleExtensionGroup;
+	_di_IXMLString_List FPolyStyleObjectExtensionGroup;
+	
+protected:
+	bool __fastcall Get_Fill();
+	bool __fastcall Get_Outline();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PolyStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PolyStyleObjectExtensionGroup();
+	void __fastcall Set_Fill(bool Value);
+	void __fastcall Set_Outline(bool Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPolyStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractColorStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPolyStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractColorStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPolyStyleType() { }
+	
+private:
+	void *__IXMLPolyStyleType;	// IXMLPolyStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {2BFF5803-0FD2-4B73-BDCE-5488B31601BA}
+	operator _di_IXMLPolyStyleType()
+	{
+		_di_IXMLPolyStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPolyStyleType*(void) { return (IXMLPolyStyleType*)&__IXMLPolyStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLBalloonStyleType : public TXMLAbstractSubStyleType
+{
+	typedef TXMLAbstractSubStyleType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FBalloonStyleSimpleExtensionGroup;
+	_di_IXMLString_List FBalloonStyleObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_AbstractBgColorGroup();
+	System::UnicodeString __fastcall Get_TextColor();
+	System::UnicodeString __fastcall Get_Text();
+	System::UnicodeString __fastcall Get_AbstractDisplayMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_BalloonStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_BalloonStyleObjectExtensionGroup();
+	void __fastcall Set_AbstractBgColorGroup(System::UnicodeString Value);
+	void __fastcall Set_TextColor(System::UnicodeString Value);
+	void __fastcall Set_Text(System::UnicodeString Value);
+	void __fastcall Set_AbstractDisplayMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLBalloonStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractSubStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLBalloonStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractSubStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLBalloonStyleType() { }
+	
+private:
+	void *__IXMLBalloonStyleType;	// IXMLBalloonStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {52F071F4-9F9D-46C8-B636-8BDA72A3B28A}
+	operator _di_IXMLBalloonStyleType()
+	{
+		_di_IXMLBalloonStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLBalloonStyleType*(void) { return (IXMLBalloonStyleType*)&__IXMLBalloonStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLListStyleType : public TXMLAbstractSubStyleType
+{
+	typedef TXMLAbstractSubStyleType inherited;
+	
+private:
+	_di_IXMLItemIconTypeList FItemIcon;
+	_di_IXMLAnySimpleTypeList FListStyleSimpleExtensionGroup;
+	_di_IXMLString_List FListStyleObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_AbstractListItemType();
+	System::UnicodeString __fastcall Get_BgColor();
+	_di_IXMLItemIconTypeList __fastcall Get_ItemIcon();
+	int __fastcall Get_MaxSnippetLines();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ListStyleSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ListStyleObjectExtensionGroup();
+	void __fastcall Set_AbstractListItemType(System::UnicodeString Value);
+	void __fastcall Set_BgColor(System::UnicodeString Value);
+	void __fastcall Set_MaxSnippetLines(int Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLListStyleType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractSubStyleType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLListStyleType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractSubStyleType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLListStyleType() { }
+	
+private:
+	void *__IXMLListStyleType;	// IXMLListStyleType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F0620F3C-DE18-4A57-AA29-C73AD94FA46D}
+	operator _di_IXMLListStyleType()
+	{
+		_di_IXMLListStyleType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLListStyleType*(void) { return (IXMLListStyleType*)&__IXMLListStyleType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLItemIconType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FItemIconSimpleExtensionGroup;
+	_di_IXMLString_List FItemIconObjectExtensionGroup;
+	
+protected:
+	System::Variant __fastcall Get_AbstractState();
+	System::UnicodeString __fastcall Get_Href();
+	_di_IXMLAnySimpleTypeList __fastcall Get_ItemIconSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_ItemIconObjectExtensionGroup();
+	void __fastcall Set_AbstractState(const System::Variant &Value);
+	void __fastcall Set_Href(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLItemIconType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLItemIconType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLItemIconType() { }
+	
+private:
+	void *__IXMLItemIconType;	// IXMLItemIconType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {55E9B6B5-BEC2-4CA4-9539-809880A83376}
+	operator _di_IXMLItemIconType()
+	{
+		_di_IXMLItemIconType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLItemIconType*(void) { return (IXMLItemIconType*)&__IXMLItemIconType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLItemIconTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLItemIconType __fastcall Add();
+	_di_IXMLItemIconType __fastcall Insert(const int Index);
+	_di_IXMLItemIconType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLItemIconTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLItemIconTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLItemIconTypeList() { }
+	
+private:
+	void *__IXMLItemIconTypeList;	// IXMLItemIconTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E5BA16ED-1763-4831-9C93-CFB3B7133E69}
+	operator _di_IXMLItemIconTypeList()
+	{
+		_di_IXMLItemIconTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLItemIconTypeList*(void) { return (IXMLItemIconTypeList*)&__IXMLItemIconTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLStyleMapType : public TXMLAbstractStyleSelectorType
+{
+	typedef TXMLAbstractStyleSelectorType inherited;
+	
+private:
+	_di_IXMLPairTypeList FPair;
+	_di_IXMLAnySimpleTypeList FStyleMapSimpleExtensionGroup;
+	_di_IXMLString_List FStyleMapObjectExtensionGroup;
+	
+protected:
+	_di_IXMLPairTypeList __fastcall Get_Pair();
+	_di_IXMLAnySimpleTypeList __fastcall Get_StyleMapSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_StyleMapObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLStyleMapType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractStyleSelectorType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLStyleMapType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractStyleSelectorType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLStyleMapType() { }
+	
+private:
+	void *__IXMLStyleMapType;	// IXMLStyleMapType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {5EE14F99-5B3E-4D52-91BF-CD9A1218F46B}
+	operator _di_IXMLStyleMapType()
+	{
+		_di_IXMLStyleMapType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLStyleMapType*(void) { return (IXMLStyleMapType*)&__IXMLStyleMapType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPairType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FPairSimpleExtensionGroup;
+	_di_IXMLString_List FPairObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_key();
+	System::UnicodeString __fastcall Get_StyleUrl();
+	_di_IXMLAbstractStyleSelectorType __fastcall Get_AbstractStyleSelectorGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PairSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PairObjectExtensionGroup();
+	void __fastcall Set_key(System::UnicodeString Value);
+	void __fastcall Set_StyleUrl(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPairType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPairType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPairType() { }
+	
+private:
+	void *__IXMLPairType;	// IXMLPairType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {DD667253-92A4-4F3D-9073-0263AB7EFCD4}
+	operator _di_IXMLPairType()
+	{
+		_di_IXMLPairType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPairType*(void) { return (IXMLPairType*)&__IXMLPairType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPairTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLPairType __fastcall Add();
+	_di_IXMLPairType __fastcall Insert(const int Index);
+	_di_IXMLPairType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPairTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPairTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPairTypeList() { }
+	
+private:
+	void *__IXMLPairTypeList;	// IXMLPairTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {D4EB0FA1-DFAC-4AC4-8E8D-C3EA0F0F2222}
+	operator _di_IXMLPairTypeList()
+	{
+		_di_IXMLPairTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPairTypeList*(void) { return (IXMLPairTypeList*)&__IXMLPairTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLTimeStampType : public TXMLAbstractTimePrimitiveType
+{
+	typedef TXMLAbstractTimePrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FTimeStampSimpleExtensionGroup;
+	_di_IXMLString_List FTimeStampObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_When();
+	_di_IXMLAnySimpleTypeList __fastcall Get_TimeStampSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_TimeStampObjectExtensionGroup();
+	void __fastcall Set_When(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLTimeStampType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTimePrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLTimeStampType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTimePrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLTimeStampType() { }
+	
+private:
+	void *__IXMLTimeStampType;	// IXMLTimeStampType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {CC90F04B-3024-43D9-806B-C2B0A7C8BD10}
+	operator _di_IXMLTimeStampType()
+	{
+		_di_IXMLTimeStampType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLTimeStampType*(void) { return (IXMLTimeStampType*)&__IXMLTimeStampType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLTimeSpanType : public TXMLAbstractTimePrimitiveType
+{
+	typedef TXMLAbstractTimePrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FTimeSpanSimpleExtensionGroup;
+	_di_IXMLString_List FTimeSpanObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Begin_();
+	System::UnicodeString __fastcall Get_End_();
+	_di_IXMLAnySimpleTypeList __fastcall Get_TimeSpanSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_TimeSpanObjectExtensionGroup();
+	void __fastcall Set_Begin_(System::UnicodeString Value);
+	void __fastcall Set_End_(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLTimeSpanType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTimePrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLTimeSpanType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTimePrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLTimeSpanType() { }
+	
+private:
+	void *__IXMLTimeSpanType;	// IXMLTimeSpanType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B1F50CB2-E906-451C-B12E-0F317AA62FA8}
+	operator _di_IXMLTimeSpanType()
+	{
+		_di_IXMLTimeSpanType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLTimeSpanType*(void) { return (IXMLTimeSpanType*)&__IXMLTimeSpanType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLCreateType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAbstractContainerTypeList FAbstractContainerGroup;
+	_di_IXMLMultiTrackTypeList FMultiTrack;
+	_di_IXMLMultiGeometryTypeList FMultiGeometry;
+	
+protected:
+	_di_IXMLAbstractContainerTypeList __fastcall Get_AbstractContainerGroup();
+	_di_IXMLMultiTrackTypeList __fastcall Get_MultiTrack();
+	_di_IXMLMultiGeometryTypeList __fastcall Get_MultiGeometry();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLCreateType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLCreateType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLCreateType() { }
+	
+private:
+	void *__IXMLCreateType;	// IXMLCreateType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {F5A67F77-BEEA-44B4-A20C-D37761AB337F}
+	operator _di_IXMLCreateType()
+	{
+		_di_IXMLCreateType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLCreateType*(void) { return (IXMLCreateType*)&__IXMLCreateType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDeleteType : public Xml::Xmldoc::TXMLNode
+{
+	typedef Xml::Xmldoc::TXMLNode inherited;
+	
+private:
+	_di_IXMLAbstractFeatureTypeList FAbstractFeatureGroup;
+	_di_IXMLAbstractGeometryTypeList FAbstractGeometryGroup;
+	
+protected:
+	_di_IXMLAbstractFeatureTypeList __fastcall Get_AbstractFeatureGroup();
+	_di_IXMLAbstractGeometryTypeList __fastcall Get_AbstractGeometryGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDeleteType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNode(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDeleteType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNode(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDeleteType() { }
+	
+private:
+	void *__IXMLDeleteType;	// IXMLDeleteType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E776C6C5-67E3-49BF-8D38-EE7E4539086F}
+	operator _di_IXMLDeleteType()
+	{
+		_di_IXMLDeleteType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDeleteType*(void) { return (IXMLDeleteType*)&__IXMLDeleteType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLChangeType : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAbstractObjectType __fastcall Get_AbstractObjectGroup(int Index);
+	_di_IXMLAbstractObjectType __fastcall Add();
+	_di_IXMLAbstractObjectType __fastcall Insert(const int Index);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLChangeType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLChangeType(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLChangeType() { }
+	
+private:
+	void *__IXMLChangeType;	// IXMLChangeType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {1EDDB85E-088C-4E2B-A79D-5ACCBB1B9791}
+	operator _di_IXMLChangeType()
+	{
+		_di_IXMLChangeType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLChangeType*(void) { return (IXMLChangeType*)&__IXMLChangeType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractTourPrimitiveType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAbstractTourPrimitiveSimpleExtensionGroup;
+	_di_IXMLString_List FAbstractTourPrimitiveObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAnySimpleTypeList __fastcall Get_AbstractTourPrimitiveSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AbstractTourPrimitiveObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractTourPrimitiveType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractTourPrimitiveType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractTourPrimitiveType() { }
+	
+private:
+	void *__IXMLAbstractTourPrimitiveType;	// IXMLAbstractTourPrimitiveType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {67BC8B37-70E0-445D-A9F5-38E779D405F1}
+	operator _di_IXMLAbstractTourPrimitiveType()
+	{
+		_di_IXMLAbstractTourPrimitiveType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractTourPrimitiveType*(void) { return (IXMLAbstractTourPrimitiveType*)&__IXMLAbstractTourPrimitiveType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAbstractTourPrimitiveTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	_di_IXMLAbstractTourPrimitiveType __fastcall Add();
+	_di_IXMLAbstractTourPrimitiveType __fastcall Insert(const int Index);
+	_di_IXMLAbstractTourPrimitiveType __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAbstractTourPrimitiveTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAbstractTourPrimitiveTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAbstractTourPrimitiveTypeList() { }
+	
+private:
+	void *__IXMLAbstractTourPrimitiveTypeList;	// IXMLAbstractTourPrimitiveTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {B4E8F7FC-50D6-4AC9-B70A-2F7FB6D6AB32}
+	operator _di_IXMLAbstractTourPrimitiveTypeList()
+	{
+		_di_IXMLAbstractTourPrimitiveTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAbstractTourPrimitiveTypeList*(void) { return (IXMLAbstractTourPrimitiveTypeList*)&__IXMLAbstractTourPrimitiveTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAnimatedUpdateType : public TXMLAbstractTourPrimitiveType
+{
+	typedef TXMLAbstractTourPrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FAnimatedUpdateSimpleExtensionGroup;
+	_di_IXMLString_List FAnimatedUpdateObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Duration();
+	_di_IXMLUpdateType __fastcall Get_Update();
+	double __fastcall Get_DelayedStart();
+	_di_IXMLAnySimpleTypeList __fastcall Get_AnimatedUpdateSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_AnimatedUpdateObjectExtensionGroup();
+	void __fastcall Set_Duration(double Value);
+	void __fastcall Set_DelayedStart(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAnimatedUpdateType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTourPrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAnimatedUpdateType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTourPrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAnimatedUpdateType() { }
+	
+private:
+	void *__IXMLAnimatedUpdateType;	// IXMLAnimatedUpdateType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {A2E28A24-55F9-4316-B9EB-A80961013A93}
+	operator _di_IXMLAnimatedUpdateType()
+	{
+		_di_IXMLAnimatedUpdateType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAnimatedUpdateType*(void) { return (IXMLAnimatedUpdateType*)&__IXMLAnimatedUpdateType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLFlyToType : public TXMLAbstractTourPrimitiveType
+{
+	typedef TXMLAbstractTourPrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FFlyToSimpleExtensionGroup;
+	_di_IXMLString_List FFlyToObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Duration();
+	System::UnicodeString __fastcall Get_AbstractFlyToMode();
+	_di_IXMLAbstractViewType __fastcall Get_AbstractViewGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_FlyToSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_FlyToObjectExtensionGroup();
+	void __fastcall Set_Duration(double Value);
+	void __fastcall Set_AbstractFlyToMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLFlyToType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTourPrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLFlyToType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTourPrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLFlyToType() { }
+	
+private:
+	void *__IXMLFlyToType;	// IXMLFlyToType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {20346892-9E03-4DC7-B32A-33A4B57E6351}
+	operator _di_IXMLFlyToType()
+	{
+		_di_IXMLFlyToType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLFlyToType*(void) { return (IXMLFlyToType*)&__IXMLFlyToType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLPlaylistType : public TXMLAbstractObjectType
+{
+	typedef TXMLAbstractObjectType inherited;
+	
+private:
+	_di_IXMLAbstractTourPrimitiveTypeList FAbstractTourPrimitiveGroup;
+	_di_IXMLAnySimpleTypeList FPlaylistSimpleExtensionGroup;
+	_di_IXMLString_List FPlaylistObjectExtensionGroup;
+	
+protected:
+	_di_IXMLAbstractTourPrimitiveTypeList __fastcall Get_AbstractTourPrimitiveGroup();
+	_di_IXMLAnySimpleTypeList __fastcall Get_PlaylistSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_PlaylistObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLPlaylistType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractObjectType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLPlaylistType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractObjectType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLPlaylistType() { }
+	
+private:
+	void *__IXMLPlaylistType;	// IXMLPlaylistType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {76A25037-10AA-46C3-A93B-1F7DB48724B6}
+	operator _di_IXMLPlaylistType()
+	{
+		_di_IXMLPlaylistType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLPlaylistType*(void) { return (IXMLPlaylistType*)&__IXMLPlaylistType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLSoundCueType : public TXMLAbstractTourPrimitiveType
+{
+	typedef TXMLAbstractTourPrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FSoundCueSimpleExtensionGroup;
+	_di_IXMLString_List FSoundCueObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_Href();
+	double __fastcall Get_DelayedStart();
+	_di_IXMLAnySimpleTypeList __fastcall Get_SoundCueSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_SoundCueObjectExtensionGroup();
+	void __fastcall Set_Href(System::UnicodeString Value);
+	void __fastcall Set_DelayedStart(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLSoundCueType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTourPrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLSoundCueType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTourPrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLSoundCueType() { }
+	
+private:
+	void *__IXMLSoundCueType;	// IXMLSoundCueType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {1F00D1E3-1E49-41E2-A589-CF62763FDC2A}
+	operator _di_IXMLSoundCueType()
+	{
+		_di_IXMLSoundCueType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLSoundCueType*(void) { return (IXMLSoundCueType*)&__IXMLSoundCueType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLTourType : public TXMLAbstractFeatureType
+{
+	typedef TXMLAbstractFeatureType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FTourSimpleExtensionGroup;
+	_di_IXMLString_List FTourObjectExtensionGroup;
+	
+protected:
+	_di_IXMLPlaylistType __fastcall Get_Playlist();
+	_di_IXMLAnySimpleTypeList __fastcall Get_TourSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_TourObjectExtensionGroup();
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLTourType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractFeatureType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLTourType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractFeatureType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLTourType() { }
+	
+private:
+	void *__IXMLTourType;	// IXMLTourType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C9604741-720D-48CD-BAC0-B0E463BA0575}
+	operator _di_IXMLTourType()
+	{
+		_di_IXMLTourType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLTourType*(void) { return (IXMLTourType*)&__IXMLTourType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLTourControlType : public TXMLAbstractTourPrimitiveType
+{
+	typedef TXMLAbstractTourPrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FTourControlSimpleExtensionGroup;
+	_di_IXMLString_List FTourControlObjectExtensionGroup;
+	
+protected:
+	System::UnicodeString __fastcall Get_AbstractPlayMode();
+	_di_IXMLAnySimpleTypeList __fastcall Get_TourControlSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_TourControlObjectExtensionGroup();
+	void __fastcall Set_AbstractPlayMode(System::UnicodeString Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLTourControlType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTourPrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLTourControlType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTourPrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLTourControlType() { }
+	
+private:
+	void *__IXMLTourControlType;	// IXMLTourControlType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {C8D65235-A748-4A70-B619-C20392CF34B3}
+	operator _di_IXMLTourControlType()
+	{
+		_di_IXMLTourControlType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLTourControlType*(void) { return (IXMLTourControlType*)&__IXMLTourControlType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLWaitType : public TXMLAbstractTourPrimitiveType
+{
+	typedef TXMLAbstractTourPrimitiveType inherited;
+	
+private:
+	_di_IXMLAnySimpleTypeList FWaitSimpleExtensionGroup;
+	_di_IXMLString_List FWaitObjectExtensionGroup;
+	
+protected:
+	double __fastcall Get_Duration();
+	_di_IXMLAnySimpleTypeList __fastcall Get_WaitSimpleExtensionGroup();
+	_di_IXMLString_List __fastcall Get_WaitObjectExtensionGroup();
+	void __fastcall Set_Duration(double Value);
+	
+public:
+	virtual void __fastcall AfterConstruction();
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLWaitType(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : TXMLAbstractTourPrimitiveType(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLWaitType(Xml::Xmldoc::TXMLNode* HostNode) : TXMLAbstractTourPrimitiveType(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLWaitType() { }
+	
+private:
+	void *__IXMLWaitType;	// IXMLWaitType 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {52291C56-803A-43ED-94C5-615AAC3FD535}
+	operator _di_IXMLWaitType()
+	{
+		_di_IXMLWaitType intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLWaitType*(void) { return (IXMLWaitType*)&__IXMLWaitType; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAtomEmailAddressList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value);
+	System::UnicodeString __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAtomEmailAddressList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAtomEmailAddressList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAtomEmailAddressList() { }
+	
+private:
+	void *__IXMLAtomEmailAddressList;	// IXMLAtomEmailAddressList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {12CE633A-830D-4486-BE75-3DE29B8664FD}
+	operator _di_IXMLAtomEmailAddressList()
+	{
+		_di_IXMLAtomEmailAddressList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAtomEmailAddressList*(void) { return (IXMLAtomEmailAddressList*)&__IXMLAtomEmailAddressList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLDateTimeTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value);
+	System::UnicodeString __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLDateTimeTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLDateTimeTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLDateTimeTypeList() { }
+	
+private:
+	void *__IXMLDateTimeTypeList;	// IXMLDateTimeTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {4D6C626A-3F8D-4047-9327-2B18D9FB1C7E}
+	operator _di_IXMLDateTimeTypeList()
+	{
+		_di_IXMLDateTimeTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLDateTimeTypeList*(void) { return (IXMLDateTimeTypeList*)&__IXMLDateTimeTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAnyTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value);
+	System::UnicodeString __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAnyTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAnyTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAnyTypeList() { }
+	
+private:
+	void *__IXMLAnyTypeList;	// IXMLAnyTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {3FECD960-D93B-4175-9026-8A52984D5237}
+	operator _di_IXMLAnyTypeList()
+	{
+		_di_IXMLAnyTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAnyTypeList*(void) { return (IXMLAnyTypeList*)&__IXMLAnyTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLAnySimpleTypeList : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::Variant &Value);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::Variant &Value);
+	System::Variant __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLAnySimpleTypeList(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLAnySimpleTypeList(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLAnySimpleTypeList() { }
+	
+private:
+	void *__IXMLAnySimpleTypeList;	// IXMLAnySimpleTypeList 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E97AC6F8-4CBE-4061-84C9-1757B822493A}
+	operator _di_IXMLAnySimpleTypeList()
+	{
+		_di_IXMLAnySimpleTypeList intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLAnySimpleTypeList*(void) { return (IXMLAnySimpleTypeList*)&__IXMLAnySimpleTypeList; }
+	#endif
+	
+};
+
+
+class PASCALIMPLEMENTATION TXMLString_List : public Xml::Xmldoc::TXMLNodeCollection
+{
+	typedef Xml::Xmldoc::TXMLNodeCollection inherited;
+	
+protected:
+	Xml::Xmlintf::_di_IXMLNode __fastcall Add(const System::UnicodeString Value);
+	Xml::Xmlintf::_di_IXMLNode __fastcall Insert(const int Index, const System::UnicodeString Value);
+	System::UnicodeString __fastcall Get_Item(int Index);
+public:
+	/* TXMLNode.Create */ inline __fastcall TXMLString_List(const Xml::Xmldom::_di_IDOMNode ADOMNode, Xml::Xmldoc::TXMLNode* const AParentNode, Xml::Xmldoc::TXMLDocument* const OwnerDoc) : Xml::Xmldoc::TXMLNodeCollection(ADOMNode, AParentNode, OwnerDoc) { }
+	/* TXMLNode.CreateHosted */ inline __fastcall TXMLString_List(Xml::Xmldoc::TXMLNode* HostNode) : Xml::Xmldoc::TXMLNodeCollection(HostNode) { }
+	/* TXMLNode.Destroy */ inline __fastcall virtual ~TXMLString_List() { }
+	
+private:
+	void *__IXMLString_List;	// IXMLString_List 
+	
+public:
+	#if defined(MANAGED_INTERFACE_OPERATORS)
+	// {E88ECD2F-A6AA-4919-85FE-75E723DFF2B6}
+	operator _di_IXMLString_List()
+	{
+		_di_IXMLString_List intf;
+		this->GetInterface(intf);
+		return intf;
+	}
+	#else
+	operator IXMLString_List*(void) { return (IXMLString_List*)&__IXMLString_List; }
+	#endif
+	
+};
+
+
+//-- var, const, procedure ---------------------------------------------------
+#define TargetNamespace L"http://www.opengis.net/kml/2.2"
+extern DELPHI_PACKAGE _di_IXMLDocumentType __fastcall GetDocument(Xml::Xmlintf::_di_IXMLDocument Doc);
+extern DELPHI_PACKAGE _di_IXMLDocumentType __fastcall LoadDocument(const System::UnicodeString FileName);
+extern DELPHI_PACKAGE _di_IXMLDocumentType __fastcall NewDocument();
+}	/* namespace Ogckml23 */
+#if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_OGCKML23)
+using namespace Ogckml23;
+#endif
+#pragma pack(pop)
+#pragma option pop
+
+#pragma delphiheader end.
+//-- end unit ----------------------------------------------------------------
+#endif	// Ogckml23HPP

@@ -92,6 +92,8 @@ struct tagCABSTRBLOB;
 struct tagCALPSTR;
 struct tagCALPWSTR;
 struct tagCAPROPVARIANT;
+struct __MIDL___MIDL_itf_PortableDeviceApi_0001_0000_0001;
+struct tag_inner_PROPVARIANT;
 struct __MIDL_IOleAutomationTypes_0004;
 struct __MIDL_IOleAutomationTypes_0001;
 struct _wireSAFEARRAY_UNION;
@@ -199,7 +201,7 @@ typedef tagTYPEDESC *PUserType11;
 
 typedef tagARRAYDESC *PUserType12;
 
-typedef tagPROPVARIANT *PUserType2;
+typedef tag_inner_PROPVARIANT *PUserType2;
 
 typedef unsigned *PUINT1;
 
@@ -819,12 +821,324 @@ struct DECLSPEC_DRECORD tagCAPROPVARIANT
 {
 public:
 	unsigned cElems;
-	tagPROPVARIANT *pElems;
+	tag_inner_PROPVARIANT *pElems;
 };
 #pragma pack(pop)
 
 
-typedef tagPROPVARIANT tag_inner_PROPVARIANT;
+struct DECLSPEC_DRECORD __MIDL___MIDL_itf_PortableDeviceApi_0001_0000_0001
+{
+	
+public:
+	union
+	{
+		struct 
+		{
+			tag_inner_PROPVARIANT *pvarVal;
+		};
+		struct 
+		{
+			wirePSAFEARRAY *pparray;
+		};
+		struct 
+		{
+			void *ppdispVal;
+		};
+		struct 
+		{
+			void *ppunkVal;
+		};
+		struct 
+		{
+			System::WideString *pbstrVal;
+		};
+		struct 
+		{
+			System::TDateTimeBase *pdate;
+		};
+		struct 
+		{
+			System::CurrencyBase *pcyVal;
+		};
+		struct 
+		{
+			int *pscode;
+		};
+		struct 
+		{
+			tagDEC *pdecVal;
+		};
+		struct 
+		{
+			System::WordBool *pboolVal;
+		};
+		struct 
+		{
+			double *pdblVal;
+		};
+		struct 
+		{
+			float *pfltVal;
+		};
+		struct 
+		{
+			unsigned *puintVal;
+		};
+		struct 
+		{
+			int *pintVal;
+		};
+		struct 
+		{
+			unsigned *pulVal;
+		};
+		struct 
+		{
+			int *plVal;
+		};
+		struct 
+		{
+			System::Word *puiVal;
+		};
+		struct 
+		{
+			short *piVal;
+		};
+		struct 
+		{
+			System::Byte *pbVal;
+		};
+		struct 
+		{
+			System::Int8 *pcVal;
+		};
+		struct 
+		{
+			tagCAPROPVARIANT capropvar;
+		};
+		struct 
+		{
+			tagCALPWSTR calpwstr;
+		};
+		struct 
+		{
+			tagCALPSTR calpstr;
+		};
+		struct 
+		{
+			tagCABSTRBLOB cabstrblob;
+		};
+		struct 
+		{
+			tagCABSTR cabstr;
+		};
+		struct 
+		{
+			tagCACLIPDATA caclipdata;
+		};
+		struct 
+		{
+			tagCACLSID cauuid;
+		};
+		struct 
+		{
+			tagCAFILETIME cafiletime;
+		};
+		struct 
+		{
+			tagCADATE cadate;
+		};
+		struct 
+		{
+			tagCACY cacy;
+		};
+		struct 
+		{
+			tagCASCODE cascode;
+		};
+		struct 
+		{
+			tagCABOOL cabool;
+		};
+		struct 
+		{
+			tagCADBL cadbl;
+		};
+		struct 
+		{
+			tagCAFLT caflt;
+		};
+		struct 
+		{
+			tagCAUH cauh;
+		};
+		struct 
+		{
+			tagCAH cah;
+		};
+		struct 
+		{
+			tagCAUL caul;
+		};
+		struct 
+		{
+			tagCAL cal;
+		};
+		struct 
+		{
+			tagCAUI caui;
+		};
+		struct 
+		{
+			tagCAI cai;
+		};
+		struct 
+		{
+			tagCAUB caub;
+		};
+		struct 
+		{
+			tagCAC cac;
+		};
+		struct 
+		{
+			PUserType5 *parray;
+		};
+		struct 
+		{
+			tagVersionedStream *pVersionedStream;
+		};
+		struct 
+		{
+			void *pStorage;
+		};
+		struct 
+		{
+			void *pStream;
+		};
+		struct 
+		{
+			void *pdispVal;
+		};
+		struct 
+		{
+			void *punkVal;
+		};
+		struct 
+		{
+			System::WideChar *pwszVal;
+		};
+		struct 
+		{
+			char *pszVal;
+		};
+		struct 
+		{
+			tagBLOB blob;
+		};
+		struct 
+		{
+			tagBSTRBLOB bstrblobVal;
+		};
+		struct 
+		{
+			void *bstrVal;
+		};
+		struct 
+		{
+			tagCLIPDATA *pClipData;
+		};
+		struct 
+		{
+			GUID *puuid;
+		};
+		struct 
+		{
+			_FILETIME filetime;
+		};
+		struct 
+		{
+			System::TDateTimeBase date;
+		};
+		struct 
+		{
+			System::CurrencyBase cyVal;
+		};
+		struct 
+		{
+			int scode;
+		};
+		struct 
+		{
+			System::WordBool Bool;
+		};
+		struct 
+		{
+			System::WordBool boolVal;
+		};
+		struct 
+		{
+			double dblVal;
+		};
+		struct 
+		{
+			float fltVal;
+		};
+		struct 
+		{
+			_ULARGE_INTEGER uhVal;
+		};
+		struct 
+		{
+			_LARGE_INTEGER hVal;
+		};
+		struct 
+		{
+			unsigned uintVal;
+		};
+		struct 
+		{
+			int intVal;
+		};
+		struct 
+		{
+			unsigned ulVal;
+		};
+		struct 
+		{
+			int lVal;
+		};
+		struct 
+		{
+			System::Word uiVal;
+		};
+		struct 
+		{
+			short iVal;
+		};
+		struct 
+		{
+			System::Byte bVal;
+		};
+		struct 
+		{
+			System::Int8 cVal;
+		};
+		
+	};
+};
+
+
+struct DECLSPEC_DRECORD tag_inner_PROPVARIANT
+{
+public:
+	System::Word vt;
+	System::Byte wReserved1;
+	System::Byte wReserved2;
+	unsigned wReserved3;
+	__MIDL___MIDL_itf_PortableDeviceApi_0001_0000_0001 __MIDL____MIDL_itf_PortableDeviceApi_0001_00000001;
+};
+
 
 struct DECLSPEC_DRECORD __MIDL_IOleAutomationTypes_0004
 {
@@ -1156,9 +1470,9 @@ __interface  INTERFACE_UUID("{625E2DF8-6392-4CF0-9AD1-3CFA5F17775C}") IPortableD
 __interface  INTERFACE_UUID("{6848F6F2-3155-4F86-B6F5-263EEEAB3143}") IPortableDeviceValues  : public System::IInterface 
 {
 	virtual HRESULT __stdcall GetCount(unsigned &pcelt) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned index, _tagpropertykey &pKey, tagPROPVARIANT &pValue) = 0 ;
-	virtual HRESULT __stdcall SetValue(_tagpropertykey &key, tagPROPVARIANT &pValue) = 0 ;
-	virtual HRESULT __stdcall GetValue(_tagpropertykey &key, /* out */ tagPROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall GetAt(unsigned index, _tagpropertykey &pKey, tag_inner_PROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall SetValue(_tagpropertykey &key, tag_inner_PROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall GetValue(_tagpropertykey &key, /* out */ tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall SetStringValue(_tagpropertykey &key, System::WideChar * Value) = 0 ;
 	virtual HRESULT __stdcall GetStringValue(_tagpropertykey &key, /* out */ System::WideChar * &pValue) = 0 ;
 	virtual HRESULT __stdcall SetUnsignedIntegerValue(_tagpropertykey &key, unsigned Value) = 0 ;
@@ -1290,8 +1604,8 @@ __interface  INTERFACE_UUID("{00020402-0000-0000-C000-000000000046}") ITypeLib  
 __interface  INTERFACE_UUID("{89B2E422-4F1B-4316-BCEF-A44AFEA83EB3}") IPortableDevicePropVariantCollection  : public System::IInterface 
 {
 	virtual HRESULT __stdcall GetCount(unsigned &pcElems) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned dwIndex, tagPROPVARIANT &pValue) = 0 ;
-	virtual HRESULT __stdcall Add(tagPROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall GetAt(unsigned dwIndex, tag_inner_PROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall Add(tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall GetType(/* out */ System::Word &pvt) = 0 ;
 	virtual HRESULT __stdcall ChangeType(System::Word vt) = 0 ;
 	virtual HRESULT __stdcall Clear() = 0 ;
@@ -1320,8 +1634,8 @@ __interface  INTERFACE_UUID("{886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99}") IPropertyS
 {
 	virtual HRESULT __stdcall GetCount(/* out */ unsigned &cProps) = 0 ;
 	virtual HRESULT __stdcall GetAt(unsigned iProp, /* out */ _tagpropertykey &pKey) = 0 ;
-	virtual HRESULT __stdcall GetValue(_tagpropertykey &key, /* out */ tagPROPVARIANT &pv) = 0 ;
-	virtual HRESULT __stdcall SetValue(_tagpropertykey &key, tagPROPVARIANT &propvar) = 0 ;
+	virtual HRESULT __stdcall GetValue(_tagpropertykey &key, /* out */ tag_inner_PROPVARIANT &pv) = 0 ;
+	virtual HRESULT __stdcall SetValue(_tagpropertykey &key, tag_inner_PROPVARIANT &propvar) = 0 ;
 	virtual HRESULT __stdcall Commit() = 0 ;
 };
 

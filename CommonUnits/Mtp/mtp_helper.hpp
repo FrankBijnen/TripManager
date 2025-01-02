@@ -23,6 +23,7 @@
 #include <System.Win.ComObj.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <PortableDeviceApiLib_TLB.hpp>
+#include <UnitMtpDevice.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -30,8 +31,6 @@ namespace Mtp_helper
 {
 //-- forward type declarations -----------------------------------------------
 //-- type declarations -------------------------------------------------------
-typedef Portabledeviceapilib_tlb::_di_IPortableDevice IMTPDevice;
-
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::WideString CLIENT_NAME;
 static const System::Int8 CLIENT_MAJOR_VER = System::Int8(0x1);
@@ -296,12 +295,13 @@ static const System::Int8 WPD_PROPERTY_ATTRIBUTE_REGULAR_EXPRESSION_PID = System
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_FMTID;
 static const System::Int8 WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_PID = System::Int8(0xd);
 #define WPD_DEVICE_OBJECT_ID L"DEVICE"
-extern DELPHI_PACKAGE bool __fastcall RenameObject(Portabledeviceapilib_tlb::_di_IPortableDevice Device, System::WideChar * ObjectId, System::WideChar * NewName);
+extern DELPHI_PACKAGE bool __fastcall RenameObject(Portabledeviceapilib_tlb::_di_IPortableDevice Device, System::WideString ObjectId, System::WideString NewName);
 extern DELPHI_PACKAGE bool __fastcall ConnectToDevice(System::WideString SDev, Portabledeviceapilib_tlb::_di_IPortableDevice &PortableDev, bool Readonly = true);
 extern DELPHI_PACKAGE System::Classes::TList* __fastcall GetDevices();
-extern DELPHI_PACKAGE System::WideChar * __fastcall ReadFilesFromDevice(System::WideString SDev, Vcl::Comctrls::TListItems* Lst, System::WideString SParent, System::WideString &CompletePath);
+extern DELPHI_PACKAGE System::WideString __fastcall GetFirstStorageID(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev);
+extern DELPHI_PACKAGE System::WideChar * __fastcall ReadFilesFromDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, Vcl::Comctrls::TListItems* Lst, System::WideString SParent, System::WideString &CompletePath);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForFile(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SPath, System::WideString SFile, Vcl::Comctrls::TListItem* AListItem = (Vcl::Comctrls::TListItem*)(0x0));
-extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForPath(System::WideString SDev, System::WideString SPath, System::UnicodeString &FriendlyPath);
+extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForPath(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SPath, System::UnicodeString &FriendlyPath);
 extern DELPHI_PACKAGE bool __fastcall GetFileFromDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NFile);
 extern DELPHI_PACKAGE bool __fastcall DelFileFromDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile);
 extern DELPHI_PACKAGE System::WideString __fastcall TransferNewFileToDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NewName = System::WideString());

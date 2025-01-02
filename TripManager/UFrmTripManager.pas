@@ -10,7 +10,7 @@ uses
   Vcl.ImgList, Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls,
   Vcl.ToolWin, Vcl.ButtonGroup,
   TripManager_ShellList,
-  BCHexEditor,  UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, UnitGpi, Monitor;
+  BCHexEditor, UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, UnitGpi, Monitor;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
