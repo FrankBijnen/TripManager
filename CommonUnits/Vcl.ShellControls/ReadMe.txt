@@ -9,11 +9,7 @@ Due to the Copyright statement I can't distribute that source, but the Community
 
 property OnCustomDrawItem;
 
-2) In the 'public' declarations of TShellFolder, after 'property Details...' add these lines.
-
-    property DetailStrings: TStrings read FDetails;
-
-3) In the 'private' declarations of TCustomShellListView, comment 'procedure EnumColumns'.
+2) In the 'private' declarations of TCustomShellListView, comment 'procedure EnumColumns'.
 
 //  procedure EnumColumns;
 
@@ -25,7 +21,7 @@ property OnCustomDrawItem;
 
     property FoldersList: TList read FFolders;
 
-- Open the ShellControls.groupproj in Delphi, Compile and Install the 32 Bits version. The 64 Bits also works, but is not needed.
+- Open the ShellControls.groupproj in Delphi (Or CBuilder), Compile and Install the 32 Bits version. The 64 Bits also works, but is not needed.
 
 Notes:
 
