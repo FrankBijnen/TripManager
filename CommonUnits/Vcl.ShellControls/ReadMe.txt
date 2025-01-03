@@ -26,5 +26,5 @@ property OnCustomDrawItem;
 Notes:
 
 - If you already have these controls installed, make the modifications described above to your version.
-- Add the subdirectory 'Vcl.ShellControls' to the Search path. 
+- The subdirectory 'Vcl.ShellControls' is in the Search path of the Project. 
 

@@ -68,7 +68,7 @@
         <VerInfo_Locale>1043</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <IncludePath>..\TripManager\;$(IncludePath)</IncludePath>
-        <DCC_UnitSearchPath>..\CommonUnits;..\CommonUnits\BCHex;..\CommonUnits\DirMon;..\CommonUnits\kml;..\CommonUnits\LVSort;..\CommonUnits\Mtp;..\CommonUnits\osm;..\CommonUnits\VerySimpleXml;..\TripManager;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\CommonUnits;..\CommonUnits\BCHex;..\CommonUnits\DirMon;..\CommonUnits\kml;..\CommonUnits\LVSort;..\CommonUnits\Mtp;..\CommonUnits\osm;..\CommonUnits\VerySimpleXml;..\CommonUnits\Vcl.ShellControls;..\TripManager;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <ILINK_LibraryPath>..\TripManager\;..\CommonUnits;..\CommonUnits\BCHex;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <Custom_Styles>&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;</Custom_Styles>
