@@ -448,6 +448,9 @@ var CurrentTrack: TXmlVSNode;
                           const NS, Category: string);
     var AnExtensionsNode: TXmlVsNode;
     begin
+      if (ProcessCategory = []) then
+        exit;
+
       AnExtensionsNode := ExtensionsNode.AddChild(NS + 'WaypointExtension');
       AnExtensionsNode := AnExtensionsNode.AddChild(NS + 'Categories');
       if (pcSymbol in ProcessCategory) then
@@ -474,6 +477,8 @@ var CurrentTrack: TXmlVSNode;
     var AnExtensionsNode, CategoriesNode: TXmlVsNode;
         CatsPos, CatPos:integer;
     begin
+      if (ProcessCategory = []) then
+        exit;
       if (ExtensionsNode = nil) then
         exit;
       AnExtensionsNode := ExtensionsNode.Find(NS + 'WaypointExtension');
@@ -674,6 +679,13 @@ var CurrentTrack: TXmlVSNode;
       RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
 
       // Begin
+      if (ProcessDistance) and
+         (Cnt = 1) then
+      begin
+        TotalDistance := 0;
+        PrevCoord := CoordFromAttribute(RtePtNode.AttributeList);
+      end;
+
       if (ProcessBegin) and
          (Cnt = 1) then
       begin
@@ -713,11 +725,6 @@ var CurrentTrack: TXmlVSNode;
         if (ProcessWayPtsFromRoute) then
           AddWayPointFromRoute(RtePtNode, WptName, BeginStr, Symbol);
 
-        if (ProcessDistance) then
-        begin
-          TotalDistance := 0;
-          PrevCoord := CoordFromAttribute(RtePtNode.AttributeList);
-        end;
         if (ProcessViaPts) then
           AddBeginPoint(RtePtNode, WptName, Symbol);
       end;

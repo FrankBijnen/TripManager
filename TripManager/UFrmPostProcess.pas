@@ -175,7 +175,7 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginStr', BeginStr);
 
   ProcessEnd := ChkProcessEnd.Checked;
-  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessEnd', BooleanValues[ProcessBegin]);
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessEnd', BooleanValues[ProcessEnd]);
   EndSymbol := CmbEndSymbol.Text;
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndSymbol', EndSymbol);
   EndStr := EdEndStr.Text;
