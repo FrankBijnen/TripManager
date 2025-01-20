@@ -49,8 +49,12 @@ Source: "..\Win32\Symbols\*"; Excludes: "*.png,*.jbf,*.db"; DestDir: "{app}\Symb
 ;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell\f_createadditional"; ValueType: string; ValueData: "Create additional files (Via points, Google, OSM and POI)"; Flags: uninsdeletekey
 ;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell\f_createadditional\command"; ValueType: string; ValueData: """{app}\CreateAdditional.exe"" ""%L"""; Flags: uninsdeletekey
 
+; attempt to remove previous version icon installed on userdesktop. New one is autodesktop
+[InstallDelete]
+Type: files; Name: "{userdesktop}\TripManager.lnk";                                   tasks: desktopicon;
+
 [Icons]
 Name: "{group}\{#MyAppName}";         Filename: "{app}\TripManager.exe"
-Name: "{userdesktop}\{#MyAppName}";   Filename: "{app}\TripManager.exe";              tasks: desktopicon;
+Name: "{autodesktop}\{#MyAppName}";   Filename: "{app}\TripManager.exe";              tasks: desktopicon;
 
 [Run]

@@ -41,7 +41,7 @@ object FrmTripManager: TFrmTripManager
     Height = 245
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 1293
+    ExplicitWidth = 1295
     object VSplitterDev_Files: TSplitter
       Left = 631
       Top = 1
@@ -218,7 +218,7 @@ object FrmTripManager: TFrmTripManager
       Height = 243
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 656
+      ExplicitWidth = 658
       object VSplitterFile_Sys: TSplitter
         Left = 247
         Top = 33
@@ -307,7 +307,7 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 4
-        ExplicitWidth = 654
+        ExplicitWidth = 656
         object BtnAddToMap: TButton
           AlignWithMargins = True
           Left = 170
@@ -389,7 +389,7 @@ object FrmTripManager: TFrmTripManager
         Height = 25
         Align = alBottom
         TabOrder = 3
-        ExplicitWidth = 654
+        ExplicitWidth = 656
         object EdFileSysFolder: TEdit
           AlignWithMargins = True
           Left = 69
@@ -401,7 +401,7 @@ object FrmTripManager: TFrmTripManager
           Align = alClient
           TabOrder = 0
           OnKeyPress = EdFileSysFolderKeyPress
-          ExplicitWidth = 581
+          ExplicitWidth = 583
           ExplicitHeight = 21
         end
         object Panel1: TPanel
@@ -434,8 +434,8 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 657
-    ExplicitHeight = 366
+    ExplicitWidth = 659
+    ExplicitHeight = 363
     object TsHex: TTabSheet
       Caption = 'Hexadecimal display'
       object HexPanel: TPanel
@@ -487,7 +487,7 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 0
         OnResize = AdvPanel_MapTopResize
-        ExplicitWidth = 649
+        ExplicitWidth = 651
         object SpeedBtn_MapClear: TSpeedButton
           Left = 0
           Top = 0
@@ -540,7 +540,7 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           TabOrder = 2
           Text = '-'
-          ExplicitWidth = 62
+          ExplicitWidth = 64
           ExplicitHeight = 21
         end
         object PnlCoordinates: TPanel
@@ -589,8 +589,8 @@ object FrmTripManager: TFrmTripManager
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitTop = 301
-        ExplicitWidth = 649
+        ExplicitTop = 298
+        ExplicitWidth = 651
         object EditMapBounds: TLabeledEdit
           AlignWithMargins = True
           Left = 50
@@ -612,7 +612,7 @@ object FrmTripManager: TFrmTripManager
           ShowHint = True
           TabOrder = 0
           Text = ''
-          ExplicitWidth = 596
+          ExplicitWidth = 598
           ExplicitHeight = 21
         end
       end
@@ -628,8 +628,8 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
-        ExplicitWidth = 649
-        ExplicitHeight = 279
+        ExplicitWidth = 651
+        ExplicitHeight = 276
       end
     end
   end
@@ -641,7 +641,7 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsTripGpiInfo
     Align = alLeft
     TabOrder = 2
-    ExplicitHeight = 366
+    ExplicitHeight = 363
     object TsTripGpiInfo: TTabSheet
       Caption = 'Trip info'
       object VSplitterTree_Grid: TSplitter
@@ -685,7 +685,7 @@ object FrmTripManager: TFrmTripManager
         ToolTips = False
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
-        ExplicitHeight = 316
+        ExplicitHeight = 313
       end
       object PnlVlTripInfo: TPanel
         Left = 246
@@ -694,7 +694,7 @@ object FrmTripManager: TFrmTripManager
         Height = 317
         Align = alClient
         TabOrder = 1
-        ExplicitHeight = 316
+        ExplicitHeight = 313
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
@@ -707,7 +707,7 @@ object FrmTripManager: TFrmTripManager
           OnKeyDown = ValueListKeyDown
           OnSelectCell = VlTripInfoSelectCell
           OnStringsChange = VlTripInfoStringsChange
-          ExplicitHeight = 288
+          ExplicitHeight = 285
           ColWidths = (
             150
             219)

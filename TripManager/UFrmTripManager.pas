@@ -2478,6 +2478,7 @@ begin
 
   if TBASE_Data(Item.Data).IsFolder then
     exit;
+
   SetImported(Item, not Item.Checked);
 
   LoadTripFile(IncludeTrailingPathDelimiter(CreatedTempPath) + Item.Caption, true);
@@ -2771,7 +2772,9 @@ procedure TFrmTripManager.SetImported(const AListItem: TListItem; const NewValue
 var
   TmpTripList: TTripList;
   LocalFile: string;
+  NewCheck: boolean;
 begin
+  NewCheck := NewValue;
   TmpTripList := TTripList.Create;
   try
     // Copy File to Local directory
@@ -2786,10 +2789,10 @@ begin
     TmpTripList.SaveToFile(LocalFile);
 
     CopyFileFromTmp(LocalFile, AListItem);
-
-    SetCheckMark(AListItem, not NewValue);
+    NewCheck := not NewCheck;
   finally
     TmpTripList.Free;
+    SetCheckMark(AListItem, NewCheck);
   end;
 end;
 

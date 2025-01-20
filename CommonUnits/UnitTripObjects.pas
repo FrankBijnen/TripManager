@@ -2259,7 +2259,6 @@ begin
                                DataType);
     if (BytesRead = 0) then
       break;
-
     ABaseItem := CreateBaseItemByName(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
     Add(ABaseItem);
 
@@ -2274,6 +2273,8 @@ begin
   AStream := TBufferedFileStream.Create(AFile, fmOpenRead);
   try
     result := LoadFromStream(AStream);
+    if not result then
+      raise Exception.Create(Format('Not a valid trip file: %s', [AFile]));
   finally
     AStream.Free;
   end;
