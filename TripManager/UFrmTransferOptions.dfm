@@ -12,6 +12,7 @@ object FrmTransferOptions: TFrmTransferOptions
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
+  Scaled = False
   OnClose = FormClose
   OnShow = FormShow
   TextHeight = 15
@@ -22,8 +23,6 @@ object FrmTransferOptions: TFrmTransferOptions
     Height = 33
     Align = alBottom
     TabOrder = 0
-    ExplicitTop = 297
-    ExplicitWidth = 528
     DesignSize = (
       530
       33)
@@ -36,7 +35,6 @@ object FrmTransferOptions: TFrmTransferOptions
       Kind = bkCancel
       NumGlyphs = 2
       TabOrder = 0
-      ExplicitLeft = 438
     end
     object BitBtn2: TBitBtn
       Left = 354
@@ -47,7 +45,6 @@ object FrmTransferOptions: TFrmTransferOptions
       Kind = bkOK
       NumGlyphs = 2
       TabOrder = 1
-      ExplicitLeft = 352
     end
   end
   object MemoTransfer: TMemo
@@ -72,7 +69,6 @@ object FrmTransferOptions: TFrmTransferOptions
     ParentFont = False
     ReadOnly = True
     TabOrder = 1
-    ExplicitWidth = 528
   end
   object LvSelections: TListView
     Left = 0
@@ -108,8 +104,6 @@ object FrmTransferOptions: TFrmTransferOptions
       65006C0065006300740069006F006E003A00200025007300}
     TabOrder = 2
     ViewStyle = vsReport
-    ExplicitWidth = 528
-    ExplicitHeight = 128
   end
   object MemoDestinations: TMemo
     Left = 0
@@ -128,6 +122,5 @@ object FrmTransferOptions: TFrmTransferOptions
     ParentFont = False
     ReadOnly = True
     TabOrder = 3
-    ExplicitWidth = 528
   end
 end

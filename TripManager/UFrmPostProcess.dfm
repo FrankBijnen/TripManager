@@ -12,6 +12,7 @@ object FrmPostProcess: TFrmPostProcess
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
+  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -23,8 +24,6 @@ object FrmPostProcess: TFrmPostProcess
     Height = 33
     Align = alBottom
     TabOrder = 0
-    ExplicitTop = 385
-    ExplicitWidth = 563
     DesignSize = (
       565
       33)
@@ -37,7 +36,6 @@ object FrmPostProcess: TFrmPostProcess
       Kind = bkCancel
       NumGlyphs = 2
       TabOrder = 0
-      ExplicitLeft = 482
     end
     object BitBtn2: TBitBtn
       Left = 398
@@ -48,7 +46,6 @@ object FrmPostProcess: TFrmPostProcess
       Kind = bkOK
       NumGlyphs = 2
       TabOrder = 1
-      ExplicitLeft = 396
     end
   end
   object PnlBegin: TPanel
@@ -58,7 +55,6 @@ object FrmPostProcess: TFrmPostProcess
     Height = 28
     Align = alTop
     TabOrder = 1
-    ExplicitWidth = 563
     object PnlBeginCaption: TPanel
       Left = 1
       Top = 1
@@ -83,7 +79,6 @@ object FrmPostProcess: TFrmPostProcess
       Height = 26
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 401
       object EdBeginStr: TEdit
         Left = 1
         Top = 1
@@ -104,7 +99,6 @@ object FrmPostProcess: TFrmPostProcess
         TabOrder = 1
         Text = 'CmbBeginSymbol'
         Images = ImgListSymbols
-        ExplicitWidth = 279
       end
     end
   end
@@ -115,7 +109,6 @@ object FrmPostProcess: TFrmPostProcess
     Height = 28
     Align = alTop
     TabOrder = 2
-    ExplicitWidth = 563
     object PnlEndCaption: TPanel
       Left = 1
       Top = 1
@@ -140,7 +133,6 @@ object FrmPostProcess: TFrmPostProcess
       Height = 26
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 401
       object EdEndStr: TEdit
         Left = 1
         Top = 1
@@ -161,7 +153,6 @@ object FrmPostProcess: TFrmPostProcess
         TabOrder = 1
         Text = 'CmbEndSymbol'
         Images = ImgListSymbols
-        ExplicitWidth = 279
       end
     end
   end
@@ -172,7 +163,6 @@ object FrmPostProcess: TFrmPostProcess
     Height = 28
     Align = alTop
     TabOrder = 5
-    ExplicitWidth = 563
     object PnlWayptCaption: TPanel
       Left = 1
       Top = 1
@@ -197,7 +187,6 @@ object FrmPostProcess: TFrmPostProcess
       Height = 26
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 401
       object CmbWayPtCat: TComboBox
         Left = 121
         Top = 1
@@ -208,7 +197,6 @@ object FrmPostProcess: TFrmPostProcess
         Text = 'CmbWayPtCat'
         Items.Strings = (
           '-')
-        ExplicitWidth = 279
       end
       object EdWptStr: TEdit
         Left = 1
@@ -230,7 +218,6 @@ object FrmPostProcess: TFrmPostProcess
     Height = 28
     Align = alTop
     TabOrder = 3
-    ExplicitWidth = 563
     object PnlShapeCaption: TPanel
       Left = 1
       Top = 1
@@ -255,7 +242,6 @@ object FrmPostProcess: TFrmPostProcess
       Height = 26
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 401
       object CmbShapingName: TComboBox
         Left = 1
         Top = 1
@@ -282,7 +268,6 @@ object FrmPostProcess: TFrmPostProcess
         Items.Strings = (
           'Km'
           'Mile')
-        ExplicitWidth = 279
       end
     end
   end
@@ -320,7 +305,6 @@ object FrmPostProcess: TFrmPostProcess
         'tically when transferred to the XT.')
     ReadOnly = True
     TabOrder = 4
-    ExplicitWidth = 563
   end
   object ImgListSymbols: TImageList
     DrawingStyle = dsTransparent

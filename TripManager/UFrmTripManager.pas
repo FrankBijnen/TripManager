@@ -149,6 +149,11 @@ type
     BtnPostProcess: TButton;
     ChkWatch: TCheckBox;
     PostProcessTimer: TTimer;
+    MainMenu: TMainMenu;
+    Help1: TMenuItem;
+    About1: TMenuItem;
+    N7: TMenuItem;
+    Onlinehelp1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -213,6 +218,8 @@ type
     procedure ChkWatchClick(Sender: TObject);
     procedure PostProcessTimerTimer(Sender: TObject);
     procedure ShellListView1DblClick(Sender: TObject);
+    procedure About1Click(Sender: TObject);
+    procedure Onlinehelp1Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -450,6 +457,11 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.About1Click(Sender: TObject);
+begin
+  ShowMessage(VerInfo);
+end;
+
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
 var SizeLeft: integer;
 begin
@@ -608,6 +620,9 @@ var
 begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
+  // Revert to default (startup) locations
+  ReadSettings;
+  BgDeviceClick(BgDevice);
   if (FrmTransferOptions.ShowModal <> ID_OK) then
     exit;
 
@@ -2510,6 +2525,13 @@ begin
   TTimer(Sender).Enabled := false;
   EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s);', [FMapReq.Desc, FMapReq.Coords]));
 end;
+
+procedure TFrmTripManager.Onlinehelp1Click(Sender: TObject);
+begin
+  ShellExecute(0, 'Open',
+               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md',
+               '','', SW_SHOWNORMAL);
+ end;
 
 procedure TFrmTripManager.CreateAdditionalClick(Sender: TObject);
 var

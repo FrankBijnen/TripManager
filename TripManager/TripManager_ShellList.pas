@@ -38,6 +38,7 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure WMNotify(var Msg: TWMNotify); message WM_NOTIFY;
 
     procedure InitSortSpec(SortColumn: integer; SortState: THeaderSortState);
     procedure Populate; override;
@@ -71,9 +72,11 @@ uses
   System.Win.ComObj, System.UITypes,
   TripManager_MultiContext;
 
+{$IFDEF VER350}
 const
   Arrow_Up = #$25b2;
   Arrow_Down = #$25bc;
+{$ENDIF}
 
 { Listview Sort helpers }
 
@@ -108,15 +111,19 @@ begin
     hssAscending:
       begin
         // Add an arrow to the caption. Using styles doesn't show the arrows in the header
+{$IFDEF VER350}
         if (Column.Caption[Length(Column.Caption)] <> Arrow_Up) then
           Column.Caption := Column.Caption + ' ' + Arrow_Up;
+{$ENDIF}
         Item.fmt := Item.fmt or HDF_SORTUP;
       end;
     hssDescending:
       begin
         // Add an arrow to the caption.
+{$IFDEF VER350}
         if (Column.Caption[Length(Column.Caption)] <> Arrow_Down) then
           Column.Caption := Column.Caption + ' ' + Arrow_Down;
+{$ENDIF}
         Item.fmt := Item.fmt or HDF_SORTDOWN;
       end;
   end;
@@ -124,6 +131,36 @@ begin
 end;
 
 { TShellListView }
+
+procedure TShellListView.WMNotify(var Msg: TWMNotify);
+var
+  Column: TListColumn;
+  ResizedColumn: integer;
+begin
+  inherited;
+
+  case Msg.NMHdr^.code of
+    HDN_ENDTRACK,
+    HDN_DIVIDERDBLCLICK:
+      begin
+        ResizedColumn := pHDNotify(Msg.NMHdr)^.Item;
+        Column := Columns[ResizedColumn];
+        if (Column.Index = FSortColumn) then
+        begin
+          case (FSortState) of
+            THeaderSortState.hssAscending:
+              SetListHeaderSortState(Self, Column, hssAscending);
+            THeaderSortState.hssDescending:
+              SetListHeaderSortState(Self, Column, hssDescending);
+          end;
+        end;
+      end;
+    HDN_BEGINTRACK:
+      ;
+    HDN_TRACK:
+      ;
+  end;
+end;
 
 procedure TShellListView.InitSortSpec(SortColumn: integer; SortState: THeaderSortState);
 begin
@@ -276,6 +313,9 @@ begin
   ICM2 := nil;
 
   DoubleBuffered := true;
+{$IFNDEF VER350}
+  DoubleBufferedMode := TDoubleBufferedMode.dbmRequested;
+{$ENDIF}
   StyleElements := [seFont, seBorder];
   FDragSource := false;
   FDragStarted := false;

@@ -12,6 +12,7 @@ object FrmDateDialog: TFrmDateDialog
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
+  Scaled = False
   TextHeight = 15
   object PnlBot: TPanel
     Left = 0
@@ -20,8 +21,6 @@ object FrmDateDialog: TFrmDateDialog
     Height = 33
     Align = alBottom
     TabOrder = 0
-    ExplicitTop = 60
-    ExplicitWidth = 208
     DesignSize = (
       212
       33)
@@ -34,7 +33,6 @@ object FrmDateDialog: TFrmDateDialog
       Kind = bkCancel
       NumGlyphs = 2
       TabOrder = 0
-      ExplicitLeft = 122
     end
     object BitBtn2: TBitBtn
       Left = 43
@@ -45,7 +43,6 @@ object FrmDateDialog: TFrmDateDialog
       Kind = bkOK
       NumGlyphs = 2
       TabOrder = 1
-      ExplicitLeft = 39
     end
   end
   object DtPicker: TDateTimePicker

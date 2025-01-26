@@ -41,6 +41,8 @@ function GetTracksTmp: string;
 function GetOSMTemp: string;
 function GetRoutesTmp: string;
 
+function VerInfo(IncludeCompany: boolean = false): string;
+
 var
   CreatedTempPath: string;
   App_Prefix: string;
@@ -340,6 +342,52 @@ begin
   if (ShResult <> 0) and (ShOp.fAnyOperationsAborted = false) then
     ShowMessage(Format('Remove directory failed code %u', [ShResult]));
   result := (ShResult = 0);
+end;
+
+function VerInfo(IncludeCompany: boolean = false): string;
+var
+  S: string;
+  Buf, Value: PChar;
+   N, Len: DWORD;
+
+  function QueryItem(Item: string): string;
+  begin
+    if VerQueryValue(Buf, PChar('stringFileInfo\040904E4\' + Item), Pointer(Value), Len) then
+       result := value
+    else
+       result:= '';
+  end;
+
+begin
+  S := Application.ExeName;
+  N := GetFileVersionInfoSize(PChar(S), N);
+  if (N > 0) then
+  begin
+    Buf := AllocMem(N);
+    try
+      GetFileVersionInfo(PChar(S), 0, N, Buf);
+      S := 'ProductName';
+      result := QueryItem(S);
+      result := S + ': ' + #9 + result + #10;
+      S := 'FileDescription';
+      result := result + S + ': ' + #9 + QueryItem(S) + #10;
+      S := 'FileVersion';
+      result := result + S + ': ' + #9 + QueryItem(S) +#10;
+      S := 'CompilerVersion';
+      result := result + S + ': ' + #9 + FormatFloat('#0.0', CompilerVersion, FormatSettings) +#10;
+      S := 'LegalCopyRight';
+      result := result + S + ': ' + #9 + QueryItem(S) +#10;
+      if (IncludeCompany) then
+      begin
+        S := 'CompanyName';
+        result := result + S + ': ' + #9 + QueryItem(S) + #10;
+      end;
+    finally
+      FreeMem(Buf, N);
+    end;
+  end
+  else
+    result := ('No FileVersionInfo found');
 end;
 
 initialization

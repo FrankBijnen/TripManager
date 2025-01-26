@@ -12,6 +12,7 @@ object FrmSelectGPX: TFrmSelectGPX
   Font.Name = 'Tahoma'
   Font.Style = []
   Position = poOwnerFormCenter
+  Scaled = False
   OnShow = FormShow
   TextHeight = 13
   object LvTracks: TListView
@@ -45,8 +46,6 @@ object FrmSelectGPX: TFrmSelectGPX
     TabOrder = 0
     ViewStyle = vsReport
     OnChange = LvTracksChange
-    ExplicitWidth = 364
-    ExplicitHeight = 185
   end
   object PnlTop: TPanel
     Left = 0
@@ -56,7 +55,6 @@ object FrmSelectGPX: TFrmSelectGPX
     Align = alTop
     Caption = 'Select Routes/Tracks to show'
     TabOrder = 1
-    ExplicitWidth = 362
   end
   object PnlBot: TPanel
     Left = 0
@@ -65,8 +63,6 @@ object FrmSelectGPX: TFrmSelectGPX
     Height = 29
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 249
-    ExplicitWidth = 362
     DesignSize = (
       366
       29)
@@ -79,7 +75,6 @@ object FrmSelectGPX: TFrmSelectGPX
       Kind = bkOK
       NumGlyphs = 2
       TabOrder = 0
-      ExplicitLeft = 169
     end
     object BitBtnCan: TBitBtn
       Left = 254
@@ -90,7 +85,6 @@ object FrmSelectGPX: TFrmSelectGPX
       Kind = bkCancel
       NumGlyphs = 2
       TabOrder = 1
-      ExplicitLeft = 250
     end
   end
   object PnlClear: TPanel
@@ -100,7 +94,6 @@ object FrmSelectGPX: TFrmSelectGPX
     Height = 32
     Align = alTop
     TabOrder = 3
-    ExplicitWidth = 362
     object lblChangeColor: TLabel
       Left = 12
       Top = 8
