@@ -648,7 +648,7 @@ begin
 
       DeleteTempFiles(ForceOutDir, '*.*');
 
-      DoFunction(FrmTransferOptions.Funcs, GPXFile);
+      DoFunction(FrmTransferOptions.Funcs, GPXFile, nil, AnItem.Index);
       if (FrmTransferOptions.CompleteRoute) then
         CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(ForceOutDir) + ExtractFilename(GPXFile)), false);
 

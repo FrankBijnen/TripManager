@@ -76,7 +76,10 @@ const CatGPX = 'GPX:';
 const DefWaypointSymbol = 'Waypoint';
 const ZumoModel: TZumoModel = TZumoModel.XT;
 
-procedure DoFunction(const AllFuncs: array of TGPXFunc; const GPXFile:string; const OutStringList: TstringList = nil);
+procedure DoFunction(const AllFuncs: array of TGPXFunc;
+                     const GPXFile:string;
+                     const OutStringList: TStringList = nil;
+                     const SeqNo: cardinal = 0);
 procedure ReadConfigFromIni;
 function ReadConfigParm(ASection, AKey: TGPXString; Default: TGPXString = ''): TGPXString;
 procedure Usage;
@@ -1120,7 +1123,11 @@ begin
   result.Category := TGPXString(Category);
 end;
 
-procedure DoFunction(const AllFuncs: array of TGPXFunc; const GPXFile:string; const OutStringList: TstringList = nil);
+
+procedure DoFunction(const AllFuncs: array of TGPXFunc;
+                     const GPXFile:string;
+                     const OutStringList: TStringList = nil;
+                     const SeqNo: cardinal = 0);
 var Func: TGPXFunc;
     OutDir: string;
     BaseFile: string;
@@ -1943,7 +1950,7 @@ var Func: TGPXFunc;
       if (GpxNode = nil) or
        (GpxNode.Name <> GpxNodename) then
         exit;
-      ParentTripId := TmArrival.DateTimeAsCardinal(Now);
+      ParentTripId := TmArrival.DateTimeAsCardinal(Now) + SeqNo;
       for RteNode in GpxNode.ChildNodes do
       begin
         if (RteNode.Name = RteNodename) then // Only want <rte> nodes. No <trk> or <wpt>
