@@ -42,6 +42,7 @@ const ProcessWayPts: boolean = true;
 const ProcessTracks: boolean = true;
 const UniqueTracks: boolean = true;
 const ProcessWayPtsFromRoute: boolean = true; // Create points for GPI and RoutePoints from route
+const DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
 const ProcessShapePtsInGpi: boolean = false;
 const ProcessViaPtsInGpi: boolean = true;
 const ProcessWayPtsInGpi: boolean = true;
@@ -311,12 +312,19 @@ end;
 
 function FindSubNodeValue(ANode: TXmlVSNode;
                           SubName: string): string;
-var SubNode: TXmlVSNode;
+var
+  SubNode: TXmlVSNode;
 begin
   Result := '';
   SubNode := ANode.Find(SubName);
   if (SubNode <> nil) then
+  begin
     Result := SubNode.NodeValue;
+    if (Result = '') and
+       (SubNode.HasChildNodes) and
+       (SubNode.FirstChild.NodeType = TXmlVSNodeType.ntCData) then
+      Result := SubNode.FirstChild.NodeValue;
+  end;
 end;
 
 function GetTrackColor(ANExtension: TXmlVsNode): string;
@@ -1618,6 +1626,7 @@ var Func: TGPXFunc;
 
     procedure DoCreateRoutes;
     const GpxNodename = 'gpx';
+          WptNodename = 'wpt';
           RteNodename = 'rte';
           RteNameNodeName = 'name';
           RtePtNodename = 'rtept';
@@ -1628,6 +1637,8 @@ var Func: TGPXFunc;
 
     var OutFile: string;
         RteNode, GpxNode: TXmlVSNode;
+        WptNode: TXmlVSNode;
+        WptNodePos: integer;
 
       procedure ProcessRtePt(const RtePtNode: TXmlVSNode);
       var ExtensionNode: TXmlVSNode;
@@ -1661,6 +1672,17 @@ var Func: TGPXFunc;
       if (GpxNode = nil) or
        (GpxNode.Name <> GpxNodename) then
         exit;
+
+      if (DeleteWayPtsInRoute) then
+      begin
+        for WptNodePos := GpxNode.ChildNodes.Count -1 downto 0 do
+        begin
+          WptNode := GpxNode.ChildNodes[WptNodePos];
+          if (WptNode.Name = WptNodename) then
+            GpxNode.ChildNodes.Delete(WptNodePos);
+        end;
+      end;
+
       for RteNode in GpxNode.ChildNodes do
       begin
         if (RteNode.Name = RteNodename) then // Only want <rte> nodes. No <trk> or <wpt>
