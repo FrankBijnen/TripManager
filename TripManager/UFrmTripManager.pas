@@ -287,6 +287,7 @@ type
     procedure CheckTrips;
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
+    procedure ReadDefaultFolders;
     procedure ReadSettings;
     procedure ClearTripInfo;
   protected
@@ -620,9 +621,11 @@ var
 begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
+
   // Revert to default (startup) locations
-  ReadSettings;
+  ReadDefaultFolders;
   BgDeviceClick(BgDevice);
+
   if (FrmTransferOptions.ShowModal <> ID_OK) then
     exit;
 
@@ -1144,6 +1147,8 @@ function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
 var P: integer;
 begin
   result := CompletePath;
+  if (Pos(':\', result) > 0) then
+    exit;
   P := Pos('\', result);
   if (P > 1) then
     result := Copy(result, P + 1, Length(result));
@@ -1361,8 +1366,7 @@ begin
     end
     else
     begin
-      EnableBalloon := false;
-      EnableTimeout := false;
+      SetFixedPrefs;
       DoFunction([CreateOSMPoints], ShellListView1.SelectedFolder.PathName, OsmTrack);
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
@@ -2839,6 +2843,7 @@ begin
   ProcessEnd := false;
   ProcessShape := false;
   ProcessVia := false;
+  ShapingPointName := TShapingPointName.Unchanged;
 
   WayPtList := TStringList.Create;
   try
@@ -2862,14 +2867,18 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.ReadDefaultFolders;
+begin
+  DeviceFolder[0] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevTripsFolder_Key, 'Internal Storage\.System\Trips');
+  DeviceFolder[1] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevGpxFolder_Key, 'Internal Storage\GPX');
+  DeviceFolder[2] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevPoiFolder_Key, 'Internal Storage\POI');
+end;
 
 procedure TFrmTripManager.ReadSettings;
 begin
   PrefDevice := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDev_Key, 'zūmo XT');
   GuessModel(PrefDevice);
-  DeviceFolder[0] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevTripsFolder_Key, 'Internal Storage\.System\Trips');
-  DeviceFolder[1] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevGpxFolder_Key, 'Internal Storage\GPX');
-  DeviceFolder[2] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevPoiFolder_Key, 'Internal Storage\POI');
+  ReadDefaultFolders;
   WarnModel := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True') = 'True');
   WarnRecalc := mrNone;
   SetFixedPrefs;

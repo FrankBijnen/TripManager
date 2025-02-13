@@ -856,7 +856,6 @@ begin
   Result := WPD_DEVICE_OBJECT_ID;
   if PortableDev.Content(Content) = S_OK then
   begin
-    Result := '';
     if Content.EnumObjects(0, '', nil, ObjectIds) = S_OK then
     begin
       ObjectIds.Reset;
@@ -1019,6 +1018,8 @@ begin
   AContent.Properties(Prop);
   Prop.GetSupportedProperties(PWideChar(SParent), Keys);
   Prop.GetValues(PWideChar(SParent), Keys, Prop_Val);
+  if (Prop_Val = nil) then
+    exit('');
 
   // Build up path
   result := PropValToName(Prop_Val);
@@ -1046,14 +1047,14 @@ begin
   Result := '';
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
-  //read content of device
   try
     if PortableDev.Content(Content) = S_OK then
     begin
-      if (SParent = '') then
+      CompletePath := GetParents(Content, SParent, '');
+      if (CompletePath = '') then
         SParent := GetFirstStorageID(PortableDev);
 
-      CompletePath := GetParents(Content, SParent, '');
+      //read content of device
       Result := EnumContentsOfFolder(Content, SParent, Lst);
     end;
   finally
@@ -1066,7 +1067,7 @@ function FindItemInFolder(Content: IPortableDeviceContent;
                           var FriendlyPath: string): PWideChar;
 var ObjectIds: IEnumPortableDeviceObjectIDs;
     ObjId, ObjName, PersistentId: PWideChar;
-
+    PersistentIdString: string;
     Fetched: Cardinal;
     Keys: IPortableDeviceKeyCollection;
     Prop: IPortableDeviceProperties;
@@ -1074,8 +1075,10 @@ var ObjectIds: IEnumPortableDeviceObjectIDs;
     Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   result := '';
-  ObjName := '';
+  if (FolderId = '') then
+    exit;
 
+  ObjName := '';
   try
     if not VarIsClear(Content) then
     begin
@@ -1090,7 +1093,6 @@ begin
         begin
           if (Fetched = 0) then // Does it ever happen?
             break;
-
           //Get object prop.
           Prop.GetSupportedProperties(ObjId, Keys);
           Prop.GetValues(ObjId, Keys, Prop_Val);
@@ -1109,12 +1111,13 @@ begin
           Dev_Val.fmtid := WPD_OBJECT_PERSISTENT_UNIQUE_ID_FMTID;
           Dev_Val.pid := WPD_OBJECT_PERSISTENT_UNIQUE_ID_PID;
           Prop_Val.GetStringValue(Dev_Val, PersistentId);
-          if (FileId = PersistentId) then
+          PersistentIdString := ReplaceAll(PersistentId, ['%3B%5C'], [':\']);
+
+          if (FileId = PersistentIdString) then
           begin
             result := ObjId;
             exit;
           end;
-
         end;
       end;
     end;
@@ -1172,12 +1175,13 @@ begin
   CompletePath := SPath;
   FriendlyPath := '';
   try
+    CurPath := NextField(CompletePath, '\');
+    if (CompletePath = '') then
+      exit(CurPath);
+
     //read content of device
     if PortableDev.Content(Content) = S_OK then
-    begin
-      CurPath := NextField(CompletePath, '\');
       TraversePath(CurPath, GetFirstStorageID(PortableDev), CompletePath, SFolder, FriendlyPath, result);
-    end;
   finally
     SetCursor(CrNormal);
   end;
