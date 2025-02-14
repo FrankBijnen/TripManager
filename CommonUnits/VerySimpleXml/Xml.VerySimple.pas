@@ -555,7 +555,7 @@ begin
     FirstChar := Reader.FirstChar;
 //FB Dont add last empty node. If the XML File ends with 0x0a, or 0x0d0a for example.
     if ((FirstChar = #10) or (FirstChar = #13)) and
-       (Reader.FBufferedData.Length < 3) then
+        not Reader.PrepareBuffer(3) then // At least 3 more chars should be available
       Continue;
 //FB_X
     if FirstChar = '!' then
