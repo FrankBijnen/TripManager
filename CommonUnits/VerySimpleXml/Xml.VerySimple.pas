@@ -19,6 +19,10 @@
   * implied. See the License for the specific language governing      *
   * rights and limitations under the License.                         *
 }
+
+// Changed for ExifToolGUI
+// - Add utf16
+
 unit Xml.VerySimple;
 
 interface
@@ -514,6 +518,12 @@ begin
   else
   if AnsiSameText(Encoding, 'utf-8') then
     Reader := TXmlStreamReader.Create(Stream, TEncoding.UTF8, False, BufferSize)
+//ExifToolGUI Add utf16
+  else if AnsiSameText(Encoding, 'utf-16') then
+    Reader := TXmlStreamReader.Create(Stream, TEncoding.Unicode, False, BufferSize)
+  else if AnsiSameText(Encoding, 'utf-16be') then
+    Reader := TXmlStreamReader.Create(Stream, TEncoding.BigEndianUnicode, False, BufferSize)
+//ExifToolGUI_x
   else
     Reader := TXmlStreamReader.Create(Stream, TEncoding.ANSI, False, BufferSize);
   try
@@ -543,8 +553,8 @@ begin
         Break;
     end;
     FirstChar := Reader.FirstChar;
-//FB Dont add last empty node. If the XML File ends with 0x0d0a for example.
-    if (FirstChar = #13) and
+//FB Dont add last empty node. If the XML File ends with 0x0a, or 0x0d0a for example.
+    if ((FirstChar = #10) or (FirstChar = #13)) and
        (Reader.FBufferedData.Length < 3) then
       Continue;
 //FB_X
