@@ -1147,10 +1147,9 @@ function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
 var P: integer;
 begin
   result := CompletePath;
-  if (Pos(':\', result) > 0) then
-    exit;
   P := Pos('\', result);
-  if (P > 1) then
+  if (P > 1) and
+     (Pos(':\', result) = 0) then
     result := Copy(result, P + 1, Length(result));
 end;
 
