@@ -9,7 +9,10 @@ uses
   Xml.XMLIntf, UnitVerySimpleXml,
   kml_helper, OSM_helper,
   UnitMapUtils,
-  UnitGPI, UnitBMP, UnitTripObjects;
+{$IFDEF TRIPOBJECTS}
+  UnitTripObjects,
+{$ENDIF}
+  UnitGPI, UnitBMP;
 
 type
   TDistanceUnit = (duKm, duMi);
@@ -75,8 +78,9 @@ const DistanceUnit: TDistanceUnit = duKm;
 const CatSymbol = 'Symbol:';
 const CatGPX = 'GPX:';
 const DefWaypointSymbol = 'Waypoint';
+{$IFDEF TRIPOBJECTS}
 const ZumoModel: TZumoModel = TZumoModel.XT;
-
+{$ENDIF}
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
                      const OutStringList: TStringList = nil;
@@ -1700,7 +1704,11 @@ var Func: TGPXFunc;
     end;
 
     procedure DoCreateTrips;
+{$IFNDEF TRIPOBJECTS}
+    begin
 
+    end;
+{$ELSE}
     const GpxNodename = 'gpx';
           RteNodename = 'rte';
           RteNameNodeName = 'name';
@@ -1970,6 +1978,7 @@ var Func: TGPXFunc;
       end;
 
     begin
+
       GpxNode := Xml.ChildNodes.find(GpxNodename);  // Look for <gpx> node
       if (GpxNode = nil) or
        (GpxNode.Name <> GpxNodename) then
@@ -1981,6 +1990,7 @@ var Func: TGPXFunc;
           ProcessTrip(RteNode, ParentTripId);
       end;
     end;
+    {$ENDIF}
 
 begin
 
