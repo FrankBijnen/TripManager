@@ -35,7 +35,7 @@ const MaxTries: integer = 3;
 const ProcessBegin: boolean = true;
 const ProcessEnd: boolean = true;
 const ProcessShape: boolean = true;
-const ProcessVia: boolean = true;
+const ProcessSubClass: boolean = true;
 const ProcessFlags: boolean = true;
 const ProcessViaPts: boolean = true;
 const ProcessWayPts: boolean = true;
@@ -782,9 +782,11 @@ var CurrentTrack: TXmlVSNode;
             ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), DistanceStr, RouteName]);
         end;
 
+        if (ProcessSubClass) then
+          ClearSubClass(ExtensionNode);
+
         if (ProcessShape) then
         begin
-          ClearSubClass(ExtensionNode);
 
           UnglitchNode(RtePtNode, ExtensionNode, TGPXString(ShapePtName));
 
@@ -803,7 +805,7 @@ var CurrentTrack: TXmlVSNode;
          (Cnt <> LastCnt) and
          (RtePtViaPoint <> nil) then
       begin
-        if (ProcessVia) then
+        if (ProcessSubClass) then
           ClearSubClass(ExtensionNode);
 
         ViaNodeName := RtePtNode.Find('name');

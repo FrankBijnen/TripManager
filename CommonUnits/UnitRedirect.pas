@@ -5,7 +5,6 @@ unit UnitRedirect;
 // and is part of the site:
 // http://www.martinstoeckli.ch/delphi/
 //
-{$INCLUDE COMPILER.INC}
 
 interface
 

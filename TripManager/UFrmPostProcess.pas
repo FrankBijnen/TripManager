@@ -127,12 +127,11 @@ begin
   MaxTries := 0;
   DebugComments := 'False';
 
+  ProcessSubClass := true;
   ProcessBegin := true;
   ProcessEnd := true;
   ProcessShape := true;
-  ProcessVia := true;
   ProcessViaPts := true;
-
 end;
 
 procedure TFrmPostProcess.SetPrefs;

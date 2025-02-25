@@ -251,6 +251,7 @@ type
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     procedure ClearSelHexEdit;
     procedure SyncHexEdit(Sender: TObject);
+    procedure HexEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HexEditKeyPress(Sender: TObject; var Key: Char);
     procedure LoadHex(const FileName: string);
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
@@ -1027,6 +1028,7 @@ begin
   HexEdit.Parent := HexPanel;
   HexEdit.Align := alClient;
   HexEdit.OnKeyPress := HexEditKeyPress;
+  HexEdit.OnKeyDown := HexEditKeyDown;
 
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
@@ -1540,6 +1542,34 @@ var
                                  TGridSelItem.Create(ABaseData));
   end;
 
+  procedure AddRoutePreferences(ARoutePreferences: TBaseRoutePreferences);
+  var
+    SegmentNr: Cardinal;
+    Segments: TStringList;
+    Offset: Cardinal;
+  begin
+    Segments := TStringList.Create;
+    try
+      Offset := (ARoutePreferences.SelEnd - ARoutePreferences.SelStart - ARoutePreferences.LenValue) +
+                SizeOf(biInitiator);
+      Segments.Text := ARoutePreferences.GetRoutePrefs;
+      VlTripInfo.Strings.AddObject(Format('%s #Segments', [ARoutePreferences.Name]) +
+                                     VlTripInfo.Strings.NameValueSeparator +
+                                     Format('%d', [ARoutePreferences.Count]),
+                                   TGridSelItem.Create(ARoutePreferences));
+      Inc(Offset, SizeOf(Cardinal));
+      for SegmentNr := 0 to Segments.Count -1 do
+      begin
+        VlTripInfo.Strings.AddObject(Format('Segment %d', [SegmentNr +1]) + VlTripInfo.Strings.NameValueSeparator + Segments[SegmentNr],
+                                     TGridSelItem.Create(ARoutePreferences, SizeOf(Word), Offset));
+        Inc(Offset, SizeOf(Word));
+
+      end;
+    finally
+      Segments.Free
+    end;
+  end;
+
   procedure AddLocation(ALocation: TLocation; ZoomToPoint: boolean);
   var
     ANitem: TBaseItem;
@@ -1819,6 +1849,12 @@ var
         continue;
       end;
 
+      if (ANitem is TBaseRoutePreferences) then
+      begin
+        AddRoutePreferences(TBaseRoutePreferences(ANitem));
+        continue;
+      end;
+
       if (ANitem is TBaseDataItem) then
       begin
         AddBaseData(TBaseDataItem(ANitem));
@@ -1917,6 +1953,9 @@ begin
     else if (TObject(Node.Data) is TLocation) then
       AddLocation(TLocation(Node.Data), true)
 
+    else if (TObject(Node.Data) is TBaseRoutePreferences) then
+      AddRoutePreferences(TBaseRoutePreferences(Node.Data))
+
     else if (TObject(Node.Data) is TBaseDataItem) then
       AddBaseData(TBaseDataItem(Node.Data))
 
@@ -2012,6 +2051,18 @@ begin
       TmArrival(ABaseDataItem).AsUnixDateTime := TmArrival.DateTimeAsCardinal(ADateTime);
       BtnSaveTripValues.Enabled := true;
     end;
+  end;
+end;
+
+procedure TFrmTripManager.HexEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (ssCtrl in Shift) and
+     (Chr(Key) = 'C') then
+  begin
+    if (ssShift in Shift) then
+      Clipboard.AsText := String(HexEdit.SelectionAsText)
+    else
+      Clipboard.AsText := String(HexEdit.SelectionAsHex);
   end;
 end;
 
@@ -2838,10 +2889,10 @@ begin
   GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
   IniProximityStr := '500';
 
+  ProcessSubClass := true;
   ProcessBegin := false;
   ProcessEnd := false;
   ProcessShape := false;
-  ProcessVia := false;
   ShapingPointName := TShapingPointName.Unchanged;
 
   WayPtList := TStringList.Create;

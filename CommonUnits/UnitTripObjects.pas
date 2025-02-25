@@ -13,9 +13,20 @@ const
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
   TZumoModel        = (XT, XT2, Unknown);
-  TRoutePreference  = (rmFasterTime = 0, rmShorterDistance = 1, rmDirect = 4, rmCurvyRoads = 7);
-  TTransportMode    = (tmAutoMotive = 1, tmMotorcycling = 9, tmOffRoad = 10);
-  TRoutePoint       = (rpVia = 0, rpShaping = 1);
+  TRoutePreference  = (rmFasterTime       = $00,
+                       rmShorterDistance  = $01,
+                       rmDirect           = $04,
+                       rmCurvyRoads       = $07,
+                       rmHills            = $1a,
+                       rmPopular          = $1f,
+                       rmNoShape          = $58,
+                       rmScenic           = $be);
+  TTransportMode    = (tmAutoMotive       = 1,
+                       tmMotorcycling     = 9,
+                        tmOffRoad         = 10);
+  TRoutePoint       = (rpVia              = 0,
+                       rpShaping          = 1,
+                       rpShapingXT2       = 2);
 
 { Elementary data types }
 const
@@ -37,19 +48,23 @@ const
                                                           (Value: Ord(True);                Name: 'True')
                                                         );
 
-  RoutePreferenceMap : array[0..3] of TIdentMapEntry =  ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
+  RoutePreferenceMap : array[0..7] of TIdentMapEntry =  ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
                                                           (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),
                                                           (Value: Ord(rmDirect);            Name: 'Direct'),
-                                                          (Value: ord(rmCurvyRoads);        Name: 'CurvyRoads')
-                                                        );
+                                                          (Value: Ord(rmCurvyRoads);        Name: 'CurvyRoads'),
+                                                          (Value: Ord(rmHills);             Name: 'Hills'),
+                                                          (Value: Ord(rmPopular);           Name: 'Popular'),
+                                                          (Value: Ord(rmNoShape);           Name: 'No Shape'),
+                                                          (Value: Ord(rmScenic);            Name: 'Scenic'));
 
   TransportModeMap : array[0..2] of TIdentMapEntry =    ( (Value: Ord(tmAutoMotive);        Name: 'AutoMotive'),
                                                           (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
                                                           (Value: Ord(tmOffRoad);           Name: 'OffRoad')
                                                         );
 
-  RoutePointMap : array[0..1] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
-                                                          (Value: Ord(rpShaping);           Name: 'Shaping point')
+  RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
+                                                          (Value: Ord(rpShaping);           Name: 'Shaping point'),
+                                                          (Value: Ord(rpShapingXT2);        Name: 'Shaping point XT2')
                                                         );
   UdbDirTurn  = 'Turn';
 
@@ -405,6 +420,26 @@ type
   public
     constructor Create(AValue: string);
   end;
+
+{*** XT2 ***}
+{*** RoutePreferences ***}
+  TBaseRoutePreferences = class(TRawDataItem)
+  private
+    function StandardPrefs: boolean; virtual;
+    function GetCount: Cardinal;
+  public
+    function GetValue: string; override;
+    function GetRoutePrefs: string;
+    property Count: Cardinal read GetCount;
+  end;
+
+  TmRoutePreferences = class(TBaseRoutePreferences)
+    function StandardPrefs: boolean; override;
+  end;
+  TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseRoutePreferences);
+  TmRoutePreferencesAdventurousScenicRoads = class(TBaseRoutePreferences);
+  TmRoutePreferencesAdventurousMode = class(TBaseRoutePreferences);
+  TmRoutePreferencesAdventurousPopularPaths = class(TBaseRoutePreferences);
 
 {*** Header ***}
   THeaderValue = packed record
@@ -1590,6 +1625,62 @@ begin
   inherited Create('mName', AValue);
 end;
 
+{ TBaseRoutePreferences }
+function TBaseRoutePreferences.StandardPrefs: boolean;
+begin
+  result := false;
+end;
+
+function TBaseRoutePreferences.GetCount: Cardinal;
+var
+  Stream: TBytesStream;
+begin
+  Stream := TBytesStream.Create(FBytes);
+  try
+    Stream.Read(result, SizeOf(result));
+    result := Swap32(result);
+  finally
+    Stream.Free;
+  end;
+end;
+
+function TBaseRoutePreferences.GetValue: string;
+begin
+  result := Format('%d Segments', [GetCount]);
+end;
+
+function TBaseRoutePreferences.GetRoutePrefs: string;
+var
+  Stream: TBytesStream;
+  SegmentNr: Cardinal;
+  RoutePref: Word;
+  RoutePreferenceByte: byte;
+  RoutePreferenceString: string;
+begin
+  result := '';
+  Stream := TBytesStream.Create(FBytes);
+  try
+    Stream.Seek(SizeOf(Cardinal), TSeekOrigin.soBeginning);
+    for SegmentNr := 1 to Count do
+    begin
+      Stream.Read(RoutePref, SizeOf(RoutePref));
+      RoutePref := Swap(RoutePref);
+      RoutePreferenceByte := RoutePref;// and $0f;
+      if (not StandardPrefs) or
+         (not IntToIdent(RoutePreferenceByte, RoutePreferenceString, RoutePreferenceMap)) then
+        RoutePreferenceString := 'TBD';
+      result := result + Format('%s (0x%s)%s', [RoutePreferenceString, IntTohex(RoutePref, 4), #10]);
+    end;
+  finally
+    Stream.Free;
+  end;
+end;
+
+function TmRoutePreferences.StandardPrefs: boolean;
+begin
+  result := true;
+end;
+
 {*** Header ***}
 procedure THeaderValue.SwapCardinals;
 begin
@@ -2561,7 +2652,13 @@ begin
   // TmLocations
     TmLocations,
   // TmAllRoutes
-    TmAllRoutes
+    TmAllRoutes,
+  // XT2
+    TmRoutePreferences,
+    TmRoutePreferencesAdventurousHillsAndCurves,
+    TmRoutePreferencesAdventurousScenicRoads,
+    TmRoutePreferencesAdventurousMode,
+    TmRoutePreferencesAdventurousPopularPaths
     ]);
 end;
 
