@@ -23,14 +23,16 @@ type
     lblChangeColor: TLabel;
     procedure CheckAll1Click(Sender: TObject);
     procedure CheckNone1Click(Sender: TObject);
-    procedure LvTracksChange(Sender: TObject; Item: TListItem; Change: TItemChange);
     procedure CmbOverruleColorClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
   public
     { Public declarations }
-    procedure LoadTracks(const TrackList: TStringList);
+    AllTracks: TStringList;
+    procedure LoadTracks(DisplayColor: string);
     function TrackSelectedColor(const TrackName: string): string;
   end;
 
@@ -42,29 +44,30 @@ uses UnitStringUtils;
 
 {$R *.dfm}
 
-procedure TFrmSelectGPX.LoadTracks(const TrackList: TStringList);
+procedure TFrmSelectGPX.LoadTracks(DisplayColor: string);
 var Indx: integer;
     Name, Color, Points: string;
     LVItem: TListItem;
 begin
   LvTracks.Items.Clear;
-  for Indx := 0 to TrackList.Count - 1 do
+  for Indx := 0 to AllTracks.Count - 1 do
   begin
-    Name := TrackList[Indx];
+    Name := AllTracks[Indx];
     Color := NextField(Name, Chr(9));
     Points := NextField(Name, Chr(9));
     LVItem := LvTracks.Items.Add;
     LVItem.Caption := Name;
     LVItem.Checked := true;
-    LVItem.SubItems.Add(Color);
+    if (DisplayColor = '') then
+      LVItem.SubItems.Add(Color)
+    else
+      LVItem.SubItems.Add(DisplayColor);
     LVItem.SubItems.Add(Points);
   end;
-end;
-
-procedure TFrmSelectGPX.LvTracksChange(Sender: TObject; Item: TListItem; Change: TItemChange);
-begin
-  if (Item.SubItems.Count > 0) then
-    CmbOverruleColor.Text := Item.SubItems[0];
+  if (DisplayColor = '') then
+    CmbOverruleColor.ItemIndex := 0
+  else
+    CmbOverruleColor.Text := DisplayColor;
 end;
 
 procedure TFrmSelectGPX.CheckAll1Click(Sender: TObject);
@@ -85,11 +88,26 @@ procedure TFrmSelectGPX.CmbOverruleColorClick(Sender: TObject);
 var
   AnItem: TlistItem;
 begin
-  for AnItem in LvTracks.Items do
+  if (CmbOverruleColor.ItemIndex = 0) then
+    LoadTracks('')
+  else
   begin
-    if (AnItem.Checked) then
-      AnItem.SubItems[0] := CmbOverruleColor.Text;
+    for AnItem in LvTracks.Items do
+    begin
+      if (AnItem.Checked) then
+        AnItem.SubItems[0] := CmbOverruleColor.Text;
+    end;
   end;
+end;
+
+procedure TFrmSelectGPX.FormCreate(Sender: TObject);
+begin
+  AllTracks := TStringList.Create;
+end;
+
+procedure TFrmSelectGPX.FormDestroy(Sender: TObject);
+begin
+  AllTracks.Free;
 end;
 
 procedure TFrmSelectGPX.FormShow(Sender: TObject);

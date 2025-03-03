@@ -70,7 +70,7 @@ const ShapingPointCategory: string = 'Shape';
 const ViaPointSymbol: string = 'Navaid, Red';
 const ViaPointCategory: string = 'Via';
 const DefTrackColor: string = 'Blue';
-const TrackColor: string = 'Blue';
+const TrackColor: string = '';
 const KMLTrackColor: string = 'Magenta';
 const OSMTrackColor: string = 'Red';
 const DebugComments: string = 'False';
@@ -1153,10 +1153,11 @@ var Func: TGPXFunc;
         Track : TXmlVSNode;
         RouteWayPoints, WayPoint: TXmlVSNode;
         TrackPoint: TXmlVSNode;
-        OutFile: string;
+        OutFile, TrackName, DisplayColor: string;
         TracksProcessed: TStringList;
     begin
       TracksProcessed := TStringList.Create;
+      FrmSelectGPX := TFrmSelectGPX.Create(nil);
       try
         WptTracksRoot := InitRoot(WptTracksXml);
 
@@ -1183,6 +1184,23 @@ var Func: TGPXFunc;
 
         for Track in TrackList do
         begin
+          if (Track.Find('extensions') <> nil) then
+            DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
+          else
+            DisplayColor := DefTrackColor;
+          FrmSelectGPX.AllTracks.Add(DisplayColor + #9 + IntToStr(Track.ChildNodes.Count) + #9 + Track.Name);
+        end;
+        FrmSelectGPX.LoadTracks(TrackColor);
+        if FrmSelectGPX.ShowModal <> ID_OK then
+            exit;
+
+        if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then
+          TrackColor := ''
+        else
+          TrackColor := FrmSelectGPX.CmbOverruleColor.Text;
+
+        for Track in TrackList do
+        begin
           if (UniqueTracks) then
           begin
             if (TracksProcessed.IndexOf(Track.NodeValue) > -1) then
@@ -1192,10 +1210,14 @@ var Func: TGPXFunc;
 
           WptTrack := WptTracksRoot.AddChild('trk');
           WptTrack.AddChild('name').NodeValue := Track.NodeValue;
-          if (TrackColor <> '') then
+
+          Trackname := Track.Name;
+          DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
+
+          if (DisplayColor <> '') then
             WptTrack.AddChild('extensions').
                      AddChild('gpxx:TrackExtension').
-                     AddChild('gpxx:DisplayColor').NodeValue := TrackColor
+                     AddChild('gpxx:DisplayColor').NodeValue := DisplayColor
           else
             CloneSubNodes(Track.Find('extensions').ChildNodes, WptTrack.AddChild('extensions').ChildNodes);
           WptTrack := WptTrack.AddChild('trkseg');
@@ -1214,6 +1236,7 @@ var Func: TGPXFunc;
         WptTracksXml.SaveToFile(OutFile);
       finally
         TracksProcessed.Free;
+        FrmSelectGPX.Free;
       end;
     end;
 
@@ -1510,93 +1533,93 @@ var Func: TGPXFunc;
         TrackPoints: integer;
         RoutePoints: integer;
         TrackPointAttribute: TXmlVSAttribute;
-        AllTracks: TStringList;
     begin
-      AllTracks := TStringList.Create;
       FrmSelectGPX := TFrmSelectGPX.Create(nil);
       try
-      OutStringList.Clear;
+        OutStringList.Clear;
 
-      if (ProcessTracks) then
-      begin
-        for Track in TrackList do
+        if (ProcessTracks) then
         begin
-          if (Track.Find('extensions') <> nil) then
-            DisplayColor := FindSubNodeValue(Track.Find('extensions').
-                                             Find('gpxx:TrackExtension'),'gpxx:DisplayColor')
-          else
-            DisplayColor := 'Blue';
-          AllTracks.Add(DisplayColor + #9 + IntToStr(Track.ChildNodes.Count) + #9 + Track.Name);
-        end;
-        FrmSelectGPX.LoadTracks(AllTracks);
-        if FrmSelectGPX.ShowModal <> ID_OK then
-            exit;
-
-        RoutePoints := 0;
-        for Track in TrackList do
-        begin
-          Trackname := Track.Name;
-          DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
-          if (DisplayColor = '') then
-            continue;
-          TrackPoints := 0;
-          for TrackPoint in Track.ChildNodes do
+          for Track in TrackList do
           begin
-            if (TrackPoint.Name <> 'trkpt') then
-              continue;
-            Lon := '0';
-            Lat := '0';
-            for TrackPointAttribute in TrackPoint.AttributeList do
-            begin
-              if (TrackPointAttribute.Name = 'lon') then
-                Lon := TrackPointAttribute.Value;
-              if (TrackPointAttribute.Name = 'lat') then
-                Lat := TrackPointAttribute.Value;
-            end;
-            OutStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
-            Inc(TrackPoints);
+            if (Track.Find('extensions') <> nil) then
+              DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
+            else
+              DisplayColor := DefTrackColor;
+            FrmSelectGPX.AllTracks.Add(DisplayColor + #9 + IntToStr(Track.ChildNodes.Count) + #9 + Track.Name);
           end;
-          OutStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
+          FrmSelectGPX.LoadTracks(TrackColor);
+          if FrmSelectGPX.ShowModal <> ID_OK then
+              exit;
+          if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then
+            TrackColor := ''
+          else
+            TrackColor := FrmSelectGPX.CmbOverruleColor.Text;
 
-          if (ProcessViaPts) then
+          RoutePoints := 0;
+          for Track in TrackList do
           begin
-            for RouteWayPoint in RouteViaPointList do
+            Trackname := Track.Name;
+            DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
+            if (DisplayColor = '') then
+              continue;
+            TrackPoints := 0;
+            for TrackPoint in Track.ChildNodes do
             begin
-              if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+              if (TrackPoint.Name <> 'trkpt') then
                 continue;
-              for WayPoint in RouteWayPoint.ChildNodes do
+              Lon := '0';
+              Lat := '0';
+              for TrackPointAttribute in TrackPoint.AttributeList do
               begin
-                Lon := '0';
-                Lat := '0';
-                for WayPointAttribute in WayPoint.AttributeList do
-                begin
-                  if (WayPointAttribute.Name = 'lon') then
-                    lon := WayPointAttribute.Value;
-                  if (WayPointAttribute.Name = 'lat') then
-                    lat := WayPointAttribute.Value;
-                end;
+                if (TrackPointAttribute.Name = 'lon') then
+                  Lon := TrackPointAttribute.Value;
+                if (TrackPointAttribute.Name = 'lat') then
+                  Lat := TrackPointAttribute.Value;
+              end;
+              OutStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
+              Inc(TrackPoints);
+            end;
+            OutStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
-                Symbol := FindSubNodeValue(WayPoint, 'sym');
-                if (ContainsText(Symbol, 'red')) or
-                   (ContainsText(Symbol, 'flag')) then
-                  Color := 'red'
-                else
-                  color := 'blue';
-                OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s");',
-                                         [RoutePoints,
-                                          EscapeDQuote(FindSubNodeValue(WayPoint, 'name')),
-                                          lat,
-                                          lon,
-                                          Color]));
-                Inc(RoutePoints);
+            if (ProcessViaPts) then
+            begin
+              for RouteWayPoint in RouteViaPointList do
+              begin
+                if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+                  continue;
+                for WayPoint in RouteWayPoint.ChildNodes do
+                begin
+                  Lon := '0';
+                  Lat := '0';
+                  for WayPointAttribute in WayPoint.AttributeList do
+                  begin
+                    if (WayPointAttribute.Name = 'lon') then
+                      lon := WayPointAttribute.Value;
+                    if (WayPointAttribute.Name = 'lat') then
+                      lat := WayPointAttribute.Value;
+                  end;
+
+                  Symbol := FindSubNodeValue(WayPoint, 'sym');
+                  if (ContainsText(Symbol, 'red')) or
+                     (ContainsText(Symbol, 'flag')) then
+                    Color := 'red'
+                  else
+                    color := 'blue';
+                  OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s");',
+                                           [RoutePoints,
+                                            EscapeDQuote(FindSubNodeValue(WayPoint, 'name')),
+                                            lat,
+                                            lon,
+                                            Color]));
+                  Inc(RoutePoints);
+                end;
               end;
             end;
           end;
         end;
-      end;
       finally
         FrmSelectGPX.Free;
-        AllTracks.Free;
       end;
     end;
 

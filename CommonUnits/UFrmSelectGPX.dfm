@@ -1,7 +1,7 @@
 object FrmSelectGPX: TFrmSelectGPX
   Left = 0
   Top = 0
-  Caption = 'Add GPX to map'
+  Caption = 'Select from GPX'
   ClientHeight = 279
   ClientWidth = 366
   Color = clBtnFace
@@ -13,6 +13,8 @@ object FrmSelectGPX: TFrmSelectGPX
   Font.Style = []
   Position = poOwnerFormCenter
   Scaled = False
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   TextHeight = 13
   object LvTracks: TListView
@@ -45,7 +47,6 @@ object FrmSelectGPX: TFrmSelectGPX
     ShowWorkAreas = True
     TabOrder = 0
     ViewStyle = vsReport
-    OnChange = LvTracksChange
   end
   object PnlTop: TPanel
     Left = 0
@@ -110,6 +111,7 @@ object FrmSelectGPX: TFrmSelectGPX
       Text = 'CmbOverruleColor'
       OnClick = CmbOverruleColorClick
       Items.Strings = (
+        'No Change'
         'Black'
         'Blue'
         'Cyan'

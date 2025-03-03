@@ -653,6 +653,8 @@ begin
       DeleteTempFiles(ForceOutDir, '*.*');
 
       DoFunction(FrmTransferOptions.Funcs, GPXFile, nil, AnItem.Index);
+      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
+
       if (FrmTransferOptions.CompleteRoute) then
         CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(ForceOutDir) + ExtractFilename(GPXFile)), false);
 
@@ -1368,7 +1370,11 @@ begin
     else
     begin
       SetFixedPrefs;
+      ProcessBegin := true;
+      ProcessEnd := true;
       DoFunction([CreateOSMPoints], ShellListView1.SelectedFolder.PathName, OsmTrack);
+      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
+
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
                                               FileSysTrip,
@@ -2613,7 +2619,10 @@ begin
         continue;
       Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
       if (ContainsText(Ext, GpxExtension)) then
+      begin
         DoFunction(FrmAdditional.Funcs, ShellListView1.Folders[AnItem.Index].PathName);
+        SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
+      end;
     end;
 
   finally
@@ -2884,6 +2893,7 @@ begin
   MaxTries := 0;
   DebugComments := 'False';
 
+  TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');
   KMLTrackColor := '';
   OSMTrackColor := 'Magenta';
   GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';

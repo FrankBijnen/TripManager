@@ -18,9 +18,9 @@ type
                        rmDirect           = $04,
                        rmCurvyRoads       = $07,
                        rmHills            = $1a,
-                       rmPopular          = $1f,
                        rmNoShape          = $58,
-                       rmScenic           = $be);
+                       rmScenic           = $be,
+                       rmPopular          = $ef);
   TTransportMode    = (tmAutoMotive       = 1,
                        tmMotorcycling     = 9,
                         tmOffRoad         = 10);
