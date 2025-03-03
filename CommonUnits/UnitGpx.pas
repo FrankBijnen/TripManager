@@ -1213,13 +1213,12 @@ var Func: TGPXFunc;
 
           Trackname := Track.Name;
           DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
+          if (DisplayColor = '') then
+            continue;
+          WptTrack.AddChild('extensions').
+                   AddChild('gpxx:TrackExtension').
+                   AddChild('gpxx:DisplayColor').NodeValue := DisplayColor;
 
-          if (DisplayColor <> '') then
-            WptTrack.AddChild('extensions').
-                     AddChild('gpxx:TrackExtension').
-                     AddChild('gpxx:DisplayColor').NodeValue := DisplayColor
-          else
-            CloneSubNodes(Track.Find('extensions').ChildNodes, WptTrack.AddChild('extensions').ChildNodes);
           WptTrack := WptTrack.AddChild('trkseg');
           for TrackPoint in Track.ChildNodes do
           begin
