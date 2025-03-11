@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'BCHexEditor.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'BCHexEditor.pas' rev: 36.00 (Windows)
 
-#ifndef BchexeditorHPP
-#define BchexeditorHPP
+#ifndef BCHexEditorHPP
+#define BCHexEditorHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -41,7 +43,7 @@ class DELPHICLASS TBCHexEditor;
 struct TBCHUndoRec;
 class DELPHICLASS TBCHUndoStorage;
 //-- type declarations -------------------------------------------------------
-typedef Vcl::Grids::TGridCoord TGridCoord;
+using Vcl::Grids::TGridCoord;
 
 enum DECLSPEC_DENUM TBCHCharConvType : unsigned char { cctFromAnsi, cctToAnsi };
 
@@ -56,17 +58,17 @@ class PASCALIMPLEMENTATION EBCHexEditor : public System::Sysutils::Exception
 	
 public:
 	/* Exception.Create */ inline __fastcall EBCHexEditor(const System::UnicodeString Msg) : System::Sysutils::Exception(Msg) { }
-	/* Exception.CreateFmt */ inline __fastcall EBCHexEditor(const System::UnicodeString Msg, const System::TVarRec *Args, const int Args_High) : System::Sysutils::Exception(Msg, Args, Args_High) { }
-	/* Exception.CreateRes */ inline __fastcall EBCHexEditor(NativeUInt Ident)/* overload */ : System::Sysutils::Exception(Ident) { }
+	/* Exception.CreateFmt */ inline __fastcall EBCHexEditor(const System::UnicodeString Msg, const System::TVarRec *Args, const System::NativeInt Args_High) : System::Sysutils::Exception(Msg, Args, Args_High) { }
+	/* Exception.CreateRes */ inline __fastcall EBCHexEditor(System::NativeUInt Ident)/* overload */ : System::Sysutils::Exception(Ident) { }
 	/* Exception.CreateRes */ inline __fastcall EBCHexEditor(System::PResStringRec ResStringRec)/* overload */ : System::Sysutils::Exception(ResStringRec) { }
-	/* Exception.CreateResFmt */ inline __fastcall EBCHexEditor(NativeUInt Ident, const System::TVarRec *Args, const int Args_High)/* overload */ : System::Sysutils::Exception(Ident, Args, Args_High) { }
-	/* Exception.CreateResFmt */ inline __fastcall EBCHexEditor(System::PResStringRec ResStringRec, const System::TVarRec *Args, const int Args_High)/* overload */ : System::Sysutils::Exception(ResStringRec, Args, Args_High) { }
+	/* Exception.CreateResFmt */ inline __fastcall EBCHexEditor(System::NativeUInt Ident, const System::TVarRec *Args, const System::NativeInt Args_High)/* overload */ : System::Sysutils::Exception(Ident, Args, Args_High) { }
+	/* Exception.CreateResFmt */ inline __fastcall EBCHexEditor(System::PResStringRec ResStringRec, const System::TVarRec *Args, const System::NativeInt Args_High)/* overload */ : System::Sysutils::Exception(ResStringRec, Args, Args_High) { }
 	/* Exception.CreateHelp */ inline __fastcall EBCHexEditor(const System::UnicodeString Msg, int AHelpContext) : System::Sysutils::Exception(Msg, AHelpContext) { }
-	/* Exception.CreateFmtHelp */ inline __fastcall EBCHexEditor(const System::UnicodeString Msg, const System::TVarRec *Args, const int Args_High, int AHelpContext) : System::Sysutils::Exception(Msg, Args, Args_High, AHelpContext) { }
-	/* Exception.CreateResHelp */ inline __fastcall EBCHexEditor(NativeUInt Ident, int AHelpContext)/* overload */ : System::Sysutils::Exception(Ident, AHelpContext) { }
+	/* Exception.CreateFmtHelp */ inline __fastcall EBCHexEditor(const System::UnicodeString Msg, const System::TVarRec *Args, const System::NativeInt Args_High, int AHelpContext) : System::Sysutils::Exception(Msg, Args, Args_High, AHelpContext) { }
+	/* Exception.CreateResHelp */ inline __fastcall EBCHexEditor(System::NativeUInt Ident, int AHelpContext)/* overload */ : System::Sysutils::Exception(Ident, AHelpContext) { }
 	/* Exception.CreateResHelp */ inline __fastcall EBCHexEditor(System::PResStringRec ResStringRec, int AHelpContext)/* overload */ : System::Sysutils::Exception(ResStringRec, AHelpContext) { }
-	/* Exception.CreateResFmtHelp */ inline __fastcall EBCHexEditor(System::PResStringRec ResStringRec, const System::TVarRec *Args, const int Args_High, int AHelpContext)/* overload */ : System::Sysutils::Exception(ResStringRec, Args, Args_High, AHelpContext) { }
-	/* Exception.CreateResFmtHelp */ inline __fastcall EBCHexEditor(NativeUInt Ident, const System::TVarRec *Args, const int Args_High, int AHelpContext)/* overload */ : System::Sysutils::Exception(Ident, Args, Args_High, AHelpContext) { }
+	/* Exception.CreateResFmtHelp */ inline __fastcall EBCHexEditor(System::PResStringRec ResStringRec, const System::TVarRec *Args, const System::NativeInt Args_High, int AHelpContext)/* overload */ : System::Sysutils::Exception(ResStringRec, Args, Args_High, AHelpContext) { }
+	/* Exception.CreateResFmtHelp */ inline __fastcall EBCHexEditor(System::NativeUInt Ident, const System::TVarRec *Args, const System::NativeInt Args_High, int AHelpContext)/* overload */ : System::Sysutils::Exception(Ident, Args, Args_High, AHelpContext) { }
 	/* Exception.Destroy */ inline __fastcall virtual ~EBCHexEditor() { }
 	
 };
@@ -167,7 +169,7 @@ private:
 	void * __fastcall PointerAt(const int APosition, const int ACount);
 	
 public:
-	System::PByte __fastcall GetAddress(const int Index, const int Count);
+	Winapi::Windows::PByte __fastcall GetAddress(const int Index, const int Count);
 	void __fastcall ReadBufferAt(void *Buffer, const int APosition, const int ACount);
 	void __fastcall WriteBufferAt(const void *Buffer, const int APosition, const int ACount);
 	void __fastcall Move(const int AFromPos, const int AToPos, const int ACount);
@@ -201,7 +203,7 @@ public:
 };
 
 
-typedef void __fastcall (__closure *TBCHDrawCellEvent)(System::TObject* Sender, Vcl::Graphics::TCanvas* ACanvas, int ACol, int ARow, System::WideString &AWideText, const System::Types::TRect &ARect, bool &ADefaultDraw);
+typedef void __fastcall (__closure *TBCHDrawCellEvent)(System::TObject* Sender, Vcl::Graphics::TCanvas* ACanvas, int ACol, int ARow, System::WideString &AWideText, const Winapi::Windows::TRect &ARect, bool &ADefaultDraw);
 
 class PASCALIMPLEMENTATION TCustomBCHexEditor : public Vcl::Grids::TCustomGrid
 {
@@ -402,9 +404,9 @@ protected:
 	System::UnicodeString FRulerCharString;
 	bool FFixedFileSizeOverride;
 	bool FModified;
-	DYNAMIC bool __fastcall DoMouseWheelDown(System::Classes::TShiftState Shift, const System::Types::TPoint &MousePos);
-	DYNAMIC bool __fastcall DoMouseWheelUp(System::Classes::TShiftState Shift, const System::Types::TPoint &MousePos);
-	virtual void __fastcall DrawCell(int ACol, int ARow, const System::Types::TRect &ARect, Vcl::Grids::TGridDrawState AState);
+	DYNAMIC bool __fastcall DoMouseWheelDown(System::Classes::TShiftState Shift, const Winapi::Windows::TPoint &MousePos);
+	DYNAMIC bool __fastcall DoMouseWheelUp(System::Classes::TShiftState Shift, const Winapi::Windows::TPoint &MousePos);
+	virtual void __fastcall DrawCell(System::LongInt ACol, System::LongInt ARow, const Winapi::Windows::TRect &ARect, Vcl::Grids::TGridDrawState AState);
 	__property int UsedRulerBytesPerUnit = {read=FUsedRulerBytesPerUnit, nodefault};
 	__property bool IsSelecting = {read=FIsSelecting, nodefault};
 	__property bool MouseUpCanResetSel = {read=FMouseUpCanResetSel, write=FMouseUpCanResetSel, nodefault};
@@ -412,7 +414,7 @@ protected:
 	__property TBCHMemoryStream* DataStorage = {read=FDataStorage};
 	virtual void __fastcall SelectionChanged();
 	void __fastcall NewSelection(int SelFrom, int SelTo);
-	Vcl::Grids::TGridCoord __fastcall CheckMouseCoord(int &X, int &Y);
+	TGridCoord __fastcall CheckMouseCoord(int &X, int &Y);
 	void __fastcall CheckUnit(int &AValue);
 	HIDESBASE virtual void __fastcall Changed();
 	int __fastcall DropPosition();
@@ -425,17 +427,17 @@ protected:
 	void __fastcall AdjustMetrics();
 	int __fastcall GetDataSize();
 	void __fastcall CalcSizes();
-	virtual bool __fastcall SelectCell(int ACol, int ARow);
+	virtual bool __fastcall SelectCell(System::LongInt ACol, System::LongInt ARow);
 	int __fastcall GetPosAtCursor(const int aCol, const int aRow);
-	Vcl::Grids::TGridCoord __fastcall GetCursorAtPos(const int aPos, const bool aChars);
+	TGridCoord __fastcall GetCursorAtPos(const int aPos, const bool aChars);
 	int __fastcall GetOtherFieldCol(const int aCol);
 	int __fastcall GetOtherFieldColCheck(const int aCol);
 	bool __fastcall CheckSelectCell(int aCol, int aRow);
-	HIDESBASE MESSAGE void __fastcall WMChar(Winapi::Messages::TWMKey &Msg);
-	MESSAGE void __fastcall WMImeChar(Winapi::Messages::TWMKey &Msg);
+	HIDESBASE MESSAGE void __fastcall WMChar(Winapi::Messages::TWMChar &Msg);
+	MESSAGE void __fastcall WMImeChar(Winapi::Messages::TWMChar &Msg);
 	MESSAGE void __fastcall CMINTUPDATECARET(Winapi::Messages::TMessage &Msg);
 	MESSAGE void __fastcall CMSelectionChanged(Winapi::Messages::TMessage &Msg);
-	HIDESBASE MESSAGE void __fastcall WMGetDlgCode(Winapi::Messages::TWMNoParams &Msg);
+	HIDESBASE MESSAGE void __fastcall WMGetDlgCode(Winapi::Messages::TWMGetDlgCode &Msg);
 	HIDESBASE MESSAGE void __fastcall CMFontChanged(Winapi::Messages::TMessage &Message);
 	void __fastcall IntChangeByte(const System::Byte aOldByte, const System::Byte aNewByte, int aPos, int aCol, int aRow, const System::UnicodeString UndoDesc = System::UnicodeString());
 	void __fastcall IntChangeWideChar(const System::WideChar aOldChar, const System::WideChar aNewChar, int aPos, int aCol, int aRow, const System::UnicodeString UndoDesc = System::UnicodeString());
@@ -451,8 +453,8 @@ protected:
 	virtual void __fastcall CreateWnd();
 	HIDESBASE MESSAGE void __fastcall WMSetFocus(Winapi::Messages::TWMSetFocus &Msg);
 	HIDESBASE MESSAGE void __fastcall WMKillFocus(Winapi::Messages::TWMKillFocus &Msg);
-	HIDESBASE MESSAGE void __fastcall WMVScroll(Winapi::Messages::TWMScroll &Msg);
-	HIDESBASE MESSAGE void __fastcall WMHScroll(Winapi::Messages::TWMScroll &Msg);
+	HIDESBASE MESSAGE void __fastcall WMVScroll(Winapi::Messages::TWMVScroll &Msg);
+	HIDESBASE MESSAGE void __fastcall WMHScroll(Winapi::Messages::TWMHScroll &Msg);
 	DYNAMIC void __fastcall Resize();
 	bool __fastcall HasCustomBookmarkBitmap();
 	__property bool AutoBytesPerRow = {read=FAutoBytesPerRow, write=SetAutoBytesPerRow, default=0};
@@ -506,7 +508,7 @@ protected:
 	void __fastcall WriteMaskChar_I(System::Classes::TWriter* Writer);
 	
 public:
-	System::PByte __fastcall GetFastPointer(const int Index, const int Count);
+	Winapi::Windows::PByte __fastcall GetFastPointer(const int Index, const int Count);
 	__fastcall virtual TCustomBCHexEditor(System::Classes::TComponent* aOwner);
 	__fastcall virtual ~TCustomBCHexEditor();
 	__property System::UnicodeString MaskedChars = {read=FMaskedChars, write=SetMaskedChars};
@@ -729,8 +731,8 @@ private:
 	int FUpdateCount;
 	TCustomBCHexEditor* FEditor;
 	System::UnicodeString FDescription;
-	TBCHUndoRec *FRedoPointer;
-	TBCHUndoRec *FLastUndo;
+	PBCHUndoRec FRedoPointer;
+	PBCHUndoRec FLastUndo;
 	int FLastUndoSize;
 	System::UnicodeString FLastUndoDesc;
 	void __fastcall SetCount(const int Value);
@@ -744,7 +746,7 @@ private:
 public:
 	__fastcall TBCHUndoStorage(TCustomBCHexEditor* AEditor);
 	__fastcall virtual ~TBCHUndoStorage();
-	virtual void __fastcall SetSize(int NewSize)/* overload */;
+	virtual void __fastcall SetSize(System::LongInt NewSize)/* overload */;
 	void __fastcall CreateUndo(TBCHUndoFlag aKind, int APosition, int ACount, int AReplaceCount, const System::UnicodeString SDescription = System::UnicodeString());
 	bool __fastcall CanUndo();
 	bool __fastcall CanRedo();
@@ -772,9 +774,9 @@ typedef System::StaticArray<System::UnicodeString, 6> Bchexeditor__7;
 typedef System::StaticArray<System::UnicodeString, 6> Bchexeditor__8;
 
 //-- var, const, procedure ---------------------------------------------------
-static const System::Word BCH_FILEIO_BLOCKSIZE = System::Word(0xf000);
-static const System::Word CM_INTUPDATECARET = System::Word(0xb100);
-static const System::Word CM_SELECTIONCHANGED = System::Word(0xb101);
+static _DELPHI_CONST System::Word BCH_FILEIO_BLOCKSIZE = System::Word(0xf000);
+static _DELPHI_CONST System::Word CM_INTUPDATECARET = System::Word(0xb100);
+static _DELPHI_CONST System::Word CM_SELECTIONCHANGED = System::Word(0xb101);
 extern DELPHI_PACKAGE TBCHCharConv BCH_CCONV_MAC;
 extern DELPHI_PACKAGE TBCHCharConv BCH_CCONV_BCD38;
 extern DELPHI_PACKAGE System::ResourceString _BCH_TK_ASIS;
@@ -821,7 +823,7 @@ extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTempName();
 extern DELPHI_PACKAGE bool __fastcall IsKeyDown(int aKey);
 extern DELPHI_PACKAGE int __fastcall Min(int a1, int a2);
 extern DELPHI_PACKAGE int __fastcall Max(int a1, int a2);
-extern DELPHI_PACKAGE Vcl::Grids::TGridCoord __fastcall GridCoord(int aX, int aY);
+extern DELPHI_PACKAGE TGridCoord __fastcall GridCoord(System::LongInt aX, System::LongInt aY);
 extern DELPHI_PACKAGE char * __fastcall ConvertHexToBin(System::WideChar * aFrom, char * aTo, const int aCount, const bool SwapNibbles, int &BytesTranslated);
 extern DELPHI_PACKAGE System::WideChar * __fastcall ConvertBinToHex(char * aFrom, System::WideChar * aTo, const int aCount, const bool SwapNibbles);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall IntToRadix(int Value, System::Byte Radix);
@@ -855,4 +857,4 @@ using namespace Bchexeditor;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// BchexeditorHPP
+#endif	// BCHexEditorHPP

@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'Xml.VerySimple.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'Xml.VerySimple.pas' rev: 36.00 (Windows)
 
-#ifndef Xml_VerysimpleHPP
-#define Xml_VerysimpleHPP
+#ifndef Xml_VerySimpleHPP
+#define Xml_VerySimpleHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -136,7 +138,8 @@ public:
 public:
 	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlAttribute>.Create */ inline __fastcall TXmlAttributeList(const System::DelphiInterface<System::Generics::Defaults::IComparer__1<TXmlAttribute*> > AComparer)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlAttribute*>(AComparer) { }
 	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlAttribute>.Create */ inline __fastcall TXmlAttributeList(System::Generics::Collections::TEnumerable__1<TXmlAttribute*>* const Collection)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlAttribute*>(Collection) { }
-	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlAttribute>.Create */ inline __fastcall TXmlAttributeList(TXmlAttribute* const *Values, const int Values_High)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlAttribute*>(Values, Values_High) { }
+	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlAttribute>.Create */ inline __fastcall TXmlAttributeList(const System::DelphiInterface<System::IEnumerable__1<TXmlAttribute*> > Collection)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlAttribute*>(Collection) { }
+	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlAttribute>.Create */ inline __fastcall TXmlAttributeList(TXmlAttribute* const *Values, const System::NativeInt Values_High)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlAttribute*>(Values, Values_High) { }
 	
 };
 
@@ -227,7 +230,8 @@ public:
 public:
 	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlNode>.Create */ inline __fastcall TXmlNodeList(const System::DelphiInterface<System::Generics::Defaults::IComparer__1<TXmlNode*> > AComparer)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlNode*>(AComparer) { }
 	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlNode>.Create */ inline __fastcall TXmlNodeList(System::Generics::Collections::TEnumerable__1<TXmlNode*>* const Collection)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlNode*>(Collection) { }
-	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlNode>.Create */ inline __fastcall TXmlNodeList(TXmlNode* const *Values, const int Values_High)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlNode*>(Values, Values_High) { }
+	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlNode>.Create */ inline __fastcall TXmlNodeList(const System::DelphiInterface<System::IEnumerable__1<TXmlNode*> > Collection)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlNode*>(Collection) { }
+	/* {System_Generics_Collections}TList<Xml_VerySimple_TXmlNode>.Create */ inline __fastcall TXmlNodeList(TXmlNode* const *Values, const System::NativeInt Values_High)/* overload */ : System::Generics::Collections::TObjectList__1<TXmlNode*>(Values, Values_High) { }
 	
 };
 
@@ -312,4 +316,4 @@ using namespace Xml;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// Xml_VerysimpleHPP
+#endif	// Xml_VerySimpleHPP

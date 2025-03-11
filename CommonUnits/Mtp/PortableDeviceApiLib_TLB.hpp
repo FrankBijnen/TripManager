@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'PortableDeviceApiLib_TLB.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'PortableDeviceApiLib_TLB.pas' rev: 36.00 (Windows)
 
-#ifndef Portabledeviceapilib_tlbHPP
-#define Portabledeviceapilib_tlbHPP
+#ifndef PortableDeviceApiLib_TLBHPP
+#define PortableDeviceApiLib_TLBHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -228,7 +230,7 @@ struct DECLSPEC_DRECORD _tagpropertykey
 {
 public:
 	GUID fmtid;
-	unsigned pid;
+	System::LongWord pid;
 };
 #pragma pack(pop)
 
@@ -251,8 +253,8 @@ public:
 struct DECLSPEC_DRECORD _FILETIME
 {
 public:
-	unsigned dwLowDateTime;
-	unsigned dwHighDateTime;
+	System::LongWord dwLowDateTime;
+	System::LongWord dwHighDateTime;
 };
 #pragma pack(pop)
 
@@ -261,7 +263,7 @@ public:
 struct DECLSPEC_DRECORD tagCLIPDATA
 {
 public:
-	unsigned cbSize;
+	System::LongWord cbSize;
 	int ulClipFmt;
 	System::Byte *pClipData;
 };
@@ -272,7 +274,7 @@ public:
 struct DECLSPEC_DRECORD tagBSTRBLOB
 {
 public:
-	unsigned cbSize;
+	System::LongWord cbSize;
 	System::Byte *pData;
 };
 #pragma pack(pop)
@@ -282,7 +284,7 @@ public:
 struct DECLSPEC_DRECORD tagBLOB
 {
 public:
-	unsigned cbSize;
+	System::LongWord cbSize;
 	System::Byte *pBlobData;
 };
 #pragma pack(pop)
@@ -302,16 +304,16 @@ struct DECLSPEC_DRECORD tagSTATSTG
 {
 public:
 	System::WideChar *pwcsName;
-	unsigned type_;
+	System::LongWord type_;
 	_ULARGE_INTEGER cbSize;
 	_FILETIME mtime;
 	_FILETIME ctime;
 	_FILETIME atime;
-	unsigned grfMode;
-	unsigned grfLocksSupported;
+	System::LongWord grfMode;
+	System::LongWord grfLocksSupported;
 	GUID clsid;
-	unsigned grfStateBits;
-	unsigned reserved;
+	System::LongWord grfStateBits;
+	System::LongWord reserved;
 };
 
 
@@ -319,8 +321,8 @@ public:
 struct DECLSPEC_DRECORD tagRemSNB
 {
 public:
-	unsigned ulCntStr;
-	unsigned ulCntChar;
+	System::LongWord ulCntStr;
+	System::LongWord ulCntChar;
 	System::Word *rgString;
 };
 #pragma pack(pop)
@@ -330,7 +332,7 @@ public:
 struct DECLSPEC_DRECORD tagCAC
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::Int8 *pElems;
 };
 #pragma pack(pop)
@@ -340,7 +342,7 @@ public:
 struct DECLSPEC_DRECORD tagCAUB
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::Byte *pElems;
 };
 #pragma pack(pop)
@@ -350,7 +352,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARR_BSTR
 {
 public:
-	unsigned Size;
+	System::LongWord Size;
 	PUserType6 *aBstr;
 };
 #pragma pack(pop)
@@ -360,7 +362,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARR_UNKNOWN
 {
 public:
-	unsigned Size;
+	System::LongWord Size;
 	System::_di_IInterface *apUnknown;
 };
 #pragma pack(pop)
@@ -370,7 +372,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARR_DISPATCH
 {
 public:
-	unsigned Size;
+	System::LongWord Size;
 	_di_IDispatch *apDispatch;
 };
 #pragma pack(pop)
@@ -380,8 +382,8 @@ public:
 struct DECLSPEC_DRECORD _FLAGGED_WORD_BLOB
 {
 public:
-	unsigned fFlags;
-	unsigned clSize;
+	System::LongWord fFlags;
+	System::LongWord clSize;
 	System::Word *asData;
 };
 #pragma pack(pop)
@@ -391,7 +393,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARR_VARIANT
 {
 public:
-	unsigned Size;
+	System::LongWord Size;
 	PUserType7 *aVariant;
 };
 #pragma pack(pop)
@@ -401,8 +403,8 @@ public:
 struct DECLSPEC_DRECORD _wireBRECORD
 {
 public:
-	unsigned fFlags;
-	unsigned clSize;
+	System::LongWord fFlags;
+	System::LongWord clSize;
 	_di_IRecordInfo pRecInfo;
 	System::Byte *pRecord;
 };
@@ -418,15 +420,15 @@ public:
 	{
 		struct 
 		{
-			unsigned hreftype;
+			System::LongWord hreftype;
 		};
 		struct 
 		{
-			tagARRAYDESC *lpadesc;
+			PUserType12 lpadesc;
 		};
 		struct 
 		{
-			tagTYPEDESC *lptdesc;
+			PUserType11 lptdesc;
 		};
 		
 	};
@@ -448,30 +450,30 @@ public:
 struct DECLSPEC_DRECORD tagSAFEARRAYBOUND
 {
 public:
-	unsigned cElements;
+	System::LongWord cElements;
 	int lLbound;
 };
 #pragma pack(pop)
 
 
-typedef unsigned ULONG_PTR;
+typedef System::LongWord ULONG_PTR;
 
 #pragma pack(push,4)
 struct DECLSPEC_DRECORD tagIDLDESC
 {
 public:
-	unsigned dwReserved;
+	ULONG_PTR dwReserved;
 	System::Word wIDLFlags;
 };
 #pragma pack(pop)
 
 
-typedef unsigned DWORD;
+typedef System::LongWord DWORD;
 
 struct DECLSPEC_DRECORD tagPARAMDESCEX
 {
 public:
-	unsigned cBytes;
+	System::LongWord cBytes;
 	System::OleVariant varDefaultValue;
 };
 
@@ -503,9 +505,9 @@ public:
 	int memid;
 	int *lprgscode;
 	tagELEMDESC *lprgelemdescParam;
-	Winapi::Activex::TOleEnum funckind;
-	Winapi::Activex::TOleEnum invkind;
-	Winapi::Activex::TOleEnum callconv;
+	tagFUNCKIND funckind;
+	tagINVOKEKIND invkind;
+	tagCALLCONV callconv;
 	short cParams;
 	short cParamsOpt;
 	short oVft;
@@ -529,7 +531,7 @@ public:
 		};
 		struct 
 		{
-			unsigned oInst;
+			System::LongWord oInst;
 		};
 		
 	};
@@ -546,7 +548,7 @@ public:
 	__MIDL_IOleAutomationTypes_0006 DUMMYUNIONNAME;
 	tagELEMDESC elemdescVar;
 	System::Word wVarFlags;
-	Winapi::Activex::TOleEnum varkind;
+	tagVARKIND varkind;
 };
 #pragma pack(pop)
 
@@ -556,8 +558,8 @@ struct DECLSPEC_DRECORD tagTLIBATTR
 {
 public:
 	GUID guid;
-	unsigned lcid;
-	Winapi::Activex::TOleEnum syskind;
+	System::LongWord lcid;
+	tagSYSKIND syskind;
 	System::Word wMajorVerNum;
 	System::Word wMinorVerNum;
 	System::Word wLibFlags;
@@ -569,7 +571,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARR_BRECORD
 {
 public:
-	unsigned Size;
+	System::LongWord Size;
 	PUserType14 *aRecord;
 };
 #pragma pack(pop)
@@ -579,7 +581,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARR_HAVEIID
 {
 public:
-	unsigned Size;
+	System::LongWord Size;
 	System::_di_IInterface *apUnknown;
 	GUID iid;
 };
@@ -590,7 +592,7 @@ public:
 struct DECLSPEC_DRECORD _BYTE_SIZEDARR
 {
 public:
-	unsigned clSize;
+	System::LongWord clSize;
 	System::Byte *pData;
 };
 #pragma pack(pop)
@@ -600,7 +602,7 @@ public:
 struct DECLSPEC_DRECORD _SHORT_SIZEDARR
 {
 public:
-	unsigned clSize;
+	System::LongWord clSize;
 	System::Word *pData;
 };
 #pragma pack(pop)
@@ -610,7 +612,7 @@ public:
 struct DECLSPEC_DRECORD _LONG_SIZEDARR
 {
 public:
-	unsigned clSize;
+	System::LongWord clSize;
 	unsigned *pData;
 };
 #pragma pack(pop)
@@ -620,7 +622,7 @@ public:
 struct DECLSPEC_DRECORD _HYPER_SIZEDARR
 {
 public:
-	unsigned clSize;
+	System::LongWord clSize;
 	__int64 *pData;
 };
 #pragma pack(pop)
@@ -630,7 +632,7 @@ public:
 struct DECLSPEC_DRECORD tagCAI
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	short *pElems;
 };
 #pragma pack(pop)
@@ -640,7 +642,7 @@ public:
 struct DECLSPEC_DRECORD tagCAUI
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::Word *pElems;
 };
 #pragma pack(pop)
@@ -650,7 +652,7 @@ public:
 struct DECLSPEC_DRECORD tagCAL
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	int *pElems;
 };
 #pragma pack(pop)
@@ -660,7 +662,7 @@ public:
 struct DECLSPEC_DRECORD tagCAUL
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	unsigned *pElems;
 };
 #pragma pack(pop)
@@ -670,7 +672,7 @@ public:
 struct DECLSPEC_DRECORD tagCAH
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	_LARGE_INTEGER *pElems;
 };
 #pragma pack(pop)
@@ -680,7 +682,7 @@ public:
 struct DECLSPEC_DRECORD tagCAUH
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	_ULARGE_INTEGER *pElems;
 };
 #pragma pack(pop)
@@ -690,7 +692,7 @@ public:
 struct DECLSPEC_DRECORD tagCAFLT
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	float *pElems;
 };
 #pragma pack(pop)
@@ -700,7 +702,7 @@ public:
 struct DECLSPEC_DRECORD tagCADBL
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	double *pElems;
 };
 #pragma pack(pop)
@@ -710,7 +712,7 @@ public:
 struct DECLSPEC_DRECORD tagCABOOL
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::WordBool *pElems;
 };
 #pragma pack(pop)
@@ -720,7 +722,7 @@ public:
 struct DECLSPEC_DRECORD tagCASCODE
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	int *pElems;
 };
 #pragma pack(pop)
@@ -730,7 +732,7 @@ public:
 struct DECLSPEC_DRECORD tagCACY
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::Currency *pElems;
 };
 #pragma pack(pop)
@@ -740,7 +742,7 @@ public:
 struct DECLSPEC_DRECORD tagCADATE
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::TDateTime *pElems;
 };
 #pragma pack(pop)
@@ -750,7 +752,7 @@ public:
 struct DECLSPEC_DRECORD tagCAFILETIME
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	_FILETIME *pElems;
 };
 #pragma pack(pop)
@@ -760,7 +762,7 @@ public:
 struct DECLSPEC_DRECORD tagCACLSID
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	GUID *pElems;
 };
 #pragma pack(pop)
@@ -770,7 +772,7 @@ public:
 struct DECLSPEC_DRECORD tagCACLIPDATA
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	tagCLIPDATA *pElems;
 };
 #pragma pack(pop)
@@ -780,7 +782,7 @@ public:
 struct DECLSPEC_DRECORD tagCABSTR
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::WideString *pElems;
 };
 #pragma pack(pop)
@@ -790,7 +792,7 @@ public:
 struct DECLSPEC_DRECORD tagCABSTRBLOB
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	tagBSTRBLOB *pElems;
 };
 #pragma pack(pop)
@@ -800,7 +802,7 @@ public:
 struct DECLSPEC_DRECORD tagCALPSTR
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	char * *pElems;
 };
 #pragma pack(pop)
@@ -810,7 +812,7 @@ public:
 struct DECLSPEC_DRECORD tagCALPWSTR
 {
 public:
-	unsigned cElems;
+	System::LongWord cElems;
 	System::WideChar * *pElems;
 };
 #pragma pack(pop)
@@ -820,8 +822,8 @@ public:
 struct DECLSPEC_DRECORD tagCAPROPVARIANT
 {
 public:
-	unsigned cElems;
-	tag_inner_PROPVARIANT *pElems;
+	System::LongWord cElems;
+	PUserType2 pElems;
 };
 #pragma pack(pop)
 
@@ -834,7 +836,7 @@ public:
 	{
 		struct 
 		{
-			tag_inner_PROPVARIANT *pvarVal;
+			PUserType2 pvarVal;
 		};
 		struct 
 		{
@@ -1002,7 +1004,7 @@ public:
 		};
 		struct 
 		{
-			PUserType5 *parray;
+			wirePSAFEARRAY parray;
 		};
 		struct 
 		{
@@ -1102,7 +1104,7 @@ public:
 		};
 		struct 
 		{
-			unsigned ulVal;
+			System::LongWord ulVal;
 		};
 		struct 
 		{
@@ -1135,7 +1137,7 @@ public:
 	System::Word vt;
 	System::Byte wReserved1;
 	System::Byte wReserved2;
-	unsigned wReserved3;
+	System::LongWord wReserved3;
 	__MIDL___MIDL_itf_PortableDeviceApi_0001_0000_0001 __MIDL____MIDL_itf_PortableDeviceApi_0001_00000001;
 };
 
@@ -1176,7 +1178,7 @@ public:
 		};
 		struct 
 		{
-			tagDEC decVal;
+			Winapi::Activex::TDecimal decVal;
 		};
 		struct 
 		{
@@ -1192,7 +1194,7 @@ public:
 		};
 		struct 
 		{
-			unsigned ulVal;
+			System::LongWord ulVal;
 		};
 		struct 
 		{
@@ -1384,7 +1386,7 @@ public:
 struct DECLSPEC_DRECORD _wireSAFEARRAY_UNION
 {
 public:
-	unsigned sfType;
+	System::LongWord sfType;
 	__MIDL_IOleAutomationTypes_0001 u;
 };
 #pragma pack(pop)
@@ -1393,8 +1395,8 @@ public:
 struct DECLSPEC_DRECORD _wireVARIANT
 {
 public:
-	unsigned clSize;
-	unsigned rpcReserved;
+	System::LongWord clSize;
+	System::LongWord rpcReserved;
 	System::Word vt;
 	System::Word wReserved1;
 	System::Word wReserved2;
@@ -1408,13 +1410,13 @@ struct DECLSPEC_DRECORD tagTYPEATTR
 {
 public:
 	GUID guid;
-	unsigned lcid;
-	unsigned dwReserved;
+	System::LongWord lcid;
+	System::LongWord dwReserved;
 	int memidConstructor;
 	int memidDestructor;
 	System::WideChar *lpstrSchema;
-	unsigned cbSizeInstance;
-	Winapi::Activex::TOleEnum typekind;
+	System::LongWord cbSizeInstance;
+	tagTYPEKIND typekind;
 	System::Word cFuncs;
 	System::Word cVars;
 	System::Word cImplTypes;
@@ -1446,8 +1448,8 @@ struct DECLSPEC_DRECORD _wireSAFEARRAY
 public:
 	System::Word cDims;
 	System::Word fFeatures;
-	unsigned cbElements;
-	unsigned cLocks;
+	System::LongWord cbElements;
+	System::LongWord cLocks;
 	_wireSAFEARRAY_UNION uArrayStructs;
 	tagSAFEARRAYBOUND *rgsabound;
 };
@@ -1457,26 +1459,26 @@ public:
 __interface  INTERFACE_UUID("{625E2DF8-6392-4CF0-9AD1-3CFA5F17775C}") IPortableDevice  : public System::IInterface 
 {
 	virtual HRESULT __stdcall Open(System::WideChar * pszPnPDeviceID, const _di_IPortableDeviceValues pClientInfo) = 0 ;
-	virtual HRESULT __stdcall SendCommand(unsigned dwFlags, const _di_IPortableDeviceValues pParameters, /* out */ _di_IPortableDeviceValues &ppResults) = 0 ;
+	virtual HRESULT __stdcall SendCommand(System::LongWord dwFlags, const _di_IPortableDeviceValues pParameters, /* out */ _di_IPortableDeviceValues &ppResults) = 0 ;
 	virtual HRESULT __stdcall Content(/* out */ _di_IPortableDeviceContent &ppContent) = 0 ;
 	virtual HRESULT __stdcall Capabilities(/* out */ _di_IPortableDeviceCapabilities &ppCapabilities) = 0 ;
 	virtual HRESULT __stdcall Cancel() = 0 ;
 	virtual HRESULT __stdcall Close() = 0 ;
-	virtual HRESULT __stdcall Advise(unsigned dwFlags, const _di_IPortableDeviceEventCallback pCallback, const _di_IPortableDeviceValues pParameters, /* out */ System::WideChar * &ppszCookie) = 0 ;
+	virtual HRESULT __stdcall Advise(System::LongWord dwFlags, const _di_IPortableDeviceEventCallback pCallback, const _di_IPortableDeviceValues pParameters, /* out */ System::WideChar * &ppszCookie) = 0 ;
 	virtual HRESULT __stdcall Unadvise(System::WideChar * pszCookie) = 0 ;
 	virtual HRESULT __stdcall GetPnPDeviceID(/* out */ System::WideChar * &ppszPnPDeviceID) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{6848F6F2-3155-4F86-B6F5-263EEEAB3143}") IPortableDeviceValues  : public System::IInterface 
 {
-	virtual HRESULT __stdcall GetCount(unsigned &pcelt) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned index, _tagpropertykey &pKey, tag_inner_PROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall GetCount(System::LongWord &pcelt) = 0 ;
+	virtual HRESULT __stdcall GetAt(System::LongWord index, _tagpropertykey &pKey, tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall SetValue(_tagpropertykey &key, tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall GetValue(_tagpropertykey &key, /* out */ tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall SetStringValue(_tagpropertykey &key, System::WideChar * Value) = 0 ;
 	virtual HRESULT __stdcall GetStringValue(_tagpropertykey &key, /* out */ System::WideChar * &pValue) = 0 ;
-	virtual HRESULT __stdcall SetUnsignedIntegerValue(_tagpropertykey &key, unsigned Value) = 0 ;
-	virtual HRESULT __stdcall GetUnsignedIntegerValue(_tagpropertykey &key, /* out */ unsigned &pValue) = 0 ;
+	virtual HRESULT __stdcall SetUnsignedIntegerValue(_tagpropertykey &key, System::LongWord Value) = 0 ;
+	virtual HRESULT __stdcall GetUnsignedIntegerValue(_tagpropertykey &key, /* out */ System::LongWord &pValue) = 0 ;
 	virtual HRESULT __stdcall SetSignedIntegerValue(_tagpropertykey &key, int Value) = 0 ;
 	virtual HRESULT __stdcall GetSignedIntegerValue(_tagpropertykey &key, /* out */ int &pValue) = 0 ;
 	virtual HRESULT __stdcall SetUnsignedLargeIntegerValue(_tagpropertykey &key, unsigned __int64 Value) = 0 ;
@@ -1495,8 +1497,8 @@ __interface  INTERFACE_UUID("{6848F6F2-3155-4F86-B6F5-263EEEAB3143}") IPortableD
 	virtual HRESULT __stdcall GetIUnknownValue(_tagpropertykey &key, /* out */ System::_di_IInterface &ppValue) = 0 ;
 	virtual HRESULT __stdcall SetGuidValue(_tagpropertykey &key, GUID &Value) = 0 ;
 	virtual HRESULT __stdcall GetGuidValue(_tagpropertykey &key, /* out */ GUID &pValue) = 0 ;
-	virtual HRESULT __stdcall SetBufferValue(_tagpropertykey &key, System::Byte &pValue, unsigned cbValue) = 0 ;
-	virtual HRESULT __stdcall GetBufferValue(_tagpropertykey &key, /* out */ PByte1 &ppValue, /* out */ unsigned &pcbValue) = 0 ;
+	virtual HRESULT __stdcall SetBufferValue(_tagpropertykey &key, System::Byte &pValue, System::LongWord cbValue) = 0 ;
+	virtual HRESULT __stdcall GetBufferValue(_tagpropertykey &key, /* out */ PByte1 &ppValue, /* out */ System::LongWord &pcbValue) = 0 ;
 	virtual HRESULT __stdcall SetIPortableDeviceValuesValue(_tagpropertykey &key, const _di_IPortableDeviceValues pValue) = 0 ;
 	virtual HRESULT __stdcall GetIPortableDeviceValuesValue(_tagpropertykey &key, /* out */ _di_IPortableDeviceValues &ppValue) = 0 ;
 	virtual HRESULT __stdcall SetIPortableDevicePropVariantCollectionValue(_tagpropertykey &key, const _di_IPortableDevicePropVariantCollection pValue) = 0 ;
@@ -1513,27 +1515,27 @@ __interface  INTERFACE_UUID("{6848F6F2-3155-4F86-B6F5-263EEEAB3143}") IPortableD
 
 __interface  INTERFACE_UUID("{0000000B-0000-0000-C000-000000000046}") IStorage  : public System::IInterface 
 {
-	virtual HRESULT __stdcall CreateStream(System::WideChar * pwcsName, unsigned grfMode, unsigned reserved1, unsigned reserved2, /* out */ _di_IStream &ppstm) = 0 ;
-	virtual HRESULT __stdcall RemoteOpenStream(System::WideChar * pwcsName, unsigned cbReserved1, System::Byte &reserved1, unsigned grfMode, unsigned reserved2, /* out */ _di_IStream &ppstm) = 0 ;
-	virtual HRESULT __stdcall CreateStorage(System::WideChar * pwcsName, unsigned grfMode, unsigned reserved1, unsigned reserved2, /* out */ _di_IStorage &ppstg) = 0 ;
-	virtual HRESULT __stdcall OpenStorage(System::WideChar * pwcsName, const _di_IStorage pstgPriority, unsigned grfMode, tagRemSNB &snbExclude, unsigned reserved, /* out */ _di_IStorage &ppstg) = 0 ;
-	virtual HRESULT __stdcall RemoteCopyTo(unsigned ciidExclude, GUID &rgiidExclude, tagRemSNB &snbExclude, const _di_IStorage pstgDest) = 0 ;
-	virtual HRESULT __stdcall MoveElementTo(System::WideChar * pwcsName, const _di_IStorage pstgDest, System::WideChar * pwcsNewName, unsigned grfFlags) = 0 ;
-	virtual HRESULT __stdcall Commit(unsigned grfCommitFlags) = 0 ;
+	virtual HRESULT __stdcall CreateStream(System::WideChar * pwcsName, System::LongWord grfMode, System::LongWord reserved1, System::LongWord reserved2, /* out */ _di_IStream &ppstm) = 0 ;
+	virtual HRESULT __stdcall RemoteOpenStream(System::WideChar * pwcsName, System::LongWord cbReserved1, System::Byte &reserved1, System::LongWord grfMode, System::LongWord reserved2, /* out */ _di_IStream &ppstm) = 0 ;
+	virtual HRESULT __stdcall CreateStorage(System::WideChar * pwcsName, System::LongWord grfMode, System::LongWord reserved1, System::LongWord reserved2, /* out */ _di_IStorage &ppstg) = 0 ;
+	virtual HRESULT __stdcall OpenStorage(System::WideChar * pwcsName, const _di_IStorage pstgPriority, System::LongWord grfMode, tagRemSNB &snbExclude, System::LongWord reserved, /* out */ _di_IStorage &ppstg) = 0 ;
+	virtual HRESULT __stdcall RemoteCopyTo(System::LongWord ciidExclude, GUID &rgiidExclude, tagRemSNB &snbExclude, const _di_IStorage pstgDest) = 0 ;
+	virtual HRESULT __stdcall MoveElementTo(System::WideChar * pwcsName, const _di_IStorage pstgDest, System::WideChar * pwcsNewName, System::LongWord grfFlags) = 0 ;
+	virtual HRESULT __stdcall Commit(System::LongWord grfCommitFlags) = 0 ;
 	virtual HRESULT __stdcall Revert() = 0 ;
-	virtual HRESULT __stdcall RemoteEnumElements(unsigned reserved1, unsigned cbReserved2, System::Byte &reserved2, unsigned reserved3, /* out */ _di_IEnumSTATSTG &ppenum) = 0 ;
+	virtual HRESULT __stdcall RemoteEnumElements(System::LongWord reserved1, System::LongWord cbReserved2, System::Byte &reserved2, System::LongWord reserved3, /* out */ _di_IEnumSTATSTG &ppenum) = 0 ;
 	virtual HRESULT __stdcall DestroyElement(System::WideChar * pwcsName) = 0 ;
 	virtual HRESULT __stdcall RenameElement(System::WideChar * pwcsOldName, System::WideChar * pwcsNewName) = 0 ;
 	virtual HRESULT __stdcall SetElementTimes(System::WideChar * pwcsName, _FILETIME &pctime, _FILETIME &patime, _FILETIME &pmtime) = 0 ;
 	virtual HRESULT __stdcall SetClass(GUID &clsid) = 0 ;
-	virtual HRESULT __stdcall SetStateBits(unsigned grfStateBits, unsigned grfMask) = 0 ;
-	virtual HRESULT __stdcall Stat(/* out */ tagSTATSTG &pstatstg, unsigned grfStatFlag) = 0 ;
+	virtual HRESULT __stdcall SetStateBits(System::LongWord grfStateBits, System::LongWord grfMask) = 0 ;
+	virtual HRESULT __stdcall Stat(/* out */ tagSTATSTG &pstatstg, System::LongWord grfStatFlag) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{0000000D-0000-0000-C000-000000000046}") IEnumSTATSTG  : public System::IInterface 
 {
-	virtual HRESULT __stdcall RemoteNext(unsigned celt, /* out */ tagSTATSTG &rgelt, /* out */ unsigned &pceltFetched) = 0 ;
-	virtual HRESULT __stdcall Skip(unsigned celt) = 0 ;
+	virtual HRESULT __stdcall RemoteNext(System::LongWord celt, /* out */ tagSTATSTG &rgelt, /* out */ System::LongWord &pceltFetched) = 0 ;
+	virtual HRESULT __stdcall Skip(System::LongWord celt) = 0 ;
 	virtual HRESULT __stdcall Reset() = 0 ;
 	virtual HRESULT __stdcall Clone(/* out */ _di_IEnumSTATSTG &ppenum) = 0 ;
 };
@@ -1545,13 +1547,13 @@ __interface  INTERFACE_UUID("{0000002F-0000-0000-C000-000000000046}") IRecordInf
 	virtual HRESULT __stdcall RecordCopy(void * pvExisting, void * pvNew) = 0 ;
 	virtual HRESULT __stdcall GetGuid(/* out */ GUID &pguid) = 0 ;
 	virtual HRESULT __stdcall GetName(/* out */ System::WideString &pbstrName) = 0 ;
-	virtual HRESULT __stdcall GetSize(/* out */ unsigned &pcbSize) = 0 ;
+	virtual HRESULT __stdcall GetSize(/* out */ System::LongWord &pcbSize) = 0 ;
 	virtual HRESULT __stdcall GetTypeInfo(/* out */ _di_ITypeInfo &ppTypeInfo) = 0 ;
 	virtual HRESULT __stdcall GetField(void * pvData, System::WideChar * szFieldName, /* out */ System::OleVariant &pvarField) = 0 ;
 	virtual HRESULT __stdcall GetFieldNoCopy(void * pvData, System::WideChar * szFieldName, /* out */ System::OleVariant &pvarField, /* out */ void * &ppvDataCArray) = 0 ;
-	virtual HRESULT __stdcall PutField(unsigned wFlags, void * pvData, System::WideChar * szFieldName, const System::OleVariant &pvarField) = 0 ;
-	virtual HRESULT __stdcall PutFieldNoCopy(unsigned wFlags, void * pvData, System::WideChar * szFieldName, const System::OleVariant &pvarField) = 0 ;
-	virtual HRESULT __stdcall GetFieldNames(unsigned &pcNames, /* out */ System::WideString &rgBstrNames) = 0 ;
+	virtual HRESULT __stdcall PutField(System::LongWord wFlags, void * pvData, System::WideChar * szFieldName, const System::OleVariant &pvarField) = 0 ;
+	virtual HRESULT __stdcall PutFieldNoCopy(System::LongWord wFlags, void * pvData, System::WideChar * szFieldName, const System::OleVariant &pvarField) = 0 ;
+	virtual HRESULT __stdcall GetFieldNames(System::LongWord &pcNames, /* out */ System::WideString &rgBstrNames) = 0 ;
 	virtual int __stdcall IsMatchingType(const _di_IRecordInfo pRecordInfo) = 0 ;
 	virtual void * __stdcall RecordCreate() = 0 ;
 	virtual HRESULT __stdcall RecordCreateCopy(void * pvSource, /* out */ void * &ppvDest) = 0 ;
@@ -1560,18 +1562,18 @@ __interface  INTERFACE_UUID("{0000002F-0000-0000-C000-000000000046}") IRecordInf
 
 __interface  INTERFACE_UUID("{00020401-0000-0000-C000-000000000046}") ITypeInfo  : public System::IInterface 
 {
-	virtual HRESULT __stdcall RemoteGetTypeAttr(/* out */ PUserType8 &ppTypeAttr, /* out */ unsigned &pDummy) = 0 ;
+	virtual HRESULT __stdcall RemoteGetTypeAttr(/* out */ PUserType8 &ppTypeAttr, /* out */ DWORD &pDummy) = 0 ;
 	virtual HRESULT __stdcall GetTypeComp(/* out */ _di_ITypeComp &ppTComp) = 0 ;
-	virtual HRESULT __stdcall RemoteGetFuncDesc(unsigned index, /* out */ PUserType9 &ppFuncDesc, /* out */ unsigned &pDummy) = 0 ;
-	virtual HRESULT __stdcall RemoteGetVarDesc(unsigned index, /* out */ PUserType10 &ppVarDesc, /* out */ unsigned &pDummy) = 0 ;
+	virtual HRESULT __stdcall RemoteGetFuncDesc(unsigned index, /* out */ PUserType9 &ppFuncDesc, /* out */ DWORD &pDummy) = 0 ;
+	virtual HRESULT __stdcall RemoteGetVarDesc(unsigned index, /* out */ PUserType10 &ppVarDesc, /* out */ DWORD &pDummy) = 0 ;
 	virtual HRESULT __stdcall RemoteGetNames(int memid, /* out */ System::WideString &rgBstrNames, unsigned cMaxNames, /* out */ unsigned &pcNames) = 0 ;
-	virtual HRESULT __stdcall GetRefTypeOfImplType(unsigned index, /* out */ unsigned &pRefType) = 0 ;
+	virtual HRESULT __stdcall GetRefTypeOfImplType(unsigned index, /* out */ System::LongWord &pRefType) = 0 ;
 	virtual HRESULT __stdcall GetImplTypeFlags(unsigned index, /* out */ int &pImplTypeFlags) = 0 ;
 	virtual HRESULT __stdcall LocalGetIDsOfNames() = 0 ;
 	virtual HRESULT __stdcall LocalInvoke() = 0 ;
-	virtual HRESULT __stdcall RemoteGetDocumentation(int memid, unsigned refPtrFlags, /* out */ System::WideString &pbstrName, /* out */ System::WideString &pBstrDocString, /* out */ unsigned &pdwHelpContext, /* out */ System::WideString &pBstrHelpFile) = 0 ;
-	virtual HRESULT __stdcall RemoteGetDllEntry(int memid, Winapi::Activex::TOleEnum invkind, unsigned refPtrFlags, /* out */ System::WideString &pBstrDllName, /* out */ System::WideString &pbstrName, /* out */ System::Word &pwOrdinal) = 0 ;
-	virtual HRESULT __stdcall GetRefTypeInfo(unsigned hreftype, /* out */ _di_ITypeInfo &ppTInfo) = 0 ;
+	virtual HRESULT __stdcall RemoteGetDocumentation(int memid, System::LongWord refPtrFlags, /* out */ System::WideString &pbstrName, /* out */ System::WideString &pBstrDocString, /* out */ System::LongWord &pdwHelpContext, /* out */ System::WideString &pBstrHelpFile) = 0 ;
+	virtual HRESULT __stdcall RemoteGetDllEntry(int memid, tagINVOKEKIND invkind, System::LongWord refPtrFlags, /* out */ System::WideString &pBstrDllName, /* out */ System::WideString &pbstrName, /* out */ System::Word &pwOrdinal) = 0 ;
+	virtual HRESULT __stdcall GetRefTypeInfo(System::LongWord hreftype, /* out */ _di_ITypeInfo &ppTInfo) = 0 ;
 	virtual HRESULT __stdcall LocalAddressOfMember() = 0 ;
 	virtual HRESULT __stdcall RemoteCreateInstance(GUID &riid, /* out */ System::_di_IInterface &ppvObj) = 0 ;
 	virtual HRESULT __stdcall GetMops(int memid, /* out */ System::WideString &pBstrMops) = 0 ;
@@ -1583,57 +1585,57 @@ __interface  INTERFACE_UUID("{00020401-0000-0000-C000-000000000046}") ITypeInfo 
 
 __interface  INTERFACE_UUID("{00020403-0000-0000-C000-000000000046}") ITypeComp  : public System::IInterface 
 {
-	virtual HRESULT __stdcall RemoteBind(System::WideChar * szName, unsigned lHashVal, System::Word wFlags, /* out */ _di_ITypeInfo &ppTInfo, /* out */ Winapi::Activex::TOleEnum &pDescKind, /* out */ PUserType9 &ppFuncDesc, /* out */ PUserType10 &ppVarDesc, /* out */ _di_ITypeComp &ppTypeComp, /* out */ unsigned &pDummy) = 0 ;
-	virtual HRESULT __stdcall RemoteBindType(System::WideChar * szName, unsigned lHashVal, /* out */ _di_ITypeInfo &ppTInfo) = 0 ;
+	virtual HRESULT __stdcall RemoteBind(System::WideChar * szName, System::LongWord lHashVal, System::Word wFlags, /* out */ _di_ITypeInfo &ppTInfo, /* out */ tagDESCKIND &pDescKind, /* out */ PUserType9 &ppFuncDesc, /* out */ PUserType10 &ppVarDesc, /* out */ _di_ITypeComp &ppTypeComp, /* out */ DWORD &pDummy) = 0 ;
+	virtual HRESULT __stdcall RemoteBindType(System::WideChar * szName, System::LongWord lHashVal, /* out */ _di_ITypeInfo &ppTInfo) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{00020402-0000-0000-C000-000000000046}") ITypeLib  : public System::IInterface 
 {
 	virtual HRESULT __stdcall RemoteGetTypeInfoCount(/* out */ unsigned &pcTInfo) = 0 ;
 	virtual HRESULT __stdcall GetTypeInfo(unsigned index, /* out */ _di_ITypeInfo &ppTInfo) = 0 ;
-	virtual HRESULT __stdcall GetTypeInfoType(unsigned index, /* out */ Winapi::Activex::TOleEnum &pTKind) = 0 ;
+	virtual HRESULT __stdcall GetTypeInfoType(unsigned index, /* out */ tagTYPEKIND &pTKind) = 0 ;
 	virtual HRESULT __stdcall GetTypeInfoOfGuid(GUID &guid, /* out */ _di_ITypeInfo &ppTInfo) = 0 ;
-	virtual HRESULT __stdcall RemoteGetLibAttr(/* out */ PUserType13 &ppTLibAttr, /* out */ unsigned &pDummy) = 0 ;
+	virtual HRESULT __stdcall RemoteGetLibAttr(/* out */ PUserType13 &ppTLibAttr, /* out */ DWORD &pDummy) = 0 ;
 	virtual HRESULT __stdcall GetTypeComp(/* out */ _di_ITypeComp &ppTComp) = 0 ;
-	virtual HRESULT __stdcall RemoteGetDocumentation(int index, unsigned refPtrFlags, /* out */ System::WideString &pbstrName, /* out */ System::WideString &pBstrDocString, /* out */ unsigned &pdwHelpContext, /* out */ System::WideString &pBstrHelpFile) = 0 ;
-	virtual HRESULT __stdcall RemoteIsName(System::WideChar * szNameBuf, unsigned lHashVal, /* out */ int &pfName, /* out */ System::WideString &pBstrLibName) = 0 ;
-	virtual HRESULT __stdcall RemoteFindName(System::WideChar * szNameBuf, unsigned lHashVal, /* out */ _di_ITypeInfo &ppTInfo, /* out */ int &rgMemId, System::Word &pcFound, /* out */ System::WideString &pBstrLibName) = 0 ;
+	virtual HRESULT __stdcall RemoteGetDocumentation(int index, System::LongWord refPtrFlags, /* out */ System::WideString &pbstrName, /* out */ System::WideString &pBstrDocString, /* out */ System::LongWord &pdwHelpContext, /* out */ System::WideString &pBstrHelpFile) = 0 ;
+	virtual HRESULT __stdcall RemoteIsName(System::WideChar * szNameBuf, System::LongWord lHashVal, /* out */ int &pfName, /* out */ System::WideString &pBstrLibName) = 0 ;
+	virtual HRESULT __stdcall RemoteFindName(System::WideChar * szNameBuf, System::LongWord lHashVal, /* out */ _di_ITypeInfo &ppTInfo, /* out */ int &rgMemId, System::Word &pcFound, /* out */ System::WideString &pBstrLibName) = 0 ;
 	virtual HRESULT __stdcall LocalReleaseTLibAttr() = 0 ;
 };
 
 __interface  INTERFACE_UUID("{89B2E422-4F1B-4316-BCEF-A44AFEA83EB3}") IPortableDevicePropVariantCollection  : public System::IInterface 
 {
-	virtual HRESULT __stdcall GetCount(unsigned &pcElems) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned dwIndex, tag_inner_PROPVARIANT &pValue) = 0 ;
+	virtual HRESULT __stdcall GetCount(System::LongWord &pcElems) = 0 ;
+	virtual HRESULT __stdcall GetAt(System::LongWord dwIndex, tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall Add(tag_inner_PROPVARIANT &pValue) = 0 ;
 	virtual HRESULT __stdcall GetType(/* out */ System::Word &pvt) = 0 ;
 	virtual HRESULT __stdcall ChangeType(System::Word vt) = 0 ;
 	virtual HRESULT __stdcall Clear() = 0 ;
-	virtual HRESULT __stdcall RemoveAt(unsigned dwIndex) = 0 ;
+	virtual HRESULT __stdcall RemoveAt(System::LongWord dwIndex) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{DADA2357-E0AD-492E-98DB-DD61C53BA353}") IPortableDeviceKeyCollection  : public System::IInterface 
 {
-	virtual HRESULT __stdcall GetCount(unsigned &pcElems) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned dwIndex, _tagpropertykey &pKey) = 0 ;
+	virtual HRESULT __stdcall GetCount(System::LongWord &pcElems) = 0 ;
+	virtual HRESULT __stdcall GetAt(System::LongWord dwIndex, _tagpropertykey &pKey) = 0 ;
 	virtual HRESULT __stdcall Add(_tagpropertykey &key) = 0 ;
 	virtual HRESULT __stdcall Clear() = 0 ;
-	virtual HRESULT __stdcall RemoveAt(unsigned dwIndex) = 0 ;
+	virtual HRESULT __stdcall RemoveAt(System::LongWord dwIndex) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{6E3F2D79-4E07-48C4-8208-D8C2E5AF4A99}") IPortableDeviceValuesCollection  : public System::IInterface 
 {
-	virtual HRESULT __stdcall GetCount(unsigned &pcElems) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned dwIndex, /* out */ _di_IPortableDeviceValues &ppValues) = 0 ;
+	virtual HRESULT __stdcall GetCount(System::LongWord &pcElems) = 0 ;
+	virtual HRESULT __stdcall GetAt(System::LongWord dwIndex, /* out */ _di_IPortableDeviceValues &ppValues) = 0 ;
 	virtual HRESULT __stdcall Add(const _di_IPortableDeviceValues pValues) = 0 ;
 	virtual HRESULT __stdcall Clear() = 0 ;
-	virtual HRESULT __stdcall RemoveAt(unsigned dwIndex) = 0 ;
+	virtual HRESULT __stdcall RemoveAt(System::LongWord dwIndex) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99}") IPropertyStore  : public System::IInterface 
 {
-	virtual HRESULT __stdcall GetCount(/* out */ unsigned &cProps) = 0 ;
-	virtual HRESULT __stdcall GetAt(unsigned iProp, /* out */ _tagpropertykey &pKey) = 0 ;
+	virtual HRESULT __stdcall GetCount(/* out */ System::LongWord &cProps) = 0 ;
+	virtual HRESULT __stdcall GetAt(System::LongWord iProp, /* out */ _tagpropertykey &pKey) = 0 ;
 	virtual HRESULT __stdcall GetValue(_tagpropertykey &key, /* out */ tag_inner_PROPVARIANT &pv) = 0 ;
 	virtual HRESULT __stdcall SetValue(_tagpropertykey &key, tag_inner_PROPVARIANT &propvar) = 0 ;
 	virtual HRESULT __stdcall Commit() = 0 ;
@@ -1641,12 +1643,12 @@ __interface  INTERFACE_UUID("{886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99}") IPropertyS
 
 __interface  INTERFACE_UUID("{6A96ED84-7C73-4480-9938-BF5AF477D426}") IPortableDeviceContent  : public System::IInterface 
 {
-	virtual HRESULT __stdcall EnumObjects(unsigned dwFlags, System::WideChar * pszParentObjectID, const _di_IPortableDeviceValues pFilter, /* out */ _di_IEnumPortableDeviceObjectIDs &ppenum) = 0 ;
+	virtual HRESULT __stdcall EnumObjects(System::LongWord dwFlags, System::WideChar * pszParentObjectID, const _di_IPortableDeviceValues pFilter, /* out */ _di_IEnumPortableDeviceObjectIDs &ppenum) = 0 ;
 	virtual HRESULT __stdcall Properties(/* out */ _di_IPortableDeviceProperties &ppProperties) = 0 ;
 	virtual HRESULT __stdcall Transfer(/* out */ _di_IPortableDeviceResources &ppResources) = 0 ;
 	virtual HRESULT __stdcall CreateObjectWithPropertiesOnly(const _di_IPortableDeviceValues pValues, System::WideChar * &ppszObjectID) = 0 ;
-	virtual HRESULT __stdcall CreateObjectWithPropertiesAndData(const _di_IPortableDeviceValues pValues, /* out */ _di_IStream &ppData, unsigned &pdwOptimalWriteBufferSize, System::WideChar * &ppszCookie) = 0 ;
-	virtual HRESULT __stdcall Delete(unsigned dwOptions, const _di_IPortableDevicePropVariantCollection pObjectIDs, _di_IPortableDevicePropVariantCollection &ppResults) = 0 ;
+	virtual HRESULT __stdcall CreateObjectWithPropertiesAndData(const _di_IPortableDeviceValues pValues, /* out */ _di_IStream &ppData, System::LongWord &pdwOptimalWriteBufferSize, System::WideChar * &ppszCookie) = 0 ;
+	virtual HRESULT __stdcall Delete(System::LongWord dwOptions, const _di_IPortableDevicePropVariantCollection pObjectIDs, _di_IPortableDevicePropVariantCollection &ppResults) = 0 ;
 	virtual HRESULT __stdcall GetObjectIDsFromPersistentUniqueIDs(const _di_IPortableDevicePropVariantCollection pPersistentUniqueIDs, /* out */ _di_IPortableDevicePropVariantCollection &ppObjectIDs) = 0 ;
 	virtual HRESULT __stdcall Cancel() = 0 ;
 	virtual HRESULT __stdcall Move(const _di_IPortableDevicePropVariantCollection pObjectIDs, System::WideChar * pszDestinationFolderObjectID, _di_IPortableDevicePropVariantCollection &ppResults) = 0 ;
@@ -1655,8 +1657,8 @@ __interface  INTERFACE_UUID("{6A96ED84-7C73-4480-9938-BF5AF477D426}") IPortableD
 
 __interface  INTERFACE_UUID("{10ECE955-CF41-4728-BFA0-41EEDF1BBF19}") IEnumPortableDeviceObjectIDs  : public System::IInterface 
 {
-	virtual HRESULT __stdcall Next(unsigned cObjects, /* out */ System::WideChar * &pObjIDs, unsigned &pcFetched) = 0 ;
-	virtual HRESULT __stdcall Skip(unsigned cObjects) = 0 ;
+	virtual HRESULT __stdcall Next(System::LongWord cObjects, /* out */ System::WideChar * &pObjIDs, System::LongWord &pcFetched) = 0 ;
+	virtual HRESULT __stdcall Skip(System::LongWord cObjects) = 0 ;
 	virtual HRESULT __stdcall Reset() = 0 ;
 	virtual HRESULT __stdcall Clone(/* out */ _di_IEnumPortableDeviceObjectIDs &ppenum) = 0 ;
 	virtual HRESULT __stdcall Cancel() = 0 ;
@@ -1676,10 +1678,10 @@ __interface  INTERFACE_UUID("{FD8878AC-D841-4D17-891C-E6829CDB6934}") IPortableD
 {
 	virtual HRESULT __stdcall GetSupportedResources(System::WideChar * pszObjectID, /* out */ _di_IPortableDeviceKeyCollection &ppKeys) = 0 ;
 	virtual HRESULT __stdcall GetResourceAttributes(System::WideChar * pszObjectID, _tagpropertykey &key, /* out */ _di_IPortableDeviceValues &ppResourceAttributes) = 0 ;
-	virtual HRESULT __stdcall GetStream(System::WideChar * pszObjectID, _tagpropertykey &key, unsigned dwMode, unsigned &pdwOptimalBufferSize, /* out */ _di_IStream &ppStream) = 0 ;
+	virtual HRESULT __stdcall GetStream(System::WideChar * pszObjectID, _tagpropertykey &key, System::LongWord dwMode, System::LongWord &pdwOptimalBufferSize, /* out */ _di_IStream &ppStream) = 0 ;
 	virtual HRESULT __stdcall Delete(System::WideChar * pszObjectID, const _di_IPortableDeviceKeyCollection pKeys) = 0 ;
 	virtual HRESULT __stdcall Cancel() = 0 ;
-	virtual HRESULT __stdcall CreateResource(const _di_IPortableDeviceValues pResourceAttributes, /* out */ _di_IStream &ppData, unsigned &pdwOptimalWriteBufferSize, System::WideChar * &ppszCookie) = 0 ;
+	virtual HRESULT __stdcall CreateResource(const _di_IPortableDeviceValues pResourceAttributes, /* out */ _di_IStream &ppData, System::LongWord &pdwOptimalWriteBufferSize, System::WideChar * &ppszCookie) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{2C8C6DBF-E3DC-4061-BECC-8542E810D126}") IPortableDeviceCapabilities  : public System::IInterface 
@@ -1704,13 +1706,13 @@ __interface  INTERFACE_UUID("{A8792A31-F385-493C-A893-40F64EB45F6E}") IPortableD
 
 __interface  INTERFACE_UUID("{A1567595-4C2F-4574-A6FA-ECEF917B9A40}") IPortableDeviceManager  : public System::IInterface 
 {
-	virtual HRESULT __stdcall GetDevices(System::WideChar * &pPnPDeviceIDs, unsigned &pcPnPDeviceIDs) = 0 ;
+	virtual HRESULT __stdcall GetDevices(System::WideChar * &pPnPDeviceIDs, System::LongWord &pcPnPDeviceIDs) = 0 ;
 	virtual HRESULT __stdcall RefreshDeviceList() = 0 ;
-	virtual HRESULT __stdcall GetDeviceFriendlyName(System::WideChar * pszPnPDeviceID, System::Word &pDeviceFriendlyName, unsigned &pcchDeviceFriendlyName) = 0 ;
-	virtual HRESULT __stdcall GetDeviceDescription(System::WideChar * pszPnPDeviceID, System::Word &pDeviceDescription, unsigned &pcchDeviceDescription) = 0 ;
-	virtual HRESULT __stdcall GetDeviceManufacturer(System::WideChar * pszPnPDeviceID, System::Word &pDeviceManufacturer, unsigned &pcchDeviceManufacturer) = 0 ;
-	virtual HRESULT __stdcall GetDeviceProperty(System::WideChar * pszPnPDeviceID, System::WideChar * pszDevicePropertyName, System::Byte &pData, unsigned &pcbData, unsigned &pdwType) = 0 ;
-	virtual HRESULT __stdcall GetPrivateDevices(System::WideChar * &pPnPDeviceIDs, unsigned &pcPnPDeviceIDs) = 0 ;
+	virtual HRESULT __stdcall GetDeviceFriendlyName(System::WideChar * pszPnPDeviceID, System::Word &pDeviceFriendlyName, System::LongWord &pcchDeviceFriendlyName) = 0 ;
+	virtual HRESULT __stdcall GetDeviceDescription(System::WideChar * pszPnPDeviceID, System::Word &pDeviceDescription, System::LongWord &pcchDeviceDescription) = 0 ;
+	virtual HRESULT __stdcall GetDeviceManufacturer(System::WideChar * pszPnPDeviceID, System::Word &pDeviceManufacturer, System::LongWord &pcchDeviceManufacturer) = 0 ;
+	virtual HRESULT __stdcall GetDeviceProperty(System::WideChar * pszPnPDeviceID, System::WideChar * pszDevicePropertyName, System::Byte &pData, System::LongWord &pcbData, System::LongWord &pdwType) = 0 ;
+	virtual HRESULT __stdcall GetPrivateDevices(System::WideChar * &pPnPDeviceIDs, System::LongWord &pcPnPDeviceIDs) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{D3BD3A44-D7B5-40A9-98B7-2FA4D01DEC08}") IPortableDeviceService  : public System::IInterface 
@@ -1723,9 +1725,9 @@ __interface  INTERFACE_UUID("{D3BD3A44-D7B5-40A9-98B7-2FA4D01DEC08}") IPortableD
 	virtual HRESULT __stdcall Close() = 0 ;
 	virtual HRESULT __stdcall GetServiceObjectID(/* out */ System::WideChar * &ppszServiceObjectID) = 0 ;
 	virtual HRESULT __stdcall GetPnPServiceID(/* out */ System::WideChar * &ppszPnPServiceID) = 0 ;
-	virtual HRESULT __stdcall Advise(unsigned dwFlags, const _di_IPortableDeviceEventCallback pCallback, const _di_IPortableDeviceValues pParameters, /* out */ System::WideChar * &ppszCookie) = 0 ;
+	virtual HRESULT __stdcall Advise(System::LongWord dwFlags, const _di_IPortableDeviceEventCallback pCallback, const _di_IPortableDeviceValues pParameters, /* out */ System::WideChar * &ppszCookie) = 0 ;
 	virtual HRESULT __stdcall Unadvise(System::WideChar * pszCookie) = 0 ;
-	virtual HRESULT __stdcall SendCommand(unsigned dwFlags, const _di_IPortableDeviceValues pParameters, /* out */ _di_IPortableDeviceValues &ppResults) = 0 ;
+	virtual HRESULT __stdcall SendCommand(System::LongWord dwFlags, const _di_IPortableDeviceValues pParameters, /* out */ _di_IPortableDeviceValues &ppResults) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{24DBD89D-413E-43E0-BD5B-197F3C56C886}") IPortableDeviceServiceCapabilities  : public System::IInterface 
@@ -1741,7 +1743,7 @@ __interface  INTERFACE_UUID("{24DBD89D-413E-43E0-BD5B-197F3C56C886}") IPortableD
 	virtual HRESULT __stdcall GetSupportedEvents(/* out */ _di_IPortableDevicePropVariantCollection &ppEvents) = 0 ;
 	virtual HRESULT __stdcall GetEventAttributes(GUID &Event, /* out */ _di_IPortableDeviceValues &ppAttributes) = 0 ;
 	virtual HRESULT __stdcall GetEventParameterAttributes(GUID &Event, _tagpropertykey &Parameter, /* out */ _di_IPortableDeviceValues &ppAttributes) = 0 ;
-	virtual HRESULT __stdcall GetInheritedServices(unsigned dwInheritanceType, /* out */ _di_IPortableDevicePropVariantCollection &ppServices) = 0 ;
+	virtual HRESULT __stdcall GetInheritedServices(System::LongWord dwInheritanceType, /* out */ _di_IPortableDevicePropVariantCollection &ppServices) = 0 ;
 	virtual HRESULT __stdcall GetFormatRenderingProfiles(GUID &Format, /* out */ _di_IPortableDeviceValuesCollection &ppRenderingProfiles) = 0 ;
 	virtual HRESULT __stdcall GetSupportedCommands(/* out */ _di_IPortableDeviceKeyCollection &ppCommands) = 0 ;
 	virtual HRESULT __stdcall GetCommandOptions(_tagpropertykey &Command, /* out */ _di_IPortableDeviceValues &ppOptions) = 0 ;
@@ -1750,7 +1752,7 @@ __interface  INTERFACE_UUID("{24DBD89D-413E-43E0-BD5B-197F3C56C886}") IPortableD
 
 __interface  INTERFACE_UUID("{9B4ADD96-F6BF-4034-8708-ECA72BF10554}") IPortableDeviceContent2  : public IPortableDeviceContent 
 {
-	virtual HRESULT __stdcall UpdateObjectWithPropertiesAndData(System::WideChar * pszObjectID, const _di_IPortableDeviceValues pProperties, /* out */ _di_IStream &ppData, unsigned &pdwOptimalWriteBufferSize) = 0 ;
+	virtual HRESULT __stdcall UpdateObjectWithPropertiesAndData(System::WideChar * pszObjectID, const _di_IPortableDeviceValues pProperties, /* out */ _di_IStream &ppData, System::LongWord &pdwOptimalWriteBufferSize) = 0 ;
 };
 
 __interface  INTERFACE_UUID("{E20333C9-FD34-412D-A381-CC6F2D820DF7}") IPortableDeviceServiceMethods  : public System::IInterface 
@@ -1900,8 +1902,8 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-static const System::Int8 PortableDeviceApiLibMajorVersion = System::Int8(0x1);
-static const System::Int8 PortableDeviceApiLibMinorVersion = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 PortableDeviceApiLibMajorVersion = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 PortableDeviceApiLibMinorVersion = System::Int8(0x0);
 extern DELPHI_PACKAGE GUID LIBID_PortableDeviceApiLib;
 extern DELPHI_PACKAGE GUID IID_IPortableDevice;
 extern DELPHI_PACKAGE GUID CLASS_PortableDevice;
@@ -1936,49 +1938,49 @@ extern DELPHI_PACKAGE GUID CLASS_PortableDeviceFTM;
 extern DELPHI_PACKAGE GUID CLASS_PortableDeviceServiceFTM;
 extern DELPHI_PACKAGE GUID IID_IPortableDeviceWebControl;
 extern DELPHI_PACKAGE GUID CLASS_PortableDeviceWebControl;
-static const System::Int8 TKIND_ENUM = System::Int8(0x0);
-static const System::Int8 TKIND_RECORD = System::Int8(0x1);
-static const System::Int8 TKIND_MODULE = System::Int8(0x2);
-static const System::Int8 TKIND_INTERFACE = System::Int8(0x3);
-static const System::Int8 TKIND_DISPATCH = System::Int8(0x4);
-static const System::Int8 TKIND_COCLASS = System::Int8(0x5);
-static const System::Int8 TKIND_ALIAS = System::Int8(0x6);
-static const System::Int8 TKIND_UNION = System::Int8(0x7);
-static const System::Int8 TKIND_MAX = System::Int8(0x8);
-static const System::Int8 DESCKIND_NONE = System::Int8(0x0);
-static const System::Int8 DESCKIND_FUNCDESC = System::Int8(0x1);
-static const System::Int8 DESCKIND_VARDESC = System::Int8(0x2);
-static const System::Int8 DESCKIND_TYPECOMP = System::Int8(0x3);
-static const System::Int8 DESCKIND_IMPLICITAPPOBJ = System::Int8(0x4);
-static const System::Int8 DESCKIND_MAX = System::Int8(0x5);
-static const System::Int8 FUNC_VIRTUAL = System::Int8(0x0);
-static const System::Int8 FUNC_PUREVIRTUAL = System::Int8(0x1);
-static const System::Int8 FUNC_NONVIRTUAL = System::Int8(0x2);
-static const System::Int8 FUNC_STATIC = System::Int8(0x3);
-static const System::Int8 FUNC_DISPATCH = System::Int8(0x4);
-static const System::Int8 INVOKE_FUNC = System::Int8(0x1);
-static const System::Int8 INVOKE_PROPERTYGET = System::Int8(0x2);
-static const System::Int8 INVOKE_PROPERTYPUT = System::Int8(0x4);
-static const System::Int8 INVOKE_PROPERTYPUTREF = System::Int8(0x8);
-static const System::Int8 CC_FASTCALL = System::Int8(0x0);
-static const System::Int8 CC_CDECL = System::Int8(0x1);
-static const System::Int8 CC_MSCPASCAL = System::Int8(0x2);
-static const System::Int8 CC_PASCAL = System::Int8(0x2);
-static const System::Int8 CC_MACPASCAL = System::Int8(0x3);
-static const System::Int8 CC_STDCALL = System::Int8(0x4);
-static const System::Int8 CC_FPFASTCALL = System::Int8(0x5);
-static const System::Int8 CC_SYSCALL = System::Int8(0x6);
-static const System::Int8 CC_MPWCDECL = System::Int8(0x7);
-static const System::Int8 CC_MPWPASCAL = System::Int8(0x8);
-static const System::Int8 CC_MAX = System::Int8(0x9);
-static const System::Int8 VAR_PERINSTANCE = System::Int8(0x0);
-static const System::Int8 VAR_STATIC = System::Int8(0x1);
-static const System::Int8 VAR_CONST = System::Int8(0x2);
-static const System::Int8 VAR_DISPATCH = System::Int8(0x3);
-static const System::Int8 SYS_WIN16 = System::Int8(0x0);
-static const System::Int8 SYS_WIN32 = System::Int8(0x1);
-static const System::Int8 SYS_MAC = System::Int8(0x2);
-static const System::Int8 SYS_WIN64 = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 TKIND_ENUM = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 TKIND_RECORD = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 TKIND_MODULE = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 TKIND_INTERFACE = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 TKIND_DISPATCH = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 TKIND_COCLASS = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 TKIND_ALIAS = System::Int8(0x6);
+static _DELPHI_CONST System::Int8 TKIND_UNION = System::Int8(0x7);
+static _DELPHI_CONST System::Int8 TKIND_MAX = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 DESCKIND_NONE = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 DESCKIND_FUNCDESC = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 DESCKIND_VARDESC = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 DESCKIND_TYPECOMP = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 DESCKIND_IMPLICITAPPOBJ = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 DESCKIND_MAX = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 FUNC_VIRTUAL = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 FUNC_PUREVIRTUAL = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 FUNC_NONVIRTUAL = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 FUNC_STATIC = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 FUNC_DISPATCH = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 INVOKE_FUNC = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 INVOKE_PROPERTYGET = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 INVOKE_PROPERTYPUT = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 INVOKE_PROPERTYPUTREF = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 CC_FASTCALL = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 CC_CDECL = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 CC_MSCPASCAL = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 CC_PASCAL = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 CC_MACPASCAL = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 CC_STDCALL = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 CC_FPFASTCALL = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 CC_SYSCALL = System::Int8(0x6);
+static _DELPHI_CONST System::Int8 CC_MPWCDECL = System::Int8(0x7);
+static _DELPHI_CONST System::Int8 CC_MPWPASCAL = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 CC_MAX = System::Int8(0x9);
+static _DELPHI_CONST System::Int8 VAR_PERINSTANCE = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 VAR_STATIC = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 VAR_CONST = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 VAR_DISPATCH = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 SYS_WIN16 = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 SYS_WIN32 = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 SYS_MAC = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 SYS_WIN64 = System::Int8(0x3);
 }	/* namespace Portabledeviceapilib_tlb */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_PORTABLEDEVICEAPILIB_TLB)
 using namespace Portabledeviceapilib_tlb;
@@ -1988,4 +1990,4 @@ using namespace Portabledeviceapilib_tlb;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// Portabledeviceapilib_tlbHPP
+#endif	// PortableDeviceApiLib_TLBHPP

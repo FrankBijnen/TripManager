@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'mtp_helper.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'mtp_helper.pas' rev: 36.00 (Windows)
 
-#ifndef Mtp_helperHPP
-#define Mtp_helperHPP
+#ifndef mtp_helperHPP
+#define mtp_helperHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -33,9 +35,9 @@ namespace Mtp_helper
 //-- type declarations -------------------------------------------------------
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::WideString CLIENT_NAME;
-static const System::Int8 CLIENT_MAJOR_VER = System::Int8(0x1);
-static const System::Int8 CLIENT_MINOR_VER = System::Int8(0x0);
-static const System::Int8 CLIENT_REVISION = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 CLIENT_MAJOR_VER = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 CLIENT_MINOR_VER = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 CLIENT_REVISION = System::Int8(0x0);
 extern DELPHI_PACKAGE GUID CLASS_PortableDeviceValues;
 extern DELPHI_PACKAGE GUID CLASS_PortableDevicePropVariantCollection;
 extern DELPHI_PACKAGE GUID CLASS_PortableDeviceKeyCollection;
@@ -209,103 +211,103 @@ extern DELPHI_PACKAGE GUID WPD_TASK_OBJECT_PROPERTIES_V1;
 extern DELPHI_PACKAGE GUID WPD_VIDEO_OBJECT_PROPERTIES_V1;
 extern DELPHI_PACKAGE Portabledeviceapilib_tlb::_tagpropertykey WPD_OBJECT_CONTENT_TYPE;
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_NULL_FMTID;
-static const System::Int8 WPD_PROPERTY_NULL_PID = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_NULL_PID = System::Int8(0x0);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_ID_FMTID;
-static const System::Int8 WPD_OBJECT_ID_PID = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_ID_PID = System::Int8(0x2);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_PARENT_ID_FMTID;
-static const System::Int8 WPD_OBJECT_PARENT_ID_PID = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_PARENT_ID_PID = System::Int8(0x3);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_NAME_FMTID;
-static const System::Int8 WPD_OBJECT_NAME_PID = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_NAME_PID = System::Int8(0x4);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_PERSISTENT_UNIQUE_ID_FMTID;
-static const System::Int8 WPD_OBJECT_PERSISTENT_UNIQUE_ID_PID = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_PERSISTENT_UNIQUE_ID_PID = System::Int8(0x5);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_FORMAT_FMTID;
-static const System::Int8 WPD_OBJECT_FORMAT_PID = System::Int8(0x6);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_FORMAT_PID = System::Int8(0x6);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_CONTENT_TYPE_FMTID;
-static const System::Int8 WPD_OBJECT_CONTENT_TYPE_PID = System::Int8(0x7);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_CONTENT_TYPE_PID = System::Int8(0x7);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_ISHIDDEN_FMTID;
-static const System::Int8 WPD_OBJECT_ISHIDDEN_PID = System::Int8(0x9);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_ISHIDDEN_PID = System::Int8(0x9);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_ISSYSTEM_FMTID;
-static const System::Int8 WPD_OBJECT_ISSYSTEM_PID = System::Int8(0xa);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_ISSYSTEM_PID = System::Int8(0xa);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_SIZE_FMTID;
-static const System::Int8 WPD_OBJECT_SIZE_PID = System::Int8(0xb);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_SIZE_PID = System::Int8(0xb);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_ORIGINAL_FILE_NAME_FMTID;
-static const System::Int8 WPD_OBJECT_ORIGINAL_FILE_NAME_PID = System::Int8(0xc);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_ORIGINAL_FILE_NAME_PID = System::Int8(0xc);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_NON_CONSUMABLE_FMTID;
-static const System::Int8 WPD_OBJECT_NON_CONSUMABLE_PID = System::Int8(0xd);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_NON_CONSUMABLE_PID = System::Int8(0xd);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_REFERENCES_FMTID;
-static const System::Int8 WPD_OBJECT_REFERENCES_PID = System::Int8(0xe);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_REFERENCES_PID = System::Int8(0xe);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_KEYWORDS_FMTID;
-static const System::Int8 WPD_OBJECT_KEYWORDS_PID = System::Int8(0xf);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_KEYWORDS_PID = System::Int8(0xf);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_SYNC_ID_FMTID;
-static const System::Int8 WPD_OBJECT_SYNC_ID_PID = System::Int8(0x10);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_SYNC_ID_PID = System::Int8(0x10);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_IS_DRM_PROTECTED_FMTID;
-static const System::Int8 WPD_OBJECT_IS_DRM_PROTECTED_PID = System::Int8(0x11);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_IS_DRM_PROTECTED_PID = System::Int8(0x11);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_DATE_CREATED_FMTID;
-static const System::Int8 WPD_OBJECT_DATE_CREATED_PID = System::Int8(0x12);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_DATE_CREATED_PID = System::Int8(0x12);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_DATE_MODIFIED_FMTID;
-static const System::Int8 WPD_OBJECT_DATE_MODIFIED_PID = System::Int8(0x13);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_DATE_MODIFIED_PID = System::Int8(0x13);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_DATE_AUTHORED_FMTID;
-static const System::Int8 WPD_OBJECT_DATE_AUTHORED_PID = System::Int8(0x14);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_DATE_AUTHORED_PID = System::Int8(0x14);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_BACK_REFERENCES_FMTID;
-static const System::Int8 WPD_OBJECT_BACK_REFERENCES_PID = System::Int8(0x15);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_BACK_REFERENCES_PID = System::Int8(0x15);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_CONTAINER_FUNCTIONAL_OBJECT_ID_FMTID;
-static const System::Int8 WPD_OBJECT_CONTAINER_FUNCTIONAL_OBJECT_ID_PID = System::Int8(0x17);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_CONTAINER_FUNCTIONAL_OBJECT_ID_PID = System::Int8(0x17);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_GENERATE_THUMBNAIL_FROM_RESOURCE_FMTID;
-static const System::Int8 WPD_OBJECT_GENERATE_THUMBNAIL_FROM_RESOURCE_PID = System::Int8(0x18);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_GENERATE_THUMBNAIL_FROM_RESOURCE_PID = System::Int8(0x18);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_HINT_LOCATION_DISPLAY_NAME_FMTID;
-static const System::Int8 WPD_OBJECT_HINT_LOCATION_DISPLAY_NAME_PID = System::Int8(0x19);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_HINT_LOCATION_DISPLAY_NAME_PID = System::Int8(0x19);
 extern DELPHI_PACKAGE GUID WPD_OBJECT_CAN_DELETE_FMTID;
-static const System::Int8 WPD_OBJECT_CAN_DELETE_PID = System::Int8(0x1a);
+static _DELPHI_CONST System::Int8 WPD_OBJECT_CAN_DELETE_PID = System::Int8(0x1a);
 extern DELPHI_PACKAGE GUID WPD_CLIENT_NAME_FMTID;
-static const System::Int8 WPD_CLIENT_NAME_PID = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 WPD_CLIENT_NAME_PID = System::Int8(0x2);
 extern DELPHI_PACKAGE GUID WPD_CLIENT_MAJOR_VERSION_FMTID;
-static const System::Int8 WPD_CLIENT_MAJOR_VERSION_PID = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 WPD_CLIENT_MAJOR_VERSION_PID = System::Int8(0x3);
 extern DELPHI_PACKAGE GUID WPD_CLIENT_MINOR_VERSION_FMTID;
-static const System::Int8 WPD_CLIENT_MINOR_VERSION_PID = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 WPD_CLIENT_MINOR_VERSION_PID = System::Int8(0x4);
 extern DELPHI_PACKAGE GUID WPD_CLIENT_REVISION_FMTID;
-static const System::Int8 WPD_CLIENT_REVISION_PID = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 WPD_CLIENT_REVISION_PID = System::Int8(0x5);
 extern DELPHI_PACKAGE GUID WPD_CLIENT_DESIRED_ACCESS_FMTID;
-static const System::Int8 WPD_CLIENT_DESIRED_ACCESS_PID = System::Int8(0x9);
+static _DELPHI_CONST System::Int8 WPD_CLIENT_DESIRED_ACCESS_PID = System::Int8(0x9);
 extern DELPHI_PACKAGE GUID WPD_DEVICE_FRIENDLY_NAME_FMTID;
-static const System::Int8 WPD_DEVICE_FRIENDLY_NAME_PID = System::Int8(0xc);
+static _DELPHI_CONST System::Int8 WPD_DEVICE_FRIENDLY_NAME_PID = System::Int8(0xc);
 extern DELPHI_PACKAGE GUID WPD_RESOURCE_DEFAULT_FMTID;
-static const System::Int8 WPD_RESOURCE_DEFAULT_PID = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 WPD_RESOURCE_DEFAULT_PID = System::Int8(0x0);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_FORM_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_FORM_PID = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_FORM_PID = System::Int8(0x2);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_CAN_READ_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_CAN_READ_PID = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_CAN_READ_PID = System::Int8(0x3);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_PID = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_PID = System::Int8(0x4);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_CAN_DELETE_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_CAN_DELETE_PID = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_CAN_DELETE_PID = System::Int8(0x5);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_DEFAULT_VALUE_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_DEFAULT_VALUE_PID = System::Int8(0x6);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_DEFAULT_VALUE_PID = System::Int8(0x6);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_FAST_PROPERTY_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_FAST_PROPERTY_PID = System::Int8(0x7);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_FAST_PROPERTY_PID = System::Int8(0x7);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_RANGE_MIN_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_RANGE_MIN_PID = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_RANGE_MIN_PID = System::Int8(0x8);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_RANGE_MAX_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_RANGE_MAX_PID = System::Int8(0x9);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_RANGE_MAX_PID = System::Int8(0x9);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_RANGE_STEP_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_RANGE_STEP_PID = System::Int8(0xa);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_RANGE_STEP_PID = System::Int8(0xa);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_ENUMERATION_ELEMENTS_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_ENUMERATION_ELEMENTS_PID = System::Int8(0xb);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_ENUMERATION_ELEMENTS_PID = System::Int8(0xb);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_REGULAR_EXPRESSION_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_REGULAR_EXPRESSION_PID = System::Int8(0xc);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_REGULAR_EXPRESSION_PID = System::Int8(0xc);
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_FMTID;
-static const System::Int8 WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_PID = System::Int8(0xd);
+static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_PID = System::Int8(0xd);
 #define WPD_DEVICE_OBJECT_ID L"DEVICE"
-extern DELPHI_PACKAGE bool __fastcall RenameObject(Portabledeviceapilib_tlb::_di_IPortableDevice Device, System::WideString ObjectId, System::WideString NewName);
-extern DELPHI_PACKAGE bool __fastcall ConnectToDevice(System::WideString SDev, Portabledeviceapilib_tlb::_di_IPortableDevice &PortableDev, bool Readonly = true);
+extern DELPHI_PACKAGE bool __fastcall RenameObject(Unitmtpdevice::IMTPDevice Device, System::WideString ObjectId, System::WideString NewName);
+extern DELPHI_PACKAGE bool __fastcall ConnectToDevice(System::WideString SDev, Unitmtpdevice::IMTPDevice &PortableDev, bool Readonly = true);
 extern DELPHI_PACKAGE System::Classes::TList* __fastcall GetDevices();
-extern DELPHI_PACKAGE System::WideString __fastcall GetFirstStorageID(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev);
-extern DELPHI_PACKAGE System::WideChar * __fastcall ReadFilesFromDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, Vcl::Comctrls::TListItems* Lst, System::WideString SParent, System::WideString &CompletePath);
-extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForFile(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SPath, System::WideString SFile, Vcl::Comctrls::TListItem* AListItem = (Vcl::Comctrls::TListItem*)(0x0));
-extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForPath(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SPath, System::UnicodeString &FriendlyPath);
-extern DELPHI_PACKAGE bool __fastcall GetFileFromDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NFile);
-extern DELPHI_PACKAGE bool __fastcall DelFileFromDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile);
-extern DELPHI_PACKAGE System::WideString __fastcall TransferNewFileToDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NewName = System::WideString());
-extern DELPHI_PACKAGE bool __fastcall TransferExistingFileToDevice(Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, Vcl::Comctrls::TListItem* AListItem);
+extern DELPHI_PACKAGE System::WideString __fastcall GetFirstStorageID(Unitmtpdevice::IMTPDevice PortableDev);
+extern DELPHI_PACKAGE System::WideChar * __fastcall ReadFilesFromDevice(Unitmtpdevice::IMTPDevice PortableDev, Vcl::Comctrls::TListItems* Lst, System::WideString SParent, System::WideString &CompletePath);
+extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForFile(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SPath, System::WideString SFile, Vcl::Comctrls::TListItem* AListItem = (Vcl::Comctrls::TListItem*)(0x0));
+extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForPath(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SPath, System::UnicodeString &FriendlyPath);
+extern DELPHI_PACKAGE bool __fastcall GetFileFromDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NFile);
+extern DELPHI_PACKAGE bool __fastcall DelFileFromDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile);
+extern DELPHI_PACKAGE System::WideString __fastcall TransferNewFileToDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NewName = System::WideString());
+extern DELPHI_PACKAGE bool __fastcall TransferExistingFileToDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, Vcl::Comctrls::TListItem* AListItem);
 }	/* namespace Mtp_helper */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_MTP_HELPER)
 using namespace Mtp_helper;
@@ -315,4 +317,4 @@ using namespace Mtp_helper;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// Mtp_helperHPP
+#endif	// mtp_helperHPP

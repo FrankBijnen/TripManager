@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'UnitGpi.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'UnitGpi.pas' rev: 36.00 (Windows)
 
-#ifndef UnitgpiHPP
-#define UnitgpiHPP
+#ifndef UnitGpiHPP
+#define UnitGpiHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -60,20 +62,20 @@ class PASCALIMPLEMENTATION TGPXWayPoint : public System::TObject
 	typedef System::TObject inherited;
 	
 public:
-	System::UTF8String Name;
-	System::UTF8String Lat;
-	System::UTF8String Lon;
-	System::UTF8String Symbol;
-	System::UTF8String Phone;
-	System::UTF8String Email;
-	System::UTF8String Comment;
-	System::UTF8String Country;
-	System::UTF8String State;
-	System::UTF8String PostalCode;
-	System::UTF8String City;
-	System::UTF8String Street;
-	System::UTF8String HouseNbr;
-	System::UTF8String Category;
+	TGPXString Name;
+	TGPXString Lat;
+	TGPXString Lon;
+	TGPXString Symbol;
+	TGPXString Phone;
+	TGPXString Email;
+	TGPXString Comment;
+	TGPXString Country;
+	TGPXString State;
+	TGPXString PostalCode;
+	TGPXString City;
+	TGPXString Street;
+	TGPXString HouseNbr;
+	TGPXString Category;
 	System::Word Speed;
 	System::Word Proximity;
 	int BitmapId;
@@ -85,7 +87,7 @@ public:
 };
 
 
-typedef System::Generics::Collections::TObjectList__1<TGPXWayPoint*>* TPOIList;
+typedef System::Generics::Collections::TObjectList__1<TGPXWayPoint*> TPOIList;
 
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TGPXCategory : public System::TObject
@@ -93,7 +95,7 @@ class PASCALIMPLEMENTATION TGPXCategory : public System::TObject
 	typedef System::TObject inherited;
 	
 public:
-	System::UTF8String Category;
+	TGPXString Category;
 	System::Word CategoryId;
 	__fastcall TGPXCategory();
 	__fastcall virtual ~TGPXCategory();
@@ -107,7 +109,7 @@ class PASCALIMPLEMENTATION TGPXBitmap : public System::TObject
 	typedef System::TObject inherited;
 	
 public:
-	System::UTF8String Bitmap;
+	TGPXString Bitmap;
 	System::Word BitmapId;
 	__fastcall TGPXBitmap();
 	__fastcall virtual ~TGPXBitmap();
@@ -126,7 +128,7 @@ private:
 public:
 	System::Word LChars;
 	_TPString__1 Chars;
-	__fastcall TPString(System::UTF8String AChars);
+	__fastcall TPString(TGPXString AChars);
 	void __fastcall Write(System::Classes::TBufferedFileStream* S);
 	void __fastcall Read(System::Classes::TBufferedFileStream* S);
 	int __fastcall Size();
@@ -148,7 +150,7 @@ public:
 	System::StaticArray<char, 2> Country;
 	System::Word LChars;
 	_TPLString__1 Chars;
-	__fastcall TPLString(System::UTF8String AChars);
+	__fastcall TPLString(TGPXString AChars);
 	void __fastcall Write(System::Classes::TBufferedFileStream* S);
 	void __fastcall Read(System::Classes::TBufferedFileStream* S);
 	int __fastcall Size();
@@ -402,8 +404,8 @@ public:
 	bool Extra;
 	TExtraRec ExtraRec;
 	TMainRec MainRec;
-	int Lat;
-	int Lon;
+	System::LongInt Lat;
+	System::LongInt Lon;
 	System::Word Dummy1;
 	System::Byte HasAlert;
 	TPLString Name;
@@ -431,10 +433,10 @@ public:
 	bool Extra;
 	int ExtraSize;
 	TExtraRec ExtraRec;
-	int MaxLat;
-	int MaxLon;
-	int MinLat;
-	int MinLon;
+	System::LongInt MaxLat;
+	System::LongInt MaxLon;
+	System::LongInt MinLat;
+	System::LongInt MinLon;
 	unsigned Dummy1;
 	System::Word Dummy2;
 	System::Byte Alert;
@@ -475,7 +477,7 @@ public:
 	TArea Area;
 	System::Generics::Collections::TObjectList__1<TGPXCategory*>* Categories;
 	System::Generics::Collections::TObjectList__1<TGPXBitmap*>* BitMaps;
-	__fastcall TPOIGroup(System::Word AVersion, System::UTF8String AName, bool AExtra);
+	__fastcall TPOIGroup(System::Word AVersion, TGPXString AName, bool AExtra);
 	void __fastcall AddWpt(TGPXWayPoint* GPXWayPt);
 	int __fastcall AddCat(TGPXCategory* GPXCategory);
 	int __fastcall AddBmp(TGPXBitmap* GPXBitMap);
@@ -500,18 +502,18 @@ public:
 	TEndx Endx;
 	__fastcall TGPI(System::Word AVersion, bool AExtra);
 	void __fastcall WriteHeader(System::Classes::TBufferedFileStream* S);
-	TPOIGroup __fastcall CreatePOIGroup(System::UTF8String Category);
+	TPOIGroup __fastcall CreatePOIGroup(TGPXString Category);
 	void __fastcall WriteEnd(System::Classes::TBufferedFileStream* S);
-	void __fastcall Read(System::Classes::TBufferedFileStream* S, System::Generics::Collections::TObjectList__1<TGPXWayPoint*>* APOIList, System::UnicodeString ImageDir = System::UnicodeString());
+	void __fastcall Read(System::Classes::TBufferedFileStream* S, TPOIList* APOIList, System::UnicodeString ImageDir = System::UnicodeString());
 	TGPI() {}
 };
 #pragma pack(pop)
 
 
 //-- var, const, procedure ---------------------------------------------------
-extern DELPHI_PACKAGE System::UTF8String GpiName;
+extern DELPHI_PACKAGE TGPXString GpiName;
 extern DELPHI_PACKAGE System::Word GpiVersion;
-extern DELPHI_PACKAGE System::UTF8String GpiSymbolsDir;
+extern DELPHI_PACKAGE TGPXString GpiSymbolsDir;
 extern DELPHI_PACKAGE unsigned DefTransparentColor;
 extern DELPHI_PACKAGE System::Word HasPhone;
 extern DELPHI_PACKAGE System::Word HasEmail;
@@ -530,4 +532,4 @@ using namespace Unitgpi;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UnitgpiHPP
+#endif	// UnitGpiHPP

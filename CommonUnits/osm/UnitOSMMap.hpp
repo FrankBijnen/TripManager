@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'UnitOSMMap.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'UnitOSMMap.pas' rev: 36.00 (Windows)
 
-#ifndef UnitosmmapHPP
-#define UnitosmmapHPP
+#ifndef UnitOSMMapHPP
+#define UnitOSMMapHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -50,8 +52,8 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-static const System::Int8 Coord_Decimals = System::Int8(0x6);
-static const System::Int8 Place_Decimals = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 Coord_Decimals = System::Int8(0x6);
+static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
 #define OSMCtrlClick L"Ctrl Click"
 #define OSMGetBounds L"GetBounds"
 #define OSMGetRoutePoint L"GetRoutePoint"
@@ -70,4 +72,4 @@ using namespace Unitosmmap;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UnitosmmapHPP
+#endif	// UnitOSMMapHPP

@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'UnitMtpDevice.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'UnitMtpDevice.pas' rev: 36.00 (Windows)
 
-#ifndef UnitmtpdeviceHPP
-#define UnitmtpdeviceHPP
+#ifndef UnitMtpDeviceHPP
+#define UnitMtpDeviceHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -39,8 +41,8 @@ public:
 	System::UnicodeString ObjectId;
 	System::TDateTime Created;
 	__fastcall TBASE_Data(const bool AIsFolder, const __int64 ASortValue, const System::UnicodeString AObjectId, const System::TDateTime ACreated);
-	void __fastcall UpdateListItem(Vcl::Comctrls::TListItem* const AListItem, const System::UnicodeString *ASubItems, const int ASubItems_High);
-	Vcl::Comctrls::TListItem* __fastcall CreateListItem(Vcl::Comctrls::TListItems* const Alist, const System::UnicodeString ACaption, const System::UnicodeString *ASubItems, const int ASubItems_High);
+	void __fastcall UpdateListItem(Vcl::Comctrls::TListItem* const AListItem, const System::UnicodeString *ASubItems, const System::NativeInt ASubItems_High);
+	Vcl::Comctrls::TListItem* __fastcall CreateListItem(Vcl::Comctrls::TListItems* const Alist, const System::UnicodeString ACaption, const System::UnicodeString *ASubItems, const System::NativeInt ASubItems_High);
 public:
 	/* TObject.Destroy */ inline __fastcall virtual ~TBASE_Data() { }
 	
@@ -69,7 +71,7 @@ public:
 	System::UnicodeString Device;
 	System::UnicodeString Description;
 	System::UnicodeString FriendlyName;
-	Portabledeviceapilib_tlb::_di_IPortableDevice PortableDev;
+	IMTPDevice PortableDev;
 public:
 	/* TObject.Create */ inline __fastcall TMTP_Device() : System::TObject() { }
 	/* TObject.Destroy */ inline __fastcall virtual ~TMTP_Device() { }
@@ -88,4 +90,4 @@ using namespace Unitmtpdevice;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UnitmtpdeviceHPP
+#endif	// UnitMtpDeviceHPP

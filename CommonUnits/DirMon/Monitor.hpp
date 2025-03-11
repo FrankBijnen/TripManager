@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'Monitor.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'Monitor.pas' rev: 36.00 (Windows)
 
 #ifndef MonitorHPP
 #define MonitorHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -40,7 +42,7 @@ class PASCALIMPLEMENTATION TDirectoryMonitor : public System::TObject
 	typedef System::TObject inherited;
 	
 private:
-	NativeUInt FHandle;
+	Winapi::Windows::THandle FHandle;
 	System::UnicodeString FDirectory;
 	TActionsToWatch FActions;
 	bool FSubdirectories;
@@ -55,7 +57,7 @@ private:
 protected:
 	virtual void __fastcall WndProc(Winapi::Messages::TMessage &Msg);
 	virtual void __fastcall DoChange(TDirectoryMonitorAction Action, const System::WideString FileName);
-	__property NativeUInt Handle = {read=FHandle, nodefault};
+	__property Winapi::Windows::THandle Handle = {read=FHandle, nodefault};
 	
 public:
 	__fastcall TDirectoryMonitor();
@@ -78,10 +80,10 @@ private:
 	System::UnicodeString FDirectory;
 	TActionsToWatch FActions;
 	bool FSubdirectories;
-	NativeUInt FOwnerHandle;
-	NativeUInt FDirHandle;
-	NativeUInt FChangeHandle;
-	NativeUInt FShutdownHandle;
+	Winapi::Windows::THandle FOwnerHandle;
+	Winapi::Windows::THandle FDirHandle;
+	Winapi::Windows::THandle FChangeHandle;
+	Winapi::Windows::THandle FShutdownHandle;
 	unsigned __fastcall GetNotifyMask();
 	TDirectoryMonitorAction __fastcall GetNotifyAction(unsigned SystemAction);
 	
@@ -96,7 +98,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-static const System::Word WMUSER_DIRECTORYCHANGED = System::Word(0x401);
+static _DELPHI_CONST System::Word WMUSER_DIRECTORYCHANGED = System::Word(0x401);
 #define AllActions (System::Set<TActionToWatch, TActionToWatch::awChangeFileName, TActionToWatch::awChangeSecurity>() << TActionToWatch::awChangeFileName << TActionToWatch::awChangeDirName << TActionToWatch::awChangeAttributes << TActionToWatch::awChangeSize << TActionToWatch::awChangeLastWrite << TActionToWatch::awChangeLastAccess << TActionToWatch::awChangeCreation << TActionToWatch::awChangeSecurity )
 }	/* namespace Monitor */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_MONITOR)

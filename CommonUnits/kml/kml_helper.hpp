@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'kml_helper.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'kml_helper.pas' rev: 36.00 (Windows)
 
-#ifndef Kml_helperHPP
-#define Kml_helperHPP
+#ifndef kml_helperHPP
+#define kml_helperHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -54,7 +56,7 @@ public:
 	Ogckml23::_di_IXMLDocumentType __fastcall NewKMLDocument();
 	void __fastcall WriteLineStyle(Xml::Xmlintf::_di_IXMLNode AStyle, System::UnicodeString AColor = L"Magenta");
 	void __fastcall WriteStyle(const TStyleMap &AStyle);
-	void __fastcall WriteStyleMap(TStyleMap *Styles, const int Styles_High);
+	void __fastcall WriteStyleMap(TStyleMap *Styles, const System::NativeInt Styles_High);
 	Xml::Xmlintf::_di_IXMLNode __fastcall WriteFolder(System::UnicodeString AName, System::UnicodeString ACoordinates);
 	void __fastcall WriteHeader(bool ARing = false);
 	void __fastcall WritePointsStart(const System::UnicodeString ATrackName, const System::UnicodeString AColor);
@@ -85,4 +87,4 @@ using namespace Kml_helper;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// Kml_helperHPP
+#endif	// kml_helperHPP

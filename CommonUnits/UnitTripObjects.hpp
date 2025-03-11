@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'unitTripObjects.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'unitTripObjects.pas' rev: 36.00 (Windows)
 
-#ifndef UnittripobjectsHPP
-#define UnittripobjectsHPP
+#ifndef unitTripObjectsHPP
+#define unitTripObjectsHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -65,6 +67,12 @@ class DELPHICLASS TmAddress;
 class DELPHICLASS TmisTravelapseDestination;
 class DELPHICLASS TmShapingRadius;
 class DELPHICLASS TmName;
+class DELPHICLASS TBaseRoutePreferences;
+class DELPHICLASS TmRoutePreferences;
+class DELPHICLASS TmRoutePreferencesAdventurousHillsAndCurves;
+class DELPHICLASS TmRoutePreferencesAdventurousScenicRoads;
+class DELPHICLASS TmRoutePreferencesAdventurousMode;
+class DELPHICLASS TmRoutePreferencesAdventurousPopularPaths;
 struct THeaderValue;
 class DELPHICLASS THeader;
 struct TLocationValue;
@@ -84,19 +92,19 @@ enum DECLSPEC_DENUM TEditMode : unsigned char { emNone, emEdit, emPickList, emBu
 
 enum DECLSPEC_DENUM TZumoModel : unsigned char { XT, XT2, Unknown };
 
-enum DECLSPEC_DENUM TRoutePreference : unsigned char { rmFasterTime, rmShorterDistance, rmDirect = 4, rmCurvyRoads = 7 };
+enum DECLSPEC_DENUM TRoutePreference : unsigned char { rmFasterTime, rmShorterDistance, rmDirect = 4, rmCurvyRoads = 7, rmHills = 26, rmNoShape = 88, rmScenic = 190, rmPopular = 239 };
 
 enum DECLSPEC_DENUM TTransportMode : unsigned char { tmAutoMotive = 1, tmMotorcycling = 9, tmOffRoad };
 
-enum DECLSPEC_DENUM TRoutePoint : unsigned char { rpVia, rpShaping };
+enum DECLSPEC_DENUM TRoutePoint : unsigned char { rpVia, rpShaping, rpShapingXT2 };
 
 typedef System::StaticArray<System::Classes::TIdentMapEntry, 2> Unittripobjects__1;
 
-typedef System::StaticArray<System::Classes::TIdentMapEntry, 4> Unittripobjects__2;
+typedef System::StaticArray<System::Classes::TIdentMapEntry, 8> Unittripobjects__2;
 
 typedef System::StaticArray<System::Classes::TIdentMapEntry, 3> Unittripobjects__3;
 
-typedef System::StaticArray<System::Classes::TIdentMapEntry, 2> Unittripobjects__4;
+typedef System::StaticArray<System::Classes::TIdentMapEntry, 3> Unittripobjects__4;
 
 struct DECLSPEC_DRECORD TOSMRoutePoint
 {
@@ -139,7 +147,7 @@ public:
 
 #pragma pack(pop)
 
-typedef System::Generics::Collections::TList__1<TBaseItem*>* TItemList;
+typedef System::Generics::Collections::TList__1<TBaseItem*> TItemList;
 
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TBaseDataItem : public TBaseItem
@@ -352,7 +360,7 @@ class PASCALIMPLEMENTATION TRawDataItem : public TBaseDataItem
 	typedef TBaseDataItem inherited;
 	
 private:
-	System::DynamicArray<System::Byte> FBytes;
+	System::Sysutils::TBytes FBytes;
 	virtual void __fastcall WriteValue(System::Classes::TMemoryStream* AStream);
 	
 public:
@@ -761,6 +769,106 @@ public:
 
 #pragma pack(pop)
 
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TBaseRoutePreferences : public TRawDataItem
+{
+	typedef TRawDataItem inherited;
+	
+private:
+	virtual bool __fastcall StandardPrefs();
+	unsigned __fastcall GetCount();
+	
+public:
+	virtual System::UnicodeString __fastcall GetValue();
+	System::UnicodeString __fastcall GetRoutePrefs();
+	__property unsigned Count = {read=GetCount, nodefault};
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TBaseRoutePreferences() { }
+	
+public:
+	/* TBaseDataItem.Create */ inline __fastcall virtual TBaseRoutePreferences(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TRawDataItem(AName, ALenValue, ADataType) { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmRoutePreferences : public TBaseRoutePreferences
+{
+	typedef TBaseRoutePreferences inherited;
+	
+__published:
+	virtual bool __fastcall StandardPrefs();
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferences() { }
+	
+public:
+	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferences(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousHillsAndCurves : public TBaseRoutePreferences
+{
+	typedef TBaseRoutePreferences inherited;
+	
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousHillsAndCurves() { }
+	
+public:
+	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousHillsAndCurves(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousScenicRoads : public TBaseRoutePreferences
+{
+	typedef TBaseRoutePreferences inherited;
+	
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousScenicRoads() { }
+	
+public:
+	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousScenicRoads(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousMode : public TBaseRoutePreferences
+{
+	typedef TBaseRoutePreferences inherited;
+	
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousMode() { }
+	
+public:
+	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousMode(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousPopularPaths : public TBaseRoutePreferences
+{
+	typedef TBaseRoutePreferences inherited;
+	
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousPopularPaths() { }
+	
+public:
+	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousPopularPaths(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	
+};
+
+#pragma pack(pop)
+
 #pragma pack(push,1)
 struct DECLSPEC_DRECORD THeaderValue
 {
@@ -814,7 +922,7 @@ class PASCALIMPLEMENTATION TLocation : public TBaseItem
 	
 private:
 	TLocationValue Value;
-	System::Generics::Collections::TList__1<TBaseItem*>* FItems;
+	TItemList* FItems;
 	virtual void __fastcall WriteValue(System::Classes::TMemoryStream* AStream);
 	
 public:
@@ -822,7 +930,7 @@ public:
 	__fastcall virtual ~TLocation();
 	void __fastcall Add(TBaseItem* ANitem);
 	__property TLocationValue LocationValue = {read=Value};
-	__property System::Generics::Collections::TList__1<TBaseItem*>* LocationItems = {read=FItems};
+	__property TItemList* LocationItems = {read=FItems};
 };
 
 #pragma pack(pop)
@@ -834,7 +942,7 @@ class PASCALIMPLEMENTATION TmLocations : public TBaseDataItem
 	
 private:
 	unsigned FItemCount;
-	System::Generics::Collections::TList__1<TBaseItem*>* FItemList;
+	TItemList* FItemList;
 	TLocation* FLocation;
 	virtual void __fastcall Calculate(System::Classes::TMemoryStream* AStream);
 	virtual void __fastcall WritePrefix(System::Classes::TMemoryStream* AStream);
@@ -846,7 +954,7 @@ public:
 	__fastcall virtual ~TmLocations();
 	void __fastcall AddLocatIon(TLocation* ALocation);
 	TBaseItem* __fastcall Add(TBaseItem* ANItem);
-	__property System::Generics::Collections::TList__1<TBaseItem*>* Locations = {read=FItemList};
+	__property TItemList* Locations = {read=FItemList};
 	__property unsigned LocationCount = {read=FItemCount, nodefault};
 };
 
@@ -912,7 +1020,7 @@ public:
 
 #pragma pack(pop)
 
-typedef System::Generics::Collections::TList__1<TUdbDir*>* TUdbDirList;
+typedef System::Generics::Collections::TList__1<TUdbDir*> TUdbDirList;
 
 #pragma pack(push,1)
 struct DECLSPEC_DRECORD TUdbPrefValue
@@ -957,7 +1065,7 @@ private:
 	unsigned FUdbHandleId;
 	TUdbPrefValue FUdbPrefValue;
 	TUdbHandleValue FValue;
-	System::Generics::Collections::TList__1<TUdbDir*>* FUdbDirList;
+	TUdbDirList* FUdbDirList;
 	unsigned FSubLength;
 	unsigned __fastcall ComputeUnknown3Size();
 	virtual void __fastcall WritePrefix(System::Classes::TMemoryStream* AStream);
@@ -971,12 +1079,12 @@ public:
 	__property unsigned HandleId = {read=FUdbHandleId, nodefault};
 	__property TUdbPrefValue PrefValue = {read=FUdbPrefValue};
 	__property TUdbHandleValue UdbHandleValue = {read=FValue};
-	__property System::Generics::Collections::TList__1<TUdbDir*>* Items = {read=FUdbDirList};
+	__property TUdbDirList* Items = {read=FUdbDirList};
 };
 
 #pragma pack(pop)
 
-typedef System::Generics::Collections::TList__1<TmUdbDataHndl*>* TUdbHandleList;
+typedef System::Generics::Collections::TList__1<TmUdbDataHndl*> TUdbHandleList;
 
 #pragma pack(push,1)
 struct DECLSPEC_DRECORD TmAllRoutesValue
@@ -995,7 +1103,7 @@ class PASCALIMPLEMENTATION TmAllRoutes : public TBaseDataItem
 	
 private:
 	TmAllRoutesValue FValue;
-	System::Generics::Collections::TList__1<TmUdbDataHndl*>* FUdBList;
+	TUdbHandleList* FUdBList;
 	virtual void __fastcall Calculate(System::Classes::TMemoryStream* AStream);
 	virtual void __fastcall WritePrefix(System::Classes::TMemoryStream* AStream);
 	virtual void __fastcall WriteValue(System::Classes::TMemoryStream* AStream);
@@ -1006,7 +1114,7 @@ public:
 	virtual void __fastcall InitFromStream(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType, System::Classes::TStream* AStream);
 	__fastcall virtual ~TmAllRoutes();
 	void __fastcall AddUdbHandle(TmUdbDataHndl* AnUdbHandle);
-	__property System::Generics::Collections::TList__1<TmUdbDataHndl*>* Items = {read=FUdBList};
+	__property TUdbHandleList* Items = {read=FUdBList};
 	__property TmAllRoutesValue AllRoutesValue = {read=FValue};
 };
 
@@ -1019,7 +1127,7 @@ class PASCALIMPLEMENTATION TTripList : public System::TObject
 	
 private:
 	THeader* FHeader;
-	System::Generics::Collections::TList__1<TBaseItem*>* FItemList;
+	TItemList* FItemList;
 	void __fastcall ResetCalculation();
 	void __fastcall Calculate(System::Classes::TMemoryStream* AStream);
 	TZumoModel __fastcall GetZumoModel();
@@ -1043,7 +1151,7 @@ public:
 	void __fastcall CreateOSMPoints(System::Classes::TStringList* const OutStringList);
 	void __fastcall ForceRecalc(const TZumoModel AModel = (TZumoModel)(0x2), int ViaPointCount = 0x0);
 	__property THeader* Header = {read=FHeader};
-	__property System::Generics::Collections::TList__1<TBaseItem*>* ItemList = {read=FItemList};
+	__property TItemList* ItemList = {read=FItemList};
 	__property TZumoModel ZumoModel = {read=GetZumoModel, nodefault};
 };
 
@@ -1052,17 +1160,17 @@ public:
 //-- var, const, procedure ---------------------------------------------------
 #define XT2Name L"z\u016bmo XT2"
 #define XTName L"z\u016bmo XT"
-static const System::Int8 dtByte = System::Int8(0x1);
-static const System::Int8 dtCardinal = System::Int8(0x3);
-static const System::Int8 dtSingle = System::Int8(0x4);
-static const System::Int8 dtBoolean = System::Int8(0x7);
-static const System::Int8 dtVersion = System::Int8(0x8);
-static const System::Int8 dtPosn = System::Int8(0x8);
-static const System::Int8 dtLctnPref = System::Int8(0xa);
-static const System::Int8 dtUdbPref = System::Int8(0xa);
-static const System::Int8 dtUdbHandle = System::Int8(0xb);
-static const System::Int8 dtString = System::Int8(0xe);
-static const System::Byte dtList = System::Byte(0x80);
+static _DELPHI_CONST System::Int8 dtByte = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 dtCardinal = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 dtSingle = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 dtBoolean = System::Int8(0x7);
+static _DELPHI_CONST System::Int8 dtVersion = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 dtPosn = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 dtLctnPref = System::Int8(0xa);
+static _DELPHI_CONST System::Int8 dtUdbPref = System::Int8(0xa);
+static _DELPHI_CONST System::Int8 dtUdbHandle = System::Int8(0xb);
+static _DELPHI_CONST System::Int8 dtString = System::Int8(0xe);
+static _DELPHI_CONST System::Byte dtList = System::Byte(0x80);
 extern DELPHI_PACKAGE char biInitiator;
 extern DELPHI_PACKAGE Unittripobjects__1 BooleanMap;
 extern DELPHI_PACKAGE Unittripobjects__2 RoutePreferenceMap;
@@ -1081,4 +1189,4 @@ using namespace Unittripobjects;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UnittripobjectsHPP
+#endif	// unitTripObjectsHPP

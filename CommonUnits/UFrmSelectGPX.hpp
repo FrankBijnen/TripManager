@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'UFrmSelectGPX.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'UFrmSelectGPX.pas' rev: 36.00 (Windows)
 
-#ifndef UfrmselectgpxHPP
-#define UfrmselectgpxHPP
+#ifndef UFrmSelectGPXHPP
+#define UFrmSelectGPXHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -54,16 +56,19 @@ __published:
 	Vcl::Stdctrls::TLabel* lblChangeColor;
 	void __fastcall CheckAll1Click(System::TObject* Sender);
 	void __fastcall CheckNone1Click(System::TObject* Sender);
-	void __fastcall LvTracksChange(System::TObject* Sender, Vcl::Comctrls::TListItem* Item, Vcl::Comctrls::TItemChange Change);
 	void __fastcall CmbOverruleColorClick(System::TObject* Sender);
 	void __fastcall FormShow(System::TObject* Sender);
+	void __fastcall FormCreate(System::TObject* Sender);
+	void __fastcall FormDestroy(System::TObject* Sender);
 	
 public:
-	void __fastcall LoadTracks(System::Classes::TStringList* const TrackList);
+	System::Classes::TStringList* AllTracks;
+	void __fastcall LoadTracks(System::UnicodeString DisplayColor);
 	System::UnicodeString __fastcall TrackSelectedColor(const System::UnicodeString TrackName);
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmSelectGPX(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmSelectGPX(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }
+	/* TCustomForm.CreateScaledNew */ inline __fastcall virtual TFrmSelectGPX(System::Classes::TComponent* AOwner, int ADPI, int Dummy) : Vcl::Forms::TForm(AOwner, ADPI, Dummy) { }
 	/* TCustomForm.Destroy */ inline __fastcall virtual ~TFrmSelectGPX() { }
 	
 public:
@@ -83,4 +88,4 @@ using namespace Ufrmselectgpx;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UfrmselectgpxHPP
+#endif	// UFrmSelectGPXHPP
