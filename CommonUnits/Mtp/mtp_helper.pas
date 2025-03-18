@@ -334,6 +334,7 @@ const
 
   WPD_DEVICE_OBJECT_ID = 'DEVICE';
 
+function FirstStorageIDs(PortableDev: IMTPDevice): IEnumPortableDeviceObjectIDs;
 function GetFirstStorageID(PortableDev: IMTPDevice): WideString;
 function ReadFilesFromDevice(PortableDev: IMTPDevice;
                              Lst: TListItems;
@@ -847,6 +848,17 @@ begin
   end;
 end;
 
+function FirstStorageIDs(PortableDev: IMTPDevice): IEnumPortableDeviceObjectIDs;
+var
+  Content: IPortableDeviceContent;
+  ObjectIds: IEnumPortableDeviceObjectIDs;
+begin
+  result := nil;
+  if (PortableDev.Content(Content) = S_OK) and
+     (Content.EnumObjects(0, WPD_DEVICE_OBJECT_ID, nil, ObjectIds) = S_OK) then
+    result := ObjectIds;
+end;
+
 function GetFirstStorageID(PortableDev: IMTPDevice): WideString;
 var Content: IPortableDeviceContent;
     ObjectIds: IEnumPortableDeviceObjectIDs;
@@ -854,16 +866,14 @@ var Content: IPortableDeviceContent;
     Fetched: Cardinal;
 begin
   Result := WPD_DEVICE_OBJECT_ID;
-  if PortableDev.Content(Content) = S_OK then
-  begin
-    if Content.EnumObjects(0, '', nil, ObjectIds) = S_OK then
-    begin
-      ObjectIds.Reset;
-      ObjectIds.Next(1, ObjectId, Fetched);
-      if (Fetched > 0) then
-        Result := ObjectId;
-    end;
-  end;
+  ObjectIds := FirstStorageIDs(PortableDev);
+  if (ObjectIds = nil) then
+    exit;
+
+  ObjectIds.Reset;
+  ObjectIds.Next(1, ObjectId, Fetched);
+  if (Fetched > 0) then
+    Result := ObjectId;
 end;
 
 procedure FillObjectProperties(ObjId: PWideChar; Prop: IPortableDeviceProperties;

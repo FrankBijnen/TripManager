@@ -104,8 +104,8 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>138</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.2.0.138;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.2;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>139</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.2.0.139;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.2;Comments=Use at your own risk</VerInfo_Keys>
         <VerInfo_MinorVer>2</VerInfo_MinorVer>
     </PropertyGroup>
     <ItemGroup>

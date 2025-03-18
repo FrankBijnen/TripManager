@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'TripManager_ShellList.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'TripManager_ShellList.pas' rev: 36.00 (Windows)
 
-#ifndef Tripmanager_shelllistHPP
-#define Tripmanager_shelllistHPP
+#ifndef TripManager_ShellListHPP
+#define TripManager_ShellListHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -45,11 +47,11 @@ private:
 	int FSortColumn;
 	THeaderSortState FSortState;
 	_di_IContextMenu2 ICM2;
-	System::Types::TPoint FDragStartPos;
+	Winapi::Windows::TPoint FDragStartPos;
 	bool FDragSource;
 	bool FDragStarted;
-	HRESULT __stdcall GiveFeedback(int dwEffect);
-	HRESULT __stdcall QueryContinueDrag(System::LongBool fEscapePressed, int grfKeyState);
+	HRESULT __stdcall GiveFeedback(System::LongInt dwEffect);
+	HRESULT __stdcall QueryContinueDrag(System::LongBool fEscapePressed, System::LongInt grfKeyState);
 	void __fastcall SetColumnSorted(bool AValue);
 	System::Classes::TStringList* __fastcall CreateSelectedFileList();
 	
@@ -57,14 +59,15 @@ protected:
 	DYNAMIC void __fastcall MouseDown(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
 	DYNAMIC void __fastcall MouseMove(System::Classes::TShiftState Shift, int X, int Y);
 	DYNAMIC void __fastcall MouseUp(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
+	HIDESBASE MESSAGE void __fastcall WMNotify(Winapi::Messages::TWMNotify &Msg);
 	void __fastcall InitSortSpec(int SortColumn, THeaderSortState SortState);
 	virtual void __fastcall Populate();
 	virtual void __fastcall ColumnSort();
 	virtual void __fastcall CreateWnd();
 	virtual void __fastcall DestroyWnd();
-	DYNAMIC void __fastcall DoContextPopup(const System::Types::TPoint &MousePos, bool &Handled);
-	DYNAMIC void __fastcall Edit(const tagLVITEMW &Item);
-	void __fastcall ShowMultiContextMenu(const System::Types::TPoint &MousePos);
+	DYNAMIC void __fastcall DoContextPopup(const Winapi::Windows::TPoint &MousePos, bool &Handled);
+	DYNAMIC void __fastcall Edit(const Winapi::Commctrl::TLVItem &Item);
+	void __fastcall ShowMultiContextMenu(const Winapi::Windows::TPoint &MousePos);
 	virtual void __fastcall WndProc(Winapi::Messages::TMessage &Message);
 	
 public:
@@ -112,4 +115,4 @@ using namespace Tripmanager_shelllist;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// Tripmanager_shelllistHPP
+#endif	// TripManager_ShellListHPP

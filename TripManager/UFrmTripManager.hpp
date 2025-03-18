@@ -1,16 +1,18 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2022 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'UFrmTripManager.pas' rev: 35.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'UFrmTripManager.pas' rev: 36.00 (Windows)
 
-#ifndef UfrmtripmanagerHPP
-#define UfrmtripmanagerHPP
+#ifndef UFrmTripManagerHPP
+#define UFrmTripManagerHPP
 
 #pragma delphiheader begin
 #pragma option push
+#if defined(__BORLANDC__) && !defined(__clang__)
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
+#endif
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
@@ -176,6 +178,11 @@ __published:
 	Vcl::Stdctrls::TButton* BtnPostProcess;
 	Vcl::Stdctrls::TCheckBox* ChkWatch;
 	Vcl::Extctrls::TTimer* PostProcessTimer;
+	Vcl::Menus::TMainMenu* MainMenu;
+	Vcl::Menus::TMenuItem* Help1;
+	Vcl::Menus::TMenuItem* About1;
+	Vcl::Menus::TMenuItem* N7;
+	Vcl::Menus::TMenuItem* Onlinehelp1;
 	void __fastcall FormCreate(System::TObject* Sender);
 	void __fastcall FormDestroy(System::TObject* Sender);
 	void __fastcall BtnRefreshClick(System::TObject* Sender);
@@ -239,6 +246,8 @@ __published:
 	void __fastcall ChkWatchClick(System::TObject* Sender);
 	void __fastcall PostProcessTimerTimer(System::TObject* Sender);
 	void __fastcall ShellListView1DblClick(System::TObject* Sender);
+	void __fastcall About1Click(System::TObject* Sender);
+	void __fastcall Onlinehelp1Click(System::TObject* Sender);
 	
 private:
 	System::UnicodeString PrefDevice;
@@ -252,7 +261,7 @@ private:
 	Listviewsort::TSortSpecification FSortSpecification;
 	Bchexeditor::TBCHexEditor* HexEdit;
 	Unittripobjects::TTripList* ATripList;
-	System::Generics::Collections::TObjectList__1<Unitgpi::TGPXWayPoint*>* APOIList;
+	Unitgpi::TPOIList* APOIList;
 	TMapReq FMapReq;
 	double EdgeZoom;
 	int WarnRecalc;
@@ -264,10 +273,11 @@ private:
 	MESSAGE void __fastcall FileSysDrop(Winapi::Messages::TWMDropFiles &Msg);
 	void __fastcall ClearSelHexEdit();
 	void __fastcall SyncHexEdit(System::TObject* Sender);
+	void __fastcall HexEditKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall HexEditKeyPress(System::TObject* Sender, System::WideChar &Key);
 	void __fastcall LoadHex(const System::UnicodeString FileName);
 	void __fastcall LoadTripOnMap(Unittripobjects::TTripList* CurrentTrip, System::UnicodeString Id);
-	void __fastcall LoadGpiOnMap(System::Generics::Collections::TObjectList__1<Unitgpi::TGPXWayPoint*>* CurrentGpi, System::UnicodeString Id);
+	void __fastcall LoadGpiOnMap(Unitgpi::TPOIList* CurrentGpi, System::UnicodeString Id);
 	void __fastcall MapRequest(const System::UnicodeString Coords, const System::UnicodeString Desc);
 	void __fastcall SaveTripGpiFile();
 	void __fastcall LoadTripFile(const System::UnicodeString FileName, const bool FromDevice);
@@ -296,6 +306,7 @@ private:
 	void __fastcall CheckTrips();
 	void __fastcall ShowWarnRecalc();
 	void __fastcall ShowWarnOverWrite(const System::UnicodeString AFile);
+	void __fastcall ReadDefaultFolders();
 	void __fastcall ReadSettings();
 	void __fastcall ClearTripInfo();
 	
@@ -310,6 +321,7 @@ public:
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmTripManager(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmTripManager(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }
+	/* TCustomForm.CreateScaledNew */ inline __fastcall virtual TFrmTripManager(System::Classes::TComponent* AOwner, int ADPI, int Dummy) : Vcl::Forms::TForm(AOwner, ADPI, Dummy) { }
 	/* TCustomForm.Destroy */ inline __fastcall virtual ~TFrmTripManager() { }
 	
 public:
@@ -353,4 +365,4 @@ using namespace Ufrmtripmanager;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UfrmtripmanagerHPP
+#endif	// UFrmTripManagerHPP

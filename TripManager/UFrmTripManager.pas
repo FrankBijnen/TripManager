@@ -450,7 +450,7 @@ begin
   try
     result := Assigned(CurrentDevice) and
               Assigned(CurrentDevice.PortableDev) and
-              (GetFirstStorageID(CurrentDevice.PortableDev) <> '');
+              (FirstStorageIds(CurrentDevice.PortableDev) <> nil);
     if (not result) and
        (RaiseException) then
       raise exception.Create('No MTP Device opened.');
@@ -706,12 +706,11 @@ begin
     ConnectionOK := (CurrentDevice <> nil) and
                     (CurrentDevice.PortableDev <> nil);
     ConnectionOK := ConnectionOK and
-                    (GetFirstStorageID(CurrentDevice.PortableDev) <> '');
+                    (FirstStorageIds(CurrentDevice.PortableDev) <> nil);
   except
     CurrentDevice := nil; // Prevent needless tries
     ConnectionOK := false;
   end;
-
   if (ConnectionOK) then
     ReloadFileList
   else
@@ -1095,6 +1094,7 @@ var Indx: integer;
 begin
   FreeDevices;
   LstFiles.Clear;
+  CmbDevices.ItemIndex := -1;
   CmbDevices.Text := SelectMTPDevice;
   DeviceList := GetDevices;
   for Indx := 0 to DeviceList.Count - 1 do
@@ -1105,6 +1105,7 @@ begin
     if (PrefDevice = TMTP_Device(DeviceList[Indx]).FriendlyName) then
     begin
       CmbDevices.ItemIndex := Indx;
+      ReadDefaultFolders;
       SelectDevice(Indx);
 
       // Get files
