@@ -265,7 +265,8 @@ type
     procedure FreeCustomData(const ACustomData: pointer);
     procedure FreeDevices;
     procedure GuessModel(const FriendlyName: string);
-    procedure SelectDevice(const Indx: integer);
+    procedure SelectDevice(const Indx: integer); overload;
+    procedure SelectDevice(const Device: string); overload;
     function GetItemType(const AListview: TListView): TDirType;
 
     procedure CloseDevice;
@@ -567,7 +568,8 @@ begin
       begin
         EdFileSysFolder.Text := Format('Transferring %s', [NFile]);
         EdFileSysFolder.Update;
-        TransferNewFileToDevice(CurrentDevice.PortableDev, AFolder.PathName, FSavedFolderId)
+        if (TransferNewFileToDevice(CurrentDevice.PortableDev, AFolder.PathName, FSavedFolderId) = '') then
+          raise exception.Create('Writing file failed');
       end
       else
       begin
@@ -590,7 +592,8 @@ begin
           raise exception.Create('Overwrite file failed');
         EdFileSysFolder.Text := Format('Transferring %s', [NFile]);
         EdFileSysFolder.Update;
-        TransferExistingFileToDevice(CurrentDevice.PortableDev, AFolder.PathName, FSavedFolderId, CurrentItem);
+        if (not TransferExistingFileToDevice(CurrentDevice.PortableDev, AFolder.PathName, FSavedFolderId, CurrentItem)) then
+          raise exception.Create('Overwrite file failed');
       end;
     end;
 
@@ -678,14 +681,16 @@ begin
             Rc := FindNext(Fs);
             continue;
           end;
-          DelFileFromDevice(CurrentDevice.PortableDev, CurrentObjectid);
+          if (not DelFileFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
+            raise Exception.Create(Format('Could not overwrite file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
         end;
 
         EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
         EdFileSysFolder.Update;
         TempFile := IncludeTrailingPathDelimiter(ForceOutDir) + TempFile;
 
-        TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId);
+        if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
+          raise Exception.Create(Format('Could not overwrite file: %s on %s', [ExtractFileName(TempFile), CurrentDevice.FriendlyName]));
         Rc := FindNext(Fs);
       end;
       FindClose(Fs);
@@ -700,21 +705,20 @@ end;
 
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
 var
-  ConnectionOK: boolean;
+  DeviceName: string;
 begin
+  DeviceName := PrefDevice;
+  if Assigned(CurrentDevice) then
+    DeviceName := CurrentDevice.FriendlyName;
+
+  GetDeviceList;
   try
-    ConnectionOK := (CurrentDevice <> nil) and
-                    (CurrentDevice.PortableDev <> nil);
-    ConnectionOK := ConnectionOK and
-                    (FirstStorageIds(CurrentDevice.PortableDev) <> nil);
+    SelectDevice(DeviceName);
+    if CheckDevice(false) then
+      ReloadFileList;
   except
     CurrentDevice := nil; // Prevent needless tries
-    ConnectionOK := false;
   end;
-  if (ConnectionOK) then
-    ReloadFileList
-  else
-    GetDeviceList;
 end;
 
 function TFrmTripManager.GetSelectedFile: string;
@@ -1048,8 +1052,11 @@ begin
   except
     ShellTreeView1.Root := 'rfDesktop';
   end;
-  BgDevice.ItemIndex := 0; //Default to GPX
+  BgDevice.ItemIndex := 0; // Default to trips
   GetDeviceList;
+  SelectDevice(PrefDevice);
+  if (CheckDevice(false)) then
+    ListFiles;
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -1090,28 +1097,14 @@ begin
 end;
 
 procedure TFrmTripManager.GetDeviceList;
-var Indx: integer;
+var
+  Index: integer;
 begin
   FreeDevices;
   LstFiles.Clear;
-  CmbDevices.ItemIndex := -1;
-  CmbDevices.Text := SelectMTPDevice;
   DeviceList := GetDevices;
-  for Indx := 0 to DeviceList.Count - 1 do
-  begin
-    CmbDevices.Items.Add(TMTP_Device(DeviceList[Indx]).FriendlyName + ' (' + TMTP_Device(DeviceList[Indx]).Description + ')');
-
-    // Does this device match our registry setting? Select right away
-    if (PrefDevice = TMTP_Device(DeviceList[Indx]).FriendlyName) then
-    begin
-      CmbDevices.ItemIndex := Indx;
-      ReadDefaultFolders;
-      SelectDevice(Indx);
-
-      // Get files
-      ListFiles;
-    end;
-  end;
+  for Index := 0 to DeviceList.Count - 1 do
+    CmbDevices.Items.Add(TMTP_Device(DeviceList[Index]).FriendlyName + ' (' + TMTP_Device(DeviceList[Index]).Description + ')');
 end;
 
 procedure TFrmTripManager.SelectDevice(const Indx: integer);
@@ -1137,11 +1130,30 @@ begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
 end;
 
+procedure TFrmTripManager.SelectDevice(const Device: string);
+var
+  Index: integer;
+begin
+  CmbDevices.ItemIndex := -1;
+  CmbDevices.Text := SelectMTPDevice;
+
+  for Index := 0 to DeviceList.Count - 1 do
+  begin
+    // Does this device match our registry setting? Select right away
+    if (TMTP_Device(DeviceList[Index]).FriendlyName = Device) then
+    begin
+      CmbDevices.ItemIndex := Index;
+      SelectDevice(Index);
+    end;
+  end;
+end;
+
 procedure TFrmTripManager.CmbDevicesChange(Sender: TObject);
 begin
   if (CmbDevices.ItemIndex > -1) and
      (CmbDevices.ItemIndex < CmbDevices.Items.Count) then
   begin
+    ReadDefaultFolders;
     SelectDevice(CmbDevices.ItemIndex);
 
     ListFiles;

@@ -334,7 +334,7 @@ const
 
   WPD_DEVICE_OBJECT_ID = 'DEVICE';
 
-function FirstStorageIDs(PortableDev: IMTPDevice): IEnumPortableDeviceObjectIDs;
+function FirstStorageIDs(PortableDev: IMTPDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
 function GetFirstStorageID(PortableDev: IMTPDevice): WideString;
 function ReadFilesFromDevice(PortableDev: IMTPDevice;
                              Lst: TListItems;
@@ -848,25 +848,25 @@ begin
   end;
 end;
 
-function FirstStorageIDs(PortableDev: IMTPDevice): IEnumPortableDeviceObjectIDs;
+function FirstStorageIDs(PortableDev: IMTPDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
 var
   Content: IPortableDeviceContent;
   ObjectIds: IEnumPortableDeviceObjectIDs;
 begin
   result := nil;
   if (PortableDev.Content(Content) = S_OK) and
-     (Content.EnumObjects(0, WPD_DEVICE_OBJECT_ID, nil, ObjectIds) = S_OK) then
+     (Content.EnumObjects(0, PWideChar(DeviceRoot), nil, ObjectIds) = S_OK) then
     result := ObjectIds;
 end;
 
 function GetFirstStorageID(PortableDev: IMTPDevice): WideString;
-var Content: IPortableDeviceContent;
-    ObjectIds: IEnumPortableDeviceObjectIDs;
-    ObjectId: PWideChar;
-    Fetched: Cardinal;
+var
+  ObjectIds: IEnumPortableDeviceObjectIDs;
+  ObjectId: PWideChar;
+  Fetched: Cardinal;
 begin
   Result := WPD_DEVICE_OBJECT_ID;
-  ObjectIds := FirstStorageIDs(PortableDev);
+  ObjectIds := FirstStorageIDs(PortableDev, '');
   if (ObjectIds = nil) then
     exit;
 
