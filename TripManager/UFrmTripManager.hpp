@@ -285,7 +285,8 @@ private:
 	void __fastcall FreeCustomData(const void * ACustomData);
 	void __fastcall FreeDevices();
 	void __fastcall GuessModel(const System::UnicodeString FriendlyName);
-	void __fastcall SelectDevice(const int Indx);
+	void __fastcall SelectDevice(const int Indx)/* overload */;
+	void __fastcall SelectDevice(const System::UnicodeString Device)/* overload */;
 	TDirType __fastcall GetItemType(Vcl::Comctrls::TListView* const AListview);
 	void __fastcall CloseDevice();
 	bool __fastcall CheckDevice(bool RaiseException = true);

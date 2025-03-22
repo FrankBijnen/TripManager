@@ -300,6 +300,7 @@ static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_PID = System::
 extern DELPHI_PACKAGE bool __fastcall RenameObject(Unitmtpdevice::IMTPDevice Device, System::WideString ObjectId, System::WideString NewName);
 extern DELPHI_PACKAGE bool __fastcall ConnectToDevice(System::WideString SDev, Unitmtpdevice::IMTPDevice &PortableDev, bool Readonly = true);
 extern DELPHI_PACKAGE System::Classes::TList* __fastcall GetDevices();
+extern DELPHI_PACKAGE Portabledeviceapilib_tlb::_di_IEnumPortableDeviceObjectIDs __fastcall FirstStorageIDs(Unitmtpdevice::IMTPDevice PortableDev, System::UnicodeString DeviceRoot = L"DEVICE");
 extern DELPHI_PACKAGE System::WideString __fastcall GetFirstStorageID(Unitmtpdevice::IMTPDevice PortableDev);
 extern DELPHI_PACKAGE System::WideChar * __fastcall ReadFilesFromDevice(Unitmtpdevice::IMTPDevice PortableDev, Vcl::Comctrls::TListItems* Lst, System::WideString SParent, System::WideString &CompletePath);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForFile(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SPath, System::WideString SFile, Vcl::Comctrls::TListItem* AListItem = (Vcl::Comctrls::TListItem*)(0x0));

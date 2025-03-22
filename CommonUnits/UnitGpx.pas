@@ -80,6 +80,7 @@ const CatGPX = 'GPX:';
 const DefWaypointSymbol = 'Waypoint';
 {$IFDEF TRIPOBJECTS}
 const ZumoModel: TZumoModel = TZumoModel.XT;
+const ExploreUuid: string = '11111111-1111-1111-1111-111111111111';
 {$ENDIF}
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
@@ -1879,14 +1880,13 @@ var Func: TGPXFunc;
             try
               TripList.AddHeader(THeader.Create);
 
-              //Note: TRawDataItem used for unknown (XT2) types. Need investigating
-            PrepStream(TmpStream, [$0000]);
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
+              PrepStream(TmpStream, [$0000]);
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
 
-            Triplist.Add(TCardinalItem.Create('mAvoidancesChangedTimeAtSave', 0));
+              Triplist.Add(TCardinalItem.Create('mAvoidancesChangedTimeAtSave', 0));
 
-            PrepStream(TmpStream, [$0000]);
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
+              PrepStream(TmpStream, [$0000]);
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
 
               TripList.Add(TmIsDisplayable.Create);
               TripList.Add(TBooleanItem.Create('mIsDeviceRoute', true));
@@ -1896,45 +1896,45 @@ var Func: TGPXFunc;
               TripList.Add(TmTotalTripTime.Create);
               TripList.Add(TmTripName.Create(TripName));
 
-            TripList.Add(TStringItem.Create('mVehicleProfileGuid', '00000000-0000-0000-0000-000000000000'));
+              TripList.Add(TStringItem.Create('mVehicleProfileGuid', '00000000-0000-0000-0000-000000000000'));
 
               TripList.Add(TmParentTripId.Create(ParentTripId));
               TripList.Add(TmIsRoundTrip.Create);
 
-            TripList.Add(TStringItem.Create('mVehicleProfileName', 'z' + #0361 + 'mo Motorcycle'));
+              TripList.Add(TStringItem.Create('mVehicleProfileName', 'z' + #0361 + 'mo Motorcycle'));
               TripList.Add(TmAvoidancesChanged.Create);
               TripList.Add(TmParentTripName.Create(BaseFile));
-            TripList.Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
-            TripList.Add(TCardinalItem.Create('mVehicleProfileHash', 0));
+              TripList.Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
+              TripList.Add(TCardinalItem.Create('mVehicleProfileHash', 0));
 
-            SetLength(RoutePreferences, ViaPointCount -1);
-            for Index := 0 to High(RoutePreferences) do
-              RoutePreferences[Index] := Swap($0100);
-            PrepStream(TmpStream, ViaPointCount -1, RoutePreferences);
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferences', TmpStream.Size, $80, TmpStream);
+              SetLength(RoutePreferences, ViaPointCount -1);
+              for Index := 0 to High(RoutePreferences) do
+                RoutePreferences[Index] := Swap($0100);
+              PrepStream(TmpStream, ViaPointCount -1, RoutePreferences);
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferences', TmpStream.Size, $80, TmpStream);
 
               TripList.Add(TmImported.Create);
               TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
-              TripList.Add(TStringItem.Create('mExploreUuid', '00000000-0000-0000-0000-000000000000'));
+            TripList.Add(TStringItem.Create('mExploreUuid', ExploreUuid));
               TripList.Add(TmVersionNumber.Create(4, $10));
 
-            TmpStream.Position := 0;
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousHillsAndCurves', TmpStream.Size, $80, TmpStream);
+              TmpStream.Position := 0;
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousHillsAndCurves', TmpStream.Size, $80, TmpStream);
               TripList.Add(TmTotalTripDistance.Create);
-            TripList.Add(TByteItem.Create('mVehicleId', 1)); // ?
-            TmpStream.Position := 0;
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousScenicRoads', TmpStream.Size, $80, TmpStream);
+              TripList.Add(TByteItem.Create('mVehicleId', 1)); // ?
+              TmpStream.Position := 0;
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousScenicRoads', TmpStream.Size, $80, TmpStream);
 
               // Create Dummy AllRoutes, to force recalc on the XT2. Just an entry for every Via.
               TripList.ForceRecalc(ZumoModel, ViaPointCount);
-            TmpStream.Position := 0;
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousPopularPaths', TmpStream.Size, $80, TmpStream);
+              TmpStream.Position := 0;
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousPopularPaths', TmpStream.Size, $80, TmpStream);
               TripList.Add(TmPartOfSplitRoute.Create);
               TripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
               TripList.Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
 
-            TmpStream.Position := 0;
-            Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousMode', TmpStream.Size, $80, TmpStream);
+              TmpStream.Position := 0;
+              Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousMode', TmpStream.Size, $80, TmpStream);
 
               TripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
 

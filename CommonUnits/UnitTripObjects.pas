@@ -298,6 +298,13 @@ type
     constructor Create(AValue: string);
   end;
 
+  TmExploreUuid = class(TStringItem)
+  private
+    function GetEditMode: TEditMode; override;
+  public
+    constructor Create(AValue: string);
+  end;
+
   TmOptimized = class(TBooleanItem)
   public
     constructor Create(AValue: boolean = false);
@@ -632,6 +639,7 @@ type
     function LoadFromFile(AFile: string): boolean;
     function GetValue(AKey: ShortString): string;
     function GetItem(AKey: ShortString): TBaseItem;
+    procedure SetItem(AKey: ShortString; ABaseItem: TBaseItem);
     function GetRoutePointCount: integer;
     function GetRoutePoint(RoutePointId: integer): Tlocation;
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
@@ -1339,6 +1347,16 @@ end;
 constructor TmParentTripName.Create(AValue: string);
 begin
   inherited Create('mParentTripName', AValue);
+end;
+
+constructor TmExploreUuid.Create(AValue: string);
+begin
+  inherited Create('mExploreUuid', AValue);
+end;
+
+function TmExploreUuid.GetEditMode: TEditMode;
+begin
+  result := TEditMode.emButton;
 end;
 
 constructor TmOptimized.Create(AValue: boolean = false);
@@ -2403,6 +2421,18 @@ begin
   end;
 end;
 
+procedure TTripList.SetItem(AKey: ShortString; ABaseItem: TBaseItem);
+var
+  Index: integer;
+begin
+  for Index := 0 to ItemList.Count -1 do
+  begin
+    if (ItemList[Index] is TBaseDataItem) and
+       (TbaseDataItem(ItemList[Index]).Name = AKey) then
+      ItemList[Index] := ABaseItem;
+  end;
+end;
+
 function TTripList.GetRoutePointCount: integer;
 var
   ALocations: TmLocations;
@@ -2654,6 +2684,7 @@ begin
   // TmAllRoutes
     TmAllRoutes,
   // XT2
+    TmExploreUuid,
     TmRoutePreferences,
     TmRoutePreferencesAdventurousHillsAndCurves,
     TmRoutePreferencesAdventurousScenicRoads,

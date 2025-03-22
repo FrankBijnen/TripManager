@@ -154,6 +154,8 @@ type
     About1: TMenuItem;
     N7: TMenuItem;
     Onlinehelp1: TMenuItem;
+    BtnCopyFromTrip: TButton;
+    OpenTrip: TOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -220,6 +222,7 @@ type
     procedure ShellListView1DblClick(Sender: TObject);
     procedure About1Click(Sender: TObject);
     procedure Onlinehelp1Click(Sender: TObject);
+    procedure BtnCopyFromTripClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -496,6 +499,41 @@ begin
     TmScPosn(ABaseDataItem).MapCoords := EditMapCoords.Text;
     VlTripInfo.Cells[1, VlTripInfo.Row] := TmScPosn(ABaseDataItem).AsString;
     BtnSaveTripValues.Enabled := true;
+  end;
+end;
+
+procedure TFrmTripManager.BtnCopyFromTripClick(Sender: TObject);
+var
+  ABaseDataItem: TBaseDataItem;
+  TmpDataItem, CopyDataItem: TBaseItem;
+  TmpTripList, CopyTripList: TTripList;
+begin
+  ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
+  if not Assigned(ABaseDataItem) then
+    exit;
+
+  OpenTrip.InitialDir := ShellTreeView1.Path;
+  if not (OpenTrip.Execute) then
+    exit;
+
+  TmpTripList := TTripList.Create;
+  CopyTripList := TTripList.Create;
+  try
+    TmpTripList.LoadFromFile(OpenTrip.FileName);
+    CopyTripList.LoadFromFile(HexEditFile);
+    TmpDataItem := TmpTripList.GetItem(ABaseDataItem.Name);
+    CopyDataItem := CopyTripList.GetItem(ABaseDataItem.Name);
+    if (TmpDataItem <> nil) and
+       (CopyDataItem <> nil) then
+    begin
+      TmpTripList.SetItem(ABaseDataItem.Name, CopyDataItem);
+      CopyTripList.SetItem(ABaseDataItem.Name, TmpDataItem);
+      CopyTripList.SaveToFile(ChangeFileExt(HexEditFile, '') + '_' + string(ABaseDataItem.Name) + ExtractFileExt(HexEditFile));
+    end;
+  finally
+    TmpTripList.Free;
+    CopyTripList.Free;
+    ShellListView1.Refresh;
   end;
 end;
 
@@ -2052,7 +2090,12 @@ begin
   if not Assigned(ABaseDataItem) then
     exit;
 
-  if (ABaseDataItem is TmScPosn) then
+  if (ABaseDataItem is TmExploreUuid) then
+  begin
+    if (Application.MessageBox('Set as Explore UUID?', 'Verify', MB_YESNO) = ID_YES) then
+      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ABaseDataItem.AsString);
+  end
+  else if (ABaseDataItem is TmScPosn) then
     ShowMessage('Position Map and click on ''Apply Coordinates''.' + #10 +
                 'Tip: Use Ctrl + Click on Map to get precise coordinates')
   else if (ABaseDataItem is TmArrival) then
@@ -2918,6 +2961,7 @@ begin
   ProcessShape := false;
   ShapingPointName := TShapingPointName.Unchanged;
 
+  ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
   WayPtList := TStringList.Create;
   try
     WayPtList.Text := ProcessCategoryPick;

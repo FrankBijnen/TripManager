@@ -710,11 +710,22 @@ object FrmTripManager: TFrmTripManager
             Left = 1
             Top = 1
             Width = 144
-            Height = 22
+            Height = 24
+            Align = alLeft
             Caption = 'Save Trip File (From Values)'
             Enabled = False
             TabOrder = 0
             OnClick = BtnSaveTripValuesClick
+          end
+          object BtnCopyFromTrip: TButton
+            Left = 230
+            Top = 1
+            Width = 144
+            Height = 24
+            Align = alRight
+            Caption = 'Copy from trip'
+            TabOrder = 1
+            OnClick = BtnCopyFromTripClick
           end
         end
       end
@@ -1023,5 +1034,11 @@ object FrmTripManager: TFrmTripManager
         OnClick = Onlinehelp1Click
       end
     end
+  end
+  object OpenTrip: TOpenDialog
+    DefaultExt = 'trip'
+    Filter = '*.trip|*.trip'
+    Left = 736
+    Top = 346
   end
 end
