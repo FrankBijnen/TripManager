@@ -80,7 +80,7 @@ const CatGPX = 'GPX:';
 const DefWaypointSymbol = 'Waypoint';
 {$IFDEF TRIPOBJECTS}
 const ZumoModel: TZumoModel = TZumoModel.XT;
-const ExploreUuid: string = '11111111-1111-1111-1111-111111111111';
+const ExploreUuid: string = '';
 {$ENDIF}
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
@@ -1875,6 +1875,7 @@ var Func: TGPXFunc;
             TmpStream: TMemoryStream;
             RoutePreferences: array of WORD;
             Index: integer;
+            Uid: TGuid;
           begin
             TmpStream := TMemoryStream.Create;
             try
@@ -1915,7 +1916,18 @@ var Func: TGPXFunc;
 
               TripList.Add(TmImported.Create);
               TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
-            TripList.Add(TStringItem.Create('mExploreUuid', ExploreUuid));
+
+            if (ExploreUuid <> '') then
+              TripList.Add(TStringItem.Create('mExploreUuid', ExploreUuid))
+            else
+            begin
+              if CreateGUID(Uid) = S_OK then
+                TripList.Add(TStringItem.Create('mExploreUuid',
+                                                ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])))
+              else
+                raise exception.Create('Cant create GUID');
+            end;
+
               TripList.Add(TmVersionNumber.Create(4, $10));
 
               TmpStream.Position := 0;

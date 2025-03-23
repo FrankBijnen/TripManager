@@ -2085,6 +2085,7 @@ var
   ABaseDataItem: TBaseDataItem;
   ADateTime: TDateTime;
   Rc: integer;
+  CustomButtonCaptions: array of string;
 begin
   ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
   if not Assigned(ABaseDataItem) then
@@ -2092,8 +2093,26 @@ begin
 
   if (ABaseDataItem is TmExploreUuid) then
   begin
-    if (Application.MessageBox('Set as Explore UUID?', 'Verify', MB_YESNO) = ID_YES) then
-      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ABaseDataItem.AsString);
+    SetLength(CustomButtonCaptions , 5);
+    CustomButtonCaptions[0] := 'Yes';
+    CustomButtonCaptions[1] := 'No';
+    CustomButtonCaptions[2] := 'Generate Unique';
+    CustomButtonCaptions[3] := 'Default ''0000-''';
+    CustomButtonCaptions[4] := 'Cancel';
+
+    case MessageDlg('Set this value as default Explore UUID?',
+                    TMsgDlgType.mtConfirmation,
+                    mbYesAllNoAllCancel,
+                    0,
+                    TMsgDlgBtn.mbCancel,
+                    CustomButtonCaptions) of
+        mrYes: // Yes. copy
+          SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ABaseDataItem.AsString);
+        mrCancel: // Generate  = ''
+          SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', '');
+        mrNoToAll: // Default
+          SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', '00000000-0000-0000-0000-000000000000');
+    end;
   end
   else if (ABaseDataItem is TmScPosn) then
     ShowMessage('Position Map and click on ''Apply Coordinates''.' + #10 +
