@@ -246,6 +246,19 @@ type
   end;
 
 {*** Specialized Classes ***}
+  TUnixDate = class(TCardinalItem)
+  private
+    function GetEditMode: TEditMode; override;
+    function GetValue: string; override;
+    function GetAsUnixDateTime: Cardinal;
+    procedure SetAsUnixDateTime(AValue: Cardinal);
+  public
+    constructor Create(AName: ShortString; AValue: TDateTime = 0);
+    property AsUnixDateTime: Cardinal read GetAsUnixDateTime write SetAsUnixDateTime;
+    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
+    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
+    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
+  end;
 
 {*** Unknown/not Editable ***}
   TRawDataItem = class(TBaseDataItem)
@@ -299,10 +312,13 @@ type
   end;
 
   TmExploreUuid = class(TStringItem)
-  private
-    function GetEditMode: TEditMode; override;
   public
     constructor Create(AValue: string);
+  end;
+
+  TmAvoidancesChangedTimeAtSave = class(TUnixDate)
+  public
+    constructor Create(AValue: TDateTime = 0);
   end;
 
   TmOptimized = class(TBooleanItem)
@@ -391,18 +407,9 @@ type
     constructor Create(AValue: integer = -1);
   end;
 
-  TmArrival = class(TCardinalItem)
-  private
-    function GetEditMode: TEditMode; override;
-    function GetValue: string; override;
-    function GetAsUnixDateTime: Cardinal;
-    procedure SetAsUnixDateTime(AValue: Cardinal);
+  TmArrival = class(TUnixDate)
   public
     constructor Create(AValue: TDateTime = 0);
-    property AsUnixDateTime: Cardinal read GetAsUnixDateTime write SetAsUnixDateTime;
-    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
-    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
-    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
   end;
 
   TmAddress = class(TStringItem)
@@ -1287,6 +1294,58 @@ end;
 
 {*** Specialized classes ***}
 
+constructor TUnixDate.Create(AName: ShortString; AValue: TDateTime = 0);
+begin
+  inherited Create(AName, TUnixDate.DateTimeAsCardinal(AValue));
+end;
+
+function TUnixDate.GetEditMode: TEditMode;
+begin
+  result := TEditMode.emButton;
+end;
+
+function TUnixDate.GetValue: string;
+begin
+  result := TUnixDate.CardinalAsDateTimeString(FValue);
+end;
+
+function TUnixDate.GetAsUnixDateTime: Cardinal;
+begin
+  result := FValue;
+end;
+
+procedure TUnixDate.SetAsUnixDateTime(AValue: Cardinal);
+begin
+  FValue := AValue;
+end;
+
+class function TUnixDate.DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
+var
+  ValueEpoch: int64;
+  ValueUnix: int64;
+begin
+  result := 0;
+  if (ADateTime <> 0) then
+  begin
+    ValueUnix := DateTimeToUnix(ADateTime, false);
+    ValueEpoch := DateTimeToUnix(EncodeDateTime(1989, 12, 31, 0, 0, 0, 0));
+    result := ValueUnix - ValueEpoch;
+  end;
+end;
+
+class function TUnixDate.CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
+var
+  ValueEpoch: int64;
+begin
+  ValueEpoch := ACardinal + DateTimeToUnix(EncodeDateTime(1989,12,31,0,0,0,0)); // Starts from 1989/12/31
+  result := UnixToDateTime(ValueEpoch, false);
+end;
+
+class function TUnixDate.CardinalAsDateTimeString(ACardinal: Cardinal): string;
+begin
+  result := Format('%s', [DateTimeToStr(TUnixDate.CardinalAsDateTime(ACardinal))]);
+end;
+
 {*** Raw Data used for unknown
 We just keep the data in TBytes
 ***}
@@ -1354,9 +1413,9 @@ begin
   inherited Create('mExploreUuid', AValue);
 end;
 
-function TmExploreUuid.GetEditMode: TEditMode;
+constructor TmAvoidancesChangedTimeAtSave.Create(AValue: TDateTime = 0);
 begin
-  result := TEditMode.emButton;
+  inherited Create('mAvoidancesChangedTimeAtSave', AValue);
 end;
 
 constructor TmOptimized.Create(AValue: boolean = false);
@@ -1559,54 +1618,7 @@ end;
 { TmArrival }
 constructor TmArrival.Create(AValue: TDateTime = 0);
 begin
-  inherited Create('mArrival', DateTimeAsCardinal(AValue));
-end;
-
-function TmArrival.GetEditMode: TEditMode;
-begin
-  result := TEditMode.emButton;
-end;
-
-class function TmArrival.DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
-var
-  ValueEpoch: int64;
-  ValueUnix: int64;
-begin
-  result := 0;
-  if (ADateTime <> 0) then
-  begin
-    ValueUnix := DateTimeToUnix(ADateTime, false);
-    ValueEpoch := DateTimeToUnix(EncodeDateTime(1989, 12, 31, 0, 0, 0, 0));
-    result := ValueUnix - ValueEpoch;
-  end;
-end;
-
-class function TmArrival.CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
-var
-  ValueEpoch: int64;
-begin
-  ValueEpoch := ACardinal + DateTimeToUnix(EncodeDateTime(1989,12,31,0,0,0,0)); // Starts from 1989/12/31
-  result := UnixToDateTime(ValueEpoch, false);
-end;
-
-class function TmArrival.CardinalAsDateTimeString(ACardinal: Cardinal): string;
-begin
-  result := Format('%s', [DateTimeToStr(TmArrival.CardinalAsDateTime(ACardinal))]);
-end;
-
-function TmArrival.GetValue: string;
-begin
-  result := CardinalAsDateTimeString(FValue);
-end;
-
-function TmArrival.GetAsUnixDateTime: Cardinal;
-begin
-  result := FValue;
-end;
-
-procedure TmArrival.SetAsUnixDateTime(AValue: Cardinal);
-begin
-  FValue := AValue;
+  inherited Create('mArrival', AValue);
 end;
 
 { TmAddress }
@@ -2685,6 +2697,7 @@ begin
     TmAllRoutes,
   // XT2
     TmExploreUuid,
+    TmAvoidancesChangedTimeAtSave,
     TmRoutePreferences,
     TmRoutePreferencesAdventurousHillsAndCurves,
     TmRoutePreferencesAdventurousScenicRoads,

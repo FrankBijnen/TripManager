@@ -10,7 +10,8 @@ uses
   Vcl.ImgList, Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls,
   Vcl.ToolWin, Vcl.ButtonGroup,
   TripManager_ShellList,
-  BCHexEditor, UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, UnitGpi, Monitor;
+  BCHexEditor, UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, UnitGpi, Monitor, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
+  System.Actions, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -45,6 +46,9 @@ const
   WarnModel_Key           = 'WarnModel';
 
   BooleanValues: array[boolean] of string = ('False', 'True');
+  XT2_VehicleProfileGuid  = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
+  XT2_VehicleProfileHash  = '135656608';
+  XT2_VehicleId           = '1';
 
 type
   TMapReq = record
@@ -149,13 +153,14 @@ type
     BtnPostProcess: TButton;
     ChkWatch: TCheckBox;
     PostProcessTimer: TTimer;
-    MainMenu: TMainMenu;
-    Help1: TMenuItem;
-    About1: TMenuItem;
-    N7: TMenuItem;
-    Onlinehelp1: TMenuItem;
-    BtnCopyFromTrip: TButton;
     OpenTrip: TOpenDialog;
+    ActionMainMenuBar: TActionMainMenuBar;
+    ActionManager: TActionManager;
+    Action1: TAction;
+    Action2: TAction;
+    PopupTripInfo: TPopupMenu;
+    CopyValueFromTrip: TMenuItem;
+    Action3: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -220,9 +225,10 @@ type
     procedure ChkWatchClick(Sender: TObject);
     procedure PostProcessTimerTimer(Sender: TObject);
     procedure ShellListView1DblClick(Sender: TObject);
-    procedure About1Click(Sender: TObject);
-    procedure Onlinehelp1Click(Sender: TObject);
-    procedure BtnCopyFromTripClick(Sender: TObject);
+    procedure Action1Execute(Sender: TObject);
+    procedure Action2Execute(Sender: TObject);
+    procedure CopyValueFromTripClick(Sender: TObject);
+    procedure Action3Execute(Sender: TObject);
 
   private
     { Private declarations }
@@ -313,7 +319,7 @@ implementation
 uses
   System.StrUtils, System.UITypes, System.DateUtils, winapi.ShellAPI, Vcl.Clipbrd,
   UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop,
-  UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions;
+  UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings;
 
 const
   DupeCount = 10;
@@ -415,7 +421,8 @@ var
 begin
   if not WarnModel then
     exit;
-  if (CmbModel.ItemIndex <> Ord(TZumoModel.XT)) then
+  if (CmbModel.ItemIndex <> Ord(TZumoModel.XT)) and
+     (CmbModel.ItemIndex <> Ord(TZumoModel.XT2)) then
   begin
     Rc := MessageDlg('Trip files created may not work for selected model.', TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbIgnore], 0);
     if (Rc = ID_IGNORE) then
@@ -463,9 +470,22 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.About1Click(Sender: TObject);
+procedure TFrmTripManager.Action1Execute(Sender: TObject);
 begin
   ShowMessage(VerInfo);
+end;
+
+procedure TFrmTripManager.Action2Execute(Sender: TObject);
+begin
+  ShellExecute(0, 'Open',
+               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md',
+               '','', SW_SHOWNORMAL);
+end;
+
+procedure TFrmTripManager.Action3Execute(Sender: TObject);
+begin
+  if FrmAdvSettings.ShowModal = mrOk then
+    SetFixedPrefs;
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
@@ -499,41 +519,6 @@ begin
     TmScPosn(ABaseDataItem).MapCoords := EditMapCoords.Text;
     VlTripInfo.Cells[1, VlTripInfo.Row] := TmScPosn(ABaseDataItem).AsString;
     BtnSaveTripValues.Enabled := true;
-  end;
-end;
-
-procedure TFrmTripManager.BtnCopyFromTripClick(Sender: TObject);
-var
-  ABaseDataItem: TBaseDataItem;
-  TmpDataItem, CopyDataItem: TBaseItem;
-  TmpTripList, CopyTripList: TTripList;
-begin
-  ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
-  if not Assigned(ABaseDataItem) then
-    exit;
-
-  OpenTrip.InitialDir := ShellTreeView1.Path;
-  if not (OpenTrip.Execute) then
-    exit;
-
-  TmpTripList := TTripList.Create;
-  CopyTripList := TTripList.Create;
-  try
-    TmpTripList.LoadFromFile(OpenTrip.FileName);
-    CopyTripList.LoadFromFile(HexEditFile);
-    TmpDataItem := TmpTripList.GetItem(ABaseDataItem.Name);
-    CopyDataItem := CopyTripList.GetItem(ABaseDataItem.Name);
-    if (TmpDataItem <> nil) and
-       (CopyDataItem <> nil) then
-    begin
-      TmpTripList.SetItem(ABaseDataItem.Name, CopyDataItem);
-      CopyTripList.SetItem(ABaseDataItem.Name, TmpDataItem);
-      CopyTripList.SaveToFile(ChangeFileExt(HexEditFile, '') + '_' + string(ABaseDataItem.Name) + ExtractFileExt(HexEditFile));
-    end;
-  finally
-    TmpTripList.Free;
-    CopyTripList.Free;
-    ShellListView1.Refresh;
   end;
 end;
 
@@ -1237,7 +1222,7 @@ begin
   if (Arrival = nil) then
     exit;
 
-  ADateTime := TmArrival.CardinalAsDateTime(Arrival.AsUnixDateTime);
+  ADateTime := TUnixDate.CardinalAsDateTime(Arrival.AsUnixDateTime);
   with TFrmDateDialog.Create(nil) do
   begin
     DtPicker.DateTime := ADateTime;
@@ -1266,7 +1251,7 @@ begin
         LocalFile := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
         TmpTripList.LoadFromFile(LocalFile);
         Arrival := TmpTripList.GetArrival;
-        Arrival.AsUnixDateTime := TmArrival.DateTimeAsCardinal(ADateTime);
+        Arrival.AsUnixDateTime := TUnixDate.DateTimeAsCardinal(ADateTime);
         if (IncrementDay) then
           ADateTime := IncDay(ADateTime, 1);
         TmpTripList.SaveToFile(LocalFile);
@@ -2085,41 +2070,17 @@ var
   ABaseDataItem: TBaseDataItem;
   ADateTime: TDateTime;
   Rc: integer;
-  CustomButtonCaptions: array of string;
 begin
   ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
   if not Assigned(ABaseDataItem) then
     exit;
 
-  if (ABaseDataItem is TmExploreUuid) then
-  begin
-    SetLength(CustomButtonCaptions , 5);
-    CustomButtonCaptions[0] := 'Yes';
-    CustomButtonCaptions[1] := 'No';
-    CustomButtonCaptions[2] := 'Generate Unique';
-    CustomButtonCaptions[3] := 'Default ''0000-''';
-    CustomButtonCaptions[4] := 'Cancel';
-
-    case MessageDlg('Set this value as default Explore UUID?',
-                    TMsgDlgType.mtConfirmation,
-                    mbYesAllNoAllCancel,
-                    0,
-                    TMsgDlgBtn.mbCancel,
-                    CustomButtonCaptions) of
-        mrYes: // Yes. copy
-          SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ABaseDataItem.AsString);
-        mrCancel: // Generate  = ''
-          SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', '');
-        mrNoToAll: // Default
-          SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', '00000000-0000-0000-0000-000000000000');
-    end;
-  end
-  else if (ABaseDataItem is TmScPosn) then
+  if (ABaseDataItem is TmScPosn) then
     ShowMessage('Position Map and click on ''Apply Coordinates''.' + #10 +
                 'Tip: Use Ctrl + Click on Map to get precise coordinates')
-  else if (ABaseDataItem is TmArrival) then
+  else if (ABaseDataItem is TUnixDate) then
   begin
-    ADateTime := TmArrival.CardinalAsDateTime(TmArrival(ABaseDataItem).AsUnixDateTime);
+    ADateTime := TUnixDate.CardinalAsDateTime(TUnixDate(ABaseDataItem).AsUnixDateTime);
     with TFrmDateDialog.Create(nil) do
     begin
       DtPicker.DateTime := ADateTime;
@@ -2129,8 +2090,9 @@ begin
     end;
     if Rc = ID_OK then
     begin
-      TmArrival(ABaseDataItem).AsUnixDateTime := TmArrival.DateTimeAsCardinal(ADateTime);
+      TUnixDate(ABaseDataItem).AsUnixDateTime := TUnixDate.DateTimeAsCardinal(ADateTime);
       BtnSaveTripValues.Enabled := true;
+      TvTripChange(TvTrip, TvTrip.Selected);
     end;
   end;
 end;
@@ -2204,6 +2166,41 @@ begin
     raise Exception.Create(Format('Copy %s from %s failed', [NFile, CurrentDevice.Device]));
 
   result := IncludeTrailingPathDelimiter(CreatedTempPath) + NFile;
+end;
+
+procedure TFrmTripManager.CopyValueFromTripClick(Sender: TObject);
+var
+  ABaseDataItem: TBaseDataItem;
+  TmpDataItem, CopyDataItem: TBaseItem;
+  TmpTripList, CopyTripList: TTripList;
+begin
+  ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
+  if not Assigned(ABaseDataItem) then
+    exit;
+
+  OpenTrip.InitialDir := ShellTreeView1.Path;
+  if not (OpenTrip.Execute) then
+    exit;
+
+  TmpTripList := TTripList.Create;
+  CopyTripList := TTripList.Create;
+  try
+    TmpTripList.LoadFromFile(OpenTrip.FileName);
+    CopyTripList.LoadFromFile(HexEditFile);
+    TmpDataItem := TmpTripList.GetItem(ABaseDataItem.Name);
+    CopyDataItem := CopyTripList.GetItem(ABaseDataItem.Name);
+    if (TmpDataItem <> nil) and
+       (CopyDataItem <> nil) then
+    begin
+      TmpTripList.SetItem(ABaseDataItem.Name, CopyDataItem);
+      CopyTripList.SetItem(ABaseDataItem.Name, TmpDataItem);
+      CopyTripList.SaveToFile(ChangeFileExt(HexEditFile, '') + '_' + string(ABaseDataItem.Name) + ExtractFileExt(HexEditFile));
+    end;
+  finally
+    TmpTripList.Free;
+    CopyTripList.Free;
+    ShellListView1.Refresh;
+  end;
 end;
 
 procedure TFrmTripManager.DeviceMenuPopup(Sender: TObject);
@@ -2388,7 +2385,7 @@ begin
     ParentName := 'Group1';
     if not InputQuery('Group selected trips', 'Group name', ParentName) then
       exit;
-    ParentId := TmArrival.DateTimeAsCardinal(Now);
+    ParentId := TUnixDate.DateTimeAsCardinal(Now);
   end;
 
   CrWait := LoadCursor(0, IDC_WAIT);
@@ -2661,13 +2658,6 @@ begin
   EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s);', [FMapReq.Desc, FMapReq.Coords]));
 end;
 
-procedure TFrmTripManager.Onlinehelp1Click(Sender: TObject);
-begin
-  ShellExecute(0, 'Open',
-               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md',
-               '','', SW_SHOWNORMAL);
- end;
-
 procedure TFrmTripManager.CreateAdditionalClick(Sender: TObject);
 var
   AnItem: TListItem;
@@ -2786,7 +2776,7 @@ begin
   try
     if not ATripList.LoadFromStream(AStream) then
       raise Exception.Create('Not a valid trip file');
-//TODO do calculations in InitFromStream, so we dont need to save to stream to get the sizes
+    //Save, and discard, to stream to get the sizes
     MemStream := TMemoryStream.Create;
     try
       ATripList.SaveToStream(MemStream);
@@ -2799,6 +2789,7 @@ begin
 
     TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
+    CopyValueFromTrip.Enabled := not DeviceFile;
     if (DeviceFile) then
       PnlTripGpiInfo.Color := clLime
     else
@@ -2980,7 +2971,13 @@ begin
   ProcessShape := false;
   ShapingPointName := TShapingPointName.Unchanged;
 
+  // XT2 Defaults
   ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
+  VehicleProfileGuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileGuid', XT2_VehicleProfileGuid);
+  VehicleProfileHash := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileHash', XT2_VehicleProfileHash);
+  VehicleId := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleId', XT2_VehicleId);
+
+
   WayPtList := TStringList.Create;
   try
     WayPtList.Text := ProcessCategoryPick;

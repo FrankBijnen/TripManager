@@ -10,6 +10,7 @@ uses
   UFrmTransferOptions in 'UFrmTransferOptions.pas' {FrmTransferOptions},
   TripManager_MultiContext in 'TripManager_MultiContext.pas',
   TripManager_ShellList in 'TripManager_ShellList.pas',
+  UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
   Vcl.Themes,
   Vcl.Styles;
 
@@ -30,5 +31,6 @@ begin
   Application.CreateForm(TFrmDateDialog, FrmDateDialog);
   Application.CreateForm(TFrmAdditional, FrmAdditional);
   Application.CreateForm(TFrmTransferOptions, FrmTransferOptions);
+  Application.CreateForm(TFrmAdvSettings, FrmAdvSettings);
   Application.Run;
 end.

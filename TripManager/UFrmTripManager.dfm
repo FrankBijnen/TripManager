@@ -11,7 +11,6 @@ object FrmTripManager: TFrmTripManager
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  Menu = MainMenu
   Position = poScreenCenter
   Scaled = False
   OnClose = FormClose
@@ -21,7 +20,7 @@ object FrmTripManager: TFrmTripManager
   TextHeight = 13
   object HSplitterDevFiles_Info: TSplitter
     Left = 0
-    Top = 245
+    Top = 270
     Width = 1297
     Height = 5
     Cursor = crVSplit
@@ -30,16 +29,16 @@ object FrmTripManager: TFrmTripManager
   end
   object VSplitterTripInfo_HexOSM: TSplitter
     Left = 631
-    Top = 250
+    Top = 275
     Width = 5
-    Height = 367
+    Height = 342
     ExplicitLeft = 1
     ExplicitTop = 1
     ExplicitHeight = 464
   end
   object PnlXTAndFileSys: TPanel
     Left = 0
-    Top = 0
+    Top = 25
     Width = 1297
     Height = 245
     Align = alTop
@@ -69,11 +68,13 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 1
         object CmbDevices: TComboBox
           AlignWithMargins = True
-          Left = 196
+          Left = 166
           Top = 5
-          Width = 100
+          Width = 145
           Height = 21
+          Margins.Left = 1
           Margins.Top = 4
+          Margins.Right = 1
           Align = alClient
           TabOrder = 2
           Text = 'Select an MTP device'
@@ -83,10 +84,12 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
-          Left = 95
+          Left = 84
           Top = 4
-          Width = 95
+          Width = 80
           Height = 24
+          Margins.Left = 1
+          Margins.Right = 1
           Align = alLeft
           Caption = 'Refresh'
           TabOrder = 1
@@ -94,7 +97,7 @@ object FrmTripManager: TFrmTripManager
         end
         object BgDevice: TButtonGroup
           AlignWithMargins = True
-          Left = 376
+          Left = 385
           Top = 4
           Width = 157
           Height = 24
@@ -118,10 +121,12 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnSetDeviceDefault: TButton
           AlignWithMargins = True
-          Left = 539
+          Left = 546
           Top = 4
-          Width = 85
+          Width = 80
           Height = 24
+          Margins.Left = 1
+          Margins.Right = 1
           Align = alRight
           Caption = 'Set as default'
           TabOrder = 5
@@ -129,10 +134,12 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnFunctions: TButton
           AlignWithMargins = True
-          Left = 4
+          Left = 2
           Top = 4
-          Width = 85
+          Width = 80
           Height = 24
+          Margins.Left = 1
+          Margins.Right = 1
           Align = alLeft
           Caption = 'Functions'
           TabOrder = 0
@@ -140,11 +147,13 @@ object FrmTripManager: TFrmTripManager
         end
         object CmbModel: TComboBox
           AlignWithMargins = True
-          Left = 302
+          Left = 313
           Top = 5
           Width = 68
           Height = 21
+          Margins.Left = 1
           Margins.Top = 4
+          Margins.Right = 1
           Align = alRight
           TabOrder = 3
           Text = 'Unknown'
@@ -426,9 +435,9 @@ object FrmTripManager: TFrmTripManager
   end
   object PctHexOsm: TPageControl
     Left = 636
-    Top = 250
+    Top = 275
     Width = 661
-    Height = 367
+    Height = 342
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
@@ -438,7 +447,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 653
-        Height = 339
+        Height = 314
         Align = alClient
         Color = clWhite
         ParentBackground = False
@@ -571,7 +580,7 @@ object FrmTripManager: TFrmTripManager
       end
       object AdvPanel_MapBottom: TPanel
         Left = 0
-        Top = 302
+        Top = 277
         Width = 653
         Height = 37
         Align = alBottom
@@ -611,7 +620,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 22
         Width = 653
-        Height = 280
+        Height = 255
         Align = alClient
         TabOrder = 2
         AllowSingleSignOnUsingOSPrimaryAccount = False
@@ -626,9 +635,9 @@ object FrmTripManager: TFrmTripManager
   end
   object PageControl1: TPageControl
     Left = 0
-    Top = 250
+    Top = 275
     Width = 631
-    Height = 367
+    Height = 342
     ActivePage = TsTripGpiInfo
     Align = alLeft
     TabOrder = 2
@@ -638,7 +647,7 @@ object FrmTripManager: TFrmTripManager
         Left = 241
         Top = 22
         Width = 5
-        Height = 317
+        Height = 292
         ExplicitTop = 0
         ExplicitHeight = 383
       end
@@ -664,7 +673,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 22
         Width = 241
-        Height = 317
+        Height = 292
         Align = alLeft
         DoubleBuffered = True
         HideSelection = False
@@ -680,16 +689,17 @@ object FrmTripManager: TFrmTripManager
         Left = 246
         Top = 22
         Width = 377
-        Height = 317
+        Height = 292
         Align = alClient
         TabOrder = 1
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
           Width = 375
-          Height = 289
+          Height = 264
           Align = alClient
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
+          PopupMenu = PopupTripInfo
           TabOrder = 0
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
@@ -717,19 +727,28 @@ object FrmTripManager: TFrmTripManager
             TabOrder = 0
             OnClick = BtnSaveTripValuesClick
           end
-          object BtnCopyFromTrip: TButton
-            Left = 230
-            Top = 1
-            Width = 144
-            Height = 24
-            Align = alRight
-            Caption = 'Copy from trip'
-            TabOrder = 1
-            OnClick = BtnCopyFromTripClick
-          end
         end
       end
     end
+  end
+  object ActionMainMenuBar: TActionMainMenuBar
+    Left = 0
+    Top = 0
+    Width = 1297
+    Height = 25
+    UseSystemFont = False
+    ActionManager = ActionManager
+    Color = clMenuBar
+    ColorMap.DisabledFontColor = 7171437
+    ColorMap.HighlightColor = clWhite
+    ColorMap.BtnSelectedFont = clBlack
+    ColorMap.UnusedColor = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
+    Spacing = 0
   end
   object ImageList: TImageList
     Left = 124
@@ -1017,28 +1036,66 @@ object FrmTripManager: TFrmTripManager
     Left = 397
     Top = 68
   end
-  object MainMenu: TMainMenu
-    Left = 513
-    Top = 65
-    object Help1: TMenuItem
-      Caption = 'Help'
-      object About1: TMenuItem
-        Caption = 'About'
-        OnClick = About1Click
-      end
-      object N7: TMenuItem
-        Caption = '-'
-      end
-      object Onlinehelp1: TMenuItem
-        Caption = 'Online help'
-        OnClick = Onlinehelp1Click
-      end
-    end
-  end
   object OpenTrip: TOpenDialog
     DefaultExt = 'trip'
     Filter = '*.trip|*.trip'
-    Left = 736
-    Top = 346
+    Left = 456
+    Top = 394
+  end
+  object ActionManager: TActionManager
+    ActionBars = <
+      item
+        Items = <
+          item
+            Items = <
+              item
+                Action = Action1
+                Caption = '&About'
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Action = Action2
+                Caption = '&Online documentation'
+              end>
+            Caption = '&Help'
+          end
+          item
+            Items = <
+              item
+                Action = Action3
+                Caption = '&Settings'
+              end>
+            Caption = '&Advanced'
+          end>
+        ActionBar = ActionMainMenuBar
+      end>
+    Left = 505
+    Top = 65
+    StyleName = 'Platform Default'
+    object Action1: TAction
+      Category = 'Help'
+      Caption = 'About'
+      OnExecute = Action1Execute
+    end
+    object Action2: TAction
+      Category = 'Help'
+      Caption = 'Online documentation'
+      OnExecute = Action2Execute
+    end
+    object Action3: TAction
+      Category = 'Advanced'
+      Caption = 'Settings'
+      OnExecute = Action3Execute
+    end
+  end
+  object PopupTripInfo: TPopupMenu
+    Left = 362
+    Top = 393
+    object CopyValueFromTrip: TMenuItem
+      Caption = 'Copy value from trip file'
+      OnClick = CopyValueFromTripClick
+    end
   end
 end

@@ -81,6 +81,9 @@ const DefWaypointSymbol = 'Waypoint';
 {$IFDEF TRIPOBJECTS}
 const ZumoModel: TZumoModel = TZumoModel.XT;
 const ExploreUuid: string = '';
+const VehicleProfileGuid: string = '';
+const VehicleProfileHash: string = '';
+const VehicleId: string = '';
 {$ENDIF}
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
@@ -110,6 +113,11 @@ var TrayIcon: TTrayIcon;
     WayPointsProcessedList: TStringList;
     FormatSettings: TFormatSettings;
     DistanceStr: string;
+
+procedure CheckHRGuid(HR: Hresult);
+begin
+  Assert(HR = S_OK, 'Error creating GUID');
+end;
 
 function GetToolsDirectory: TGPXString;
 begin
@@ -1884,7 +1892,7 @@ var Func: TGPXFunc;
               PrepStream(TmpStream, [$0000]);
               Triplist.Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
 
-              Triplist.Add(TCardinalItem.Create('mAvoidancesChangedTimeAtSave', 0));
+              Triplist.Add(TmAvoidancesChangedTimeAtSave.Create(Now));
 
               PrepStream(TmpStream, [$0000]);
               Triplist.Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
@@ -1896,8 +1904,15 @@ var Func: TGPXFunc;
               TripList.Add(TmOptimized.Create);
               TripList.Add(TmTotalTripTime.Create);
               TripList.Add(TmTripName.Create(TripName));
-
-              TripList.Add(TStringItem.Create('mVehicleProfileGuid', '00000000-0000-0000-0000-000000000000'));
+// Test JFH
+            if (VehicleProfileGuid <> '') then
+              TripList.Add(TStringItem.Create('mVehicleProfileGuid', VehicleProfileGuid))
+            else
+            begin
+              CheckHRGuid(CreateGUID(Uid));
+              TripList.Add(TStringItem.Create('mVehicleProfileGuid',
+                                              ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])))
+            end;
 
               TripList.Add(TmParentTripId.Create(ParentTripId));
               TripList.Add(TmIsRoundTrip.Create);
@@ -1906,7 +1921,7 @@ var Func: TGPXFunc;
               TripList.Add(TmAvoidancesChanged.Create);
               TripList.Add(TmParentTripName.Create(BaseFile));
               TripList.Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
-              TripList.Add(TCardinalItem.Create('mVehicleProfileHash', 0));
+              TripList.Add(TCardinalItem.Create('mVehicleProfileHash', StrToIntDef(VehicleProfileHash, 0)));
 
               SetLength(RoutePreferences, ViaPointCount -1);
               for Index := 0 to High(RoutePreferences) do
@@ -1917,23 +1932,21 @@ var Func: TGPXFunc;
               TripList.Add(TmImported.Create);
               TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
 
-            if (ExploreUuid <> '') then
-              TripList.Add(TStringItem.Create('mExploreUuid', ExploreUuid))
-            else
-            begin
-              if CreateGUID(Uid) = S_OK then
+              if (ExploreUuid <> '') then
+                TripList.Add(TStringItem.Create('mExploreUuid', ExploreUuid))
+              else
+              begin
+                CheckHRGuid(CreateGUID(Uid));
                 TripList.Add(TStringItem.Create('mExploreUuid',
                                                 ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])))
-              else
-                raise exception.Create('Cant create GUID');
-            end;
+              end;
 
               TripList.Add(TmVersionNumber.Create(4, $10));
 
               TmpStream.Position := 0;
               Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousHillsAndCurves', TmpStream.Size, $80, TmpStream);
               TripList.Add(TmTotalTripDistance.Create);
-              TripList.Add(TByteItem.Create('mVehicleId', 1)); // ?
+              TripList.Add(TByteItem.Create('mVehicleId', StrToIntDef(VehicleId, 1)));
               TmpStream.Position := 0;
               Triplist.Add(TRawDataItem.Create).InitFromStream('mRoutePreferencesAdventurousScenicRoads', TmpStream.Size, $80, TmpStream);
 
@@ -2017,7 +2030,7 @@ var Func: TGPXFunc;
       if (GpxNode = nil) or
        (GpxNode.Name <> GpxNodename) then
         exit;
-      ParentTripId := TmArrival.DateTimeAsCardinal(Now) + SeqNo;
+      ParentTripId := TUnixDate.DateTimeAsCardinal(Now) + SeqNo;
       for RteNode in GpxNode.ChildNodes do
       begin
         if (RteNode.Name = RteNodename) then // Only want <rte> nodes. No <trk> or <wpt>
