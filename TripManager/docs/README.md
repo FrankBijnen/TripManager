@@ -34,6 +34,7 @@ Throughout the docs here the terms Way point, Via point and Shaping point are us
 <ol>
      <li><a href="DataFormats/Subclass%20for%20RoutePoints%20in%20Garmin%20GPX.pdf">Subclass field</a></li>
      <li><a href="DataFormats/DataFormats%20used.pdf">Data format used in TripManager</a></li>
+     <li><a href="DataFormats/Route%20Preferences.xlsx">Route Preferences</a></li>
 </ol>
 </body>
 </html>
