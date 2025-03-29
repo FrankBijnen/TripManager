@@ -267,6 +267,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
   public
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure Init(AName: ShortString; ADataType: byte);
     destructor Destroy; override;
   end;
 
@@ -1354,6 +1355,13 @@ begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
   SetLength(FBytes, FLenValue);
   AStream.ReadBuffer(FBytes, FLenValue);
+end;
+
+procedure TRawDataItem.Init(AName: ShortString; ADataType: byte);
+begin
+  FName := AName;
+  FDataType := ADataType;
+  SetLength(FBytes, 0);
 end;
 
 destructor TRawDataItem.Destroy;
@@ -2597,9 +2605,35 @@ var
   Index: integer;
   ViaCount: integer;
   Locations: TBaseItem;
+  RoutePreferences: array of WORD;
+  TmpStream: TMemoryStream;
 
   Location: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
+
+  procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD);
+  var
+    SwapCount: Cardinal;
+  begin
+    SwapCount := Swap32(Count);
+    TmpStream.Clear;
+    TmpStream.Write(SwapCount, SizeOf(SwapCount));
+    TmpStream.Write(Buffer, SizeOf(Buffer));
+    TmpStream.Position := 0;
+  end;
+
+  procedure SetRoutePref(AKey: ShortString);
+  var
+    RoutePreference: TRawDataItem;
+  begin
+    RoutePreference := TRawDataItem(GetItem(AKey));
+    if (RoutePreference <> nil) then
+    begin
+      TmpStream.Position := 0;
+      RoutePreference.InitFromStream(AKey, TmpStream.Size, $80, TmpStream);
+    end;
+  end;
+
 begin
   // If the model is not supplied, try to get it from the data
   CalcModel := AModel;
@@ -2636,14 +2670,34 @@ begin
     end;
   end;
 
-  // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
-  // The XT recalculates all. (And hopefully the XT2 also)
-  for Index := 1 to ViaCount -1 do
-  begin
-    AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
-    TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
-  end;
+  TmpStream := TMemoryStream.Create;
+  try
+    // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
+    // The XT recalculates all. (And hopefully the XT2 also)
+    for Index := 1 to ViaCount -1 do
+    begin
+      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
+      TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
+    end;
 
+    // The RoutePreferences need to be resized?
+    if (CalcModel = TZumoModel.XT2) then
+    begin
+      // For XT2
+      SetLength(RoutePreferences, ViaCount -1);
+      for Index := 0 to High(RoutePreferences) do
+        RoutePreferences[Index] := Swap($0100);
+      PrepStream(TmpStream, ViaCount -1, RoutePreferences);
+
+      SetRoutePref('mRoutePreferences');
+      SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves');
+      SetRoutePref('mRoutePreferencesAdventurousScenicRoads');
+      SetRoutePref('mRoutePreferencesAdventurousPopularPaths');
+      SetRoutePref('mRoutePreferencesAdventurousMode');
+    end;
+  finally
+    TmpStream.Free;
+  end;
 end;
 
 function TTripList.GetZumoModel: TZumoModel;
