@@ -267,7 +267,6 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
   public
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
-    procedure Init(AName: ShortString; ADataType: byte);
     destructor Destroy; override;
   end;
 
@@ -449,12 +448,27 @@ type
   end;
 
   TmRoutePreferences = class(TBaseRoutePreferences)
+  private
     function StandardPrefs: boolean; override;
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
-  TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseRoutePreferences);
-  TmRoutePreferencesAdventurousScenicRoads = class(TBaseRoutePreferences);
-  TmRoutePreferencesAdventurousMode = class(TBaseRoutePreferences);
-  TmRoutePreferencesAdventurousPopularPaths = class(TBaseRoutePreferences);
+  TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseRoutePreferences)
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+  end;
+  TmRoutePreferencesAdventurousScenicRoads = class(TBaseRoutePreferences)
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+  end;
+  TmRoutePreferencesAdventurousMode = class(TBaseRoutePreferences)
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+  end;
+  TmRoutePreferencesAdventurousPopularPaths = class(TBaseRoutePreferences)
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+  end;
 
 {*** Header ***}
   THeaderValue = packed record
@@ -1357,13 +1371,6 @@ begin
   AStream.ReadBuffer(FBytes, FLenValue);
 end;
 
-procedure TRawDataItem.Init(AName: ShortString; ADataType: byte);
-begin
-  FName := AName;
-  FDataType := ADataType;
-  SetLength(FBytes, 0);
-end;
-
 destructor TRawDataItem.Destroy;
 begin
   SetLength(FBytes, 0);
@@ -1714,9 +1721,34 @@ begin
   end;
 end;
 
+constructor TmRoutePreferences.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create('mRoutePreferences', 0 , $80);
+end;
+
 function TmRoutePreferences.StandardPrefs: boolean;
 begin
   result := true;
+end;
+
+constructor TmRoutePreferencesAdventurousHillsAndCurves.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create('mRoutePreferencesAdventurousHillsAndCurves', 0 , $80);
+end;
+
+constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create('mRoutePreferencesAdventurousScenicRoads', 0 , $80);
+end;
+
+constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create('mRoutePreferencesAdventurousMode', 0 , $80);
+end;
+
+constructor TmRoutePreferencesAdventurousPopularPaths.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create('mRoutePreferencesAdventurousPopularPaths', 0 , $80);
 end;
 
 {*** Header ***}

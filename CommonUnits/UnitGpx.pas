@@ -1858,11 +1858,11 @@ var Func: TGPXFunc;
 
             TripList.Add(TmPartOfSplitRoute.Create);
             TripList.Add(TmVersionNumber.Create);
+            TripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
+            TripList.Add(TmTripName.Create(TripName));
 
             // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
             TripList.ForceRecalc(ZumoModel);
-
-            TripList.Add(TmTripName.Create(TripName));
           end;
 
           // Note: Not indented Items need verification
@@ -1908,7 +1908,7 @@ var Func: TGPXFunc;
               TripList.Add(TmParentTripName.Create(BaseFile));
               TripList.Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
               TripList.Add(TCardinalItem.Create('mVehicleProfileHash', StrToIntDef(VehicleProfileHash, 0)));
-              TRawDataItem(Triplist.Add(TRawDataItem.Create)).Init('mRoutePreferences', $80);
+              Triplist.Add(TmRoutePreferences.Create);
               TripList.Add(TmImported.Create);
               TripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
 
@@ -1922,22 +1922,22 @@ var Func: TGPXFunc;
               end;
 
               TripList.Add(TmVersionNumber.Create(4, $10));
-              TRawDataItem(Triplist.Add(TRawDataItem.Create)).Init('mRoutePreferencesAdventurousHillsAndCurves', $80);
+              Triplist.Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
               TripList.Add(TmTotalTripDistance.Create);
               TripList.Add(TByteItem.Create('mVehicleId', StrToIntDef(VehicleId, 1)));
-              TRawDataItem(Triplist.Add(TRawDataItem.Create)).Init('mRoutePreferencesAdventurousScenicRoads', $80);
+              Triplist.Add(TmRoutePreferencesAdventurousScenicRoads.Create);
               TripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
-              TRawDataItem(Triplist.Add(TRawDataItem.Create)).Init('mRoutePreferencesAdventurousPopularPaths', $80);
+              Triplist.Add(TmRoutePreferencesAdventurousPopularPaths.Create);
               TripList.Add(TmPartOfSplitRoute.Create);
               TripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
               TripList.Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
-              TRawDataItem(Triplist.Add(TRawDataItem.Create)).Init('mRoutePreferencesAdventurousMode', $80);
-                            TripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+              Triplist.Add(TmRoutePreferencesAdventurousMode.Create);
+              TripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+
+              CreateLocations;
 
               // Create dummy AllRoutes, and complete RoutePreferences
               TripList.ForceRecalc(ZumoModel, ViaPointCount);
-              CreateLocations;
-
             finally
               TmpStream.Free;
             end;
