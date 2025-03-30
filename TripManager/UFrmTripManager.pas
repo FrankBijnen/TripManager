@@ -2765,13 +2765,15 @@ var
 begin
   TsTripGpiInfo.Caption := 'Trip info';
 
-  AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
+  AStream := TBufferedFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
   ATripList.Clear;
-  TvTrip.LockDrawing;
   TvTrip.items.BeginUpdate;
+  TvTrip.LockDrawing;
   TvTrip.Items.Clear;
+
   VlTripInfo.Strings.BeginUpdate;
   ClearTripInfo;
+
   DeviceFile := FromDevice;
   HexEditFile := FileName;
 
@@ -2787,9 +2789,10 @@ begin
     end;
 
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
+    TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
     TvTrip.ShowRoot := true;
 
-    TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
+    RootNode.Expand(false);
 
     CopyValueFromTrip.Enabled := not DeviceFile;
     if (DeviceFile) then
@@ -2819,18 +2822,21 @@ begin
         end;
       end;
     end;
-    RootNode.Expand(false);
+
+    LoadHex(FileName);
+    RootNode.Selected := true;
+    LoadTripOnMap(ATripList, CurrentTrip);
+
   finally
-    TvTrip.Items.EndUpdate;
-    TvTrip.UnlockDrawing;
-    VlTripInfo.Strings.EndUpdate;
     AStream.Free;
+
+    TvTrip.UnlockDrawing;
+    TvTrip.Items.EndUpdate;
+    VlTripInfo.Strings.EndUpdate;
+
+    BtnSaveTripValues.Enabled := false;
+    BtnSaveTripGpiFile.Enabled := false;
   end;
-  LoadHex(FileName);
-  LoadTripOnMap(ATripList, CurrentTrip);
-  RootNode.Selected := true;
-  BtnSaveTripValues.Enabled := false;
-  BtnSaveTripGpiFile.Enabled := false;
 end;
 
 procedure TFrmTripManager.LoadGpiFile(const FileName: string; const FromDevice: boolean);
