@@ -44,6 +44,7 @@ const
   PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
   PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
   WarnModel_Key           = 'WarnModel';
+  TripColor_Key           = 'TripColor';
 
   BooleanValues: array[boolean] of string = ('False', 'True');
   XT2_VehicleProfileGuid  = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
@@ -1431,7 +1432,8 @@ begin
     exit;
   OsmTrack := TStringList.Create;
   try
-    CurrentTrip.CreateOSMPoints(OsmTrack);
+    CurrentTrip.CreateOSMPoints(OsmTrack,
+                                GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,  TripColor_Key, 'Magenta'));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     ShowMap(EdgeBrowser1);
   finally

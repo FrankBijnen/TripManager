@@ -666,7 +666,7 @@ type
     function GetRoutePoint(RoutePointId: integer): Tlocation;
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
-    procedure CreateOSMPoints(const OutStringList: TStringList);
+    procedure CreateOSMPoints(const OutStringList: TStringList; const DisplayColor: string = 'Magenta');
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
 
     property Header: THeader read FHeader;
@@ -2558,9 +2558,9 @@ begin
   end;
 end;
 
-procedure TTripList.CreateOSMPoints(const OutStringList: TStringList);
+procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const DisplayColor: string = 'Magenta');
 var
-  Coords, DisplayColor, Color, PointName: string;
+  Coords, Color, PointName: string;
   TrackPoints: integer;
   RoutePoints: integer;
   TripName: TmTripName;
@@ -2576,8 +2576,6 @@ begin
   if (not Assigned(TripName)) then
     exit;
 
-//TODO Add option
-  DisplayColor := 'magenta';
   AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
   if (Assigned(AllRoutes)) then
   begin
