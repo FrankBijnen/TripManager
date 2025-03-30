@@ -2767,8 +2767,9 @@ begin
 
   AStream := TBufferedFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
   ATripList.Clear;
-  TvTrip.items.BeginUpdate;
+
   TvTrip.LockDrawing;
+  TvTrip.items.BeginUpdate;
   TvTrip.Items.Clear;
 
   VlTripInfo.Strings.BeginUpdate;
@@ -2830,9 +2831,10 @@ begin
   finally
     AStream.Free;
 
-    TvTrip.UnlockDrawing;
-    TvTrip.Items.EndUpdate;
     VlTripInfo.Strings.EndUpdate;
+
+    TvTrip.Items.EndUpdate;
+    TvTrip.UnlockDrawing;
 
     BtnSaveTripValues.Enabled := false;
     BtnSaveTripGpiFile.Enabled := false;
