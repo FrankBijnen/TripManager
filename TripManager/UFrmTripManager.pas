@@ -2769,20 +2769,16 @@ var
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CRNormal := SetCursor(CrWait);
+
   TsTripGpiInfo.Caption := 'Trip info';
 
   AStream := TBufferedFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
   ATripList.Clear;
 
-  TvTrip.LockDrawing;
   TvTrip.Items.BeginUpdate;
-  TvTrip.Items.Clear;
 
   VlTripInfo.Strings.BeginUpdate;
   ClearTripInfo;
-
-  DeviceFile := FromDevice;
-  HexEditFile := FileName;
 
   try
     if not ATripList.LoadFromStream(AStream) then
@@ -2795,6 +2791,9 @@ begin
     finally
       MemStream.Free;
     end;
+
+    DeviceFile := FromDevice;
+    HexEditFile := FileName;
 
     LoadHex(FileName);
     LoadTripOnMap(ATripList, CurrentTrip);
@@ -2813,6 +2812,7 @@ begin
     if (TripName <> ParentTripName) then
       PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
 
+    TvTrip.Items.Clear;
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
     TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
@@ -2839,7 +2839,6 @@ begin
 
     VlTripInfo.Strings.EndUpdate;
     TvTrip.Items.EndUpdate;
-    TvTrip.UnLockDrawing;
 
     BtnSaveTripValues.Enabled := false;
     BtnSaveTripGpiFile.Enabled := false;
