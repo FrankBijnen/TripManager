@@ -1,4 +1,5 @@
 ﻿unit UFrmTripManager;
+{.$DEFINE CLEARTREEVIEW}
 
 interface
 
@@ -2715,6 +2716,9 @@ var
   ANItem: TBaseItem;
   CurrentNode: TTreeNode;
   RootNode: TTreeNode;
+{$IFNDEF CLEARTREEVIEW}
+  OldRoot: TTreeNode;
+{$ENDIF}
   TripName: string;
   ParentTripName: string;
 
@@ -2812,7 +2816,12 @@ begin
     if (TripName <> ParentTripName) then
       PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
 
+{$IFNDEF CLEARTREEVIEW}
+    OldRoot := TvTrip.TopItem;
+{$ELSE}
     TvTrip.Items.Clear;
+{$ENDIF}
+
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
     TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
@@ -2830,6 +2839,11 @@ begin
         end;
       end;
     end;
+
+{$IFNDEF CLEARTREEVIEW}
+    if (OldRoot <> nil) then
+      TvTrip.Items.Delete(OldRoot);
+{$ENDIF}
 
     RootNode.Selected := true;
     RootNode.Expand(false);
