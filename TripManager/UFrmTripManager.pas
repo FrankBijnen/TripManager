@@ -318,7 +318,7 @@ var
 implementation
 
 uses
-  System.StrUtils, System.UITypes, System.DateUtils, winapi.ShellAPI, Vcl.Clipbrd,
+  System.StrUtils, System.UITypes, System.DateUtils, Winapi.ShellAPI, Vcl.Clipbrd,
   UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings;
 
@@ -1491,8 +1491,11 @@ end;
 procedure TFrmTripManager.ClearSelHexEdit;
 begin
   // Default no selection
-  HexEdit.SelStart := 0;
-  HexEdit.SelEnd := -1;
+  if (HexEdit.DataSize > 0) then
+  begin
+    HexEdit.SelStart := 0;
+    HexEdit.SelEnd := -1;
+  end;
 end;
 
 procedure TFrmTripManager.SyncHexEdit(Sender: TObject);
@@ -2706,6 +2709,7 @@ end;
 
 procedure TFrmTripManager.LoadTripFile(const FileName: string; const FromDevice: boolean);
 var
+  CrWait, CrNormal: HCURSOR;
   AStream: TBufferedFileStream;
   MemStream: TMemoryStream;
   ANItem: TBaseItem;
@@ -2763,13 +2767,15 @@ var
   end;
 
 begin
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CRNormal := SetCursor(CrWait);
   TsTripGpiInfo.Caption := 'Trip info';
 
   AStream := TBufferedFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
   ATripList.Clear;
 
   TvTrip.LockDrawing;
-  TvTrip.items.BeginUpdate;
+  TvTrip.Items.BeginUpdate;
   TvTrip.Items.Clear;
 
   VlTripInfo.Strings.BeginUpdate;
@@ -2781,6 +2787,7 @@ begin
   try
     if not ATripList.LoadFromStream(AStream) then
       raise Exception.Create('Not a valid trip file');
+
     //Save, and discard, to stream to get the sizes
     MemStream := TMemoryStream.Create;
     try
@@ -2789,11 +2796,8 @@ begin
       MemStream.Free;
     end;
 
-    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
-    TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
-    TvTrip.ShowRoot := true;
-
-    RootNode.Expand(false);
+    LoadHex(FileName);
+    LoadTripOnMap(ATripList, CurrentTrip);
 
     CopyValueFromTrip.Enabled := not DeviceFile;
     if (DeviceFile) then
@@ -2808,6 +2812,9 @@ begin
     PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
     if (TripName <> ParentTripName) then
       PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
+
+    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
+    TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
     for ANItem in ATripList.ItemList do
     begin
@@ -2824,20 +2831,20 @@ begin
       end;
     end;
 
-    LoadHex(FileName);
     RootNode.Selected := true;
-    LoadTripOnMap(ATripList, CurrentTrip);
+    RootNode.Expand(false);
 
   finally
     AStream.Free;
 
     VlTripInfo.Strings.EndUpdate;
-
     TvTrip.Items.EndUpdate;
-    TvTrip.UnlockDrawing;
+    TvTrip.UnLockDrawing;
 
     BtnSaveTripValues.Enabled := false;
     BtnSaveTripGpiFile.Enabled := false;
+
+    SetCursor(CrNormal);
   end;
 end;
 

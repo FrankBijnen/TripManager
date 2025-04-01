@@ -676,6 +676,7 @@ object FrmTripManager: TFrmTripManager
         Height = 292
         Align = alLeft
         DoubleBuffered = True
+        DoubleBufferedMode = dbmRequested
         HideSelection = False
         Indent = 19
         ParentDoubleBuffered = False
