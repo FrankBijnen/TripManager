@@ -2,7 +2,7 @@ object FrmTripManager: TFrmTripManager
   Left = 0
   Top = 0
   AlphaBlend = True
-  Caption = 'XT Trip Manager'
+  Caption = 'XT(2) Trip Manager'
   ClientHeight = 617
   ClientWidth = 1297
   Color = clBtnFace
@@ -737,7 +737,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1297
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -745,7 +744,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -1098,5 +1097,20 @@ object FrmTripManager: TFrmTripManager
       Caption = 'Copy value from trip file'
       OnClick = CopyValueFromTripClick
     end
+    object N7: TMenuItem
+      Caption = '-'
+    end
+    object SaveCSV1: TMenuItem
+      Caption = 'Save CSV'
+      OnClick = SaveCSV1Click
+    end
+    object SaveGPX1: TMenuItem
+      Caption = 'Save GPX'
+      OnClick = SaveGPX1Click
+    end
+  end
+  object SaveTrip: TSaveDialog
+    Left = 522
+    Top = 393
   end
 end

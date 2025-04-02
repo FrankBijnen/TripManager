@@ -93,6 +93,7 @@ procedure ReadConfigFromIni;
 function ReadConfigParm(ASection, AKey: TGPXString; Default: TGPXString = ''): TGPXString;
 procedure Usage;
 procedure ShowBalloon(const Hint: string; const Force: boolean = false);
+function InitRoot(WptTracksXml: TXmlVSDocument): TXmlVSNode;
 
 implementation
 
@@ -1054,10 +1055,11 @@ begin
   WptTracksXml.Clear;
   WptTracksXml.Encoding := 'utf-8';
   result := WptTracksXml.AddChild('gpx', TXmlVSNodeType.ntDocument);
-  result.SetAttribute('xmlns', 'http://www.topografix.com/GPX/1/1');
+  result.SetAttribute('xmlns',       'http://www.topografix.com/GPX/1/1');
   result.SetAttribute('xmlns:gpxx',  'http://www.garmin.com/xmlschemas/GpxExtensions/v3');
   result.SetAttribute('xmlns:wptx1', 'http://www.garmin.com/xmlschemas/WaypointExtension/v1');
   result.SetAttribute('xmlns:ctx',   'http://www.garmin.com/xmlschemas/CreationTimeExtension/v1');
+  result.SetAttribute('xmlns:trp',   'http://www.garmin.com/xmlschemas/TripExtensions/v1');
 
   result.SetAttribute('creator', 'TDBWare');
   result.SetAttribute('version', '1.1');

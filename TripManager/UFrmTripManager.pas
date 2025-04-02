@@ -163,6 +163,10 @@ type
     PopupTripInfo: TPopupMenu;
     CopyValueFromTrip: TMenuItem;
     Action3: TAction;
+    N7: TMenuItem;
+    SaveCSV1: TMenuItem;
+    SaveTrip: TSaveDialog;
+    SaveGPX1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -231,6 +235,8 @@ type
     procedure Action2Execute(Sender: TObject);
     procedure CopyValueFromTripClick(Sender: TObject);
     procedure Action3Execute(Sender: TObject);
+    procedure SaveCSV1Click(Sender: TObject);
+    procedure SaveGPX1Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -320,7 +326,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, Winapi.ShellAPI, Vcl.Clipbrd,
-  UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop,
+  UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop, UnitVerySimpleXml,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings;
 
 const
@@ -788,6 +794,109 @@ begin
     // Refresh ShellList retaining selection
     ShellListView1.Refresh;
     SetSelectedFile(SelName);
+  end;
+end;
+
+procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
+var
+  Writer: TTextWriter;
+  Lst: TStringList;
+  Index: integer;
+begin
+  SaveTrip.Filter := '*.csv|*.csv';
+  SaveTrip.FileName := ChangeFileExt(HexEditFile, '.csv');
+  if not SaveTrip.Execute then
+    exit;
+
+  Writer := TStreamWriter.Create(SaveTrip.FileName, false, TEncoding.UTF8);
+  try
+    Lst := TStringList.Create;
+    try
+      Lst.QuoteChar := '"';
+      Lst.Delimiter := ';';
+
+      Lst.AddStrings(['Key', 'Value']);
+      Writer.WriteLine(Lst.DelimitedText);
+
+      for Index := 0 to VlTripInfo.Strings.Count -1 do
+      begin
+        Lst.Clear;
+        Lst.AddStrings([#9 + VlTripInfo.Strings.KeyNames[Index], #9 + VlTripInfo.Strings.ValueFromIndex[Index]]);
+        Writer.WriteLine(Lst.DelimitedText);
+      end;
+    finally
+      lst.Free;
+    end;
+  finally
+    Writer.Free;
+  end;
+
+end;
+
+procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
+var
+  Xml: TXmlVSDocument;
+  XMLRoot: TXmlVSNode;
+  Rte, RtePt: TXmlVSNode;
+  Locations: TmLocations;
+  Location, ANItem: TBaseItem;
+  ViaPointType, PointName, Lat, Lon: string;
+begin
+  if not Assigned(ATripList) then
+    exit;
+
+  SaveTrip.Filter := '*.gpx|*.gpx';
+  SaveTrip.FileName := ChangeFileExt(HexEditFile, '.gpx');
+  if not SaveTrip.Execute then
+    exit;
+
+  XML := TXmlVSDocument.Create;
+  try
+    XMLRoot := InitRoot(XML);
+    Rte := XMLRoot.AddChild('rte');
+    Rte.AddChild('name').NodeValue := TBaseDataItem(ATripList.GetItem('mTripName')).AsString;
+
+    Locations := TmLocations(ATripList.GetItem('mLocations'));
+    if not (Assigned(Locations)) then
+      exit;
+
+    for Location in Locations.Locations do
+    begin
+      if (Location is TLocation) then
+      begin
+        RtePt := Rte.AddChild('rtept');
+        for ANItem in TLocation(Location).LocationItems do
+        begin
+
+          if (ANItem is TmAttr) then
+          begin
+            if (Pos('Via', TmAttr(ANItem).AsString) =1) then
+              ViaPointType := 'trp:ViaPoint'
+            else
+              ViaPointType := 'trp:ShapingPoint';
+          end;
+
+          if (ANItem is TmName) then
+            PointName := TmName(ANItem).AsString;
+
+          if (ANItem is TmScPosn) then
+          begin
+            Lon := TmScPosn(ANItem).MapCoords;
+            Lat := Trim(NextField(Lon, ','));
+            Lon := Trim(Lon);
+          end;
+
+        end;
+        RtePt.Attributes['lat'] := Lat;
+        RtePt.Attributes['lon'] := Lon;
+        RtePt.AddChild('name').NodeValue := PointName;
+        RtePt.AddChild('extensions').AddChild(ViaPointType);
+      end;
+
+    end;
+    XML.SaveToFile(SaveTrip.FileName);
+  finally
+    Xml.Free;
   end;
 end;
 
@@ -2817,7 +2926,7 @@ begin
       PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
 
 {$IFNDEF CLEARTREEVIEW}
-    OldRoot := TvTrip.TopItem;
+    OldRoot := TvTrip.Items.GetFirstNode;
 {$ELSE}
     TvTrip.Items.Clear;
 {$ENDIF}
