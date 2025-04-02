@@ -804,7 +804,8 @@ var
   Index: integer;
 begin
   SaveTrip.Filter := '*.csv|*.csv';
-  SaveTrip.FileName := ChangeFileExt(HexEditFile, '.csv');
+  SaveTrip.InitialDir := ShellTreeView1.Path;
+  SaveTrip.FileName := ChangeFileExt(ExtractFileName(HexEditFile), '.csv');
   if not SaveTrip.Execute then
     exit;
 
@@ -837,8 +838,11 @@ procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
 var
   Xml: TXmlVSDocument;
   XMLRoot: TXmlVSNode;
-  Rte, RtePt: TXmlVSNode;
+  Rte, RtePt, Trk, TrkSeg, TrkPt: TXmlVSNode;
   Locations: TmLocations;
+  AllRoutes: TmAllRoutes;
+  AnUdbHandle: TmUdbDataHndl;
+  ANUdbDir: TUdbDir;
   Location, ANItem: TBaseItem;
   ViaPointType, PointName, Lat, Lon: string;
 begin
@@ -846,7 +850,8 @@ begin
     exit;
 
   SaveTrip.Filter := '*.gpx|*.gpx';
-  SaveTrip.FileName := ChangeFileExt(HexEditFile, '.gpx');
+  SaveTrip.InitialDir := ShellTreeView1.Path;
+  SaveTrip.FileName := ChangeFileExt(ExtractFileName(HexEditFile), '.gpx');
   if not SaveTrip.Execute then
     exit;
 
@@ -892,8 +897,28 @@ begin
         RtePt.AddChild('name').NodeValue := PointName;
         RtePt.AddChild('extensions').AddChild(ViaPointType);
       end;
-
     end;
+
+    AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
+    if Assigned(AllRoutes) then
+    begin
+      Trk := XMLRoot.AddChild('trk');
+      Trk.AddChild('name').NodeValue := TBaseDataItem(ATripList.GetItem('mTripName')).AsString;
+      for AnUdbHandle in AllRoutes.Items do
+      begin
+        TrkSeg := Trk.AddChild('trkseg');
+        for ANUdbDir in AnUdbHandle.Items do
+        begin
+          TrkPt := TrkSeg.AddChild('trkpt');
+          Lon := ANUdbDir.MapCoords;
+          Lat := Trim(NextField(Lon, ','));
+          Lon := Trim(Lon);
+          TrkPt.Attributes['lat'] := Lat;
+          TrkPt.Attributes['lon'] := Lon;
+        end;
+      end;
+    end;
+
     XML.SaveToFile(SaveTrip.FileName);
   finally
     Xml.Free;
