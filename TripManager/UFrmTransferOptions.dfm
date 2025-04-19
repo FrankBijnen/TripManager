@@ -12,7 +12,6 @@ object FrmTransferOptions: TFrmTransferOptions
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnShow = FormShow
   TextHeight = 15

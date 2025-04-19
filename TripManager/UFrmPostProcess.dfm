@@ -12,7 +12,6 @@ object FrmPostProcess: TFrmPostProcess
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow

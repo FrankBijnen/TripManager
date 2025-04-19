@@ -12,7 +12,6 @@ object FrmSelectGPX: TFrmSelectGPX
   Font.Name = 'Tahoma'
   Font.Style = []
   Position = poOwnerFormCenter
-  Scaled = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

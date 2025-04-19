@@ -12,7 +12,6 @@ object FrmTripManager: TFrmTripManager
   Font.Name = 'Tahoma'
   Font.Style = []
   Position = poScreenCenter
-  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy

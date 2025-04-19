@@ -12,7 +12,6 @@ object FrmDateDialog: TFrmDateDialog
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poScreenCenter
-  Scaled = False
   TextHeight = 15
   object PnlBot: TPanel
     Left = 0
