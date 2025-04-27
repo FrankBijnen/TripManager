@@ -711,39 +711,43 @@ var CurrentTrack: TXmlVSNode;
         PrevCoord := CoordFromAttribute(RtePtNode.AttributeList);
       end;
 
-      if (ProcessBegin) and
-         (Cnt = 1) then
+      if (Cnt = 1) then
       begin
-        WptName := BeginStr + ' ' + RouteName;
-        Symbol := BeginSymbol;
-        RenameNode(RtePtNode, WptName);
-        if (ProcessFlags) then
-          RenameSubNode(RtePtNode, 'sym', Symbol);
-        ClearSubClass(ExtensionNode);
+        WptName := FindSubNodeValue(RtePtNode, 'name');
 
-        // Fill Mapsegment
-        RteNode := RtePtNode.Parent;
-        if (RteNode <> nil) then
+        if (ProcessBegin) then
         begin
-          DescNode := RteNode.Find('desc');
-          if  (DescNode = nil) then                   // No Desc node, add it.
+          WptName := BeginStr + ' ' + RouteName;
+          Symbol := BeginSymbol;
+          RenameNode(RtePtNode, WptName);
+          if (ProcessFlags) then
+            RenameSubNode(RtePtNode, 'sym', Symbol);
+          ClearSubClass(ExtensionNode);
+
+          // Fill Mapsegment
+          RteNode := RtePtNode.Parent;
+          if (RteNode <> nil) then
           begin
-            NewDescPos := RteNode.FindPos('cmt');     // After existing Cmt?
-            if (NewDescPos < 0) then
-              NewDescPos := RteNode.FindPos('name');  // No, After name
-            if (NewDescPos > -1) then
-              DescNode := RteNode.InsertChild('desc', NewDescPos +1);
-          end;
-          if (DescNode <> nil) and
-             (ExtensionNode <> nil) then
-          begin
-            CalculatedSubClass := GetFirstSubClass(ExtensionNode);
-            MapSeg := MapSegFromSubClass(CalculatedSubClass);
-            MapName := LookupMap(IntToStr(MapSeg));
-            if (MapName <> '') then
-              RenameSubNode(RteNode, 'desc', 'Map name: '+ MapName + ' Map segment: ' + IntToStr(MapSeg))
-            else
-              RenameSubNode(RteNode, 'desc', 'Map segment: '+ IntToStr(MapSeg));
+            DescNode := RteNode.Find('desc');
+            if  (DescNode = nil) then                   // No Desc node, add it.
+            begin
+              NewDescPos := RteNode.FindPos('cmt');     // After existing Cmt?
+              if (NewDescPos < 0) then
+                NewDescPos := RteNode.FindPos('name');  // No, After name
+              if (NewDescPos > -1) then
+                DescNode := RteNode.InsertChild('desc', NewDescPos +1);
+            end;
+            if (DescNode <> nil) and
+               (ExtensionNode <> nil) then
+            begin
+              CalculatedSubClass := GetFirstSubClass(ExtensionNode);
+              MapSeg := MapSegFromSubClass(CalculatedSubClass);
+              MapName := LookupMap(IntToStr(MapSeg));
+              if (MapName <> '') then
+                RenameSubNode(RteNode, 'desc', 'Map name: '+ MapName + ' Map segment: ' + IntToStr(MapSeg))
+              else
+                RenameSubNode(RteNode, 'desc', 'Map segment: '+ IntToStr(MapSeg));
+            end;
           end;
         end;
 
@@ -755,15 +759,19 @@ var CurrentTrack: TXmlVSNode;
       end;
 
       // End
-      if (ProcessEnd) and
-         (Cnt = LastCnt) then
+      if (Cnt = LastCnt) then
       begin
-        WptName := EndStr + ' ' + RouteName;
-        Symbol := EndSymbol;
-        RenameNode(RtePtNode, WptName);
-        if (ProcessFlags) then
-          RenameSubNode(RtePtNode, 'sym', Symbol);
-        ClearSubClass(ExtensionNode);
+        WptName := FindSubNodeValue(RtePtNode, 'name');
+
+        if (ProcessEnd) then
+        begin
+          WptName := EndStr + ' ' + RouteName;
+          Symbol := EndSymbol;
+          RenameNode(RtePtNode, WptName);
+          if (ProcessFlags) then
+            RenameSubNode(RtePtNode, 'sym', Symbol);
+          ClearSubClass(ExtensionNode);
+        end;
 
         if (ProcessWayPtsFromRoute) then
           AddWayPointFromRoute(RtePtNode, WptName, EndStr, Symbol);
@@ -1279,27 +1287,14 @@ var Func: TGPXFunc;
         S: TBufferedFileStream;
         CatId: integer;
         BmpId: integer;
+        ViaPtName: string;
+        ViaPointList: TStringList;
     begin
-
       OutFile := ChangeFileExt(OutDir + BaseFile, '.gpi');
       S := TBufferedFileStream.Create(OutFile, fmCreate);
       GPIFile := TGPI.Create(GPIVersion);
       GPIFile.WriteHeader(S);
       PoiGroup := GPIFile.CreatePOIGroup(TGPXString(BaseFile));
-
-      if (ProcessShapePtsInGpi) then // Default False
-      begin
-        for RouteWayPoints in RouteViaPointList do
-        begin
-          CatId := PoiGroup.AddCat(GPXCategory(RouteWayPoints.NodeValue)); // RouteName
-
-          for WayPoint in RouteWayPoints.ChildNodes do
-          begin
-            BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-            PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
-          end;
-        end;
-      end;
 
       if (ProcessTracks) then
       begin
@@ -1332,10 +1327,44 @@ var Func: TGPXFunc;
           end;
         end;
 
-        POIGroup.Write(S);
-        GPIFile.WriteEnd(S);
-        S.Free;
       end;
+
+      if (ProcessShapePtsInGpi) then // Default False
+      begin
+        ViaPointList := TStringList.Create;
+        ViaPointList.Sorted := true;
+        ViaPointList.Duplicates := TDuplicates.dupIgnore;
+        try
+          // Build list of Via points in WayPointFromRouteList. Must be excluded.
+          for RouteWayPoints in WayPointFromRouteList do
+            for WayPoint in RouteWayPoints.ChildNodes do
+              ViaPointList.Add(FindSubNodeValue(WayPoint, 'name'));
+
+          for RouteWayPoints in RouteViaPointList do
+          begin
+            CatId := PoiGroup.AddCat(GPXCategory(RouteWayPoints.NodeValue)); // RouteName
+
+            for WayPoint in RouteWayPoints.ChildNodes do
+            begin
+              ViaPtName := FindSubNodeValue(WayPoint, 'name');
+              if (ViaPointList.IndexOf(ViaPtName) < 0) and  // Dont want Via points here
+                 (WayPointNotProcessed(WayPoint)) then      // Dont want duplictes
+              begin
+                BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+                PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+              end;
+            end;
+          end;
+        finally
+          ViaPointList.Free;
+        end;
+
+      end;
+
+      POIGroup.Write(S);
+      GPIFile.WriteEnd(S);
+      S.Free;
+
     end;
 
     procedure DoCreateKML;
