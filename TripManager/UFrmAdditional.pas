@@ -31,7 +31,7 @@ var
 implementation
 
 uses
-  System.TypInfo, UnitStringUtils, UnitGpi, UFrmTripManager;
+  UnitStringUtils, UnitGpi, UFrmAdvSettings, UFrmTripManager;
 
 {$R *.dfm}
 
@@ -129,7 +129,7 @@ end;
 
 procedure TFrmAdditional.FormShow(Sender: TObject);
 begin
-  FrmTripManager.SetFixedPrefs;
+  FrmAdvSettings.SetFixedPrefs;
   SetPrefs;
 end;
 

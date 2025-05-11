@@ -39,25 +39,38 @@ type
 var FrmSelectGPX: TFrmSelectGPX;
 
 implementation
+{$R *.dfm}
 
 uses UnitStringUtils;
 
-{$R *.dfm}
+const
+  TypeColumn = 1;
+  ColorColumn = 1;
 
 procedure TFrmSelectGPX.LoadTracks(DisplayColor: string);
 var Indx: integer;
-    Name, Color, Points: string;
+    Name, Color, Points, FromRoute: string;
     LVItem: TListItem;
 begin
+
+  if (DisplayColor = '-') then
+  begin
+    PnlClear.Visible := false;
+    PnlTop.Caption := 'Select Waypoints/Route to import';
+    LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte';
+  end;
+
   LvTracks.Items.Clear;
   for Indx := 0 to AllTracks.Count - 1 do
   begin
-    Name := AllTracks[Indx];
-    Color := NextField(Name, Chr(9));
-    Points := NextField(Name, Chr(9));
+    FromRoute := AllTracks[Indx];
+    Color := NextField(FromRoute, Chr(9));
+    Points := NextField(FromRoute, Chr(9));
+    Name := NextField(FromRoute, Chr(9));
     LVItem := LvTracks.Items.Add;
     LVItem.Caption := Name;
-    LVItem.Checked := true;
+    LVItem.Checked := (DisplayColor <> '-');
+    LVItem.SubItems.Add(FromRoute);
     if (DisplayColor = '') then
       LVItem.SubItems.Add(Color)
     else
@@ -95,7 +108,7 @@ begin
     for AnItem in LvTracks.Items do
     begin
       if (AnItem.Checked) then
-        AnItem.SubItems[0] := CmbOverruleColor.Text;
+        AnItem.SubItems[ColorColumn] := CmbOverruleColor.Text;
     end;
   end;
 end;
@@ -124,7 +137,7 @@ begin
   begin
     if (LVItem.Caption = TrackName) and
        (LVItem.Checked) then
-      exit(LVItem.SubItems[0]);
+      exit(LVItem.SubItems[ColorColumn]);
   end;
 end;
 

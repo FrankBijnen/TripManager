@@ -6,7 +6,7 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
   Vcl.Edge;
 
-procedure ShowMap(Browser: TEdgeBrowser);
+procedure ShowMap(Browser: TEdgeBrowser; Home: string = '');
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
 
 const
@@ -16,9 +16,10 @@ const
   OSMGetBounds      = 'GetBounds';
   OSMGetRoutePoint  = 'GetRoutePoint';
   InitialZoom_Point = '15';
-  InitialZoom_Out   = '16';
-  InitialZoom_In    = '20';
+  InitialZoom_Home  = '12';
+  InitialZoom_NoHome= '20';
   PopupTimeout      = '3000';
+  GeoSearchTimeout  = '8000';
 
 type
   TOSMHelper = class(TObject)
@@ -28,11 +29,12 @@ type
     Html: TStringList;
     FInitialZoom: string;
     FPathName: string;
+    FHome: string;
     procedure WriteHeader;
     procedure WriteTrackPoints;
     procedure WriteFooter;
   public
-    constructor Create(const APathName, AInitialZoom: string);
+    constructor Create(const APathName, AHome, AInitialZoom: string);
     destructor Destroy; override;
   end;
 
@@ -44,12 +46,13 @@ uses
   REST.Types, REST.Client, REST.Utils,
   UnitStringUtils;
 
-constructor TOSMHelper.Create(const APathName, AInitialZoom: string);
+constructor TOSMHelper.Create(const APathName, AHome, AInitialZoom: string);
 begin
   inherited Create;
   OsmFormatSettings.DecimalSeparator := '.'; // The decimal separator is a . PERIOD!
   OsmFormatSettings.NegCurrFormat := 11;
   FPathName := APathName;
+  FHome := AHome;
   FInitialZoom := AInitialZoom;
   Html := TStringList.Create;
 end;
@@ -179,7 +182,7 @@ begin
   Html.Add('  }');
 
   // OpenLayers uses LonLat, not LatLon. Confusing maybe,
-  Html.Add('  function PopupAtPoint(Href, PointLat, PointLon){');
+  Html.Add('  function PopupAtPoint(Href, PointLat, PointLon, PopupTimeOut){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
   Html.Add('     line_string.calculateBounds();');
@@ -191,7 +194,7 @@ begin
   Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
   Html.Add('       map.addPopup(popup, true);');
   Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
-  Html.Add('       timeoutId = setTimeout(RemovePopup, ' + PopupTimeout + ');');
+  Html.Add('       timeoutId = setTimeout(RemovePopup, PopupTimeOut);');
   Html.Add('     };');
   Html.Add('  }');
 
@@ -261,7 +264,8 @@ var
   Rc: integer;
 begin
   Html.Add('  function AddTrackPoints(){');
-
+  if (FHome <> '') then
+    Html.Add('  AddTrkPoint(1, ' + FHome + ');');
   Rc := System.SysUtils.FindFirst(GetTracksTmp, faAnyFile - faDirectory, Fs);
   while (Rc = 0) do
   begin
@@ -291,11 +295,14 @@ begin
   Html.SaveToFile(FPathName, TEncoding.UTF8);
 end;
 
-procedure ShowMap(Browser: TEdgeBrowser);
+procedure ShowMap(Browser: TEdgeBrowser; Home: string = '');
 var
   OsmHelper: TOSMHelper;
 begin
-  OsmHelper := TOSMHelper.Create(GetHtmlTmp, InitialZoom_Out);
+  if (Home = '') then
+    OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom_NoHome)
+  else
+    OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom_Home);
   try
     OsmHelper.Scaled := Browser.ScaleValue(100);
     OsmHelper.WriteHeader;

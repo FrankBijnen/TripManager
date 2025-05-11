@@ -1,0 +1,611 @@
+unit UDmRoutePoints;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
+  Data.DB, Datasnap.DBClient,
+  UnitTripObjects;
+
+const
+  BooleanTrue = 'True';
+  BooleanFalse = 'False';
+
+  BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
+  RtePt = 'RtePt ';
+
+type
+  TOnGetMapCoords = function: string of object;
+
+  TDmRoutePoints = class(TDataModule)
+    DsRoutePoints: TDataSource;
+    CdsRoutePoints: TClientDataSet;
+    CdsRoutePointsId: TIntegerField;
+    CdsRoutePointsName: TWideStringField;
+    CdsRoutePointsViaPoint: TBooleanField;
+    CdsRoutePointsLat: TStringField;
+    CdsRoutePointsLon: TStringField;
+    CdsRoutePointsAddress: TStringField;
+    CdsRoutePointsCoords: TStringField;
+    CdsRoute: TClientDataSet;
+    DsRoute: TDataSource;
+    CdsRouteTripName: TStringField;
+    CdsRouteRoutePreference: TStringField;
+    CdsRouteTransportationMode: TStringField;
+    CdsRouteDepartureDate: TDateTimeField;
+    procedure CdsRoutePointsAfterInsert(DataSet: TDataSet);
+    procedure CdsRoutePointsAfterScroll(DataSet: TDataSet);
+    procedure CdsRoutePointsBeforePost(DataSet: TDataSet);
+    procedure CdsRoutePointsBeforeDelete(DataSet: TDataSet);
+    procedure CdsRoutePointsAfterPost(DataSet: TDataSet);
+    procedure CdsRoutePointsBeforeInsert(DataSet: TDataSet);
+    procedure DataModuleCreate(Sender: TObject);
+    procedure CdsRoutePointsCalcFields(DataSet: TDataSet);
+    procedure CdsRoutePointsViaPointGetText(Sender: TField; var Text: string; DisplayText: Boolean);
+    procedure CdsRoutePointsViaPointSetText(Sender: TField; const Text: string);
+    procedure CdsRoutePointsAfterDelete(DataSet: TDataSet);
+  private
+    { Private declarations }
+    FRoutePickList: string;
+    FTransportPickList: string;
+    FTripList: TTripList;
+    FFileName: string;
+    IdToInsert: integer;
+
+    FOnRoutePointUpdated: TNotifyEvent;
+    FOnGetMapCoords: TOnGetMapCoords;
+    procedure DoRoutePointUpdated;
+    function CheckEmptyField(Sender: TField): boolean;
+    procedure SetAddressFromCoords(Sender: TObject; Coords: string);
+
+  public
+    { Public declarations }
+    function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
+    function NameExists(Name: string): boolean;
+    procedure LoadTrip(ATripList: TTripList; FileName: string);
+    procedure SaveTrip;
+    procedure MoveUp(Dataset: TDataset);
+    procedure MoveDown(Dataset: TDataset);
+    function AddressFromCoords(const Lat, Lon: string): string;
+    procedure CoordinatesApplied(Sender: TObject; Coords: string);
+    procedure LookUpAddress;
+    procedure ExportToGPX(GPXFile: string);
+    property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
+    property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
+    property RoutePickList: string read FRoutePickList;
+    property TransportPickList: string read FTransportPickList;
+  end;
+
+var
+  DmRoutePoints: TDmRoutePoints;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+uses
+  System.StrUtils, System.Variants, System.DateUtils,
+  Winapi.Windows,
+  Vcl.Dialogs,
+  UnitGeoCode, UnitStringUtils, UnitVerySimpleXml, UnitGpx;
+
+{$R *.dfm}
+
+var
+  FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
+
+function TDmRoutePoints.CheckEmptyField(Sender: TField): boolean;
+begin
+  result := (Sender.AsString <> '');
+  if (not result) then
+    MessageDlg(Format('%s is Mandatory', [Sender.FieldName]), TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
+end;
+
+procedure TDmRoutePoints.DataModuleCreate(Sender: TObject);
+begin
+  FloatFormatSettings.ThousandSeparator := ',';
+  FloatFormatSettings.DecimalSeparator := '.';
+  with TmRoutePreference.Create(TRoutePreference.rmFasterTime) do
+  begin
+    FRoutePickList := PickList;
+    Free;
+  end;
+  with TmTransportationMode.Create(TTransportMode.tmMotorcycling) do
+  begin
+    FTransportPickList := PickList;
+    Free;
+  end;
+end;
+
+procedure TDmRoutePoints.DoRoutePointUpdated;
+begin
+  if (CdsRoutePoints.ControlsDisabled) then
+    exit;
+  if Assigned(FOnRoutePointUpdated) then
+    FOnRoutePointUpdated(Self);
+end;
+
+// Renumber Route points
+procedure TDmRoutePoints.CdsRoutePointsAfterDelete(DataSet: TDataSet);
+var
+  Id: integer;
+  MyBook: TBookmark;
+begin
+  CdsRoutePoints.DisableControls;
+  MyBook := CdsRoutePoints.GetBookmark;
+  try
+    Id := 0;
+    CdsRoutePoints.First;
+    while not CdsRoutePoints.Eof do
+    begin
+      Inc(Id);
+      CdsRoutePoints.Edit;
+      CdsRoutePointsId.AsInteger := Id;
+      CdsRoutePoints.Post;
+      CdsRoutePoints.Next;
+    end;
+  finally
+    CdsRoutePoints.GotoBookmark(MyBook);
+    CdsRoutePoints.FreeBookmark(MyBook);
+    CdsRoutePoints.EnableControls;
+  end;
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsAfterInsert(DataSet: TDataSet);
+begin
+  CdsRoutePointsId.AsInteger := IdToInsert;
+  if (DataSet.ControlsDisabled) then
+    exit;
+
+  CdsRoutePointsName.AsString := Format(RtePt + '%d', [IdToInsert]);
+  CdsRoutePointsViaPoint.AsBoolean := (IdToInsert = 1) or (IdToInsert > DataSet.RecordCount);
+  if Assigned(FOnGetMapCoords) then
+    SetAddressFromCoords(Dataset, FOnGetMapCoords);
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsAfterPost(DataSet: TDataSet);
+begin
+  DoRoutePointUpdated;
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsAfterScroll(DataSet: TDataSet);
+begin
+  DoRoutePointUpdated;
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsBeforeInsert(DataSet: TDataSet);
+var
+  MyBook: TBookmark;
+begin
+  if (DataSet.ControlsDisabled) or
+     (Dataset.Eof) then
+    IdToInsert := DataSet.RecordCount +1
+  else
+  begin
+    Dataset.Next;
+    IdToInsert := DataSet.FieldByName('Id').AsInteger;
+    MyBook := Dataset.GetBookmark;
+    Dataset.DisableControls;
+    try
+      Dataset.Last;
+      while not Dataset.Bof and
+            (Dataset.FieldByName('Id').AsInteger >= IdToInsert) do
+      begin
+        Dataset.Edit;
+        Dataset.FieldByName('Id').AsInteger := Dataset.FieldByName('Id').AsInteger +1;
+        if StartsText(RtePt, Dataset.FieldByName('Name').AsString) then
+          CdsRoutePointsName.AsString := Format(RtePt + '%d', [Dataset.FieldByName('Id').AsInteger]);
+        Dataset.Post;
+        Dataset.Prior;
+      end;
+    finally
+      DataSet.GotoBookmark(MyBook);
+      DataSet.FreeBookmark(MyBook);
+      Dataset.EnableControls;
+    end;
+  end;
+  DoRoutePointUpdated;
+end;
+
+function TDmRoutePoints.ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
+begin
+  result := MessageDlg(Format('%s Exists', [AField]), TMsgDlgType.mtError, AButtons, 0);
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsBeforePost(DataSet: TDataSet);
+begin
+  if not (CheckEmptyField(Dataset.FieldByName('Name'))) then
+    Abort;
+end;
+
+function TDmRoutePoints.AddressFromCoords(const Lat, Lon: string): string;
+begin
+  result := Format('%s, %s', [Lat, Lon]);
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsCalcFields(DataSet: TDataSet);
+begin
+  DataSet.FieldByName('Coords').AsString :=
+    AddressFromCoords(DataSet.FieldByName('Lat').AsString, DataSet.FieldByName('Lon').AsString);
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsViaPointGetText(Sender: TField; var Text: string; DisplayText: Boolean);
+begin
+  Text:='';
+  if (Sender.IsNull = false) and
+     (SameText(Sender.Value, BooleanTrue)) then
+     Text := BooleanValues[Sender.Tag, 0]
+  else
+     Text := BooleanValues[Sender.Tag, 1];
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsViaPointSetText(Sender: TField; const Text: string);
+begin
+  Sender.clear;
+  if StartsText(Text, BooleanValues[Sender.Tag,0]) then
+     Sender.Value := BooleanTrue
+  else
+     Sender.Value := BooleanFalse;
+end;
+
+procedure TDmRoutePoints.CdsRoutePointsBeforeDelete(DataSet: TDataSet);
+begin
+  if CdsRoutePoints.ReadOnly then
+    Abort;
+end;
+
+procedure TDmRoutePoints.MoveUp(Dataset: TDataSet);
+var
+  OrigId, PriorId: integer;
+  MyBook: TBookmark;
+begin
+  Dataset.DisableControls;
+  MyBook := Dataset.GetBookmark;
+  try
+    // Cant move
+    if (Dataset.RecordCount < 2) or
+      (Dataset.Bof) then
+      exit;
+
+    // Sort column Orig
+    OrigId := Dataset.FieldByName('Id').AsInteger;
+    if (OrigId < 1) then
+      exit;
+
+    // Edit Prior line
+    Dataset.Prior;
+    Dataset.Edit;
+    PriorId := Dataset.FieldByName('Id').AsInteger; // Save Id Prior
+    Dataset.FieldByName('Id').AsInteger := OrigId;
+    Dataset.Post;
+
+    // Reposition to Orig line, and update with PriorId
+    Dataset.GotoBookmark(MyBook);
+    Dataset.Edit;
+    Dataset.FieldByName('Id').AsInteger := PriorId;
+    Dataset.Post;
+
+  finally
+    Dataset.FreeBookmark(MyBook);
+    Dataset.EnableControls;
+  end;
+end;
+
+procedure TDmRoutePoints.MoveDown(Dataset: TDataSet);
+var
+  OrigId, NextId, S: integer;
+  MyBook: TBookmark;
+begin
+  Dataset.DisableControls;
+  MyBook := Dataset.GetBookmark;
+  try
+    // Cant move
+    if (Dataset.RecordCount < 2) or
+      (Dataset.Eof) then
+      exit;
+
+    // Sort column Orig
+    OrigId := Dataset.FieldByName('Id').AsInteger;
+    if (OrigId < 0) then
+      exit;
+
+    // Edit Next line
+    Dataset.Next;
+    Dataset.Edit;
+    NextId := Dataset.FieldByName('Id').AsInteger; // Save Id Next
+    Dataset.FieldByName('Id').AsInteger := OrigId;
+    Dataset.Post;
+
+    // Reposition to orig line, and update with NextId
+    Dataset.GotoBookmark(MyBook);
+    Dataset.Edit;
+    Dataset.FieldByName('Id').AsInteger := NextId;
+    Dataset.Post;
+
+    // Hack to fix the toprow of the grid
+    S := Dataset.RecNo;
+    DataSet.First;
+    Dataset.RecNo := S;
+
+  finally
+    Dataset.FreeBookmark(MyBook);
+    Dataset.EnableControls;
+  end;
+end;
+
+procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);
+begin
+  TmpStream.Clear;
+  TmpStream.Write(Buffer, SizeOf(Buffer));
+  TmpStream.Position := 0;
+end;
+
+procedure TDmRoutePoints.SaveTrip;
+var
+  Locations: TmLocations;
+  TmpStream: TMemoryStream;
+  ZumoModel: TZumoModel;
+  ANItem: TBaseItem;                                                                          
+begin
+  if (CdsRoute.State in [dsEdit, dsInsert]) then
+    CdsRoute.Post;
+
+  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+    CdsRoutePoints.Post;
+
+  CdsRoutePoints.DisableControls;
+  TmpStream := TMemoryStream.Create;
+
+  try
+    Locations := TmLocations(FTripList.GetItem('mLocations'));
+    if not (Assigned(Locations)) then
+      exit;
+    Locations.Clear;
+    ZumoModel := FTripList.ZumoModel;
+
+    CdsRoutePoints.First;
+    while not CdsRoutePoints.Eof do
+    begin
+      // Create Location
+      Locations.AddLocatIon(TLocation.Create);
+
+      if (ZumoModel = TZumoModel.XT2) then
+      begin
+        PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
+        Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
+      end;
+
+      if (CdsRoutePointsViaPoint.AsBoolean) then
+        Locations.Add(TmAttr.Create(TRoutePoint.rpVia))
+      else
+        Locations.Add(TmAttr.Create(TRoutePoint.rpShaping));
+      Locations.Add(TmIsDFSPoint.Create);
+      Locations.Add(TmDuration.Create);
+      Locations.Add(TmArrival.Create); // Departure will be set later
+      Locations.Add(TmScPosn.Create(StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
+                                    StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings)));
+      Locations.Add(TmAddress.Create(CdsRoutePointsAddress.AsString));
+      Locations.Add(TmisTravelapseDestination.Create);
+      Locations.Add(TmShapingRadius.Create);
+      Locations.Add(TmName.Create(CdsRoutePointsName.AsString));
+
+      CdsRoutePoints.Next;
+    end;
+
+    if (CdsRoute.State = dsBrowse) then
+    begin
+      ANItem := FTripList.GetItem('mTripName');
+      if (ANItem <> nil) then
+        TmTripName(ANItem).AsString := CdsRouteTripName.AsString;
+
+      ANItem := FTripList.GetItem('mRoutePreference');
+      if (ANItem <> nil) then
+        TmRoutePreference(ANItem).AsByte := Ord(TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString));
+
+      ANItem := FTripList.GetItem('mTransportationMode');
+      if (ANItem <> nil) then
+        TmTransportationMode(ANItem).AsByte := Ord(TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString));
+
+      ANItem := FTripList.GetArrival;
+      if (ANItem <> nil) then
+        TmArrival(ANItem).AsUnixDateTime := TmArrival(ANItem).DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
+    end;
+
+
+  finally
+    TmpStream.Free;
+    CdsRoutePoints.EnableControls;
+
+    FTripList.ForceRecalc;
+    FTripList.SaveToFile(FFileName);
+  end;
+end;
+
+function TDmRoutePoints.NameExists(Name: string): boolean;
+var
+  ACds: TClientDataSet;
+begin
+  ACds := TClientDataSet.Create(Self);
+  try
+    ACds.CloneCursor(CdsRoutePoints, true, false);
+    result := ACds.Locate('Name', Name, [TLocateOption.loCaseInsensitive]);
+  finally
+    ACds.Free;
+  end;
+end;
+
+procedure TDmRoutePoints.LoadTrip(ATripList: TTripList; FileName: string);
+var
+  Locations: TmLocations;
+  Location, ANItem: TBaseItem;
+  LatLon: string;
+begin
+  FTripList := ATripList;
+  FFileName := FileName;
+  CdsRoute.Close;
+  CdsRoute.DisableControls;
+  CdsRoute.ReadOnly := false;
+
+  CdsRoutePoints.Close;
+  CdsRoutePoints.DisableControls;
+  CdsRoutePoints.ReadOnly := false;
+  try
+
+    CdsRoute.IndexFieldNames := 'TripName'; // There will be only 1 record!
+    CdsRoute.CreateDataSet;
+    CdsRoute.LogChanges := false;
+
+    CdsRoute.Insert;
+    ANItem := FTripList.GetItem('mTripName');
+    if (ANItem <> nil) then
+      CdsRouteTripName.AsString := TmTripName(ANItem).AsString;
+
+    ANItem := FTripList.GetItem('mRoutePreference');
+    if (ANItem <> nil) then
+    begin
+      FRoutePickList := TmRoutePreference(ANItem).PickList;
+      CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
+    end;
+
+    ANItem := FTripList.GetItem('mTransportationMode');
+    if (ANItem <> nil) then
+    begin
+      FTransportPickList := TmTransportationMode(ANItem).PickList;
+      CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
+    end;
+
+    ANItem := FTripList.GetArrival;
+    if (ANItem <> nil) then
+      CdsRouteDepartureDate.AsDateTime := TmArrival(ANItem).CardinalAsDateTime(TmArrival(ANItem).AsUnixDateTime);
+    CdsRoute.Post;
+
+    CdsRoutePoints.IndexFieldNames := 'Id';
+    CdsRoutePoints.CreateDataSet;
+    CdsRoutePoints.LogChanges := false;
+
+    Locations := TmLocations(FTripList.GetItem('mLocations'));
+    if not (Assigned(Locations)) then
+      exit;
+
+    for Location in Locations.Locations do
+    begin
+      if (Location is TLocation) then
+      begin
+        CdsRoutePoints.Insert; // Id is autoassigned
+
+        for ANItem in TLocation(Location).LocationItems do
+        begin
+
+          if (ANItem is TmAttr) then
+          begin
+            CdsRoutePointsViaPoint.AsBoolean := false;
+            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
+              CdsRoutePointsViaPoint.AsBoolean := true;
+          end;
+
+          if (ANItem is TmName) then
+            CdsRoutePointsName.AsString := TmName(ANItem).AsString;
+
+          if (ANItem is TmAddress) then
+            CdsRoutePointsAddress.AsString := TmAddress(ANItem).AsString;
+
+          if (ANItem is TmScPosn) then
+          begin
+            LatLon := TmScPosn(ANItem).MapCoords;
+            CdsRoutePointsLat.AsString := Trim(NextField(LatLon, ','));
+            CdsRoutePointsLon.AsString := Trim(LatLon);
+          end;
+
+        end;
+        CdsRoutePoints.Post;
+      end;
+    end;
+  finally
+    CdsRoute.First;
+    CdsRoute.EnableControls;
+
+    CdsRoutePoints.First;
+    CdsRoutePoints.EnableControls;
+    DoRoutePointUpdated;  // Now filter tagnames
+  end;
+end;
+
+procedure TDmRoutePoints.SetAddressFromCoords(Sender: TObject; Coords: string);
+var
+  Lat, Lon: string;
+begin
+  ParseLatLon(Coords, Lat, Lon);
+  CdsRoutePointsLat.AsString := Lat;
+  CdsRoutePointsLon.AsString := Lon;
+  CdsRoutePointsAddress.AsString := AddressFromCoords(Lat, Lon);
+end;
+
+procedure TDmRoutePoints.CoordinatesApplied(Sender: TObject; Coords: string);
+begin
+  if not (CdsRoutePoints.State in [dsInsert, dsEdit]) then
+    CdsRoutePoints.Edit;
+  SetAddressFromCoords(Sender, Coords);
+  CdsRoutePoints.Post;
+end;
+
+procedure TDmRoutePoints.LookUpAddress;
+var
+  Place: TPlace;
+begin
+  Place := GetPlaceOfCoords(CdsRoutePointsLat.AsString,
+                            CdsRoutePointsLon.AsString);
+  if (Place <> nil) then
+  begin
+    CdsRoutePoints.Edit;
+    CdsRoutePointsAddress.AsString := Place.FormattedAddress;
+    CdsRoutePoints.Post;
+  end;
+end;
+
+procedure TDmRoutePoints.ExportToGPX(GPXFile: string);
+var
+  Xml: TXmlVSDocument;
+  XMLRoot: TXmlVSNode;
+  Rte, RtePt, PointType: TXmlVSNode;
+begin
+  XML := TXmlVSDocument.Create;
+  CdsRoutePoints.DisableControls;
+  try
+    XMLRoot := InitRoot(XML);
+    Rte := XMLRoot.AddChild('rte');
+    Rte.AddChild('name').NodeValue := CdsRouteTripName.AsString;
+    Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := CdsRouteTransportationMode.AsString;
+
+    CdsRoutePoints.First;
+    while not CdsRoutePoints.Eof do
+    begin
+      RtePt := Rte.AddChild('rtept');
+      RtePt.Attributes['lat'] := CdsRoutePointsLat.AsString;
+      RtePt.Attributes['lon'] := CdsRoutePointsLon.AsString;
+      RtePt.AddChild('name').NodeValue := CdsRoutePointsName.AsString;
+      RtePt.AddChild('cmt').NodeValue := CdsRoutePointsAddress.AsString;
+      RtePt.AddChild('desc').NodeValue := CdsRoutePointsAddress.AsString;
+      if (CdsRoutePointsViaPoint.AsBoolean) then
+        PointType := RtePt.AddChild('extensions').AddChild('trp:ViaPoint')
+      else
+        PointType := RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
+
+      if (CdsRoutePoints.Bof) then
+        PointType.AddChild('trp:DepartureTime').NodeValue :=
+          DateToISO8601(TTimezone.Local.ToUniversalTime(CdsRouteDepartureDate.AsDateTime), true);
+
+      if (CdsRoutePointsViaPoint.AsBoolean) then
+        PointType.AddChild('trp:CalculationMode').NodeValue := CdsRouteRoutePreference.AsString;
+
+      CdsRoutePoints.Next;
+    end;
+
+    XML.SaveToFile(GPXFile);
+  finally
+    Xml.Free;
+    CdsRoutePoints.EnableControls;
+  end;
+end;
+
+
+end.

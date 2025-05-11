@@ -1,0 +1,399 @@
+unit UnitGeoCode;
+
+interface
+
+uses
+  System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
+  Vcl.Edge;
+
+const
+  TripManagerReg_Key      = 'Software\TDBware\TripManager';
+  GeoCodeUrl              = 'GeoCodeUrl';
+  GeoCodeApiKey           = 'GeoCodeApiKey';
+  AddressFormat           = 'AddressFormat';
+  ThrottleGeoCode         = 'ThrottleGeoCode';
+
+type
+  TExecRestEvent = procedure(Url, Response: string; Succes: boolean) of object;
+
+  GEOsettingsRec = record
+    GeoCodeUrl: string;
+    GeoCodeApiKey: string;
+    AddressFormat: string;
+    ThrottleGeoCode: integer;
+  end;
+
+  TPlace = class
+  private
+    FAddressList : TStringList;
+    FDisplayPlace: string;
+    function GetHtmlPlace: string;
+    function GetDisplayPlace: string;
+    function GetFormattedAddress: string;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure Clear;
+    procedure AssignFromGeocode(Key, Value: string);
+    class function UnEscape(Value: string): string;
+    property DisplayPlace: string read GetDisplayPlace;
+    property HtmlPlace: string read GetHtmlPlace;
+    property FormattedAddress: string read GetFormattedAddress;
+  end;
+
+function GetPlaceOfCoords(const Lat, Lon: string): TPlace;
+procedure GetCoordsOfPlace(const Place: string; var Lat, Lon: string);
+procedure ReadGeoCodeSettings;
+procedure ClearCoordCache;
+
+const
+  Place_Decimals = 4;
+
+var
+  GeoSettings: GEOsettingsRec;
+  ExecRestEvent: TExecRestEvent;
+
+implementation
+
+uses
+  System.Variants, System.JSON,  System.NetEncoding, System.Math, System.StrUtils, System.DateUtils,
+  Winapi.Windows, Vcl.Dialogs,
+  REST.Types, REST.Client, REST.Utils,
+  UnitStringUtils,
+  UFrmPLaces, UFrmGeoSearch;
+
+const StrInvalidJson = 'Json Invalid %s';
+
+var
+  LastQuery: TDateTime;
+  CoordCache: TObjectDictionary<string, TPlace>;
+
+constructor TPlace.Create;
+begin
+  inherited Create; // Does nothing
+  FAddressList := TStringList.Create;
+end;
+
+destructor TPlace.Destroy;
+begin
+  Clear;
+  FAddressList.Free;
+  inherited;
+end;
+
+procedure TPlace.Clear;
+begin
+{}
+end;
+
+class function TPlace.UnEscape(Value: string): string;
+begin
+  result := Value;
+  if (LeftStr(Value, 1) = '"') and
+     (RightStr(Value, 1) = '"') then
+    result := Copy(result, 2, Length(result) -2);
+  result := ReplaceAll(result, ['\/'], ['/']); // Belgium
+end;
+
+procedure TPlace.AssignFromGeocode(Key, Value: string);
+begin
+  FAddressList.AddPair(Key, Value);
+end;
+
+function TPlace.GetFormattedAddress: string;
+var
+  AAddressFormat: string;
+  AField: string;
+  ABackup: string;
+  AFieldValue: string;
+  SubFieldChar: char;
+begin
+  result := '';
+  AAddressFormat := GeoSettings.AddressFormat;
+  while (AAddressFormat <> '') do
+  begin
+    AField := NextField(AAddressFormat, '|');
+    SubFieldChar := ',';
+    if (Pos('+', AField) > 0) then
+      SubFieldChar := '+';
+    AFieldValue := '';
+    while (AField <> '') and
+          ((AFieldValue = '') or (SubFieldChar = '+')) do
+    begin
+      ABackup := Trim(NextField(AField, SubFieldChar));
+      if (SubFieldChar = ',') then
+        AFieldValue := FAddressList.Values[ABackup]
+      else
+      begin
+        if (AFieldValue <> '') then
+          AFieldValue := AFieldValue + ' ';
+        AFieldValue := AFieldValue + FAddressList.Values[ABackup];
+      end;
+    end;
+    if (result <> '') then
+      result := result + ', ';
+    result := result + AFieldValue;
+  end;
+end;
+
+function TPlace.GetHtmlPlace: string;
+begin
+  result := ReplaceAll(TPlace.UnEscape(FormattedAddress), [', '], ['<br>'], [rfReplaceAll]);
+end;
+
+function TPlace.GetDisplayPlace: string;
+begin
+  result := ReplaceAll(TPlace.UnEscape(FormattedAddress), [', '], [#13#10], [rfReplaceAll]);
+end;
+
+procedure Throttle(const Delay: Int64);
+var Diff: Int64;
+begin
+  Diff := Delay - MilliSecondsBetween(Now, LastQuery);
+  if (Diff > 0) then
+    Sleep(Diff);
+  LastQuery := Now;
+end;
+
+function ExecuteRest(const RESTRequest: TRESTRequest): boolean;
+var
+  ARestParm: TRESTRequestParameter;
+begin
+  result := true;
+  try
+    Throttle(GeoSettings.ThrottleGeoCode);
+    RESTRequest.Execute;
+    LastQuery := Now;
+    if (RESTRequest.Response.StatusCode >= 400) then
+      raise exception.Create('Request failed with' + #10 + RESTRequest.Response.StatusText);
+  finally
+    if Assigned(ExecRestEvent) then
+    begin
+      // The Caller will free the params right after this request.
+      // No need to restore.
+      for ARestParm in RESTRequest.Params do
+        ARestParm.Options := [TRESTRequestParameterOption.poDoNotEncode];
+      ExecRestEvent(RESTRequest.GetFullRequestURL(true) + #10, RESTRequest.Response.Content, result);
+    end;
+  end;
+end;
+
+
+function GetPlaceOfCoords_GeoCode(const Lat, Lon: string): TPlace;
+var
+  RESTClient:   TRESTClient;
+  RESTRequest:  TRESTRequest;
+  RESTResponse: TRESTResponse;
+  JSONObject:   TJSONObject;
+  JSONAddress:  TJSONObject;
+  JSONPair:     TJSONPair;
+  LatE, LonE:   string;
+begin
+  result := TPlace.Create;
+  LatE := Trim(Lat);
+  LonE := Trim(Lon);
+
+  RESTClient := TRESTClient.Create(GeoSettings.GeoCodeUrl);
+  RESTResponse := TRESTResponse.Create(nil);
+  RESTRequest := TRESTRequest.Create(nil);
+  RESTRequest.Client := RESTClient;
+  RESTRequest.Resource := 'reverse';
+  RESTRequest.Response := RESTResponse;
+  try
+    RESTRequest.Params.Clear;
+    RESTRequest.Params.AddItem('lat', LatE, TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.Params.AddItem('lon', LonE, TRESTRequestParameterKind.pkGETorPOST);
+
+    if (GeoSettings.GeoCodeApiKey <> '') then
+      RESTRequest.params.AddItem('api_key', GeoSettings.GeoCodeApiKey , TRESTRequestParameterKind.pkGETorPOST);
+
+    if not ExecuteRest(RESTRequest) then
+      exit;
+
+    if not RESTResponse.JSONValue.TryGetValue(JSONObject) then
+      raise Exception.Create(Format(StrInvalidJson, [RESTResponse.Content]));
+
+    if (JSONObject.FindValue('display_name') <> nil) then
+      result.FDisplayPlace := JSONObject.GetValue('display_name').ToString;
+    if (JSONObject.FindValue('address') <> nil) then
+    begin
+      JSONAddress := JSONObject.GetValue<TJSONObject>('address');
+      for JSONPair in JSONAddress do
+        result.AssignFromGeocode(TPlace.UnEscape(JSONPair.JsonString.ToString),
+                                 TPlace.UnEscape(JSONPair.JsonValue.ToString)
+                                );
+    end;
+
+  finally
+    RESTResponse.Free;
+    RESTRequest.Free;
+    RESTClient.Free;
+  end;
+end;
+
+function GetPlaceOfCoords(const Lat, Lon: string): TPlace;
+var CoordsKey: string;
+    LatP, LonP: string;
+    CrWait, CrNormal: HCURSOR;
+begin
+  result := nil;
+  if (GeoSettings.GeoCodeApiKey = '') then
+    exit;
+
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  try
+    LatP := Lat;
+    LonP := Lon;
+    AdjustLatLon(LatP, LonP, Place_Decimals);
+    CoordsKey := LatP + ',' + LonP;
+    if (CoordCache.ContainsKey(CoordsKey)) then
+    begin
+      result := CoordCache.Items[CoordsKey];
+      exit;
+    end;
+
+    result := GetPlaceOfCoords_GeoCode(Lat, Lon);
+
+    // Also cache if not found
+    CoordCache.Add(CoordsKey, result);
+  finally
+    SetCursor(CrNormal);
+  end;
+end;
+
+procedure ClearCoordCache;
+begin
+  CoordCache.Clear;
+end;
+
+function ChooseLocation(var Lat, Lon: string): Integer;
+begin
+  Lat := '';
+  Lon := '';
+  with FrmPlaces do
+  begin
+    result := ShowModal;
+    if (result <> IDOK) then
+      exit;
+    if (Listview1.Selected = nil) then
+      exit;
+    Lat := Listview1.Selected.Caption;
+    Lon := Listview1.Selected.Subitems[0];
+  end;
+end;
+
+function GetCoordsOfPlace_GeoCode(var Lat, Lon: string):integer;
+var
+  RESTClient: TRESTClient;
+  RESTRequest: TRESTRequest;
+  RESTResponse: TRESTResponse;
+  JValue: TJSONValue;
+  Places: TJSONArray;
+begin
+  result := IDRETRY;
+  Lat := '';
+  Lon := '';
+
+  RESTClient := TRESTClient.Create(GeoSettings.GeoCodeUrl);
+  RESTResponse := TRESTResponse.Create(nil);
+  RESTRequest := TRESTRequest.Create(nil);
+  RESTRequest.Client := RESTClient;
+  RESTRequest.Resource := 'search';
+  RESTRequest.Response := RESTResponse;
+  try
+    RESTRequest.params.Clear;
+    if (FGeoSearch.PctMain.TabIndex = 0) and
+       (FGeoSearch.EdSearchFree.Text <> '') then
+      RESTRequest.params.AddItem('q', FGeoSearch.EdSearchFree.Text, TRESTRequestParameterKind.pkGETorPOST)
+    else
+    begin
+      if (FGeoSearch.EdStreet.Text <> '') then
+        RESTRequest.params.AddItem('street', FGeoSearch.EdStreet.Text, TRESTRequestParameterKind.pkGETorPOST);
+      if (FGeoSearch.EdCity.Text <> '') then
+        RESTRequest.params.AddItem('city', FGeoSearch.EdCity.Text, TRESTRequestParameterKind.pkGETorPOST);
+      if (FGeoSearch.EdCounty.Text <> '') then
+        RESTRequest.params.AddItem('county', FGeoSearch.EdCounty.Text, TRESTRequestParameterKind.pkGETorPOST);
+      if (FGeoSearch.EdState.Text <> '') then
+        RESTRequest.params.AddItem('state', FGeoSearch.EdState.Text, TRESTRequestParameterKind.pkGETorPOST);
+      if (FGeoSearch.EdCountry.Text <> '') then
+        RESTRequest.params.AddItem('country', FGeoSearch.EdCountry.Text, TRESTRequestParameterKind.pkGETorPOST);
+      if (FGeoSearch.EdPostalCode.Text <> '') then
+        RESTRequest.params.AddItem('postalcode', FGeoSearch.EdPostalCode.Text, TRESTRequestParameterKind.pkGETorPOST);
+    end;
+
+    if (RESTRequest.params.Count = 0) then
+    begin
+      ShowMessage('Enter some search criteria');
+      exit;
+    end;
+
+    if (GeoSettings.GeoCodeApiKey <> '') then
+      RESTRequest.params.AddItem('api_key', GeoSettings.GeoCodeApiKey , TRESTRequestParameterKind.pkGETorPOST);
+
+    if not ExecuteRest(RESTRequest) then
+      exit;
+
+    if not RESTResponse.JSONValue.TryGetValue(Places) then
+      raise Exception.Create(Format(StrInvalidJson, [RESTResponse.Content]));
+
+    for JValue in Places do
+      FrmPlaces.AddPlace2LV(JValue.GetValue<string>('display_name'), JValue.GetValue<string>('lat'), JValue.GetValue<string>('lon'));
+    result := ChooseLocation(Lat, Lon);
+  finally
+    RESTResponse.Free;
+    RESTRequest.Free;
+    RESTClient.Free;
+  end;
+end;
+
+procedure GetCoordsOfPlace(const Place: string; var Lat, Lon: string);
+var
+  CrWait, CrNormal: HCURSOR;
+  RetrySearch: boolean;
+begin
+  Lat := '';
+  Lon := '';
+  if (GeoSettings.GeoCodeApiKey = '') then
+    exit;
+  FGeoSearch.EdSearchFree.Text := Trim(Place);
+
+  repeat
+    if (FGeoSearch.ShowModal <> IDOK) then
+      exit;
+
+    CrWait := LoadCursor(0, IDC_WAIT);
+    CrNormal := SetCursor(CrWait);
+
+    FrmPlaces.ListView1.Items.Clear;
+    try
+      RetrySearch := (GetCoordsOfPlace_GeoCode(Lat, Lon) = IDRETRY);
+    finally
+      SetCursor(CrNormal);
+    end;
+  until (not RetrySearch);
+end;
+
+// https://wiki.openstreetmap.org/wiki/Key:place
+procedure ReadGeoCodeSettings;
+begin
+  GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeUrl, 'https://geocode.maps.co');
+  GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeApiKey, '');
+  GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
+   'ISO3166-2-lvl4,state|village,town,city,municipality|road');
+  GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, ThrottleGeoCode, '1025'));
+end;
+
+initialization
+begin
+  CoordCache := TObjectDictionary<string, TPlace>.Create([doOwnsValues]);
+  LastQuery := 0;
+  ReadGeoCodeSettings;
+end;
+
+finalization
+begin
+  CoordCache.Free;
+end;
+
+end.

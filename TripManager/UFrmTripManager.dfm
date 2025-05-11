@@ -344,7 +344,7 @@ object FrmTripManager: TFrmTripManager
           Width = 65
           Height = 30
           Align = alLeft
-          TabOrder = 5
+          TabOrder = 4
           object ChkWatch: TCheckBox
             Left = 1
             Top = 1
@@ -367,17 +367,6 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 0
           OnClick = BtnRefreshFileSysClick
         end
-        object BtnCreateAdditional: TButton
-          AlignWithMargins = True
-          Left = 457
-          Top = 4
-          Width = 85
-          Height = 24
-          Align = alLeft
-          Caption = 'Additional files'
-          TabOrder = 4
-          OnClick = CreateAdditionalClick
-        end
         object BtnPostProcess: TButton
           AlignWithMargins = True
           Left = 366
@@ -388,6 +377,17 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Post process'
           TabOrder = 3
           OnClick = PostProcessClick
+        end
+        object BtnCreateAdditional: TButton
+          AlignWithMargins = True
+          Left = 457
+          Top = 4
+          Width = 85
+          Height = 24
+          Align = alLeft
+          Caption = 'Additional files'
+          TabOrder = 5
+          OnClick = CreateAdditionalClick
         end
       end
       object PnlBotFileSys: TPanel
@@ -480,7 +480,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 653
-        Height = 22
+        Height = 26
         Align = alTop
         BevelOuter = bvNone
         Font.Charset = DEFAULT_CHARSET
@@ -495,24 +495,37 @@ object FrmTripManager: TFrmTripManager
           Left = 0
           Top = 0
           Width = 60
-          Height = 22
+          Height = 26
           Align = alLeft
           Caption = 'Clear map'
           OnClick = SpeedBtn_MapClearClick
+          ExplicitLeft = -3
+          ExplicitTop = -6
+          ExplicitHeight = 22
         end
-        object Splitter1: TSplitter
-          Left = 584
+        object BtnGeoSearch: TSpeedButton
+          Left = 60
           Top = 0
-          Height = 22
+          Width = 60
+          Height = 26
+          Align = alLeft
+          Caption = 'Search'
+          OnClick = BtnGeoSearchClick
+          ExplicitHeight = 22
+        end
+        object SpltRoutePoint: TSplitter
+          Left = 644
+          Top = 0
+          Height = 26
           ExplicitLeft = 545
           ExplicitTop = 5
           ExplicitHeight = 100
         end
         object EditMapCoords: TEdit
-          Left = 242
+          Left = 302
           Top = 0
           Width = 143
-          Height = 22
+          Height = 26
           Hint = 'Use Ctrl+Click on the map to set the Lat/Lon values'
           Align = alLeft
           MaxLength = 127
@@ -524,10 +537,10 @@ object FrmTripManager: TFrmTripManager
           ExplicitHeight = 21
         end
         object BtnApplyCoords: TButton
-          Left = 60
+          Left = 120
           Top = 0
           Width = 106
-          Height = 22
+          Height = 26
           Align = alLeft
           Caption = 'Apply Coordinates'
           Enabled = False
@@ -535,10 +548,10 @@ object FrmTripManager: TFrmTripManager
           OnClick = BtnApplyCoordsClick
         end
         object LblRoutePoint: TEdit
-          Left = 587
+          Left = 647
           Top = 0
-          Width = 66
-          Height = 22
+          Width = 6
+          Height = 26
           Align = alClient
           ReadOnly = True
           TabOrder = 2
@@ -546,30 +559,30 @@ object FrmTripManager: TFrmTripManager
           ExplicitHeight = 21
         end
         object PnlCoordinates: TPanel
-          Left = 166
+          Left = 226
           Top = 0
           Width = 76
-          Height = 22
+          Height = 26
           Align = alLeft
           Caption = 'Coordinates'
           ParentBackground = False
           TabOrder = 3
         end
         object PnlRoutePoint: TPanel
-          Left = 385
+          Left = 445
           Top = 0
           Width = 76
-          Height = 22
+          Height = 26
           Align = alLeft
           Caption = 'Route/Point'
           ParentBackground = False
           TabOrder = 4
         end
         object LblRoute: TEdit
-          Left = 461
+          Left = 521
           Top = 0
           Width = 123
-          Height = 22
+          Height = 26
           Align = alLeft
           ReadOnly = True
           TabOrder = 5
@@ -617,9 +630,9 @@ object FrmTripManager: TFrmTripManager
       end
       object EdgeBrowser1: TEdgeBrowser
         Left = 0
-        Top = 22
+        Top = 26
         Width = 653
-        Height = 255
+        Height = 251
         Align = alClient
         TabOrder = 2
         AllowSingleSignOnUsingOSPrimaryAccount = False
@@ -726,6 +739,16 @@ object FrmTripManager: TFrmTripManager
             Enabled = False
             TabOrder = 0
             OnClick = BtnSaveTripValuesClick
+          end
+          object BtnTripEditor: TButton
+            Left = 145
+            Top = 1
+            Width = 75
+            Height = 24
+            Align = alLeft
+            Caption = 'Trip Editor'
+            TabOrder = 1
+            OnMouseUp = BtnTripEditorMouseUp
           end
         end
       end
@@ -1112,5 +1135,18 @@ object FrmTripManager: TFrmTripManager
   object SaveTrip: TSaveDialog
     Left = 522
     Top = 393
+  end
+  object PopupTripEdit: TPopupMenu
+    Left = 275
+    Top = 394
+    object MnuTripNew: TMenuItem
+      Caption = 'New'
+      OnClick = MnuTripNewClick
+    end
+    object MnuTripEdit: TMenuItem
+      Caption = 'Edit'
+      Enabled = False
+      OnClick = MnuTripEditClick
+    end
   end
 end

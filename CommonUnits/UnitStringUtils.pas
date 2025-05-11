@@ -25,6 +25,7 @@ function CoordAsDec(const ACoord: string): double;
 function ValidLatLon(const Lat, Lon: string): boolean;
 procedure ParseLatLon(const LatLon: string; var Lat, Lon: string);
 procedure AdjustLatLon(var Lat, Lon: string; No_Decimals: integer);
+procedure CheckHRGuid(HR: Hresult);
 
 procedure DebugMsg(const Msg: array of variant);
 function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
@@ -175,6 +176,11 @@ begin
     F := RoundTo(F, -No_Decimals);
     result := FloatToStr(F, FloatFormatSettings);
   end;
+end;
+
+procedure CheckHRGuid(HR: Hresult);
+begin
+  Assert(HR = S_OK, 'Error creating GUID');
 end;
 
 procedure AdjustLatLon(var Lat, Lon: string; No_Decimals: integer);

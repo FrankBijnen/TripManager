@@ -12,6 +12,9 @@ uses
 {$IFDEF TRIPOBJECTS}
   UnitTripObjects,
 {$ENDIF}
+{$IFDEF GEOCODE}
+  UnitGeoCode,
+{$ENDIF}
   UnitGPI, UnitBMP;
 
 type
@@ -85,6 +88,16 @@ const VehicleProfileGuid: string = '';
 const VehicleProfileHash: string = '';
 const VehicleId: string = '';
 {$ENDIF}
+function FindSubNodeValue(ANode: TXmlVSNode;
+                          SubName: string): string;
+procedure CreateGlobals;
+procedure FreeGlobals;
+procedure AnalyzeGpx(const GPXFile:string;
+                     var OutWayPointList: TXmlVSNodeList;
+                     var OutWayPointFromRouteList: TXmlVSNodeList;
+                     var OutRouteViaPointList: TXmlVSNodeList;
+                     var OutTrackList: TXmlVSNodeList);
+
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
                      const OutStringList: TStringList = nil;
@@ -115,10 +128,6 @@ var TrayIcon: TTrayIcon;
     FormatSettings: TFormatSettings;
     DistanceStr: string;
 
-procedure CheckHRGuid(HR: Hresult);
-begin
-  Assert(HR = S_OK, 'Error creating GUID');
-end;
 
 function GetToolsDirectory: TGPXString;
 begin
@@ -628,6 +637,10 @@ var CurrentTrack: TXmlVSNode;
          (pcfShapePt in ProcessCategoryFor) then
       begin
         ExtensionsNode := NewNode.AddChild('extensions');
+        if (ProcessCategory = pcfViaPt) then
+          ExtensionsNode.AddChild('trp:ViaPoint');
+        if (ProcessCategory = pcfShapePt) then
+          ExtensionsNode.AddChild('trp:ShapingPoint');
         AddCategory(ExtensionsNode, 'gpxx:', Category);
         AddCategory(ExtensionsNode, 'wptx1:', Category);
       end;
@@ -893,6 +906,7 @@ var CurrentTrack: TXmlVSNode;
       begin
         CurrentTrack := TrackList.Add(CurrentRouteTrackName);
         CurrentTrack.NodeValue := CurrentRouteTrackName;
+        CurrentTrack.AddChild('desc').NodeValue := 'Rte';
 
         if (ExtensionsNode <> nil) then
         begin
@@ -954,6 +968,7 @@ var CurrentTrack: TXmlVSNode;
       begin
         CurrentTrack := TrackList.Add(CurrentRouteTrackName);
         CurrentTrack.NodeValue := CurrentRouteTrackName;
+        CurrentTrack.AddChild('desc').NodeValue := 'Trk';
         if (ExtensionsNode <> nil) then
         begin
           TrackExtension := ExtensionsNode.Find('gpxx:TrackExtension');
@@ -1156,6 +1171,21 @@ begin
   result.Category := TGPXString(Category);
 end;
 
+procedure AnalyzeGpx(const GPXFile:string;
+                     var OutWayPointList: TXmlVSNodeList;
+                     var OutWayPointFromRouteList: TXmlVSNodeList;
+                     var OutRouteViaPointList: TXmlVSNodeList;
+                     var OutTrackList: TXmlVSNodeList);
+var
+  BaseFile: string;
+begin
+  BaseFile := ChangeFileExt(ExtractFileName(GPXFile), '');
+  ProcessGPX(GPXFile, BaseFile);
+  OutWayPointList := WayPointList;
+  OutWayPointFromRouteList := WayPointFromRouteList;
+  OutRouteViaPointList := RouteViaPointList;
+  OutTrackList := TrackList;
+end;
 
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
@@ -1200,14 +1230,16 @@ var Func: TGPXFunc;
             end;
           end;
         end;
-
         for Track in TrackList do
         begin
           if (Track.Find('extensions') <> nil) then
             DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
           else
             DisplayColor := DefTrackColor;
-          FrmSelectGPX.AllTracks.Add(DisplayColor + #9 + IntToStr(Track.ChildNodes.Count) + #9 + Track.Name);
+          FrmSelectGPX.AllTracks.Add(DisplayColor + #9 +
+                                     IntToStr(Track.ChildNodes.Count) + #9 +
+                                     Track.Name + #9 +
+                                     FindSubNodeValue(Track, 'desc'));
         end;
         FrmSelectGPX.LoadTracks(TrackColor);
         if FrmSelectGPX.ShowModal <> ID_OK then
@@ -1227,13 +1259,14 @@ var Func: TGPXFunc;
             TracksProcessed.Add(Track.NodeValue);
           end;
 
-          WptTrack := WptTracksRoot.AddChild('trk');
-          WptTrack.AddChild('name').NodeValue := Track.NodeValue;
-
           Trackname := Track.Name;
           DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
           if (DisplayColor = '') then
             continue;
+
+          WptTrack := WptTracksRoot.AddChild('trk');
+          WptTrack.AddChild('name').NodeValue := Track.NodeValue;
+
           WptTrack.AddChild('extensions').
                    AddChild('gpxx:TrackExtension').
                    AddChild('gpxx:DisplayColor').NodeValue := DisplayColor;
@@ -1579,13 +1612,17 @@ var Func: TGPXFunc;
 
         if (ProcessTracks) then
         begin
+//TODO, route or track
           for Track in TrackList do
           begin
             if (Track.Find('extensions') <> nil) then
               DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
             else
               DisplayColor := DefTrackColor;
-            FrmSelectGPX.AllTracks.Add(DisplayColor + #9 + IntToStr(Track.ChildNodes.Count) + #9 + Track.Name);
+            FrmSelectGPX.AllTracks.Add(DisplayColor + #9 +
+                                       IntToStr(Track.ChildNodes.Count) + #9 +
+                                       Track.Name + #9 +
+                                       FindSubNodeValue(Track, 'desc'));
           end;
           FrmSelectGPX.LoadTracks(TrackColor);
           if FrmSelectGPX.ShowModal <> ID_OK then
@@ -1896,7 +1933,6 @@ var Func: TGPXFunc;
             TripList.ForceRecalc(ZumoModel);
           end;
 
-          // Note: Not indented Items need verification
           procedure CreateTrip_XT2;
           var
             TmpStream: TMemoryStream;
@@ -1921,7 +1957,7 @@ var Func: TGPXFunc;
               TripList.Add(TmOptimized.Create);
               TripList.Add(TmTotalTripTime.Create);
               TripList.Add(TmTripName.Create(TripName));
-// Test JFH
+
               if (VehicleProfileGuid <> '') then
                 TripList.Add(TStringItem.Create('mVehicleProfileGuid', VehicleProfileGuid))
               else

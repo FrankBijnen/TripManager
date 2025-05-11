@@ -1,5 +1,5 @@
 // Can be used for sorting the trips.
-// Can be combined with groupning on parenttripid. Max 16 file
+// Can be combined with grouping on parenttripid. Max 16 file
 // Sorting of groups appears to be on the first file of the group
 unit UFrmDateDialog;
 

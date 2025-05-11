@@ -1,18 +1,17 @@
 ﻿unit UFrmTripManager;
-{.$DEFINE CLEARTREEVIEW}
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.WebView2,
-  System.SysUtils, System.Variants, System.Classes, System.ImageList,
-  WinApi.ShlObj, System.Win.ComObj, Winapi.ActiveX,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ImgList, Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls,
-  Vcl.ToolWin, Vcl.ButtonGroup,
-  TripManager_ShellList,
-  BCHexEditor, UnitMtpDevice, mtp_helper, ListViewSort, UnitTripObjects, UnitGpi, Monitor, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  System.Actions, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls;
+  Winapi.Windows, Winapi.Messages, Winapi.WebView2, WinApi.ShlObj, System.Win.ComObj, Winapi.ActiveX,
+
+  System.SysUtils, System.Variants, System.Classes, System.ImageList, System.Actions,
+
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ImgList,
+  Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
+  Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
+
+  Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellList, ListViewSort, UnitTripObjects, UnitGpi;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -38,31 +37,20 @@ const
   CurrentGPI              = 'CurrentGPI';
   FileSysTrip             = 'FileSys';
 
-  TripManagerReg_Key      = 'Software\TDBware\TripManager';
-  PrefFileSysFolder_Key   = 'PrefFileSysFolder';
-  PrefDev_Key             = 'PrefDevice';
-  PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
-  PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
-  PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
-  WarnModel_Key           = 'WarnModel';
-  TripColor_Key           = 'TripColor';
-
-  BooleanValues: array[boolean] of string = ('False', 'True');
-  XT2_VehicleProfileGuid  = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
-  XT2_VehicleProfileHash  = '135656608';
-  XT2_VehicleId           = '1';
-
 type
   TMapReq = record
     Coords: string;
     Desc: string;
     Zoom: string;
+    TimeOut: string;
   end;
 
   TDirType = (NoDir, Up, Down);
   TListFilesDir = (lfCurrent, lfUp, lfDown);
 
   TRouteParm = (RoutePref, TransportMode);
+
+  TCoordinatesAppliedEvent = procedure(Sender: Tobject; Coords: string) of object;
 
   TFrmTripManager = class(TForm)
     HSplitterDevFiles_Info: TSplitter;
@@ -105,7 +93,6 @@ type
     PnlRoutePoint: TPanel;
     SpeedBtn_MapClear: TSpeedButton;
     LblRoute: TEdit;
-    Splitter1: TSplitter;
     EdDeviceFolder: TEdit;
     PnlDeviceTop: TPanel;
     BtnRefresh: TButton;
@@ -149,7 +136,6 @@ type
     Panel1: TPanel;
     BtnOpenTemp: TButton;
     MapTimer: TTimer;
-    BtnCreateAdditional: TButton;
     PnlTripGpiInfo: TPanel;
     CmbModel: TComboBox;
     BtnPostProcess: TButton;
@@ -167,6 +153,13 @@ type
     SaveCSV1: TMenuItem;
     SaveTrip: TSaveDialog;
     SaveGPX1: TMenuItem;
+    BtnGeoSearch: TSpeedButton;
+    BtnTripEditor: TButton;
+    SpltRoutePoint: TSplitter;
+    BtnCreateAdditional: TButton;
+    PopupTripEdit: TPopupMenu;
+    MnuTripNew: TMenuItem;
+    MnuTripEdit: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -237,7 +230,10 @@ type
     procedure Action3Execute(Sender: TObject);
     procedure SaveCSV1Click(Sender: TObject);
     procedure SaveGPX1Click(Sender: TObject);
-
+    procedure BtnGeoSearchClick(Sender: TObject);
+    procedure BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure MnuTripEditClick(Sender: TObject);
+    procedure MnuTripNewClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -256,13 +252,14 @@ type
     APOIList: TPOIList;
 
     FMapReq: TMapReq;
-
     EdgeZoom: double;
     WarnRecalc: integer; // MrNone, MrYes, MrNo, mrIgnore
     WarnModel: boolean;
     WarnOverWrite: integer;  // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
     ModifiedList: TStringList;
     DirectoryMonitor: TDirectoryMonitor;
+    FOnCoordinatesApplied: TCoordinatesAppliedEvent;
+
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
 
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
@@ -273,7 +270,7 @@ type
     procedure LoadHex(const FileName: string);
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
-    procedure MapRequest(const Coords, Desc: string);
+    procedure MapRequest(const Coords, Desc, TimeOut: string);
 
     procedure SaveTripGpiFile;
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
@@ -315,8 +312,11 @@ type
   public
     { Public declarations }
     DeviceFolder: array[0..2] of string;
-    procedure SetFixedPrefs;
     procedure CheckSupportedModel;
+    procedure RoutePointsShowing(Sender: TObject; Showing: boolean);
+    procedure RoutePointUpdated(Sender: TObject);
+    function GetMapCoords: string;
+    property OnCoordinatesApplied: TCoordinatesAppliedEvent read FOnCoordinatesApplied write FOnCoordinatesApplied;
   end;
 
 var
@@ -326,8 +326,8 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, Winapi.ShellAPI, Vcl.Clipbrd,
-  UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop, UnitVerySimpleXml,
-  UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings;
+  UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop, UnitVerySimpleXml, UnitGeoCode, UDmRoutePoints,
+  UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
 
 const
   DupeCount = 10;
@@ -375,7 +375,6 @@ begin
   FSelStart := ASelStart;
   FSelLength := ASelLength;
 end;
-
 
 class function TGridSelItem.GridSelItem(AValueListEditor: TValueListEditor; ARow: integer): TGridSelItem;
 begin
@@ -493,7 +492,11 @@ end;
 procedure TFrmTripManager.Action3Execute(Sender: TObject);
 begin
   if FrmAdvSettings.ShowModal = mrOk then
-    SetFixedPrefs;
+  begin
+    FrmAdvSettings.SetFixedPrefs;
+    BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
+    ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
+  end;
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
@@ -520,6 +523,12 @@ procedure TFrmTripManager.BtnApplyCoordsClick(Sender: TObject);
 var
   ABaseDataItem: TBaseDataItem;
 begin
+  if (Assigned(FOnCoordinatesApplied)) then
+  begin
+    FOnCoordinatesApplied(Self, EditMapCoords.Text);
+    exit;
+  end;
+
   ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
   if Assigned(ABaseDataItem) and
      (ABaseDataItem is TmScPosn) then
@@ -644,6 +653,21 @@ begin
   Pt.Y := Y;
   Pt := TButton(Sender).ClientToScreen(Pt);
   DeviceMenu.Popup(Pt.X, Pt.Y);
+end;
+
+procedure TFrmTripManager.BtnGeoSearchClick(Sender: TObject);
+var
+  Lat, Lon: string;
+  Place: TPlace;
+begin
+  GetCoordsOfPlace('', Lat, Lon);
+  if (Lat <> '') and
+     (Lon <> '') then
+  begin
+    Place := GetPlaceOfCoords(Lat, Lon);
+    Clipboard.AsText := Place.DisplayPlace;
+    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), GeoSearchTimeout);
+  end;
 end;
 
 procedure TFrmTripManager.BtnTransferToDeviceClick(Sender: TObject);
@@ -797,6 +821,43 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.RoutePointUpdated(Sender: TObject);
+begin
+  MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
+             DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
+             '5000');
+end;
+
+function TFrmTripManager.GetMapCoords: string;
+begin
+  result := EditMapCoords.Text;
+end;
+
+procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
+var
+  CanSelect: boolean;
+begin
+  DmRoutePoints.OnRoutePointUpdated := nil;
+  OnCoordinatesApplied := nil;
+  if Showing then
+  begin
+    OnCoordinatesApplied := DmRoutePoints.CoordinatesApplied;
+    DmRoutePoints.OnRoutePointUpdated := RoutePointUpdated;
+  end;
+  CanSelect := false;
+  VlTripInfoSelectCell(VlTripInfo, VlTripInfo.Col, VlTripInfo.Row, CanSelect);
+end;
+
+procedure TFrmTripManager.BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Pt: TPoint;
+begin
+  Pt.X := X;
+  Pt.Y := Y;
+  Pt := TButton(Sender).ClientToScreen(Pt);
+  PopupTripEdit.Popup(Pt.X, Pt.Y);
+end;
+
 procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
 var
   Writer: TTextWriter;
@@ -844,7 +905,7 @@ var
   AnUdbHandle: TmUdbDataHndl;
   ANUdbDir: TUdbDir;
   Location, ANItem: TBaseItem;
-  ViaPointType, PointName, Lat, Lon: string;
+  ViaPointType, PointName, Lat, Lon, Address: string;
 begin
   if not Assigned(ATripList) then
     exit;
@@ -870,12 +931,17 @@ begin
       if (Location is TLocation) then
       begin
         RtePt := Rte.AddChild('rtept');
+        ViaPointType := 'trp:ShapingPoint';
+        PointName := '';
+        Lat := '';
+        Lon := '';
+        Address := '';
         for ANItem in TLocation(Location).LocationItems do
         begin
 
           if (ANItem is TmAttr) then
           begin
-            if (Pos('Via', TmAttr(ANItem).AsString) =1) then
+            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
               ViaPointType := 'trp:ViaPoint'
             else
               ViaPointType := 'trp:ShapingPoint';
@@ -891,10 +957,15 @@ begin
             Lon := Trim(Lon);
           end;
 
+          if (ANItem is TmAddress) then
+            Address := TmAddress(ANItem).AsString;
+
         end;
         RtePt.Attributes['lat'] := Lat;
         RtePt.Attributes['lon'] := Lon;
         RtePt.AddChild('name').NodeValue := PointName;
+        RtePt.AddChild('cmt').NodeValue := Address;
+        RtePt.AddChild('desc').NodeValue := Address;
         RtePt.AddChild('extensions').AddChild(ViaPointType);
       end;
     end;
@@ -1116,13 +1187,14 @@ end;
 
 procedure TFrmTripManager.EdgeBrowser1NavigationStarting(Sender: TCustomEdgeBrowser; Args: TNavigationStartingEventArgs);
 begin
-   Sender.ZoomFactor := EdgeZoom;
+  Sender.ZoomFactor := EdgeZoom;
 end;
 
 procedure TFrmTripManager.EdgeBrowser1WebMessageReceived(Sender: TCustomEdgeBrowser; Args: TWebMessageReceivedEventArgs);
 var
   Message: PChar;
   Msg, Parm1, Parm2, Lat, Lon: string;
+  Place: TPlace;
 begin
   Args.ArgsInterface.Get_webMessageAsJson(Message);
   ParseJsonMessage(Message, Msg, Parm1, Parm2);
@@ -1151,7 +1223,12 @@ begin
   EditMapCoords.Text := Parm1 + ', ' + Parm2;
   if (Msg = OSMCtrlClick) then
   begin
-    MapRequest(EditMapCoords.Text, OSMCtrlClick);
+    Place := GetPlaceOfCoords(Parm1, Parm2);
+    if (Place <> nil) then
+    begin
+      Clipboard.AsText := Place.DisplayPlace;
+      MapRequest(EditMapCoords.Text, Place.HtmlPlace, GeoSearchTimeout);
+    end;
     exit;
   end;
 
@@ -1162,11 +1239,47 @@ begin
   EdgeZoom := AZoomFactor;
 end;
 
+procedure TFrmTripManager.MnuTripNewClick(Sender: TObject);
+begin
+  if not Assigned(ATripList) then
+    ATripList := TTripList.Create;
+  FrmNewTrip.DevicePath := DeviceFolder[0];
+  FrmNewTrip.CurPath := ShellTreeView1.Path;
+
+  if (FrmNewTrip.ShowModal = mrOk) then
+  begin
+    DeviceFile := FrmNewTrip.ChkDevice.Checked;
+    if (DeviceFile) then
+      HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension)
+    else
+      HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
+
+    ATripList.CreateTemplate(TZumoModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
+    MnuTripEditClick(Sender);
+  end;
+end;
+
+procedure TFrmTripManager.MnuTripEditClick(Sender: TObject);
+begin
+  FrmTripEditor.CurPath := ShellTreeView1.Path;
+  FrmTripEditor.CurTripList := ATripList;
+  FrmTripEditor.CurFile := HexEditFile;
+  FrmTripEditor.CurDevice := DeviceFile;
+
+  FrmTripEditor.OnTripFileUpdated := BtnSaveTripValuesClick;
+  FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
+  DmRoutePoints.OnGetMapCoords := GetMapCoords;
+
+  FrmTripEditor.Left := Left;
+  FrmTripEditor.Width := FrmTripEditor.Constraints.MinWidth;
+  FrmTripEditor.Show;
+end;
+
 procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key = VK_Return) and
      (EditMapCoords.Text <> '') then
-    MapRequest(EditMapCoords.Text, EditMapCoords.Text);
+    MapRequest(EditMapCoords.Text, EditMapCoords.Text, PopupTimeout);
 end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -1235,6 +1348,8 @@ procedure TFrmTripManager.FormShow(Sender: TObject);
 begin
   PageControl1.ActivePageIndex := 0;
   PctHexOsm.ActivePageIndex := 1;
+  BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
+  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
 end;
 
 procedure TFrmTripManager.FreeCustomData(const ACustomData: pointer);
@@ -1479,8 +1594,10 @@ procedure TFrmTripManager.ShellListView1KeyUp(Sender: TObject; var Key: Word; Sh
 begin
   if (ssCtrl in Shift) and
      (Key = Ord('A')) then
+  begin
     ShellListView1.SelectAll;
-  ShellListView1Click(Sender);
+    ShellListView1Click(Sender);
+  end;
 end;
 
 procedure TFrmTripManager.ShellTreeView1Change(Sender: TObject; Node: TTreeNode);
@@ -1504,7 +1621,7 @@ end;
 procedure TFrmTripManager.SpeedBtn_MapClearClick(Sender: TObject);
 begin
   DeleteTempFiles(GetOSMTemp, GetTracksMask);
-  MapRequest(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates), '');
+  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
 end;
 
 procedure TFrmTripManager.BtnAddToMapClick(Sender: TObject);
@@ -1541,7 +1658,7 @@ begin
     end
     else
     begin
-      SetFixedPrefs;
+      FrmAdvSettings.SetFixedPrefs;
       ProcessBegin := true;
       ProcessEnd := true;
       DoFunction([CreateOSMPoints], ShellListView1.SelectedFolder.PathName, OsmTrack);
@@ -1767,7 +1884,7 @@ var
         GpsCoords := TmScPosn(ANitem).MapCoords;
     end;
     if (ZoomToPoint) then
-      MapRequest(GpsCoords, LocationName);
+      MapRequest(GpsCoords, LocationName, PopupTimeout);
 
     with ALocation do
     begin
@@ -1853,7 +1970,7 @@ var
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s Type:%d', [AnUdbDir.DisplayName,
-                                       AnUdbDir.UdbDirValue.SubClass.PointType]));
+                                       AnUdbDir.UdbDirValue.SubClass.PointType]), PopupTimeout);
   end;
 
 
@@ -2095,7 +2212,7 @@ var
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-                 Format('%s', [AGPXWayPoint.Name]));
+                 Format('%s', [AGPXWayPoint.Name]), PopupTimeout);
 
   end;
 
@@ -2258,14 +2375,15 @@ procedure TFrmTripManager.VlTripInfoSelectCell(Sender: TObject; ACol, ARow: Inte
 var
   AGridSel: TGridSelItem;
 begin
-  BtnApplyCoords.Enabled := false;
+  BtnApplyCoords.Enabled := FrmTripEditor.Showing;
   AGridSel := TGridSelItem.GridSelItem(TValueListEditor(Sender), ARow -1);
   if not Assigned(AGridSel) then
     exit;
 
   SyncHexEdit(AGridSel);
 
-  BtnApplyCoords.Enabled := TGridSelItem.BaseDataItem(TValueListEditor(Sender), ARow -1) is TmScPosn;
+  BtnApplyCoords.Enabled := (TGridSelItem.BaseDataItem(TValueListEditor(Sender), ARow -1) is TmScPosn) or
+                             BtnApplyCoords.Enabled;
 end;
 
 procedure TFrmTripManager.VlTripInfoStringsChange(Sender: TObject);
@@ -2784,10 +2902,11 @@ begin
   TripGpiTimer.Enabled := true;
 end;
 
-procedure TFrmTripManager.MapRequest(const Coords, Desc: string);
+procedure TFrmTripManager.MapRequest(const Coords, Desc, TimeOut: string);
 begin
   FMapReq.Coords := Coords;
   FMapReq.Desc := Desc;
+  FMapReq.TimeOut := TimeOut;
   MapTimer.Enabled := false;
   MapTimer.Enabled := true;
 end;
@@ -2795,7 +2914,7 @@ end;
 procedure TFrmTripManager.MapTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
-  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s);', [FMapReq.Desc, FMapReq.Coords]));
+  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, %s);', [FMapReq.Desc, FMapReq.Coords, FMapReq.TimeOut]));
 end;
 
 procedure TFrmTripManager.CreateAdditionalClick(Sender: TObject);
@@ -2850,9 +2969,7 @@ var
   ANItem: TBaseItem;
   CurrentNode: TTreeNode;
   RootNode: TTreeNode;
-{$IFNDEF CLEARTREEVIEW}
   OldRoot: TTreeNode;
-{$ENDIF}
   TripName: string;
   ParentTripName: string;
 
@@ -2949,13 +3066,7 @@ begin
     PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
     if (TripName <> ParentTripName) then
       PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
-
-{$IFNDEF CLEARTREEVIEW}
     OldRoot := TvTrip.Items.GetFirstNode;
-{$ELSE}
-    TvTrip.Items.Clear;
-{$ENDIF}
-
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
     TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
@@ -2974,11 +3085,8 @@ begin
       end;
     end;
 
-{$IFNDEF CLEARTREEVIEW}
     if (OldRoot <> nil) then
       TvTrip.Items.Delete(OldRoot);
-{$ENDIF}
-
     RootNode.Selected := true;
     RootNode.Expand(false);
 
@@ -2990,6 +3098,7 @@ begin
 
     BtnSaveTripValues.Enabled := false;
     BtnSaveTripGpiFile.Enabled := false;
+    MnuTripEdit.Enabled := true;
 
     SetCursor(CrNormal);
   end;
@@ -3013,6 +3122,7 @@ begin
   ClearTripInfo;
   DeviceFile := FromDevice;
   HexEditFile := FileName;
+  MnuTripEdit.Enabled := false;
 
   try
     GPIRec.Read(AStream, APOIList, GetOSMTemp);
@@ -3111,59 +3221,6 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.SetFixedPrefs;
-var
-  ProcessWpt: boolean;
-  WayPtCat: integer;
-  WayPtList: TStringList;
-begin
-  EnableBalloon := false;
-  EnableTimeout := false;
-  TimeOut := 0;
-  MaxTries := 0;
-  DebugComments := 'False';
-
-  TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');
-  KMLTrackColor := '';
-  OSMTrackColor := 'Magenta';
-  GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
-  IniProximityStr := '500';
-
-  ProcessSubClass := true;
-  ProcessBegin := false;
-  ProcessEnd := false;
-  ProcessShape := false;
-  ShapingPointName := TShapingPointName.Unchanged;
-
-  // XT2 Defaults
-  ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
-  VehicleProfileGuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileGuid', XT2_VehicleProfileGuid);
-  VehicleProfileHash := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileHash', XT2_VehicleProfileHash);
-  VehicleId := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleId', XT2_VehicleId);
-
-
-  WayPtList := TStringList.Create;
-  try
-    WayPtList.Text := ProcessCategoryPick;
-    ProcessWpt := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true]);
-    WayPtCat := WayPtList.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', WayPtList[WayPtList.Count -1]));
-    ProcessCategory := [];
-    if (ProcessWpt) then
-    begin
-      case WayPtCat of
-        1: Include(ProcessCategory, pcSymbol);
-        2: Include(ProcessCategory, pcGPX);
-        3: begin
-             Include(ProcessCategory, pcSymbol);
-             Include(ProcessCategory, pcGPX);
-            end;
-      end;
-    end;
-  finally
-    WayPtList.Free;
-  end;
-end;
-
 procedure TFrmTripManager.ReadDefaultFolders;
 begin
   DeviceFolder[0] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevTripsFolder_Key, 'Internal Storage\.System\Trips');
@@ -3178,7 +3235,7 @@ begin
   ReadDefaultFolders;
   WarnModel := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True') = 'True');
   WarnRecalc := mrNone;
-  SetFixedPrefs;
+  FrmAdvSettings.SetFixedPrefs;
 end;
 
 // Drag and Drop methods

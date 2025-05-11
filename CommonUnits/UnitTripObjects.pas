@@ -1,5 +1,6 @@
 ﻿unit unitTripObjects;
 {.$DEFINE DEBUG_POS}
+{.$DEFINE DEBUG_ENUMS}
 interface
 
 uses
@@ -9,6 +10,11 @@ uses
 const
   XT2Name     = 'zūmo XT2';
   XTName      = 'zūmo XT';
+
+  XT2_VehicleProfileGuid  = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
+  XT2_VehicleProfileHash  = '135656608';
+  XT2_VehicleId           = '1';
+
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
@@ -23,7 +29,7 @@ type
                        rmPopular          = $ef);
   TTransportMode    = (tmAutoMotive       = 1,
                        tmMotorcycling     = 9,
-                        tmOffRoad         = 10);
+                       tmOffRoad          = 10);
   TRoutePoint       = (rpVia              = 0,
                        rpShaping          = 1,
                        rpShapingXT2       = 2);
@@ -524,6 +530,7 @@ type
     constructor Create; reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
+    procedure Clear;
     procedure AddLocatIon(ALocation: TLocation);
     function Add(ANItem: TBaseItem): TBaseItem;
     property Locations: TItemList read FItemList;
@@ -649,6 +656,8 @@ type
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function GetZumoModel: TZumoModel;
+    procedure CreateTemplate_XT(const TripName: string);
+    procedure CreateTemplate_XT2(const TripName: string);
   public
     constructor Create;
     destructor Destroy; override;
@@ -668,7 +677,7 @@ type
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const DisplayColor: string = 'Magenta');
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
-
+    procedure CreateTemplate(const AModel: TZumoModel; TripName: string);
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
     property ZumoModel: TZumoModel read GetZumoModel;
@@ -719,6 +728,35 @@ begin
   ParseLatLon(LatLon, Lat, Lon);
   result.Lat := CoordAsInt(UnitStringUtils.CoordAsDec(Lat));
   result.Lon := CoordAsInt(UnitStringUtils.CoordAsDec(Lon));
+end;
+
+// For some reason the degree character ° is stored on the Zumo as 0xe0b0 and not just 0xb0
+// For converting to and from Unicode these 2 functions are used.
+function FromPrivate(const AnUCS4String: UCS4String): UCS4String;
+var
+  Index: integer;
+begin
+  result := Copy(AnUCS4String);
+  for Index := Low(result) to High(result) do
+  begin
+    case result[Index] of
+      $0000e0b0:
+        result[Index] := $000000b0;
+    end;
+  end;
+end;
+
+procedure ToPrivate(var AnUCS4String: UCS4String);
+var
+  Index: integer;
+begin
+  for Index := Low(AnUCS4String) to High(AnUCS4String) do
+  begin
+    case AnUCS4String[Index] of
+      $000000b0:
+        AnUCS4String[Index] := $0000e0b0;
+    end;
+  end;
 end;
 
 procedure WideStringToUCS4Array(AWideString: WideString; var AnUCS4Array: array of UCS4Char);
@@ -1253,6 +1291,7 @@ begin
   Create(AName, Length(AValue));
 
   FValue := WideStringToUCS4String(AValue);
+  ToPrivate(FValue);
 end;
 
 constructor TStringItem.Create(AName: ShortString; AValue: UCS4String);
@@ -1293,7 +1332,7 @@ end;
 
 function TStringItem.GetValue: string;
 begin
-  result := UCS4StringToUnicodeString(FValue);
+  result := UCS4StringToUnicodeString(FromPrivate(FValue));
 end;
 
 function TStringItem.GetEditMode: TEditMode;
@@ -1304,6 +1343,7 @@ end;
 procedure TStringItem.SetValue(NewValue: string);
 begin
   FValue := UnicodeStringToUCS4String(NewValue);
+  ToPrivate(FValue);
   FByteSize := Swap(Length(NewValue) * SizeOf(UCS4Char));
 end;
 
@@ -1483,7 +1523,9 @@ function TmRoutePreference.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, RoutePreferenceMap)) then
     result := 'N/A';
+{$IFDEF DEBUG_ENUMS}
   result := result + Format(' (%d)', [FValue]);
+{$ENDIF}
 end;
 
 procedure TmRoutePreference.SetValue(AValue: string);
@@ -1502,7 +1544,12 @@ var
 begin
   result := '';
   for Index := 0 to High(RoutePreferenceMap) do
-    result := result + RoutePreferenceMap[index].Name + #10;
+    result := result + RoutePreferenceMap[index].Name +
+{$IFDEF DEBUG_ENUMS}
+                       Format(' (%d)', [RoutePreferenceMap[Index].Value]) +
+{$ENDIF}
+                       #10;
+
 end;
 
 constructor TmTransportationMode.Create(AValue: TTransportMode = tmMotorcycling);
@@ -1524,7 +1571,9 @@ function TmTransportationMode.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, TransportModeMap)) then
     result := 'N/A';
+{$IFDEF DEBUG_ENUMS}
   result := result + Format(' (%d)', [FValue]);
+{$ENDIF}
 end;
 
 procedure TmTransportationMode.SetValue(AValue: string);
@@ -1543,7 +1592,11 @@ var
 begin
   result := '';
   for Index := 0 to High(TransportModeMap) do
-    result := result + TransportModeMap[Index].Name + #10;
+    result := result + TransportModeMap[Index].Name +
+{$IFDEF DEBUG_ENUMS}
+                       Format(' (%d)', [TransportModeMap[Index].Value]) +
+{$ENDIF}
+                       #10;
 end;
 
 constructor TmTotalTripDistance.Create(AValue: single = 0);
@@ -1885,6 +1938,14 @@ begin
 end;
 
 destructor TmLocations.Destroy;
+begin
+  Clear;
+  FreeAndNil(FItemList);
+
+  inherited Destroy;
+end;
+
+procedure TmLocations.Clear;
 var
   AnItem: TBaseItem;
 begin
@@ -1892,10 +1953,9 @@ begin
   begin
     for ANitem in FItemList do
       ANitem.Free;
-
-    FreeAndNil(FItemList);
   end;
-  inherited Destroy;
+  FItemList.Clear;
+  FItemCount := 0;
 end;
 
 procedure TmLocations.AddLocatIon(ALocation: TLocation);
@@ -2752,6 +2812,116 @@ begin
   begin
     if (Length(AnUdbHandle.FValue.Unknown3) = Unknown3Size[AModel]) then
       exit(AModel);
+  end;
+end;
+
+procedure TTripList.CreateTemplate_XT(const TripName: string);
+begin
+  AddHeader(THeader.Create);
+  Add(TmPreserveTrackToRoute.Create);
+  Add(TmParentTripId.Create(0));
+  Add(TmDayNumber.Create);
+  Add(TmTripDate.Create);
+  Add(TmIsDisplayable.Create);
+  Add(TmAvoidancesChanged.Create);
+  Add(TmIsRoundTrip.Create);
+  Add(TmParentTripName.Create(TripName));
+  Add(TmOptimized.Create);
+  Add(TmTotalTripTime.Create);
+  Add(TmImported.Create);
+  Add(TmRoutePreference.Create(TRoutePreference.rmFasterTime));
+  Add(TmTransportationMode.Create(TTransportMode.tmMotorcycling));
+  Add(TmTotalTripDistance.Create);
+  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmLocations.Create);
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmVersionNumber.Create);
+  Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
+  Add(TmTripName.Create(TripName));
+
+  // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
+  ForceRecalc(TZumoModel.XT, 2);
+end;
+
+procedure TTripList.CreateTemplate_XT2(const TripName: string);
+var
+  TmpStream: TMemoryStream;
+  Uid: TGuid;
+
+  procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);
+  begin
+    TmpStream.Clear;
+    TmpStream.Write(Buffer, SizeOf(Buffer));
+    TmpStream.Position := 0;
+  end;
+
+begin
+  TmpStream := TMemoryStream.Create;
+  try
+    AddHeader(THeader.Create);
+
+    PrepStream(TmpStream, [$0000]);
+    Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
+
+    Add(TmAvoidancesChangedTimeAtSave.Create(Now));
+
+    PrepStream(TmpStream, [$0000]);
+    Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
+
+    Add(TmIsDisplayable.Create);
+    Add(TBooleanItem.Create('mIsDeviceRoute', true));
+    Add(TmDayNumber.Create);
+    Add(TmTripDate.Create);
+    Add(TmOptimized.Create);
+    Add(TmTotalTripTime.Create);
+    Add(TmTripName.Create(TripName));
+    Add(TStringItem.Create('mVehicleProfileGuid', XT2_VehicleProfileGuid));
+    Add(TmParentTripId.Create(0));
+    Add(TmIsRoundTrip.Create);
+    Add(TStringItem.Create('mVehicleProfileName', 'z' + #0361 + 'mo Motorcycle'));
+    Add(TmAvoidancesChanged.Create);
+    Add(TmParentTripName.Create(TripName));
+    Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
+    Add(TCardinalItem.Create('mVehicleProfileHash', StrToIntDef(XT2_VehicleProfileHash, 0)));
+    Add(TmRoutePreferences.Create);
+    Add(TmImported.Create);
+    Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+
+    CheckHRGuid(CreateGUID(Uid));
+    Add(TStringItem.Create('mExploreUuid',
+                            ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
+
+    Add(TmVersionNumber.Create(4, $10));
+    Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
+    Add(TmTotalTripDistance.Create);
+    Add(TByteItem.Create('mVehicleId', 1));
+    Add(TmRoutePreferencesAdventurousScenicRoads.Create);
+    Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
+    Add(TmRoutePreferencesAdventurousPopularPaths.Create);
+    Add(TmPartOfSplitRoute.Create);
+    Add(TmRoutePreference.Create(TRoutePreference.rmFasterTime));
+    Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
+    Add(TmRoutePreferencesAdventurousMode.Create);
+    Add(TmTransportationMode.Create(TTransportMode.tmMotorcycling));
+    Add(TmLocations.Create);
+
+    // Create dummy AllRoutes, and complete RoutePreferences
+    ForceRecalc(TZumoModel.XT2, 2);
+  finally
+    TmpStream.Free;
+  end;
+end;
+
+procedure TTripList.CreateTemplate(const AModel: TZumoModel; TripName: string);
+begin
+  Clear;
+  case AModel of
+    TZumoModel.XT:
+      CreateTemplate_XT(TripName);
+    TZumoModel.XT2:
+      CreateTemplate_XT2(TripName);
+    else
+      CreateTemplate_XT(TripName);
   end;
 end;
 
