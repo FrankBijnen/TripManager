@@ -1112,7 +1112,7 @@ begin
             continue;
 
           ObJName := PropValToName(Prop_Val);
-          if (FileId = ObjName) then
+          if SameText(FileId, ObjName) then
           begin
             result := ObjId;
             exit;

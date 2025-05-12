@@ -158,8 +158,9 @@ type
     SpltRoutePoint: TSplitter;
     BtnCreateAdditional: TButton;
     PopupTripEdit: TPopupMenu;
-    MnuTripNew: TMenuItem;
+    MnuTripNewZumo: TMenuItem;
     MnuTripEdit: TMenuItem;
+    NewtripWindows1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -233,7 +234,9 @@ type
     procedure BtnGeoSearchClick(Sender: TObject);
     procedure BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MnuTripEditClick(Sender: TObject);
-    procedure MnuTripNewClick(Sender: TObject);
+    procedure MnuTripNewZumoClick(Sender: TObject);
+    procedure NewtripWindows1Click(Sender: TObject);
+    procedure PopupTripEditPopup(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -306,6 +309,7 @@ type
     procedure ReadDefaultFolders;
     procedure ReadSettings;
     procedure ClearTripInfo;
+    procedure EditTrip(NewFile: boolean);
   protected
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
@@ -313,8 +317,11 @@ type
     { Public declarations }
     DeviceFolder: array[0..2] of string;
     procedure CheckSupportedModel;
+    procedure ReloadTripOnMap(Sender: TObject);
     procedure RoutePointsShowing(Sender: TObject; Showing: boolean);
     procedure RoutePointUpdated(Sender: TObject);
+    procedure TripFileUpdating(Sender: TObject);
+    procedure TripFileUpdated(Sender: TObject);
     function GetMapCoords: string;
     property OnCoordinatesApplied: TCoordinatesAppliedEvent read FOnCoordinatesApplied write FOnCoordinatesApplied;
   end;
@@ -833,9 +840,42 @@ begin
   result := EditMapCoords.Text;
 end;
 
+procedure TFrmTripManager.EditTrip(NewFile: boolean);
+begin
+  TvTrip.Items.Clear;
+  ClearTripInfo;
+
+  if (NewFile) then
+    ATripList.CreateTemplate(TZumoModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
+
+  FrmTripEditor.CurPath := ShellTreeView1.Path;
+  FrmTripEditor.CurTripList := ATripList;
+  FrmTripEditor.CurFile := HexEditFile;
+  FrmTripEditor.CurDevice := DeviceFile;
+  FrmTripEditor.CurNewFile := NewFile;
+  FrmTripEditor.OnTripFileUpdating := TripFileUpdating;
+  FrmTripEditor.OnTripFileUpdated := TripFileUpdated;
+  FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
+
+  DmRoutePoints.OnGetMapCoords := GetMapCoords;
+  DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
+
+  FrmTripEditor.Left := Left;
+  FrmTripEditor.Width := FrmTripEditor.Constraints.MinWidth;
+  FrmTripEditor.Show;
+end;
+
+procedure TFrmTripManager.ReloadTripOnMap(Sender: TObject);
+begin
+  DmRoutePoints.SaveTrip;
+  FrmTripEditor.CurTripList.ForceRecalc;
+  LoadTripOnMap(FrmTripEditor.CurTripList, CurrentTrip);
+end;
+
 procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
 var
   CanSelect: boolean;
+  CurSel: integer;
 begin
   DmRoutePoints.OnRoutePointUpdated := nil;
   OnCoordinatesApplied := nil;
@@ -843,9 +883,58 @@ begin
   begin
     OnCoordinatesApplied := DmRoutePoints.CoordinatesApplied;
     DmRoutePoints.OnRoutePointUpdated := RoutePointUpdated;
+  end
+  else
+  begin
+    if (DeviceFile) then
+    begin
+      // Save currently selected trip
+      if Assigned(LstFiles.Selected) then
+        CurSel := LstFiles.Selected.Index
+      else
+        CurSel := -1;
+
+      ReloadFileList;
+      // Need to (re)select?
+      if (CurSel > -1) and
+         (CurSel < LstFiles.items.Count) then
+        LstFiles.Items[CurSel].Selected := true;
+    end;
   end;
+
   CanSelect := false;
   VlTripInfoSelectCell(VlTripInfo, VlTripInfo.Col, VlTripInfo.Row, CanSelect);
+end;
+
+procedure TFrmTripManager.TripFileUpdating(Sender: TObject);
+begin
+  TvTrip.Items.Clear;
+  ClearTripInfo;
+end;
+
+procedure TFrmTripManager.TripFileUpdated(Sender: TObject);
+begin
+  if (FrmTripEditor.CurNewFile = false) then
+  begin
+    ShowWarnRecalc;
+    if (WarnRecalc = mrNo) then
+      exit;
+  end;
+
+  ATripList.ForceRecalc;
+  ATripList.SaveToFile(HexEditFile);
+  if not (DeviceFile) then
+    BtnRefreshFileSysClick(Sender)
+  else
+  begin
+    if (FrmTripEditor.CurNewFile = false) then
+      CopyFileFromTmp(HexEditFile, LstFiles.Selected)
+    else
+    begin
+      if (TransferNewFileToDevice(CurrentDevice.PortableDev, HexEditFile, FSavedFolderId) = '') then
+        raise exception.Create('Writing file failed');
+    end;
+  end;
 end;
 
 procedure TFrmTripManager.BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -892,7 +981,6 @@ begin
   finally
     Writer.Free;
   end;
-
 end;
 
 procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
@@ -1041,6 +1129,11 @@ end;
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
 begin
   ShellExecute(0, 'OPEN', PWideChar(CreatedTempPath), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
+begin
+  MnuTripNewZumo.Enabled := CheckDevice(false);
 end;
 
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);
@@ -1239,40 +1332,46 @@ begin
   EdgeZoom := AZoomFactor;
 end;
 
-procedure TFrmTripManager.MnuTripNewClick(Sender: TObject);
+procedure TFrmTripManager.MnuTripNewZumoClick(Sender: TObject);
 begin
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
+
+  ReadDefaultFolders;
   FrmNewTrip.DevicePath := DeviceFolder[0];
-  FrmNewTrip.CurPath := ShellTreeView1.Path;
+
+  FrmNewTrip.CurrentDevice := CurrentDevice;
+  SetCurrentPath(DeviceFolder[0]);
+  FrmNewTrip.SavedFolderId := FSavedFolderId;
+  DeviceFile := true;
 
   if (FrmNewTrip.ShowModal = mrOk) then
   begin
-    DeviceFile := FrmNewTrip.ChkDevice.Checked;
-    if (DeviceFile) then
-      HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension)
-    else
-      HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
+    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
+    EditTrip(true);
+  end;
+end;
 
-    ATripList.CreateTemplate(TZumoModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
-    MnuTripEditClick(Sender);
+procedure TFrmTripManager.NewtripWindows1Click(Sender: TObject);
+begin
+  if not Assigned(ATripList) then
+    ATripList := TTripList.Create;
+
+  FrmNewTrip.SavedFolderId := '';
+  FrmNewTrip.CurrentDevice := nil;
+  FrmNewTrip.CurPath := ShellTreeView1.Path;
+  DeviceFile := false;
+
+  if (FrmNewTrip.ShowModal = mrOk) then
+  begin
+    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
+    EditTrip(true);
   end;
 end;
 
 procedure TFrmTripManager.MnuTripEditClick(Sender: TObject);
 begin
-  FrmTripEditor.CurPath := ShellTreeView1.Path;
-  FrmTripEditor.CurTripList := ATripList;
-  FrmTripEditor.CurFile := HexEditFile;
-  FrmTripEditor.CurDevice := DeviceFile;
-
-  FrmTripEditor.OnTripFileUpdated := BtnSaveTripValuesClick;
-  FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
-  DmRoutePoints.OnGetMapCoords := GetMapCoords;
-
-  FrmTripEditor.Left := Left;
-  FrmTripEditor.Width := FrmTripEditor.Constraints.MinWidth;
-  FrmTripEditor.Show;
+  EditTrip(false);
 end;
 
 procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

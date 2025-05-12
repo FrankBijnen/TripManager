@@ -184,7 +184,7 @@ object FrmTripEditor: TFrmTripEditor
         ImageIndex = 1
         ImageName = 'AddPoint'
         Wrap = True
-        OnClick = ToolButton3Click
+        OnClick = TbInsertPointClick
       end
       object TbDeletePoint: TToolButton
         Left = 0
@@ -193,7 +193,7 @@ object FrmTripEditor: TFrmTripEditor
         ImageIndex = 2
         ImageName = 'DeletePoint'
         Wrap = True
-        OnClick = ToolButton2Click
+        OnClick = TbDeletePointClick
       end
       object TBMoveDown: TToolButton
         Left = 0

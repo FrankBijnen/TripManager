@@ -20,7 +20,7 @@ type
     property InplaceEditor;
   end;
 
-  TTripFileUpdated = TNotifyEvent;
+  TTripFileUpdate = TNotifyEvent;
   TRoutePointsShowing = procedure(Sender: TObject; Showing: boolean) of object;
 
   TFrmTripEditor = class(TForm)
@@ -77,8 +77,8 @@ type
     procedure Delete1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure DBGRoutePointsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure ToolButton3Click(Sender: TObject);
-    procedure ToolButton2Click(Sender: TObject);
+    procedure TbInsertPointClick(Sender: TObject);
+    procedure TbDeletePointClick(Sender: TObject);
     procedure TbMoveUpClick(Sender: TObject);
     procedure TBMoveDownClick(Sender: TObject);
     procedure TbLookupAddressClick(Sender: TObject);
@@ -90,7 +90,8 @@ type
     procedure Paste1Click(Sender: TObject);
   private
     { Private declarations }
-    FTripFileUpdated: TTripFileUpdated;
+    FTripFileUpdating: TTripFileUpdate;
+    FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
     procedure CopyToClipBoard(Cut: boolean);
   public
@@ -98,9 +99,11 @@ type
     CurPath: string;
     CurTripList: TTripList;
     CurFile: string;
+    CurNewFile: boolean;
     CurDevice: boolean;
     CurModel: TZumoModel;
-    property OnTripFileUpdated: TTripFileUpdated read FTripFileUpdated write FTripFileUpdated;
+    property OnTripFileUpdating: TTripFileUpdate read FTripFileUpdating write FTripFileUpdating;
+    property OnTripFileUpdated: TTripFileUpdate read FTripFileUpdated write FTripFileUpdated;
     property OnRoutePointsShowing: TRoutePointsShowing read FRoutePointsShowing write FRoutePointsShowing;
   end;
 
@@ -167,6 +170,9 @@ procedure TFrmTripEditor.BtnOkClick(Sender: TObject);
 begin
   if (DmRoutePoints.CdsRoutePoints.RecordCount < 2) then
     raise Exception.Create('Need at least a begin and end point.');
+
+  if Assigned(FTripFileUpdating) then
+    FTripFileUpdating(Self);
 
   DmRoutePoints.CdsRoute.Edit;
   DmRoutePoints.CdsRouteDepartureDate.AsDateTime := DTDepartureDate.DateTime;
@@ -291,7 +297,7 @@ begin
 
   DBCRoutePreference.Items.Text := DmRoutePoints.RoutePickList;
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
-  DmRoutePoints.LoadTrip(CurTripList, CurFile);
+  DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
 
   CmbModel.ItemIndex := Ord(CurTripList.ZumoModel);
@@ -493,11 +499,10 @@ end;
 procedure TFrmTripEditor.TbMoveUpClick(Sender: TObject);
 begin
   DBGRoutePoints.SelectedRows.Clear;
-
   DmRoutePoints.MoveUp(DmRoutePoints.CdsRoutePoints);
 end;
 
-procedure TFrmTripEditor.ToolButton2Click(Sender: TObject);
+procedure TFrmTripEditor.TbDeletePointClick(Sender: TObject);
 var
   Index: integer;
   MyBook: TBookmark;
@@ -512,10 +517,9 @@ begin
   DBGRoutePoints.SelectedRows.Clear;
 end;
 
-procedure TFrmTripEditor.ToolButton3Click(Sender: TObject);
+procedure TFrmTripEditor.TbInsertPointClick(Sender: TObject);
 begin
   DBGRoutePoints.SelectedRows.Clear;
-
   DmRoutePoints.CdsRoutePoints.Insert;
   DmRoutePoints.CdsRoutePoints.Post;
 end;
@@ -528,17 +532,19 @@ var
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+  MyBook := DmRoutePoints.CdsRoutePoints.GetBookmark;
   try
     if (DmRoutePoints.CdsRoutePoints.state in [dsInsert, dsEdit]) then
       DmRoutePoints.CdsRoutePoints.Post;
     DBGRoutePoints.SelectedRows.CurrentRowSelected := true; // Select at least one row
     for Index := 0 to DBGRoutePoints.SelectedRows.Count -1 do
     begin
-      MyBook := DBGRoutePoints.SelectedRows[Index];
-      DmRoutePoints.CdsRoutePoints.GotoBookmark(MyBook);
+      DmRoutePoints.CdsRoutePoints.GotoBookmark(DBGRoutePoints.SelectedRows[Index]);
       DmRoutePoints.LookUpAddress;
     end;
   finally
+    DmRoutePoints.CdsRoutePoints.GotoBookmark(MyBook);
+    DmRoutePoints.CdsRoutePoints.FreeBookmark(MyBook);
     SetCursor(CrNormal);
   end;
 end;

@@ -1952,7 +1952,7 @@ begin
   if (Assigned(FItemList)) then
   begin
     for ANitem in FItemList do
-      ANitem.Free;
+      FreeAndNil(ANitem);
   end;
   FItemList.Clear;
   FItemCount := 0;
@@ -2348,7 +2348,7 @@ begin
   if (Assigned(ItemList)) then
   begin
     for ANitem in ItemList do
-      ANitem.Free;
+      FreeAndNil(ANitem);
 
     ItemList.Clear;
   end;
@@ -2630,16 +2630,17 @@ var
   Locations: TmLocations;
   Location: TBaseItem;
   ANItem: TBaseItem;
+  IsCalculated: boolean;
 begin
   OutStringList.Clear;
   TripName := TmTripName(GetItem('mTripName'));
   if (not Assigned(TripName)) then
     exit;
 
+  TrackPoints := 0;
   AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
   if (Assigned(AllRoutes)) then
   begin
-    TrackPoints := 0;
     for UdbDataHndl in AllRoutes.Items do
     begin
       for UdbDir in UdbDataHndl.Items do
@@ -2648,8 +2649,8 @@ begin
         Inc(TrackPoints);
       end;
     end;
-    OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));
   end;
+  IsCalculated := (TrackPoints > 0);
 
   Locations := TmLocations(GetItem('mLocations'));
   if (Assigned(Locations)) then
@@ -2678,6 +2679,12 @@ begin
             Coords := TmScPosn(ANItem).GetMapCoords;
         end;
 
+        if (IsCalculated = false) then
+        begin
+          OutStringList.Add(Format('AddTrkPoint(%d,%s);', [TrackPoints, Coords], FloatFormatSettings ) );
+          Inc(TrackPoints);
+        end;
+
         OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, "%s");',
                                  [RoutePoints,
                                   EscapeDQuote(PointName),
@@ -2685,6 +2692,8 @@ begin
                                   Color]));
       end;
     end;
+    OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));
+
   end;
 end;
 
@@ -2740,7 +2749,7 @@ begin
   begin
     // Clear all UdbHandles from AllRoutes
     for AnUdbHandle in TmAllRoutes(AllRoutes).Items do
-      AnUdbHandle.Free;
+      FreeAndNil(AnUdbHandle);
     TmAllRoutes(AllRoutes).Items.Clear;
   end;
 

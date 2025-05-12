@@ -1114,7 +1114,7 @@ object FrmTripManager: TFrmTripManager
     end
   end
   object PopupTripInfo: TPopupMenu
-    Left = 362
+    Left = 378
     Top = 393
     object CopyValueFromTrip: TMenuItem
       Caption = 'Copy value from trip file'
@@ -1137,11 +1137,16 @@ object FrmTripManager: TFrmTripManager
     Top = 393
   end
   object PopupTripEdit: TPopupMenu
-    Left = 275
+    OnPopup = PopupTripEditPopup
+    Left = 283
     Top = 394
-    object MnuTripNew: TMenuItem
-      Caption = 'New'
-      OnClick = MnuTripNewClick
+    object MnuTripNewZumo: TMenuItem
+      Caption = 'New trip (Zumo)'
+      OnClick = MnuTripNewZumoClick
+    end
+    object NewtripWindows1: TMenuItem
+      Caption = 'New trip (Windows)'
+      OnClick = NewtripWindows1Click
     end
     object MnuTripEdit: TMenuItem
       Caption = 'Edit'

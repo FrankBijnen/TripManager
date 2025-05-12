@@ -49,20 +49,20 @@ type
     FRoutePickList: string;
     FTransportPickList: string;
     FTripList: TTripList;
-    FFileName: string;
     IdToInsert: integer;
 
+    FOnRouteUpdated: TNotifyEvent;
     FOnRoutePointUpdated: TNotifyEvent;
     FOnGetMapCoords: TOnGetMapCoords;
+    procedure DoRouteUpdated;
     procedure DoRoutePointUpdated;
     function CheckEmptyField(Sender: TField): boolean;
     procedure SetAddressFromCoords(Sender: TObject; Coords: string);
-
   public
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
     function NameExists(Name: string): boolean;
-    procedure LoadTrip(ATripList: TTripList; FileName: string);
+    procedure LoadTrip(ATripList: TTripList);
     procedure SaveTrip;
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
@@ -70,6 +70,7 @@ type
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure LookUpAddress;
     procedure ExportToGPX(GPXFile: string);
+    property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
     property RoutePickList: string read FRoutePickList;
@@ -125,6 +126,14 @@ begin
     FOnRoutePointUpdated(Self);
 end;
 
+procedure TDmRoutePoints.DoRouteUpdated;
+begin
+  if (CdsRoutePoints.ControlsDisabled) then
+    exit;
+  if Assigned(FOnRouteUpdated) then
+    FOnRouteUpdated(Self);
+end;
+
 // Renumber Route points
 procedure TDmRoutePoints.CdsRoutePointsAfterDelete(DataSet: TDataSet);
 var
@@ -149,6 +158,7 @@ begin
     CdsRoutePoints.FreeBookmark(MyBook);
     CdsRoutePoints.EnableControls;
   end;
+  DoRouteUpdated;
 end;
 
 procedure TDmRoutePoints.CdsRoutePointsAfterInsert(DataSet: TDataSet);
@@ -165,6 +175,7 @@ end;
 
 procedure TDmRoutePoints.CdsRoutePointsAfterPost(DataSet: TDataSet);
 begin
+  DoRouteUpdated;
   DoRoutePointUpdated;
 end;
 
@@ -360,9 +371,9 @@ begin
     Locations := TmLocations(FTripList.GetItem('mLocations'));
     if not (Assigned(Locations)) then
       exit;
-    Locations.Clear;
     ZumoModel := FTripList.ZumoModel;
 
+    Locations.Clear;
     CdsRoutePoints.First;
     while not CdsRoutePoints.Eof do
     begin
@@ -410,14 +421,9 @@ begin
       if (ANItem <> nil) then
         TmArrival(ANItem).AsUnixDateTime := TmArrival(ANItem).DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
     end;
-
-
   finally
     TmpStream.Free;
     CdsRoutePoints.EnableControls;
-
-    FTripList.ForceRecalc;
-    FTripList.SaveToFile(FFileName);
   end;
 end;
 
@@ -434,14 +440,13 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.LoadTrip(ATripList: TTripList; FileName: string);
+procedure TDmRoutePoints.LoadTrip(ATripList: TTripList);
 var
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
   LatLon: string;
 begin
   FTripList := ATripList;
-  FFileName := FileName;
   CdsRoute.Close;
   CdsRoute.DisableControls;
   CdsRoute.ReadOnly := false;
@@ -526,6 +531,7 @@ begin
 
     CdsRoutePoints.First;
     CdsRoutePoints.EnableControls;
+
     DoRoutePointUpdated;  // Now filter tagnames
   end;
 end;
