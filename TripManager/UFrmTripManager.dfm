@@ -1142,6 +1142,7 @@ object FrmTripManager: TFrmTripManager
     Top = 394
     object MnuTripNewZumo: TMenuItem
       Caption = 'New trip (Zumo)'
+      Enabled = False
       OnClick = MnuTripNewZumoClick
     end
     object NewtripWindows1: TMenuItem

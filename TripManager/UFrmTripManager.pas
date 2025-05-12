@@ -877,8 +877,6 @@ var
   CanSelect: boolean;
   CurSel: integer;
 begin
-  DmRoutePoints.OnRoutePointUpdated := nil;
-  OnCoordinatesApplied := nil;
   if Showing then
   begin
     OnCoordinatesApplied := DmRoutePoints.CoordinatesApplied;
@@ -886,7 +884,10 @@ begin
   end
   else
   begin
-    if (DeviceFile) then
+    DmRoutePoints.OnRoutePointUpdated := nil;
+    OnCoordinatesApplied := nil;
+    if (DeviceFile) and
+       (BgDevice.ItemIndex = 0) then
     begin
       // Save currently selected trip
       if Assigned(LstFiles.Selected) then
@@ -2906,7 +2907,7 @@ begin
       2: DeleteTempFiles(CreatedTempPath, GPIMask);
     end;
 
-    // LstFile.Items should contain a least a Caption (Filename) and 4 subitems Date, Time, Ext and Size.
+    // LstFile.Items should contain at least a Caption (Filename) and 4 subitems Date, Time, Ext and Size.
     // ReadFilesFromDevice will populate the data.
     // It returns the Parent ObjectId, we save it to be able to navigate to the parent directory.
     // Defined in the Listview on the form.
