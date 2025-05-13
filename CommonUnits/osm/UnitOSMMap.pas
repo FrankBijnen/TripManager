@@ -182,14 +182,16 @@ begin
   Html.Add('  }');
 
   // OpenLayers uses LonLat, not LatLon. Confusing maybe,
-  Html.Add('  function PopupAtPoint(Href, PointLat, PointLon, PopupTimeOut){');
+  Html.Add('  function PopupAtPoint(Href, PointLat, PointLon, ZoomToPoint, PopupTimeOut){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     var line_string = new OpenLayers.Geometry.LineString(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
-  Html.Add('     line_string.calculateBounds();');
-  Html.Add('     var bounds = new OpenLayers.Bounds();');
-  Html.Add('     bounds.extend(line_string.bounds);');
-  Html.Add('     map.zoomToExtent(bounds);');
-  Html.Add('     map.zoomTo(' + InitialZoom_Point + ');');
+  Html.Add('     if (ZoomToPoint) {');
+  Html.Add('       var line_string = new OpenLayers.Geometry.LineString(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
+  Html.Add('       line_string.calculateBounds();');
+  Html.Add('       var bounds = new OpenLayers.Bounds();');
+  Html.Add('       bounds.extend(line_string.bounds);');
+  Html.Add('       map.zoomToExtent(bounds);');
+  Html.Add('       map.zoomTo(ZoomToPoint);');
+  Html.Add('     }');
   Html.Add('     if (Href) {');
   Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
   Html.Add('       map.addPopup(popup, true);');

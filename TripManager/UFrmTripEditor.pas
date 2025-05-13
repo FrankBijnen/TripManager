@@ -434,6 +434,8 @@ begin
         end;
       finally
         DmRoutePoints.CdsRoutePoints.EnableControls;
+        if Assigned(DmRoutePoints.OnRouteUpdated) then
+          DmRoutePoints.OnRouteUpdated(Self);
       end;
     end;
   finally

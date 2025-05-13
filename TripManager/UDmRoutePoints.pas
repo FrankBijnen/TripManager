@@ -124,8 +124,6 @@ end;
 
 procedure TDmRoutePoints.DoRoutePointUpdated;
 begin
-  if (FZoomToPoint = false) then
-    exit;
   if (CdsRoutePoints.ControlsDisabled) then
     exit;
   if Assigned(FOnRoutePointUpdated) then

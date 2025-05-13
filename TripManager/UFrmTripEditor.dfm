@@ -178,7 +178,6 @@ object FrmTripEditor: TFrmTripEditor
       List = True
       AllowTextButtons = True
       TabOrder = 0
-      ExplicitWidth = 34
       object TbMoveUp: TToolButton
         Left = 0
         Top = 0
@@ -240,7 +239,6 @@ object FrmTripEditor: TFrmTripEditor
       Height = 20
       Align = alTop
       TabOrder = 1
-      ExplicitWidth = 34
     end
   end
   object PnlRoute: TPanel
