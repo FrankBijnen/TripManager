@@ -19,7 +19,7 @@ object DmRoutePoints: TDmRoutePoints
     AfterDelete = CdsRoutePointsAfterDelete
     AfterScroll = CdsRoutePointsAfterScroll
     OnCalcFields = CdsRoutePointsCalcFields
-    Left = 42
+    Left = 50
     Top = 108
     object CdsRoutePointsId: TIntegerField
       FieldName = 'Id'

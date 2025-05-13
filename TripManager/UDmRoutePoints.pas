@@ -192,8 +192,7 @@ procedure TDmRoutePoints.CdsRoutePointsBeforeInsert(DataSet: TDataSet);
 var
   MyBook: TBookmark;
 begin
-  if (DataSet.ControlsDisabled) or
-     (Dataset.RecordCount = 0) or
+  if (Dataset.RecordCount = 0) or
      (Dataset.RecNo = Dataset.RecordCount) then // Last record, appends
     IdToInsert := DataSet.RecordCount +1
   else
@@ -245,11 +244,12 @@ end;
 
 procedure TDmRoutePoints.CdsRoutePointsViaPointGetText(Sender: TField; var Text: string; DisplayText: Boolean);
 begin
-  Text:='';
+  Text:=''; // In case Boolean is null
   if (Sender.IsNull = false) and
      (SameText(Sender.Value, BooleanTrue)) then
-     Text := BooleanValues[Sender.Tag, 0]
-  else
+     Text := BooleanValues[Sender.Tag, 0];
+  if (Sender.IsNull = false) and
+     (SameText(Sender.Value, BooleanFalse)) then
      Text := BooleanValues[Sender.Tag, 1];
 end;
 
@@ -505,15 +505,7 @@ begin
     Locations := TmLocations(FTripList.GetItem('mLocations'));
     if not (Assigned(Locations)) or
        (Locations.LocationCount = 0) then
-    begin
-      CdsRoutePoints.Insert; // Id is autoassigned
-      SetDefaultName(IdToInsert);
-      CdsRoutePointsViaPoint.AsBoolean := true;
-      if Assigned(FOnGetMapCoords) then
-        SetAddressFromCoords(CdsRoutePoints, FOnGetMapCoords);
-      CdsRoutePoints.Post;
       exit;
-    end;
 
     for Location in Locations.Locations do
     begin

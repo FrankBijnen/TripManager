@@ -93,6 +93,7 @@ type
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
+    FTripFileCanceled: TTripFileUpdate;
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
     procedure CopyToClipBoard(Cut: boolean);
@@ -104,6 +105,7 @@ type
     CurNewFile: boolean;
     CurDevice: boolean;
     CurModel: TZumoModel;
+    property OnTripFileCanceled: TTripFileUpdate read FTripFileCanceled write FTripFileCanceled;
     property OnTripFileUpdating: TTripFileUpdate read FTripFileUpdating write FTripFileUpdating;
     property OnTripFileUpdated: TTripFileUpdate read FTripFileUpdated write FTripFileUpdated;
     property OnRoutePointsShowing: TRoutePointsShowing read FRoutePointsShowing write FRoutePointsShowing;
@@ -165,6 +167,10 @@ end;
 
 procedure TFrmTripEditor.BtnCancelClick(Sender: TObject);
 begin
+// Restore Trip
+  if  Assigned(FTripFileCanceled) then
+      FTripFileCanceled(Self);
+
   Close;
 end;
 
@@ -215,6 +221,9 @@ begin
     DBGRoutePoints.SelectedRows.Clear;
   finally
     DmRoutePoints.CdsRoutePoints.EnableControls;
+    if Cut and
+       Assigned(DmRoutePoints.OnRouteUpdated) then
+      DmRoutePoints.OnRouteUpdated(Self);
     PointsList.Free;
   end;
 end;
@@ -249,7 +258,24 @@ procedure TFrmTripEditor.DBGRoutePointsKeyDown(Sender: TObject; var Key: Word; S
 var
   NewSelStart: integer;
 begin
+
+  if (ssCtrl in Shift) then
+  begin
+    case Key of
+      VK_HOME:
+        DmRoutePoints.CdsRoutePoints.First;
+      VK_END:
+        DmRoutePoints.CdsRoutePoints.Last;
+    end;
+    exit;
+  end;
+
   case Key of
+    VK_DOWN:
+      begin
+        if (DmRoutePoints.CdsRoutePoints.RecNo = DmRoutePoints.CdsRoutePoints.RecordCount) then
+          Key := 0;
+      end;
     VK_HOME,
     VK_END,
     VK_INSERT,
@@ -489,6 +515,8 @@ begin
   finally
     PointsList.Free;
     DmRoutePoints.CdsRoutePoints.EnableControls;
+    if Assigned(DmRoutePoints.OnRouteUpdated) then
+      DmRoutePoints.OnRouteUpdated(Self);
   end;
 end;
 
@@ -528,10 +556,10 @@ begin
     end;
     DBGRoutePoints.SelectedRows.Clear;
   finally
-    if (SavedRecNo < DmRoutePoints.CdsRoutePoints.RecordCount) then
-      DmRoutePoints.CdsRoutePoints.RecNo := SavedRecNo
+    if (SavedRecNo > DmRoutePoints.CdsRoutePoints.RecordCount) then
+      DmRoutePoints.CdsRoutePoints.Last
     else
-      DmRoutePoints.CdsRoutePoints.First;
+      DmRoutePoints.CdsRoutePoints.RecNo := SavedRecNo;
   end;
 end;
 

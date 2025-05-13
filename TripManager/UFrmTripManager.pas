@@ -321,6 +321,7 @@ type
     procedure RoutePointsShowing(Sender: TObject; Showing: boolean);
     procedure RoutePointUpdated(Sender: TObject);
     procedure TripFileUpdating(Sender: TObject);
+    procedure TripFileCanceled(Sender: TObject);
     procedure TripFileUpdated(Sender: TObject);
     function GetMapCoords: string;
     property OnCoordinatesApplied: TCoordinatesAppliedEvent read FOnCoordinatesApplied write FOnCoordinatesApplied;
@@ -849,26 +850,34 @@ end;
 
 procedure TFrmTripManager.EditTrip(NewFile: boolean);
 begin
+// Clear treeview to avoid AV's when the TripList's items are deleted
   TvTrip.Items.Clear;
   ClearTripInfo;
 
+// Create new empty triplist?
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
   if (NewFile) then
     ATripList.CreateTemplate(TZumoModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
 
+// Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
   FrmTripEditor.CurPath := ShellTreeView1.Path;
   FrmTripEditor.CurFile := HexEditFile;
   FrmTripEditor.CurDevice := DeviceFile;
   FrmTripEditor.CurNewFile := NewFile;
+
+// Set FrmTripEditor Events
+  FrmTripEditor.OnTripFileCanceled := TripFileCanceled;
   FrmTripEditor.OnTripFileUpdating := TripFileUpdating;
   FrmTripEditor.OnTripFileUpdated := TripFileUpdated;
   FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
 
+// Set DmRoutePoints events
   DmRoutePoints.OnGetMapCoords := GetMapCoords;
   DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
 
+// Position left from the map.
   FrmTripEditor.Left := Left;
   FrmTripEditor.Width := FrmTripEditor.Constraints.MinWidth;
   FrmTripEditor.Show;
@@ -920,6 +929,11 @@ procedure TFrmTripManager.TripFileUpdating(Sender: TObject);
 begin
   TvTrip.Items.Clear;
   ClearTripInfo;
+end;
+
+procedure TFrmTripManager.TripFileCanceled(Sender: TObject);
+begin
+  LoadTripFile(FrmTripEditor.CurFile, FrmTripEditor.CurDevice);
 end;
 
 procedure TFrmTripManager.TripFileUpdated(Sender: TObject);
