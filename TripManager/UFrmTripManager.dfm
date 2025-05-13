@@ -1140,10 +1140,10 @@ object FrmTripManager: TFrmTripManager
     OnPopup = PopupTripEditPopup
     Left = 283
     Top = 394
-    object MnuTripNewZumo: TMenuItem
-      Caption = 'New trip (Zumo)'
+    object MnuTripNewMTP: TMenuItem
+      Caption = 'New trip (MTP device)'
       Enabled = False
-      OnClick = MnuTripNewZumoClick
+      OnClick = MnuTripNewMTPClick
     end
     object NewtripWindows1: TMenuItem
       Caption = 'New trip (Windows)'

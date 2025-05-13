@@ -53,11 +53,13 @@ type
 
     FOnRouteUpdated: TNotifyEvent;
     FOnRoutePointUpdated: TNotifyEvent;
+    FZoomToPoint: boolean;
     FOnGetMapCoords: TOnGetMapCoords;
     procedure DoRouteUpdated;
     procedure DoRoutePointUpdated;
     function CheckEmptyField(Sender: TField): boolean;
     procedure SetAddressFromCoords(Sender: TObject; Coords: string);
+    procedure SetDefaultName(IdToAssign: integer);
   public
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
@@ -67,11 +69,12 @@ type
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
     function AddressFromCoords(const Lat, Lon: string): string;
-    procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure LookUpAddress;
+    procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure ExportToGPX(GPXFile: string);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
+    property ZoomToPoint: boolean read FZoomToPoint write FZoomToPoint;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
     property RoutePickList: string read FRoutePickList;
     property TransportPickList: string read FTransportPickList;
@@ -116,10 +119,13 @@ begin
     FTransportPickList := PickList;
     Free;
   end;
+  FZoomToPoint := true;
 end;
 
 procedure TDmRoutePoints.DoRoutePointUpdated;
 begin
+  if (FZoomToPoint = false) then
+    exit;
   if (CdsRoutePoints.ControlsDisabled) then
     exit;
   if Assigned(FOnRoutePointUpdated) then
@@ -167,7 +173,7 @@ begin
   if (DataSet.ControlsDisabled) then
     exit;
 
-  CdsRoutePointsName.AsString := Format(RtePt + '%d', [IdToInsert]);
+  SetDefaultName(IdToInsert);
   CdsRoutePointsViaPoint.AsBoolean := (IdToInsert = 1) or (IdToInsert > DataSet.RecordCount);
   if Assigned(FOnGetMapCoords) then
     SetAddressFromCoords(Dataset, FOnGetMapCoords);
@@ -189,7 +195,8 @@ var
   MyBook: TBookmark;
 begin
   if (DataSet.ControlsDisabled) or
-     (Dataset.Eof) then
+     (Dataset.RecordCount = 0) or
+     (Dataset.RecNo = Dataset.RecordCount) then // Last record, appends
     IdToInsert := DataSet.RecordCount +1
   else
   begin
@@ -204,8 +211,7 @@ begin
       begin
         Dataset.Edit;
         Dataset.FieldByName('Id').AsInteger := Dataset.FieldByName('Id').AsInteger +1;
-        if StartsText(RtePt, Dataset.FieldByName('Name').AsString) then
-          CdsRoutePointsName.AsString := Format(RtePt + '%d', [Dataset.FieldByName('Id').AsInteger]);
+        SetDefaultName(Dataset.FieldByName('Id').AsInteger);
         Dataset.Post;
         Dataset.Prior;
       end;
@@ -215,7 +221,6 @@ begin
       Dataset.EnableControls;
     end;
   end;
-  DoRoutePointUpdated;
 end;
 
 function TDmRoutePoints.ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
@@ -288,17 +293,20 @@ begin
     Dataset.Edit;
     PriorId := Dataset.FieldByName('Id').AsInteger; // Save Id Prior
     Dataset.FieldByName('Id').AsInteger := OrigId;
+    SetDefaultName(OrigId);
     Dataset.Post;
 
     // Reposition to Orig line, and update with PriorId
     Dataset.GotoBookmark(MyBook);
     Dataset.Edit;
     Dataset.FieldByName('Id').AsInteger := PriorId;
+    SetDefaultName(PriorId);
     Dataset.Post;
 
   finally
     Dataset.FreeBookmark(MyBook);
     Dataset.EnableControls;
+    DoRouteUpdated;
   end;
 end;
 
@@ -325,12 +333,14 @@ begin
     Dataset.Edit;
     NextId := Dataset.FieldByName('Id').AsInteger; // Save Id Next
     Dataset.FieldByName('Id').AsInteger := OrigId;
+    SetDefaultName(OrigId);
     Dataset.Post;
 
     // Reposition to orig line, and update with NextId
     Dataset.GotoBookmark(MyBook);
     Dataset.Edit;
     Dataset.FieldByName('Id').AsInteger := NextId;
+    SetDefaultName(NextId);
     Dataset.Post;
 
     // Hack to fix the toprow of the grid
@@ -341,6 +351,7 @@ begin
   finally
     Dataset.FreeBookmark(MyBook);
     Dataset.EnableControls;
+    DoRouteUpdated;
   end;
 end;
 
@@ -353,6 +364,7 @@ end;
 
 procedure TDmRoutePoints.SaveTrip;
 var
+  SaveRecNo: integer;
   Locations: TmLocations;
   TmpStream: TMemoryStream;
   ZumoModel: TZumoModel;
@@ -364,6 +376,7 @@ begin
   if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
     CdsRoutePoints.Post;
 
+  SaveRecNo := CdsRoutePoints.RecNo;
   CdsRoutePoints.DisableControls;
   TmpStream := TMemoryStream.Create;
 
@@ -386,7 +399,9 @@ begin
         Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
       end;
 
-      if (CdsRoutePointsViaPoint.AsBoolean) then
+      if (CdsRoutePointsViaPoint.AsBoolean) or
+         (CdsRoutePoints.RecNo = 1) or
+         (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
         Locations.Add(TmAttr.Create(TRoutePoint.rpVia))
       else
         Locations.Add(TmAttr.Create(TRoutePoint.rpShaping));
@@ -423,6 +438,7 @@ begin
     end;
   finally
     TmpStream.Free;
+    CdsRoutePoints.RecNo := SaveRecNo;
     CdsRoutePoints.EnableControls;
   end;
 end;
@@ -489,8 +505,17 @@ begin
     CdsRoutePoints.LogChanges := false;
 
     Locations := TmLocations(FTripList.GetItem('mLocations'));
-    if not (Assigned(Locations)) then
+    if not (Assigned(Locations)) or
+       (Locations.LocationCount = 0) then
+    begin
+      CdsRoutePoints.Insert; // Id is autoassigned
+      SetDefaultName(IdToInsert);
+      CdsRoutePointsViaPoint.AsBoolean := true;
+      if Assigned(FOnGetMapCoords) then
+        SetAddressFromCoords(CdsRoutePoints, FOnGetMapCoords);
+      CdsRoutePoints.Post;
       exit;
+    end;
 
     for Location in Locations.Locations do
     begin
@@ -536,6 +561,16 @@ begin
   end;
 end;
 
+procedure TDmRoutePoints.SetDefaultName(IdToAssign: integer);
+var
+  IsDefault: boolean;
+begin
+  IsDefault := (CdsRoutePointsName.AsString = '') or
+               StartsText(RtePt, CdsRoutePointsName.AsString);
+  if (IsDefault) then
+    CdsRoutePointsName.AsString := Format(RtePt + '%d', [IdToAssign]);
+end;
+
 procedure TDmRoutePoints.SetAddressFromCoords(Sender: TObject; Coords: string);
 var
   Lat, Lon: string;
@@ -546,14 +581,6 @@ begin
   CdsRoutePointsAddress.AsString := AddressFromCoords(Lat, Lon);
 end;
 
-procedure TDmRoutePoints.CoordinatesApplied(Sender: TObject; Coords: string);
-begin
-  if not (CdsRoutePoints.State in [dsInsert, dsEdit]) then
-    CdsRoutePoints.Edit;
-  SetAddressFromCoords(Sender, Coords);
-  CdsRoutePoints.Post;
-end;
-
 procedure TDmRoutePoints.LookUpAddress;
 var
   Place: TPlace;
@@ -561,11 +588,16 @@ begin
   Place := GetPlaceOfCoords(CdsRoutePointsLat.AsString,
                             CdsRoutePointsLon.AsString);
   if (Place <> nil) then
-  begin
-    CdsRoutePoints.Edit;
     CdsRoutePointsAddress.AsString := Place.FormattedAddress;
-    CdsRoutePoints.Post;
-  end;
+end;
+
+procedure TDmRoutePoints.CoordinatesApplied(Sender: TObject; Coords: string);
+begin
+  if not (CdsRoutePoints.State in [dsInsert, dsEdit]) then
+    CdsRoutePoints.Edit;
+  SetAddressFromCoords(Sender, Coords);
+  LookUpAddress;
+  CdsRoutePoints.Post;
 end;
 
 procedure TDmRoutePoints.ExportToGPX(GPXFile: string);
@@ -612,6 +644,5 @@ begin
     CdsRoutePoints.EnableControls;
   end;
 end;
-
 
 end.

@@ -89,11 +89,21 @@ object FrmTripEditor: TFrmTripEditor
       TabOrder = 1
       OnClick = BtnCancelClick
     end
+    object ChkZoomToPoint: TCheckBox
+      Left = 1
+      Top = 1
+      Width = 104
+      Height = 27
+      Align = alLeft
+      Caption = 'Zoom to point'
+      TabOrder = 2
+      OnClick = ChkZoomToPointClick
+    end
   end
   object DBGRoutePoints: TDBGrid
     Left = 0
     Top = 123
-    Width = 759
+    Width = 762
     Height = 397
     Align = alClient
     Constraints.MinWidth = 640
@@ -150,24 +160,25 @@ object FrmTripEditor: TFrmTripEditor
       end>
   end
   object PnlRoutePointsButtons: TPanel
-    Left = 759
+    Left = 762
     Top = 123
-    Width = 35
+    Width = 32
     Height = 397
     Align = alRight
     TabOrder = 0
     object TBBRoutePoints: TToolBar
       Left = 1
       Top = 21
-      Width = 33
+      Width = 30
       Height = 375
       Align = alClient
-      ButtonHeight = 38
+      ButtonHeight = 32
       ButtonWidth = 32
       Images = VirtImgListRoutePoints
       List = True
       AllowTextButtons = True
       TabOrder = 0
+      ExplicitWidth = 34
       object TbMoveUp: TToolButton
         Left = 0
         Top = 0
@@ -179,7 +190,7 @@ object FrmTripEditor: TFrmTripEditor
       end
       object TbInsertPoint: TToolButton
         Left = 0
-        Top = 38
+        Top = 32
         Caption = 'Insert'
         ImageIndex = 1
         ImageName = 'AddPoint'
@@ -188,7 +199,7 @@ object FrmTripEditor: TFrmTripEditor
       end
       object TbDeletePoint: TToolButton
         Left = 0
-        Top = 76
+        Top = 64
         Caption = 'Delete'
         ImageIndex = 2
         ImageName = 'DeletePoint'
@@ -197,7 +208,7 @@ object FrmTripEditor: TFrmTripEditor
       end
       object TBMoveDown: TToolButton
         Left = 0
-        Top = 114
+        Top = 96
         Caption = 'Down'
         ImageIndex = 3
         ImageName = 'Double Arrow Down'
@@ -206,7 +217,7 @@ object FrmTripEditor: TFrmTripEditor
       end
       object TbLookupAddress: TToolButton
         Left = 0
-        Top = 152
+        Top = 128
         Caption = 'Address'
         ImageIndex = 4
         ImageName = 'LookupAddress'
@@ -215,7 +226,7 @@ object FrmTripEditor: TFrmTripEditor
       end
       object TBGPXExp_Imp: TToolButton
         Left = 0
-        Top = 190
+        Top = 160
         Caption = 'TBGPXExp_Imp'
         DropdownMenu = PopupGPX
         ImageIndex = 5
@@ -225,10 +236,11 @@ object FrmTripEditor: TFrmTripEditor
     object PnlFiller: TPanel
       Left = 1
       Top = 1
-      Width = 33
+      Width = 30
       Height = 20
       Align = alTop
       TabOrder = 1
+      ExplicitWidth = 34
     end
   end
   object PnlRoute: TPanel
@@ -431,8 +443,8 @@ object FrmTripEditor: TFrmTripEditor
     ImageCollection = ImgColRoutePoints
     Width = 24
     Height = 24
-    Left = 672
-    Top = 184
+    Left = 584
+    Top = 168
   end
   object ImgColRoutePoints: TImageCollection
     Images = <
@@ -3647,8 +3659,8 @@ object FrmTripEditor: TFrmTripEditor
               0189E0F529032650770000000049454E44AE426082}
           end>
       end>
-    Left = 680
-    Top = 256
+    Left = 584
+    Top = 240
   end
   object SaveTrip: TSaveDialog
     Left = 394

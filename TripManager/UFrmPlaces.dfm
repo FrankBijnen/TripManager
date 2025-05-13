@@ -1,7 +1,7 @@
 object FrmPlaces: TFrmPlaces
   Left = 0
   Top = 0
-  ActiveControl = Panel1
+  ActiveControl = ListView1
   Caption = 'Places found'
   ClientHeight = 433
   ClientWidth = 636
@@ -23,8 +23,6 @@ object FrmPlaces: TFrmPlaces
     Height = 29
     Align = alBottom
     TabOrder = 0
-    ExplicitTop = 403
-    ExplicitWidth = 632
     DesignSize = (
       636
       29)
@@ -121,7 +119,5 @@ object FrmPlaces: TFrmPlaces
     TabOrder = 1
     ViewStyle = vsReport
     OnDblClick = ListView1DblClick
-    ExplicitWidth = 632
-    ExplicitHeight = 403
   end
 end

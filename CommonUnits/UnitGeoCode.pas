@@ -267,7 +267,7 @@ begin
   CoordCache.Clear;
 end;
 
-function ChooseLocation(var Lat, Lon: string): Integer;
+function ChooseLocation(var Lat, Lon: string): integer;
 begin
   Lat := '';
   Lon := '';
@@ -276,6 +276,7 @@ begin
     result := ShowModal;
     if (result <> IDOK) then
       exit;
+
     if (Listview1.Selected = nil) then
       exit;
     Lat := Listview1.Selected.Caption;

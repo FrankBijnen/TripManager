@@ -67,6 +67,7 @@ type
     Copy1: TMenuItem;
     Cut1: TMenuItem;
     Paste1: TMenuItem;
+    ChkZoomToPoint: TCheckBox;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -88,6 +89,7 @@ type
     procedure Copy1Click(Sender: TObject);
     procedure Cut1Click(Sender: TObject);
     procedure Paste1Click(Sender: TObject);
+    procedure ChkZoomToPointClick(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -116,7 +118,7 @@ uses
   System.SysUtils, System.Math,
   Vcl.Clipbrd,
   UFrmSelectGPX,
-  UDmRoutePoints, UnitStringUtils, UnitVerySimpleXml, UnitGpx, UFrmAdvSettings;
+  UDmRoutePoints, UnitStringUtils, UnitVerySimpleXml, UnitGeoCode, UnitGpx, UFrmAdvSettings;
 
 {$R *.dfm}
 
@@ -217,6 +219,11 @@ begin
   end;
 end;
 
+procedure TFrmTripEditor.ChkZoomToPointClick(Sender: TObject);
+begin
+  DmRoutePoints.ZoomToPoint := ChkZoomToPoint.Checked;
+end;
+
 procedure TFrmTripEditor.Copy1Click(Sender: TObject);
 begin
   CopyToClipBoard(false);
@@ -276,6 +283,7 @@ begin
 {$IFDEF DEBUG}
   FormStyle := TFormStyle.fsNormal;
 {$ENDIF}
+  ChkZoomToPoint.Checked := DmRoutePoints.ZoomToPoint;
   MoveUp1.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
   MoveDown1.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
 end;
@@ -294,6 +302,7 @@ begin
   if (CurDevice) then
     GrpRoute.Caption := 'Device ';
   GrpRoute.Caption := GrpRoute.Caption + ExtractFileName(CurFile);
+  TbLookupAddress.Enabled := (GeoSettings.GeoCodeApiKey <> '');
 
   DBCRoutePreference.Items.Text := DmRoutePoints.RoutePickList;
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
@@ -505,16 +514,23 @@ end;
 procedure TFrmTripEditor.TbDeletePointClick(Sender: TObject);
 var
   Index: integer;
-  MyBook: TBookmark;
+  SavedRecNo: integer;
 begin
   DBGRoutePoints.SelectedRows.CurrentRowSelected := true; // Select at least one row
-  for Index := 0 to DBGRoutePoints.SelectedRows.Count -1 do
-  begin
-    MyBook := DBGRoutePoints.SelectedRows[Index];
-    DmRoutePoints.CdsRoutePoints.GotoBookmark(MyBook);
-    DmRoutePoints.CdsRoutePoints.Delete;
+  SavedRecNo := DmRoutePoints.CdsRoutePoints.RecNo;
+  try
+    for Index := 0 to DBGRoutePoints.SelectedRows.Count -1 do
+    begin
+      DmRoutePoints.CdsRoutePoints.GotoBookmark(DBGRoutePoints.SelectedRows[Index]);
+      DmRoutePoints.CdsRoutePoints.Delete;
+    end;
+    DBGRoutePoints.SelectedRows.Clear;
+  finally
+    if (SavedRecNo < DmRoutePoints.CdsRoutePoints.RecordCount) then
+      DmRoutePoints.CdsRoutePoints.RecNo := SavedRecNo
+    else
+      DmRoutePoints.CdsRoutePoints.First;
   end;
-  DBGRoutePoints.SelectedRows.Clear;
 end;
 
 procedure TFrmTripEditor.TbInsertPointClick(Sender: TObject);
@@ -540,7 +556,9 @@ begin
     for Index := 0 to DBGRoutePoints.SelectedRows.Count -1 do
     begin
       DmRoutePoints.CdsRoutePoints.GotoBookmark(DBGRoutePoints.SelectedRows[Index]);
+      DmRoutePoints.CdsRoutePoints.Edit;
       DmRoutePoints.LookUpAddress;
+      DmRoutePoints.CdsRoutePoints.Post;
     end;
   finally
     DmRoutePoints.CdsRoutePoints.GotoBookmark(MyBook);

@@ -158,7 +158,7 @@ type
     SpltRoutePoint: TSplitter;
     BtnCreateAdditional: TButton;
     PopupTripEdit: TPopupMenu;
-    MnuTripNewZumo: TMenuItem;
+    MnuTripNewMTP: TMenuItem;
     MnuTripEdit: TMenuItem;
     NewtripWindows1: TMenuItem;
     procedure FormCreate(Sender: TObject);
@@ -234,7 +234,7 @@ type
     procedure BtnGeoSearchClick(Sender: TObject);
     procedure BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MnuTripEditClick(Sender: TObject);
-    procedure MnuTripNewZumoClick(Sender: TObject);
+    procedure MnuTripNewMTPClick(Sender: TObject);
     procedure NewtripWindows1Click(Sender: TObject);
     procedure PopupTripEditPopup(Sender: TObject);
   private
@@ -667,6 +667,8 @@ var
   Lat, Lon: string;
   Place: TPlace;
 begin
+  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
+
   GetCoordsOfPlace('', Lat, Lon);
   if (Lat <> '') and
      (Lon <> '') then
@@ -845,11 +847,13 @@ begin
   TvTrip.Items.Clear;
   ClearTripInfo;
 
+  if not Assigned(ATripList) then
+    ATripList := TTripList.Create;
   if (NewFile) then
     ATripList.CreateTemplate(TZumoModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
 
-  FrmTripEditor.CurPath := ShellTreeView1.Path;
   FrmTripEditor.CurTripList := ATripList;
+  FrmTripEditor.CurPath := ShellTreeView1.Path;
   FrmTripEditor.CurFile := HexEditFile;
   FrmTripEditor.CurDevice := DeviceFile;
   FrmTripEditor.CurNewFile := NewFile;
@@ -1134,7 +1138,7 @@ end;
 
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
-  MnuTripNewZumo.Enabled := CheckDevice(false);
+  MnuTripNewMTP.Enabled := CheckDevice(false);
 end;
 
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);
@@ -1333,11 +1337,8 @@ begin
   EdgeZoom := AZoomFactor;
 end;
 
-procedure TFrmTripManager.MnuTripNewZumoClick(Sender: TObject);
+procedure TFrmTripManager.MnuTripNewMTPClick(Sender: TObject);
 begin
-  if not Assigned(ATripList) then
-    ATripList := TTripList.Create;
-
   ReadDefaultFolders;
   FrmNewTrip.DevicePath := DeviceFolder[0];
 
@@ -1355,9 +1356,6 @@ end;
 
 procedure TFrmTripManager.NewtripWindows1Click(Sender: TObject);
 begin
-  if not Assigned(ATripList) then
-    ATripList := TTripList.Create;
-
   FrmNewTrip.SavedFolderId := '';
   FrmNewTrip.CurrentDevice := nil;
   FrmNewTrip.CurPath := ShellTreeView1.Path;
