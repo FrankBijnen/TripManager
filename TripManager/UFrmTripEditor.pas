@@ -90,6 +90,7 @@ type
     procedure Cut1Click(Sender: TObject);
     procedure Paste1Click(Sender: TObject);
     procedure ChkZoomToPointClick(Sender: TObject);
+    procedure PnlRouteResize(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -517,6 +518,21 @@ begin
     DmRoutePoints.CdsRoutePoints.EnableControls;
     if Assigned(DmRoutePoints.OnRouteUpdated) then
       DmRoutePoints.OnRouteUpdated(Self);
+  end;
+end;
+
+procedure TFrmTripEditor.PnlRouteResize(Sender: TObject);
+var
+  W, X: integer;
+begin
+  GrpRoute.Width := DBGRoutePoints.Width;
+  if (DBGRoutePoints.Columns.Count > 1) then
+  begin
+    W := 0;
+    for X := 0 to DBGRoutePoints.Columns.Count -2 do
+      W := W + DBGRoutePoints.Columns[X].Width;
+    DBGRoutePoints.Columns[DBGRoutePoints.Columns.Count -1].Width :=
+      DBGRoutePoints.ClientWidth - W - GetSystemMetrics(SM_CXVSCROLL) -4;
   end;
 end;
 

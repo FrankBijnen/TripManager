@@ -2,9 +2,10 @@ object FrmTripEditor: TFrmTripEditor
   Left = 0
   Top = 0
   ActiveControl = DBGRoutePoints
+  BorderIcons = [biMinimize, biMaximize]
   Caption = 'Trip Editor'
   ClientHeight = 549
-  ClientWidth = 794
+  ClientWidth = 539
   Color = clBtnFace
   CustomTitleBar.CaptionAlignment = taCenter
   Font.Charset = DEFAULT_CHARSET
@@ -22,15 +23,16 @@ object FrmTripEditor: TFrmTripEditor
   object PnlBottom: TPanel
     Left = 0
     Top = 520
-    Width = 794
+    Width = 539
     Height = 29
     Align = alBottom
     TabOrder = 2
+    ExplicitWidth = 632
     DesignSize = (
-      794
+      539
       29)
     object BtnOk: TBitBtn
-      Left = 583
+      Left = 328
       Top = 2
       Width = 85
       Height = 25
@@ -58,9 +60,10 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnOkClick
+      ExplicitLeft = 421
     end
     object BtnCancel: TBitBtn
-      Left = 674
+      Left = 419
       Top = 2
       Width = 85
       Height = 25
@@ -88,6 +91,7 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 1
       OnClick = BtnCancelClick
+      ExplicitLeft = 512
     end
     object ChkZoomToPoint: TCheckBox
       Left = 1
@@ -103,10 +107,10 @@ object FrmTripEditor: TFrmTripEditor
   object DBGRoutePoints: TDBGrid
     Left = 0
     Top = 123
-    Width = 762
+    Width = 507
     Height = 397
     Align = alClient
-    Constraints.MinWidth = 640
+    Constraints.MinWidth = 500
     DataSource = DmRoutePoints.DsRoutePoints
     Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgMultiSelect, dgTitleClick, dgTitleHotTrack]
     TabOrder = 1
@@ -121,7 +125,7 @@ object FrmTripEditor: TFrmTripEditor
         Expanded = False
         FieldName = 'Id'
         ReadOnly = True
-        Width = 33
+        Width = 30
         Visible = True
       end
       item
@@ -137,35 +141,36 @@ object FrmTripEditor: TFrmTripEditor
           'Via'
           'Shape')
         Title.Caption = 'Point type'
-        Width = 58
+        Width = 55
         Visible = True
       end
       item
         Expanded = False
         FieldName = 'Lat'
-        Width = 77
+        Width = 68
         Visible = True
       end
       item
         Expanded = False
         FieldName = 'Lon'
-        Width = 73
+        Width = 68
         Visible = True
       end
       item
         Expanded = False
         FieldName = 'Address'
-        Width = 199
+        Width = 170
         Visible = True
       end>
   end
   object PnlRoutePointsButtons: TPanel
-    Left = 762
+    Left = 507
     Top = 123
     Width = 32
     Height = 397
     Align = alRight
     TabOrder = 0
+    ExplicitLeft = 600
     object TBBRoutePoints: TToolBar
       Left = 1
       Top = 21
@@ -244,21 +249,23 @@ object FrmTripEditor: TFrmTripEditor
   object PnlRoute: TPanel
     Left = 0
     Top = 0
-    Width = 794
+    Width = 539
     Height = 123
     Align = alTop
     TabOrder = 3
+    OnResize = PnlRouteResize
+    ExplicitWidth = 632
     object GrpRoute: TGroupBox
       Left = 0
       Top = 6
-      Width = 759
+      Width = 600
       Height = 111
       Caption = 'Route'
       TabOrder = 0
       object Label1: TLabel
-        Left = 14
+        Left = 0
         Top = 17
-        Width = 115
+        Width = 95
         Height = 21
         Alignment = taRightJustify
         AutoSize = False
@@ -266,9 +273,9 @@ object FrmTripEditor: TFrmTripEditor
         Layout = tlCenter
       end
       object Label2: TLabel
-        Left = 14
+        Left = 0
         Top = 38
-        Width = 115
+        Width = 95
         Height = 21
         Alignment = taRightJustify
         AutoSize = False
@@ -276,9 +283,9 @@ object FrmTripEditor: TFrmTripEditor
         Layout = tlCenter
       end
       object Label3: TLabel
-        Left = 14
+        Left = 0
         Top = 59
-        Width = 115
+        Width = 95
         Height = 21
         Alignment = taRightJustify
         AutoSize = False
@@ -286,9 +293,9 @@ object FrmTripEditor: TFrmTripEditor
         Layout = tlCenter
       end
       object Label4: TLabel
-        Left = 14
+        Left = 0
         Top = 80
-        Width = 115
+        Width = 95
         Height = 21
         Alignment = taRightJustify
         AutoSize = False
@@ -297,9 +304,9 @@ object FrmTripEditor: TFrmTripEditor
       end
       object CmbModel: TComboBox
         AlignWithMargins = True
-        Left = 452
+        Left = 417
         Top = 17
-        Width = 81
+        Width = 80
         Height = 21
         Margins.Left = 1
         Margins.Top = 4
@@ -313,7 +320,7 @@ object FrmTripEditor: TFrmTripEditor
           'Unknown')
       end
       object DbTripName: TDBEdit
-        Left = 135
+        Left = 100
         Top = 17
         Width = 313
         Height = 21
@@ -322,7 +329,7 @@ object FrmTripEditor: TFrmTripEditor
         TabOrder = 0
       end
       object DBCRoutePreference: TDBComboBox
-        Left = 135
+        Left = 100
         Top = 42
         Width = 200
         Height = 21
@@ -332,7 +339,7 @@ object FrmTripEditor: TFrmTripEditor
         TabOrder = 1
       end
       object DBCTransportationMode: TDBComboBox
-        Left = 135
+        Left = 100
         Top = 59
         Width = 200
         Height = 21
@@ -342,7 +349,7 @@ object FrmTripEditor: TFrmTripEditor
         TabOrder = 2
       end
       object DTDepartureDate: TDateTimePicker
-        Left = 135
+        Left = 100
         Top = 80
         Width = 200
         Height = 21
