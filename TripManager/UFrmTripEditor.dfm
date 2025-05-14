@@ -3653,6 +3653,9 @@ object FrmTripEditor: TFrmTripEditor
     Top = 240
   end
   object SaveTrip: TSaveDialog
+    DefaultExt = 'gpx'
+    Filter = '*.gpx|*.gpx'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 394
     Top = 177
   end
@@ -3669,8 +3672,8 @@ object FrmTripEditor: TFrmTripEditor
     end
   end
   object OpenTrip: TOpenDialog
-    DefaultExt = 'trip'
-    Filter = '*.trip|*.trip'
+    DefaultExt = 'gpx'
+    Filter = '*.gpx|*.gpx'
     Left = 464
     Top = 178
   end
