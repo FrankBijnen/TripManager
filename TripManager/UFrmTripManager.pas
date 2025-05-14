@@ -161,6 +161,7 @@ type
     MnuTripNewMTP: TMenuItem;
     MnuTripEdit: TMenuItem;
     NewtripWindows1: TMenuItem;
+    ChkZoomToPoint: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -832,15 +833,10 @@ begin
 end;
 
 procedure TFrmTripManager.RoutePointUpdated(Sender: TObject);
-var
-  Zoom: string;
 begin
-  Zoom := '';
-  if (TDmRoutePoints(Sender).ZoomToPoint) then
-    Zoom := InitialZoom_Point;
   MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
              DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
-             Zoom, '5000');
+             '', '5000');
 end;
 
 function TFrmTripManager.GetMapCoords: string;
@@ -933,7 +929,8 @@ end;
 
 procedure TFrmTripManager.TripFileCanceled(Sender: TObject);
 begin
-  LoadTripFile(FrmTripEditor.CurFile, FrmTripEditor.CurDevice);
+  if (FileExists(FrmTripEditor.CurFile)) then
+    LoadTripFile(FrmTripEditor.CurFile, FrmTripEditor.CurDevice);
 end;
 
 procedure TFrmTripManager.TripFileUpdated(Sender: TObject);
@@ -1341,7 +1338,9 @@ begin
   if (Msg = OSMCtrlClick) then
   begin
     Place := GetPlaceOfCoords(Parm1, Parm2);
-    if (Place <> nil) then
+    if (PLace = nil) then
+      MapRequest(EditMapCoords.Text, OSMCtrlClick, InitialZoom_Point, GeoSearchTimeout)
+    else
     begin
       Clipboard.AsText := Place.DisplayPlace;
       MapRequest(EditMapCoords.Text, Place.HtmlPlace, InitialZoom_Point, GeoSearchTimeout);
@@ -1396,7 +1395,7 @@ procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; S
 begin
   if (Key = VK_Return) and
      (EditMapCoords.Text <> '') then
-    MapRequest(EditMapCoords.Text, EditMapCoords.Text, InitialZoom_Point, PopupTimeout);
+    MapRequest(EditMapCoords.Text, EditMapCoords.Text, '', PopupTimeout);
 end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -2001,7 +2000,7 @@ var
         GpsCoords := TmScPosn(ANitem).MapCoords;
     end;
     if (ZoomToPoint) then
-      MapRequest(GpsCoords, LocationName, InitialZoom_Point, PopupTimeout);
+      MapRequest(GpsCoords, LocationName, '', PopupTimeout);
 
     with ALocation do
     begin
@@ -2087,7 +2086,7 @@ var
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s Type:%d', [AnUdbDir.DisplayName,
-                                       AnUdbDir.UdbDirValue.SubClass.PointType]), InitialZoom_Point, PopupTimeout);
+                                       AnUdbDir.UdbDirValue.SubClass.PointType]), '', PopupTimeout);
   end;
 
 
@@ -2329,7 +2328,7 @@ var
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-                 Format('%s', [AGPXWayPoint.Name]), InitialZoom_Point, PopupTimeout);
+                 Format('%s', [AGPXWayPoint.Name]), '', PopupTimeout);
 
   end;
 
@@ -3024,6 +3023,9 @@ begin
   FMapReq.Coords := Coords;
   FMapReq.Desc := Desc;
   FMapReq.Zoom := Zoom;
+  if (FMapReq.Zoom = '') and
+     (ChkZoomToPoint.Checked) then
+    FMapReq.Zoom := InitialZoom_Point;
   FMapReq.TimeOut := TimeOut;
   MapTimer.Enabled := false;
   MapTimer.Enabled := true;

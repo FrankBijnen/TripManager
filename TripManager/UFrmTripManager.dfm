@@ -606,9 +606,9 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 1
         object EditMapBounds: TLabeledEdit
           AlignWithMargins = True
-          Left = 50
+          Left = 156
           Top = 6
-          Width = 600
+          Width = 494
           Height = 28
           Hint = 'Coordinates of the visible area (South,West,North,East)'
           Margins.Left = 50
@@ -625,7 +625,20 @@ object FrmTripManager: TFrmTripManager
           ShowHint = True
           TabOrder = 0
           Text = ''
-          ExplicitHeight = 21
+          ExplicitLeft = 192
+          ExplicitWidth = 458
+        end
+        object ChkZoomToPoint: TCheckBox
+          Left = 0
+          Top = 0
+          Width = 106
+          Height = 37
+          Align = alLeft
+          Alignment = taLeftJustify
+          Caption = 'Zoom in on point'
+          Checked = True
+          State = cbChecked
+          TabOrder = 1
         end
       end
       object EdgeBrowser1: TEdgeBrowser

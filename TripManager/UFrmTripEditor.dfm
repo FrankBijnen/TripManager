@@ -27,7 +27,6 @@ object FrmTripEditor: TFrmTripEditor
     Height = 29
     Align = alBottom
     TabOrder = 2
-    ExplicitWidth = 632
     DesignSize = (
       539
       29)
@@ -60,7 +59,6 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnOkClick
-      ExplicitLeft = 421
     end
     object BtnCancel: TBitBtn
       Left = 419
@@ -91,17 +89,6 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 1
       OnClick = BtnCancelClick
-      ExplicitLeft = 512
-    end
-    object ChkZoomToPoint: TCheckBox
-      Left = 1
-      Top = 1
-      Width = 104
-      Height = 27
-      Align = alLeft
-      Caption = 'Zoom to point'
-      TabOrder = 2
-      OnClick = ChkZoomToPointClick
     end
   end
   object DBGRoutePoints: TDBGrid
@@ -170,7 +157,6 @@ object FrmTripEditor: TFrmTripEditor
     Height = 397
     Align = alRight
     TabOrder = 0
-    ExplicitLeft = 600
     object TBBRoutePoints: TToolBar
       Left = 1
       Top = 21
@@ -254,7 +240,6 @@ object FrmTripEditor: TFrmTripEditor
     Align = alTop
     TabOrder = 3
     OnResize = PnlRouteResize
-    ExplicitWidth = 632
     object GrpRoute: TGroupBox
       Left = 0
       Top = 6

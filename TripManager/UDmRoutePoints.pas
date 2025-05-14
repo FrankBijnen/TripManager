@@ -50,10 +50,8 @@ type
     FTransportPickList: string;
     FTripList: TTripList;
     IdToInsert: integer;
-
     FOnRouteUpdated: TNotifyEvent;
     FOnRoutePointUpdated: TNotifyEvent;
-    FZoomToPoint: boolean;
     FOnGetMapCoords: TOnGetMapCoords;
     procedure DoRouteUpdated;
     procedure DoRoutePointUpdated;
@@ -74,7 +72,6 @@ type
     procedure ExportToGPX(GPXFile: string);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
-    property ZoomToPoint: boolean read FZoomToPoint write FZoomToPoint;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
     property RoutePickList: string read FRoutePickList;
     property TransportPickList: string read FTransportPickList;
@@ -119,7 +116,6 @@ begin
     FTransportPickList := PickList;
     Free;
   end;
-  FZoomToPoint := true;
 end;
 
 procedure TDmRoutePoints.DoRoutePointUpdated;
@@ -172,7 +168,7 @@ begin
     exit;
 
   SetDefaultName(IdToInsert);
-  CdsRoutePointsViaPoint.AsBoolean := (IdToInsert = 1) or (IdToInsert > DataSet.RecordCount);
+  CdsRoutePointsViaPoint.AsBoolean := false;
   if Assigned(FOnGetMapCoords) then
     SetAddressFromCoords(Dataset, FOnGetMapCoords);
 end;

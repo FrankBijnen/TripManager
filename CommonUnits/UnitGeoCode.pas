@@ -26,7 +26,6 @@ type
   TPlace = class
   private
     FAddressList : TStringList;
-    FDisplayPlace: string;
     function GetHtmlPlace: string;
     function GetDisplayPlace: string;
     function GetFormattedAddress: string;
@@ -130,9 +129,12 @@ begin
         AFieldValue := AFieldValue + FAddressList.Values[ABackup];
       end;
     end;
-    if (result <> '') then
-      result := result + ', ';
-    result := result + AFieldValue;
+    if (AFieldValue <> '') then
+    begin
+      if (result <> '') then
+        result := result + ', ';
+      result := result + AFieldValue;
+    end;
   end;
 end;
 
@@ -178,7 +180,6 @@ begin
   end;
 end;
 
-
 function GetPlaceOfCoords_GeoCode(const Lat, Lon: string): TPlace;
 var
   RESTClient:   TRESTClient;
@@ -213,8 +214,11 @@ begin
     if not RESTResponse.JSONValue.TryGetValue(JSONObject) then
       raise Exception.Create(Format(StrInvalidJson, [RESTResponse.Content]));
 
+    result.AssignFromGeocode('coords', LatE + ', ' + LonE);
     if (JSONObject.FindValue('display_name') <> nil) then
-      result.FDisplayPlace := JSONObject.GetValue('display_name').ToString;
+      result.AssignFromGeocode('display_name',
+                               TPlace.UnEscape(JSONObject.GetValue('display_name').ToString)
+                              );
     if (JSONObject.FindValue('address') <> nil) then
     begin
       JSONAddress := JSONObject.GetValue<TJSONObject>('address');
@@ -381,7 +385,7 @@ begin
   GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeUrl, 'https://geocode.maps.co');
   GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeApiKey, '');
   GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
-   'ISO3166-2-lvl4,state|village,town,city,municipality|road');
+   'ISO3166-2-lvl4,state|village,town,city,municipality,hamlet|road+house_number');
   GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, ThrottleGeoCode, '1025'));
 end;
 

@@ -67,7 +67,6 @@ type
     Copy1: TMenuItem;
     Cut1: TMenuItem;
     Paste1: TMenuItem;
-    ChkZoomToPoint: TCheckBox;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -89,7 +88,6 @@ type
     procedure Copy1Click(Sender: TObject);
     procedure Cut1Click(Sender: TObject);
     procedure Paste1Click(Sender: TObject);
-    procedure ChkZoomToPointClick(Sender: TObject);
     procedure PnlRouteResize(Sender: TObject);
   private
     { Private declarations }
@@ -229,11 +227,6 @@ begin
   end;
 end;
 
-procedure TFrmTripEditor.ChkZoomToPointClick(Sender: TObject);
-begin
-  DmRoutePoints.ZoomToPoint := ChkZoomToPoint.Checked;
-end;
-
 procedure TFrmTripEditor.Copy1Click(Sender: TObject);
 begin
   CopyToClipBoard(false);
@@ -310,7 +303,6 @@ begin
 {$IFDEF DEBUG}
   FormStyle := TFormStyle.fsNormal;
 {$ENDIF}
-  ChkZoomToPoint.Checked := DmRoutePoints.ZoomToPoint;
   MoveUp1.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
   MoveDown1.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
 end;
