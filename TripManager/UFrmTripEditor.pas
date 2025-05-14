@@ -466,12 +466,12 @@ end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);
 begin
-  DmRoutePoints.CdsRoutePoints.Insert;
+  TbInsertPointClick(Sender);
 end;
 
 procedure TFrmTripEditor.Delete1Click(Sender: TObject);
 begin
-  DmRoutePoints.CdsRoutePoints.Delete;
+  TbDeletePointClick(Sender);
 end;
 
 procedure TFrmTripEditor.MoveDown1Click(Sender: TObject);

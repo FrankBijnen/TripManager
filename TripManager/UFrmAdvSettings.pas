@@ -122,7 +122,7 @@ begin
     MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
     SamplePlace := nil;
     ClearCoordCache;
-    MemoAddressFormat.OnChange(MemoAddressFormat);
+    MemoAddressFormatChange(MemoAddressFormat);
   end;
 end;
 
@@ -198,10 +198,14 @@ end;
 
 procedure TFrmAdvSettings.FormShow(Sender: TObject);
 begin
+  ClearCoordCache;
+  SamplePlace := nil;
   MemoResult.Lines.Clear;
+
   LoadSettings;
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   PctMain.ActivePage := TabXT2;
+  MemoAddressFormatChange(MemoAddressFormat);
 end;
 
 end.
