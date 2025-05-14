@@ -45,7 +45,7 @@ object DmRoutePoints: TDmRoutePoints
     object CdsRoutePointsAddress: TStringField
       DisplayWidth = 64
       FieldName = 'Address'
-      Size = 255
+      Size = 512
     end
     object CdsRoutePointsCoords: TStringField
       FieldKind = fkCalculated

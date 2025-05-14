@@ -625,8 +625,7 @@ object FrmTripManager: TFrmTripManager
           ShowHint = True
           TabOrder = 0
           Text = ''
-          ExplicitLeft = 192
-          ExplicitWidth = 458
+          ExplicitHeight = 21
         end
         object ChkZoomToPoint: TCheckBox
           Left = 0

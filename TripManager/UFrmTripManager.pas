@@ -500,6 +500,7 @@ end;
 
 procedure TFrmTripManager.Action3Execute(Sender: TObject);
 begin
+  ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   if FrmAdvSettings.ShowModal = mrOk then
   begin
     FrmAdvSettings.SetFixedPrefs;

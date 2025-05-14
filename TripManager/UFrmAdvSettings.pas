@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ValEdit, Vcl.ComCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ValEdit, Vcl.ComCtrls,
+  UnitGeoCode;
 
 const
   TripManagerReg_Key      = 'Software\TDBware\TripManager';
@@ -29,15 +30,24 @@ type
     TabGeoCode: TTabSheet;
     VlGeoCodeSettings: TValueListEditor;
     MemoAddressFormat: TMemo;
+    PnlResult: TPanel;
+    MemoResult: TMemo;
+    PnlAddressFormatTop: TPanel;
+    Splitter1: TSplitter;
     PnlAddressFormat: TPanel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
+    procedure MemoAddressFormatChange(Sender: TObject);
+    procedure VlGeoCodeSettingsStringsChange(Sender: TObject);
   private
     { Private declarations }
+    SamplePlace: TPlace;
     procedure LoadSettings;
     procedure SaveSettings;
   public
     { Public declarations }
+    SampleLat: string;
+    SampleLon: string;
     procedure SetFixedPrefs;
   end;
 
@@ -47,7 +57,7 @@ var
 implementation
 
 uses
-  UnitStringUtils, UFrmTripManager, UnitGeoCode, UnitGpx, UnitGpi, UnitTripObjects;
+  UnitStringUtils, UFrmTripManager, UnitGpx, UnitGpi, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -82,7 +92,6 @@ begin
   VehicleProfileHash := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileHash', XT2_VehicleProfileHash);
   VehicleId := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleId', XT2_VehicleId);
 
-
   WayPtList := TStringList.Create;
   try
     WayPtList.Text := ProcessCategoryPick;
@@ -102,6 +111,18 @@ begin
     end;
   finally
     WayPtList.Free;
+  end;
+end;
+
+procedure TFrmAdvSettings.VlGeoCodeSettingsStringsChange(Sender: TObject);
+begin
+  if (GeoSettings.GeoCodeApiKey <> VlGeoCodeSettings.Values[GeoCodeApiKey]) then
+  begin
+    GeoSettings.GeoCodeApiKey := VlGeoCodeSettings.Values[GeoCodeApiKey];
+    MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
+    SamplePlace := nil;
+    ClearCoordCache;
+    MemoAddressFormat.OnChange(MemoAddressFormat);
   end;
 end;
 
@@ -137,6 +158,18 @@ begin
   MemoAddressFormat.Lines.Text := ReplaceAll(GeoSettings.AddressFormat, ['|'], [#13#10], [rfReplaceAll]);
 end;
 
+procedure TFrmAdvSettings.MemoAddressFormatChange(Sender: TObject);
+begin
+  if (SamplePlace = nil) and
+     (GeoSettings.GeoCodeApiKey <> '') and
+     (ValidLatLon(SampleLat, SampleLon)) then
+    SamplePlace := GetPlaceOfCoords(SampleLat, SampleLon);
+
+  GeoSettings.AddressFormat := ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]);
+  if (SamplePlace <> nil) then
+    MemoResult.lines.Text := SamplePlace.DisplayPlace;
+end;
+
 procedure TFrmAdvSettings.SaveSettings;
 var
   Index: integer;
@@ -165,7 +198,9 @@ end;
 
 procedure TFrmAdvSettings.FormShow(Sender: TObject);
 begin
+  MemoResult.Lines.Clear;
   LoadSettings;
+  MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   PctMain.ActivePage := TabXT2;
 end;
 

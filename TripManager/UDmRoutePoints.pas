@@ -574,7 +574,7 @@ begin
   Place := GetPlaceOfCoords(CdsRoutePointsLat.AsString,
                             CdsRoutePointsLon.AsString);
   if (Place <> nil) then
-    CdsRoutePointsAddress.AsString := Place.FormattedAddress;
+    CdsRoutePointsAddress.AsString := Place.RoutePlace;
 end;
 
 procedure TDmRoutePoints.CoordinatesApplied(Sender: TObject; Coords: string);

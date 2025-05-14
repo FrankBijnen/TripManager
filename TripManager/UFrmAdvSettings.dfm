@@ -3,8 +3,8 @@ object FrmAdvSettings: TFrmAdvSettings
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Advanced settings'
-  ClientHeight = 424
-  ClientWidth = 441
+  ClientHeight = 558
+  ClientWidth = 529
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,17 +17,17 @@ object FrmAdvSettings: TFrmAdvSettings
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 393
-    Width = 441
+    Top = 527
+    Width = 529
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
     DesignSize = (
-      441
+      529
       31)
     object BtnOK: TButton
-      Left = 277
+      Left = 365
       Top = 3
       Width = 75
       Height = 25
@@ -38,7 +38,7 @@ object FrmAdvSettings: TFrmAdvSettings
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 364
+      Left = 452
       Top = 3
       Width = 75
       Height = 25
@@ -52,9 +52,9 @@ object FrmAdvSettings: TFrmAdvSettings
   object PctMain: TPageControl
     Left = 0
     Top = 0
-    Width = 441
-    Height = 393
-    ActivePage = TabXT2
+    Width = 529
+    Height = 527
+    ActivePage = TabGeoCode
     Align = alClient
     TabOrder = 1
     object TabXT2: TTabSheet
@@ -62,50 +62,89 @@ object FrmAdvSettings: TFrmAdvSettings
       object VlXT2Settings: TValueListEditor
         Left = 0
         Top = 0
-        Width = 433
-        Height = 363
+        Width = 521
+        Height = 497
         Align = alClient
         TabOrder = 0
         ColWidths = (
           176
-          251)
+          339)
       end
     end
     object TabGeoCode: TTabSheet
       Caption = 'GeoCode settings'
       ImageIndex = 1
+      object Splitter1: TSplitter
+        Left = 0
+        Top = 194
+        Width = 521
+        Height = 3
+        Cursor = crVSplit
+        Align = alBottom
+        ExplicitTop = -9
+        ExplicitWidth = 519
+      end
       object VlGeoCodeSettings: TValueListEditor
         Left = 0
         Top = 0
-        Width = 433
-        Height = 239
+        Width = 521
+        Height = 194
         Align = alClient
         TabOrder = 0
-        ExplicitWidth = 441
-        ExplicitHeight = 387
+        OnStringsChange = VlGeoCodeSettingsStringsChange
         ColWidths = (
           176
-          251)
-      end
-      object MemoAddressFormat: TMemo
-        Left = 0
-        Top = 274
-        Width = 433
-        Height = 89
-        Align = alBottom
-        Lines.Strings = (
-          'MemoAddressFormat')
-        TabOrder = 1
+          339)
       end
       object PnlAddressFormat: TPanel
         Left = 0
-        Top = 239
-        Width = 433
-        Height = 35
+        Top = 197
+        Width = 521
+        Height = 300
         Align = alBottom
-        Caption = 'Address format'
-        TabOrder = 2
-        ExplicitTop = 233
+        TabOrder = 1
+        object MemoAddressFormat: TMemo
+          Left = 1
+          Top = 36
+          Width = 519
+          Height = 93
+          Align = alTop
+          Lines.Strings = (
+            'MemoAddressFormat')
+          ScrollBars = ssVertical
+          TabOrder = 0
+          OnChange = MemoAddressFormatChange
+        end
+        object PnlResult: TPanel
+          Left = 1
+          Top = 129
+          Width = 519
+          Height = 35
+          Align = alTop
+          Caption = 'Result'
+          TabOrder = 1
+        end
+        object MemoResult: TMemo
+          Left = 1
+          Top = 164
+          Width = 519
+          Height = 135
+          Align = alClient
+          Lines.Strings = (
+            'MemoAddressFormat')
+          ReadOnly = True
+          ScrollBars = ssVertical
+          TabOrder = 3
+        end
+        object PnlAddressFormatTop: TPanel
+          Left = 1
+          Top = 1
+          Width = 519
+          Height = 35
+          Align = alTop
+          Caption = 'Address format'
+          TabOrder = 2
+        end
       end
     end
   end

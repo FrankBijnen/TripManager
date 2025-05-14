@@ -29,14 +29,16 @@ type
     function GetHtmlPlace: string;
     function GetDisplayPlace: string;
     function GetFormattedAddress: string;
+    function GetRoutePlace: string;
   public
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
     procedure AssignFromGeocode(Key, Value: string);
     class function UnEscape(Value: string): string;
-    property DisplayPlace: string read GetDisplayPlace;
     property HtmlPlace: string read GetHtmlPlace;
+    property DisplayPlace: string read GetDisplayPlace;
+    property RoutePlace: string read GetRoutePlace;
     property FormattedAddress: string read GetFormattedAddress;
   end;
 
@@ -106,12 +108,31 @@ var
   ABackup: string;
   AFieldValue: string;
   SubFieldChar: char;
+  Index: integer;
 begin
   result := '';
   AAddressFormat := GeoSettings.AddressFormat;
   while (AAddressFormat <> '') do
   begin
     AField := NextField(AAddressFormat, '|');
+
+    // Show Debug info?
+    if (SameText('debug', AField)) then
+    begin
+      if (result <> '') then
+        result := result + ', ';
+      result := result + '*****Debug info*****';
+      for Index := 0 to FAddressList.Count -1 do
+      begin
+        if (result <> '') then
+          result := result + ', ';
+        result := result + FAddressList.KeyNames[Index] + ':' +
+                           ReplaceAll(FAddressList.ValueFromIndex[Index], [','], ['&#44;'], [rfReplaceAll]); // Dont add extra lines
+      end;
+      result := result + ', *****Debug info*****';
+      continue;
+    end;
+
     SubFieldChar := ',';
     if (Pos('+', AField) > 0) then
       SubFieldChar := '+';
@@ -145,7 +166,12 @@ end;
 
 function TPlace.GetDisplayPlace: string;
 begin
-  result := ReplaceAll(TPlace.UnEscape(FormattedAddress), [', '], [#13#10], [rfReplaceAll]);
+  result := ReplaceAll(TPlace.UnEscape(FormattedAddress), [', ', '&#44;'], [#13#10, ','], [rfReplaceAll]);
+end;
+
+function TPlace.GetRoutePlace: string;
+begin
+  result := ReplaceAll(TPlace.UnEscape(FormattedAddress), ['&#44;'], [','], [rfReplaceAll]);
 end;
 
 procedure Throttle(const Delay: Int64);
@@ -154,7 +180,6 @@ begin
   Diff := Delay - MilliSecondsBetween(Now, LastQuery);
   if (Diff > 0) then
     Sleep(Diff);
-  LastQuery := Now;
 end;
 
 function ExecuteRest(const RESTRequest: TRESTRequest): boolean;
@@ -163,11 +188,19 @@ var
 begin
   result := true;
   try
-    Throttle(GeoSettings.ThrottleGeoCode);
-    RESTRequest.Execute;
-    LastQuery := Now;
-    if (RESTRequest.Response.StatusCode >= 400) then
-      raise exception.Create('Request failed with' + #10 + RESTRequest.Response.StatusText);
+    try
+      Throttle(GeoSettings.ThrottleGeoCode);
+      RESTRequest.Execute;
+      LastQuery := Now;
+      if (RESTRequest.Response.StatusCode >= 400) then
+        raise exception.Create('Request failed with' + #10 + RESTRequest.Response.StatusText);
+    except
+      on E:Exception do
+      begin
+        result := false;
+        ShowMessage(E.Message);
+      end;
+    end;
   finally
     if Assigned(ExecRestEvent) then
     begin
@@ -214,7 +247,7 @@ begin
     if not RESTResponse.JSONValue.TryGetValue(JSONObject) then
       raise Exception.Create(Format(StrInvalidJson, [RESTResponse.Content]));
 
-    result.AssignFromGeocode('coords', LatE + ', ' + LonE);
+    result.AssignFromGeocode('coords', LatE + ',' + LonE);
     if (JSONObject.FindValue('display_name') <> nil) then
       result.AssignFromGeocode('display_name',
                                TPlace.UnEscape(JSONObject.GetValue('display_name').ToString)
@@ -261,6 +294,7 @@ begin
 
     // Also cache if not found
     CoordCache.Add(CoordsKey, result);
+
   finally
     SetCursor(CrNormal);
   end;
