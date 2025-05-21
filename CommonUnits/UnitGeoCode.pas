@@ -12,8 +12,14 @@ const
   GeoCodeApiKey           = 'GeoCodeApiKey';
   AddressFormat           = 'AddressFormat';
   ThrottleGeoCode         = 'ThrottleGeoCode';
+  DefState                = 'ISO3166-2-lvl4,state';
+  DefCity                 = 'village,town,city,municipality,hamlet';
+  DefRoad                 = 'road+house_number';
+  DefCountry              = 'country';
+  DefPostalCode           = 'postcode';
 
 type
+
   TExecRestEvent = procedure(Url, Response: string; Succes: boolean) of object;
 
   GEOsettingsRec = record
@@ -28,8 +34,14 @@ type
     FAddressList : TStringList;
     function GetHtmlPlace: string;
     function GetDisplayPlace: string;
-    function GetFormattedAddress: string;
+    function GetFormattedAddress(AnAddressFormat: string): string; overload;
+    function GetFormattedAddress: string; overload;
     function GetRoutePlace: string;
+    function GetRoad: string;
+    function GetCity: string;
+    function GetState: string;
+    function GetCountry: string;
+    function GetPostalCode: string;
   public
     constructor Create;
     destructor Destroy; override;
@@ -40,6 +52,11 @@ type
     property DisplayPlace: string read GetDisplayPlace;
     property RoutePlace: string read GetRoutePlace;
     property FormattedAddress: string read GetFormattedAddress;
+    property Road: string read GetRoad;
+    property City: string read GetCity;
+    property State: string read GetState;
+    property Country: string read GetCountry;
+    property PostalCode: string read GetPostalCode;
   end;
 
 function GetPlaceOfCoords(const Lat, Lon: string): TPlace;
@@ -53,6 +70,7 @@ const
 var
   GeoSettings: GEOsettingsRec;
   ExecRestEvent: TExecRestEvent;
+  GeoCodeCache: string;
 
 implementation
 
@@ -101,7 +119,7 @@ begin
   FAddressList.AddPair(Key, Value);
 end;
 
-function TPlace.GetFormattedAddress: string;
+function TPlace.GetFormattedAddress(AnAddressFormat: string): string;
 var
   AAddressFormat: string;
   AField: string;
@@ -111,7 +129,7 @@ var
   Index: integer;
 begin
   result := '';
-  AAddressFormat := GeoSettings.AddressFormat;
+  AAddressFormat := AnAddressFormat;
   while (AAddressFormat <> '') do
   begin
     AField := NextField(AAddressFormat, '|');
@@ -159,6 +177,11 @@ begin
   end;
 end;
 
+function TPlace.GetFormattedAddress: string;
+begin
+  result := GetFormattedAddress(GeoSettings.AddressFormat);
+end;
+
 function TPlace.GetHtmlPlace: string;
 begin
   result := ReplaceAll(TPlace.UnEscape(FormattedAddress), [', '], ['<br>'], [rfReplaceAll]);
@@ -172,6 +195,31 @@ end;
 function TPlace.GetRoutePlace: string;
 begin
   result := ReplaceAll(TPlace.UnEscape(FormattedAddress), ['&#44;'], [','], [rfReplaceAll]);
+end;
+
+function TPlace.GetRoad: string;
+begin
+  result := GetFormattedAddress(DefRoad);
+end;
+
+function TPlace.GetCity: string;
+begin
+  result := GetFormattedAddress(DefCity);
+end;
+
+function TPlace.GetState: string;
+begin
+  result := GetFormattedAddress(DefState);
+end;
+
+function TPlace.GetCountry: string;
+begin
+  result := GetFormattedAddress(DefCountry);
+end;
+
+function TPlace.GetPostalCode: string;
+begin
+  result := GetFormattedAddress(DefPostalCode);
 end;
 
 procedure Throttle(const Delay: Int64);
@@ -419,19 +467,59 @@ begin
   GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeUrl, 'https://geocode.maps.co');
   GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeApiKey, '');
   GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
-   'ISO3166-2-lvl4,state|village,town,city,municipality,hamlet|road+house_number');
-  GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, ThrottleGeoCode, '1025'));
+                                                DefState + '|' + DefCity + '|' + DefRoad);
+  GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, ThrottleGeoCode, '1000'));
+end;
+
+procedure ReadCoordCache;
+var
+  ALine, CoordsKey: string;
+  F: TextFile;
+  Place: TPlace;
+begin
+  if not (FileExists(GeoCodeCache)) then
+    exit;
+  AssignFile(F, GeoCodeCache, CP_UTF8);
+  Reset(F);
+  while not Eof(F) do
+  begin
+    ReadLn(F, ALine);
+    CoordsKey := NextField(Aline, '/t');
+    ALine := ReplaceAll(ALine, ['/r/n'], [#13#10]);
+    Place := TPlace.Create;
+    Place.FAddressList.Text := ALine;
+    CoordCache.Add(CoordsKey, Place);
+  end;
+  CloseFile(F);
+end;
+
+procedure WriteCoordCache;
+var
+  CoordKey: string;
+  F: TextFile;
+begin
+  AssignFile(F, GeoCodeCache, CP_UTF8);
+  Rewrite(F);
+  for CoordKey in CoordCache.Keys do
+  begin
+    Write(F, CoordKey, '/t');
+    Writeln(F, ReplaceAll(CoordCache.Items[CoordKey].FAddressList.Text, [#13#10], ['/r/n']));
+  end;
+  CloseFile(F);
 end;
 
 initialization
 begin
+  GeoCodeCache := IncludeTrailingPathDelimiter(GetAppData) + 'GeoCode.cache';
   CoordCache := TObjectDictionary<string, TPlace>.Create([doOwnsValues]);
+  ReadCoordCache;
   LastQuery := 0;
   ReadGeoCodeSettings;
 end;
 
 finalization
 begin
+  WriteCoordCache;
   CoordCache.Free;
 end;
 

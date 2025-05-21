@@ -590,7 +590,7 @@ procedure TDmRoutePoints.ExportToGPX(GPXFile: string);
 var
   Xml: TXmlVSDocument;
   XMLRoot: TXmlVSNode;
-  Rte, RtePt, PointType: TXmlVSNode;
+  Rte, RtePt, Extensions, PointType: TXmlVSNode;
 begin
   XML := TXmlVSDocument.Create;
   CdsRoutePoints.DisableControls;
@@ -598,7 +598,9 @@ begin
     XMLRoot := InitRoot(XML);
     Rte := XMLRoot.AddChild('rte');
     Rte.AddChild('name').NodeValue := CdsRouteTripName.AsString;
-    Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := CdsRouteTransportationMode.AsString;
+    Extensions := Rte.AddChild('extensions');
+    Extensions.AddChild('gpxx:RouteExtension').AddChild('gpxx:IsAutoNamed').NodeValue := 'false';
+    Extensions.AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := CdsRouteTransportationMode.AsString;
 
     CdsRoutePoints.First;
     while not CdsRoutePoints.Eof do
@@ -609,17 +611,26 @@ begin
       RtePt.AddChild('name').NodeValue := CdsRoutePointsName.AsString;
       RtePt.AddChild('cmt').NodeValue := CdsRoutePointsAddress.AsString;
       RtePt.AddChild('desc').NodeValue := CdsRoutePointsAddress.AsString;
-      if (CdsRoutePointsViaPoint.AsBoolean) then
-        PointType := RtePt.AddChild('extensions').AddChild('trp:ViaPoint')
-      else
-        PointType := RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
 
-      if (CdsRoutePoints.Bof) then
-        PointType.AddChild('trp:DepartureTime').NodeValue :=
-          DateToISO8601(TTimezone.Local.ToUniversalTime(CdsRouteDepartureDate.AsDateTime), true);
+      // Add Symbol
+      if (CdsRoutePoints.RecNo = 1) then
+        RtePt.AddChild('sym').NodeValue := BeginSymbol
+      else if (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
+        RtePt.AddChild('sym').NodeValue := EndSymbol
+      else 
+        RtePt.AddChild('sym').NodeValue := DefWaypointSymbol;
 
-      if (CdsRoutePointsViaPoint.AsBoolean) then
+      // Add Point Type (Via of Shaping)
+      if (CdsRoutePointsViaPoint.AsBoolean) then // Includes Begin and End
+      begin
+        PointType := RtePt.AddChild('extensions').AddChild('trp:ViaPoint');
+        if (CdsRoutePoints.RecNo = 1) then
+          PointType.AddChild('trp:DepartureTime').NodeValue :=
+            DateToISO8601(TTimezone.Local.ToUniversalTime(CdsRouteDepartureDate.AsDateTime), true);
         PointType.AddChild('trp:CalculationMode').NodeValue := CdsRouteRoutePreference.AsString;
+      end
+      else
+        RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
 
       CdsRoutePoints.Next;
     end;

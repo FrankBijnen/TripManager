@@ -17,6 +17,7 @@ type
   protected
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X: Integer; Y: Integer); override;
   public
+    constructor Create(AOwner: TComponent); override;
     property InplaceEditor;
   end;
 
@@ -125,13 +126,22 @@ uses
 
 { TDBGrid }
 
+constructor TDBGrid.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FirstSel := -1;
+end;
+
 procedure TDBGrid.SelectRange;
 var
   CurrentRec: integer;
   MyBook: TBookmark;
 begin
   SelectedRows.Clear;
-  if (FirstSel = DataSource.DataSet.RecNo) then
+
+  if (FirstSel < 1) or
+     (FirstSel > DataSource.DataSet.RecordCount) or
+     (FirstSel = DataSource.DataSet.RecNo) then
     exit;
 
   DataSource.DataSet.DisableControls;
@@ -378,7 +388,9 @@ var
     end
     else
     begin
-      DmRoutePoints.CdsRoutePointsAddress.AsString := DmRoutePoints.AddressFromCoords(Lat, Lon);
+      DmRoutePoints.CdsRoutePointsAddress.AsString := FindSubNodeValue(ARoutePoint, 'cmt');
+      if (DmRoutePoints.CdsRoutePointsAddress.AsString = '') then
+        DmRoutePoints.CdsRoutePointsAddress.AsString := DmRoutePoints.AddressFromCoords(Lat, Lon);
       if (ExtensionsNode <> nil) then
         DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
     end;

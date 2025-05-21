@@ -37,6 +37,17 @@ type
     PnlWayptData: TPanel;
     CmbWayPtCat: TComboBox;
     EdWptStr: TEdit;
+    ChkBeginAddress: TCheckBox;
+    ChkEndAddress: TCheckBox;
+    ChkShapeAddress: TCheckBox;
+    PnlVia: TPanel;
+    PnlViaCaption: TPanel;
+    ChkProcessVia: TCheckBox;
+    PnlViaData: TPanel;
+    EdViaPtStr: TEdit;
+    EdViaPtChanged: TEdit;
+    ChkViaAddress: TCheckBox;
+    ChkWayPtAddress: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -130,8 +141,8 @@ begin
   ProcessSubClass := true;
   ProcessBegin := true;
   ProcessEnd := true;
-  ProcessShape := true;
   ProcessViaPts := true;
+  ProcessShape := true;
 end;
 
 procedure TFrmPostProcess.SetPrefs;
@@ -144,14 +155,20 @@ begin
     ChkProcessBegin.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessBegin', BooleanValues[true]) = BooleanValues[true]);
     CmbBeginSymbol.ItemIndex := CmbBeginSymbol.Items.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginSymbol', 'Flag, Red'));
     EdBeginStr.Text := GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginStr', 'Begin');
+    ChkBeginAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginAddress', BooleanValues[false]) = BooleanValues[true]);
 
     ChkProcessEnd.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessEnd', BooleanValues[true]) = BooleanValues[true]);
     CmbEndSymbol.ItemIndex := CmbEndSymbol.Items.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndSymbol', 'Flag, Blue'));
     EdEndStr.Text := GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndStr', 'End');
+    ChkEndAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndAddress', BooleanValues[false]) = BooleanValues[true]);
 
     ChkProcessWpt.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true]);
     CmbWayPtCat.ItemIndex := WayPtList.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessCategory',
                                                        WayPtList[WayPtList.Count -1]));
+    ChkWayPtAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'WayPtAddress', BooleanValues[false]) = BooleanValues[true]);
+
+    ChkProcessVia.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessVia', BooleanValues[true]) = BooleanValues[true]);
+    ChkViaAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ViaAddress', BooleanValues[false]) = BooleanValues[true]);
 
     ChkProcessShape.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessShape', BooleanValues[true]) = BooleanValues[true]);
     CmbShapingName.ItemIndex := GetEnumValue(TypeInfo(TShapingPointName),
@@ -159,6 +176,7 @@ begin
 
     CmbDistanceUnit.ItemIndex := GetEnumValue(TypeInfo(TDistanceUnit),
                                     GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'DistanceUnit', 'duKm'));
+    ChkShapeAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ShapeAddress', BooleanValues[false]) = BooleanValues[true]);
   finally
     WayPtList.Free;
   end;
@@ -172,6 +190,8 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginSymbol', BeginSymbol);
   BeginStr := EdBeginStr.Text;
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginStr', BeginStr);
+  ProcessAddrBegin := ChkBeginAddress.Checked;
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'BeginAddress', BooleanValues[ProcessAddrBegin]);
 
   ProcessEnd := ChkProcessEnd.Checked;
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessEnd', BooleanValues[ProcessEnd]);
@@ -179,6 +199,8 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndSymbol', EndSymbol);
   EndStr := EdEndStr.Text;
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndStr', EndStr);
+  ProcessAddrEnd := ChkEndAddress.Checked;
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'EndAddress', BooleanValues[ProcessAddrEnd]);
 
   ProcessCategory := [];
   if (ChkProcessWpt.Checked) then
@@ -194,14 +216,22 @@ begin
   end;
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessWpt', BooleanValues[ChkProcessWpt.Checked]);
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessCategory', CmbWayPtCat.Text);
+  ProcessAddrWayPt := ChkWayPtAddress.Checked;
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'WayPtAddress', BooleanValues[ProcessAddrWayPt]);
+
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessVia', BooleanValues[ChkProcessVia.Checked]);
+  ProcessVia := ChkProcessVia.Checked;
+  ProcessAddrVia := ChkViaAddress.Checked;
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ViaAddress', BooleanValues[ProcessAddrVia]);
 
   ProcessShape := ChkProcessShape.Checked;
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ProcessShape', BooleanValues[ProcessShape]);
   ShapingPointName := TShapingPointName(CmbShapingName.ItemIndex);
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ShapingName', GetEnumName(TypeInfo(TShapingPointName), CmbShapingName.ItemIndex) );
-
   DistanceUnit := TDistanceUnit(CmbDistanceUnit.ItemIndex);
   SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'DistanceUnit', GetEnumName(TypeInfo(TDistanceUnit), CmbDistanceUnit.ItemIndex) );
+  ProcessAddrShape := ChkShapeAddress.Checked;
+  SetRegistryValue(HKEY_CURRENT_USER, RegKey, 'ShapeAddress', BooleanValues[ProcessAddrShape]);
 end;
 
 procedure TFrmPostProcess.FormClose(Sender: TObject; var Action: TCloseAction);

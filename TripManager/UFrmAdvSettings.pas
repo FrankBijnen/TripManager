@@ -16,6 +16,8 @@ const
   PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
   WarnModel_Key           = 'WarnModel';
   TripColor_Key           = 'TripColor';
+  SortColumn_Key          = 'SortColumn';
+  SortAscending_Key       = 'SortAscending';
 
   BooleanValues: array[boolean] of string = ('False', 'True');
 
@@ -83,8 +85,15 @@ begin
   ProcessSubClass := true;
   ProcessBegin := false;
   ProcessEnd := false;
+  ProcessVia := false;
   ProcessShape := false;
   ShapingPointName := TShapingPointName.Unchanged;
+
+  ProcessAddrBegin := false;
+  ProcessAddrEnd := false;
+  ProcessAddrVia := false;
+  ProcessAddrShape := false;
+  ProcessAddrWayPt := false;
 
   // XT2 Defaults
   ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
@@ -121,7 +130,7 @@ begin
     GeoSettings.GeoCodeApiKey := VlGeoCodeSettings.Values[GeoCodeApiKey];
     MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
     SamplePlace := nil;
-    ClearCoordCache;
+//    ClearCoordCache;
     MemoAddressFormatChange(MemoAddressFormat);
   end;
 end;
@@ -198,7 +207,7 @@ end;
 
 procedure TFrmAdvSettings.FormShow(Sender: TObject);
 begin
-  ClearCoordCache;
+//  ClearCoordCache;
   SamplePlace := nil;
   MemoResult.Lines.Clear;
 

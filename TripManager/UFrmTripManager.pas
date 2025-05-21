@@ -308,6 +308,8 @@ type
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
+    procedure ReadSortColumn;
+    procedure WriteSortColumn;
     procedure ReadSettings;
     procedure ClearTripInfo;
     procedure EditTrip(NewFile: boolean);
@@ -1465,6 +1467,7 @@ procedure TFrmTripManager.FormShow(Sender: TObject);
 begin
   PageControl1.ActivePageIndex := 0;
   PctHexOsm.ActivePageIndex := 1;
+  ReadSortColumn;
   BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
 end;
@@ -1695,6 +1698,7 @@ end;
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   ShellListView1.ColumnClick(Column);
+  WriteSortColumn;
 end;
 
 procedure TFrmTripManager.ShellListView1DblClick(Sender: TObject);
@@ -3347,6 +3351,28 @@ begin
   DeviceFolder[0] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevTripsFolder_Key, 'Internal Storage\.System\Trips');
   DeviceFolder[1] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevGpxFolder_Key, 'Internal Storage\GPX');
   DeviceFolder[2] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevPoiFolder_Key, 'Internal Storage\POI');
+end;
+
+procedure TFrmTripManager.ReadSortColumn;
+var
+  SortedColumn: TListColumn;
+begin
+  ShellListView1.SortColumn := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortColumn_Key, '0'));
+  SortedColumn := ShellListView1.Columns[ShellListView1.SortColumn];
+  if (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'True') = 'True') then
+    SetListHeaderSortState(TlistView(ShellListView1), SortedColumn, hssDescending)
+  else
+    SetListHeaderSortState(TlistView(ShellListView1), SortedColumn, hssAscending);
+  ShellListView1.ColumnClick(SortedColumn);
+end;
+
+procedure TFrmTripManager.WriteSortColumn;
+begin
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortColumn_Key, IntToStr(ShellListView1.SortColumn));
+  if (ShellListView1.SortState = TripManager_ShellList.hssAscending) then
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'True')
+  else
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'False');
 end;
 
 procedure TFrmTripManager.ReadSettings;

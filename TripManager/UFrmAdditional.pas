@@ -111,10 +111,7 @@ begin
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncKml', BooleanValues[TvSelections.Items[IdKml].Checked]);
   if (TvSelections.Items[IdKml].Checked) then
-  begin
     Funcs := Funcs + [TGPXFunc.CreateKML];
-    FrmTripManager.CheckSupportedModel;
-  end;
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncHtml', BooleanValues[TvSelections.Items[IdHtml].Checked]);
   if (TvSelections.Items[IdHtml].Checked) then

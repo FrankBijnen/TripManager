@@ -41,6 +41,7 @@ const MaxTries: integer = 3;
 const ProcessBegin: boolean = true;
 const ProcessEnd: boolean = true;
 const ProcessShape: boolean = true;
+const ProcessVia: boolean = true;
 const ProcessSubClass: boolean = true;
 const ProcessFlags: boolean = true;
 const ProcessViaPts: boolean = true;
@@ -49,6 +50,7 @@ const ProcessTracks: boolean = true;
 const UniqueTracks: boolean = true;
 const ProcessWayPtsFromRoute: boolean = true; // Create points for GPI and RoutePoints from route
 const DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
+const DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
 const ProcessShapePtsInGpi: boolean = false;
 const ProcessViaPtsInGpi: boolean = true;
 const ProcessWayPtsInGpi: boolean = true;
@@ -57,8 +59,13 @@ const ProcessCategory: set of TProcessCategory = [pcSymbol, pcGPX];
 const ProcessCategoryFor: set of TProcessCategoryFor = [pcfWayPt, pcfViaPt, pcfShapePt];
 const ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
 const ProcessDistance: boolean = true;
-const ClearCmt: boolean = false;
-const ClearDesc: boolean = false;
+
+const ProcessAddrBegin: boolean = false;
+const ProcessAddrEnd: boolean = false;
+const ProcessAddrVia: boolean = false;
+const ProcessAddrShape: boolean = false;
+const ProcessAddrWayPt: boolean = false;
+
 const IniProximityStr: TGPXString = '';
 
 const DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
@@ -458,24 +465,60 @@ var CurrentTrack: TXmlVSNode;
         RptNode.ChildNodes.Add(TXmlVSNodeType.ntComment).Text := DebugCoords(RptNode.AttributeList);
     end;
 
+    procedure EnsureSubNodeAfter(ANode: TXmlVSNode; ChildNode: string; const AfterNodes: array of string);
+    var
+      Pos: integer;
+      AfterNode: string;
+    begin
+      if (ANode.Find(ChildNode) = nil) then
+      begin
+        for AfterNode in AfterNodes do
+        begin
+          Pos := ANode.FindPos(AfterNode);
+          if (Pos <> -1) then
+          begin
+            ANode.InsertChild(ChildNode, Pos +1);
+            exit;
+          end;
+        end;
+        ANode.InsertChild(ChildNode, 0); // Add first
+      end;
+    end;
+
     procedure RenameSubNode(RtePtNode: TXmlVSNode;
                             const NodeName:string;
-                            const NewName: string = '');
+                            const NewName: string);
     var SubNode: TXmlVSNode;
     begin
       SubNode := RtePtNode.Find(NodeName);
       if (SubNode = nil) then
-        exit;
+          exit;
       SubNode.NodeValue := NewName;
+    end;
+
+    procedure LookUpAddrRtePt(RtePtNode: TXmlVSNode);
+{$IFDEF GEOCODE}
+    var
+      Lat, Lon: string;
+      Place: TPlace;
+{$ENDIF}
+    begin
+{$IFDEF GEOCODE}
+      Lat := RtePtNode.AttributeList.Find('lat').Value;
+      Lon := RtePtNode.AttributeList.Find('lon').Value;
+      AdjustLatLon(Lat, Lon, Place_Decimals);
+
+      EnsureSubNodeAfter(RtePtNode, 'cmt', ['name']);
+      RenameSubNode(RtePtNode, 'cmt',  Format('%s, %s', [Lat, Lon], FormatSettings));
+      Place := GetPlaceOfCoords(Lat, Lon);
+      if (Place <> nil) then
+        RenameSubNode(RtePtNode, 'cmt',  Place.RoutePlace);
+{$ENDIF}
     end;
 
     procedure RenameNode(RtePtNode: TXmlVSNode; const NewName: string = '');
     begin
       RenameSubNode(RtePtNode, 'name', NewName);
-      if (ClearCmt) then
-        RenameSubNode(RtePtNode, 'cmt',  '');
-      if (ClearDesc) then
-        RenameSubNode(RtePtNode, 'desc', '');
     end;
 
     procedure AddCategory(const ExtensionsNode: TXmlVsNode;
@@ -509,7 +552,7 @@ var CurrentTrack: TXmlVSNode;
     procedure ReplaceCategory(const ExtensionsNode: TXmlVsNode;
                               const NS, Category: string);
     var AnExtensionsNode, CategoriesNode: TXmlVsNode;
-        CatsPos, CatPos:integer;
+        CatPos:integer;
     begin
       if (ProcessCategory = []) then
         exit;
@@ -519,17 +562,11 @@ var CurrentTrack: TXmlVSNode;
       // Extensions node must exist. (Saved by Basecamp!)
       if (AnExtensionsNode = nil) then
         exit;
+
+      // Find or Create Categories node
+      EnsureSubNodeAfter(AnExtensionsNode, NS + 'Categories', [NS + 'DisplayMode']);
       CategoriesNode := AnExtensionsNode.find(NS + 'Categories');
-      // Need to add categories?
-      if (CategoriesNode = nil) then
-      begin
-        // Categories should be right after DisplayMode.
-        CatsPos := AnExtensionsNode.FindPos(NS + 'DisplayMode');
-        // Should always be there, but if not...
-        if (CatsPos = -1) then
-          exit;
-        CategoriesNode := AnExtensionsNode.InsertChild(NS + 'Categories', CatsPos +1);
-      end;
+
       // Always delete these categories
       for CatPos := CategoriesNode.ChildNodes.Count -1 downto 0 do
       begin
@@ -544,14 +581,54 @@ var CurrentTrack: TXmlVSNode;
         CategoriesNode.AddChild(NS + 'Category').NodeValue := CatGPX + BaseFile;
     end;
 
+    procedure ReplaceAddrWayPt(ExtensionsNode: TXmlVSNode; const NS: string);
+{$IFDEF GEOCODE}
+    var
+      WptNode: TXmlVsNode;
+      Lat, Lon: string;
+      Place: TPlace;
+      AnExtensionsNode, AddressNode: TXmlVsNode;
+{$ENDIF}
+    begin
+{$IFDEF GEOCODE}
+      WptNode := ExtensionsNode.Parent;
+      Lat := WptNode.AttributeList.Find('lat').Value;
+      Lon := WptNode.AttributeList.Find('lon').Value;
+      AdjustLatLon(Lat, Lon, Place_Decimals);
+      Place := GetPlaceOfCoords(Lat, Lon);
+      if (Place <> nil) then
+      begin
+        EnsureSubNodeAfter(WptNode, 'cmt', ['name']);
+        RenameSubNode(WptNode, 'cmt', Place.FormattedAddress);
+
+        AnExtensionsNode := ExtensionsNode.Find(NS + 'WaypointExtension');
+        // Extensions node must exist. (Saved by Basecamp!)
+        if (AnExtensionsNode = nil) then
+          exit;
+
+        // Find or create Address node, after Categories, or DisplayMode
+        EnsureSubNodeAfter(AnExtensionsNode, NS + 'Address', [NS + 'Categories', NS + 'DisplayMode']);
+        AddressNode := AnExtensionsNode.find(NS + 'Address');
+        // Delete existinfg address
+        AddressNode.ChildNodes.DeleteRange(0, AddressNode.ChildNodes.Count);
+
+        AddressNode.AddChild(NS + 'StreetAddress').NodeValue := Place.Road;
+        AddressNode.AddChild(NS + 'City').NodeValue := Place.City;
+        AddressNode.AddChild(NS + 'State').NodeValue := Place.State;
+        AddressNode.AddChild(NS + 'Country').NodeValue := Place.Country;
+        AddressNode.AddChild(NS + 'PostalCode').NodeValue := Place.PostalCode;
+      end;
+{$ENDIF}
+    end;
+
     procedure AddWptPoint(const ChildNode: TXmlVsNode;
                           const RtePtNode: TXmlVsNode;
                           const WayPointName: string;
                           const ProcessCategory: TProcessCategoryFor;
                           const Symbol: string = '';
-                          const Comment: string = '');
+                          const Description: string = '');
     var ExtensionsNode: TXmlVsNode;
-        NewSymbol, WptTime, WptCmt: string;
+        NewSymbol, WptTime, WptDesc, WptCmt: string;
     begin
       with ChildNode do
       begin
@@ -560,12 +637,16 @@ var CurrentTrack: TXmlVSNode;
         if (WptTime <> '') then
           AddChild('time').NodeValue := WptTime;
         AddChild('name').NodeValue := WayPointName;
-        if (Comment <> '') then
-          WptCmt := Comment
-        else
-          WptCmt := FindSubNodeValue(RtePtNode, 'cmt');
+        WptCmt := FindSubNodeValue(RtePtNode, 'cmt');
         if (WptCmt <> '') then
           AddChild('cmt').NodeValue := WptCmt;
+
+        if (Description <> '') then
+          WptDesc := Description
+        else
+          WptDesc := FindSubNodeValue(RtePtNode, 'desc');
+        if (WptDesc <> '') then
+          AddChild('desc').NodeValue := WptDesc;
 
         NewSymbol := Symbol;
         if (NewSymbol = '') then
@@ -580,6 +661,17 @@ var CurrentTrack: TXmlVSNode;
         begin
           ReplaceCategory(ExtensionsNode, 'gpxx:', NewSymbol);
           ReplaceCategory(ExtensionsNode, 'wptx1:', NewSymbol);
+        end;
+      end;
+
+      if (ProcessCategory in [pcfWayPt]) and
+         (ProcessAddrWayPt) then
+      begin
+        ExtensionsNode := RtePtNode.find('extensions');
+        if (ExtensionsNode <> nil) then
+        begin
+          ReplaceAddrWayPt(ExtensionsNode, 'gpxx:');
+          ReplaceAddrWayPt(ExtensionsNode, 'wptx1:');
         end;
       end;
 
@@ -704,9 +796,9 @@ var CurrentTrack: TXmlVSNode;
                            const Cnt, LastCnt: integer);
 
     var ExtensionNode: TXmlVSNode;
-        RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint, ViaNodeName,
+        RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint,
         DescNode, RteNode: TXmlVSNode;
-        ShapePtName, WptName, Symbol, CalculatedSubClass, MapName: string;
+        ViaPtName, ShapePtName, WptName, Symbol, CalculatedSubClass, MapName: string;
         MapSeg, NewDescPos: integer;
     begin
       RtePtExtensions := RtePtNode.Find('extensions');
@@ -733,6 +825,10 @@ var CurrentTrack: TXmlVSNode;
           WptName := BeginStr + ' ' + RouteName;
           Symbol := BeginSymbol;
           RenameNode(RtePtNode, WptName);
+
+          if (ProcessAddrBegin) then
+            LookUpAddrRtePt(RtePtNode);
+
           if (ProcessFlags) then
             RenameSubNode(RtePtNode, 'sym', Symbol);
           ClearSubClass(ExtensionNode);
@@ -781,6 +877,10 @@ var CurrentTrack: TXmlVSNode;
           WptName := EndStr + ' ' + RouteName;
           Symbol := EndSymbol;
           RenameNode(RtePtNode, WptName);
+
+          if (ProcessAddrEnd) then
+            LookUpAddrRtePt(RtePtNode);
+
           if (ProcessFlags) then
             RenameSubNode(RtePtNode, 'sym', Symbol);
           ClearSubClass(ExtensionNode);
@@ -827,6 +927,9 @@ var CurrentTrack: TXmlVSNode;
 
           RenameNode(RtePtNode, ShapePtName);
 
+          if (ProcessAddrShape) then
+            LookUpAddrRtePt(RtePtNode);
+
           if (ProcessFlags) then
             RenameSubNode(RtePtNode, 'sym', DefWaypointSymbol); // Symbol for shaping and via points is only used for viapointsxxx gpx
 
@@ -843,16 +946,19 @@ var CurrentTrack: TXmlVSNode;
         if (ProcessSubClass) then
           ClearSubClass(ExtensionNode);
 
-        ViaNodeName := RtePtNode.Find('name');
-        if (ViaNodeName <> nil) then
+        ViaPtName := FindSubNodeValue(RtePtNode, 'name');
+        if (ProcessVia) then
         begin
-          Symbol := ViaPointSymbol;
-          if (ProcessViaPts) then
-            AddViaPoint(RtePtNode, ViaNodeName.NodeValue, Symbol);
-
-          if (ProcessWayPtsFromRoute) then
-            AddWayPointFromRoute(RtePtNode, ViaNodeName.NodeValue, ViaPointCategory, Symbol);
+          if (ProcessAddrVia) then
+            LookUpAddrRtePt(RtePtNode);
         end;
+
+        Symbol := ViaPointSymbol;
+        if (ProcessViaPts) then
+          AddViaPoint(RtePtNode, ViaPtName, Symbol);
+
+        if (ProcessWayPtsFromRoute) then
+          AddWayPointFromRoute(RtePtNode, ViaPtName, ViaPointCategory, Symbol);
       end;
 
       if (ProcessDistance) and
@@ -1035,6 +1141,7 @@ var CurrentTrack: TXmlVSNode;
       WptNameNode := WptNode.Find('name');
       if (WptNameNode <> nil) then
         Name := WptNameNode.NodeValue;
+
       AddWayPoint(WptNode, Name);
     end;
 
@@ -1473,9 +1580,9 @@ var Func: TGPXFunc;
                     Helper.WritePlace( Folder,
                                        Format('%s,%s,%s ', [lon, lat, ele], Helper.FormatSettings),
                                        FindSubNodeValue(WayPoint, 'name'),
-                                       Format('%s%s%s', [RouteWayPoint.NodeValue,
-                                                        #10,
-                                                        FindSubNodeValue(WayPoint, 'cmt')]));
+                                       Format('%s%s%s', [FindSubNodeValue(WayPoint, 'cmt'),
+                                                         #10,
+                                                         FindSubNodeValue(WayPoint, 'desc')]));
                   end;
                 end;
                 Helper.WritePlacesEnd;
@@ -1732,6 +1839,7 @@ var Func: TGPXFunc;
     procedure DoCreateRoutes;
     const GpxNodename = 'gpx';
           WptNodename = 'wpt';
+          TrkNodename = 'trk';
           RteNodename = 'rte';
           RteNameNodeName = 'name';
           RtePtNodename = 'rtept';
@@ -1742,8 +1850,8 @@ var Func: TGPXFunc;
 
     var OutFile: string;
         RteNode, GpxNode: TXmlVSNode;
-        WptNode: TXmlVSNode;
-        WptNodePos: integer;
+        Node2Delete: TXmlVSNode;
+        Node2DeletePos: integer;
 
       procedure ProcessRtePt(const RtePtNode: TXmlVSNode);
       var ExtensionNode: TXmlVSNode;
@@ -1778,13 +1886,23 @@ var Func: TGPXFunc;
        (GpxNode.Name <> GpxNodename) then
         exit;
 
-      if (DeleteWayPtsInRoute) then
+      // Remove WayPt and Trk from GPX
+      for Node2DeletePos := GpxNode.ChildNodes.Count -1 downto 0 do
       begin
-        for WptNodePos := GpxNode.ChildNodes.Count -1 downto 0 do
+        Node2Delete := GpxNode.ChildNodes[Node2DeletePos];
+
+        if (DeleteWayPtsInRoute) and
+           (Node2Delete.Name = WptNodename) then
         begin
-          WptNode := GpxNode.ChildNodes[WptNodePos];
-          if (WptNode.Name = WptNodename) then
-            GpxNode.ChildNodes.Delete(WptNodePos);
+          GpxNode.ChildNodes.Delete(Node2DeletePos);
+          continue;
+        end;
+
+        if (DeleteTracksInRoute) and
+           (Node2Delete.Name = TrkNodename) then
+        begin
+          GpxNode.ChildNodes.Delete(Node2DeletePos);
+          continue
         end;
       end;
 
@@ -1833,7 +1951,7 @@ var Func: TGPXFunc;
           RtePts: TXmlVSNodeList;
           RtePtExtensions, RtePtViaPoint, RteExtensions, RteTrpPoint: TXmlVSNode;
           DepartureDateString, CalculationMode, TransportMode: string;
-          TripName, RtePtName, RtePtDesc: string;
+          TripName, RtePtName, RtePtCmt: string;
           DepartureDate: TDateTime;
           Coords: TCoord;
           TripList: TTripList;
@@ -1859,9 +1977,9 @@ var Func: TGPXFunc;
                   continue;
                 RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
 
-                RtePtDesc := FindSubNodeValue(RtePtNode, 'desc');
-                if (RtePtDesc = '') then
-                  RtePtDesc := Format('%s, %s', [FormatFloat('##0.00000', Coords.Lat, FormatSettings),
+                RtePtCmt := FindSubNodeValue(RtePtNode, 'cmt');
+                if (RtePtCmt = '') then
+                  RtePtCmt := Format('%s, %s', [FormatFloat('##0.00000', Coords.Lat, FormatSettings),
                                                  FormatFloat('##0.00000', Coords.Lon, FormatSettings)]
                                       );
                 DepartureDateString := '';
@@ -1892,7 +2010,7 @@ var Func: TGPXFunc;
                   Locations.Add(TmArrival.Create);
 
                 Locations.Add(TmScPosn.Create(Coords.Lat, Coords.Lon));
-                Locations.Add(TmAddress.Create(RtePtDesc));
+                Locations.Add(TmAddress.Create(RtePtCmt));
                 Locations.Add(TmisTravelapseDestination.Create);
                 Locations.Add(TmShapingRadius.Create);
                 Locations.Add(TmName.Create(RtePtName));

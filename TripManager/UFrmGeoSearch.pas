@@ -45,7 +45,7 @@ uses
 
 procedure TFGeoSearch.FormShow(Sender: TObject);
 begin
-  ClearCoordCache; // Make sure we dont get cached data.
+//  ClearCoordCache; // Make sure we dont get cached data.
   case PctMain.ActivePageIndex of
     0: EdSearchFree.SetFocus;
     1: EdStreet.SetFocus;
