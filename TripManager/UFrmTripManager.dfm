@@ -1065,12 +1065,6 @@ object FrmTripManager: TFrmTripManager
     Left = 303
     Top = 66
   end
-  object PostProcessTimer: TTimer
-    Enabled = False
-    OnTimer = PostProcessTimerTimer
-    Left = 397
-    Top = 68
-  end
   object OpenTrip: TOpenDialog
     DefaultExt = 'trip'
     Filter = '*.trip|*.trip'
@@ -1106,7 +1100,7 @@ object FrmTripManager: TFrmTripManager
           end>
         ActionBar = ActionMainMenuBar
       end>
-    Left = 505
+    Left = 385
     Top = 65
     StyleName = 'Platform Default'
     object Action1: TAction

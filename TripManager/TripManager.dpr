@@ -1,6 +1,9 @@
 program TripManager;
 
 uses
+{$IFDEF DEBUG}
+  UnitStackTrace,
+{$ENDIF}
   MidasLib,
   Vcl.Forms,
   Vcl.Themes,
@@ -32,8 +35,8 @@ begin
   CreateTempPath('TRIP');
 
   TStyleManager.TrySetStyle('Sapphire Kamri');
-  Application.CreateForm(TFrmTripManager, FrmTripManager);
   Application.CreateForm(TDmRoutePoints, DmRoutePoints);
+  Application.CreateForm(TFrmTripManager, FrmTripManager);
   Application.CreateForm(TFrmPostProcess, FrmPostProcess);
   Application.CreateForm(TFrmDateDialog, FrmDateDialog);
   Application.CreateForm(TFrmAdditional, FrmAdditional);

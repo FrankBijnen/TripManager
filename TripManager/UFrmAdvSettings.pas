@@ -69,10 +69,6 @@ var
   WayPtCat: integer;
   WayPtList: TStringList;
 begin
-  EnableBalloon := false;
-  EnableTimeout := false;
-  TimeOut := 0;
-  MaxTries := 0;
   DebugComments := 'False';
 
   TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');

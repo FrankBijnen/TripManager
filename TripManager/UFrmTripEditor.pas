@@ -409,7 +409,6 @@ begin
   FrmAdvSettings.SetFixedPrefs;
   ProcessTracks := false;
   FrmSelectGPX := TFrmSelectGPX.Create(Self);
-  CreateGlobals;
   try
     AnalyzeGpx(OpenTrip.FileName,
                OutWayPointList,
@@ -470,7 +469,6 @@ begin
       end;
     end;
   finally
-    FreeGlobals;
     SetCursor(CrNormal);
     FrmSelectGPX.Free;
   end;

@@ -37,6 +37,8 @@ const
   CurrentGPI              = 'CurrentGPI';
   FileSysTrip             = 'FileSys';
 
+  WM_DIRCHANGED           = WM_USER + 1;
+
 type
   TMapReq = record
     Coords: string;
@@ -140,7 +142,6 @@ type
     CmbModel: TComboBox;
     BtnPostProcess: TButton;
     ChkWatch: TCheckBox;
-    PostProcessTimer: TTimer;
     OpenTrip: TOpenDialog;
     ActionMainMenuBar: TActionMainMenuBar;
     ActionManager: TActionManager;
@@ -224,7 +225,6 @@ type
     procedure ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
     procedure LstFilesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ChkWatchClick(Sender: TObject);
-    procedure PostProcessTimerTimer(Sender: TObject);
     procedure ShellListView1DblClick(Sender: TObject);
     procedure Action1Execute(Sender: TObject);
     procedure Action2Execute(Sender: TObject);
@@ -316,6 +316,7 @@ type
   protected
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
+    procedure WMDirChanged(var Msg: TMessage); message WM_DIRCHANGED;
   public
     { Public declarations }
     DeviceFolder: array[0..2] of string;
@@ -1166,70 +1167,32 @@ var
   Ext: string;
   CrNormal,CrWait: HCURSOR;
 begin
-  if FrmPostProcess.ShowModal <> ID_OK then
-    exit;
-
-  if (ShellListView1.SelectedFolder = nil) then
-    exit;
-
-  CrWait := LoadCursor(0,IDC_WAIT);
-  CrNormal := SetCursor(CrWait);
+  DirectoryMonitor.Active := false;
   try
-    for AnItem in ShellListView1.Items do
-    begin
-      if (AnItem.Selected = false) then
-        continue;
-      if (ShellListView1.Folders[AnItem.Index].IsFolder) then
-        continue;
-      Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
-      if (ContainsText(Ext, GpxExtension)) then
-        DoFunction([Unglitch], ShellListView1.Folders[AnItem.Index].PathName);
-    end;
-  finally
-    SetCursor(CrNormal);
-  end;
-end;
+    if (ShellListView1.SelectedFolder = nil) then
+      exit;
 
-procedure TFrmTripManager.PostProcessTimerTimer(Sender: TObject);
-var
-  ProcessModified: TStringList;
-  AGpx: string;
-begin
-  TTimer(Sender).Enabled := false;
-
-  // Stop directory monitor.
-  // If not we will get an event when postprocessing.
-  DirectoryMonitor.Stop;
-  while DirectoryMonitor.Active do
-  begin
-    Sleep(50);
-    ProcessMessages;
-  end;
-
-  ProcessModified := TStringList.Create;
-  try
-    // Copy the modified list
-    System.TMonitor.Enter(ModifiedList);
-    try
-      ProcessModified.Text := ModifiedList.Text;
-      ModifiedList.Clear;
-    finally
-      System.TMonitor.Exit(ModifiedList);
-    end;
-
-    // Bring to front by switching FormStyle
-    Self.FormStyle := fsStayOnTop;
-    Self.FormStyle := fsNormal;
-
-    // PostProcess
     if FrmPostProcess.ShowModal <> ID_OK then
       exit;
-    for AGpx in ProcessModified do
-      DoFunction([Unglitch], AGpx);
 
+    CrWait := LoadCursor(0,IDC_WAIT);
+    CrNormal := SetCursor(CrWait);
+    try
+      for AnItem in ShellListView1.Items do
+      begin
+        if (AnItem.Selected = false) then
+          continue;
+        if (ShellListView1.Folders[AnItem.Index].IsFolder) then
+          continue;
+        Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
+        if (ContainsText(Ext, GpxExtension)) then
+          DoFunction([Unglitch], ShellListView1.Folders[AnItem.Index].PathName);
+      end;
+    finally
+      SetCursor(CrNormal);
+    end;
   finally
-    ProcessModified.Free;
-    DirectoryMonitor.Start;
+    DirectoryMonitor.Active := ChkWatch.Checked;
   end;
 end;
 
@@ -1403,6 +1366,9 @@ end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  if (DirectoryMonitor.Active) then
+    DirectoryMonitor.Stop;
+
   CloseDevice;
   EdgeBrowser1.CloseBrowserProcess; // Close Edge. Else we can not remove the tempdir.
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, EditMapCoords.Text);
@@ -1452,15 +1418,13 @@ end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
 begin
-  if (DirectoryMonitor.Active) then
-    DirectoryMonitor.Stop;
   DirectoryMonitor.Free;
   ModifiedList.Free;
 
-  FreeDevices;
+  ClearTripInfo;
   ATripList.Free;
   APOIList.Free;
-  ClearTripInfo;
+  FreeDevices;
 end;
 
 procedure TFrmTripManager.FormShow(Sender: TObject);
@@ -1856,9 +1820,11 @@ end;
 procedure TFrmTripManager.ChkWatchClick(Sender: TObject);
 begin
   if (DirectoryMonitor <> nil) then
+  begin
     DirectoryMonitor.Active := ChkWatch.Checked;
-  if (DirectoryMonitor.Active) then
-    ShellListView1.ClearSelection;
+    if (DirectoryMonitor.Active) then
+      ShellListView1.ClearSelection;
+  end;
 end;
 
 procedure TFrmTripManager.ClearSelHexEdit;
@@ -3446,16 +3412,75 @@ begin
     BtnTransferToDeviceClick(Self);
 end;
 
+procedure TFrmTripManager.WMDirChanged(var Msg: TMessage);
+var
+  ProcessModified: TStringList;
+  AGpx: string;
+begin
+  if (DirectoryMonitor.Active = false) then
+    exit;
+
+  // Stop directory monitor.
+  // If not we will get an event when postprocessing.
+  DirectoryMonitor.Active := false;
+
+  ProcessModified := TStringList.Create;
+  try
+    // Copy the modified list
+    System.TMonitor.Enter(ModifiedList);
+    try
+      ProcessModified.Text := ModifiedList.Text;
+      ModifiedList.Clear;
+    finally
+      System.TMonitor.Exit(ModifiedList);
+    end;
+
+//    // Bring to front by switching FormStyle
+    Self.FormStyle := fsStayOnTop;
+    Self.FormStyle := fsNormal;
+
+    // PostProcess
+    if FrmPostProcess.ShowModal <> ID_OK then
+      exit;
+    for AGpx in ProcessModified do
+      DoFunction([Unglitch], AGpx);
+
+  finally
+    ProcessModified.Free;
+    DirectoryMonitor.Active := ChkWatch.Checked;
+  end;
+end;
+
 procedure TFrmTripManager.DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
 var
-  Index: integer;
   Ext: string;
-  FileFound: boolean;
+
+  function SelectModifiedFile(ModifiedFile: string): boolean;
+  var
+    Index: integer;
+  begin
+    result := false;
+    for Index := 0 to ShellListView1.Items.Count -1 do
+    begin
+      if (ShellListView1.Folders[Index].IsFolder) then
+        continue;
+
+      if SameText(ModifiedFile, ExtractFileName(ShellListView1.Folders[Index].PathName)) then
+      begin
+        ShellListView1.Items[Index].Selected := true;
+        result := true;
+      end
+      else
+        ShellListView1.Items[Index].Selected := false;
+    end;
+  end;
+
 begin
   Ext := ExtractFileExt(Filename);
   if not (ContainsText(Ext, GpxExtension)) then
     exit;
 
+  // ModifiedList has duplicates set to dupIgnore to skip multiple events for same file
   System.TMonitor.Enter(ModifiedList);
   try
     ModifiedList.Add(IncludeTrailingPathDelimiter(DirectoryMonitor.Directory) + FileName);
@@ -3463,23 +3488,15 @@ begin
     System.TMonitor.Exit(ModifiedList);
   end;
 
-  FileFound := false;
-  for Index := 0 to ShellListView1.Items.Count -1 do
+  // Mark the modified files
+  if not (SelectModifiedFile(FileName)) then
   begin
-    if (ShellListView1.Folders[Index].IsFolder) then
-      continue;
-
-    if SameText(FileName, ExtractFileName(ShellListView1.Folders[Index].PathName)) then
-    begin
-      ShellListView1.Items[Index].Selected := true;
-      FileFound := true;
-    end;
-  end;
-  if (FileFound = false) then
+    // Modified file was not found, maybe created? Refresh and retry.
     ShellListView1.Refresh;
+    SelectModifiedFile(FileName);
+  end;
 
-  PostProcessTimer.Enabled := false;
-  PostProcessTimer.Enabled := true;
+  PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;
 
 end.

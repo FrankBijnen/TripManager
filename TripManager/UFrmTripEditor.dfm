@@ -13,7 +13,6 @@ object FrmTripEditor: TFrmTripEditor
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  FormStyle = fsStayOnTop
   PopupMenu = PopupGrid
   Position = poDefault
   OnCreate = FormCreate

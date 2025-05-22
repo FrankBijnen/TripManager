@@ -46,6 +46,9 @@ type
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
     procedure DoContextPopup(MousePos: TPoint; var Handled: boolean); override;
+    function OwnerDataFind(Find: TItemFind; const FindString: string;
+      const FindPosition: TPoint; FindData: Pointer; StartIndex: Integer;
+      Direction: TSearchDirection; Wrap: Boolean): Integer; override;
     procedure Edit(const Item: TLVItem); override;
 
     procedure ShowMultiContextMenu(MousePos: TPoint);
@@ -69,7 +72,7 @@ type
 implementation
 
 uses
-  System.Win.ComObj, System.UITypes,
+  System.Win.ComObj, System.UITypes, System.StrUtils,
   TripManager_MultiContext;
 
 {$IFDEF VER350}
@@ -294,6 +297,37 @@ begin
   Handled := true;
 
 //  inherited;
+end;
+
+// The inherited has 2 problems.
+// 1. The last item is not found
+// 2. It does not check if StartIndex > Folders.Count -1
+function TShellListView.OwnerDataFind(Find: TItemFind; const FindString: string;
+  const FindPosition: TPoint; FindData: Pointer; StartIndex: Integer;
+  Direction: TSearchDirection; Wrap: Boolean): Integer;
+var
+  I: Integer;
+  Found: Boolean;
+begin
+  Result := -1;
+  I := StartIndex;
+  if (Find = ifExactString) or
+     (Find = ifPartialString) then
+  begin
+    repeat
+      if (I > FoldersList.Count -1) then // The inherited checks for =
+      begin
+        if Wrap then
+          I := 0
+        else
+          Exit;
+      end;
+      Found := StartsText(FindString, Folders[I].DisplayName);
+      Inc(I);
+    until Found or (I = StartIndex);
+    if Found then
+      Result := I -1;
+  end;
 end;
 
 procedure TShellListView.Edit(const Item: TLVItem);
