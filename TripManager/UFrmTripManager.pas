@@ -3431,46 +3431,40 @@ end;
 
 procedure TFrmTripManager.WMDirChanged(var Msg: TMessage);
 var
-  ProcessModified: TStringList;
   AGpx: string;
 begin
   Msg.Result := 0;
-  if (DirectoryMonitor.Active = false) then
+
+  // Show Dialog
+  if (FrmPostProcess.Showing) then
+    exit;
+
+  // Bring to front by switching FormStyle
+  Self.FormStyle := fsStayOnTop;
+  Self.FormStyle := fsNormal;
+
+  // PostProcess
+  if FrmPostProcess.ShowModal <> ID_OK then
     exit;
 
   // Stop directory monitor.
   // If not we will get an event when postprocessing.
+  System.TMonitor.Enter(ModifiedList);
   DirectoryMonitor.Active := false;
-
-  ProcessModified := TStringList.Create;
   try
-    // Copy the modified list
-    System.TMonitor.Enter(ModifiedList);
-    try
-      ProcessModified.Text := ModifiedList.Text;
-      ModifiedList.Clear;
-    finally
-      System.TMonitor.Exit(ModifiedList);
-    end;
-
-//    // Bring to front by switching FormStyle
-    Self.FormStyle := fsStayOnTop;
-    Self.FormStyle := fsNormal;
-
-    // PostProcess
-    if FrmPostProcess.ShowModal <> ID_OK then
-      exit;
-    for AGpx in ProcessModified do
+    while (ModifiedList.Count > 0) do
     begin
+      AGpx := ModifiedList[0];
+      ModifiedList.Delete(0);
       SbPostProcess.Panels[0].Text := AGpx;
       Application.ProcessMessages;
       DoFunction([Unglitch], AGpx);
     end;
   finally
+    DirectoryMonitor.Active := ChkWatch.Checked;
+    System.TMonitor.Exit(ModifiedList);
     SbPostProcess.Panels[0].Text  := '';
     SbPostProcess.Panels[1].Text  := '';
-    ProcessModified.Free;
-    DirectoryMonitor.Active := ChkWatch.Checked;
   end;
 end;
 
@@ -3485,27 +3479,20 @@ procedure TFrmTripManager.DirectoryEvent(Sender: TObject; Action: TDirectoryMoni
 var
   Ext: string;
 
-  function SelectModifiedFile(ModifiedFile: string): boolean;
+  procedure SelectModifiedFiles;
   var
     Index: integer;
   begin
-    result := false;
     for Index := 0 to ShellListView1.Items.Count -1 do
     begin
       if (ShellListView1.Folders[Index].IsFolder) then
         continue;
-
-      if SameText(ModifiedFile, ExtractFileName(ShellListView1.Folders[Index].PathName)) then
-      begin
-        ShellListView1.Items[Index].Selected := true;
-        result := true;
-      end
-      else
-        ShellListView1.Items[Index].Selected := false;
+      ShellListView1.Items[Index].Selected := ModifiedList.IndexOf(ShellListView1.Folders[Index].PathName) > -1;
     end;
   end;
 
 begin
+  // Only want GPX files
   Ext := ExtractFileExt(Filename);
   if not (ContainsText(Ext, GpxExtension)) then
     exit;
@@ -3518,13 +3505,12 @@ begin
     System.TMonitor.Exit(ModifiedList);
   end;
 
-  // Mark the modified files
-  if not (SelectModifiedFile(FileName)) then
-  begin
-    // Modified file was not found, maybe created? Refresh and retry.
+  // Is this a new file? Refresh
+  if (ShellListView1.FindCaption(0, Filename, true, true, false) = nil) then
     ShellListView1.Refresh;
-    SelectModifiedFile(FileName);
-  end;
+
+  // Select the files in the ShellListView
+  SelectModifiedFiles;
 
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;

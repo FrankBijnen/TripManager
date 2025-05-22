@@ -4,7 +4,7 @@ object FrmPostProcess: TFrmPostProcess
   ActiveControl = BtnOK
   BorderStyle = bsDialog
   Caption = 'Post processing parameters'
-  ClientHeight = 506
+  ClientHeight = 516
   ClientWidth = 646
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,17 +19,18 @@ object FrmPostProcess: TFrmPostProcess
   TextHeight = 15
   object PnlBot: TPanel
     Left = 0
-    Top = 473
+    Top = 483
     Width = 646
     Height = 33
     Align = alBottom
     TabOrder = 6
+    ExplicitTop = 473
     DesignSize = (
       646
       33)
     object BtnCancel: TBitBtn
-      Left = 565
-      Top = 5
+      Left = 552
+      Top = 3
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -38,8 +39,8 @@ object FrmPostProcess: TFrmPostProcess
       TabOrder = 0
     end
     object BtnOK: TBitBtn
-      Left = 479
-      Top = 5
+      Left = 471
+      Top = 3
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
