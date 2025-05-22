@@ -75,7 +75,7 @@ type
     AdvPanel_MapTop: TPanel;
     EditMapCoords: TEdit;
     AdvPanel_MapBottom: TPanel;
-    EditMapBounds: TLabeledEdit;
+    EditMapBounds: TEdit;
     EdgeBrowser1: TEdgeBrowser;
     CmbDevices: TComboBox;
     PnlXTLeft: TPanel;
@@ -165,6 +165,7 @@ type
     NewtripWindows1: TMenuItem;
     ChkZoomToPoint: TCheckBox;
     SbPostProcess: TStatusBar;
+    LblBounds: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -1198,7 +1199,7 @@ begin
         if (ContainsText(Ext, GpxExtension)) then
         begin
           SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
-          SbPostProcess.Update;
+          Application.ProcessMessages;
           DoFunction([Unglitch], ShellListView1.Folders[AnItem.Index].PathName);
         end;
       end;
@@ -3462,7 +3463,7 @@ begin
     for AGpx in ProcessModified do
     begin
       SbPostProcess.Panels[0].Text := AGpx;
-      SbPostProcess.Update;
+      Application.ProcessMessages;
       DoFunction([Unglitch], AGpx);
     end;
   finally
@@ -3476,7 +3477,7 @@ end;
 procedure TFrmTripManager.WMAddrLookUp(var Msg: TMessage);
 begin
   SbPostProcess.Panels[1].Text  := TPlace(Msg.LParam).FormattedAddress;
-  SbPostProcess.Update;
+  Application.ProcessMessages;
   Msg.Result := 0;
 end;
 
