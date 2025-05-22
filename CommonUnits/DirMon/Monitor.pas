@@ -172,7 +172,7 @@ begin
     repeat
       Action := GetNotifyAction(Info^.Action);
       WStrLen := (Info^.FileNameLength div SizeOf(WChar));
-      FileNamePtr := StrMove(WideStrAlloc(WStrLen), Info^.FileName, WStrLen);
+      FileNamePtr := StrMove(WideStrAlloc(WStrLen +1), Info^.FileName, WStrLen);
       FileNamePtr[WStrLen] := #0;
       if not PostMessage(FOwnerHandle, WMUSER_DIRECTORYCHANGED, WPARAM(Action), LPARAM(FileNamePtr)) then
         StrDispose(FileNamePtr);
