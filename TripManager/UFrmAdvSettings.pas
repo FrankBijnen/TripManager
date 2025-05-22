@@ -37,10 +37,12 @@ type
     PnlAddressFormatTop: TPanel;
     Splitter1: TSplitter;
     PnlAddressFormat: TPanel;
+    BtnClearCoordCache: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
     procedure VlGeoCodeSettingsStringsChange(Sender: TObject);
+    procedure BtnClearCoordCacheClick(Sender: TObject);
   private
     { Private declarations }
     SamplePlace: TPlace;
@@ -126,7 +128,6 @@ begin
     GeoSettings.GeoCodeApiKey := VlGeoCodeSettings.Values[GeoCodeApiKey];
     MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
     SamplePlace := nil;
-//    ClearCoordCache;
     MemoAddressFormatChange(MemoAddressFormat);
   end;
 end;
@@ -195,6 +196,11 @@ begin
   ReadGeoCodeSettings;
 end;
 
+procedure TFrmAdvSettings.BtnClearCoordCacheClick(Sender: TObject);
+begin
+  ClearCoordCache;
+end;
+
 procedure TFrmAdvSettings.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if ModalResult = mrOk then
@@ -203,7 +209,6 @@ end;
 
 procedure TFrmAdvSettings.FormShow(Sender: TObject);
 begin
-//  ClearCoordCache;
   SamplePlace := nil;
   MemoResult.Lines.Clear;
 

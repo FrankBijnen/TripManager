@@ -123,6 +123,15 @@ object FrmAdvSettings: TFrmAdvSettings
           Align = alTop
           Caption = 'Result'
           TabOrder = 1
+          object BtnClearCoordCache: TButton
+            Left = 8
+            Top = 4
+            Width = 137
+            Height = 25
+            Caption = 'Clear GeoCode cache'
+            TabOrder = 0
+            OnClick = BtnClearCoordCacheClick
+          end
         end
         object MemoResult: TMemo
           Left = 1
