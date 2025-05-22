@@ -4,7 +4,7 @@ unit UnitGPX;
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.ExtCtrls, Vcl.Dialogs,
+  System.Classes, System.SysUtils, 
   WinApi.Windows, System.IniFiles, System.Math,
   Xml.XMLIntf, UnitVerySimpleXml,
   kml_helper, OSM_helper,
@@ -33,11 +33,6 @@ type
 
 const CreateSubDir: boolean = true;
 const ForceOutDir: string  = '';
-const EnableBalloon: boolean = true;
-const EnableTimeout: boolean = true;
-const TimeOut: integer = 1000;
-const MaxTries: integer = 3;
-
 const ProcessBegin: boolean = true;
 const ProcessEnd: boolean = true;
 const ProcessShape: boolean = true;
@@ -97,8 +92,6 @@ const VehicleId: string = '';
 {$ENDIF}
 function FindSubNodeValue(ANode: TXmlVSNode;
                           SubName: string): string;
-procedure CreateGlobals;
-procedure FreeGlobals;
 procedure AnalyzeGpx(const GPXFile:string;
                      var OutWayPointList: TXmlVSNodeList;
                      var OutWayPointFromRouteList: TXmlVSNodeList;
@@ -111,8 +104,6 @@ procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const SeqNo: cardinal = 0);
 procedure ReadConfigFromIni;
 function ReadConfigParm(ASection, AKey: TGPXString; Default: TGPXString = ''): TGPXString;
-procedure Usage;
-procedure ShowBalloon(const Hint: string; const Force: boolean = false);
 function InitRoot(WptTracksXml: TXmlVSDocument): TXmlVSNode;
 
 implementation
@@ -123,13 +114,11 @@ uses
 const EarthRadiusKm: Double = 6371.009;
 const EarthRadiusMi: Double = 3958.761;
 
-var TrayIcon: TTrayIcon;
-    Xml: TXmlVSDocument;
-    WptTracksXml: TXmlVSDocument;
-    WayPointList: TXmlVSNodeList;
+var WayPointList: TXmlVSNodeList;
     WayPointFromRouteList: TXmlVSNodeList;
     RouteViaPointList: TXmlVSNodeList;
     TrackList: TXmlVSNodeList;
+
     ViaPoint: integer;
     WayPointsProcessedList: TStringList;
     FormatSettings: TFormatSettings;
@@ -252,7 +241,6 @@ end;
 
 procedure ReadConfigFromIni;
 begin
-  TimeOut := StrToInt(string(ReadConfigParm('General', 'TimeOut', '1000')));
   TrackColor := ReadConfigParmStr('General', 'TrackColor', 'Blue');
   UniqueTracks := (ReadConfigParmStr('General', 'UniqueTracks', 'True') = 'True');
 {$IFDEF DEBUG}
@@ -281,36 +269,36 @@ begin
   IniProximityStr := ReadConfigParm('GPI', 'DefaultProximity');
 end;
 
+procedure FreeGlobals;
+begin
+  FreeAndNil(RouteViaPointList);
+  FreeAndNil(WayPointFromRouteList);
+  FreeAndNil(WayPointList);
+  FreeAndNil(TrackList);
+  FreeAndNil(WayPointsProcessedList);
+end;
+
 procedure CreateGlobals;
 begin
   RouteViaPointList := TXmlVSNodeList.Create;
   WayPointFromRouteList := TXmlVSNodeList.Create;
   WayPointList := TXmlVSNodeList.Create;
   TrackList := TXmlVSNodeList.Create;
-
-  Xml := TXmlVSDocument.Create;
-  WptTracksXml := TXmlVSDocument.Create;
-
   WayPointsProcessedList := TStringList.Create;
+end;
+
+procedure ClearGlobals;
+begin
+  RouteViaPointList.Clear;
+  WayPointFromRouteList.Clear;
+  WayPointList.Clear;
+  TrackList.Clear;
+  WayPointsProcessedList.Clear;
 
   if (DistanceUnit = TDistanceUnit.duMi) then
     DistanceStr := 'Mi'
   else
     DistanceStr := 'Km';
-
-end;
-
-procedure FreeGlobals;
-begin
-  RouteViaPointList.Free;
-  WayPointFromRouteList.Free;
-  WayPointList.Free;
-  TrackList.Free;
-
-  Xml.Free;
-  WptTracksXml.Free;
-
-  WayPointsProcessedList.Free;
 end;
 
 procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
@@ -395,7 +383,7 @@ begin
   Val(Reversed, result, ErrCode);
 end;
 
-procedure ProcessGPX(const GPXFile, BaseFile:string);
+procedure ProcessGPX(const XmlDocument: TXmlVSDocument; const GPXFile, BaseFile:string);
 var CurrentTrack: TXmlVSNode;
     CurrentViaPointRoute: TXmlVSNode;
     CurrentWayPointFromRoute: TXmlVSNode;
@@ -1145,7 +1133,7 @@ var CurrentTrack: TXmlVSNode;
       AddWayPoint(WptNode, Name);
     end;
 
-    procedure ProcessGPX(GpxNode: TXmlVSNode; const BaseFile: string);
+    procedure ProcessGPXNode(GpxNode: TXmlVSNode; const BaseFile: string);
     var MainNode: TXmlVSNode;
     begin
 
@@ -1169,11 +1157,11 @@ var CurrentTrack: TXmlVSNode;
 
 begin
   try
-    Xml.LoadFromFile(GPXFile);
-    for GpxNode in xml.ChildNodes do
+    XmlDocument.LoadFromFile(GPXFile);
+    for GpxNode in XmlDocument.ChildNodes do
     begin
       if (GpxNode.Name = 'gpx') then
-        ProcessGPX(GpxNode, BaseFile);
+        ProcessGPXNode(GpxNode, BaseFile);
     end;
   finally
   { Future use }
@@ -1285,13 +1273,21 @@ procedure AnalyzeGpx(const GPXFile:string;
                      var OutTrackList: TXmlVSNodeList);
 var
   BaseFile: string;
+  XmlDocument: TXmlVSDocument;
 begin
-  BaseFile := ChangeFileExt(ExtractFileName(GPXFile), '');
-  ProcessGPX(GPXFile, BaseFile);
-  OutWayPointList := WayPointList;
-  OutWayPointFromRouteList := WayPointFromRouteList;
-  OutRouteViaPointList := RouteViaPointList;
-  OutTrackList := TrackList;
+  ClearGlobals;
+
+  XmlDocument := TXmlVSDocument.Create;
+  try
+    BaseFile := ChangeFileExt(ExtractFileName(GPXFile), '');
+    ProcessGPX(XmlDocument, GPXFile, BaseFile);
+    OutWayPointList := WayPointList;
+    OutWayPointFromRouteList := WayPointFromRouteList;
+    OutRouteViaPointList := RouteViaPointList;
+    OutTrackList := TrackList;
+  finally
+    XmlDocument.Free;
+  end;
 end;
 
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
@@ -1301,7 +1297,8 @@ procedure DoFunction(const AllFuncs: array of TGPXFunc;
 var Func: TGPXFunc;
     OutDir: string;
     BaseFile: string;
-    RetryCount: integer;
+    XmlDocument: TXmlVSDocument;
+    WptTracksXml: TXmlVSDocument;
 
     procedure DoCreateTracks;
     var WptTracksRoot: TXmlVSNode;
@@ -1881,7 +1878,7 @@ var Func: TGPXFunc;
       end;
 
     begin
-      GpxNode := Xml.ChildNodes.find(GpxNodename);  // Look for <gpx> node
+      GpxNode := XmlDocument.ChildNodes.find(GpxNodename);  // Look for <gpx> node
       if (GpxNode = nil) or
        (GpxNode.Name <> GpxNodename) then
         exit;
@@ -1916,8 +1913,8 @@ var Func: TGPXFunc;
                  'Routes_' +
                  BaseFile +
                  ExtractFileExt(GPXFile);
-      Xml.Encoding := 'utf-8';
-      Xml.SaveToFile(OutFile);
+      XmlDocument.Encoding := 'utf-8';
+      XmlDocument.SaveToFile(OutFile);
     end;
 
     procedure DoCreateTrips;
@@ -2184,7 +2181,7 @@ var Func: TGPXFunc;
 
     begin
 
-      GpxNode := Xml.ChildNodes.find(GpxNodename);  // Look for <gpx> node
+      GpxNode := XmlDocument.ChildNodes.find(GpxNodename);  // Look for <gpx> node
       if (GpxNode = nil) or
        (GpxNode.Name <> GpxNodename) then
         exit;
@@ -2199,7 +2196,7 @@ var Func: TGPXFunc;
 
 begin
 
-  CreateGlobals;
+  ClearGlobals;
 
   BaseFile := ChangeFileExt(ExtractFileName(GPXFile), '');
   if (ForceOutDir <> '') then
@@ -2211,7 +2208,7 @@ begin
       OutDir := IncludeTrailingPathDelimiter(OutDir + BaseFile);
   end;
 
-  for Func in AllFuncs  do
+  for Func in AllFuncs do
   begin
     case Func of
       CreateTracks,
@@ -2230,120 +2227,81 @@ begin
     end;
   end;
 
+  XmlDocument := TXmlVSDocument.Create;
+  WptTracksXml := TXmlVSDocument.Create;
   try
-    RetryCount := 0;
-    while (RetryCount <= MaxTries) do
+    ProcessGPX(XmlDocument, GPXFile, BaseFile);
+
+    for Func in AllFuncs  do
     begin
-      try
-        ProcessGPX(GPXFile, BaseFile);
-
-        for Func in AllFuncs  do
-        begin
-          WayPointsProcessedList.Clear;
-          case Func of
-            Unglitch:
-              begin
-                Xml.Encoding := 'utf-8';
-                Xml.SaveToFile(GPXFile);
-              end;
-            CreateTracks:
-              begin
-                DoCreateTracks;
-              end;
-            CreateRoutePoints:
-              begin
-                DoCreateRoutePoints;
-              end;
-            CreatePOI:
-              begin
-                DoCreatePOI;
-              end;
-            CreateKML:
-              begin
-                DoCreateKML;
-              end;
-            CreateOSM:
-              begin
-                DoCreateOSM;
-              end;
-            CreateOSMPoints:
-              begin
-                DoCreateOSMPoints;
-              end;
-            CreatePOLY:
-              begin
-                DoCreatePOLY;
-              end;
+      WayPointsProcessedList.Clear;
+      case Func of
+        Unglitch:
+          begin
+            XmlDocument.Encoding := 'utf-8';
+            XmlDocument.SaveToFile(GPXFile);
           end;
-        end;
-
-        // Process always last, removes a lot of nodes.
-        for Func in AllFuncs  do
-        begin
-          case Func of
-            TGPXFunc.CreateRoutes:
-              begin
-                DoCreateRoutes;
-              end;
-            TGPXFunc.CreateTrips:
-              begin
-                DoCreateTrips;
-              end;
+        CreateTracks:
+          begin
+            DoCreateTracks;
           end;
-        end;
-
-        RetryCount := MaxInt;
-
-      except
-        on E:Exception do
-        begin
-          Inc(RetryCount);
-          if (RetryCount > MaxTries) then
-            raise;
-          ShowBalloon(Format('%s. %sRetrying %d...',[E.Message, #10, RetryCount]), true);
-          Sleep(TimeOut);
-        end;
+        CreateRoutePoints:
+          begin
+            DoCreateRoutePoints;
+          end;
+        CreatePOI:
+          begin
+            DoCreatePOI;
+          end;
+        CreateKML:
+          begin
+            DoCreateKML;
+          end;
+        CreateOSM:
+          begin
+            DoCreateOSM;
+          end;
+        CreateOSMPoints:
+          begin
+            DoCreateOSMPoints;
+          end;
+        CreatePOLY:
+          begin
+            DoCreatePOLY;
+          end;
       end;
-
     end;
 
-    ShowBalloon(Format('All Done %s.',[GPXFile]));
+    // Process always last, removes a lot of nodes.
+    for Func in AllFuncs  do
+    begin
+      case Func of
+        TGPXFunc.CreateRoutes:
+          begin
+            DoCreateRoutes;
+          end;
+        TGPXFunc.CreateTrips:
+          begin
+            DoCreateTrips;
+          end;
+      end;
+    end;
 
   finally
-    if (EnableTimeout) then
-      Sleep(TimeOut);
-    FreeGlobals;
+    XmlDocument.Free;
+    WptTracksXml.Free;
   end;
-end;
-
-procedure Usage;
-begin
-  AllocConsole;
-  writeln('Usage: ', Paramstr(0), ' GPX_file' );
-  Readln;
-  Halt(1);
-end;
-
-procedure ShowBalloon(const Hint: string; const Force: boolean = false);
-begin
-  if not Force and
-     not EnableBalloon then
-    exit;
-  TrayIcon.Visible := true;
-  TrayIcon.BalloonHint := Hint;
-  TrayIcon.ShowBalloonHint;
-  TrayIcon.BalloonTimeout := TimeOut;
 end;
 
 initialization
 begin
   FormatSettings := GetLocaleSetting;
-  TrayIcon := TTrayIcon.Create(nil);
+  CreateGlobals;
 end;
 
 finalization
 begin
-  TrayIcon.Free;
+  FreeGlobals;
 end;
 
 end.
