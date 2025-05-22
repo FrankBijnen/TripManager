@@ -55,6 +55,8 @@ const ProcessCategoryFor: set of TProcessCategoryFor = [pcfWayPt, pcfViaPt, pcfS
 const ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
 const ProcessDistance: boolean = true;
 
+const LookUpWindow: Hwnd = 0;
+const LookUpMessage: UINT = 0;
 const ProcessAddrBegin: boolean = false;
 const ProcessAddrEnd: boolean = false;
 const ProcessAddrVia: boolean = false;
@@ -498,7 +500,7 @@ var CurrentTrack: TXmlVSNode;
 
       EnsureSubNodeAfter(RtePtNode, 'cmt', ['name']);
       RenameSubNode(RtePtNode, 'cmt',  Format('%s, %s', [Lat, Lon], FormatSettings));
-      Place := GetPlaceOfCoords(Lat, Lon);
+      Place := GetPlaceOfCoords(Lat, Lon, LookUpWindow, LookUpMessage);
       if (Place <> nil) then
         RenameSubNode(RtePtNode, 'cmt',  Place.RoutePlace);
 {$ENDIF}
@@ -583,7 +585,7 @@ var CurrentTrack: TXmlVSNode;
       Lat := WptNode.AttributeList.Find('lat').Value;
       Lon := WptNode.AttributeList.Find('lon').Value;
       AdjustLatLon(Lat, Lon, Place_Decimals);
-      Place := GetPlaceOfCoords(Lat, Lon);
+      Place := GetPlaceOfCoords(Lat, Lon, LookUpWindow, LookUpMessage);
       if (Place <> nil) then
       begin
         EnsureSubNodeAfter(WptNode, 'cmt', ['name']);

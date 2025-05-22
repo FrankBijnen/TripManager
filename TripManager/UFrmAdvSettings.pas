@@ -84,6 +84,7 @@ begin
   ProcessBegin := false;
   ProcessEnd := false;
   ProcessVia := false;
+  ProcessViaPts := true;
   ProcessShape := false;
   ShapingPointName := TShapingPointName.Unchanged;
 
@@ -92,6 +93,10 @@ begin
   ProcessAddrVia := false;
   ProcessAddrShape := false;
   ProcessAddrWayPt := false;
+
+  // Lookup Messages
+  LookUpWindow := FrmTripManager.Handle;
+  LookUpMessage := UFrmTripManager.WM_ADDRLOOKUP;
 
   // XT2 Defaults
   ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
@@ -119,6 +124,7 @@ begin
   finally
     WayPtList.Free;
   end;
+
 end;
 
 procedure TFrmAdvSettings.VlGeoCodeSettingsStringsChange(Sender: TObject);

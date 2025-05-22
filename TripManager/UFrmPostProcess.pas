@@ -54,7 +54,6 @@ type
   private
     SymbolsLoaded: boolean;
     procedure LoadSymbols;
-    procedure SetFixedPrefs;
     procedure SetPrefs;
     procedure StorePrefs;
     { Private declarations }
@@ -125,17 +124,6 @@ begin
   finally
     SetCursor(CrNormal);
   end;
-end;
-
-procedure TFrmPostProcess.SetFixedPrefs;
-begin
-  DebugComments := 'False';
-
-  ProcessSubClass := true;
-  ProcessBegin := true;
-  ProcessEnd := true;
-  ProcessViaPts := true;
-  ProcessShape := true;
 end;
 
 procedure TFrmPostProcess.SetPrefs;
@@ -252,7 +240,7 @@ end;
 procedure TFrmPostProcess.FormShow(Sender: TObject);
 begin
   LoadSymbols;
-  SetFixedPrefs;
+  FrmAdvSettings.SetFixedPrefs;
   SetPrefs;
 end;
 

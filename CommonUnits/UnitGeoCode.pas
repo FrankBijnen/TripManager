@@ -4,6 +4,7 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
+  Winapi.Windows,
   Vcl.Edge;
 
 const
@@ -59,7 +60,7 @@ type
     property PostalCode: string read GetPostalCode;
   end;
 
-function GetPlaceOfCoords(const Lat, Lon: string): TPlace;
+function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0): TPlace;
 procedure GetCoordsOfPlace(const Place: string; var Lat, Lon: string);
 procedure ReadGeoCodeSettings;
 procedure ClearCoordCache;
@@ -76,7 +77,7 @@ implementation
 
 uses
   System.Variants, System.JSON,  System.NetEncoding, System.Math, System.StrUtils, System.DateUtils,
-  Winapi.Windows, Vcl.Dialogs,
+  Vcl.Dialogs,
   REST.Types, REST.Client, REST.Utils,
   UnitStringUtils,
   UFrmPLaces, UFrmGeoSearch;
@@ -316,7 +317,7 @@ begin
   end;
 end;
 
-function GetPlaceOfCoords(const Lat, Lon: string): TPlace;
+function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0): TPlace;
 var CoordsKey: string;
     LatP, LonP: string;
     CrWait, CrNormal: HCURSOR;
@@ -342,7 +343,9 @@ begin
 
     // Also cache if not found
     CoordCache.Add(CoordsKey, result);
-
+    if (hWnd <> 0) and
+       (Msg <> 0) then
+      SendMessage(hWnd, Msg, 0, LPARAM(result));
   finally
     SetCursor(CrNormal);
   end;

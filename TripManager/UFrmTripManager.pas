@@ -38,6 +38,7 @@ const
   FileSysTrip             = 'FileSys';
 
   WM_DIRCHANGED           = WM_USER + 1;
+  WM_ADDRLOOKUP           = WM_USER + 2;
 
 type
   TMapReq = record
@@ -163,6 +164,7 @@ type
     MnuTripEdit: TMenuItem;
     NewtripWindows1: TMenuItem;
     ChkZoomToPoint: TCheckBox;
+    SbPostProcess: TStatusBar;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -238,6 +240,7 @@ type
     procedure MnuTripNewMTPClick(Sender: TObject);
     procedure NewtripWindows1Click(Sender: TObject);
     procedure PopupTripEditPopup(Sender: TObject);
+    procedure PageControl1Resize(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -317,6 +320,7 @@ type
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
     procedure WMDirChanged(var Msg: TMessage); message WM_DIRCHANGED;
+    procedure WMAddrLookUp(var Msg: TMessage); message WM_ADDRLOOKUP;
   public
     { Public declarations }
     DeviceFolder: array[0..2] of string;
@@ -1156,6 +1160,12 @@ begin
   ShellExecute(0, 'OPEN', PWideChar(CreatedTempPath), nil, nil, SW_SHOWNORMAL);
 end;
 
+procedure TFrmTripManager.PageControl1Resize(Sender: TObject);
+begin
+  SbPostProcess.Panels[0].Width := PageControl1.Width div 2;
+  SbPostProcess.Panels[1].Width := PageControl1.Width div 2;
+end;
+
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
   MnuTripNewMTP.Enabled := CheckDevice(false);
@@ -1186,9 +1196,15 @@ begin
           continue;
         Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
         if (ContainsText(Ext, GpxExtension)) then
+        begin
+          SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
+          SbPostProcess.Update;
           DoFunction([Unglitch], ShellListView1.Folders[AnItem.Index].PathName);
+        end;
       end;
     finally
+      SbPostProcess.Panels[0].Text := '';
+      SbPostProcess.Panels[1].Text := '';
       SetCursor(CrNormal);
     end;
   finally
@@ -3417,6 +3433,7 @@ var
   ProcessModified: TStringList;
   AGpx: string;
 begin
+  Msg.Result := 0;
   if (DirectoryMonitor.Active = false) then
     exit;
 
@@ -3443,12 +3460,24 @@ begin
     if FrmPostProcess.ShowModal <> ID_OK then
       exit;
     for AGpx in ProcessModified do
+    begin
+      SbPostProcess.Panels[0].Text := AGpx;
+      SbPostProcess.Update;
       DoFunction([Unglitch], AGpx);
-
+    end;
   finally
+    SbPostProcess.Panels[0].Text  := '';
+    SbPostProcess.Panels[1].Text  := '';
     ProcessModified.Free;
     DirectoryMonitor.Active := ChkWatch.Checked;
   end;
+end;
+
+procedure TFrmTripManager.WMAddrLookUp(var Msg: TMessage);
+begin
+  SbPostProcess.Panels[1].Text  := TPlace(Msg.LParam).FormattedAddress;
+  SbPostProcess.Update;
+  Msg.Result := 0;
 end;
 
 procedure TFrmTripManager.DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);

@@ -665,13 +665,15 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsTripGpiInfo
     Align = alLeft
     TabOrder = 2
+    OnResize = PageControl1Resize
+    ExplicitTop = 274
     object TsTripGpiInfo: TTabSheet
       Caption = 'Trip info'
       object VSplitterTree_Grid: TSplitter
         Left = 241
         Top = 22
         Width = 5
-        Height = 292
+        Height = 273
         ExplicitTop = 0
         ExplicitHeight = 383
       end
@@ -697,7 +699,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 22
         Width = 241
-        Height = 292
+        Height = 273
         Align = alLeft
         DoubleBuffered = True
         DoubleBufferedMode = dbmRequested
@@ -709,19 +711,21 @@ object FrmTripManager: TFrmTripManager
         ToolTips = False
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
+        ExplicitHeight = 292
       end
       object PnlVlTripInfo: TPanel
         Left = 246
         Top = 22
         Width = 377
-        Height = 292
+        Height = 273
         Align = alClient
         TabOrder = 1
+        ExplicitHeight = 292
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
           Width = 375
-          Height = 264
+          Height = 245
           Align = alClient
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
           PopupMenu = PopupTripInfo
@@ -730,6 +734,7 @@ object FrmTripManager: TFrmTripManager
           OnKeyDown = ValueListKeyDown
           OnSelectCell = VlTripInfoSelectCell
           OnStringsChange = VlTripInfoStringsChange
+          ExplicitHeight = 264
           ColWidths = (
             150
             219)
@@ -763,6 +768,22 @@ object FrmTripManager: TFrmTripManager
             OnMouseUp = BtnTripEditorMouseUp
           end
         end
+      end
+      object SbPostProcess: TStatusBar
+        Left = 0
+        Top = 295
+        Width = 623
+        Height = 19
+        Panels = <
+          item
+            Width = 100
+          end
+          item
+            Width = 50
+          end>
+        ExplicitLeft = 104
+        ExplicitTop = 264
+        ExplicitWidth = 0
       end
     end
   end
