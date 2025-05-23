@@ -11,7 +11,8 @@ uses
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
-  Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellList, ListViewSort, UnitTripObjects, UnitGpi;
+  Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellList, TripManager_ValEdit,
+  ListViewSort, UnitTripObjects, UnitGpi;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -68,7 +69,7 @@ type
     TsTripGpiInfo: TTabSheet;
     VSplitterTree_Grid: TSplitter;
     TvTrip: TTreeView;
-    VlTripInfo: TValueListEditor;
+    VlTripInfo: TripManager_ValEdit.TValueListEditor;
     PctHexOsm: TPageControl;
     TsHex: TTabSheet;
     TsOSMMap: TTabSheet;
@@ -179,7 +180,6 @@ type
     procedure BtnSaveTripGpiFileClick(Sender: TObject);
     procedure ValueListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TvTripChange(Sender: TObject; Node: TTreeNode);
-    procedure VlTripInfoSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure EdgeBrowser1CreateWebViewCompleted(Sender: TCustomEdgeBrowser; AResult: HRESULT);
     procedure EdgeBrowser1NavigationStarting(Sender: TCustomEdgeBrowser; Args: TNavigationStartingEventArgs);
     procedure EdgeBrowser1WebMessageReceived(Sender: TCustomEdgeBrowser; Args: TWebMessageReceivedEventArgs);
@@ -271,8 +271,12 @@ type
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
 
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
+    function SelectedScPosn: TmScPosn;
+    function SelectedLocation: TLocation;
+    procedure EnableApplyCoords;
     procedure ClearSelHexEdit;
     procedure SyncHexEdit(Sender: TObject);
+    procedure VlTripInfoSelectionMoved(Sender: TObject);
     procedure HexEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HexEditKeyPress(Sender: TObject; var Key: Char);
     procedure LoadHex(const FileName: string);
@@ -539,22 +543,55 @@ end;
 
 procedure TFrmTripManager.BtnApplyCoordsClick(Sender: TObject);
 var
-  ABaseDataItem: TBaseDataItem;
+  ALocation: TLocation;
+  AmScPosn: TmScPosn;
+  LocationScPosn: TmScPosn;
+
+  procedure LocationUpdated;
+  begin
+    ATripList.ForceRecalc;
+    LoadTripOnMap(ATripList, CurrentTrip);
+    BtnSaveTripValues.Enabled := true;
+  end;
+
 begin
+  // Updating location for Trip Editor
   if (Assigned(FOnCoordinatesApplied)) then
   begin
     FOnCoordinatesApplied(Self, EditMapCoords.Text);
+
     exit;
   end;
 
-  ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
-  if Assigned(ABaseDataItem) and
-     (ABaseDataItem is TmScPosn) then
+  // Updating location for TvTrip
+  ALocation := SelectedLocation;
+  if (Assigned(ALocation)) then
   begin
-    TmScPosn(ABaseDataItem).MapCoords := EditMapCoords.Text;
-    VlTripInfo.Cells[1, VlTripInfo.Row] := TmScPosn(ABaseDataItem).AsString;
-    BtnSaveTripValues.Enabled := true;
+    LocationScPosn := ALocation.LocationTmScPosn;
+    if (LocationScPosn <> nil) then
+    begin
+      LocationScPosn.MapCoords := EditMapCoords.Text;
+      LocationUpdated;
+
+      // Will update the Grid and the Map
+      if (Assigned(TvTrip.OnChange)) then
+        TvTrip.OnChange(TvTrip, TvTrip.Selected);
+    end;
+
+    exit;
   end;
+
+  // Updating location for vlTripInfo
+  AmScPosn := SelectedScPosn;
+  if (Assigned(AmScPosn)) then
+  begin
+    AmScPosn.MapCoords := EditMapCoords.Text;
+    VlTripInfo.Cells[1, VlTripInfo.Row] := AmScPosn.AsString;
+    BtnSaveTripValues.Enabled := true;;
+
+    exit;
+  end;
+
 end;
 
 procedure TFrmTripManager.BtnFromDevClick(Sender: TObject);
@@ -883,8 +920,8 @@ begin
   DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
 
 // Position left from the map.
+  FrmTripEditor.Top := Top;
   FrmTripEditor.Left := Left;
-  FrmTripEditor.Width := FrmTripEditor.Constraints.MinWidth;
   FrmTripEditor.Show;
 end;
 
@@ -897,7 +934,6 @@ end;
 
 procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
 var
-  CanSelect: boolean;
   CurSel: integer;
 begin
   if Showing then
@@ -926,8 +962,7 @@ begin
     end;
   end;
 
-  CanSelect := false;
-  VlTripInfoSelectCell(VlTripInfo, VlTripInfo.Col, VlTripInfo.Row, CanSelect);
+  EnableApplyCoords;
 end;
 
 procedure TFrmTripManager.TripFileUpdating(Sender: TObject);
@@ -1408,6 +1443,7 @@ begin
   HexEdit.Align := alClient;
   HexEdit.OnKeyPress := HexEditKeyPress;
   HexEdit.OnKeyDown := HexEditKeyDown;
+  VlTripInfo.OnSelectionMoved := VlTripInfoSelectionMoved;
 
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
@@ -1426,6 +1462,7 @@ begin
   except
     ShellTreeView1.Root := 'rfDesktop';
   end;
+
   BgDevice.ItemIndex := 0; // Default to trips
   GetDeviceList;
   SelectDevice(PrefDevice);
@@ -1844,6 +1881,43 @@ begin
   end;
 end;
 
+function TFrmTripManager.SelectedScPosn: TmScPosn;
+var
+  AGridSel: TGridSelItem;
+begin
+  result := nil;
+
+  AGridSel := TGridSelItem.GridSelItem(VlTripInfo, VlTripInfo.Row -1);
+  if (AGridSel <> nil) and
+     (AGridSel.BaseItem <> nil) and
+     (AGridSel.BaseItem is TmScPosn) then
+    exit(TmScPosn(AGridSel.BaseItem));
+end;
+
+function TFrmTripManager.SelectedLocation: TLocation;
+begin
+  result := nil;
+
+  if (TvTrip.Selected = nil) then
+    exit;
+
+  if (TvTrip.Selected.Data <> nil) and
+     (TObject(TvTrip.Selected.Data) is TLocation) then
+    exit(TLocation(TvTrip.Selected.Data));
+
+  if (TvTrip.Selected.Parent <> nil) and
+     (TvTrip.Selected.Parent.Data <> nil) and
+     (TObject(TvTrip.Selected.Parent.Data) is TLocation) then
+    exit(TLocation(TvTrip.Selected.Parent.Data));
+end;
+
+procedure TFrmTripManager.EnableApplyCoords;
+begin
+  BtnApplyCoords.Enabled := FrmTripEditor.Showing or
+                            (SelectedLocation <> nil) or
+                            (SelectedScPosn <> nil);
+end;
+
 procedure TFrmTripManager.ClearSelHexEdit;
 begin
   // Default no selection
@@ -1852,6 +1926,9 @@ begin
     HexEdit.SelStart := 0;
     HexEdit.SelEnd := -1;
   end;
+
+  EnableApplyCoords;
+
 end;
 
 procedure TFrmTripManager.SyncHexEdit(Sender: TObject);
@@ -1860,6 +1937,7 @@ var
   HeaderOffset: integer;
   SelStart, SelEnd: integer;
 begin
+
   ClearSelHexEdit;
 
   ANode := nil;
@@ -2475,19 +2553,15 @@ begin
   BtnSaveTripGpiFile.Enabled := true;
 end;
 
-procedure TFrmTripManager.VlTripInfoSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+procedure TFrmTripManager.VlTripInfoSelectionMoved(Sender: TObject);
 var
   AGridSel: TGridSelItem;
 begin
-  BtnApplyCoords.Enabled := FrmTripEditor.Showing;
-  AGridSel := TGridSelItem.GridSelItem(TValueListEditor(Sender), ARow -1);
+  AGridSel := TGridSelItem.GridSelItem(TValueListEditor(Sender), TValueListEditor(Sender).Row -1);
   if not Assigned(AGridSel) then
     exit;
 
   SyncHexEdit(AGridSel);
-
-  BtnApplyCoords.Enabled := (TGridSelItem.BaseDataItem(TValueListEditor(Sender), ARow -1) is TmScPosn) or
-                             BtnApplyCoords.Enabled;
 end;
 
 procedure TFrmTripManager.VlTripInfoStringsChange(Sender: TObject);

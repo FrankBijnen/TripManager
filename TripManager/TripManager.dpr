@@ -1,22 +1,23 @@
 program TripManager;
 
 uses
-{$IFDEF DEBUG}
+  {$IFDEF DEBUG}
   UnitStackTrace,
-{$ENDIF}
+  {$ENDIF }
   MidasLib,
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
   UnitStringUtils,
+  TripManager_MultiContext in 'TripManager_MultiContext.pas',
+  TripManager_ShellList in 'TripManager_ShellList.pas',
+  TripManager_ValEdit in 'TripManager_ValEdit.pas',
   UDmRoutePoints in 'UDmRoutePoints.pas' {DmRoutePoints: TDataModule},
   UFrmTripManager in 'UFrmTripManager.pas' {FrmTripManager},
   UFrmPostProcess in 'UFrmPostProcess.pas' {FrmPostProcess},
   UFrmDateDialog in 'UFrmDateDialog.pas' {FrmDateDialog},
   UFrmAdditional in 'UFrmAdditional.pas' {FrmAdditional},
   UFrmTransferOptions in 'UFrmTransferOptions.pas' {FrmTransferOptions},
-  TripManager_MultiContext in 'TripManager_MultiContext.pas',
-  TripManager_ShellList in 'TripManager_ShellList.pas',
   UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
   UFrmGeoSearch in 'UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in 'UFrmPlaces.pas' {FrmPlaces},

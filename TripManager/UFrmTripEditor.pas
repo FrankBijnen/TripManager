@@ -310,9 +310,6 @@ end;
 
 procedure TFrmTripEditor.FormCreate(Sender: TObject);
 begin
-{$IFDEF DEBUG}
-  FormStyle := TFormStyle.fsNormal;
-{$ENDIF}
   MoveUp1.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
   MoveDown1.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
 end;

@@ -514,6 +514,8 @@ type
     constructor Create(ADataType: byte = dtLctnPref); reintroduce;
     destructor Destroy; override;
     procedure Add(ANitem: TBaseItem);
+    function LocationTmName: TmName;
+    function LocationTmScPosn: TmScPosn;
     property LocationValue: TLocationValue read Value;
     property LocationItems: TItemList read FItems;
   end;
@@ -1871,6 +1873,30 @@ begin
   Inc(Value.Count);
   Value.Size := Value.Size + ANitem.SubLength;
   FItems.Add(ANitem);
+end;
+
+function TLocation.LocationTmName: TmName;
+var
+  AnItem: TBaseItem;
+begin
+  result := nil;
+  for AnItem in FItems do
+  begin
+    if (AnItem is TmName) then
+      exit(TmName(AnItem));
+  end;
+end;
+
+function TLocation.LocationTmScPosn: TmScPosn;
+var
+  AnItem: TBaseItem;
+begin
+  result := nil;
+  for AnItem in FItems do
+  begin
+    if (AnItem is TmScPosn) then
+      exit(TmScPosn(AnItem));
+  end;
 end;
 
 procedure TLocation.WriteValue(AStream: TMemoryStream);

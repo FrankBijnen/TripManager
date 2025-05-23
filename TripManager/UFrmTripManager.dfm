@@ -3,8 +3,8 @@ object FrmTripManager: TFrmTripManager
   Top = 0
   AlphaBlend = True
   Caption = 'XT(2) Trip Manager'
-  ClientHeight = 633
-  ClientWidth = 1444
+  ClientHeight = 681
+  ClientWidth = 1264
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,7 +20,7 @@ object FrmTripManager: TFrmTripManager
   object HSplitterDevFiles_Info: TSplitter
     Left = 0
     Top = 270
-    Width = 1444
+    Width = 1264
     Height = 5
     Cursor = crVSplit
     Align = alTop
@@ -31,7 +31,7 @@ object FrmTripManager: TFrmTripManager
     Left = 631
     Top = 275
     Width = 5
-    Height = 358
+    Height = 406
     ExplicitLeft = 1
     ExplicitTop = 1
     ExplicitHeight = 464
@@ -39,7 +39,7 @@ object FrmTripManager: TFrmTripManager
   object PnlXTAndFileSys: TPanel
     Left = 0
     Top = 25
-    Width = 1444
+    Width = 1264
     Height = 245
     Align = alTop
     TabOrder = 0
@@ -225,7 +225,7 @@ object FrmTripManager: TFrmTripManager
     object PnlFileSys: TPanel
       Left = 636
       Top = 1
-      Width = 807
+      Width = 627
       Height = 243
       Align = alClient
       TabOrder = 1
@@ -259,7 +259,7 @@ object FrmTripManager: TFrmTripManager
       object ShellListView1: TShellListView
         Left = 250
         Top = 33
-        Width = 556
+        Width = 376
         Height = 184
         AutoNavigate = False
         ObjectTypes = [otFolders, otNonFolders]
@@ -313,7 +313,7 @@ object FrmTripManager: TFrmTripManager
       object PnlFileSysFunc: TPanel
         Left = 1
         Top = 1
-        Width = 805
+        Width = 625
         Height = 32
         Align = alTop
         TabOrder = 4
@@ -394,7 +394,7 @@ object FrmTripManager: TFrmTripManager
       object PnlBotFileSys: TPanel
         Left = 1
         Top = 217
-        Width = 805
+        Width = 625
         Height = 25
         Align = alBottom
         TabOrder = 3
@@ -402,7 +402,7 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 69
           Top = 2
-          Width = 732
+          Width = 552
           Height = 22
           Margins.Top = 1
           Margins.Bottom = 0
@@ -436,8 +436,8 @@ object FrmTripManager: TFrmTripManager
   object PctHexOsm: TPageControl
     Left = 636
     Top = 275
-    Width = 808
-    Height = 358
+    Width = 628
+    Height = 406
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
@@ -446,8 +446,8 @@ object FrmTripManager: TFrmTripManager
       object HexPanel: TPanel
         Left = 0
         Top = 0
-        Width = 800
-        Height = 330
+        Width = 620
+        Height = 378
         Align = alClient
         Color = clWhite
         ParentBackground = False
@@ -455,7 +455,7 @@ object FrmTripManager: TFrmTripManager
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1
-          Width = 798
+          Width = 618
           Height = 25
           Align = alTop
           ParentBackground = False
@@ -480,7 +480,7 @@ object FrmTripManager: TFrmTripManager
       object AdvPanel_MapTop: TPanel
         Left = 0
         Top = 0
-        Width = 800
+        Width = 620
         Height = 26
         Align = alTop
         BevelOuter = bvNone
@@ -553,7 +553,7 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 662
           Top = 3
-          Width = 135
+          Width = 29
           Height = 20
           Align = alClient
           ReadOnly = True
@@ -596,8 +596,8 @@ object FrmTripManager: TFrmTripManager
       end
       object AdvPanel_MapBottom: TPanel
         Left = 0
-        Top = 300
-        Width = 800
+        Top = 348
+        Width = 620
         Height = 30
         Align = alBottom
         BevelOuter = bvNone
@@ -624,7 +624,7 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 157
           Top = 5
-          Width = 640
+          Width = 460
           Height = 22
           Hint = 'Coordinates of the visible area (South,West,North,East)'
           Margins.Top = 5
@@ -653,8 +653,8 @@ object FrmTripManager: TFrmTripManager
       object EdgeBrowser1: TEdgeBrowser
         Left = 0
         Top = 26
-        Width = 800
-        Height = 274
+        Width = 620
+        Height = 322
         Align = alClient
         TabOrder = 2
         AllowSingleSignOnUsingOSPrimaryAccount = False
@@ -671,7 +671,7 @@ object FrmTripManager: TFrmTripManager
     Left = 0
     Top = 275
     Width = 631
-    Height = 358
+    Height = 406
     ActivePage = TsTripGpiInfo
     Align = alLeft
     TabOrder = 2
@@ -682,7 +682,7 @@ object FrmTripManager: TFrmTripManager
         Left = 241
         Top = 22
         Width = 5
-        Height = 289
+        Height = 337
         ExplicitTop = 0
         ExplicitHeight = 383
       end
@@ -708,7 +708,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 22
         Width = 241
-        Height = 289
+        Height = 337
         Align = alLeft
         DoubleBuffered = True
         DoubleBufferedMode = dbmRequested
@@ -725,21 +725,20 @@ object FrmTripManager: TFrmTripManager
         Left = 246
         Top = 22
         Width = 377
-        Height = 289
+        Height = 337
         Align = alClient
         TabOrder = 1
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
           Width = 375
-          Height = 261
+          Height = 309
           Align = alClient
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
           PopupMenu = PopupTripInfo
           TabOrder = 0
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
-          OnSelectCell = VlTripInfoSelectCell
           OnStringsChange = VlTripInfoStringsChange
           ColWidths = (
             150
@@ -777,7 +776,7 @@ object FrmTripManager: TFrmTripManager
       end
       object SbPostProcess: TStatusBar
         Left = 0
-        Top = 311
+        Top = 359
         Width = 623
         Height = 19
         Panels = <
@@ -793,7 +792,7 @@ object FrmTripManager: TFrmTripManager
   object ActionMainMenuBar: TActionMainMenuBar
     Left = 0
     Top = 0
-    Width = 1444
+    Width = 1264
     Height = 25
     UseSystemFont = False
     ActionManager = ActionManager
