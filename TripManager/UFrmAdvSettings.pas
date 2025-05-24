@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ValEdit, Vcl.ComCtrls,
-  UnitGeoCode;
+  UnitGeoCode, Vcl.Menus;
 
 const
   TripManagerReg_Key      = 'Software\TDBware\TripManager';
@@ -38,11 +38,42 @@ type
     Splitter1: TSplitter;
     PnlAddressFormat: TPanel;
     BtnClearCoordCache: TButton;
+    BtnBuilder: TButton;
+    PopupBuilder: TPopupMenu;
+    Clear1: TMenuItem;
+    N1: TMenuItem;
+    StatePlaceRoadnr1: TMenuItem;
+    NrRoadPlaceState1: TMenuItem;
+    N2: TMenuItem;
+    Housenbr1: TMenuItem;
+    Road1: TMenuItem;
+    Smallestplace1: TMenuItem;
+    Largestplace1: TMenuItem;
+    State1: TMenuItem;
+    Countrycode1: TMenuItem;
+    Countrycode2: TMenuItem;
+    N3: TMenuItem;
+    Debug1: TMenuItem;
+    Hamlet1: TMenuItem;
+    Village1: TMenuItem;
+    N4: TMenuItem;
+    City1: TMenuItem;
+    postalcode1: TMenuItem;
+    City2: TMenuItem;
+    municipality1: TMenuItem;
+    N5: TMenuItem;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
     procedure VlGeoCodeSettingsStringsChange(Sender: TObject);
     procedure BtnClearCoordCacheClick(Sender: TObject);
+    procedure BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure Clear1Click(Sender: TObject);
+    procedure StatePlaceRoadnr1Click(Sender: TObject);
+    procedure NrRoadPlaceState1Click(Sender: TObject);
+    procedure Smallestplace1Click(Sender: TObject);
+    procedure Largestplace1Click(Sender: TObject);
+    procedure AddTag(Sender: TObject);
   private
     { Private declarations }
     SamplePlace: TPlace;
@@ -127,6 +158,16 @@ begin
 
 end;
 
+procedure TFrmAdvSettings.Smallestplace1Click(Sender: TObject);
+begin
+  MemoAddressFormat.Lines.Add('hamlet,village,town,city,municipality');
+end;
+
+procedure TFrmAdvSettings.StatePlaceRoadnr1Click(Sender: TObject);
+begin
+  MemoAddressFormat.Lines.Text := DefState + #10 + DefCity + #10 + DefRoadHouse;
+end;
+
 procedure TFrmAdvSettings.VlGeoCodeSettingsStringsChange(Sender: TObject);
 begin
   if (GeoSettings.GeoCodeApiKey <> VlGeoCodeSettings.Values[GeoCodeApiKey]) then
@@ -136,6 +177,11 @@ begin
     SamplePlace := nil;
     MemoAddressFormatChange(MemoAddressFormat);
   end;
+end;
+
+procedure TFrmAdvSettings.Largestplace1Click(Sender: TObject);
+begin
+  MemoAddressFormat.Lines.Add('municipality,city,town,village,hamlet');
 end;
 
 procedure TFrmAdvSettings.LoadSettings;
@@ -182,6 +228,11 @@ begin
     MemoResult.lines.Text := SamplePlace.DisplayPlace;
 end;
 
+procedure TFrmAdvSettings.NrRoadPlaceState1Click(Sender: TObject);
+begin
+    MemoAddressFormat.Lines.Text := DefHouseRoad + #10 + DefCity + #10 + DefState;
+end;
+
 procedure TFrmAdvSettings.SaveSettings;
 var
   Index: integer;
@@ -202,9 +253,33 @@ begin
   ReadGeoCodeSettings;
 end;
 
+procedure TFrmAdvSettings.BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Pt: TPoint;
+begin
+  Pt.X := X;
+  Pt.Y := Y;
+  Pt := TButton(Sender).ClientToScreen(Pt);
+  PopupBuilder.Popup(Pt.X, Pt.Y);
+end;
+
 procedure TFrmAdvSettings.BtnClearCoordCacheClick(Sender: TObject);
 begin
+  if (MessageDlg('Clear the cache?', TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> MB_OK) then
+    exit;
+
   ClearCoordCache;
+end;
+
+procedure TFrmAdvSettings.Clear1Click(Sender: TObject);
+begin
+  MemoAddressFormat.Lines.Clear;
+  MemoResult.Lines.Clear;
+end;
+
+procedure TFrmAdvSettings.AddTag(Sender: TObject);
+begin
+  MemoAddressFormat.lines.Add(ReplaceAll(TMenuItem(Sender).Caption, ['&'], ['']));
 end;
 
 procedure TFrmAdvSettings.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -225,3 +300,4 @@ begin
 end;
 
 end.
+

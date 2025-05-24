@@ -41,6 +41,7 @@ class DELPHICLASS TmVersionNumber;
 struct TPosnValue;
 class DELPHICLASS TmScPosn;
 class DELPHICLASS TStringItem;
+class DELPHICLASS TUnixDate;
 class DELPHICLASS TRawDataItem;
 class DELPHICLASS TmPreserveTrackToRoute;
 class DELPHICLASS TmParentTripId;
@@ -50,6 +51,8 @@ class DELPHICLASS TmIsDisplayable;
 class DELPHICLASS TmAvoidancesChanged;
 class DELPHICLASS TmIsRoundTrip;
 class DELPHICLASS TmParentTripName;
+class DELPHICLASS TmExploreUuid;
+class DELPHICLASS TmAvoidancesChangedTimeAtSave;
 class DELPHICLASS TmOptimized;
 class DELPHICLASS TmTotalTripTime;
 class DELPHICLASS TmImported;
@@ -355,6 +358,30 @@ public:
 #pragma pack(pop)
 
 #pragma pack(push,4)
+class PASCALIMPLEMENTATION TUnixDate : public TCardinalItem
+{
+	typedef TCardinalItem inherited;
+	
+private:
+	virtual TEditMode __fastcall GetEditMode();
+	virtual System::UnicodeString __fastcall GetValue();
+	unsigned __fastcall GetAsUnixDateTime();
+	void __fastcall SetAsUnixDateTime(unsigned AValue);
+	
+public:
+	__fastcall TUnixDate(System::ShortString &AName, System::TDateTime AValue);
+	__property unsigned AsUnixDateTime = {read=GetAsUnixDateTime, write=SetAsUnixDateTime, nodefault};
+	__classmethod unsigned __fastcall DateTimeAsCardinal(System::TDateTime ADateTime);
+	__classmethod System::TDateTime __fastcall CardinalAsDateTime(unsigned ACardinal);
+	__classmethod System::UnicodeString __fastcall CardinalAsDateTimeString(unsigned ACardinal);
+public:
+	/* TCardinalItem.Destroy */ inline __fastcall virtual ~TUnixDate() { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
 class PASCALIMPLEMENTATION TRawDataItem : public TBaseDataItem
 {
 	typedef TBaseDataItem inherited;
@@ -480,6 +507,34 @@ public:
 	__fastcall TmParentTripName(System::UnicodeString AValue);
 public:
 	/* TStringItem.Destroy */ inline __fastcall virtual ~TmParentTripName() { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmExploreUuid : public TStringItem
+{
+	typedef TStringItem inherited;
+	
+public:
+	__fastcall TmExploreUuid(System::UnicodeString AValue);
+public:
+	/* TStringItem.Destroy */ inline __fastcall virtual ~TmExploreUuid() { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmAvoidancesChangedTimeAtSave : public TUnixDate
+{
+	typedef TUnixDate inherited;
+	
+public:
+	__fastcall TmAvoidancesChangedTimeAtSave(System::TDateTime AValue);
+public:
+	/* TCardinalItem.Destroy */ inline __fastcall virtual ~TmAvoidancesChangedTimeAtSave() { }
 	
 };
 
@@ -686,22 +741,12 @@ public:
 #pragma pack(pop)
 
 #pragma pack(push,4)
-class PASCALIMPLEMENTATION TmArrival : public TCardinalItem
+class PASCALIMPLEMENTATION TmArrival : public TUnixDate
 {
-	typedef TCardinalItem inherited;
-	
-private:
-	virtual TEditMode __fastcall GetEditMode();
-	virtual System::UnicodeString __fastcall GetValue();
-	unsigned __fastcall GetAsUnixDateTime();
-	void __fastcall SetAsUnixDateTime(unsigned AValue);
+	typedef TUnixDate inherited;
 	
 public:
 	__fastcall TmArrival(System::TDateTime AValue);
-	__property unsigned AsUnixDateTime = {read=GetAsUnixDateTime, write=SetAsUnixDateTime, nodefault};
-	__classmethod unsigned __fastcall DateTimeAsCardinal(System::TDateTime ADateTime);
-	__classmethod System::TDateTime __fastcall CardinalAsDateTime(unsigned ACardinal);
-	__classmethod System::UnicodeString __fastcall CardinalAsDateTimeString(unsigned ACardinal);
 public:
 	/* TCardinalItem.Destroy */ inline __fastcall virtual ~TmArrival() { }
 	
@@ -797,13 +842,13 @@ class PASCALIMPLEMENTATION TmRoutePreferences : public TBaseRoutePreferences
 {
 	typedef TBaseRoutePreferences inherited;
 	
-__published:
+private:
 	virtual bool __fastcall StandardPrefs();
-public:
-	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferences() { }
 	
 public:
-	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferences(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	__fastcall virtual TmRoutePreferences(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType);
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferences() { }
 	
 };
 
@@ -815,10 +860,9 @@ class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousHillsAndCurves : public 
 	typedef TBaseRoutePreferences inherited;
 	
 public:
-	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousHillsAndCurves() { }
-	
+	__fastcall virtual TmRoutePreferencesAdventurousHillsAndCurves(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType);
 public:
-	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousHillsAndCurves(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousHillsAndCurves() { }
 	
 };
 
@@ -830,10 +874,9 @@ class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousScenicRoads : public TBa
 	typedef TBaseRoutePreferences inherited;
 	
 public:
-	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousScenicRoads() { }
-	
+	__fastcall virtual TmRoutePreferencesAdventurousScenicRoads(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType);
 public:
-	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousScenicRoads(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousScenicRoads() { }
 	
 };
 
@@ -845,10 +888,9 @@ class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousMode : public TBaseRoute
 	typedef TBaseRoutePreferences inherited;
 	
 public:
-	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousMode() { }
-	
+	__fastcall virtual TmRoutePreferencesAdventurousMode(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType);
 public:
-	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousMode(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousMode() { }
 	
 };
 
@@ -860,10 +902,9 @@ class PASCALIMPLEMENTATION TmRoutePreferencesAdventurousPopularPaths : public TB
 	typedef TBaseRoutePreferences inherited;
 	
 public:
-	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousPopularPaths() { }
-	
+	__fastcall virtual TmRoutePreferencesAdventurousPopularPaths(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType);
 public:
-	/* TBaseDataItem.Create */ inline __fastcall virtual TmRoutePreferencesAdventurousPopularPaths(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType) : TBaseRoutePreferences(AName, ALenValue, ADataType) { }
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmRoutePreferencesAdventurousPopularPaths() { }
 	
 };
 
@@ -929,6 +970,8 @@ public:
 	__fastcall TLocation(System::Byte ADataType);
 	__fastcall virtual ~TLocation();
 	void __fastcall Add(TBaseItem* ANitem);
+	TmName* __fastcall LocationTmName();
+	TmScPosn* __fastcall LocationTmScPosn();
 	__property TLocationValue LocationValue = {read=Value};
 	__property TItemList* LocationItems = {read=FItems};
 };
@@ -952,6 +995,7 @@ public:
 	__fastcall TmLocations();
 	virtual void __fastcall InitFromStream(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType, System::Classes::TStream* AStream);
 	__fastcall virtual ~TmLocations();
+	void __fastcall Clear();
 	void __fastcall AddLocatIon(TLocation* ALocation);
 	TBaseItem* __fastcall Add(TBaseItem* ANItem);
 	__property TItemList* Locations = {read=FItemList};
@@ -1131,6 +1175,8 @@ private:
 	void __fastcall ResetCalculation();
 	void __fastcall Calculate(System::Classes::TMemoryStream* AStream);
 	TZumoModel __fastcall GetZumoModel();
+	void __fastcall CreateTemplate_XT(const System::UnicodeString TripName);
+	void __fastcall CreateTemplate_XT2(const System::UnicodeString TripName);
 	
 public:
 	__fastcall TTripList();
@@ -1144,12 +1190,14 @@ public:
 	bool __fastcall LoadFromFile(System::UnicodeString AFile);
 	System::UnicodeString __fastcall GetValue(System::ShortString &AKey);
 	TBaseItem* __fastcall GetItem(System::ShortString &AKey);
+	void __fastcall SetItem(System::ShortString &AKey, TBaseItem* ABaseItem);
 	int __fastcall GetRoutePointCount();
 	TLocation* __fastcall GetRoutePoint(int RoutePointId);
 	TOSMRoutePoint __fastcall OSMRoutePoint(int RoutePointId);
 	TmArrival* __fastcall GetArrival();
-	void __fastcall CreateOSMPoints(System::Classes::TStringList* const OutStringList);
+	void __fastcall CreateOSMPoints(System::Classes::TStringList* const OutStringList, const System::UnicodeString DisplayColor = L"Magenta");
 	void __fastcall ForceRecalc(const TZumoModel AModel = (TZumoModel)(0x2), int ViaPointCount = 0x0);
+	void __fastcall CreateTemplate(const TZumoModel AModel, System::UnicodeString TripName);
 	__property THeader* Header = {read=FHeader};
 	__property TItemList* ItemList = {read=FItemList};
 	__property TZumoModel ZumoModel = {read=GetZumoModel, nodefault};
@@ -1160,6 +1208,9 @@ public:
 //-- var, const, procedure ---------------------------------------------------
 #define XT2Name L"z\u016bmo XT2"
 #define XTName L"z\u016bmo XT"
+#define XT2_VehicleProfileGuid L"dbcac367-42c5-4d01-17aa-ecfe025f2d1c"
+#define XT2_VehicleProfileHash L"135656608"
+static _DELPHI_CONST System::WideChar XT2_VehicleId = (System::WideChar)(0x31);
 static _DELPHI_CONST System::Int8 dtByte = System::Int8(0x1);
 static _DELPHI_CONST System::Int8 dtCardinal = System::Int8(0x3);
 static _DELPHI_CONST System::Int8 dtSingle = System::Int8(0x4);

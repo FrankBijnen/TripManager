@@ -66,6 +66,7 @@ protected:
 	virtual void __fastcall CreateWnd();
 	virtual void __fastcall DestroyWnd();
 	DYNAMIC void __fastcall DoContextPopup(const Winapi::Windows::TPoint &MousePos, bool &Handled);
+	virtual int __fastcall OwnerDataFind(Vcl::Comctrls::TItemFind Find, const System::UnicodeString FindString, const Winapi::Windows::TPoint &FindPosition, void * FindData, int StartIndex, Vcl::Comctrls::TSearchDirection Direction, bool Wrap);
 	DYNAMIC void __fastcall Edit(const Winapi::Commctrl::TLVItem &Item);
 	void __fastcall ShowMultiContextMenu(const Winapi::Windows::TPoint &MousePos);
 	virtual void __fastcall WndProc(Winapi::Messages::TMessage &Message);

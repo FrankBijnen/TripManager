@@ -19,13 +19,14 @@
 #include <Winapi.Windows.hpp>
 #include <Winapi.Messages.hpp>
 #include <Winapi.WebView2.hpp>
+#include <Winapi.ShlObj.hpp>
+#include <System.Win.ComObj.hpp>
+#include <Winapi.ActiveX.hpp>
 #include <System.SysUtils.hpp>
 #include <System.Variants.hpp>
 #include <System.Classes.hpp>
 #include <System.ImageList.hpp>
-#include <Winapi.ShlObj.hpp>
-#include <System.Win.ComObj.hpp>
-#include <Winapi.ActiveX.hpp>
+#include <System.Actions.hpp>
 #include <Vcl.Graphics.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.Forms.hpp>
@@ -43,14 +44,20 @@
 #include <Vcl.Shell.ShellCtrls.hpp>
 #include <Vcl.ToolWin.hpp>
 #include <Vcl.ButtonGroup.hpp>
-#include <TripManager_ShellList.hpp>
+#include <Vcl.ActnMan.hpp>
+#include <Vcl.ActnCtrls.hpp>
+#include <Vcl.ActnMenus.hpp>
+#include <Vcl.ActnList.hpp>
+#include <Vcl.PlatformDefaultStyleActnCtrls.hpp>
+#include <Monitor.hpp>
 #include <BCHexEditor.hpp>
 #include <UnitMtpDevice.hpp>
 #include <mtp_helper.hpp>
+#include <TripManager_ShellList.hpp>
+#include <TripManager_ValEdit.hpp>
 #include <ListViewSort.hpp>
 #include <unitTripObjects.hpp>
 #include <UnitGpi.hpp>
-#include <Monitor.hpp>
 #include <System.UITypes.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -61,14 +68,13 @@ namespace Ufrmtripmanager
 struct TMapReq;
 class DELPHICLASS TFrmTripManager;
 //-- type declarations -------------------------------------------------------
-typedef System::StaticArray<System::UnicodeString, 2> Ufrmtripmanager__1;
-
 struct DECLSPEC_DRECORD TMapReq
 {
 public:
 	System::UnicodeString Coords;
 	System::UnicodeString Desc;
 	System::UnicodeString Zoom;
+	System::UnicodeString TimeOut;
 };
 
 
@@ -77,6 +83,8 @@ enum DECLSPEC_DENUM TDirType : unsigned char { NoDir, Up, Down };
 enum DECLSPEC_DENUM TListFilesDir : unsigned char { lfCurrent, lfUp, lfDown };
 
 enum DECLSPEC_DENUM TRouteParm : unsigned char { RoutePref, TransportMode };
+
+typedef void __fastcall (__closure *TCoordinatesAppliedEvent)(System::TObject* Sender, System::UnicodeString Coords);
 
 class PASCALIMPLEMENTATION TFrmTripManager : public Vcl::Forms::TForm
 {
@@ -100,14 +108,14 @@ __published:
 	Vcl::Comctrls::TTabSheet* TsTripGpiInfo;
 	Vcl::Extctrls::TSplitter* VSplitterTree_Grid;
 	Vcl::Comctrls::TTreeView* TvTrip;
-	Vcl::Valedit::TValueListEditor* VlTripInfo;
+	Tripmanager_valedit::TValueListEditor* VlTripInfo;
 	Vcl::Comctrls::TPageControl* PctHexOsm;
 	Vcl::Comctrls::TTabSheet* TsHex;
 	Vcl::Comctrls::TTabSheet* TsOSMMap;
 	Vcl::Extctrls::TPanel* AdvPanel_MapTop;
 	Vcl::Stdctrls::TEdit* EditMapCoords;
 	Vcl::Extctrls::TPanel* AdvPanel_MapBottom;
-	Vcl::Extctrls::TLabeledEdit* EditMapBounds;
+	Vcl::Stdctrls::TEdit* EditMapBounds;
 	Vcl::Edge::TEdgeBrowser* EdgeBrowser1;
 	Vcl::Stdctrls::TComboBox* CmbDevices;
 	Vcl::Extctrls::TPanel* PnlXTLeft;
@@ -128,7 +136,6 @@ __published:
 	Vcl::Extctrls::TPanel* PnlRoutePoint;
 	Vcl::Buttons::TSpeedButton* SpeedBtn_MapClear;
 	Vcl::Stdctrls::TEdit* LblRoute;
-	Vcl::Extctrls::TSplitter* Splitter1;
 	Vcl::Stdctrls::TEdit* EdDeviceFolder;
 	Vcl::Extctrls::TPanel* PnlDeviceTop;
 	Vcl::Stdctrls::TButton* BtnRefresh;
@@ -172,17 +179,33 @@ __published:
 	Vcl::Extctrls::TPanel* Panel1;
 	Vcl::Stdctrls::TButton* BtnOpenTemp;
 	Vcl::Extctrls::TTimer* MapTimer;
-	Vcl::Stdctrls::TButton* BtnCreateAdditional;
 	Vcl::Extctrls::TPanel* PnlTripGpiInfo;
 	Vcl::Stdctrls::TComboBox* CmbModel;
 	Vcl::Stdctrls::TButton* BtnPostProcess;
 	Vcl::Stdctrls::TCheckBox* ChkWatch;
-	Vcl::Extctrls::TTimer* PostProcessTimer;
-	Vcl::Menus::TMainMenu* MainMenu;
-	Vcl::Menus::TMenuItem* Help1;
-	Vcl::Menus::TMenuItem* About1;
+	Vcl::Dialogs::TOpenDialog* OpenTrip;
+	Vcl::Actnmenus::TActionMainMenuBar* ActionMainMenuBar;
+	Vcl::Actnman::TActionManager* ActionManager;
+	Vcl::Actnlist::TAction* Action1;
+	Vcl::Actnlist::TAction* Action2;
+	Vcl::Menus::TPopupMenu* PopupTripInfo;
+	Vcl::Menus::TMenuItem* CopyValueFromTrip;
+	Vcl::Actnlist::TAction* Action3;
 	Vcl::Menus::TMenuItem* N7;
-	Vcl::Menus::TMenuItem* Onlinehelp1;
+	Vcl::Menus::TMenuItem* SaveCSV1;
+	Vcl::Dialogs::TSaveDialog* SaveTrip;
+	Vcl::Menus::TMenuItem* SaveGPX1;
+	Vcl::Buttons::TSpeedButton* BtnGeoSearch;
+	Vcl::Stdctrls::TButton* BtnTripEditor;
+	Vcl::Extctrls::TSplitter* SpltRoutePoint;
+	Vcl::Stdctrls::TButton* BtnCreateAdditional;
+	Vcl::Menus::TPopupMenu* PopupTripEdit;
+	Vcl::Menus::TMenuItem* MnuTripNewMTP;
+	Vcl::Menus::TMenuItem* MnuTripEdit;
+	Vcl::Menus::TMenuItem* NewtripWindows1;
+	Vcl::Stdctrls::TCheckBox* ChkZoomToPoint;
+	Vcl::Comctrls::TStatusBar* SbPostProcess;
+	Vcl::Stdctrls::TLabel* LblBounds;
 	void __fastcall FormCreate(System::TObject* Sender);
 	void __fastcall FormDestroy(System::TObject* Sender);
 	void __fastcall BtnRefreshClick(System::TObject* Sender);
@@ -196,7 +219,6 @@ __published:
 	void __fastcall BtnSaveTripGpiFileClick(System::TObject* Sender);
 	void __fastcall ValueListKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall TvTripChange(System::TObject* Sender, Vcl::Comctrls::TTreeNode* Node);
-	void __fastcall VlTripInfoSelectCell(System::TObject* Sender, int ACol, int ARow, bool &CanSelect);
 	void __fastcall EdgeBrowser1CreateWebViewCompleted(Vcl::Edge::TCustomEdgeBrowser* Sender, HRESULT AResult);
 	void __fastcall EdgeBrowser1NavigationStarting(Vcl::Edge::TCustomEdgeBrowser* Sender, Vcl::Edge::TNavigationStartingEventArgs* Args);
 	void __fastcall EdgeBrowser1WebMessageReceived(Vcl::Edge::TCustomEdgeBrowser* Sender, Vcl::Edge::TWebMessageReceivedEventArgs* Args);
@@ -244,10 +266,20 @@ __published:
 	void __fastcall ShellListView1ColumnClick(System::TObject* Sender, Vcl::Comctrls::TListColumn* Column);
 	void __fastcall LstFilesKeyUp(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall ChkWatchClick(System::TObject* Sender);
-	void __fastcall PostProcessTimerTimer(System::TObject* Sender);
 	void __fastcall ShellListView1DblClick(System::TObject* Sender);
-	void __fastcall About1Click(System::TObject* Sender);
-	void __fastcall Onlinehelp1Click(System::TObject* Sender);
+	void __fastcall Action1Execute(System::TObject* Sender);
+	void __fastcall Action2Execute(System::TObject* Sender);
+	void __fastcall CopyValueFromTripClick(System::TObject* Sender);
+	void __fastcall Action3Execute(System::TObject* Sender);
+	void __fastcall SaveCSV1Click(System::TObject* Sender);
+	void __fastcall SaveGPX1Click(System::TObject* Sender);
+	void __fastcall BtnGeoSearchClick(System::TObject* Sender);
+	void __fastcall BtnTripEditorMouseUp(System::TObject* Sender, System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
+	void __fastcall MnuTripEditClick(System::TObject* Sender);
+	void __fastcall MnuTripNewMTPClick(System::TObject* Sender);
+	void __fastcall NewtripWindows1Click(System::TObject* Sender);
+	void __fastcall PopupTripEditPopup(System::TObject* Sender);
+	void __fastcall PageControl1Resize(System::TObject* Sender);
 	
 private:
 	System::UnicodeString PrefDevice;
@@ -269,16 +301,21 @@ private:
 	int WarnOverWrite;
 	System::Classes::TStringList* ModifiedList;
 	Monitor::TDirectoryMonitor* DirectoryMonitor;
+	TCoordinatesAppliedEvent FOnCoordinatesApplied;
 	void __fastcall DirectoryEvent(System::TObject* Sender, Monitor::TDirectoryMonitorAction Action, const System::WideString FileName);
 	MESSAGE void __fastcall FileSysDrop(Winapi::Messages::TWMDropFiles &Msg);
+	Unittripobjects::TmScPosn* __fastcall SelectedScPosn();
+	Unittripobjects::TLocation* __fastcall SelectedLocation();
+	void __fastcall EnableApplyCoords();
 	void __fastcall ClearSelHexEdit();
 	void __fastcall SyncHexEdit(System::TObject* Sender);
+	void __fastcall VlTripInfoSelectionMoved(System::TObject* Sender);
 	void __fastcall HexEditKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall HexEditKeyPress(System::TObject* Sender, System::WideChar &Key);
 	void __fastcall LoadHex(const System::UnicodeString FileName);
 	void __fastcall LoadTripOnMap(Unittripobjects::TTripList* CurrentTrip, System::UnicodeString Id);
 	void __fastcall LoadGpiOnMap(Unitgpi::TPOIList* CurrentGpi, System::UnicodeString Id);
-	void __fastcall MapRequest(const System::UnicodeString Coords, const System::UnicodeString Desc);
+	void __fastcall MapRequest(const System::UnicodeString Coords, const System::UnicodeString Desc, const System::UnicodeString Zoom, const System::UnicodeString TimeOut);
 	void __fastcall SaveTripGpiFile();
 	void __fastcall LoadTripFile(const System::UnicodeString FileName, const bool FromDevice);
 	void __fastcall LoadGpiFile(const System::UnicodeString FileName, const bool FromDevice);
@@ -308,17 +345,29 @@ private:
 	void __fastcall ShowWarnRecalc();
 	void __fastcall ShowWarnOverWrite(const System::UnicodeString AFile);
 	void __fastcall ReadDefaultFolders();
+	void __fastcall ReadSortColumn();
+	void __fastcall WriteSortColumn();
 	void __fastcall ReadSettings();
 	void __fastcall ClearTripInfo();
+	void __fastcall EditTrip(bool NewFile);
 	
 protected:
 	virtual void __fastcall CreateWnd();
 	virtual void __fastcall DestroyWnd();
+	MESSAGE void __fastcall WMDirChanged(Winapi::Messages::TMessage &Msg);
+	MESSAGE void __fastcall WMAddrLookUp(Winapi::Messages::TMessage &Msg);
 	
 public:
 	_TFrmTripManager__1 DeviceFolder;
-	void __fastcall SetFixedPrefs();
 	void __fastcall CheckSupportedModel();
+	void __fastcall ReloadTripOnMap(System::TObject* Sender);
+	void __fastcall RoutePointsShowing(System::TObject* Sender, bool Showing);
+	void __fastcall RoutePointUpdated(System::TObject* Sender);
+	void __fastcall TripFileUpdating(System::TObject* Sender);
+	void __fastcall TripFileCanceled(System::TObject* Sender);
+	void __fastcall TripFileUpdated(System::TObject* Sender);
+	System::UnicodeString __fastcall GetMapCoords();
+	__property TCoordinatesAppliedEvent OnCoordinatesApplied = {read=FOnCoordinatesApplied, write=FOnCoordinatesApplied};
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmTripManager(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmTripManager(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }
@@ -348,14 +397,8 @@ public:
 #define CurrentTrip L"CurrentTrip"
 #define CurrentGPI L"CurrentGPI"
 #define FileSysTrip L"FileSys"
-#define TripManagerReg_Key L"Software\\TDBware\\TripManager"
-#define PrefFileSysFolder_Key L"PrefFileSysFolder"
-#define PrefDev_Key L"PrefDevice"
-#define PrefDevTripsFolder_Key L"PrefDeviceTripsFolder"
-#define PrefDevGpxFolder_Key L"PrefDeviceGpxFolder"
-#define PrefDevPoiFolder_Key L"PrefDevicePoiFolder"
-#define WarnModel_Key L"WarnModel"
-extern DELPHI_PACKAGE Ufrmtripmanager__1 BooleanValues;
+static _DELPHI_CONST System::Word WM_DIRCHANGED = System::Word(0x401);
+static _DELPHI_CONST System::Word WM_ADDRLOOKUP = System::Word(0x402);
 extern DELPHI_PACKAGE TFrmTripManager* FrmTripManager;
 }	/* namespace Ufrmtripmanager */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UFRMTRIPMANAGER)

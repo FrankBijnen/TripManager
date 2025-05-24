@@ -47,7 +47,7 @@ class PASCALIMPLEMENTATION TFrmPostProcess : public Vcl::Forms::TForm
 __published:
 	Vcl::Extctrls::TPanel* PnlBot;
 	Vcl::Buttons::TBitBtn* BtnCancel;
-	Vcl::Buttons::TBitBtn* BitBtn2;
+	Vcl::Buttons::TBitBtn* BtnOK;
 	Vcl::Extctrls::TPanel* PnlBegin;
 	Vcl::Extctrls::TPanel* PnlBeginCaption;
 	Vcl::Controls::TImageList* ImgListSymbols;
@@ -65,15 +65,26 @@ __published:
 	Vcl::Extctrls::TPanel* PnlShapeCaption;
 	Vcl::Stdctrls::TCheckBox* ChkProcessShape;
 	Vcl::Extctrls::TPanel* PnlShapeData;
-	Vcl::Stdctrls::TComboBox* CmbShapingName;
+	Vcl::Comctrls::TComboBoxEx* CmbShapingName;
 	Vcl::Stdctrls::TMemo* MemoPostProcess;
-	Vcl::Stdctrls::TComboBox* CmbDistanceUnit;
+	Vcl::Comctrls::TComboBoxEx* CmbDistanceUnit;
 	Vcl::Extctrls::TPanel* PnlWaypt;
 	Vcl::Extctrls::TPanel* PnlWayptCaption;
 	Vcl::Stdctrls::TCheckBox* ChkProcessWpt;
 	Vcl::Extctrls::TPanel* PnlWayptData;
-	Vcl::Stdctrls::TComboBox* CmbWayPtCat;
+	Vcl::Comctrls::TComboBoxEx* CmbWayPtCat;
 	Vcl::Stdctrls::TEdit* EdWptStr;
+	Vcl::Stdctrls::TCheckBox* ChkBeginAddress;
+	Vcl::Stdctrls::TCheckBox* ChkEndAddress;
+	Vcl::Stdctrls::TCheckBox* ChkShapeAddress;
+	Vcl::Extctrls::TPanel* PnlVia;
+	Vcl::Extctrls::TPanel* PnlViaCaption;
+	Vcl::Stdctrls::TCheckBox* ChkProcessVia;
+	Vcl::Extctrls::TPanel* PnlViaData;
+	Vcl::Stdctrls::TEdit* EdViaPtStr;
+	Vcl::Stdctrls::TEdit* EdViaPtChanged;
+	Vcl::Stdctrls::TCheckBox* ChkViaAddress;
+	Vcl::Stdctrls::TCheckBox* ChkWayPtAddress;
 	void __fastcall FormShow(System::TObject* Sender);
 	void __fastcall FormClose(System::TObject* Sender, System::Uitypes::TCloseAction &Action);
 	void __fastcall FormCreate(System::TObject* Sender);
@@ -81,12 +92,8 @@ __published:
 private:
 	bool SymbolsLoaded;
 	void __fastcall LoadSymbols();
-	void __fastcall SetFixedPrefs();
 	void __fastcall SetPrefs();
 	void __fastcall StorePrefs();
-	
-public:
-	void __fastcall SetPreferences();
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmPostProcess(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmPostProcess(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }

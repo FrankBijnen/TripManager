@@ -153,8 +153,107 @@ object FrmAdvSettings: TFrmAdvSettings
           Align = alTop
           Caption = 'Address format'
           TabOrder = 2
+          object BtnBuilder: TButton
+            Left = 8
+            Top = 5
+            Width = 75
+            Height = 25
+            Caption = 'Builder'
+            TabOrder = 0
+            OnMouseUp = BtnBuilderMouseUp
+          end
         end
       end
+    end
+  end
+  object PopupBuilder: TPopupMenu
+    Left = 36
+    Top = 287
+    object Clear1: TMenuItem
+      Caption = 'Clear'
+      OnClick = Clear1Click
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object StatePlaceRoadnr1: TMenuItem
+      Caption = 'State, Place, Road + House_number'
+      OnClick = StatePlaceRoadnr1Click
+    end
+    object NrRoadPlaceState1: TMenuItem
+      Caption = 'House_number + Road, Place, State'
+      OnClick = NrRoadPlaceState1Click
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Smallestplace1: TMenuItem
+      Caption = 'Smallest place'
+      OnClick = Smallestplace1Click
+    end
+    object Largestplace1: TMenuItem
+      Caption = 'Largest place'
+      OnClick = Largestplace1Click
+    end
+    object N5: TMenuItem
+      Break = mbBarBreak
+      Caption = '-'
+    end
+    object Housenbr1: TMenuItem
+      Caption = 'House_number'
+      OnClick = AddTag
+    end
+    object Road1: TMenuItem
+      Caption = 'Road'
+      OnClick = AddTag
+    end
+    object State1: TMenuItem
+      Caption = 'State'
+      OnClick = AddTag
+    end
+    object Countrycode1: TMenuItem
+      Caption = 'Country_Code'
+      OnClick = AddTag
+    end
+    object Countrycode2: TMenuItem
+      Caption = 'Country'
+      OnClick = AddTag
+    end
+    object postalcode1: TMenuItem
+      Caption = 'PostCode'
+      OnClick = AddTag
+    end
+    object N3: TMenuItem
+      Break = mbBarBreak
+      Caption = '-'
+    end
+    object Hamlet1: TMenuItem
+      Caption = 'Hamlet'
+      OnClick = AddTag
+    end
+    object Village1: TMenuItem
+      Caption = 'Village'
+      OnClick = AddTag
+    end
+    object City1: TMenuItem
+      Caption = 'Town'
+      OnClick = AddTag
+    end
+    object City2: TMenuItem
+      Caption = 'City'
+      OnClick = AddTag
+    end
+    object municipality1: TMenuItem
+      Caption = 'Municipality'
+      OnClick = AddTag
+    end
+    object N4: TMenuItem
+      Break = mbBarBreak
+      Caption = '-'
+    end
+    object Debug1: TMenuItem
+      Caption = 'Debug'
+      OnClick = AddTag
     end
   end
 end

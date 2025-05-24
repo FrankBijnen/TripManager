@@ -40,12 +40,13 @@ private:
 	System::Classes::TStringList* Html;
 	System::UnicodeString FInitialZoom;
 	System::UnicodeString FPathName;
+	System::UnicodeString FHome;
 	void __fastcall WriteHeader();
 	void __fastcall WriteTrackPoints();
 	void __fastcall WriteFooter();
 	
 public:
-	__fastcall TOSMHelper(const System::UnicodeString APathName, const System::UnicodeString AInitialZoom);
+	__fastcall TOSMHelper(const System::UnicodeString APathName, const System::UnicodeString AHome, const System::UnicodeString AInitialZoom);
 	__fastcall virtual ~TOSMHelper();
 };
 
@@ -58,10 +59,11 @@ static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
 #define OSMGetBounds L"GetBounds"
 #define OSMGetRoutePoint L"GetRoutePoint"
 #define InitialZoom_Point L"15"
-#define InitialZoom_Out L"16"
-#define InitialZoom_In L"20"
+#define InitialZoom_Home L"12"
+#define InitialZoom_NoHome L"20"
 #define PopupTimeout L"3000"
-extern DELPHI_PACKAGE void __fastcall ShowMap(Vcl::Edge::TEdgeBrowser* Browser);
+#define GeoSearchTimeout L"8000"
+extern DELPHI_PACKAGE void __fastcall ShowMap(Vcl::Edge::TEdgeBrowser* Browser, System::UnicodeString Home = System::UnicodeString());
 extern DELPHI_PACKAGE void __fastcall ParseJsonMessage(const System::UnicodeString Message, System::UnicodeString &Msg, System::UnicodeString &Parm1, System::UnicodeString &Parm2);
 }	/* namespace Unitosmmap */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITOSMMAP)

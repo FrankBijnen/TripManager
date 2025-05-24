@@ -15,7 +15,8 @@ const
   ThrottleGeoCode         = 'ThrottleGeoCode';
   DefState                = 'ISO3166-2-lvl4,state';
   DefCity                 = 'village,town,city,municipality,hamlet';
-  DefRoad                 = 'road+house_number';
+  DefRoadHouse            = 'road+house_number';
+  DefHouseRoad            = 'house_number+road';
   DefCountry              = 'country';
   DefPostalCode           = 'postcode';
 
@@ -200,7 +201,7 @@ end;
 
 function TPlace.GetRoad: string;
 begin
-  result := GetFormattedAddress(DefRoad);
+  result := GetFormattedAddress(DefRoadHouse);
 end;
 
 function TPlace.GetCity: string;
@@ -470,7 +471,7 @@ begin
   GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeUrl, 'https://geocode.maps.co');
   GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeApiKey, '');
   GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
-                                                DefState + '|' + DefCity + '|' + DefRoad);
+                                                DefState + '|' + DefCity + '|' + DefRoadHouse);
   GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, ThrottleGeoCode, '1000'));
 end;
 

@@ -76,7 +76,7 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <AllPackageLibs>rtl.lib;vcl.lib;vcledge.lib</AllPackageLibs>
+        <AllPackageLibs>rtl.lib;vcl.lib;vcledge.lib;vclactnband.lib;dbrtl.lib;dsnap.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
         <Icon_MainIcon>$(BDS)\bin\cbuilder_PROJECTICON.ico</Icon_MainIcon>
@@ -154,7 +154,7 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
-        <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi</LinkPackageImports>
+        <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi;vclactnband.bpi;dbrtl.bpi;dsnap.bpi</LinkPackageImports>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
@@ -168,30 +168,61 @@
         <DelphiCompile Include="..\TripManager\TripManager_ShellList.pas">
             <BuildOrder>4</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\UDmRoutePoints.pas">
+            <Form>DmRoutePoints</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+            <BuildOrder>4</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmAdditional.pas">
             <Form>FrmAdditional</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>7</BuildOrder>
+            <BuildOrder>5</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\UFrmAdvSettings.pas">
+            <Form>FrmAdvSettings</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>6</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmDateDialog.pas">
             <Form>FrmDateDialog</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>6</BuildOrder>
+            <BuildOrder>7</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\UFrmGeoSearch.pas">
+            <Form>FGeoSearch</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>8</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\UFrmNewTrip.pas">
+            <Form>FrmNewTrip</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>9</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\UFrmPlaces.pas">
+            <Form>FrmPlaces</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>10</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmPostProcess.pas">
             <Form>FrmPostProcess</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>5</BuildOrder>
+            <BuildOrder>11</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmTransferOptions.pas">
             <Form>FrmTransferOptions</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>8</BuildOrder>
+            <BuildOrder>12</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\UFrmTripEditor.pas">
+            <Form>FrmTripEditor</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>13</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmTripManager.pas">
             <Form>FrmTripManager</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>8</BuildOrder>
+            <BuildOrder>14</BuildOrder>
         </DelphiCompile>
         <CppCompile Include="TripManager_CBuilder.cpp">
             <BuildOrder>0</BuildOrder>
@@ -199,6 +230,17 @@
         <None Include="TripManager_CBuilderPCH2.h">
             <BuildOrder>8</BuildOrder>
         </None>
+        <FormResources Include="..\TripManager\UDmRoutePoints.dfm"/>
+        <FormResources Include="..\TripManager\UFrmAdditional.dfm"/>
+        <FormResources Include="..\TripManager\UFrmAdvSettings.dfm"/>
+        <FormResources Include="..\TripManager\UFrmDateDialog.dfm"/>
+        <FormResources Include="..\TripManager\UFrmGeoSearch.dfm"/>
+        <FormResources Include="..\TripManager\UFrmNewTrip.dfm"/>
+        <FormResources Include="..\TripManager\UFrmPlaces.dfm"/>
+        <FormResources Include="..\TripManager\UFrmPostProcess.dfm"/>
+        <FormResources Include="..\TripManager\UFrmTransferOptions.dfm"/>
+        <FormResources Include="..\TripManager\UFrmTripEditor.dfm"/>
+        <FormResources Include="..\TripManager\UFrmTripManager.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -317,9 +359,9 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName=".\Win32\Debug\TripManager_CBuilder.tds" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile LocalName=".\Win32\Release\TripManager_CBuilder.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>TripManager_CBuilder.tds</RemoteName>
+                        <RemoteName>TripManager_CBuilder.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
