@@ -40,7 +40,10 @@ const ProcessVia: boolean = true;
 const ProcessSubClass: boolean = true;
 const ProcessFlags: boolean = true;
 const ProcessViaPts: boolean = true;
-const ProcessWayPts: boolean = true;
+const ProcessShapePtsInTrack: boolean = false;
+const ProcessViaPtsInTrack: boolean = true;
+const ProcessWayPtsInTrack: boolean = true;
+
 const ProcessTracks: boolean = true;
 const UniqueTracks: boolean = true;
 
@@ -716,8 +719,7 @@ var CurrentTrack: TXmlVSNode;
                   DefinedSymbol,
                   Distance);
 
-      if (pcfViaPt in ProcessCategoryFor) or
-         (pcfShapePt in ProcessCategoryFor) then
+      if ([pcfViaPt, pcfShapePt] * ProcessCategoryFor <> []) then
       begin
         ExtensionsNode := NewNode.AddChild('extensions');
         if (ProcessCategory = pcfViaPt) then
@@ -1307,31 +1309,43 @@ var Func: TGPXFunc;
     var WptTracksRoot: TXmlVSNode;
         WptTrack: TXmlVSNode;
         Track : TXmlVSNode;
-        RouteWayPoints, WayPoint: TXmlVSNode;
+        RouteWayPoints, WayPoint, ExtensionsNode: TXmlVSNode;
         TrackPoint: TXmlVSNode;
         OutFile, TrackName, DisplayColor: string;
         TracksProcessed: TStringList;
+        IsViaPt: boolean;
+
     begin
       TracksProcessed := TStringList.Create;
       FrmSelectGPX := TFrmSelectGPX.Create(nil);
       try
         WptTracksRoot := InitRoot(WptTracksXml);
 
-        if (ProcessWayPts) then
+        if (ProcessWayPtsInTrack) then
         begin
           for WayPoint in WayPointList do
           begin
             if (WayPointNotProcessed(WayPoint)) then
               CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
           end;
+        end;
 
-          if (ProcessWayPtsFromRoute) then
+        if ((ProcessViaPtsInTrack) or (ProcessShapePtsInTrack)) and
+           (ProcessWayPtsFromRoute) then
+        begin
+          for RouteWayPoints in RouteViaPointList do
           begin
-            for RouteWayPoints in WayPointFromRouteList do
+            for WayPoint in RouteWayPoints.ChildNodes do
             begin
-              for WayPoint in RouteWayPoints.ChildNodes do
+              if (WayPointNotProcessed(WayPoint)) then
               begin
-                if (WayPointNotProcessed(WayPoint)) then
+                IsViaPt := false;
+                ExtensionsNode := WayPoint.find('extensions');
+                if (ExtensionsNode <> nil) then
+                  IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+
+                if ((IsViaPt) and (ProcessViaPtsInTrack)) or
+                   ((IsViaPt = false) and (ProcessShapePtsInTrack)) then
                   CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
               end;
             end;

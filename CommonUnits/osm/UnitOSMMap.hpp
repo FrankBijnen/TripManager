@@ -35,6 +35,7 @@ class PASCALIMPLEMENTATION TOSMHelper : public System::TObject
 	typedef System::TObject inherited;
 	
 private:
+	bool HasData;
 	int Scaled;
 	System::Sysutils::TFormatSettings OsmFormatSettings;
 	System::Classes::TStringList* Html;

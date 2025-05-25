@@ -44,17 +44,40 @@ const
   IdCompleteRoute   = 3;
   IdPOI             = 4;
   TripFilesFor      = 'Trip files (No import required, but will recalculate. Selected model: %s)';
-  GPISel            = 'POI (.gpi) files (Points Of Interest). Selection:%s';
+  GPISel            = 'POI (.gpi) files (Points Of Interest). Selection: %s';
+  TrackSel          = 'Tracks (%s %s)';
 
 procedure TFrmTransferOptions.SetPrefs;
 var
-  PtsInGpi: string;
+  PtsInGpi, PtsInTrack, IncExcWpt: string;
 begin
   LvSelections.Items[IdTrip].Caption := Format(TripFilesFor, [FrmTripManager.CmbModel.Text]);
   LvSelections.Items[IdTrip].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrip', BooleanValues[true]) = BooleanValues[true]);
   LvSelections.Items[IdTrack].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrack', BooleanValues[true]) = BooleanValues[true]);
+
+  IncExcWpt := 'Including';
+  PtsInTrack := '';
+  ProcessWayPtsInTrack := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackWayPt', BooleanValues[false]), BooleanValues[true]);
+  if ProcessWayPtsInTrack then
+    PtsInTrack := PtsInTrack + ' Way points,';
+  ProcessViaPtsInTrack := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackViaPt', BooleanValues[false]), BooleanValues[true]);
+  if ProcessViaPtsInTrack then
+    PtsInTrack := PtsInTrack + ' Via points as Way points,';
+  ProcessShapePtsInTrack := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackShpPt', BooleanValues[false]), BooleanValues[true]);
+  if ProcessShapePtsInTrack then
+    PtsInTrack := PtsInTrack + ' Shaping points as Way points,';
+  if (PtsInTrack <> '') then
+    SetLength(PtsInTrack, Length(PtsInTrack) -1)
+  else
+    IncExcWpt := 'Excluding Way points';
+
+  LvSelections.Items[IdTrack].Caption := Format(TrackSel, [IncExcWpt, PtsInTrack]);
+
   LvSelections.Items[IdStrippedRoute].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferStrippedRoute', BooleanValues[false]) = BooleanValues[true]);
   LvSelections.Items[IdCompleteRoute].Checked :=
@@ -63,18 +86,18 @@ begin
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferGPI', BooleanValues[false]) = BooleanValues[true]);
 
   PtsInGpi := '';
-  ProcessWayPtsInGpi :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]) = BooleanValues[true]);
+  ProcessWayPtsInGpi := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[false]), BooleanValues[true]);
   if ProcessWayPtsInGpi then
-    PtsInGpi := PtsInGpi + ' WayPoints,';
-  ProcessViaPtsInGpi :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]) = BooleanValues[true]);
+    PtsInGpi := PtsInGpi + ' Way points,';
+  ProcessViaPtsInGpi := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]);
   if ProcessViaPtsInGpi then
-    PtsInGpi := PtsInGpi + ' Via Points,';
-  ProcessShapePtsInGpi :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[false]) = BooleanValues[true]);
+    PtsInGpi := PtsInGpi + ' Via points,';
+  ProcessShapePtsInGpi := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[false]), BooleanValues[true]);
   if ProcessShapePtsInGpi then
-    PtsInGpi := PtsInGpi + ' Shaping Points,';
+    PtsInGpi := PtsInGpi + ' Shaping points,';
   if (PtsInGpi <> '') then
     SetLength(PtsInGpi, Length(PtsInGpi) -1)
   else

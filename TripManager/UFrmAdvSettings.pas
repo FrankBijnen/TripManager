@@ -161,8 +161,6 @@ begin
   finally
     WayPtList.Free;
   end;
-  // Used when creating tracks
-  ProcessWayPts := SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWayPts', BooleanValues[true]), BooleanValues[true]);
 end;
 
 procedure TFrmAdvSettings.Smallestplace1Click(Sender: TObject);
@@ -202,8 +200,21 @@ begin
   VlGeneralSettings.Strings.BeginUpdate;
   try
     VlGeneralSettings.Strings.Clear;
+    AddKey(VlGeneralSettings, '-Window startup-');
     AddKey(VlGeneralSettings, Maximized_Key,    'False');
-    AddKey(VlGeneralSettings, 'ProcessWayPts',  'True');
+    AddKey(VlGeneralSettings, '-');
+
+    AddKey(VlGeneralSettings, '-Creating Tracks-');
+    AddKey(VlGeneralSettings, 'FuncTrackWayPt', 'False');
+    AddKey(VlGeneralSettings, 'FuncTrackViaPt', 'False');
+    AddKey(VlGeneralSettings, 'FuncTrackShpPt', 'False');
+    AddKey(VlGeneralSettings, '-');
+
+    AddKey(VlGeneralSettings, '-Creating Poi Files-');
+    AddKey(VlGeneralSettings, 'FuncGpiWayPt',   'False');
+    AddKey(VlGeneralSettings, 'FuncGpiViaPt',   'False');
+    AddKey(VlGeneralSettings, 'FuncGpiShpPt',   'False');
+    AddKey(VlGeneralSettings, '-');
   finally
     VlGeneralSettings.Strings.EndUpdate;
   end;
@@ -255,6 +266,8 @@ var
 begin
   for Index := 0 to VlGeneralSettings.Strings.Count -1 do
   begin
+    if (Copy(VlGeneralSettings.Strings.KeyNames[Index], 1, 1) = '-') then
+      continue;
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
                      VlGeneralSettings.Strings.KeyNames[Index], VlGeneralSettings.Strings.ValueFromIndex[Index]);
   end;
