@@ -104,7 +104,7 @@ __published:
 	Vcl::Extctrls::TPanel* PnlXTAndFileSys;
 	Vcl::Comctrls::TListView* LstFiles;
 	Vcl::Extctrls::TSplitter* VSplitterDev_Files;
-	Vcl::Comctrls::TPageControl* PageControl1;
+	Vcl::Comctrls::TPageControl* PCTTripInfo;
 	Vcl::Comctrls::TTabSheet* TsTripGpiInfo;
 	Vcl::Extctrls::TSplitter* VSplitterTree_Grid;
 	Vcl::Comctrls::TTreeView* TvTrip;
@@ -279,7 +279,7 @@ __published:
 	void __fastcall MnuTripNewMTPClick(System::TObject* Sender);
 	void __fastcall NewtripWindows1Click(System::TObject* Sender);
 	void __fastcall PopupTripEditPopup(System::TObject* Sender);
-	void __fastcall PageControl1Resize(System::TObject* Sender);
+	void __fastcall PCTTripInfoResize(System::TObject* Sender);
 	
 private:
 	System::UnicodeString PrefDevice;
@@ -345,8 +345,8 @@ private:
 	void __fastcall ShowWarnRecalc();
 	void __fastcall ShowWarnOverWrite(const System::UnicodeString AFile);
 	void __fastcall ReadDefaultFolders();
-	void __fastcall ReadSortColumn();
-	void __fastcall WriteSortColumn();
+	void __fastcall ReadColumnSettings();
+	void __fastcall WriteColumnSettings();
 	void __fastcall ReadSettings();
 	void __fastcall ClearTripInfo();
 	void __fastcall EditTrip(bool NewFile);

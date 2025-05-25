@@ -161,7 +161,8 @@ begin
   finally
     WayPtList.Free;
   end;
-
+  // Used when creating tracks
+  ProcessWayPts := SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWayPts', BooleanValues[true]), BooleanValues[true]);
 end;
 
 procedure TFrmAdvSettings.Smallestplace1Click(Sender: TObject);
@@ -202,6 +203,7 @@ begin
   try
     VlGeneralSettings.Strings.Clear;
     AddKey(VlGeneralSettings, Maximized_Key,    'False');
+    AddKey(VlGeneralSettings, 'ProcessWayPts',  'True');
   finally
     VlGeneralSettings.Strings.EndUpdate;
   end;

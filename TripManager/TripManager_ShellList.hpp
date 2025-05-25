@@ -28,6 +28,7 @@
 #include <Vcl.Shell.ShellConsts.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.Controls.hpp>
+#include <ListViewSort.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -36,8 +37,6 @@ namespace Tripmanager_shelllist
 //-- forward type declarations -----------------------------------------------
 class DELPHICLASS TShellListView;
 //-- type declarations -------------------------------------------------------
-enum DECLSPEC_DENUM THeaderSortState : unsigned char { hssNone, hssAscending, hssDescending };
-
 class PASCALIMPLEMENTATION TShellListView : public Vcl::Shell::Shellctrls::TShellListView
 {
 	typedef Vcl::Shell::Shellctrls::TShellListView inherited;
@@ -45,7 +44,7 @@ class PASCALIMPLEMENTATION TShellListView : public Vcl::Shell::Shellctrls::TShel
 private:
 	bool FColumnSorted;
 	int FSortColumn;
-	THeaderSortState FSortState;
+	Listviewsort::THeaderSortState FSortState;
 	_di_IContextMenu2 ICM2;
 	Winapi::Windows::TPoint FDragStartPos;
 	bool FDragSource;
@@ -60,13 +59,14 @@ protected:
 	DYNAMIC void __fastcall MouseMove(System::Classes::TShiftState Shift, int X, int Y);
 	DYNAMIC void __fastcall MouseUp(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
 	HIDESBASE MESSAGE void __fastcall WMNotify(Winapi::Messages::TWMNotify &Msg);
-	void __fastcall InitSortSpec(int SortColumn, THeaderSortState SortState);
-	virtual void __fastcall Populate();
-	virtual void __fastcall ColumnSort();
-	virtual void __fastcall CreateWnd();
-	virtual void __fastcall DestroyWnd();
+	void __fastcall InitSortSpec(int SortColumn, Listviewsort::THeaderSortState SortState);
+	void __fastcall RestoreSortIndicator();
 	DYNAMIC void __fastcall DoContextPopup(const Winapi::Windows::TPoint &MousePos, bool &Handled);
 	virtual int __fastcall OwnerDataFind(Vcl::Comctrls::TItemFind Find, const System::UnicodeString FindString, const Winapi::Windows::TPoint &FindPosition, void * FindData, int StartIndex, Vcl::Comctrls::TSearchDirection Direction, bool Wrap);
+	virtual void __fastcall ColumnSort();
+	virtual void __fastcall CreateWnd();
+	virtual void __fastcall EnumColumns();
+	virtual void __fastcall Populate();
 	DYNAMIC void __fastcall Edit(const Winapi::Commctrl::TLVItem &Item);
 	void __fastcall ShowMultiContextMenu(const Winapi::Windows::TPoint &MousePos);
 	virtual void __fastcall WndProc(Winapi::Messages::TMessage &Message);
@@ -74,6 +74,7 @@ protected:
 public:
 	__fastcall virtual TShellListView(System::Classes::TComponent* AOwner);
 	__fastcall virtual ~TShellListView();
+	virtual void __fastcall Invalidate();
 	virtual void __fastcall ClearSelection();
 	virtual void __fastcall SelectAll();
 	HIDESBASE void __fastcall Refresh();
@@ -81,7 +82,7 @@ public:
 	virtual void __fastcall SetFocus();
 	__property bool ColumnSorted = {read=FColumnSorted, write=SetColumnSorted, nodefault};
 	__property int SortColumn = {read=FSortColumn, write=FSortColumn, nodefault};
-	__property THeaderSortState SortState = {read=FSortState, write=FSortState, nodefault};
+	__property Listviewsort::THeaderSortState SortState = {read=FSortState, write=FSortState, nodefault};
 	__property OnMouseWheel;
 	__property bool DragSource = {read=FDragSource, write=FDragSource, nodefault};
 public:

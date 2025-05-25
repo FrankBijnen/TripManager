@@ -31,6 +31,7 @@
 #include <Vcl.ValEdit.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <UnitGeoCode.hpp>
+#include <Vcl.Menus.hpp>
 #include <System.UITypes.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -62,11 +63,45 @@ __published:
 	Vcl::Extctrls::TSplitter* Splitter1;
 	Vcl::Extctrls::TPanel* PnlAddressFormat;
 	Vcl::Stdctrls::TButton* BtnClearCoordCache;
+	Vcl::Stdctrls::TButton* BtnBuilder;
+	Vcl::Menus::TPopupMenu* PopupBuilder;
+	Vcl::Menus::TMenuItem* Clear1;
+	Vcl::Menus::TMenuItem* N1;
+	Vcl::Menus::TMenuItem* StatePlaceRoadnr1;
+	Vcl::Menus::TMenuItem* NrRoadPlaceState1;
+	Vcl::Menus::TMenuItem* N2;
+	Vcl::Menus::TMenuItem* Housenbr1;
+	Vcl::Menus::TMenuItem* Road1;
+	Vcl::Menus::TMenuItem* Smallestplace1;
+	Vcl::Menus::TMenuItem* Largestplace1;
+	Vcl::Menus::TMenuItem* State1;
+	Vcl::Menus::TMenuItem* Countrycode1;
+	Vcl::Menus::TMenuItem* Countrycode2;
+	Vcl::Menus::TMenuItem* N3;
+	Vcl::Menus::TMenuItem* Debug1;
+	Vcl::Menus::TMenuItem* Hamlet1;
+	Vcl::Menus::TMenuItem* Village1;
+	Vcl::Menus::TMenuItem* N4;
+	Vcl::Menus::TMenuItem* City1;
+	Vcl::Menus::TMenuItem* postalcode1;
+	Vcl::Menus::TMenuItem* City2;
+	Vcl::Menus::TMenuItem* municipality1;
+	Vcl::Menus::TMenuItem* N5;
+	Vcl::Comctrls::TTabSheet* TabGeneral;
+	Vcl::Valedit::TValueListEditor* VlGeneralSettings;
+	Vcl::Menus::TMenuItem* Coords1;
 	void __fastcall FormClose(System::TObject* Sender, System::Uitypes::TCloseAction &Action);
 	void __fastcall FormShow(System::TObject* Sender);
 	void __fastcall MemoAddressFormatChange(System::TObject* Sender);
 	void __fastcall VlGeoCodeSettingsStringsChange(System::TObject* Sender);
 	void __fastcall BtnClearCoordCacheClick(System::TObject* Sender);
+	void __fastcall BtnBuilderMouseUp(System::TObject* Sender, System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
+	void __fastcall Clear1Click(System::TObject* Sender);
+	void __fastcall StatePlaceRoadnr1Click(System::TObject* Sender);
+	void __fastcall NrRoadPlaceState1Click(System::TObject* Sender);
+	void __fastcall Smallestplace1Click(System::TObject* Sender);
+	void __fastcall Largestplace1Click(System::TObject* Sender);
+	void __fastcall AddTag(System::TObject* Sender);
 	
 private:
 	Unitgeocode::TPlace* SamplePlace;
@@ -98,6 +133,8 @@ public:
 #define PrefDevPoiFolder_Key L"PrefDevicePoiFolder"
 #define WarnModel_Key L"WarnModel"
 #define TripColor_Key L"TripColor"
+#define Maximized_Key L"Maximized"
+#define WidthColumns_Key L"WidthColumns"
 #define SortColumn_Key L"SortColumn"
 #define SortAscending_Key L"SortAscending"
 extern DELPHI_PACKAGE Ufrmadvsettings__1 BooleanValues;

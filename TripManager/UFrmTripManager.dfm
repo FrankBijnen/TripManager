@@ -66,7 +66,6 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 1
-        ExplicitWidth = 628
         object CmbDevices: TComboBox
           AlignWithMargins = True
           Left = 166
@@ -82,7 +81,6 @@ object FrmTripManager: TFrmTripManager
           OnChange = CmbDevicesChange
           Items.Strings = (
             'Select an MTP device')
-          ExplicitWidth = 145
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
@@ -120,7 +118,6 @@ object FrmTripManager: TFrmTripManager
           ItemIndex = 0
           TabOrder = 4
           OnClick = BgDeviceClick
-          ExplicitLeft = 385
         end
         object BtnSetDeviceDefault: TButton
           AlignWithMargins = True
@@ -134,7 +131,6 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Set as default'
           TabOrder = 5
           OnClick = BtnSetDeviceDefaultClick
-          ExplicitLeft = 546
         end
         object BtnFunctions: TButton
           AlignWithMargins = True
@@ -165,7 +161,6 @@ object FrmTripManager: TFrmTripManager
             'XT'
             'XT2'
             'Unknown')
-          ExplicitLeft = 313
         end
       end
       object LstFiles: TListView
@@ -214,7 +209,6 @@ object FrmTripManager: TFrmTripManager
         OnKeyUp = LstFilesKeyUp
         OnSelectItem = LstFilesSelectItem
         OnItemChecked = LstFilesItemChecked
-        ExplicitWidth = 628
       end
       object EdDeviceFolder: TEdit
         AlignWithMargins = True
@@ -226,7 +220,6 @@ object FrmTripManager: TFrmTripManager
         Align = alBottom
         TabOrder = 2
         OnKeyPress = EdDeviceFolderKeyPress
-        ExplicitWidth = 622
       end
     end
     object PnlFileSys: TPanel
@@ -236,8 +229,6 @@ object FrmTripManager: TFrmTripManager
       Height = 243
       Align = alClient
       TabOrder = 1
-      ExplicitLeft = 636
-      ExplicitWidth = 627
       object VSplitterFile_Sys: TSplitter
         Left = 247
         Top = 33
@@ -288,7 +279,6 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 1
         ViewStyle = vsReport
         OnKeyUp = ShellListView1KeyUp
-        ExplicitWidth = 376
       end
       object PnlXt2FileSys: TPanel
         Left = 1
@@ -327,7 +317,6 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 4
-        ExplicitWidth = 625
         object BtnAddToMap: TButton
           AlignWithMargins = True
           Left = 170
@@ -409,7 +398,6 @@ object FrmTripManager: TFrmTripManager
         Height = 25
         Align = alBottom
         TabOrder = 3
-        ExplicitWidth = 625
         object EdFileSysFolder: TEdit
           AlignWithMargins = True
           Left = 69
@@ -421,7 +409,6 @@ object FrmTripManager: TFrmTripManager
           Align = alClient
           TabOrder = 0
           OnKeyPress = EdFileSysFolderKeyPress
-          ExplicitWidth = 552
           ExplicitHeight = 21
         end
         object Panel1: TPanel
@@ -454,8 +441,6 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
-    ExplicitLeft = 636
-    ExplicitWidth = 628
     object TsHex: TTabSheet
       Caption = 'Hexadecimal display'
       object HexPanel: TPanel
@@ -467,7 +452,6 @@ object FrmTripManager: TFrmTripManager
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 620
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1
@@ -476,7 +460,6 @@ object FrmTripManager: TFrmTripManager
           Align = alTop
           ParentBackground = False
           TabOrder = 0
-          ExplicitWidth = 618
           object BtnSaveTripGpiFile: TButton
             Left = 1
             Top = 1
@@ -509,7 +492,6 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 0
         OnResize = AdvPanel_MapTopResize
-        ExplicitWidth = 620
         object SpeedBtn_MapClear: TSpeedButton
           Left = 0
           Top = 0
@@ -626,7 +608,6 @@ object FrmTripManager: TFrmTripManager
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitWidth = 620
         object LblBounds: TLabel
           AlignWithMargins = True
           Left = 116
@@ -654,7 +635,6 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           ShowHint = True
           TabOrder = 0
-          ExplicitWidth = 460
           ExplicitHeight = 21
         end
         object ChkZoomToPoint: TCheckBox
@@ -684,7 +664,6 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
-        ExplicitWidth = 620
       end
     end
   end
@@ -724,7 +703,6 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 2
         StyleElements = [seBorder]
-        ExplicitWidth = 623
       end
       object TvTrip: TTreeView
         Left = 0
@@ -750,7 +728,6 @@ object FrmTripManager: TFrmTripManager
         Height = 337
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 377
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
@@ -774,7 +751,6 @@ object FrmTripManager: TFrmTripManager
           Height = 26
           Align = alTop
           TabOrder = 1
-          ExplicitWidth = 375
           object BtnSaveTripValues: TButton
             Left = 1
             Top = 1
@@ -810,7 +786,6 @@ object FrmTripManager: TFrmTripManager
           item
             Width = 50
           end>
-        ExplicitWidth = 623
       end
     end
   end

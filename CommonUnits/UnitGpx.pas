@@ -43,6 +43,7 @@ const ProcessViaPts: boolean = true;
 const ProcessWayPts: boolean = true;
 const ProcessTracks: boolean = true;
 const UniqueTracks: boolean = true;
+
 const ProcessWayPtsFromRoute: boolean = true; // Create points for GPI and RoutePoints from route
 const DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
 const DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
@@ -1323,19 +1324,20 @@ var Func: TGPXFunc;
             if (WayPointNotProcessed(WayPoint)) then
               CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
           end;
-        end;
 
-        if (ProcessWayPtsFromRoute) then
-        begin
-          for RouteWayPoints in WayPointFromRouteList do
+          if (ProcessWayPtsFromRoute) then
           begin
-            for WayPoint in RouteWayPoints.ChildNodes do
+            for RouteWayPoints in WayPointFromRouteList do
             begin
-              if (WayPointNotProcessed(WayPoint)) then
-                CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
+              for WayPoint in RouteWayPoints.ChildNodes do
+              begin
+                if (WayPointNotProcessed(WayPoint)) then
+                  CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
+              end;
             end;
           end;
         end;
+
         for Track in TrackList do
         begin
           if (Track.Find('extensions') <> nil) then

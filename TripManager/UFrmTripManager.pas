@@ -3459,7 +3459,7 @@ begin
   GuessModel(PrefDevice);
   ReadDefaultFolders;
   WarnModel := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True') = 'True');
-  if (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'False') = 'True') then
+  if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'False'), 'True')) then
     WindowState := TWindowState.wsMaximized;
   ReadColumnSettings;
   WarnRecalc := mrNone;

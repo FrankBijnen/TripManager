@@ -46,8 +46,8 @@ enum DECLSPEC_DENUM THeaderSortState : unsigned char { hssNone, hssAscending, hs
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE int __fastcall CompareTextAsInteger(const System::UnicodeString s1, const System::UnicodeString s2);
 extern DELPHI_PACKAGE int __fastcall CompareTextAsDateTime(const System::UnicodeString s1, const System::UnicodeString s2);
-extern DELPHI_PACKAGE THeaderSortState __fastcall GetListHeaderSortState(Vcl::Comctrls::TListView* HeaderLView, Vcl::Comctrls::TListColumn* Column);
-extern DELPHI_PACKAGE void __fastcall SetListHeaderSortState(Vcl::Comctrls::TListView* HeaderLView, Vcl::Comctrls::TListColumn* Column, THeaderSortState Value);
+extern DELPHI_PACKAGE THeaderSortState __fastcall GetListHeaderSortState(Vcl::Comctrls::TCustomListView* HeaderLView, Vcl::Comctrls::TListColumn* Column);
+extern DELPHI_PACKAGE void __fastcall SetListHeaderSortState(Vcl::Comctrls::TCustomListView* HeaderLView, Vcl::Comctrls::TListColumn* Column, THeaderSortState Value);
 extern DELPHI_PACKAGE void __fastcall ListViewCompare(Vcl::Comctrls::TListItem* Item1, Vcl::Comctrls::TListItem* Item2, const TSortSpecification &FSortSpecification, int Data, int &Compare);
 extern DELPHI_PACKAGE void __fastcall InitSortSpec(Vcl::Comctrls::TListColumn* Column, bool Ascending, TSortSpecification &FSortSpecification);
 extern DELPHI_PACKAGE void __fastcall DoListViewSort(Vcl::Comctrls::TListView* AListView, Vcl::Comctrls::TListColumn* Column, bool Ascending, TSortSpecification &FSortSpecification);

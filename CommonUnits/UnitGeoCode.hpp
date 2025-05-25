@@ -88,7 +88,8 @@ public:
 #define ThrottleGeoCode L"ThrottleGeoCode"
 #define DefState L"ISO3166-2-lvl4,state"
 #define DefCity L"village,town,city,municipality,hamlet"
-#define DefRoad L"road+house_number"
+#define DefRoadHouse L"road+house_number"
+#define DefHouseRoad L"house_number+road"
 #define DefCountry L"country"
 #define DefPostalCode L"postcode"
 static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
