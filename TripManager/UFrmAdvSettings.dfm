@@ -54,9 +54,24 @@ object FrmAdvSettings: TFrmAdvSettings
     Top = 0
     Width = 529
     Height = 527
-    ActivePage = TabGeoCode
+    ActivePage = TabGeneral
     Align = alClient
     TabOrder = 1
+    object TabGeneral: TTabSheet
+      Caption = 'General'
+      ImageIndex = 2
+      object VlGeneralSettings: TValueListEditor
+        Left = 0
+        Top = 0
+        Width = 521
+        Height = 497
+        Align = alClient
+        TabOrder = 0
+        ColWidths = (
+          176
+          339)
+      end
+    end
     object TabXT2: TTabSheet
       Caption = 'XT2 settings'
       object VlXT2Settings: TValueListEditor
@@ -250,6 +265,10 @@ object FrmAdvSettings: TFrmAdvSettings
     object N4: TMenuItem
       Break = mbBarBreak
       Caption = '-'
+    end
+    object Coords1: TMenuItem
+      Caption = 'Coords'
+      OnClick = AddTag
     end
     object Debug1: TMenuItem
       Caption = 'Debug'

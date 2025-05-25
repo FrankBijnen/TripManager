@@ -10,7 +10,8 @@ interface
 uses
   System.Classes, System.SysUtils, System.Types,
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl, Winapi.ShlObj, WinApi.ActiveX,
-  Vcl.Shell.ShellCtrls, Vcl.Shell.ShellConsts, Vcl.ComCtrls, Vcl.Controls;
+  Vcl.Shell.ShellCtrls, Vcl.Shell.ShellConsts, Vcl.ComCtrls, Vcl.Controls,
+  ListViewSort;
 
 // Extend ShellListview, keeping the same Type. So we dont have to register it in the IDE
 // Extended to support:
@@ -18,14 +19,12 @@ uses
 // Multi-select context menu, with custom menu items. (For Refresh and generate thumbs)
 
 type
-  THeaderSortState = (hssNone, hssAscending, hssDescending);
 
   TShellListView = class(Vcl.Shell.ShellCtrls.TShellListView, IDropSource)
   private
     FColumnSorted: boolean;
     FSortColumn: integer;
     FSortState: THeaderSortState;
-
     ICM2: IContextMenu2;
     FDragStartPos: TPoint;
     FDragSource: boolean;
@@ -39,23 +38,23 @@ type
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure WMNotify(var Msg: TWMNotify); message WM_NOTIFY;
-
     procedure InitSortSpec(SortColumn: integer; SortState: THeaderSortState);
-    procedure Populate; override;
-    procedure ColumnSort; virtual;
-    procedure CreateWnd; override;
-    procedure DestroyWnd; override;
+    procedure RestoreSortIndicator;
     procedure DoContextPopup(MousePos: TPoint; var Handled: boolean); override;
     function OwnerDataFind(Find: TItemFind; const FindString: string;
       const FindPosition: TPoint; FindData: Pointer; StartIndex: Integer;
       Direction: TSearchDirection; Wrap: Boolean): Integer; override;
+    procedure ColumnSort; virtual;
+    procedure CreateWnd; override;
+    procedure EnumColumns; override;
+    procedure Populate; override;
     procedure Edit(const Item: TLVItem); override;
-
     procedure ShowMultiContextMenu(MousePos: TPoint);
     procedure WndProc(var Message: TMessage); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure Invalidate; override;
     procedure ClearSelection; override;
     procedure SelectAll; override;
     procedure Refresh;
@@ -75,64 +74,6 @@ uses
   System.Win.ComObj, System.UITypes, System.StrUtils,
   TripManager_MultiContext;
 
-{$IFDEF VER350}
-const
-  Arrow_Up = #$25b2;
-  Arrow_Down = #$25bc;
-{$ENDIF}
-
-{ Listview Sort helpers }
-
-function GetListHeaderSortState(HeaderLView: TCustomListView; Column: TListColumn): THeaderSortState;
-var
-  Header: HWND;
-  Item: THDItem;
-begin
-  Header := ListView_GetHeader(HeaderLView.Handle);
-  ZeroMemory(@Item, SizeOf(Item));
-  Item.Mask := HDI_FORMAT;
-  Header_GetItem(Header, Column.Index, Item);
-  if Item.fmt and HDF_SORTUP <> 0 then
-    Result := hssAscending
-  else if Item.fmt and HDF_SORTDOWN <> 0 then
-    Result := hssDescending
-  else
-    Result := hssNone;
-end;
-
-procedure SetListHeaderSortState(HeaderLView: TCustomListView; Column: TListColumn; Value: THeaderSortState);
-var
-  Header: HWND;
-  Item: THDItem;
-begin
-  Header := ListView_GetHeader(HeaderLView.Handle);
-  ZeroMemory(@Item, SizeOf(Item));
-  Item.Mask := HDI_FORMAT;
-  Header_GetItem(Header, Column.Index, Item);
-  Item.fmt := Item.fmt and not(HDF_SORTUP or HDF_SORTDOWN); // remove both flags
-  case Value of
-    hssAscending:
-      begin
-        // Add an arrow to the caption. Using styles doesn't show the arrows in the header
-{$IFDEF VER350}
-        if (Column.Caption[Length(Column.Caption)] <> Arrow_Up) then
-          Column.Caption := Column.Caption + ' ' + Arrow_Up;
-{$ENDIF}
-        Item.fmt := Item.fmt or HDF_SORTUP;
-      end;
-    hssDescending:
-      begin
-        // Add an arrow to the caption.
-{$IFDEF VER350}
-        if (Column.Caption[Length(Column.Caption)] <> Arrow_Down) then
-          Column.Caption := Column.Caption + ' ' + Arrow_Down;
-{$ENDIF}
-        Item.fmt := Item.fmt or HDF_SORTDOWN;
-      end;
-  end;
-  Header_SetItem(Header, Column.Index, Item);
-end;
-
 { TShellListView }
 
 procedure TShellListView.WMNotify(var Msg: TWMNotify);
@@ -149,14 +90,7 @@ begin
         ResizedColumn := pHDNotify(Msg.NMHdr)^.Item;
         Column := Columns[ResizedColumn];
         if (Column.Index = FSortColumn) then
-        begin
-          case (FSortState) of
-            THeaderSortState.hssAscending:
-              SetListHeaderSortState(Self, Column, hssAscending);
-            THeaderSortState.hssDescending:
-              SetListHeaderSortState(Self, Column, hssDescending);
-          end;
-        end;
+          RestoreSortIndicator;
       end;
     HDN_BEGINTRACK:
       ;
@@ -171,15 +105,11 @@ begin
   FSortState := SortState;
 end;
 
-procedure TShellListView.Populate;
+procedure TShellListView.RestoreSortIndicator;
 begin
-  Items.BeginUpdate;
-  try
-    inherited Populate;
-    ColumnSort;
-  finally
-    Items.EndUpdate;
-  end;
+  if (ColumnSorted) and
+     (SortColumn < Columns.Count) then
+    SetListHeaderSortState(Self, Columns[SortColumn], FSortState);
 end;
 
 procedure TShellListView.ColumnSort;
@@ -193,8 +123,6 @@ begin
 
   // Sorting column
   LocalCompareColumn := SortColumn;
-  if (LocalCompareColumn < Columns.Count) then
-    SetListHeaderSortState(Self, Columns[LocalCompareColumn], FSortState);
   LocalDescending := (SortState = THeaderSortState.hssDescending);
 
   // Use an anonymous method. So we can test for FDoDefault, CompareColumn and SortState
@@ -360,7 +288,7 @@ procedure TShellListView.CreateWnd;
 begin
   inherited;
 
-  SetColumnSorted(FColumnSorted); // Disable inherited Sorted?  Note: Populate will not be called when Enabled = false
+  SetColumnSorted(FColumnSorted); // Disable inherited Sorted
 end;
 
 destructor TShellListView.Destroy;
@@ -368,9 +296,51 @@ begin
   inherited;
 end;
 
-procedure TShellListView.DestroyWnd;
+procedure TShellListView.Populate;
 begin
-  inherited DestroyWnd;
+  Items.BeginUpdate;
+  try
+    inherited Populate;
+    ColumnSort;
+  finally
+    Items.EndUpdate;
+  end;
+end;
+
+procedure TShellListView.EnumColumns;
+var
+  SavedColWidths: array of integer;
+  Index: integer;
+begin
+  // Save column widths
+  SetLength(SavedColWidths, Columns.Count);
+  for Index := 0 to Columns.Count -1 do
+    SavedColWidths[Index] := Columns[Index].Width;
+  LockDrawing;
+
+  try
+    inherited;
+
+    // Restore column widths
+    if (Columns.Count = Length(SavedColWidths)) then
+      for Index := 0 to Columns.Count -1 do
+        Columns[Index].Width := SavedColWidths[Index];
+
+    // Inherited does a Columns.EndUpdate, clearing the sort indicator.
+    // Need to restore that
+    RestoreSortIndicator;
+
+  finally
+    UnlockDrawing;
+  end;
+
+end;
+
+procedure TShellListView.Invalidate;
+begin
+  inherited;
+
+  RestoreSortIndicator;
 end;
 
 procedure TShellListView.ColumnClick(Column: TListColumn);
@@ -397,6 +367,7 @@ begin
       State := hssNone;
     SetListHeaderSortState(Self, Columns[I], State);
   end;
+
   EnumColumns;
   Populate;
 end;

@@ -16,6 +16,8 @@ const
   PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
   WarnModel_Key           = 'WarnModel';
   TripColor_Key           = 'TripColor';
+  Maximized_Key           = 'Maximized';
+  WidthColumns_Key        = 'WidthColumns';
   SortColumn_Key          = 'SortColumn';
   SortAscending_Key       = 'SortAscending';
 
@@ -62,6 +64,9 @@ type
     City2: TMenuItem;
     municipality1: TMenuItem;
     N5: TMenuItem;
+    TabGeneral: TTabSheet;
+    VlGeneralSettings: TValueListEditor;
+    Coords1: TMenuItem;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -92,6 +97,7 @@ var
 implementation
 
 uses
+  System.UITypes,
   UnitStringUtils, UFrmTripManager, UnitGpx, UnitGpi, UnitTripObjects;
 
 {$R *.dfm}
@@ -192,6 +198,14 @@ procedure TFrmAdvSettings.LoadSettings;
   end;
 
 begin
+  VlGeneralSettings.Strings.BeginUpdate;
+  try
+    VlGeneralSettings.Strings.Clear;
+    AddKey(VlGeneralSettings, Maximized_Key,    'False');
+  finally
+    VlGeneralSettings.Strings.EndUpdate;
+  end;
+
   VlXT2Settings.Strings.BeginUpdate;
   try
     VlXT2Settings.Strings.Clear;
@@ -237,6 +251,12 @@ procedure TFrmAdvSettings.SaveSettings;
 var
   Index: integer;
 begin
+  for Index := 0 to VlGeneralSettings.Strings.Count -1 do
+  begin
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
+                     VlGeneralSettings.Strings.KeyNames[Index], VlGeneralSettings.Strings.ValueFromIndex[Index]);
+  end;
+
   for Index := 0 to VlXT2Settings.Strings.Count -1 do
   begin
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
@@ -295,7 +315,7 @@ begin
 
   LoadSettings;
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-  PctMain.ActivePage := TabXT2;
+  PctMain.ActivePage := TabGeneral;
   MemoAddressFormatChange(MemoAddressFormat);
 end;
 

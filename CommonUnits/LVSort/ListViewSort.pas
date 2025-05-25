@@ -17,8 +17,8 @@ type
 // Listview Sort
 function CompareTextAsInteger(const s1, s2: string): Integer;
 function CompareTextAsDateTime(const s1, s2: string): Integer;
-function GetListHeaderSortState(HeaderLView: TListView; Column: TListColumn): THeaderSortState;
-procedure SetListHeaderSortState(HeaderLView: TListView; Column: TListColumn; Value: THeaderSortState);
+function GetListHeaderSortState(HeaderLView: TCustomListView; Column: TListColumn): THeaderSortState;
+procedure SetListHeaderSortState(HeaderLView: TCustomListView; Column: TListColumn; Value: THeaderSortState);
 procedure ListViewCompare(Item1, Item2: TListItem;
                           FSortSpecification:TSortSpecification;
                           Data: Integer; var Compare: Integer);
@@ -56,7 +56,7 @@ begin
   Result := CompareDateTime(StrToDateTime(s1), StrToDateTime(s2));
 end;
 
-function GetListHeaderSortState(HeaderLView: TListView; Column: TListColumn): THeaderSortState;
+function GetListHeaderSortState(HeaderLView: TCustomListView; Column: TListColumn): THeaderSortState;
 var
   Header: HWND;
   Item: THDItem;
@@ -73,7 +73,7 @@ begin
     Result := hssNone;
 end;
 
-procedure SetListHeaderSortState(HeaderLView: TListView; Column: TListColumn; Value: THeaderSortState);
+procedure SetListHeaderSortState(HeaderLView: TCustomListView; Column: TListColumn; Value: THeaderSortState);
 var
   Header: HWND;
   Item: THDItem;

@@ -65,7 +65,7 @@ type
     PnlXTAndFileSys: TPanel;
     LstFiles: TListView;
     VSplitterDev_Files: TSplitter;
-    PageControl1: TPageControl;
+    PCTTripInfo: TPageControl;
     TsTripGpiInfo: TTabSheet;
     VSplitterTree_Grid: TSplitter;
     TvTrip: TTreeView;
@@ -241,7 +241,7 @@ type
     procedure MnuTripNewMTPClick(Sender: TObject);
     procedure NewtripWindows1Click(Sender: TObject);
     procedure PopupTripEditPopup(Sender: TObject);
-    procedure PageControl1Resize(Sender: TObject);
+    procedure PCTTripInfoResize(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -316,8 +316,8 @@ type
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
-    procedure ReadSortColumn;
-    procedure WriteSortColumn;
+    procedure ReadColumnSettings;
+    procedure WriteColumnSettings;
     procedure ReadSettings;
     procedure ClearTripInfo;
     procedure EditTrip(NewFile: boolean);
@@ -518,6 +518,10 @@ begin
     FrmAdvSettings.SetFixedPrefs;
     BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
     ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
+  if (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'True') = 'True') then
+    WindowState := TWindowState.wsMaximized
+  else
+    WindowState := TWindowState.wsNormal;
   end;
 end;
 
@@ -1196,10 +1200,10 @@ begin
   ShellExecute(0, 'OPEN', PWideChar(CreatedTempPath), nil, nil, SW_SHOWNORMAL);
 end;
 
-procedure TFrmTripManager.PageControl1Resize(Sender: TObject);
+procedure TFrmTripManager.PCTTripInfoResize(Sender: TObject);
 begin
-  SbPostProcess.Panels[0].Width := PageControl1.Width div 2;
-  SbPostProcess.Panels[1].Width := PageControl1.Width div 2;
+  SbPostProcess.Panels[0].Width := PCTTripInfo.Width div 2;
+  SbPostProcess.Panels[1].Width := PCTTripInfo.Width div 2;
 end;
 
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
@@ -1418,12 +1422,14 @@ end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  EdgeBrowser1.CloseBrowserProcess; // Close Edge. Else we can not remove the tempdir.
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, EditMapCoords.Text);
+
   if (DirectoryMonitor.Active) then
     DirectoryMonitor.Stop;
 
   CloseDevice;
-  EdgeBrowser1.CloseBrowserProcess; // Close Edge. Else we can not remove the tempdir.
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, EditMapCoords.Text);
+  WriteColumnSettings;
 end;
 
 procedure TFrmTripManager.FormCreate(Sender: TObject);
@@ -1483,9 +1489,8 @@ end;
 
 procedure TFrmTripManager.FormShow(Sender: TObject);
 begin
-  PageControl1.ActivePageIndex := 0;
+  PCTTripInfo.ActivePageIndex := 0;
   PctHexOsm.ActivePageIndex := 1;
-  ReadSortColumn;
   BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
 end;
@@ -1716,7 +1721,7 @@ end;
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
 begin
   ShellListView1.ColumnClick(Column);
-  WriteSortColumn;
+  WriteColumnSettings;
 end;
 
 procedure TFrmTripManager.ShellListView1DblClick(Sender: TObject);
@@ -3410,26 +3415,42 @@ begin
   DeviceFolder[2] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevPoiFolder_Key, 'Internal Storage\POI');
 end;
 
-procedure TFrmTripManager.ReadSortColumn;
+procedure TFrmTripManager.ReadColumnSettings;
 var
-  SortedColumn: TListColumn;
+  ColWidths: string;
+  AColWidth, Index: integer;
 begin
+  ColWidths := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WidthColumns_Key, '145,55,75,100');
+  Index := 0;
+  while (ColWidths <> '') do
+  begin
+    AColWidth := StrToIntDef(NextField(ColWidths, ','), 50);
+    ShellListView1.Columns[Index].Width := AColWidth;
+    Inc(Index);
+  end;
+
   ShellListView1.SortColumn := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortColumn_Key, '0'));
-  SortedColumn := ShellListView1.Columns[ShellListView1.SortColumn];
-  if (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'True') = 'True') then
-    SetListHeaderSortState(TlistView(ShellListView1), SortedColumn, hssDescending)
-  else
-    SetListHeaderSortState(TlistView(ShellListView1), SortedColumn, hssAscending);
-  ShellListView1.ColumnClick(SortedColumn);
+  ShellListView1.SortState := THeaderSortState.hssDescending;
 end;
 
-procedure TFrmTripManager.WriteSortColumn;
+procedure TFrmTripManager.WriteColumnSettings;
+var
+  ColWidths: string;
+  Index: integer;
 begin
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortColumn_Key, IntToStr(ShellListView1.SortColumn));
-  if (ShellListView1.SortState = TripManager_ShellList.hssAscending) then
+  if (ShellListView1.SortState = hssAscending) then
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'True')
   else
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'False');
+  ColWidths := '';
+  for Index := 0 to ShellListView1.Columns.Count -1 do
+  begin
+    if (ColWidths <> '') then
+      ColWidths := ColWidths + ',';
+    ColWidths := ColWidths + IntToStr(ShellListView1.Columns[Index].Width);
+  end;
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WidthColumns_Key, ColWidths);
 end;
 
 procedure TFrmTripManager.ReadSettings;
@@ -3438,6 +3459,9 @@ begin
   GuessModel(PrefDevice);
   ReadDefaultFolders;
   WarnModel := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True') = 'True');
+  if (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'False') = 'True') then
+    WindowState := TWindowState.wsMaximized;
+  ReadColumnSettings;
   WarnRecalc := mrNone;
   FrmAdvSettings.SetFixedPrefs;
 end;

@@ -24,6 +24,7 @@ const
 type
   TOSMHelper = class(TObject)
   private
+    HasData: boolean;
     Scaled: integer;
     OsmFormatSettings: TFormatSettings;
     Html: TStringList;
@@ -55,6 +56,7 @@ begin
   FHome := AHome;
   FInitialZoom := AInitialZoom;
   Html := TStringList.Create;
+  HasData := false;
 end;
 
 destructor TOSMHelper.Destroy;
@@ -67,6 +69,7 @@ end;
 
 procedure TOSMHelper.WriteHeader;
 begin
+  HasData := false;
   Html.Clear;
 
   Html.Add('<Html>');
@@ -267,14 +270,21 @@ var
 begin
   Html.Add('  function AddTrackPoints(){');
   if (FHome <> '') then
+  begin
     Html.Add('  AddTrkPoint(1, ' + FHome + ');');
+    HasData := true;
+  end;
   Rc := System.SysUtils.FindFirst(GetTracksTmp, faAnyFile - faDirectory, Fs);
   while (Rc = 0) do
   begin
     F := TStringList.Create;
     try
       F.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFileDir(GetTracksTmp)) + Fs.Name);
-      Html.AddStrings(F);
+      if (F.Count > 0) then
+      begin
+        HasData := true;
+        Html.AddStrings(F);
+      end;
     finally
       F.Free;
     end;
@@ -312,7 +322,8 @@ begin
   finally
     OsmHelper.Free;
   end;
-  Browser.Navigate(GetHtmlTmp);
+  if (OsmHelper.HasData) then
+    Browser.Navigate(GetHtmlTmp);
 end;
 
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
