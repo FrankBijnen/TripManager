@@ -37,11 +37,11 @@ uses
 
 const
   IdTrack       = 0;
-  IdTrackWayPt  = 1;
-  IdTrackViaPt  = 2;
-  IdTrackShpPt  = 3;
-  IdRoute       = 4;
-  IdRoutePoint  = 5;
+  IdRoute       = 1;
+  IdWayPoint    = 2;
+  IdWayPointWpt = 3;
+  IdWayPointVia = 4;
+  IdWayPointShp = 5;
   IdGpi         = 6;
   IdGpiWayPt    = 7;
   IdGpiViaPt    = 8;
@@ -55,17 +55,19 @@ procedure TFrmAdditional.SetPrefs;
 begin
   TvSelections.Items[IdTrack].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrack', BooleanValues[true]) = BooleanValues[true]);
-    TvSelections.Items[IdTrackWayPt].Checked := SameText
-      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackWayPt', BooleanValues[false]), BooleanValues[true]);
-    TvSelections.Items[IdTrackViaPt].Checked := SameText
-      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackViaPt', BooleanValues[false]), BooleanValues[true]);
-    TvSelections.Items[IdTrackShpPt].Checked := SameText
-      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackShpPt', BooleanValues[false]), BooleanValues[true]);
 
   TvSelections.Items[IdRoute].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncRoute', BooleanValues[true]) = BooleanValues[true]);
-  TvSelections.Items[IdRoutePoint].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncRoutePoint', BooleanValues[true]) = BooleanValues[true]);
+
+  TvSelections.Items[IdWayPoint].Checked :=
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPoint', BooleanValues[false]) = BooleanValues[true]);
+    TvSelections.Items[IdWayPointWpt].Checked := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
+    TvSelections.Items[IdWayPointVia].Checked := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]);
+    TvSelections.Items[IdWayPointShp].Checked := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[false]), BooleanValues[true]);
+
   TvSelections.Items[IdGpi].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpi', BooleanValues[true]) = BooleanValues[true]);
     TvSelections.Items[IdGpiWayPt].Checked := SameText
@@ -94,22 +96,22 @@ begin
   if (TvSelections.Items[IdTrack].Checked) then
     Funcs := Funcs + [TGPXFunc.CreateTracks];
 
-    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackWayPt', BooleanValues[TvSelections.Items[IdTrackWayPt].Checked]);
-    ProcessWayPtsInTrack := (TvSelections.Items[IdTrackWayPt].Checked);
-
-    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackViaPt', BooleanValues[TvSelections.Items[IdTrackViaPt].Checked]);
-    ProcessViaPtsInTrack := (TvSelections.Items[IdTrackViaPt].Checked);
-
-    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackShpPt', BooleanValues[TvSelections.Items[IdTrackShpPt].Checked]);
-    ProcessShapePtsInTrack := (TvSelections.Items[IdTrackShpPt].Checked);
-
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncRoute', BooleanValues[TvSelections.Items[IdRoute].Checked]);
   if (TvSelections.Items[IdRoute].Checked) then
     Funcs := Funcs + [TGPXFunc.CreateRoutes];
 
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncRoutePoint', BooleanValues[TvSelections.Items[IdRoutePoint].Checked]);
-  if (TvSelections.Items[IdRoutePoint].Checked) then
-    Funcs := Funcs + [TGPXFunc.CreateRoutePoints];
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPoint', BooleanValues[TvSelections.Items[IdWayPoint].Checked]);
+  if (TvSelections.Items[IdWayPoint].Checked) then
+    Funcs := Funcs + [TGPXFunc.CreateWayPoints];
+
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[TvSelections.Items[IdWayPointWpt].Checked]);
+    ProcessWayPtsInWayPts:= (TvSelections.Items[IdWayPointWpt].Checked);
+
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[TvSelections.Items[IdWayPointVia].Checked]);
+    ProcessViaPtsInWayPts:= (TvSelections.Items[IdWayPointVia].Checked);
+
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[TvSelections.Items[IdWayPointShp].Checked]);
+    ProcessShapePtsInWayPts := (TvSelections.Items[IdWayPointShp].Checked);
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpi', BooleanValues[TvSelections.Items[IdGpi].Checked]);
   if (TvSelections.Items[IdGpi].Checked) then

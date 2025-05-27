@@ -40,43 +40,49 @@ uses
 const
   IdTrip            = 0;
   IdTrack           = 1;
-  IdStrippedRoute   = 2;
-  IdCompleteRoute   = 3;
-  IdPOI             = 4;
+  IdWayPoint        = 2;
+  IdStrippedRoute   = 3;
+  IdCompleteRoute   = 4;
+  IdPOI             = 5;
   TripFilesFor      = 'Trip files (No import required, but will recalculate. Selected model: %s)';
   GPISel            = 'POI (.gpi) files (Points Of Interest). Selection: %s';
-  TrackSel          = 'Tracks (%s %s)';
+  WayPointSel       = 'Way points %s';
 
 procedure TFrmTransferOptions.SetPrefs;
 var
-  PtsInGpi, PtsInTrack, IncExcWpt: string;
+  PtsInGpi, AddRoutePoints: string;
 begin
   LvSelections.Items[IdTrip].Caption := Format(TripFilesFor, [FrmTripManager.CmbModel.Text]);
   LvSelections.Items[IdTrip].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrip', BooleanValues[true]) = BooleanValues[true]);
   LvSelections.Items[IdTrack].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrack', BooleanValues[true]) = BooleanValues[true]);
+  LvSelections.Items[IdWayPoint].Checked :=
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferWayPoint', BooleanValues[false]) = BooleanValues[true]);
 
-  IncExcWpt := 'Including';
-  PtsInTrack := '';
-  ProcessWayPtsInTrack := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackWayPt', BooleanValues[false]), BooleanValues[true]);
-  if ProcessWayPtsInTrack then
-    PtsInTrack := PtsInTrack + ' Way points,';
-  ProcessViaPtsInTrack := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackViaPt', BooleanValues[false]), BooleanValues[true]);
-  if ProcessViaPtsInTrack then
-    PtsInTrack := PtsInTrack + ' Via points as Way points,';
-  ProcessShapePtsInTrack := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrackShpPt', BooleanValues[false]), BooleanValues[true]);
-  if ProcessShapePtsInTrack then
-    PtsInTrack := PtsInTrack + ' Shaping points as Way points,';
-  if (PtsInTrack <> '') then
-    SetLength(PtsInTrack, Length(PtsInTrack) -1)
-  else
-    IncExcWpt := 'Excluding Way points';
+  AddRoutePoints := '';
 
-  LvSelections.Items[IdTrack].Caption := Format(TrackSel, [IncExcWpt, PtsInTrack]);
+  ProcessWayPtsInWayPts := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
+  if ProcessWayPtsInWayPts then
+    AddRoutePoints := AddRoutePoints + ' Way points,';
+
+  ProcessViaPtsInWayPts := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]);
+  if ProcessViaPtsInWayPts then
+    AddRoutePoints := AddRoutePoints + ' Via points,';
+
+  ProcessShapePtsInWayPts := SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[false]), BooleanValues[true]);
+  if ProcessShapePtsInWayPts then
+    AddRoutePoints := AddRoutePoints + ' Shaping points,';
+
+  if (AddRoutePoints <> '') then
+  begin
+    AddRoutePoints := '(Including' + AddRoutePoints;
+    AddRoutePoints[Length(AddRoutePoints)] := ')'
+  end;
+  LvSelections.Items[IdWayPoint].Caption := Format(WayPointSel, [AddRoutePoints]);
 
   LvSelections.Items[IdStrippedRoute].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferStrippedRoute', BooleanValues[false]) = BooleanValues[true]);
@@ -108,7 +114,7 @@ begin
   MemoDestinations.Text :=
     'Files will be transferred to:' + #13 + #10 + #13 + #10 +
      'Trip files: ' + FrmTripManager.DeviceFolder[0] + #13 + #10 +
-     'GPX files (Tracks & Routes): ' + FrmTripManager.DeviceFolder[1] + #13 + #10 +
+     'GPX files (Tracks & Routes & Way points): ' + FrmTripManager.DeviceFolder[1] + #13 + #10 +
      'GPI files (Points Of Interest): ' + FrmTripManager.DeviceFolder[2];
 end;
 
@@ -130,6 +136,10 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrack', BooleanValues[LvSelections.Items[IdTrack].Checked]);
   if (LvSelections.Items[IdTrack].Checked) then
     Funcs := Funcs + [TGPXFunc.CreateTracks];
+
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferWayPoint', BooleanValues[LvSelections.Items[IdWayPoint].Checked]);
+  if (LvSelections.Items[IdWayPoint].Checked) then
+    Funcs := Funcs + [TGPXFunc.CreateWayPoints];
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferStrippedRoute', BooleanValues[LvSelections.Items[IdStrippedRoute].Checked]);
   if (LvSelections.Items[IdStrippedRoute].Checked) then

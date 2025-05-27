@@ -28,7 +28,7 @@ type
     Lon: double;
   end;
 
-  TGPXFunc = (Unglitch, CreateTracks, CreateRoutePoints, CreatePOI, CreateKML,
+  TGPXFunc = (Unglitch, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
               CreateOSM, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints);
 
 const CreateSubDir: boolean = true;
@@ -40,14 +40,14 @@ const ProcessVia: boolean = true;
 const ProcessSubClass: boolean = true;
 const ProcessFlags: boolean = true;
 const ProcessViaPts: boolean = true;
-const ProcessShapePtsInTrack: boolean = false;
-const ProcessViaPtsInTrack: boolean = true;
-const ProcessWayPtsInTrack: boolean = true;
+const ProcessWayPtsInWayPts: boolean = true;
+const ProcessViaPtsInWayPts: boolean = false;
+const ProcessShapePtsInWayPts: boolean = false;
 
 const ProcessTracks: boolean = true;
 const UniqueTracks: boolean = true;
 
-const ProcessWayPtsFromRoute: boolean = true; // Create points for GPI and RoutePoints from route
+const ProcessWayPtsFromRoute: boolean = true; // Create points for GPI and route Points from route
 const DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
 const DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
 const ProcessShapePtsInGpi: boolean = false;
@@ -1309,48 +1309,15 @@ var Func: TGPXFunc;
     var WptTracksRoot: TXmlVSNode;
         WptTrack: TXmlVSNode;
         Track : TXmlVSNode;
-        RouteWayPoints, WayPoint, ExtensionsNode: TXmlVSNode;
         TrackPoint: TXmlVSNode;
         OutFile, TrackName, DisplayColor: string;
         TracksProcessed: TStringList;
-        IsViaPt: boolean;
 
     begin
       TracksProcessed := TStringList.Create;
       FrmSelectGPX := TFrmSelectGPX.Create(nil);
       try
         WptTracksRoot := InitRoot(WptTracksXml);
-
-        if (ProcessWayPtsInTrack) then
-        begin
-          for WayPoint in WayPointList do
-          begin
-            if (WayPointNotProcessed(WayPoint)) then
-              CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
-          end;
-        end;
-
-        if ((ProcessViaPtsInTrack) or (ProcessShapePtsInTrack)) and
-           (ProcessWayPtsFromRoute) then
-        begin
-          for RouteWayPoints in RouteViaPointList do
-          begin
-            for WayPoint in RouteWayPoints.ChildNodes do
-            begin
-              if (WayPointNotProcessed(WayPoint)) then
-              begin
-                IsViaPt := false;
-                ExtensionsNode := WayPoint.find('extensions');
-                if (ExtensionsNode <> nil) then
-                  IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
-
-                if ((IsViaPt) and (ProcessViaPtsInTrack)) or
-                   ((IsViaPt = false) and (ProcessShapePtsInTrack)) then
-                  CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
-              end;
-            end;
-          end;
-        end;
 
         for Track in TrackList do
         begin
@@ -1413,24 +1380,62 @@ var Func: TGPXFunc;
       end;
     end;
 
-    procedure DoCreateRoutePoints;
+    procedure DoCreateWayPoints;
     var RouteWayPoints, WayPoint: TXmlVSNode;
-        WptTracksRoot: TXmlVSNode;
+        WptTracksRoot, ExtensionsNode: TXmlVSNode;
         OutFile: string;
-
+        IsViaPt: boolean;
     begin
-      for RouteWayPoints in RouteViaPointList do
-      begin
-        WptTracksXml.Clear;
-        WptTracksRoot := InitRoot(WptTracksXml);
 
-        for WayPoint in RouteWayPoints.ChildNodes do
-          CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
+      WptTracksXml.Clear;
+      WptTracksRoot := InitRoot(WptTracksXml);
+
+// Create Way points, from Way points
+      if (ProcessWayPtsInWayPts) then
+      begin
+        for WayPoint in WayPointList do
+        begin
+          if (WayPointNotProcessed(WayPoint)) then
+            CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
+        end;
         OutFile := OutDir +
-                   'RoutePoints_' +
-                   EscapeFileName(RouteWayPoints.Name) +
-                   ExtractFileExt(GPXFile);
+             'WayPoints_' +
+             BaseFile +
+             ExtractFileExt(GPXFile);
         WptTracksXml.SaveToFile(OutFile);
+      end;
+
+// Create Way points, from Via, or Shaping points in routes.
+// Create a file per route/track
+      if ((ProcessViaPtsInWayPts) or (ProcessShapePtsInWayPts)) and
+         (ProcessWayPtsFromRoute) then
+      begin
+        for RouteWayPoints in RouteViaPointList do
+        begin
+          WptTracksXml.Clear;
+          WptTracksRoot := InitRoot(WptTracksXml);
+
+          for WayPoint in RouteWayPoints.ChildNodes do
+          begin
+            if (WayPointNotProcessed(WayPoint)) then
+            begin
+              IsViaPt := false;
+              ExtensionsNode := WayPoint.find('extensions');
+              if (ExtensionsNode <> nil) then
+                IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+
+              if ((IsViaPt) and (ProcessViaPtsInWayPts)) or
+                 ((IsViaPt = false) and (ProcessShapePtsInWayPts)) then
+                CloneNode(WayPoint, WptTracksRoot.AddChild(WayPoint.Name));
+            end;
+          end;
+
+          OutFile := OutDir +
+                     'WayPoints_' +
+                     EscapeFileName(RouteWayPoints.Name) +
+                     ExtractFileExt(GPXFile);
+          WptTracksXml.SaveToFile(OutFile);
+        end;
       end;
     end;
 
@@ -1734,7 +1739,6 @@ var Func: TGPXFunc;
 
         if (ProcessTracks) then
         begin
-//TODO, route or track
           for Track in TrackList do
           begin
             if (Track.Find('extensions') <> nil) then
@@ -2230,7 +2234,7 @@ begin
   begin
     case Func of
       CreateTracks,
-      CreateRoutePoints,
+      CreateWayPoints,
       CreatePOI,
       CreateKML,
       CreateOSM,
@@ -2263,9 +2267,9 @@ begin
           begin
             DoCreateTracks;
           end;
-        CreateRoutePoints:
+        CreateWayPoints:
           begin
-            DoCreateRoutePoints;
+            DoCreateWayPoints;
           end;
         CreatePOI:
           begin

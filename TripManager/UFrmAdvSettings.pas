@@ -204,16 +204,16 @@ begin
     AddKey(VlGeneralSettings, Maximized_Key,    'False');
     AddKey(VlGeneralSettings, '-');
 
-    AddKey(VlGeneralSettings, '-Creating Tracks-');
-    AddKey(VlGeneralSettings, 'FuncTrackWayPt', 'False');
-    AddKey(VlGeneralSettings, 'FuncTrackViaPt', 'False');
-    AddKey(VlGeneralSettings, 'FuncTrackShpPt', 'False');
+    AddKey(VlGeneralSettings, '-Creating Way point files (*.gpx)-');
+    AddKey(VlGeneralSettings, 'FuncWayPointWpt',    'True');
+    AddKey(VlGeneralSettings, 'FuncWayPointVia',    'False');
+    AddKey(VlGeneralSettings, 'FuncWayPointShape',  'False');
     AddKey(VlGeneralSettings, '-');
 
-    AddKey(VlGeneralSettings, '-Creating Poi Files-');
-    AddKey(VlGeneralSettings, 'FuncGpiWayPt',   'False');
-    AddKey(VlGeneralSettings, 'FuncGpiViaPt',   'False');
-    AddKey(VlGeneralSettings, 'FuncGpiShpPt',   'False');
+    AddKey(VlGeneralSettings, '-Creating Poi files (*.gpi)-');
+    AddKey(VlGeneralSettings, 'FuncGpiWayPt',       'False');
+    AddKey(VlGeneralSettings, 'FuncGpiViaPt',       'False');
+    AddKey(VlGeneralSettings, 'FuncGpiShpPt',       'False');
     AddKey(VlGeneralSettings, '-');
   finally
     VlGeneralSettings.Strings.EndUpdate;

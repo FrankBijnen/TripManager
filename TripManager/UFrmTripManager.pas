@@ -744,8 +744,8 @@ begin
 
   // Revert to default (startup) locations
   ReadDefaultFolders;
+  // Also checks for connected MTP
   BgDeviceClick(BgDevice);
-
   if (FrmTransferOptions.ShowModal <> ID_OK) then
     exit;
 
@@ -3430,7 +3430,10 @@ begin
   end;
 
   ShellListView1.SortColumn := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortColumn_Key, '0'));
-  ShellListView1.SortState := THeaderSortState.hssDescending;
+  if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SortAscending_Key, 'True'), 'True')) then
+    ShellListView1.SortState := THeaderSortState.hssAscending
+  else
+    ShellListView1.SortState := THeaderSortState.hssDescending;
 end;
 
 procedure TFrmTripManager.WriteColumnSettings;
