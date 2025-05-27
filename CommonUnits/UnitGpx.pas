@@ -88,7 +88,8 @@ const DebugComments: string = 'False';
 const DistanceUnit: TDistanceUnit = duKm;
 const CatSymbol = 'Symbol:';
 const CatGPX = 'GPX:';
-const DefWaypointSymbol = 'Waypoint';
+const DefShapePtSymbol = 'Waypoint';
+const DefWaypointSymbol = 'Flag, Green';
 {$IFDEF TRIPOBJECTS}
 const ZumoModel: TZumoModel = TZumoModel.XT;
 const ExploreUuid: string = '';
@@ -645,6 +646,8 @@ var CurrentTrack: TXmlVSNode;
         NewSymbol := Symbol;
         if (NewSymbol = '') then
           NewSymbol := FindSubNodeValue(RtePtNode, 'sym');
+        if (NewSymbol = '') then
+          NewSymbol := DefWayPointSymbol;
         AddChild('sym').NodeValue := NewSymbol;
       end;
 
@@ -704,7 +707,7 @@ var CurrentTrack: TXmlVSNode;
       // If there is a symbol defined, other than Waypoint, take that.
       DefinedSymbol := FindSubNodeValue(RtePtNode, 'sym');
       if (DefinedSymbol = '') or
-         (DefinedSymbol = DefWaypointSymbol) then
+         (DefinedSymbol = DefShapePtSymbol) then
         DefinedSymbol := Symbol;
 
       NewNode := CurrentViaPointRoute.AddChild('wpt');
@@ -924,7 +927,7 @@ var CurrentTrack: TXmlVSNode;
             LookUpAddrRtePt(RtePtNode);
 
           if (ProcessFlags) then
-            RenameSubNode(RtePtNode, 'sym', DefWaypointSymbol); // Symbol for shaping and via points is only used for viapointsxxx gpx
+            RenameSubNode(RtePtNode, 'sym', DefShapePtSymbol); // Symbol for shaping and via points.
 
         end;
         if (ProcessViaPts) then
