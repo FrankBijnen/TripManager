@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ValEdit, Vcl.ComCtrls,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls,
   UnitGeoCode, Vcl.Menus;
 
 const
@@ -30,48 +30,26 @@ type
     PnlBottom: TPanel;
     PctMain: TPageControl;
     TabXT2: TTabSheet;
-    VlXT2Settings: TValueListEditor;
     TabGeoCode: TTabSheet;
-    VlGeoCodeSettings: TValueListEditor;
     MemoAddressFormat: TMemo;
     PnlResult: TPanel;
     MemoResult: TMemo;
     PnlAddressFormatTop: TPanel;
     Splitter1: TSplitter;
     PnlAddressFormat: TPanel;
-    BtnClearCoordCache: TButton;
     BtnBuilder: TButton;
-    PopupBuilder: TPopupMenu;
-    Clear1: TMenuItem;
-    N1: TMenuItem;
-    StatePlaceRoadnr1: TMenuItem;
-    NrRoadPlaceState1: TMenuItem;
-    N2: TMenuItem;
-    Housenbr1: TMenuItem;
-    Road1: TMenuItem;
-    Smallestplace1: TMenuItem;
-    Largestplace1: TMenuItem;
-    State1: TMenuItem;
-    Countrycode1: TMenuItem;
-    Countrycode2: TMenuItem;
-    N3: TMenuItem;
-    Debug1: TMenuItem;
-    Hamlet1: TMenuItem;
-    Village1: TMenuItem;
-    N4: TMenuItem;
-    City1: TMenuItem;
-    postalcode1: TMenuItem;
-    City2: TMenuItem;
-    municipality1: TMenuItem;
-    N5: TMenuItem;
     TabGeneral: TTabSheet;
-    VlGeneralSettings: TValueListEditor;
-    Coords1: TMenuItem;
+    GridGeneralSettings: TStringGrid;
+    GridXT2Settings: TStringGrid;
+    PopupBuilder: TPopupMenu;
+    GridGeoCodeSettings: TStringGrid;
+    Panel1: TPanel;
+    BtnValidate: TButton;
+    BtnClearCoordCache: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
-    procedure VlGeoCodeSettingsStringsChange(Sender: TObject);
-    procedure BtnClearCoordCacheClick(Sender: TObject);
+
     procedure BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Clear1Click(Sender: TObject);
     procedure StatePlaceRoadnr1Click(Sender: TObject);
@@ -79,10 +57,15 @@ type
     procedure Smallestplace1Click(Sender: TObject);
     procedure Largestplace1Click(Sender: TObject);
     procedure AddTag(Sender: TObject);
+    procedure BtnValidateClick(Sender: TObject);
+    procedure BtnClearCoordCacheClick(Sender: TObject);
   private
     { Private declarations }
     SamplePlace: TPlace;
+    procedure LookupSamplePlace(UseCache: boolean);
+    procedure ValidateApiKey;
     procedure LoadSettings;
+    procedure SaveGrid(AGrid: TStringGrid);
     procedure SaveSettings;
   public
     { Public declarations }
@@ -173,83 +156,126 @@ begin
   MemoAddressFormat.Lines.Text := DefState + #10 + DefCity + #10 + DefRoadHouse;
 end;
 
-procedure TFrmAdvSettings.VlGeoCodeSettingsStringsChange(Sender: TObject);
-begin
-  if (GeoSettings.GeoCodeApiKey <> VlGeoCodeSettings.Values[GeoCodeApiKey]) then
-  begin
-    GeoSettings.GeoCodeApiKey := VlGeoCodeSettings.Values[GeoCodeApiKey];
-    MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-    SamplePlace := nil;
-    MemoAddressFormatChange(MemoAddressFormat);
-  end;
-end;
-
 procedure TFrmAdvSettings.Largestplace1Click(Sender: TObject);
 begin
   MemoAddressFormat.Lines.Add('municipality,city,town,village,hamlet');
 end;
 
 procedure TFrmAdvSettings.LoadSettings;
+var
+  CurRow: integer;
 
-  procedure AddKey(VLEditor: TValueListEditor; AKey: string; DefaultValue: string = '');
+  procedure AddGridHeader(const AGrid: TStringGrid);
   begin
-    VLEditor.Strings.AddPair(AKey, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AKey, DefaultValue));
+    AGrid.FixedRows := 1;
+    AGrid.Cells[0, 0] := 'Registry Key';
+    AGrid.Cells[1, 0] := 'Description';
+    AGrid.Cells[2, 0] := 'Value';
+    AGrid.ColWidths[0] := 120;  // Less room for the Key
+  end;
+
+  procedure AddGridLine(const AGrid: TStringGrid; var ARow: integer; const AKey: string;
+                        DefaultValue: string = ''; ADesc: string = '');
+  begin
+    AGrid.Cells[0, ARow] := AKey;
+    AGrid.Cells[1, ARow] := ADesc;
+    AGrid.Cells[2, ARow] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AKey, DefaultValue);
+    ARow := ARow + 1;
   end;
 
 begin
-  VlGeneralSettings.Strings.BeginUpdate;
+  GridGeneralSettings.RowCount := GridGeneralSettings.FixedRows +1;
+  GridGeneralSettings.BeginUpdate;
   try
-    VlGeneralSettings.Strings.Clear;
-    AddKey(VlGeneralSettings, '-Window startup-');
-    AddKey(VlGeneralSettings, Maximized_Key,    'False');
-    AddKey(VlGeneralSettings, '-');
 
-    AddKey(VlGeneralSettings, '-Creating Way point files (*.gpx)-');
-    AddKey(VlGeneralSettings, 'FuncWayPointWpt',    'True');
-    AddKey(VlGeneralSettings, 'FuncWayPointVia',    'False');
-    AddKey(VlGeneralSettings, 'FuncWayPointShape',  'False');
-    AddKey(VlGeneralSettings, '-');
+    CurRow := 1;
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
+    AddGridLine(GridGeneralSettings, CurRow, Maximized_Key,       'False', 'Start TripManager maximized');
+    AddGridLine(GridGeneralSettings, CurRow, '');
 
-    AddKey(VlGeneralSettings, '-Creating Poi files (*.gpi)-');
-    AddKey(VlGeneralSettings, 'FuncGpiWayPt',       'False');
-    AddKey(VlGeneralSettings, 'FuncGpiViaPt',       'False');
-    AddKey(VlGeneralSettings, 'FuncGpiShpPt',       'False');
-    AddKey(VlGeneralSettings, '-');
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Creating Way point files (*.gpx)-');
+    AddGridLine(GridGeneralSettings, CurRow, 'FuncWayPointWpt',   'True',  'Add original Way points');
+    AddGridLine(GridGeneralSettings, CurRow, 'FuncWayPointVia',   'False', 'Add Via points from route');
+    AddGridLine(GridGeneralSettings, CurRow, 'FuncWayPointShape', 'False', 'Add Shaping points from route');
+    AddGridLine(GridGeneralSettings, CurRow, '');
+
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Creating Poi files (*.gpi)-');
+    AddGridLine(GridGeneralSettings, CurRow, 'FuncGpiWayPt',      'True', 'Add original Way points');
+    AddGridLine(GridGeneralSettings, CurRow, 'FuncGpiViaPt',      'False', 'Add Via points from route');
+    AddGridLine(GridGeneralSettings, CurRow, 'FuncGpiShpPt',      'False', 'Add Shaping points from route');
+    GridGeneralSettings.RowCount := CurRow;
+
+    AddGridHeader(GridGeneralSettings);
+
   finally
-    VlGeneralSettings.Strings.EndUpdate;
+    GridGeneralSettings.EndUpdate;
   end;
 
-  VlXT2Settings.Strings.BeginUpdate;
+  GridXT2Settings.RowCount := GridXT2Settings.FixedRows +1;
+  GridXT2Settings.BeginUpdate;
   try
-    VlXT2Settings.Strings.Clear;
-    AddKey(VlXT2Settings, 'ExploreUuid');       // No default
-    AddKey(VlXT2Settings, 'VehicleProfileGuid', XT2_VehicleProfileGuid);
-    AddKey(VlXT2Settings, 'VehicleProfileHash', XT2_VehicleProfileHash);
-    AddKey(VlXT2Settings, 'VehicleId',          XT2_VehicleId);
+
+    CurRow := 1;
+    AddGridLine(GridXT2Settings, CurRow, '', '', '-Defaults for creating XT2 trips-');
+    AddGridLine(GridXT2Settings, CurRow, 'ExploreUuid',           '', 'Leave blank to generate unique GUID''s');
+    AddGridLine(GridXT2Settings, CurRow, 'VehicleProfileGuid',    XT2_VehicleProfileGuid);
+    AddGridLine(GridXT2Settings, CurRow, 'VehicleProfileHash',    XT2_VehicleProfileHash);
+    AddGridLine(GridXT2Settings, CurRow, 'VehicleId',             XT2_VehicleId);
+    GridXT2Settings.RowCount := CurRow;
+
+    AddGridHeader(GridXT2Settings);
+
   finally
-    VlXT2Settings.Strings.EndUpdate;
+    GridXT2Settings.EndUpdate;
   end;
 
+  GridGeoCodeSettings.RowCount := GridGeoCodeSettings.FixedRows +1;
   ReadGeoCodeSettings;
-  VlGeoCodeSettings.Strings.BeginUpdate;
+  GridGeoCodeSettings.BeginUpdate;
   try
-    VlGeoCodeSettings.Strings.Clear;
-    AddKey(VlGeoCodeSettings, GeoCodeUrl,       GeoSettings.GeoCodeUrl);
-    AddKey(VlGeoCodeSettings, GeoCodeApiKey,    GeoSettings.GeoCodeApiKey);
-    AddKey(VlGeoCodeSettings, ThrottleGeoCode,  IntToStr(GeoSettings.ThrottleGeoCode));
+
+    CurRow := 1;
+    AddGridLine(GridGeoCodeSettings, CurRow, '', '', '-GeoCode settings-');
+    AddGridLine(GridGeoCodeSettings, CurRow, GeoCodeUrl,       GeoSettings.GeoCodeUrl,    'Open URL in a browser for more info.');
+    AddGridLine(GridGeoCodeSettings, CurRow, GeoCodeApiKey,    GeoSettings.GeoCodeApiKey, 'Enter your API_Key here and click Validate');
+    AddGridLine(GridGeoCodeSettings, CurRow, ThrottleGeoCode,  IntToStr(GeoSettings.ThrottleGeoCode), 'Minimum time in ms between calls');
+    GridGeoCodeSettings.RowCount := CurRow;
+
+    AddGridHeader(GridGeoCodeSettings);
   finally
-    VlGeoCodeSettings.Strings.EndUpdate;
+    GridGeoCodeSettings.EndUpdate;
   end;
   MemoAddressFormat.Lines.Text := ReplaceAll(GeoSettings.AddressFormat, ['|'], [#13#10], [rfReplaceAll]);
 end;
 
-procedure TFrmAdvSettings.MemoAddressFormatChange(Sender: TObject);
+procedure TFrmAdvSettings.LookupSamplePlace(UseCache: boolean);
 begin
   if (SamplePlace = nil) and
      (GeoSettings.GeoCodeApiKey <> '') and
      (ValidLatLon(SampleLat, SampleLon)) then
-    SamplePlace := GetPlaceOfCoords(SampleLat, SampleLon);
+    SamplePlace := GetPlaceOfCoords(SampleLat, SampleLon, 0, 0, UseCache);
+end;
 
+procedure TFrmAdvSettings.ValidateApiKey;
+begin
+  GeoSettings.GeoCodeUrl := GridGeoCodeSettings.Cells[2, 2];
+  if (Trim(GeoSettings.GeoCodeUrl) = '') then
+    raise Exception.Create('Need a GeoCode URL');
+  GeoSettings.GeoCodeApiKey := GridGeoCodeSettings.Cells[2, 3];
+  if (Trim(GeoSettings.GeoCodeApiKey) = '') then
+    raise Exception.Create('Need a GeoCode API_Key');
+  if not(ValidLatLon(SampleLat, SampleLon)) then
+    raise Exception.Create(Format('Your current map position (%s, %s) is not valid.', [SampleLat, SampleLon]));
+
+  MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
+  SamplePlace := nil;
+  LookupSamplePlace(false);
+  MemoAddressFormatChange(MemoAddressFormat);
+end;
+
+procedure TFrmAdvSettings.MemoAddressFormatChange(Sender: TObject);
+begin
+  LookupSamplePlace(true);
   GeoSettings.AddressFormat := ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]);
   if (SamplePlace <> nil) then
     MemoResult.lines.Text := SamplePlace.DisplayPlace;
@@ -260,31 +286,28 @@ begin
     MemoAddressFormat.Lines.Text := DefHouseRoad + #10 + DefCity + #10 + DefState;
 end;
 
-procedure TFrmAdvSettings.SaveSettings;
+procedure TFrmAdvSettings.SaveGrid(AGrid: TStringGrid);
 var
   Index: integer;
 begin
-  for Index := 0 to VlGeneralSettings.Strings.Count -1 do
+  for Index := AGrid.FixedRows to AGrid.RowCount do
   begin
-    if (Copy(VlGeneralSettings.Strings.KeyNames[Index], 1, 1) = '-') then
+    if (AGrid.Cells[0, Index] = '') then
       continue;
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
-                     VlGeneralSettings.Strings.KeyNames[Index], VlGeneralSettings.Strings.ValueFromIndex[Index]);
+                     AGrid.Cells[0, Index], AGrid.Cells[2, Index]);
   end;
+end;
 
-  for Index := 0 to VlXT2Settings.Strings.Count -1 do
-  begin
-    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
-                     VlXT2Settings.Strings.KeyNames[Index], VlXT2Settings.Strings.ValueFromIndex[Index]);
-  end;
+procedure TFrmAdvSettings.SaveSettings;
+begin
+  SaveGrid(GridGeneralSettings);
+  SaveGrid(GridXT2Settings);
+  SaveGrid(GridGeoCodeSettings);
 
-  for Index := 0 to VlGeoCodeSettings.Strings.Count -1 do
-  begin
-    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
-                     VlGeoCodeSettings.Strings.KeyNames[Index], VlGeoCodeSettings.Strings.ValueFromIndex[Index]);
-  end;
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
                    ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
+
   ReadGeoCodeSettings;
 end;
 
@@ -300,10 +323,15 @@ end;
 
 procedure TFrmAdvSettings.BtnClearCoordCacheClick(Sender: TObject);
 begin
-  if (MessageDlg('Clear the cache?', TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> MB_OK) then
+  if (MessageDlg('Clear the cache?', TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> idOK) then
     exit;
 
   ClearCoordCache;
+end;
+
+procedure TFrmAdvSettings.BtnValidateClick(Sender: TObject);
+begin
+  ValidateApiKey;
 end;
 
 procedure TFrmAdvSettings.Clear1Click(Sender: TObject);

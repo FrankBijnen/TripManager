@@ -781,7 +781,8 @@ var CurrentTrack: TXmlVSNode;
     end;
 
     procedure AddTrackPoint(const RptNode: TXmlVsNode);
-    var TrackPoint: TXmlVsNode;
+    var
+      TrackPoint: TXmlVsNode;
     begin
       TrackPoint := CurrentTrack.AddChild('trkpt');
       CloneAttributes(RptNode, TrackPoint);
@@ -970,6 +971,7 @@ var CurrentTrack: TXmlVSNode;
       if (ProcessTracks) and
          (ExtensionNode <> nil) then
       begin
+        AddTrackPoint(RtePtNode);  // Add the <rtept> as a trackpoint. Will draw straight lines. In line with BC
         for RptNode in ExtensionNode.ChildNodes do
         begin
           if (RptNode.Name = 'gpxx:rpt') then

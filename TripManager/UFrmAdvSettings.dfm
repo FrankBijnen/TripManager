@@ -3,8 +3,8 @@ object FrmAdvSettings: TFrmAdvSettings
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Advanced settings'
-  ClientHeight = 558
-  ClientWidth = 529
+  ClientHeight = 561
+  ClientWidth = 633
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,17 +17,17 @@ object FrmAdvSettings: TFrmAdvSettings
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 527
-    Width = 529
+    Top = 530
+    Width = 633
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
     DesignSize = (
-      529
+      633
       31)
     object BtnOK: TButton
-      Left = 365
+      Left = 469
       Top = 3
       Width = 75
       Height = 25
@@ -38,7 +38,7 @@ object FrmAdvSettings: TFrmAdvSettings
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 452
+      Left = 556
       Top = 3
       Width = 75
       Height = 25
@@ -52,38 +52,58 @@ object FrmAdvSettings: TFrmAdvSettings
   object PctMain: TPageControl
     Left = 0
     Top = 0
-    Width = 529
-    Height = 527
-    ActivePage = TabGeneral
+    Width = 633
+    Height = 530
+    ActivePage = TabGeoCode
     Align = alClient
     TabOrder = 1
     object TabGeneral: TTabSheet
       Caption = 'General'
       ImageIndex = 2
-      object VlGeneralSettings: TValueListEditor
+      object GridGeneralSettings: TStringGrid
         Left = 0
         Top = 0
-        Width = 521
-        Height = 497
+        Width = 625
+        Height = 500
         Align = alClient
+        ColCount = 3
+        DefaultColWidth = 230
+        DrawingStyle = gdsGradient
+        FixedCols = 2
+        GradientEndColor = clMoneyGreen
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
-        ColWidths = (
-          176
-          339)
+        StyleElements = []
+        RowHeights = (
+          24
+          24
+          24
+          24
+          24)
       end
     end
     object TabXT2: TTabSheet
       Caption = 'XT2 settings'
-      object VlXT2Settings: TValueListEditor
+      object GridXT2Settings: TStringGrid
         Left = 0
         Top = 0
-        Width = 521
-        Height = 497
+        Width = 625
+        Height = 500
         Align = alClient
+        ColCount = 3
+        DefaultColWidth = 230
+        DrawingStyle = gdsGradient
+        FixedCols = 2
+        GradientEndColor = clMoneyGreen
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
-        ColWidths = (
-          176
-          339)
+        StyleElements = []
+        RowHeights = (
+          24
+          24
+          24
+          23
+          24)
       end
     end
     object TabGeoCode: TTabSheet
@@ -91,37 +111,25 @@ object FrmAdvSettings: TFrmAdvSettings
       ImageIndex = 1
       object Splitter1: TSplitter
         Left = 0
-        Top = 194
-        Width = 521
+        Top = 197
+        Width = 625
         Height = 3
         Cursor = crVSplit
         Align = alBottom
         ExplicitTop = -9
         ExplicitWidth = 519
       end
-      object VlGeoCodeSettings: TValueListEditor
-        Left = 0
-        Top = 0
-        Width = 521
-        Height = 194
-        Align = alClient
-        TabOrder = 0
-        OnStringsChange = VlGeoCodeSettingsStringsChange
-        ColWidths = (
-          176
-          339)
-      end
       object PnlAddressFormat: TPanel
         Left = 0
-        Top = 197
-        Width = 521
+        Top = 200
+        Width = 625
         Height = 300
         Align = alBottom
-        TabOrder = 1
+        TabOrder = 0
         object MemoAddressFormat: TMemo
           Left = 1
           Top = 36
-          Width = 519
+          Width = 623
           Height = 93
           Align = alTop
           Lines.Strings = (
@@ -133,25 +141,16 @@ object FrmAdvSettings: TFrmAdvSettings
         object PnlResult: TPanel
           Left = 1
           Top = 129
-          Width = 519
+          Width = 623
           Height = 35
           Align = alTop
           Caption = 'Result'
           TabOrder = 1
-          object BtnClearCoordCache: TButton
-            Left = 8
-            Top = 4
-            Width = 137
-            Height = 25
-            Caption = 'Clear GeoCode cache'
-            TabOrder = 0
-            OnClick = BtnClearCoordCacheClick
-          end
         end
         object MemoResult: TMemo
           Left = 1
           Top = 164
-          Width = 519
+          Width = 623
           Height = 135
           Align = alClient
           Lines.Strings = (
@@ -163,14 +162,14 @@ object FrmAdvSettings: TFrmAdvSettings
         object PnlAddressFormatTop: TPanel
           Left = 1
           Top = 1
-          Width = 519
+          Width = 623
           Height = 35
           Align = alTop
           Caption = 'Address format'
           TabOrder = 2
           object BtnBuilder: TButton
-            Left = 8
-            Top = 5
+            Left = 4
+            Top = 4
             Width = 75
             Height = 25
             Caption = 'Builder'
@@ -179,11 +178,60 @@ object FrmAdvSettings: TFrmAdvSettings
           end
         end
       end
+      object GridGeoCodeSettings: TStringGrid
+        Left = 0
+        Top = 33
+        Width = 625
+        Height = 164
+        Align = alClient
+        ColCount = 3
+        DefaultColWidth = 230
+        DrawingStyle = gdsGradient
+        FixedCols = 2
+        GradientEndColor = clMoneyGreen
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        TabOrder = 1
+        StyleElements = []
+        ExplicitTop = 0
+        ExplicitHeight = 197
+        RowHeights = (
+          24
+          24
+          24
+          24
+          24)
+      end
+      object Panel1: TPanel
+        Left = 0
+        Top = 0
+        Width = 625
+        Height = 33
+        Align = alTop
+        TabOrder = 2
+        object BtnValidate: TButton
+          Left = 4
+          Top = 3
+          Width = 75
+          Height = 25
+          Caption = 'Validate'
+          TabOrder = 0
+          OnClick = BtnValidateClick
+        end
+        object BtnClearCoordCache: TButton
+          Left = 86
+          Top = 3
+          Width = 137
+          Height = 25
+          Caption = 'Clear GeoCode cache'
+          TabOrder = 1
+          OnClick = BtnClearCoordCacheClick
+        end
+      end
     end
   end
   object PopupBuilder: TPopupMenu
-    Left = 36
-    Top = 287
+    Left = 52
+    Top = 279
     object Clear1: TMenuItem
       Caption = 'Clear'
       OnClick = Clear1Click

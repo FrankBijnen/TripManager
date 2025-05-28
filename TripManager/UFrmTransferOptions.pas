@@ -65,7 +65,7 @@ begin
   ProcessWayPtsInWayPts := SameText
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
   if ProcessWayPtsInWayPts then
-    AddRoutePoints := AddRoutePoints + ' Way points,';
+    AddRoutePoints := AddRoutePoints + ' Original Way points,';
 
   ProcessViaPtsInWayPts := SameText
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]);
@@ -93,7 +93,7 @@ begin
 
   PtsInGpi := '';
   ProcessWayPtsInGpi := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[false]), BooleanValues[true]);
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
   if ProcessWayPtsInGpi then
     PtsInGpi := PtsInGpi + ' Way points,';
   ProcessViaPtsInGpi := SameText

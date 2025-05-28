@@ -71,7 +71,7 @@ begin
   TvSelections.Items[IdGpi].Checked :=
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpi', BooleanValues[true]) = BooleanValues[true]);
     TvSelections.Items[IdGpiWayPt].Checked := SameText
-      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[false]), BooleanValues[true]);
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
     TvSelections.Items[IdGpiViaPt].Checked := SameText
       (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]);
     TvSelections.Items[IdGpiShpPt].Checked := SameText

@@ -61,7 +61,7 @@ type
     property PostalCode: string read GetPostalCode;
   end;
 
-function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0): TPlace;
+function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0; UseCache: boolean = true): TPlace;
 procedure GetCoordsOfPlace(const Place: string; var Lat, Lon: string);
 procedure ReadGeoCodeSettings;
 procedure ClearCoordCache;
@@ -248,7 +248,8 @@ begin
       on E:Exception do
       begin
         result := false;
-        ShowMessage(E.Message);
+        if (not Assigned(ExecRestEvent)) then
+          ShowMessage(E.Message);
       end;
     end;
   finally
@@ -263,7 +264,7 @@ begin
   end;
 end;
 
-function GetPlaceOfCoords_GeoCode(const Lat, Lon: string): TPlace;
+function GetPlaceOfCoords_GeoCode(const Lat, Lon: string; UseCache: boolean): TPlace;
 var
   RESTClient:   TRESTClient;
   RESTRequest:  TRESTRequest;
@@ -318,7 +319,7 @@ begin
   end;
 end;
 
-function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0): TPlace;
+function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0; UseCache: boolean = true): TPlace;
 var CoordsKey: string;
     LatP, LonP: string;
     CrWait, CrNormal: HCURSOR;
@@ -334,15 +335,18 @@ begin
     LonP := Lon;
     AdjustLatLon(LatP, LonP, Place_Decimals);
     CoordsKey := LatP + ',' + LonP;
-    if (CoordCache.ContainsKey(CoordsKey)) then
+    if (UseCache) and
+       (CoordCache.ContainsKey(CoordsKey)) then
     begin
       result := CoordCache.Items[CoordsKey];
       exit;
     end;
 
-    result := GetPlaceOfCoords_GeoCode(Lat, Lon);
+    result := GetPlaceOfCoords_GeoCode(Lat, Lon, UseCache);
 
     // Also cache if not found
+    if (CoordCache.ContainsKey(CoordsKey)) then // Prevent Duplicates not allowed
+      CoordCache.Remove(CoordsKey);
     CoordCache.Add(CoordsKey, result);
     if (hWnd <> 0) and
        (Msg <> 0) then
