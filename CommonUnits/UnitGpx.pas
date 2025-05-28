@@ -5,7 +5,7 @@ interface
 
 uses
   System.Classes, System.SysUtils, 
-  WinApi.Windows, System.IniFiles, System.Math,
+  WinApi.Windows, System.Math,
   Xml.XMLIntf, UnitVerySimpleXml,
   kml_helper, OSM_helper,
   UnitMapUtils,
@@ -97,20 +97,18 @@ const VehicleProfileGuid: string = '';
 const VehicleProfileHash: string = '';
 const VehicleId: string = '';
 {$ENDIF}
-function FindSubNodeValue(ANode: TXmlVSNode;
-                          SubName: string): string;
+
 procedure AnalyzeGpx(const GPXFile:string;
                      var OutWayPointList: TXmlVSNodeList;
                      var OutWayPointFromRouteList: TXmlVSNodeList;
                      var OutRouteViaPointList: TXmlVSNodeList;
                      var OutTrackList: TXmlVSNodeList);
-
 procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
                      const OutStringList: TStringList = nil;
                      const SeqNo: cardinal = 0);
-procedure ReadConfigFromIni;
-function ReadConfigParm(ASection, AKey: TGPXString; Default: TGPXString = ''): TGPXString;
+function FindSubNodeValue(ANode: TXmlVSNode;
+                          SubName: string): string;
 function InitRoot(WptTracksXml: TXmlVSDocument): TXmlVSNode;
 
 implementation
@@ -131,27 +129,6 @@ var WayPointList: TXmlVSNodeList;
     FormatSettings: TFormatSettings;
     DistanceStr: string;
 
-
-function GetToolsDirectory: TGPXString;
-begin
-  result := TGPXString(ExtractFilePath(ParamStr(0)));
-end;
-
-function ReadConfigParm(ASection, AKey: TGPXString; Default: TGPXString = ''): TGPXString;
-var MainIni:TIniFile;
-begin
-  MainIni := TIniFile.Create(string(GetToolsDirectory + '\GPXTools.ini'));
-  try
-    result := TGPXString(MainIni.ReadString(string(ASection), string(AKey), string(Default)));
-  finally
-    MainIni.free;
-  end;
-end;
-
-function ReadConfigParmStr(ASection, AKey: TGPXString; Default: TGPXString = ''):string;
-begin
-  result := string(ReadConfigParm(ASection, AKey, Default));
-end;
 
 function GetLocaleSetting: TFormatSettings;
 begin
@@ -244,36 +221,6 @@ begin
   LastSub := LastSub + Copy(Hex, 5, 2) + Copy(Hex, 3, 2);
   result := result + Copy(Hex, 1, 2) + 'xx';
   result := result + LastSub + ' ' + LatLon;
-end;
-
-procedure ReadConfigFromIni;
-begin
-  TrackColor := ReadConfigParmStr('General', 'TrackColor', 'Blue');
-  UniqueTracks := (ReadConfigParmStr('General', 'UniqueTracks', 'True') = 'True');
-{$IFDEF DEBUG}
-  DebugComments := ReadConfigParmStr('General', 'DebugComments', 'True');
-{$ELSE}
-  DebugComments := ReadConfigParmStr('General', 'DebugComments', 'False');
-{$ENDIF}
-  UnglitchTreshold := StrToFloat(ReadConfigParmStr('Unglitch', 'UnglitchTreshold', '0.0005'), FormatSettings);
-  BeginStr := ReadConfigParmStr('Unglitch', 'BeginStr', 'Begin');
-  BeginSymbol := ReadConfigParmStr('Unglitch', 'BeginSymbol', 'Flag, Red');
-  EndStr := ReadConfigParmStr('Unglitch', 'EndStr', 'End');
-  EndSymbol := ReadConfigParmStr('Unglitch', 'EndSymbol', 'Flag, Blue');
-  ShapingPointName := TShapingPointName(GetEnumValue(TypeInfo(TShapingPointName),
-                                                     ReadConfigParmStr('Unglitch', 'ShapingPointName', 'Unchanged')));
-  ShapingPointSymbol := ReadConfigParmStr('Unglitch', 'ShapingPointSymbol', 'Navaid, Blue');
-  ShapingPointCategory := ReadConfigParmStr('Unglitch', 'ShapingPointCategory', 'Shape');
-
-  ViaPointSymbol := ReadConfigParmStr('Unglitch', 'ViaPointSymbol', 'Navaid, Red');
-  ViaPointCategory := ReadConfigParmStr('Unglitch', 'ViaPointCategory', 'Via');
-
-  KMLTrackColor := ReadConfigParmStr('KML', 'TrackColor', 'Magenta');
-
-  OSMTrackColor := ReadConfigParmStr('OSM', 'TrackColor', 'Red');
-
-  GpiSymbolsDir := GetToolsDirectory + '\' + ReadConfigParm('GPI', 'SymbolsDir', 'Symbols\80x80\');
-  IniProximityStr := ReadConfigParm('GPI', 'DefaultProximity');
 end;
 
 procedure FreeGlobals;
