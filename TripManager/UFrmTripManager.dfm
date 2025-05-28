@@ -278,6 +278,7 @@ object FrmTripManager: TFrmTripManager
         OnColumnClick = ShellListView1ColumnClick
         TabOrder = 1
         ViewStyle = vsReport
+        OnKeyDown = ShellListView1KeyDown
         OnKeyUp = ShellListView1KeyUp
       end
       object PnlXt2FileSys: TPanel

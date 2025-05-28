@@ -10,10 +10,14 @@ uses
 const
   TripManagerReg_Key      = 'Software\TDBware\TripManager';
   PrefFileSysFolder_Key   = 'PrefFileSysFolder';
+  PrefFileSysFolder_Val   = 'rfDesktop';
   PrefDev_Key             = 'PrefDevice';
   PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
+  PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
   PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
+  PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
   PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
+  PrefDevPoiFolder_Val    = 'Internal Storage\POI';
   WarnModel_Key           = 'WarnModel';
   TripColor_Key           = 'TripColor';
   Maximized_Key           = 'Maximized';
@@ -191,6 +195,14 @@ begin
     CurRow := 1;
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
     AddGridLine(GridGeneralSettings, CurRow, Maximized_Key,       'False', 'Start TripManager maximized');
+    AddGridLine(GridGeneralSettings, CurRow, '');
+
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Preferred device and folders-');
+    AddGridLine(GridGeneralSettings, CurRow, PrefDev_Key,             XTName,                 'Default device to use');
+    AddGridLine(GridGeneralSettings, CurRow, PrefDevTripsFolder_Key,  PrefDevTripsFolder_Val, 'Default trips folder');
+    AddGridLine(GridGeneralSettings, CurRow, PrefDevGpxFolder_Key,    PrefDevGPXFolder_Val,   'Default GPX folder');
+    AddGridLine(GridGeneralSettings, CurRow, PrefDevPoiFolder_Key,    PrefDevPoiFolder_Val,   'Default GPI folder');
+    AddGridLine(GridGeneralSettings, CurRow, PrefFileSysFolder_Key,   PrefFileSysFolder_Val,  'Last used Windows folder');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Creating Way point files (*.gpx)-');

@@ -60,7 +60,7 @@ type
     procedure Refresh;
     procedure ColumnClick(Column: TListColumn);
     procedure SetFocus; override;
-
+    function PathForParsing(AFolder: TShellFolder): string;
     property ColumnSorted: boolean read FColumnSorted write SetColumnSorted;
     property SortColumn: integer read FSortColumn write FSortColumn;
     property SortState: THeaderSortState read FSortState write FSortState;
@@ -73,6 +73,29 @@ implementation
 uses
   System.Win.ComObj, System.UITypes, System.StrUtils,
   TripManager_MultiContext;
+
+// For parsing DisplayName
+function StrRetToStr(StrRet: TStrRet; PIDL: PItemIDList): string;
+var
+  P: PAnsiChar;
+begin
+  result := '';
+  case StrRet.uType of
+    STRRET_WSTR:
+      if Assigned(StrRet.pOleStr) then
+      begin
+        Result := StrRet.pOleStr;
+        CoTaskMemFree(StrRet.pOleStr); // Need to free!
+      end;
+    STRRET_OFFSET:  // Not used. is Ansi.
+      begin
+        P := @PIDL.mkid.abID[StrRet.uOffset - SizeOf(PIDL.mkid.cb)];
+        SetString(Result, P, PIDL.mkid.cb - StrRet.uOffset);
+      end;
+    STRRET_CSTR:    // Not used. is Ansi.
+      SetString(Result, StrRet.cStr, lStrLenA(StrRet.cStr));
+  end;
+end;
 
 { TShellListView }
 
@@ -386,6 +409,16 @@ begin
 // Avoid cannot focus a disabled or invisible window
   if Enabled then
     inherited SetFocus;
+end;
+
+// Use when setting Shell path. Can contain ::{ etc. E.G. 'This PC'
+function TShellListView.PathForParsing(AFolder: TShellFolder): string;
+var
+  StrRet: TStrRet;
+begin
+  FillChar(StrRet, SizeOf(StrRet), 0);
+  AFolder.ParentShellFolder.GetDisplayNameOf(AFolder.RelativeID, SHGDN_FORPARSING, StrRet);
+  Result := StrRetToStr(StrRet, AFolder.RelativeID);
 end;
 
 function TShellListView.GiveFeedback(dwEffect: Longint): HResult; stdcall;

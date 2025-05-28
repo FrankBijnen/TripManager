@@ -242,6 +242,7 @@ type
     procedure NewtripWindows1Click(Sender: TObject);
     procedure PopupTripEditPopup(Sender: TObject);
     procedure PCTTripInfoResize(Sender: TObject);
+    procedure ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
     PrefDevice: string;
@@ -1466,7 +1467,7 @@ begin
        (DirectoryExists(AFilePath)) then
       ShellTreeView1.Path := AFilePath;
   except
-    ShellTreeView1.Root := 'rfDesktop';
+    ShellTreeView1.Root := PrefFileSysFolder_Val;
   end;
 
   BgDevice.ItemIndex := 0; // Default to trips
@@ -1695,6 +1696,8 @@ end;
 procedure TFrmTripManager.ShellListView1Click(Sender: TObject);
 var
   Ext: string;
+  AnItem: TlistItem;
+  HasGpxSelected: boolean;
 begin
   BtnTransferToDevice.Enabled := false;
   BtnAddToMap.Enabled :=  false;
@@ -1704,12 +1707,23 @@ begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
 
-  Ext := ExtractFileExt(ShellListView1.SelectedFolder.PathName);
-  BtnPostProcess.Enabled := ContainsText(Ext, GpxExtension) and
-                         not (ShellListView1.SelectedFolder.IsFolder);
-  BtnCreateAdditional.Enabled := BtnPostProcess.Enabled;
-  BtnTransferToDevice.Enabled := BtnPostProcess.Enabled;
-  BtnAddToMap.Enabled := BtnPostProcess.Enabled and
+  HasGpxSelected := false;
+  for AnItem in ShellListView1.Items do
+  begin
+    if (AnItem.Selected = false) or
+       (ShellListView1.Folders[AnItem.Index].IsFolder) then
+      continue;
+
+    Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
+    HasGpxSelected := ContainsText(Ext, GpxExtension);
+    if (HasGpxSelected) then
+      break;
+  end;
+
+  BtnPostProcess.Enabled := HasGpxSelected;
+  BtnCreateAdditional.Enabled := HasGpxSelected;
+  BtnTransferToDevice.Enabled := HasGpxSelected;
+  BtnAddToMap.Enabled := HasGpxSelected and
                          (ShellListView1.SelCount = 1);
 
   if (ContainsText(Ext, TripExtension)) then
@@ -1729,18 +1743,38 @@ begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
   if (ShellListView1.SelectedFolder.IsFolder) then
-    ShellTreeView1.Path := ShellListView1.SelectedFolder.PathName
+    ShellTreeView1.Path := ShellListView1.PathForParsing(ShellListView1.SelectedFolder)
   else
     ShellExecute(0, 'OPEN', PWideChar(ShellListView1.SelectedFolder.PathName), '' ,'', SW_SHOWNORMAL);
 end;
 
+procedure TFrmTripManager.ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    Ord('A'):
+    begin
+      if (ssCtrl in Shift) and
+         (Key = Ord('A')) then
+      begin
+        ShellListView1.SelectAll;
+        ShellListView1Click(Sender);
+      end;
+    end;
+  end;
+end;
+
 procedure TFrmTripManager.ShellListView1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (ssCtrl in Shift) and
-     (Key = Ord('A')) then
-  begin
-    ShellListView1.SelectAll;
-    ShellListView1Click(Sender);
+  case Key of
+    VK_HOME,
+    VK_END,
+    VK_UP,
+    VK_DOWN,
+    VK_LEFT,
+    VK_RIGHT,
+    VK_PRIOR,
+    VK_NEXT:
+      ShellListView1Click(Sender);
   end;
 end;
 
@@ -3410,9 +3444,9 @@ end;
 
 procedure TFrmTripManager.ReadDefaultFolders;
 begin
-  DeviceFolder[0] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevTripsFolder_Key, 'Internal Storage\.System\Trips');
-  DeviceFolder[1] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevGpxFolder_Key, 'Internal Storage\GPX');
-  DeviceFolder[2] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevPoiFolder_Key, 'Internal Storage\POI');
+  DeviceFolder[0] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevTripsFolder_Key, PrefDevTripsFolder_Val);
+  DeviceFolder[1] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevGpxFolder_Key, PrefDevGpxFolder_Val);
+  DeviceFolder[2] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDevPoiFolder_Key, PrefDevPoiFolder_Val);
 end;
 
 procedure TFrmTripManager.ReadColumnSettings;
@@ -3458,7 +3492,7 @@ end;
 
 procedure TFrmTripManager.ReadSettings;
 begin
-  PrefDevice := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDev_Key, 'zūmo XT');
+  PrefDevice := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDev_Key, XTName);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
   WarnModel := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True') = 'True');

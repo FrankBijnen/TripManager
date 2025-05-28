@@ -192,8 +192,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 1
         StyleElements = []
-        ExplicitTop = 0
-        ExplicitHeight = 197
         RowHeights = (
           24
           24
