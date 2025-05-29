@@ -1282,6 +1282,7 @@ var Func: TGPXFunc;
                                      Track.Name + #9 +
                                      FindSubNodeValue(Track, 'desc'));
         end;
+        FrmSelectGPX.Caption := 'Create Tracks from: '+ ExtractFileName(GPXFile);
         FrmSelectGPX.LoadTracks(TrackColor);
         if FrmSelectGPX.ShowModal <> ID_OK then
             exit;
@@ -1703,6 +1704,7 @@ var Func: TGPXFunc;
                                        FindSubNodeValue(Track, 'desc'));
           end;
           FrmSelectGPX.LoadTracks(TrackColor);
+          FrmSelectGPX.Caption := 'Show ' + ExtractFileName(GPXFile) + ' on Map';
           if FrmSelectGPX.ShowModal <> ID_OK then
               exit;
           if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then

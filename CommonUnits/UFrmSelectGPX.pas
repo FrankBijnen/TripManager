@@ -56,7 +56,7 @@ begin
   if (DisplayColor = '-') then
   begin
     PnlClear.Visible := false;
-    PnlTop.Caption := 'Select Waypoints/Route to import';
+    PnlTop.Caption := 'Select Waypoints/Route';
     LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte';
   end;
 

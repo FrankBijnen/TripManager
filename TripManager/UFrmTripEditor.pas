@@ -432,6 +432,7 @@ begin
 
     FrmSelectGPX.LoadTracks('-');
     SetCursor(CrNormal);
+    FrmSelectGPX.Caption := 'Import route points from: ' + ExtractFileName(OpenTrip.FileName);
     if (FrmSelectGPX.ShowModal = mrOk) then
     begin
       DmRoutePoints.CdsRoutePoints.DisableControls;

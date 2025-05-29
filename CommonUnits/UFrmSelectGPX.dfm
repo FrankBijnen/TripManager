@@ -55,7 +55,7 @@ object FrmSelectGPX: TFrmSelectGPX
     Width = 489
     Height = 29
     Align = alTop
-    Caption = 'Select Routes/Tracks to show'
+    Caption = 'Select Routes/Tracks'
     TabOrder = 1
   end
   object PnlBot: TPanel
