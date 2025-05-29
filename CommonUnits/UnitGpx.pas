@@ -764,6 +764,9 @@ var CurrentTrack: TXmlVSNode;
       begin
         WptName := FindSubNodeValue(RtePtNode, 'name');
 
+        if (ProcessSubClass) then
+          ClearSubClass(ExtensionNode);
+
         if (ProcessBegin) then
         begin
           WptName := BeginStr + ' ' + RouteName;
@@ -775,7 +778,6 @@ var CurrentTrack: TXmlVSNode;
 
           if (ProcessFlags) then
             RenameSubNode(RtePtNode, 'sym', Symbol);
-          ClearSubClass(ExtensionNode);
 
           // Fill Mapsegment
           RteNode := RtePtNode.Parent;
@@ -816,6 +818,9 @@ var CurrentTrack: TXmlVSNode;
       begin
         WptName := FindSubNodeValue(RtePtNode, 'name');
 
+        if (ProcessSubClass) then
+          ClearSubClass(ExtensionNode);
+
         if (ProcessEnd) then
         begin
           WptName := EndStr + ' ' + RouteName;
@@ -827,7 +832,6 @@ var CurrentTrack: TXmlVSNode;
 
           if (ProcessFlags) then
             RenameSubNode(RtePtNode, 'sym', Symbol);
-          ClearSubClass(ExtensionNode);
         end;
 
         if (ProcessWayPtsFromRoute) then

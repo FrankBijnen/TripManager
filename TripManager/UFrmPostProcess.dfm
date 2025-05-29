@@ -24,7 +24,6 @@ object FrmPostProcess: TFrmPostProcess
     Height = 33
     Align = alBottom
     TabOrder = 6
-    ExplicitTop = 473
     DesignSize = (
       646
       33)
@@ -407,8 +406,8 @@ object FrmPostProcess: TFrmPostProcess
         '- It renames Shaping points to route name + Seq or route + Dista' +
         'nce'
       
-        '- Lookup the address of Begin, End, Via and Shaping pointsand  s' +
-        'ave it in <cmt>.'
+        '- Looks up the address of Begin, End, Via and Shaping points and' +
+        '  saves it in <cmt>.'
       ''
       'with Way points:'
       'Optionally:'
