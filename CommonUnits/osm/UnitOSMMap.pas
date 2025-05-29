@@ -18,8 +18,6 @@ const
   InitialZoom_Point = '15';
   InitialZoom_Home  = '12';
   InitialZoom_NoHome= '20';
-  PopupTimeout      = '3000';
-  GeoSearchTimeout  = '8000';
 
 type
   TOSMHelper = class(TObject)

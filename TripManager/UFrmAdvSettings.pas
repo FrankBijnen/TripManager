@@ -24,6 +24,10 @@ const
   WidthColumns_Key        = 'WidthColumns';
   SortColumn_Key          = 'SortColumn';
   SortAscending_Key       = 'SortAscending';
+  RoutePointTimeOut_Key   = 'RoutePointTimeOut';
+  RoutePointTimeOut_Val   = '5000';
+  GeoSearchTimeOut_Key    = 'GeoSearchTimeOut';
+  GeoSearchTimeOut_Val    = '8000';
 
   BooleanValues: array[boolean] of string = ('False', 'True');
 
@@ -50,6 +54,8 @@ type
     Panel1: TPanel;
     BtnValidate: TButton;
     BtnClearCoordCache: TButton;
+    TabTransferDevice: TTabSheet;
+    GridTransferDevice: TStringGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -205,23 +211,41 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, PrefFileSysFolder_Key,   PrefFileSysFolder_Val,  'Last used Windows folder');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Creating Way point files (*.gpx)-');
-    AddGridLine(GridGeneralSettings, CurRow, 'FuncWayPointWpt',   'True',  'Add original Way points');
-    AddGridLine(GridGeneralSettings, CurRow, 'FuncWayPointVia',   'False', 'Add Via points from route');
-    AddGridLine(GridGeneralSettings, CurRow, 'FuncWayPointShape', 'False', 'Add Shaping points from route');
-    AddGridLine(GridGeneralSettings, CurRow, '');
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Map display-');
+    AddGridLine(GridGeneralSettings, CurRow, GeoSearchTimeOut_Key,    GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
+    AddGridLine(GridGeneralSettings, CurRow, RoutePointTimeOut_Key,   RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
 
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Creating Poi files (*.gpi)-');
-    AddGridLine(GridGeneralSettings, CurRow, 'FuncGpiWayPt',      'True', 'Add original Way points');
-    AddGridLine(GridGeneralSettings, CurRow, 'FuncGpiViaPt',      'False', 'Add Via points from route');
-    AddGridLine(GridGeneralSettings, CurRow, 'FuncGpiShpPt',      'False', 'Add Shaping points from route');
     GridGeneralSettings.RowCount := CurRow;
-
     AddGridHeader(GridGeneralSettings);
 
   finally
     GridGeneralSettings.EndUpdate;
   end;
+
+  GridTransferDevice.RowCount := GridTransferDevice.FixedRows +1;
+  GridTransferDevice.BeginUpdate;
+  try
+
+    CurRow := 1;
+
+    AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Way point files (*.gpx)-');
+    AddGridLine(GridTransferDevice, CurRow, 'FuncWayPointWpt',   'True',  'Add original Way points');
+    AddGridLine(GridTransferDevice, CurRow, 'FuncWayPointVia',   'False', 'Add Via points from route');
+    AddGridLine(GridTransferDevice, CurRow, 'FuncWayPointShape', 'False', 'Add Shaping points from route');
+    AddGridLine(GridTransferDevice, CurRow, '');
+
+    AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Poi files (*.gpi)-');
+    AddGridLine(GridTransferDevice, CurRow, 'FuncGpiWayPt',      'True', 'Add original Way points');
+    AddGridLine(GridTransferDevice, CurRow, 'FuncGpiViaPt',      'False', 'Add Via points from route');
+    AddGridLine(GridTransferDevice, CurRow, 'FuncGpiShpPt',      'False', 'Add Shaping points from route');
+    GridTransferDevice.RowCount := CurRow;
+
+    AddGridHeader(GridTransferDevice);
+
+  finally
+    GridTransferDevice.EndUpdate;
+  end;
+
 
   GridXT2Settings.RowCount := GridXT2Settings.FixedRows +1;
   GridXT2Settings.BeginUpdate;
@@ -314,6 +338,7 @@ end;
 procedure TFrmAdvSettings.SaveSettings;
 begin
   SaveGrid(GridGeneralSettings);
+  SaveGrid(GridTransferDevice);
   SaveGrid(GridXT2Settings);
   SaveGrid(GridGeoCodeSettings);
 

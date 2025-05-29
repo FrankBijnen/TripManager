@@ -260,17 +260,19 @@ type
     ATripList: TTripList;
     APOIList: TPOIList;
 
-    FMapReq: TMapReq;
-    EdgeZoom: double;
     WarnRecalc: integer; // MrNone, MrYes, MrNo, mrIgnore
     WarnModel: boolean;
     WarnOverWrite: integer;  // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
     ModifiedList: TStringList;
     DirectoryMonitor: TDirectoryMonitor;
+
     FOnCoordinatesApplied: TCoordinatesAppliedEvent;
+    FMapReq: TMapReq;
+    EdgeZoom: double;
+    RoutePointTimeOut: string;
+    GeoSearchTimeOut: string;
 
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
-
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     function SelectedScPosn: TmScPosn;
     function SelectedLocation: TLocation;
@@ -515,15 +517,7 @@ procedure TFrmTripManager.Action3Execute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   if FrmAdvSettings.ShowModal = mrOk then
-  begin
-    FrmAdvSettings.SetFixedPrefs;
-    BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-    ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
-  if (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'True') = 'True') then
-    WindowState := TWindowState.wsMaximized
-  else
-    WindowState := TWindowState.wsNormal;
-  end;
+    ReadSettings;
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
@@ -728,7 +722,7 @@ begin
   begin
     Place := GetPlaceOfCoords(Lat, Lon);
     Clipboard.AsText := Place.DisplayPlace;
-    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), InitialZoom_Point, GeoSearchTimeout);
+    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), InitialZoom_Point, GeoSearchTimeOut);
   end;
 end;
 
@@ -887,7 +881,7 @@ procedure TFrmTripManager.RoutePointUpdated(Sender: TObject);
 begin
   MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
              DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
-             '', '5000');
+             '', RoutePointTimeOut);
 end;
 
 function TFrmTripManager.GetMapCoords: string;
@@ -1362,11 +1356,11 @@ begin
   begin
     Place := GetPlaceOfCoords(Parm1, Parm2);
     if (PLace = nil) then
-      MapRequest(EditMapCoords.Text, OSMCtrlClick, InitialZoom_Point, GeoSearchTimeout)
+      MapRequest(EditMapCoords.Text, OSMCtrlClick, InitialZoom_Point, GeoSearchTimeOut)
     else
     begin
       Clipboard.AsText := Place.DisplayPlace;
-      MapRequest(EditMapCoords.Text, Place.HtmlPlace, InitialZoom_Point, GeoSearchTimeout);
+      MapRequest(EditMapCoords.Text, Place.HtmlPlace, InitialZoom_Point, GeoSearchTimeOut);
     end;
     exit;
   end;
@@ -1418,7 +1412,7 @@ procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; S
 begin
   if (Key = VK_Return) and
      (EditMapCoords.Text <> '') then
-    MapRequest(EditMapCoords.Text, EditMapCoords.Text, '', PopupTimeout);
+    MapRequest(EditMapCoords.Text, EditMapCoords.Text, '', RoutePointTimeOut);
 end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -1492,8 +1486,6 @@ procedure TFrmTripManager.FormShow(Sender: TObject);
 begin
   PCTTripInfo.ActivePageIndex := 0;
   PctHexOsm.ActivePageIndex := 1;
-  BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
 end;
 
 procedure TFrmTripManager.FreeCustomData(const ACustomData: pointer);
@@ -2105,7 +2097,7 @@ var
         GpsCoords := TmScPosn(ANitem).MapCoords;
     end;
     if (ZoomToPoint) then
-      MapRequest(GpsCoords, LocationName, '', PopupTimeout);
+      MapRequest(GpsCoords, LocationName, '', RoutePointTimeOut);
 
     with ALocation do
     begin
@@ -2191,7 +2183,7 @@ var
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s Type:%d', [AnUdbDir.DisplayName,
-                                       AnUdbDir.UdbDirValue.SubClass.PointType]), '', PopupTimeout);
+                                       AnUdbDir.UdbDirValue.SubClass.PointType]), '', RoutePointTimeOut);
   end;
 
 
@@ -2433,7 +2425,7 @@ var
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-                 Format('%s', [AGPXWayPoint.Name]), '', PopupTimeout);
+                 Format('%s', [AGPXWayPoint.Name]), '', RoutePointTimeOut);
 
   end;
 
@@ -3492,15 +3484,24 @@ end;
 
 procedure TFrmTripManager.ReadSettings;
 begin
+  FrmAdvSettings.SetFixedPrefs;
+
   PrefDevice := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDev_Key, XTName);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
-  WarnModel := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True') = 'True');
-  if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'False'), 'True')) then
-    WindowState := TWindowState.wsMaximized;
-  ReadColumnSettings;
+  WarnModel :=(SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WarnModel_Key, 'True'), 'True'));
   WarnRecalc := mrNone;
-  FrmAdvSettings.SetFixedPrefs;
+  RoutePointTimeOut := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, RoutePointTimeOut_Key, RoutePointTimeOut_Val);
+  GeoSearchTimeOut := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoSearchTimeOut_Key, GeoSearchTimeOut_Val);
+
+  BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
+  if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'False'), 'True')) then
+    WindowState := TWindowState.wsMaximized
+  else
+    WindowState := TWindowState.wsNormal;
+  ReadColumnSettings;
+
+  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
 end;
 
 // Drag and Drop methods
