@@ -2173,7 +2173,7 @@ var
 
   procedure AddUdbDir(AnUdbDir: TUdbDir; ZoomToPoint: boolean);
   begin
-    VlTripInfo.Strings.AddPair(AnUdbDir.DisplayName, Format('MapSegment: %s RoadId: %s PointType: %d Lat: %1.5f Lon: %1.5f',
+    VlTripInfo.Strings.AddPair(AnUdbDir.DisplayName, Format('MapSegment: %s RoadId: %s PointType: %d Lat: %1.6f Lon: %1.6f',
                                  [IntToHex(AnUdbDir.UdbDirValue.SubClass.MapSegment, 8),
                                   IntToHex(AnUdbDir.UdbDirValue.SubClass.RoadId, 8),
                                   AnUdbDir.UdbDirValue.SubClass.PointType,
