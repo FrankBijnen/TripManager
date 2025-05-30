@@ -15,7 +15,6 @@ const
   XT2_VehicleProfileHash  = '135656608';
   XT2_VehicleId           = '1';
 
-
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
   TZumoModel        = (XT, XT2, Unknown);
@@ -692,6 +691,9 @@ uses
   Vcl.Dialogs,
   OSM_helper, UnitStringUtils;
 
+const
+  Coord_Decimals = '%1.6f';
+
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
 
@@ -1263,14 +1265,16 @@ end;
 
 function TmScPosn.GetValue: string;
 begin
-  result := Format('Unknown: 0x%s, Lat: %1.5f, Lon: %1.5f', [IntToHex(FValue.Unknown1, 8),
-                                                             CoordAsDec(FValue.Lat),
-                                                             CoordAsDec(FValue.Lon)], FloatFormatSettings);
+  result := Format(Format('Unknown: 0x%%s, Lat: %s, Lon: %s', [Coord_Decimals, Coord_Decimals]),
+                  [IntToHex(FValue.Unknown1, 8),
+                   CoordAsDec(FValue.Lat),
+                   CoordAsDec(FValue.Lon)], FloatFormatSettings);
 end;
 
 function TmScPosn.GetMapCoords: string;
 begin
-  result := Format('%1.5f, %1.5f', [CoordAsDec(FValue.Lat), CoordAsDec(FValue.Lon)], FloatFormatSettings);
+  result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
+                   [CoordAsDec(FValue.Lat), CoordAsDec(FValue.Lon)], FloatFormatSettings);
 end;
 
 procedure TmScPosn.SetMapCoords(ACoords: string);
@@ -2100,7 +2104,8 @@ end;
 
 function TUdbDir.GetMapCoords: string;
 begin
-  result := Format('%1.5f, %1.5f', [Lat, Lon], FloatFormatSettings);
+  result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
+                  [Lat, Lon], FloatFormatSettings);
 end;
 
 function TUdbDir.IsTurn: boolean;

@@ -337,7 +337,11 @@ uses
   Vcl.Imaging.pngimage,
   Winapi.Windows;
 
-var FormatSettings: TFormatSettings;
+const
+  Coord_Decimals = '%1.6f';
+
+var
+  FormatSettings: TFormatSettings;
 
 // Need separate class
 constructor TGPXWayPoint.Create;
@@ -426,7 +430,7 @@ var HCoord: Double;
 begin
   try
     HCoord := SimpleRoundTo(ACoord / 4294967296 * 360, -6);
-    result := TGPXString(Format('%1.5f', [HCoord], FormatSettings));
+    result := TGPXString(Format(Coord_Decimals, [HCoord], FormatSettings));
   except
     result := '';
   end;
