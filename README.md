@@ -8,9 +8,9 @@ This program has been tested on the XT, and the XT2. Thanks to John Heath and St
 
 # Changed with V1.4.0.162
 - Added GeoCoding. To find a location on the map, or find the address of GPS coordinates.
-[Using GeoCode](https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/WalkThroughs/11%20Using%20GeoCode.pdf)
+[Using GeoCode](https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/WalkThroughs/11%20Using%20GeoCode.pdf)
 - Added Trip Editor. To View, Create and Edit trip files directly.
-[Using GeoCode](https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/WalkThroughs/12%20Using%20Trip%20Editor.pdf)
+[Using Trip Editor](https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/WalkThroughs/12%20Using%20Trip%20Editor.pdf)
 
 # Changed with V1.3.0.147
 Creating and modifying trips works for the XT2.<br>
