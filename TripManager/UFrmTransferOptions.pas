@@ -45,8 +45,8 @@ const
   IdCompleteRoute   = 4;
   IdPOI             = 5;
   TripFilesFor      = 'Trip files (No import required, but will recalculate. Selected model: %s)';
-  GPISel            = 'POI (.gpi) files (Points Of Interest). Selection: %s';
-  WayPointSel       = 'Way points %s';
+  GPISel            = 'POI (.gpi) files (Points Of Interest). (Selection: %s)';
+  WayPointSel       = 'Way points. (Selection: %s)';
 
 procedure TFrmTransferOptions.SetPrefs;
 var
@@ -78,10 +78,9 @@ begin
     AddRoutePoints := AddRoutePoints + ' Shaping points,';
 
   if (AddRoutePoints <> '') then
-  begin
-    AddRoutePoints := '(Including' + AddRoutePoints;
-    AddRoutePoints[Length(AddRoutePoints)] := ')'
-  end;
+    SetLength(AddRoutePoints, Length(AddRoutePoints) -1)
+  else
+    AddRoutePoints := ' None';
   LvSelections.Items[IdWayPoint].Caption := Format(WayPointSel, [AddRoutePoints]);
 
   LvSelections.Items[IdStrippedRoute].Checked :=
@@ -95,7 +94,7 @@ begin
   ProcessWayPtsInGpi := SameText
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
   if ProcessWayPtsInGpi then
-    PtsInGpi := PtsInGpi + ' Way points,';
+    PtsInGpi := PtsInGpi + ' Original Way points,';
   ProcessViaPtsInGpi := SameText
     (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]);
   if ProcessViaPtsInGpi then
