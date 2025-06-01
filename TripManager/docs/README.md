@@ -32,6 +32,8 @@ Throughout the docs here the terms Way point, Via point and Shaping point are us
      <li><a href="WalkThroughs/8%20Post%20processing%20a%20GPX%20file.pdf">Post processing a GPX file</a></li>
      <li><a href="WalkThroughs/9%20Creating%20Additional%20files.pdf">Creating Additional files</a></li>
      <li><a href="WalkThroughs/10%20Using%20POI%20files.pdf">Using POI files</a></li>
+     <li><a href="WalkThroughs/11%20Using%20GeoCode.pdf">Using GeoCode (*New in V1.4*)</a></li>
+     <li><a href="WalkThroughs/12%20Using%20Trip%20Editor.pdf">Using Trip Editor (*New in V1.4*)</a></li>
 </ol><br>
 
 <h4>Technical info on the data formats.</h4>
