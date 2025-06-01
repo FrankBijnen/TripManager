@@ -150,6 +150,7 @@ begin
       Inc(Id);
       CdsRoutePoints.Edit;
       CdsRoutePointsId.AsInteger := Id;
+      SetDefaultName(Id);
       CdsRoutePoints.Post;
       CdsRoutePoints.Next;
     end;
