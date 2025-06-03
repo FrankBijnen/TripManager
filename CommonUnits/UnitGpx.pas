@@ -1,6 +1,5 @@
 unit UnitGPX;
 {$WARN SYMBOL_PLATFORM OFF}
-
 interface
 
 uses
@@ -8,7 +7,9 @@ uses
   WinApi.Windows, System.Math,
   Xml.XMLIntf, UnitVerySimpleXml,
   kml_helper, OSM_helper,
+{$IFDEF MAPUTILS}
   UnitMapUtils,
+{$ENDIF}
 {$IFDEF TRIPOBJECTS}
   UnitTripObjects,
 {$ENDIF}
@@ -107,9 +108,7 @@ procedure DoFunction(const AllFuncs: array of TGPXFunc;
                      const GPXFile:string;
                      const OutStringList: TStringList = nil;
                      const SeqNo: cardinal = 0);
-function FindSubNodeValue(ANode: TXmlVSNode;
-                          SubName: string): string;
-function InitRoot(WptTracksXml: TXmlVSDocument): TXmlVSNode;
+function InitGarminGpx(GarminGPX: TXmlVSDocument): TXmlVSNode;
 
 implementation
 
@@ -189,7 +188,7 @@ begin
   try
     HCoord := HCoord * 360;
     Result := result + ' * 360 = ' + FormatFloat('0', HCoord);
-    HCoord := HCoord / 4294967296;
+    HCoord := HCoord / 4294967296; {2^32}
     Result := result + ' / 2^32 = ' + FormatFloat('0.000000000000000', HCoord);
   except
     result := '';
@@ -280,23 +279,6 @@ begin
   ToNode.NodeType := FromNode.NodeType;
   CloneAttributes(FromNode, ToNode);
   CloneSubNodes(FromNode.ChildNodes, ToNode.ChildNodes);
-end;
-
-function FindSubNodeValue(ANode: TXmlVSNode;
-                          SubName: string): string;
-var
-  SubNode: TXmlVSNode;
-begin
-  Result := '';
-  SubNode := ANode.Find(SubName);
-  if (SubNode <> nil) then
-  begin
-    Result := SubNode.NodeValue;
-    if (Result = '') and
-       (SubNode.HasChildNodes) and
-       (SubNode.FirstChild.NodeType = TXmlVSNodeType.ntCData) then
-      Result := SubNode.FirstChild.NodeValue;
-  end;
 end;
 
 function GetTrackColor(ANExtension: TXmlVsNode): string;
@@ -740,10 +722,13 @@ var CurrentTrack: TXmlVSNode;
                            const Cnt, LastCnt: integer);
 
     var ExtensionNode: TXmlVSNode;
-        RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint,
+        RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint: TXmlVSNode;
+        WptName, Symbol, ViaPtName, ShapePtName: string;
+{$IFDEF MAPUTILS}
         DescNode, RteNode: TXmlVSNode;
-        ViaPtName, ShapePtName, WptName, Symbol, CalculatedSubClass, MapName: string;
+        CalculatedSubClass, MapName: string;
         MapSeg, NewDescPos: integer;
+{$ENDIF}
     begin
       RtePtExtensions := RtePtNode.Find('extensions');
       if (RtePtExtensions = nil) then
@@ -780,6 +765,7 @@ var CurrentTrack: TXmlVSNode;
             RenameSubNode(RtePtNode, 'sym', Symbol);
 
           // Fill Mapsegment
+{$IFDEF MAPUTILS}
           RteNode := RtePtNode.Parent;
           if (RteNode <> nil) then
           begin
@@ -792,6 +778,7 @@ var CurrentTrack: TXmlVSNode;
               if (NewDescPos > -1) then
                 DescNode := RteNode.InsertChild('desc', NewDescPos +1);
             end;
+
             if (DescNode <> nil) and
                (ExtensionNode <> nil) then
             begin
@@ -804,6 +791,7 @@ var CurrentTrack: TXmlVSNode;
                 RenameSubNode(RteNode, 'desc', 'Map segment: '+ IntToStr(MapSeg));
             end;
           end;
+{$ENDIF}
         end;
 
         if (ProcessWayPtsFromRoute) then
@@ -1129,11 +1117,11 @@ begin
   end;
 end;
 
-function InitRoot(WptTracksXml: TXmlVSDocument): TXmlVSNode;
+function InitGarminGpx(GarminGPX: TXmlVSDocument): TXmlVSNode;
 begin
-  WptTracksXml.Clear;
-  WptTracksXml.Encoding := 'utf-8';
-  result := WptTracksXml.AddChild('gpx', TXmlVSNodeType.ntDocument);
+  GarminGPX.Clear;
+  GarminGPX.Encoding := 'utf-8';
+  result := GarminGPX.AddChild('gpx', TXmlVSNodeType.ntDocument);
   result.SetAttribute('xmlns',       'http://www.topografix.com/GPX/1/1');
   result.SetAttribute('xmlns:gpxx',  'http://www.garmin.com/xmlschemas/GpxExtensions/v3');
   result.SetAttribute('xmlns:wptx1', 'http://www.garmin.com/xmlschemas/WaypointExtension/v1');
@@ -1273,7 +1261,7 @@ var Func: TGPXFunc;
       TracksProcessed := TStringList.Create;
       FrmSelectGPX := TFrmSelectGPX.Create(nil);
       try
-        WptTracksRoot := InitRoot(WptTracksXml);
+        WptTracksRoot := InitGarminGpx(WptTracksXml);
 
         for Track in TrackList do
         begin
@@ -1345,7 +1333,7 @@ var Func: TGPXFunc;
     begin
 
       WptTracksXml.Clear;
-      WptTracksRoot := InitRoot(WptTracksXml);
+      WptTracksRoot := InitGarminGpx(WptTracksXml);
 
 // Create Way points, from Way points
       if (ProcessWayPtsInWayPts) then
@@ -1370,7 +1358,7 @@ var Func: TGPXFunc;
         for RouteWayPoints in RouteViaPointList do
         begin
           WptTracksXml.Clear;
-          WptTracksRoot := InitRoot(WptTracksXml);
+          WptTracksRoot := InitGarminGpx(WptTracksXml);
 
           for WayPoint in RouteWayPoints.ChildNodes do
           begin

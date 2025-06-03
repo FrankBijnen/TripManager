@@ -165,6 +165,8 @@ begin
         AFieldValue := FAddressList.Values[ABackup]
       else
       begin
+        if (FAddressList.Values[ABackup] = '') then
+          continue;
         if (AFieldValue <> '') then
           AFieldValue := AFieldValue + ' ';
         AFieldValue := AFieldValue + FAddressList.Values[ABackup];
