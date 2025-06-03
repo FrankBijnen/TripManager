@@ -39,11 +39,7 @@ uses System.Types, UnitMtpDevice;
 
 function SafeStrToInt64(const S: string): int64;
 begin
-  try
-    result := StrToInt(S);
-  except
-    result := 0;
-  end;
+  result := StrToIntDef(S, 0);
 end;
 
 function CompareTextAsInteger(const s1, s2: string): Integer;

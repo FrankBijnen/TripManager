@@ -40,10 +40,14 @@ type
 implementation
 
 uses
-  System.Variants, System.JSON,  System.NetEncoding, System.Math, System.DateUtils, System.IOUtils,
+  System.Variants, System.JSON, System.NetEncoding, System.Math, System.DateUtils, System.IOUtils,
   Winapi.Windows, Vcl.Dialogs,
   REST.Types, REST.Client, REST.Utils,
   UnitStringUtils;
+
+var
+  UseOl2Local: boolean;
+  Ol2Installed: boolean;
 
 constructor TOSMHelper.Create(const APathName, AHome, AInitialZoom: string);
 begin
@@ -73,8 +77,16 @@ begin
   Html.Add('<Html>');
   Html.Add('<head>');
   Html.Add('<title></title>');
-  Html.Add('<script type="text/javascript"  src="https://openlayers.org/api/OpenLayers.js"></script>');
-  Html.Add('<script src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
+  if (UseOl2Local) then
+  begin
+    Html.Add('<script type="text/javascript" src="OpenLayers.js"></script>');
+    Html.Add('<script type="text/javascript" src="OpenStreetMap.js"></script>');
+  end
+  else
+  begin
+    Html.Add('<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>');
+    Html.Add('<script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
+  end;
   Html.Add('<script type="text/javascript">');
   Html.Add('var map;');
   Html.Add('var RoutePointsLayer;');
@@ -305,10 +317,60 @@ begin
   Html.SaveToFile(FPathName, TEncoding.UTF8);
 end;
 
+function InstallOpenLayers2: boolean;
+const Ol2Files: array[0..14,0..1] of string  = (
+    ('OL2_OpenLayers',      'OpenLayers.js'),
+    ('OL2_OpenStreetMap',   'OpenStreetMap.js'),
+    ('OL2_img_cpr',         'img\cloud-popup-relative.png'),
+    ('OL2_img_em',          'img\east-mini.png'),
+    ('OL2_img_lsmax',       'img\layer-switcher-maximize.png'),
+    ('OL2_img_lsmin',       'img\layer-switcher-minimize.png'),
+    ('OL2_img_nm',          'img\north-mini.png'),
+    ('OL2_img_s',           'img\slider.png'),
+    ('OL2_img_sm',          'img\south-mini.png'),
+    ('OL2_img_wm',          'img\west-mini.png'),
+    ('OL2_img_zmm',         'img\zoom-minus-mini.png'),
+    ('OL2_img_zpm',         'img\zoom-plus-mini.png'),
+    ('OL2_img_zb',          'img\zoombar.png'),
+    ('OL2_thm_def_close',   'theme\default\img\close.gif'),
+    ('OL2_thm_def_style',   'theme\default\style.css')
+  );
+
+var
+  ResStream: TResourceStream;
+  Index: integer;
+begin
+  result := false;
+  try
+    ForceDirectories(IncludeTrailingPathDelimiter(GetOSMTemp) + 'img');
+    ForceDirectories(IncludeTrailingPathDelimiter(GetOSMTemp) + 'theme\default\img');
+    for Index := 0 to High(Ol2Files) do
+    begin
+      ResStream := TResourceStream.Create(hInstance, Ol2Files[Index, 0], RT_RCDATA);
+      try
+        ResStream.SaveToFile(IncludeTrailingPathDelimiter(GetOSMTemp) + Ol2Files[Index, 1]);
+      finally
+        ResStream.Free;
+      end;
+    end;
+    result := true;
+  except on E:Exception do
+    ShowMessage(E.Message);
+  end;
+end;
+
 procedure ShowMap(Browser: TEdgeBrowser; Home: string = '');
 var
   OsmHelper: TOSMHelper;
 begin
+  if (UseOl2Local) then
+  begin
+    if not Ol2Installed then
+      Ol2Installed := InstallOpenLayers2;
+    if not Ol2Installed then
+      UseOl2Local := false;
+  end;
+
   if (Home = '') then
     OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom_NoHome)
   else
@@ -336,6 +398,12 @@ begin
   finally
     JSONValue.Free;
   end;
+end;
+
+initialization
+begin
+  UseOl2Local := true;
+  Ol2Installed := false;
 end;
 
 end.

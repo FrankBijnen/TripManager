@@ -51,28 +51,29 @@ const KML_StyleUrl = 'm_ylw-pushpin';
 
 implementation
 
-uses Winapi.ShellAPI, WinApi.Windows;
+uses
+  Winapi.ShellAPI, WinApi.Windows;
 
 function KMLColor(GPXColor: string): string;
 begin
   result := 'ffff00ff';
-  if (GPXColor = 'Black')       then begin result := 'ff000000'; exit; end;
-  if (GPXColor = 'DarkRed')     then begin result := 'ff00008b'; exit; end;
-  if (GPXColor = 'DarkGreen')   then begin result := 'ff006400'; exit; end;
-  if (GPXColor = 'DarkYellow')  then begin result := 'ff20b8b5'; exit; end;
-  if (GPXColor = 'DarkBlue')    then begin result := 'ff8b0000'; exit; end;
-  if (GPXColor = 'DarkMagenta') then begin result := 'ff8b008b'; exit; end;
-  if (GPXColor = 'DarkCyan')    then begin result := 'ff8b8b00'; exit; end;
-  if (GPXColor = 'LightGray')   then begin result := 'ffcccccc'; exit; end;
-  if (GPXColor = 'DarkGray')    then begin result := 'ff444444'; exit; end;
-  if (GPXColor = 'Red')         then begin result := 'ff0000ff'; exit; end;
-  if (GPXColor = 'Green')       then begin result := 'ff00ff00'; exit; end;
-  if (GPXColor = 'Yellow')      then begin result := 'ff00ffff'; exit; end;
-  if (GPXColor = 'Blue')        then begin result := 'ffff0000'; exit; end;
-  if (GPXColor = 'Magenta')     then begin result := 'ffff00ff'; exit; end;
-  if (GPXColor = 'Cyan')        then begin result := 'ffffff00'; exit; end;
-  if (GPXColor = 'White')       then begin result := 'ffffffff'; exit; end;
-  if (GPXColor = 'Transparent') then begin result := 'ffffffff'; exit; end;
+  if (GPXColor = 'Black')       then exit('ff000000');
+  if (GPXColor = 'DarkRed')     then exit('ff00008b');
+  if (GPXColor = 'DarkGreen')   then exit('ff006400');
+  if (GPXColor = 'DarkYellow')  then exit('ff20b8b5');
+  if (GPXColor = 'DarkBlue')    then exit('ff8b0000');
+  if (GPXColor = 'DarkMagenta') then exit('ff8b008b');
+  if (GPXColor = 'DarkCyan')    then exit('ff8b8b00');
+  if (GPXColor = 'LightGray')   then exit('ffcccccc');
+  if (GPXColor = 'DarkGray')    then exit('ff444444');
+  if (GPXColor = 'Red')         then exit('ff0000ff');
+  if (GPXColor = 'Green')       then exit('ff00ff00');
+  if (GPXColor = 'Yellow')      then exit('ff00ffff');
+  if (GPXColor = 'Blue')        then exit('ffff0000');
+  if (GPXColor = 'Magenta')     then exit('ffff00ff');
+  if (GPXColor = 'Cyan')        then exit('ffffff00');
+  if (GPXColor = 'White')       then exit('ffffffff');
+  if (GPXColor = 'Transparent') then exit('ffffffff');
 end;
 
 function GetNodeAsType(ANewDoc: IXMLNode; Aname: string; SomeType: TXMLNodeClass): IXMLNode;
@@ -153,9 +154,10 @@ begin
 end;
 
 function TKMLHelper.WriteFolder(AName:string; ACoordinates:string): IXMLNode;
-var PlaceMark     : IXMLNode;
-    MultiGeometry : IXMLNode;
-    LineString    : IXMLNode;
+var
+  PlaceMark     : IXMLNode;
+  MultiGeometry : IXMLNode;
+  LineString    : IXMLNode;
 begin
   result := GetNodeAsType(FNewDoc, 'Folder', TXMLFolderType);
   with result as IXMLFolderType do
@@ -195,8 +197,9 @@ procedure TKMLHelper.WritePlace(AFolder: IXMLNode;
                                 ACoordinates: string;
                                 AName: string;
                                 ADescription: string = '');
-var PlaceMark : IXMLNode;
-    Point     : IXMLNode;
+var
+  PlaceMark : IXMLNode;
+  Point     : IXMLNode;
 begin
   PlaceMark := GetNodeAsType(AFolder, 'Placemark', TXMLPlacemarkType);
   with PlaceMark as IXMLPlacemarkType do
@@ -222,8 +225,9 @@ begin
 end;
 
 procedure TKMLHelper.WriteHeader(ARing:boolean = false);
-var MyStyles  : array of TStyleMap;
-    Style     : TStyleMap;
+var
+  MyStyles  : array of TStyleMap;
+  Style     : TStyleMap;
 begin
   MyStyles := [TStyleMap.Create('normal', 's_ylw-pushpin', 1.1),
                TStyleMap.Create('highlight', 's_ylw-pushpin_hl', 1.3)];
@@ -260,7 +264,8 @@ begin
 end;
 
 procedure TKMLHelper.WriteKml;
-var XmL: IXMLDocument;
+var
+  XmL: IXMLDocument;
 begin
   XmL := TXMLDocument.Create(nil);
   Xml.XML.Add(FNewDoc.XML);

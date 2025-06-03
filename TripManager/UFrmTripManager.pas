@@ -1070,7 +1070,7 @@ begin
 
   XML := TXmlVSDocument.Create;
   try
-    XMLRoot := InitRoot(XML);
+    XMLRoot := InitGarminGpx(XML);
     Rte := XMLRoot.AddChild('rte');
     Rte.AddChild('name').NodeValue := TBaseDataItem(ATripList.GetItem('mTripName')).AsString;
 
@@ -1233,7 +1233,7 @@ begin
         if (ContainsText(Ext, GpxExtension)) then
         begin
           SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
-          Application.ProcessMessages;
+          ProcessMessages;
           DoFunction([Unglitch], ShellListView1.Folders[AnItem.Index].PathName);
         end;
       end;
@@ -3593,7 +3593,7 @@ begin
       AGpx := ModifiedList[0];
       ModifiedList.Delete(0);
       SbPostProcess.Panels[0].Text := AGpx;
-      Application.ProcessMessages;
+      ProcessMessages;
       DoFunction([Unglitch], AGpx);
     end;
   finally
@@ -3607,7 +3607,7 @@ end;
 procedure TFrmTripManager.WMAddrLookUp(var Msg: TMessage);
 begin
   SbPostProcess.Panels[1].Text  := TPlace(Msg.LParam).FormattedAddress;
-  Application.ProcessMessages;
+  ProcessMessages;
   Msg.Result := 0;
 end;
 

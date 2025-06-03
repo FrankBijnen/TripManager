@@ -596,7 +596,7 @@ begin
   XML := TXmlVSDocument.Create;
   CdsRoutePoints.DisableControls;
   try
-    XMLRoot := InitRoot(XML);
+    XMLRoot := InitGarminGpx(XML);
     Rte := XMLRoot.AddChild('rte');
     Rte.AddChild('name').NodeValue := CdsRouteTripName.AsString;
     Extensions := Rte.AddChild('extensions');

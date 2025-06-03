@@ -39,6 +39,7 @@ type
 var FrmSelectGPX: TFrmSelectGPX;
 
 implementation
+
 {$R *.dfm}
 
 uses UnitStringUtils;
@@ -48,9 +49,10 @@ const
   ColorColumn = 1;
 
 procedure TFrmSelectGPX.LoadTracks(DisplayColor: string);
-var Indx: integer;
-    Name, Color, Points, FromRoute: string;
-    LVItem: TListItem;
+var
+  Indx: integer;
+  Name, Color, Points, FromRoute: string;
+  LVItem: TListItem;
 begin
 
   if (DisplayColor = '-') then

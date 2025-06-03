@@ -1,4 +1,5 @@
 unit OSM_helper;
+// Unit to write HTML page from a GPX
 
 interface
 
@@ -83,8 +84,8 @@ begin
   Html.Add('<Html>');
   Html.Add('<head>');
   Html.Add('<title></title>');
-  Html.Add('<script type="text/javascript"  src="http://openlayers.org/api/OpenLayers.js"></script>');
-  Html.Add('<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
+  Html.Add('<script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>');
+  Html.Add('<script type="text/javascript" src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
   Html.Add('<script type="text/javascript">');
   Html.Add('');
   Html.Add('var map;');
@@ -140,8 +141,6 @@ begin
   Html.Add('  function createTrack(){');
   Html.Add('');
   Html.Add('    lineLayer = new OpenLayers.Layer.Vector("Track");');
-//  Html.Add('    style = {strokeColor: ''#0000ff'', strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: 5};');
-
   Html.Add(Format('    style = {strokeColor: ''%s'', strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: 5};', [OSMColor(Color)]));
 
   Html.Add('    points = new Array();');

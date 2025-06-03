@@ -18,6 +18,7 @@ type
   TXmlVSAttribute = TXmlAttribute;
   TXmlVSAttributeList = TXmlAttributeList;
 
+function FindSubNodeValue(ANode: TXmlVSNode; SubName: string): string;
 function XMLPrefix(const AName: TXmlVSNode): string;
 
 implementation
@@ -29,6 +30,22 @@ begin
   P := Pos(':', AName.NodeName);
   if (P > 1) then
     result := Copy(AName.NodeName, 1, P);
+end;
+
+function FindSubNodeValue(ANode: TXmlVSNode; SubName: string): string;
+var
+  SubNode: TXmlVSNode;
+begin
+  Result := '';
+  SubNode := ANode.Find(SubName);
+  if (SubNode <> nil) then
+  begin
+    Result := SubNode.NodeValue;
+    if (Result = '') and
+       (SubNode.HasChildNodes) and
+       (SubNode.FirstChild.NodeType = TXmlVSNodeType.ntCData) then
+      Result := SubNode.FirstChild.NodeValue;
+  end;
 end;
 
 end.

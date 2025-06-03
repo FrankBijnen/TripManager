@@ -1,21 +1,27 @@
 unit UnitStackTrace;
 
+// Enabling this will give a detailed stack trace in the event of an exception.
+// JEDI-JCL should be installed. https://github.com/project-jedi/jcl
+// Enable Debug_CallStack in the DPR
 interface
 
-uses System.SysUtils;
+uses
+  System.SysUtils;
 
 type
   TLog_StackTrace = class
-    private
-      procedure HandleAppException(Sender: TObject; E: Exception);
+  private
+    procedure HandleAppException(Sender: TObject; E: Exception);
   end;
 
 implementation
 
-uses Winapi.Windows, System.Variants, System.Classes, Vcl.Clipbrd, System.UITypes,
-     Vcl.Forms, Vcl.Dialogs, JclDebug;
+uses
+  Winapi.Windows, System.Variants, System.Classes, Vcl.Clipbrd, System.UITypes,
+  Vcl.Forms, Vcl.Dialogs, JclDebug;
 
-var Log_StackTrace: TLog_StackTrace;
+var
+  Log_StackTrace: TLog_StackTrace;
 
 procedure TLog_StackTrace.HandleAppException(Sender: TObject; E: Exception);
 var StackTrace: TStringList;
