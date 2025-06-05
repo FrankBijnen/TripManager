@@ -96,6 +96,7 @@ type
     FTripFileCanceled: TTripFileUpdate;
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
+    procedure OnSetAnalyzePrefs(Sender: TObject);
     procedure CopyToClipBoard(Cut: boolean);
   public
     { Public declarations }
@@ -120,7 +121,7 @@ uses
   System.SysUtils, System.Math,
   Vcl.Clipbrd,
   UFrmSelectGPX,
-  UDmRoutePoints, UnitStringUtils, UnitVerySimpleXml, UnitGeoCode, UnitGpx, UFrmAdvSettings;
+  UDmRoutePoints, UnitStringUtils, UnitVerySimpleXml, UnitGeoCode, UnitGpxObjects, UFrmAdvSettings;
 
 {$R *.dfm}
 
@@ -200,6 +201,11 @@ begin
     FTripFileUpdated(Self);
 
   Close;
+end;
+
+procedure TFrmTripEditor.OnSetAnalyzePrefs(Sender: TObject);
+begin
+  TProcessOptions(Sender).ProcessTracks := false;
 end;
 
 procedure TFrmTripEditor.CopyToClipBoard(Cut: boolean);
@@ -341,10 +347,7 @@ end;
 procedure TFrmTripEditor.Import1Click(Sender: TObject);
 var
   CrNormal,CrWait: HCURSOR;
-  OutWayPointList: TXmlVSNodeList;
-  OutWayPointFromRouteList: TXmlVSNodeList;
-  OutRouteViaPointList: TXmlVSNodeList;
-  OutTrackList: TXmlVSNodeList;
+  GPXFile: TGPXFile;
   RoutePoints, RoutePoint: TXmlVSNode;
   AnItem: TListItem;
 
@@ -403,24 +406,19 @@ begin
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
-  FrmAdvSettings.SetFixedPrefs;
-  ProcessTracks := false;
   FrmSelectGPX := TFrmSelectGPX.Create(Self);
+  GPXFile := TGPXFile.Create(OpenTrip.FileName, OnSetAnalyzePrefs, nil);
   try
-    AnalyzeGpx(OpenTrip.FileName,
-               OutWayPointList,
-               OutWayPointFromRouteList,
-               OutRouteViaPointList,
-               OutTrackList);
+    GPXFile.AnalyzeGpx;
 
-    if (OutWayPointList.Count > 0) then
+    if (GPXFile.WayPointList.Count > 0) then
       FrmSelectGPX.AllTracks.Add('-' + #9 +
-                                 IntToStr(OutWayPointList.Count) + #9 +
+                                 IntToStr(GPXFile.WayPointList.Count) + #9 +
                                  'Waypoints' + #9 +
                                  'Wpt');
-    if (OutRouteViaPointList.Count > 0) then
+    if (GPXFile.RouteViaPointList.Count > 0) then
     begin
-      for RoutePoints in OutRouteViaPointList do
+      for RoutePoints in GPXFile.RouteViaPointList do
       begin
         if (RoutePoints.ChildNodes.Count > 0) then
           FrmSelectGPX.AllTracks.Add('-' + #9 +
@@ -446,12 +444,12 @@ begin
 
           if (AnItem.SubItems[0] = 'Wpt') then
           begin
-            for RoutePoint in OutWayPointList do
+            for RoutePoint in GPXFile.WayPointList do
               AddRoutePoint(RoutePoint, true);
             continue;
           end;
 
-          for RoutePoints in OutRouteViaPointList do
+          for RoutePoints in GPXFile.RouteViaPointList do
           begin
             if (RoutePoints.NodeName <> AnItem.Caption) then
               continue;
@@ -467,8 +465,9 @@ begin
       end;
     end;
   finally
-    SetCursor(CrNormal);
     FrmSelectGPX.Free;
+    GPXFile.Free;
+    SetCursor(CrNormal);
   end;
 end;
 

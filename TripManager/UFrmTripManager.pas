@@ -321,6 +321,12 @@ type
     procedure ReadDefaultFolders;
     procedure ReadColumnSettings;
     procedure WriteColumnSettings;
+    procedure OnSetFixedPrefs(Sender: TObject);
+    procedure OnSetTransferPrefs(Sender: TObject);
+    procedure OnSetPostProcessPrefs(Sender: TObject);
+    procedure OnSetAdditionalPrefs(Sender: TObject);
+    procedure OnSavePrefs(Sender: TObject);
+
     procedure ReadSettings;
     procedure ClearTripInfo;
     procedure EditTrip(NewFile: boolean);
@@ -349,8 +355,8 @@ var
 implementation
 
 uses
-  System.StrUtils, System.UITypes, System.DateUtils, Winapi.ShellAPI, Vcl.Clipbrd,
-  UnitStringUtils, UnitOSMMap, UnitGpx, MsgLoop, UnitVerySimpleXml, UnitGeoCode, UDmRoutePoints,
+  System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, Winapi.ShellAPI, Vcl.Clipbrd,
+  UnitStringUtils, UnitOSMMap, UnitGpxObjects, MsgLoop, UnitVerySimpleXml, UnitGeoCode, UDmRoutePoints,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
 
 const
@@ -739,8 +745,10 @@ begin
 
   // Revert to default (startup) locations
   ReadDefaultFolders;
+
   // Also checks for connected MTP
   BgDeviceClick(BgDevice);
+
   if (FrmTransferOptions.ShowModal <> ID_OK) then
     exit;
 
@@ -750,9 +758,9 @@ begin
   WarnOverWrite := mrNone;
 
   try
-    ForceOutDir := GetRoutesTmp;
-    ZumoModel := TZumoModel(CmbModel.ItemIndex);
     CheckSupportedModel;
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ZumoModel', CmbModel.Text);
+
     for AnItem in ShellListView1.Items do
     begin
       if (AnItem.Selected = false) then
@@ -764,15 +772,15 @@ begin
       if not (ContainsText(ExtractFileExt(GPXFile), GpxExtension)) then
         continue;
 
-      DeleteTempFiles(ForceOutDir, '*.*');
+      DeleteTempFiles(GetRoutesTmp, '*.*');
+      TGPXFile.PerformFunctions(FrmTransferOptions.Funcs, GPXFile,
+                                OnSetTransferPrefs, OnSavePrefs,
+                                GetRoutesTmp, nil, AnItem.Index);
 
-      DoFunction(FrmTransferOptions.Funcs, GPXFile, nil, AnItem.Index);
-      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
+      if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferRoute', ''), BooleanValues[true])) then
+        CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)), false);
 
-      if (FrmTransferOptions.CompleteRoute) then
-        CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(ForceOutDir) + ExtractFilename(GPXFile)), false);
-
-      Rc := FindFirst(ForceOutDir + '\*.*', faAnyFile - faDirectory, Fs);
+      Rc := FindFirst(GetRoutesTmp + '\*.*', faAnyFile - faDirectory, Fs);
       while (Rc = 0) do
       begin
         TempFile := Fs.Name;
@@ -798,7 +806,7 @@ begin
 
         EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
         EdFileSysFolder.Update;
-        TempFile := IncludeTrailingPathDelimiter(ForceOutDir) + TempFile;
+        TempFile := IncludeTrailingPathDelimiter(GetRoutesTmp) + TempFile;
 
         if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
           raise Exception.Create(Format('Could not overwrite file: %s on %s', [ExtractFileName(TempFile), CurrentDevice.FriendlyName]));
@@ -1219,7 +1227,6 @@ begin
 
     if FrmPostProcess.ShowModal <> ID_OK then
       exit;
-
     CrWait := LoadCursor(0,IDC_WAIT);
     CrNormal := SetCursor(CrWait);
     try
@@ -1234,7 +1241,8 @@ begin
         begin
           SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
           ProcessMessages;
-          DoFunction([Unglitch], ShellListView1.Folders[AnItem.Index].PathName);
+          TGPXFile.PerformFunctions([PostProcess], ShellListView1.Folders[AnItem.Index].PathName,
+                                    OnSetPostProcessPrefs, OnSavePrefs);
         end;
       end;
     finally
@@ -1828,11 +1836,9 @@ begin
     end
     else
     begin
-      FrmAdvSettings.SetFixedPrefs;
-      ProcessBegin := true;
-      ProcessEnd := true;
-      DoFunction([CreateOSMPoints], ShellListView1.SelectedFolder.PathName, OsmTrack);
-      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
+      TGPXFile.PerformFunctions([CreateOSMPoints], ShellListView1.SelectedFolder.PathName,
+                                nil, OnSavePrefs,
+                                '', OsmTrack);
 
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
@@ -3144,9 +3150,8 @@ begin
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   try
-    ForceOutDir := '';
-    ZumoModel := TZumoModel(CmbModel.ItemIndex);
     CheckSupportedModel;
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ZumoModel', CmbModel.Text);
 
     for AnItem in ShellListView1.Items do
     begin
@@ -3156,10 +3161,9 @@ begin
         continue;
       Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
       if (ContainsText(Ext, GpxExtension)) then
-      begin
-        DoFunction(FrmAdditional.Funcs, ShellListView1.Folders[AnItem.Index].PathName);
-        SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
-      end;
+        TGPXFile.PerformFunctions(FrmAdditional.Funcs, ShellListView1.Folders[AnItem.Index].PathName,
+                                  OnSetAdditionalPrefs, OnSavePrefs,
+                                  '', nil, AnItem.Index);
     end;
 
   finally
@@ -3482,9 +3486,171 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, WidthColumns_Key, ColWidths);
 end;
 
+procedure TFrmTripManager.OnSetFixedPrefs(Sender: TObject);
+begin
+  with Sender as TProcessOptions do
+  begin
+    TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');
+//TODO add keys in FrmAdvancedSettings
+    KMLTrackColor := '';
+    OSMTrackColor := 'Magenta';
+    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
+    DefaultProximityStr := '500';
+
+    ProcessTracks := true;
+    ProcessSubClass := true;
+    ProcessBegin := false;
+    ProcessEnd := false;
+    ProcessVia := false;
+    ProcessViaPts := true;
+    ProcessShape := false;
+    ShapingPointName := TShapingPointName.Unchanged;
+
+    ProcessAddrBegin := false;
+    ProcessAddrEnd := false;
+    ProcessAddrVia := false;
+    ProcessAddrShape := false;
+    ProcessAddrWayPt := false;
+
+    // Lookup Messages
+    LookUpWindow := FrmTripManager.Handle;
+    LookUpMessage := UFrmTripManager.WM_ADDRLOOKUP;
+
+    // Model to use
+    ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ZumoModel', '')));
+
+    // XT2 Defaults
+    ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
+    VehicleProfileGuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileGuid', XT2_VehicleProfileGuid);
+    VehicleProfileHash := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileHash', XT2_VehicleProfileHash);
+    VehicleId := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleId', XT2_VehicleId);
+
+    ProcessCategory := [];
+  end;
+end;
+
+procedure TFrmTripManager.OnSetTransferPrefs(Sender: TObject);
+begin
+  with Sender as TProcessOptions do
+  begin
+    ProcessWayPtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
+    ProcessViaPtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]);
+    ProcessShapePtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[false]), BooleanValues[true]);
+
+    ProcessWayPtsInGpi := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
+    ProcessViaPtsInGpi := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]);
+    ProcessShapePtsInGpi := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[false]), BooleanValues[true]);
+  end;
+end;
+
+procedure TFrmTripManager.OnSetPostProcessPrefs(Sender: TObject);
+var
+  WayPtList: TStringList;
+  ProcessWpt: boolean;
+  WayPtCat: integer;
+begin
+  with Sender as TProcessOptions do
+  begin
+    ProcessBegin := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessBegin', BooleanValues[true]), BooleanValues[true]);
+    BeginSymbol := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginSymbol');
+    BeginStr := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginStr');;
+    ProcessAddrBegin := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginAddress', BooleanValues[true]), BooleanValues[true]);
+
+    ProcessEnd := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessEnd', BooleanValues[true]), BooleanValues[true]);
+    EndSymbol := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndSymbol');;
+    EndStr := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndStr');;
+    ProcessAddrEnd := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndAddress', BooleanValues[true]), BooleanValues[true]);
+
+    WayPtList := TStringList.Create;
+    try
+      WayPtList.Text := ProcessCategoryPick;
+      ProcessWpt := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true]);
+      WayPtCat := WayPtList.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', WayPtList[WayPtList.Count -1]));
+      ProcessCategory := [];
+      if (ProcessWpt) then
+      begin
+        case WayPtCat of
+          1: Include(ProcessCategory, pcSymbol);
+          2: Include(ProcessCategory, pcGPX);
+          3: begin
+               Include(ProcessCategory, pcSymbol);
+               Include(ProcessCategory, pcGPX);
+              end;
+        end;
+      end;
+    finally
+      WayPtList.Free;
+    end;
+
+    ProcessWayPtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
+    ProcessViaPtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[true]), BooleanValues[true]);
+    ProcessShapePtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[true]), BooleanValues[true]);
+    ProcessAddrWayPt := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'WayPtAddress', BooleanValues[true]), BooleanValues[true]);
+
+    ProcessVia := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessVia', BooleanValues[true]), BooleanValues[true]);
+    ProcessAddrVia := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ViaAddress', BooleanValues[true]), BooleanValues[true]);
+
+    ProcessShape := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessShape', BooleanValues[true]), BooleanValues[true]);
+    ShapingPointName := TShapingPointName(GetEnumValue(TypeInfo(TShapingPointName),
+                                          GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ShapingName', 'Route_Distance')));
+    DistanceUnit := TDistanceUnit(
+        StrToIntDef(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'DistanceUnit', ''), Ord(TDistanceUnit.duKm)));
+    DistanceUnit := TDistanceUnit(GetEnumValue(TypeInfo(TDistanceUnit),
+                                          GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'DistanceUnit', 'duKm')));
+    ProcessAddrShape := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ShapeAddress', BooleanValues[true]), BooleanValues[true]);;
+
+  end;
+end;
+
+procedure TFrmTripManager.OnSetAdditionalPrefs(Sender: TObject);
+begin
+  with Sender as TProcessOptions do
+  begin
+    ProcessWayPtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
+    ProcessViaPtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[true]), BooleanValues[true]);
+    ProcessShapePtsInWayPts := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[true]), BooleanValues[true]);
+
+    ProcessWayPtsInGpi := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
+    ProcessViaPtsInGpi := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[true]), BooleanValues[true]);
+    ProcessShapePtsInGpi := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[true]), BooleanValues[true]);
+  end;
+end;
+
+procedure TFrmTripManager.OnSavePrefs(Sender: TObject);
+begin
+  with Sender as TProcessOptions do
+  begin
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', TrackColor);
+  end;
+end;
+
 procedure TFrmTripManager.ReadSettings;
 begin
-  FrmAdvSettings.SetFixedPrefs;
+  UnitGpxObjects.OnSetFixedPrefs := OnSetFixedPrefs;
 
   PrefDevice := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, PrefDev_Key, XTName);
   GuessModel(PrefDevice);
@@ -3493,7 +3659,7 @@ begin
   WarnRecalc := mrNone;
   RoutePointTimeOut := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, RoutePointTimeOut_Key, RoutePointTimeOut_Val);
   GeoSearchTimeOut := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoSearchTimeOut_Key, GeoSearchTimeOut_Val);
-
+  ReadGeoCodeSettings(TripManagerReg_Key);
   BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, Maximized_Key, 'False'), 'True')) then
     WindowState := TWindowState.wsMaximized
@@ -3594,7 +3760,8 @@ begin
       ModifiedList.Delete(0);
       SbPostProcess.Panels[0].Text := AGpx;
       ProcessMessages;
-      DoFunction([Unglitch], AGpx);
+      TGPXFile.PerformFunctions([PostProcess], AGpx,
+                                OnSetPostProcessPrefs, OnSavePrefs);
     end;
   finally
     DirectoryMonitor.Active := ChkWatch.Checked;

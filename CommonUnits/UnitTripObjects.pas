@@ -69,7 +69,7 @@ const
 
   RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
                                                           (Value: Ord(rpShaping);           Name: 'Shaping point'),
-                                                          (Value: Ord(rpShapingXT2);        Name: 'Shaping point XT2')
+                                                          (Value: Ord(rpShapingXT2);        Name: 'Shaping point XT(2)')
                                                         );
   UdbDirTurn  = 'Turn';
 
@@ -2741,17 +2741,6 @@ var
   Location: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
 
-  procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD);
-  var
-    SwapCount: Cardinal;
-  begin
-    SwapCount := Swap32(Count);
-    TmpStream.Clear;
-    TmpStream.Write(SwapCount, SizeOf(SwapCount));
-    TmpStream.Write(Buffer, SizeOf(Buffer));
-    TmpStream.Position := 0;
-  end;
-
   procedure SetRoutePref(AKey: ShortString);
   var
     RoutePreference: TRawDataItem;
@@ -2803,7 +2792,7 @@ begin
   TmpStream := TMemoryStream.Create;
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
-    // The XT recalculates all. (And hopefully the XT2 also)
+    // The XT(2) recalculates all.
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
@@ -2887,13 +2876,6 @@ procedure TTripList.CreateTemplate_XT2(const TripName: string);
 var
   TmpStream: TMemoryStream;
   Uid: TGuid;
-
-  procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);
-  begin
-    TmpStream.Clear;
-    TmpStream.Write(Buffer, SizeOf(Buffer));
-    TmpStream.Position := 0;
-  end;
 
 begin
   TmpStream := TMemoryStream.Create;

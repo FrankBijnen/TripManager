@@ -5,13 +5,11 @@ program TripManager;
 uses
   {$IFDEF Debug_CallStack}
   UnitStackTrace in 'UnitStackTrace.pas',
-  {$ENDIF}
+  {$ENDIF }
   MidasLib,
   Vcl.Forms,
   Vcl.Themes,
   Vcl.Styles,
-
-// Forms
   UDmRoutePoints in 'UDmRoutePoints.pas' {DmRoutePoints: TDataModule},
   UFrmTripManager in 'UFrmTripManager.pas' {FrmTripManager},
   UFrmPostProcess in 'UFrmPostProcess.pas' {FrmPostProcess},
@@ -19,17 +17,11 @@ uses
   UFrmAdditional in 'UFrmAdditional.pas' {FrmAdditional},
   UFrmTransferOptions in 'UFrmTransferOptions.pas' {FrmTransferOptions},
   UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
-  UFrmGeoSearch in 'UFrmGeoSearch.pas' {FGeoSearch},
-  UFrmPlaces in 'UFrmPlaces.pas' {FrmPlaces},
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
-
-// Control extensions
   TripManager_MultiContext in 'TripManager_MultiContext.pas',
   TripManager_ShellList in 'TripManager_ShellList.pas',
   TripManager_ValEdit in 'TripManager_ValEdit.pas',
-
-// Common
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
   ogckml23 in '..\CommonUnits\kml\ogckml23.pas',
@@ -49,9 +41,11 @@ uses
   UnitBmp in '..\CommonUnits\UnitBmp.pas',
   UnitGeoCode in '..\CommonUnits\UnitGeoCode.pas',
   UnitGpi in '..\CommonUnits\UnitGpi.pas',
-  UnitGpx in '..\CommonUnits\UnitGpx.pas',
   UnitStringUtils in '..\CommonUnits\UnitStringUtils.pas',
-  UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas';
+  UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
+  UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
+  UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
+  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
 
 {$R *.res}
 
@@ -72,10 +66,10 @@ begin
   Application.CreateForm(TFrmAdditional, FrmAdditional);
   Application.CreateForm(TFrmTransferOptions, FrmTransferOptions);
   Application.CreateForm(TFrmAdvSettings, FrmAdvSettings);
-  Application.CreateForm(TFGeoSearch, FGeoSearch);
-  Application.CreateForm(TFrmPlaces, FrmPlaces);
   Application.CreateForm(TFrmNewTrip, FrmNewTrip);
   Application.CreateForm(TFrmTripEditor, FrmTripEditor);
   Application.CreateForm(TFrmSelectGPX, FrmSelectGPX);
+  Application.CreateForm(TFGeoSearch, FGeoSearch);
+  Application.CreateForm(TFrmPlaces, FrmPlaces);
   Application.Run;
 end.

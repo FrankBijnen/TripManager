@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ComCtrls, System.ImageList, Vcl.ImgList,
-  UnitGpx;
+  UnitGpxObjects;
 
 type
   TFrmTransferOptions = class(TForm)
@@ -24,7 +24,6 @@ type
   public
     { Public declarations }
     Funcs: array of TGPXFunc;
-    CompleteRoute: boolean;
   end;
 
 var
@@ -53,68 +52,57 @@ var
   PtsInGpi, AddRoutePoints: string;
 begin
   LvSelections.Items[IdTrip].Caption := Format(TripFilesFor, [FrmTripManager.CmbModel.Text]);
-  LvSelections.Items[IdTrip].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrip', BooleanValues[true]) = BooleanValues[true]);
-  LvSelections.Items[IdTrack].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrack', BooleanValues[true]) = BooleanValues[true]);
-  LvSelections.Items[IdWayPoint].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferWayPoint', BooleanValues[false]) = BooleanValues[true]);
+  LvSelections.Items[IdTrip].Checked := SameText(
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrip', BooleanValues[true])), BooleanValues[true]);
+  LvSelections.Items[IdTrack].Checked := SameText(
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferTrack', BooleanValues[true])), BooleanValues[true]);
+  LvSelections.Items[IdWayPoint].Checked := SameText(
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferWayPoint', BooleanValues[false])), BooleanValues[true]);
 
   AddRoutePoints := '';
-
-  ProcessWayPtsInWayPts := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
-  if ProcessWayPtsInWayPts then
+  if SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]) then
     AddRoutePoints := AddRoutePoints + ' Original Way points,';
-
-  ProcessViaPtsInWayPts := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]);
-  if ProcessViaPtsInWayPts then
+  if SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]) then
     AddRoutePoints := AddRoutePoints + ' Via points,';
-
-  ProcessShapePtsInWayPts := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[false]), BooleanValues[true]);
-  if ProcessShapePtsInWayPts then
+  if SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[false]), BooleanValues[true]) then
     AddRoutePoints := AddRoutePoints + ' Shaping points,';
-
   if (AddRoutePoints <> '') then
     SetLength(AddRoutePoints, Length(AddRoutePoints) -1)
   else
     AddRoutePoints := ' None';
   LvSelections.Items[IdWayPoint].Caption := Format(WayPointSel, [AddRoutePoints]);
 
-  LvSelections.Items[IdStrippedRoute].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferStrippedRoute', BooleanValues[false]) = BooleanValues[true]);
-  LvSelections.Items[IdCompleteRoute].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferRoute', BooleanValues[false]) = BooleanValues[true]);
-  LvSelections.Items[IdPOI].Checked :=
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferGPI', BooleanValues[false]) = BooleanValues[true]);
+  LvSelections.Items[IdStrippedRoute].Checked := SameText(
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferStrippedRoute', BooleanValues[false])), BooleanValues[true]);
+  LvSelections.Items[IdCompleteRoute].Checked := SameText(
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferRoute', BooleanValues[false])), BooleanValues[true]);
+  LvSelections.Items[IdPOI].Checked := SameText(
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferGPI', BooleanValues[false])), BooleanValues[true]);
 
   PtsInGpi := '';
-  ProcessWayPtsInGpi := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
-  if ProcessWayPtsInGpi then
+  if SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]) then
     PtsInGpi := PtsInGpi + ' Original Way points,';
-  ProcessViaPtsInGpi := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]);
-  if ProcessViaPtsInGpi then
+  if SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]) then
     PtsInGpi := PtsInGpi + ' Via points,';
-  ProcessShapePtsInGpi := SameText
-    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[false]), BooleanValues[true]);
-  if ProcessShapePtsInGpi then
+  if SameText
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[false]), BooleanValues[true]) then
     PtsInGpi := PtsInGpi + ' Shaping points,';
   if (PtsInGpi <> '') then
     SetLength(PtsInGpi, Length(PtsInGpi) -1)
   else
     PtsInGpi := ' None';
-
   LvSelections.Items[IdPOI].Caption := Format(GPISel, [PtsInGpi]);
 
   MemoDestinations.Text :=
     'Files will be transferred to:' + #13 + #10 + #13 + #10 +
-     'Trip files: ' + FrmTripManager.DeviceFolder[0] + #13 + #10 +
-     'GPX files (Tracks & Routes & Way points): ' + FrmTripManager.DeviceFolder[1] + #13 + #10 +
-     'GPI files (Points Of Interest): ' + FrmTripManager.DeviceFolder[2];
+    'Trip files: ' + FrmTripManager.DeviceFolder[0] + #13 + #10 +
+    'GPX files (Tracks & Routes & Way points): ' + FrmTripManager.DeviceFolder[1] + #13 + #10 +
+    'GPI files (Points Of Interest): ' + FrmTripManager.DeviceFolder[2];
 end;
 
 procedure TFrmTransferOptions.StorePrefs;
@@ -144,8 +132,7 @@ begin
   if (LvSelections.Items[IdStrippedRoute].Checked) then
     Funcs := Funcs + [TGPXFunc.CreateRoutes];
 
-  CompleteRoute := LvSelections.Items[IdCompleteRoute].Checked;
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferRoute', BooleanValues[CompleteRoute]);
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferRoute', BooleanValues[LvSelections.Items[IdCompleteRoute].Checked]);
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferGPI', BooleanValues[LvSelections.Items[IdPOI].Checked]);
   if (LvSelections.Items[IdPOI].Checked) then
@@ -161,7 +148,6 @@ end;
 
 procedure TFrmTransferOptions.FormShow(Sender: TObject);
 begin
-  FrmAdvSettings.SetFixedPrefs;
   SetPrefs;
 end;
 

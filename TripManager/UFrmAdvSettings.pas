@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls,
-  UnitGeoCode, Vcl.Menus;
+  Vcl.Menus,
+  UnitGeoCode;
 
 const
   TripManagerReg_Key      = 'Software\TDBware\TripManager';
@@ -81,7 +82,6 @@ type
     { Public declarations }
     SampleLat: string;
     SampleLon: string;
-    procedure SetFixedPrefs;
   end;
 
 var
@@ -91,70 +91,9 @@ implementation
 
 uses
   System.UITypes,
-  UnitStringUtils, UFrmTripManager, UnitGpx, UnitGpi, UnitTripObjects;
+  UnitStringUtils, UFrmTripManager, UnitGpi, UnitTripObjects;
 
 {$R *.dfm}
-
-procedure TFrmAdvSettings.SetFixedPrefs;
-var
-  ProcessWpt: boolean;
-  WayPtCat: integer;
-  WayPtList: TStringList;
-begin
-  DebugComments := 'False';
-
-  TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');
-  KMLTrackColor := '';
-  OSMTrackColor := 'Magenta';
-  GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
-  IniProximityStr := '500';
-
-  ProcessTracks := true;
-  ProcessSubClass := true;
-  ProcessBegin := false;
-  ProcessEnd := false;
-  ProcessVia := false;
-  ProcessViaPts := true;
-  ProcessShape := false;
-  ShapingPointName := TShapingPointName.Unchanged;
-
-  ProcessAddrBegin := false;
-  ProcessAddrEnd := false;
-  ProcessAddrVia := false;
-  ProcessAddrShape := false;
-  ProcessAddrWayPt := false;
-
-  // Lookup Messages
-  LookUpWindow := FrmTripManager.Handle;
-  LookUpMessage := UFrmTripManager.WM_ADDRLOOKUP;
-
-  // XT2 Defaults
-  ExploreUuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ExploreUuid', ExploreUuid);
-  VehicleProfileGuid := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileGuid', XT2_VehicleProfileGuid);
-  VehicleProfileHash := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleProfileHash', XT2_VehicleProfileHash);
-  VehicleId := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'VehicleId', XT2_VehicleId);
-
-  WayPtList := TStringList.Create;
-  try
-    WayPtList.Text := ProcessCategoryPick;
-    ProcessWpt := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true]);
-    WayPtCat := WayPtList.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', WayPtList[WayPtList.Count -1]));
-    ProcessCategory := [];
-    if (ProcessWpt) then
-    begin
-      case WayPtCat of
-        1: Include(ProcessCategory, pcSymbol);
-        2: Include(ProcessCategory, pcGPX);
-        3: begin
-             Include(ProcessCategory, pcSymbol);
-             Include(ProcessCategory, pcGPX);
-            end;
-      end;
-    end;
-  finally
-    WayPtList.Free;
-  end;
-end;
 
 procedure TFrmAdvSettings.Smallestplace1Click(Sender: TObject);
 begin
@@ -266,7 +205,7 @@ begin
   end;
 
   GridGeoCodeSettings.RowCount := GridGeoCodeSettings.FixedRows +1;
-  ReadGeoCodeSettings;
+  ReadGeoCodeSettings(TripManagerReg_Key);
   GridGeoCodeSettings.BeginUpdate;
   try
 
@@ -344,8 +283,6 @@ begin
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
                    ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
-
-  ReadGeoCodeSettings;
 end;
 
 procedure TFrmAdvSettings.BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

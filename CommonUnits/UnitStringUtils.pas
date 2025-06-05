@@ -3,7 +3,7 @@ unit UnitStringUtils;
 interface
 
 uses
-  System.Sysutils, System.Variants, Winapi.ShellAPI, System.Win.Registry,
+  System.Sysutils, System.Variants, Winapi.ShellAPI, System.Win.Registry, System.Classes,
   Winapi.Windows;
 
 
@@ -26,6 +26,8 @@ function ValidLatLon(const Lat, Lon: string): boolean;
 procedure ParseLatLon(const LatLon: string; var Lat, Lon: string);
 procedure AdjustLatLon(var Lat, Lon: string; No_Decimals: integer);
 procedure CheckHRGuid(HR: Hresult);
+procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);  overload;
+procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD); overload;
 
 procedure DebugMsg(const Msg: array of variant);
 function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
@@ -182,6 +184,24 @@ begin
     F := RoundTo(F, -No_Decimals);
     result := FloatToStr(F, FloatFormatSettings);
   end;
+end;
+
+procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);
+begin
+  TmpStream.Clear;
+  TmpStream.Write(Buffer, SizeOf(Buffer));
+  TmpStream.Position := 0;
+end;
+
+procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD);
+var
+  SwapCount: Cardinal;
+begin
+  SwapCount := Swap32(Count);
+  TmpStream.Clear;
+  TmpStream.Write(SwapCount, SizeOf(SwapCount));
+  TmpStream.Write(Buffer, SizeOf(Buffer));
+  TmpStream.Position := 0;
 end;
 
 procedure CheckHRGuid(HR: Hresult);

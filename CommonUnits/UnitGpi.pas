@@ -1,6 +1,6 @@
 unit UnitGpi;
 {$WARN SYMBOL_PLATFORM OFF}
-
+{$J+}
 interface
 
 uses

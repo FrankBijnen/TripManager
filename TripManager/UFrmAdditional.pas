@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ComCtrls, System.ImageList, Vcl.ImgList,
-  UnitGpx;
+  UnitGpxObjects;
 
 type
   TFrmAdditional = class(TForm)
@@ -105,26 +105,20 @@ begin
     Funcs := Funcs + [TGPXFunc.CreateWayPoints];
 
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[TvSelections.Items[IdWayPointWpt].Checked]);
-    ProcessWayPtsInWayPts:= (TvSelections.Items[IdWayPointWpt].Checked);
 
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[TvSelections.Items[IdWayPointVia].Checked]);
-    ProcessViaPtsInWayPts:= (TvSelections.Items[IdWayPointVia].Checked);
 
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[TvSelections.Items[IdWayPointShp].Checked]);
-    ProcessShapePtsInWayPts := (TvSelections.Items[IdWayPointShp].Checked);
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpi', BooleanValues[TvSelections.Items[IdGpi].Checked]);
   if (TvSelections.Items[IdGpi].Checked) then
     Funcs := Funcs + [TGPXFunc.CreatePOI];
 
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[TvSelections.Items[IdGpiWayPt].Checked]);
-    ProcessWayPtsInGpi := (TvSelections.Items[IdGpiWayPt].Checked);
 
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[TvSelections.Items[IdGpiViaPt].Checked]);
-    ProcessViaPtsInGpi := (TvSelections.Items[IdGpiViaPt].Checked);
 
     SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[TvSelections.Items[IdGpiShpPt].Checked]);
-    ProcessShapePtsInGpi := (TvSelections.Items[IdGpiShpPt].Checked);
 
   SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrip', BooleanValues[TvSelections.Items[IdTrip].Checked]);
   if (TvSelections.Items[IdTrip].Checked) then
@@ -147,7 +141,6 @@ end;
 
 procedure TFrmAdditional.FormShow(Sender: TObject);
 begin
-  FrmAdvSettings.SetFixedPrefs;
   SetPrefs;
 end;
 

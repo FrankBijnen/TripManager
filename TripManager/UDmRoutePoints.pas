@@ -88,7 +88,7 @@ uses
   System.StrUtils, System.Variants, System.DateUtils,
   Winapi.Windows,
   Vcl.Dialogs,
-  UnitGeoCode, UnitStringUtils, UnitVerySimpleXml, UnitGpx;
+  UnitGeoCode, UnitStringUtils, UnitVerySimpleXml, UnitGpxObjects;
 
 {$R *.dfm}
 
@@ -592,8 +592,10 @@ var
   Xml: TXmlVSDocument;
   XMLRoot: TXmlVSNode;
   Rte, RtePt, Extensions, PointType: TXmlVSNode;
+  DefProcessOptions: TProcessOptions;
 begin
   XML := TXmlVSDocument.Create;
+  DefProcessOptions := TProcessOptions.Create(nil, nil);
   CdsRoutePoints.DisableControls;
   try
     XMLRoot := InitGarminGpx(XML);
@@ -615,11 +617,11 @@ begin
 
       // Add Symbol
       if (CdsRoutePoints.RecNo = 1) then
-        RtePt.AddChild('sym').NodeValue := BeginSymbol
+        RtePt.AddChild('sym').NodeValue := DefProcessOptions.BeginSymbol
       else if (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
-        RtePt.AddChild('sym').NodeValue := EndSymbol
-      else 
-        RtePt.AddChild('sym').NodeValue := DefShapePtSymbol;
+        RtePt.AddChild('sym').NodeValue := DefProcessOptions.EndSymbol
+      else
+        RtePt.AddChild('sym').NodeValue := DefProcessOptions.DefShapePtSymbol;
 
       // Add Point Type (Via of Shaping)
       if (CdsRoutePointsViaPoint.AsBoolean) then // Includes Begin and End
@@ -639,6 +641,7 @@ begin
     XML.SaveToFile(GPXFile);
   finally
     Xml.Free;
+    DefProcessOptions.Free;
     CdsRoutePoints.EnableControls;
   end;
 end;

@@ -8,7 +8,6 @@ uses
   Vcl.Edge;
 
 const
-  TripManagerReg_Key      = 'Software\TDBware\TripManager';
   GeoCodeUrl              = 'GeoCodeUrl';
   GeoCodeApiKey           = 'GeoCodeApiKey';
   AddressFormat           = 'AddressFormat';
@@ -63,7 +62,7 @@ type
 
 function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0; UseCache: boolean = true): TPlace;
 procedure GetCoordsOfPlace(const Place: string; var Lat, Lon: string);
-procedure ReadGeoCodeSettings;
+procedure ReadGeoCodeSettings(const Reg_Key: string);
 procedure ClearCoordCache;
 
 const
@@ -83,7 +82,8 @@ uses
   UnitStringUtils,
   UFrmPLaces, UFrmGeoSearch;
 
-const StrInvalidJson = 'Json Invalid %s';
+const
+  StrInvalidJson = 'Json Invalid %s';
 
 var
   LastQuery: TDateTime;
@@ -472,13 +472,13 @@ begin
 end;
 
 // https://wiki.openstreetmap.org/wiki/Key:place
-procedure ReadGeoCodeSettings;
+procedure ReadGeoCodeSettings(const Reg_Key: string);
 begin
-  GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeUrl, 'https://geocode.maps.co');
-  GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, GeoCodeApiKey, '');
-  GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
+  GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, GeoCodeUrl, 'https://geocode.maps.co');
+  GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, GeoCodeApiKey, '');
+  GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, AddressFormat,
                                                 DefState + '|' + DefCity + '|' + DefRoadHouse);
-  GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, ThrottleGeoCode, '1000'));
+  GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, ThrottleGeoCode, '1000'));
 end;
 
 procedure ReadCoordCache;
@@ -524,7 +524,6 @@ begin
   CoordCache := TObjectDictionary<string, TPlace>.Create([doOwnsValues]);
   ReadCoordCache;
   LastQuery := 0;
-  ReadGeoCodeSettings;
 end;
 
 finalization

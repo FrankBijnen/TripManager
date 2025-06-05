@@ -23,7 +23,6 @@ object FrmAdvSettings: TFrmAdvSettings
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 556
     DesignSize = (
       587
       31)
@@ -60,7 +59,6 @@ object FrmAdvSettings: TFrmAdvSettings
     ActivePage = TabGeneral
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 556
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
@@ -155,7 +153,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Height = 300
         Align = alBottom
         TabOrder = 0
-        ExplicitWidth = 548
         object MemoAddressFormat: TMemo
           Left = 1
           Top = 36
@@ -167,7 +164,6 @@ object FrmAdvSettings: TFrmAdvSettings
           ScrollBars = ssVertical
           TabOrder = 0
           OnChange = MemoAddressFormatChange
-          ExplicitWidth = 546
         end
         object PnlResult: TPanel
           Left = 1
@@ -190,7 +186,6 @@ object FrmAdvSettings: TFrmAdvSettings
           ReadOnly = True
           ScrollBars = ssVertical
           TabOrder = 3
-          ExplicitWidth = 546
         end
         object PnlAddressFormatTop: TPanel
           Left = 1
