@@ -19,17 +19,6 @@ uses
 {$ENDIF}
   UnitGPI, UnitBMP;
 
-type
-  TDistanceUnit = (duKm, duMi);
-  TProcessCategory = (pcSymbol, pcGPX);
-  TProcessCategoryFor = (pcfNone, pcfWayPt, pcfViaPt, pcfShapePt);
-  TShapingPointName = (Unchanged, Route_Sequence, Route_Distance, Sequence_Route, Distance_Route);
-
-  TCoord = record
-    Lat: double;
-    Lon: double;
-  end;
-
 var
   OnSetFixedPrefs: TNotifyEvent;
 
@@ -37,96 +26,144 @@ const
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
 
 type
+  TDistanceUnit = (duKm, duMi);
+  TProcessCategory = (pcSymbol, pcGPX);
+  TProcessPointType = (pptNone, pptWayPt, pptViaPt, pptShapePt);
+  TShapingPointName = (Unchanged, Route_Sequence, Route_Distance, Sequence_Route, Distance_Route);
+  TCoord = record
+    Lat: double;
+    Lon: double;
+  end;
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
               CreateOSM, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints);
 
   TProcessOptions = class
-    ProcessBegin: boolean;
-    ProcessEnd: boolean;
-    ProcessShape: boolean;
-    ProcessVia: boolean;
-    ProcessSubClass: boolean;
-    ProcessFlags: boolean;
-    ProcessViaPts: boolean;
-    ProcessWayPtsInWayPts: boolean;
-    ProcessViaPtsInWayPts: boolean;
-    ProcessShapePtsInWayPts: boolean;
+    LookUpWindow: Hwnd;                       // 0, Window handle
+                                              // Used to send progress messages when looking up addresses
+    LookUpMessage: UINT;                      // 0, Message Id
+                                              // Used to send progress messages when looking up addresses
 
-    ProcessTracks: boolean;
+    ProcessSubClass: boolean;                 // True, Allow clearing the subclass,
+                                              // Used in: PostProcess, CreateRoutes
+    ProcessFlags: boolean;                    // True, Allow to change the symbol
+                                              // Used in: PostProcess, CreateRoutes
+    ProcessBegin: boolean;                    // True, Allow RenameNode(BeginStr),
+                                              //       ClearSubClass(ProcessSubClass),
+                                              //       Change Symbol(ProcessFlags),
+                                              //       Lookup Address(ProcessAddrBegin),
+      ProcessAddrBegin: boolean;              // False
+      BeginStr: string;                       // Begin
+                                              // Also used as category
+      BeginSymbol: string;                    // Flag, Red
+                                              // Also used as category
 
-    ProcessWayPtsFromRoute: boolean;
-    ProcessShapePtsInGpi: boolean;
-    ProcessViaPtsInGpi: boolean;
-    ProcessWayPtsInGpi: boolean;
+    ProcessEnd: boolean;                      // True, Allow RenameNode(EndStr),
+                                              //       ClearSubClass(ProcessSubClass),
+                                              //       Change Symbol(ProcessFlags),
+                                              //       Lookup Address(ProcessAddrEnd)
+      ProcessAddrEnd: boolean;                // False
+      EndStr: string;                         // End
+                                              // Also used as category
+      EndSymbol: string;                      // Flag, Blue
+                                              // Also used as category
 
-    ProcessCategory: set of TProcessCategory;
-    ProcessCategoryFor: set of TProcessCategoryFor;
-    ProcessDistance: boolean;
+    ProcessShape: boolean;                    // True, Allow Unglitch,
+                                              //       ClearSubClass(ProcessSubClass)
+                                              //       Change Symbol(ProcessFlags),
+                                              //       RenameNode(ShapingPointName),
+                                              //       Lookup Address(ProcessAddrShape)
+      DefShapePtSymbol: string;               // Waypoint ==> https://www.javawa.nl/bc_waypointsymbool.html.
+                                              // Used in: Unglitch
+      ProcessAddrShape: boolean;              // False
+      ShapingPointName: TShapingPointName;    // Route_Distance, Rename Shaping points automatically
+      DefShapingPointSymbol: string;          // Navaid, Blue,
+                                              // Only used if there is no custom symbol defined
+                                              // Used in: CreateRoutes, and CreateWayPoints
+      ShapingPointCategory: string;           // Shape
+                                              // Used in: CreateWayPoints, CreatePOI
 
-    LookUpWindow: Hwnd;
-    LookUpMessage: UINT;
-    ProcessAddrBegin: boolean;
-    ProcessAddrEnd: boolean;
-    ProcessAddrVia: boolean;
-    ProcessAddrShape: boolean;
-    ProcessAddrWayPt: boolean;
-    DefaultProximityStr: string;
+    ProcessVia: boolean;                      // True, Allow ClearSubClass(ProcessSubClass),
+                                              //       Lookup Address(ProcessAddrVia)
+     ProcessAddrVia: boolean;                 // False
+      DefViaPointSymbol: string;              // Navaid, Red
+                                              // Only used if there is no custom symbol defined
+                                              // Used in: CreateRoutes, and CreateWayPoints
+      ViaPointCategory: string;               // Via
+                                              // Used in: CreateWayPoints, CreatePOI
+    ProcessCreateRoutePoints: boolean;        // True, Allow adding routepoints to FRouteViaPointList
+                                              // Used in: CreateOSM(Points), CreateKml, CreatePoly. Exposed public
 
-    BeginStr: string;
-    BeginSymbol: string;
-    EndStr: string;
-    EndSymbol: string;
+    ProcessTracks: boolean;                   // True, Retain tracks, Create tracks from ghost points in routes.
 
-    ShapingPointName: TShapingPointName;
-    ShapingPointSymbol: string;
-    ShapingPointCategory: string;
-    ViaPointSymbol: string;
-    ViaPointCategory: string;
-    DefTrackColor: string;
-    TrackColor: string;
-    KMLTrackColor: string;
-    OSMTrackColor: string;
-    DistanceUnit: TDistanceUnit;
+    ProcessWayPtsFromRoute: boolean;          // True, Allow adding routepoints to FWayPointFromRouteList for creating WayPoints
+                                              // Used in: CreateWayPoints, CreatePOI
+    ProcessWayPtsInWayPts: boolean;           // True, Add original Way points to WayPoints_<Gpx_name>.gpx
+                                              // Categories are taken from original Way point
+    ProcessViaPtsInWayPts: boolean;           // False, Add Via points to WayPoints_<Route_name>.gpx
+                                              // Categories 'Symbol:<Begin, End, Via>' and 'Route:<Route_name>'
+    ProcessShapePtsInWayPts: boolean;         // False, Add Shaping points to WayPoints_<Route_name>.gpx
+                                              // Categories 'Symbol:<Via>' and 'Route:<Route_name>'
 
-    DefShapePtSymbol: string;
-    DefWaypointSymbol: string;
-    CatSymbol: string;
-    CatGPX: string;
+                                              // The POIGroup name will be <Gpx_name>.
+                                              // The XT will use that as the main category in Custom POI's.
+    ProcessWayPtsInGpi: boolean;              // True, Add original Way points to <Gpx_name>.gpi
+                                              // Category 'Symbol:<symbol>' from original Way point
+    ProcessViaPtsInGpi: boolean;              // True, Add Via points to <Gpx_name>.gpi
+                                              // Category 'Route:<Route_name>
+    ProcessShapePtsInGpi: boolean;            // False, Add Shaping points to <Gpx_name>.gpi
+                                              // Category 'Route:<Route_name>
+    DefaultProximityStr: string;              // 500, Default proximity for alerts (meters)
+
+    ProcessDistance: boolean;                 // True, Compute distance. Added in KML, and name of shaping points
+    DistanceUnit: TDistanceUnit;              // duKm, Kilometers.
+
+    ProcessCategory: set of TProcessCategory; // [pcSymbol, pcGPX], Add Categories to WayPoints
+    ProcessAddrWayPt: boolean;                // False
+    DefTrackColor: string;                    // Blue, Used if no Displaycolor found in <trk>
+    TrackColor: string;                       // '', The Track color possible changed by user. Saved in Registry
+    KMLTrackColor: string;                    // '', Override the KML track color? '' = Use original
+    OSMTrackColor: string;                    // Magenta, Override the OSM (html) track color? '' = Use original
+
+    DefWaypointSymbol: string;                // Flag, Green, Default symbol for Via and Shaping points in GPX
+    CatSymbol: string;                        // Symbol:, used in created Waypoints/GPI
+    CatGPX: string;                           // GPX:, used in created Waypoints/GPI from Original Way points
+    CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
 
     {$IFDEF TRIPOBJECTS}
-    ZumoModel: TZumoModel;
-    ExploreUuid: string;
-    VehicleProfileGuid: string;
-    VehicleProfileHash: string;
-    VehicleId: string;
+    ZumoModel: TZumoModel;                    // XT1
+    ExploreUuid: string;                      // Defaults for XT2
+    VehicleProfileGuid: string;               // Defaults for XT2
+    VehicleProfileHash: string;               // Defaults for XT2
+    VehicleId: string;                        // Defaults for XT2
     {$ENDIF}
+
     FOnSetFuncPrefs: TNotifyEvent;
     FOnSavePrefs: TNotifyEvent;
 
     constructor Create(OnSetFuncPrefs, OnSavePrefs: TNotifyEvent);
     destructor Destroy; override;
     procedure DoPrefSaved;
+    procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
   end;
 
   TGPXFile = class
   private
-    FWayPointList: TXmlVSNodeList;
-    FWayPointFromRouteList: TXmlVSNodeList;
-    FRouteViaPointList: TXmlVSNodeList;
-    FTrackList: TXmlVSNodeList;
+    FWayPointList: TXmlVSNodeList;          // All Original way point
+    FWayPointFromRouteList: TXmlVSNodeList; // Used in CreateWaypoints and CreatePoi. Has Categories. Only private
+    FRouteViaPointList: TXmlVSNodeList;     // Used in CreateOSM(Points), CreateKml, CreatePoly. Exposed public
+    FTrackList: TXmlVSNodeList;             // All tracks. Can be created fro calculated routes
+    FWayPointsProcessedList: TStringList;   // To prevent duplicate Way points
 
     CurrentTrack: TXmlVSNode;
     CurrentViaPointRoute: TXmlVSNode;
     CurrentWayPointFromRoute: TXmlVSNode;
     CurrentRouteTrackName: string;
-
-    ViaPoint: integer;
-    FWayPointsProcessedList: TStringList;
-    DistanceStr: string;
+    ShapingPointCnt: integer;               // Counter of all <trp:ShapingPoint>. Seqnr of name
 
     CurrentCoord: TCoord;
     TotalDistance: double;
     CurrentDistance: double;
+    DistanceStr: string;
     PrevCoord: TCoord;
 
     FXmlDocument: TXmlVSDocument;
@@ -136,8 +173,8 @@ type
     FOutStringList: TStringList;
     FBaseFile: string;
     FGPXFile: string;
+{$IFDEF TRIPOBJECTS}
     FSeqNo: cardinal;
-{$IFDEF TRIpOBJECTS}
     FTripList: TTripList;
 {$ENDIF}
     FProcessOptions: TProcessOptions;
@@ -175,25 +212,28 @@ type
     procedure RenameSubNode(RtePtNode: TXmlVSNode; const NodeName:string; const NewName: string);
     procedure LookUpAddrRtePt(RtePtNode: TXmlVSNode);
     procedure RenameNode(RtePtNode: TXmlVSNode; const NewName: string = '');
-    procedure AddCategory(const ExtensionsNode: TXmlVsNode; const NS, Category: string);
+    procedure AddRouteCategory(const ExtensionsNode: TXmlVsNode;
+                               const NS, Symbol, Route: string);
     procedure ReplaceAutoName(const ExtensionsNode: TXmlVsNode; const AutoName: string);
     procedure ReplaceCategory(const ExtensionsNode: TXmlVsNode; const NS, Category: string);
     procedure ReplaceAddrWayPt(ExtensionsNode: TXmlVSNode; const NS: string);
     procedure AddWptPoint(const ChildNode: TXmlVsNode;
                           const RtePtNode: TXmlVsNode;
                           const WayPointName: string;
-                          const ProcessCategory: TProcessCategoryFor;
+                          const ProcessPointType: TProcessPointType;
                           const Symbol: string = '';
                           const Description: string = '');
 
     procedure AddWayPointFromRoute(const RtePtNode: TXmlVsNode;
                                    const WayPointName: string;
+                                   const ViaPt: boolean;
+                                   const Symbol: string;
                                    const Category: string;
-                                   const Symbol: string);
+                                   const Route: string);
     procedure AddViaOrShapePoint(const RtePtNode: TXmlVsNode;
                                  const ViaOrShapingPointName: string;
                                  const Symbol: string;
-                                 const ProcessCategory: TProcessCategoryFor;
+                                 const ProcessPointType: TProcessPointType;
                                  const Category: string);
 
     procedure AddBeginPoint(const RtePtNode: TXmlVsNode;
@@ -229,7 +269,6 @@ type
                              ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 
 {$ENDIF}
-
   public
     constructor Create(const GPXFile:string;
                        const FunctionPrefs, SavePrefs: TNotifyEvent); overload;
@@ -254,10 +293,8 @@ type
 {$ENDIF}
     procedure AnalyzeGpx;
     property WayPointList: TXmlVSNodeList read FWayPointList;
-    property WayPointFromRouteList: TXmlVSNodeList read FWayPointFromRouteList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
     property TrackList: TXmlVSNodeList read FTrackList;
-    property WayPointsProcessedList: TStringList read FWayPointsProcessedList;
     property ProcessOptions: TProcessOptions read FProcessOptions write FProcessOptions;
     class procedure PerformFunctions(const AllFuncs: array of TGPXFunc;
                                      const GPXFile:string;
@@ -285,7 +322,6 @@ const
   UniqueTracks: boolean = true;
   DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
   DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
-
   DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
   UnglitchTreshold: double = 0.0005; // In Km. ==> 50 Cm
   BooleanValues: array[boolean] of string = ('False', 'True');
@@ -310,57 +346,65 @@ begin
   FOnSetFuncPrefs := OnSetFuncPrefs;
   FOnSavePrefs := OnSavePrefs;
 
-  ProcessBegin := true;
-  ProcessEnd := true;
-  ProcessShape := true;
-  ProcessVia := true;
   ProcessSubClass := true;
   ProcessFlags := true;
-  ProcessViaPts := true;
-  ProcessWayPtsInWayPts := true;
-  ProcessViaPtsInWayPts := false;
-  ProcessShapePtsInWayPts := false;
+
+  ProcessBegin := true;
+    ProcessAddrBegin := false;
+    BeginStr := 'Begin';
+    BeginSymbol := 'Flag, Red';
+
+  ProcessEnd := true;
+    ProcessAddrEnd := false;
+    EndStr := 'End';
+    EndSymbol := 'Flag, Blue';
+
+  ProcessShape := true;
+    ProcessAddrShape := false;
+    ShapingPointName := TShapingPointName.Route_Distance;
+    DefShapingPointSymbol := 'Navaid, Blue';
+    ShapingPointCategory := 'Shape';
+    DefShapePtSymbol := 'Waypoint';
+
+  ProcessVia := true;
+    DefViaPointSymbol := 'Navaid, Red';
+    ViaPointCategory := 'Via';
+
+  ProcessCreateRoutePoints := true;
+
   ProcessTracks := true;
 
   ProcessWayPtsFromRoute := true; // Create points for GPI and route Points from route
-  ProcessShapePtsInGpi := false;
-  ProcessViaPtsInGpi := true;
+  ProcessWayPtsInWayPts := true;
+  ProcessViaPtsInWayPts := false;
+  ProcessShapePtsInWayPts := false;
+
   ProcessWayPtsInGpi := true;
-
-  ProcessCategory :=  [pcSymbol, pcGPX];
-  ProcessCategoryFor := [pcfWayPt, pcfViaPt, pcfShapePt];
-  ProcessDistance := true;
-
-  ProcessAddrBegin := false;
-  ProcessAddrEnd := false;
-  ProcessAddrVia := false;
-  ProcessAddrShape := false;
-  ProcessAddrWayPt := false;
+  ProcessViaPtsInGpi := true;
+  ProcessShapePtsInGpi := false;
   DefaultProximityStr := '';
 
-  BeginStr := 'Begin';
-  BeginSymbol := 'Flag, Red';
-  EndStr := 'End';
-  EndSymbol := 'Flag, Blue';
-  ShapingPointName := TShapingPointName.Route_Distance;
-  ShapingPointSymbol := 'Navaid, Blue';
-  ShapingPointCategory := 'Shape';
-  ViaPointSymbol := 'Navaid, Red';
-  ViaPointCategory := 'Via';
-  DefTrackColor := 'Blue';
-  TrackColor := '';
-  KMLTrackColor := 'Magenta';
-  OSMTrackColor := 'Magenta';
+  ProcessCategory := [pcSymbol, pcGPX];
+
+  ProcessAddrVia := false;
+  ProcessAddrWayPt := false;
+
+  ProcessDistance := true;
   DistanceUnit := duKm;
 
+  DefTrackColor := 'Blue';
+  TrackColor := '';
+  KMLTrackColor := '';
+  OSMTrackColor := 'Magenta';
+
+  DefWaypointSymbol := 'Flag, Green';
   CatSymbol := 'Symbol:';
   CatGPX := 'GPX:';
-
-  DefShapePtSymbol := 'Waypoint';
-  DefWaypointSymbol := 'Flag, Green';
+  CatRoute := 'Route:';
 
   LookUpWindow := 0;
   LookUpMessage := 0;
+
 {$IFDEF TRIPOBJECTS}
   ZumoModel := TZumoModel.XT;
   ExploreUuid := '';
@@ -386,6 +430,32 @@ procedure TProcessOptions.DoPrefSaved;
 begin
   if (Assigned(FOnSavePrefs)) then
     FOnSavePrefs(Self);
+end;
+
+procedure TProcessOptions.SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
+var
+  WayPtList: TStringList;
+  WayPtCatSeq: integer;
+begin
+  WayPtList := TStringList.Create;
+  try
+    WayPtList.Text := ProcessCategoryPick;
+    ProcessCategory := [];
+    WayPtCatSeq := WayPtList.IndexOf(WayPtCat);
+    if (ProcessWpt) then
+    begin
+      case WayPtCatSeq of
+        1: Include(ProcessCategory, pcSymbol);
+        2: Include(ProcessCategory, pcGPX);
+        3: begin
+             Include(ProcessCategory, pcSymbol);
+             Include(ProcessCategory, pcGPX);
+            end;
+      end;
+    end;
+  finally
+    WayPtList.Free;
+  end;
 end;
 
 function TGPXfile.CoordFromAttribute(Atributes: TXmlVSAttributeList): TCoord;
@@ -689,19 +759,15 @@ begin
   RenameSubNode(RtePtNode, 'name', NewName);
 end;
 
-procedure TGPXfile.AddCategory(const ExtensionsNode: TXmlVsNode;
-                              const NS, Category: string);
-var AnExtensionsNode: TXmlVsNode;
+procedure TGPXfile.AddRouteCategory(const ExtensionsNode: TXmlVsNode;
+                                    const NS, Symbol, Route: string);
+var
+  AnExtensionsNode: TXmlVsNode;
 begin
-  if (ProcessOptions.ProcessCategory = []) then
-    exit;
-
   AnExtensionsNode := ExtensionsNode.AddChild(NS + 'WaypointExtension');
   AnExtensionsNode := AnExtensionsNode.AddChild(NS + 'Categories');
-  if (pcSymbol in ProcessOptions.ProcessCategory) then
-    AnExtensionsNode.AddChild(NS + 'Category').NodeValue := ProcessOptions.CatSymbol + Category;
-  if (pcGPX in ProcessOptions.ProcessCategory) then
-    AnExtensionsNode.AddChild(NS + 'Category').NodeValue := ProcessOptions.CatGPX + FBaseFile;
+  AnExtensionsNode.AddChild(NS + 'Category').NodeValue := ProcessOptions.CatSymbol + Symbol;
+  AnExtensionsNode.AddChild(NS + 'Category').NodeValue := ProcessOptions.CatRoute + Route;
 end;
 
 procedure TGPXfile.ReplaceAutoName(const ExtensionsNode: TXmlVsNode; const AutoName: string);
@@ -721,16 +787,14 @@ var
   AnExtensionsNode, CategoriesNode: TXmlVsNode;
   CatPos:integer;
 begin
-  if (ProcessOptions.ProcessCategory = []) then
-    exit;
   if (ExtensionsNode = nil) then
     exit;
+
   AnExtensionsNode := ExtensionsNode.Find(NS + 'WaypointExtension');
-  // Extensions node must exist. (Saved by Basecamp!)
-  if (AnExtensionsNode = nil) then
+  if (AnExtensionsNode = nil) then   // Extensions node must exist. (Saved by Basecamp!)
     exit;
 
-  // Find or Create Categories node
+  // Find or Create Categories node. Must be after Displaymode
   EnsureSubNodeAfter(AnExtensionsNode, NS + 'Categories', [NS + 'DisplayMode']);
   CategoriesNode := AnExtensionsNode.find(NS + 'Categories');
 
@@ -746,6 +810,13 @@ begin
     CategoriesNode.AddChild(NS + 'Category').NodeValue := ProcessOptions.CatSymbol + Category;
   if (pcGPX in ProcessOptions.ProcessCategory) then
     CategoriesNode.AddChild(NS + 'Category').NodeValue := ProcessOptions.CatGPX + FBaseFile;
+
+  // Mapsource and BaseCamp dont like <Categories/>
+  if (CategoriesNode.ChildNodes.Count = 0) then
+  begin
+    CatPos := AnExtensionsNode.findPos(NS + 'Categories');
+    AnExtensionsNode.ChildNodes.Delete(CatPos);
+  end;
 end;
 
 procedure TGPXFile.ReplaceAddrWayPt(ExtensionsNode: TXmlVSNode; const NS: string);
@@ -789,13 +860,14 @@ begin
 end;
 
 procedure TGpxFile.AddWptPoint(const ChildNode: TXmlVsNode;
-                      const RtePtNode: TXmlVsNode;
-                      const WayPointName: string;
-                      const ProcessCategory: TProcessCategoryFor;
-                      const Symbol: string = '';
-                      const Description: string = '');
-var ExtensionsNode: TXmlVsNode;
-    NewSymbol, WptTime, WptDesc, WptCmt: string;
+                               const RtePtNode: TXmlVsNode;
+                               const WayPointName: string;
+                               const ProcessPointType: TProcessPointType;
+                               const Symbol: string = '';
+                               const Description: string = '');
+var
+  ExtensionsNode: TXmlVsNode;
+  NewSymbol, WptTime, WptDesc, WptCmt: string;
 begin
   with ChildNode do
   begin
@@ -823,56 +895,59 @@ begin
     AddChild('sym').NodeValue := NewSymbol;
   end;
 
-  if (ProcessCategory in ProcessOptions.ProcessCategoryFor) then
+  if (ProcessPointType in [pptWayPt]) then
   begin
     ExtensionsNode := RtePtNode.find('extensions');
     if (ExtensionsNode <> nil) then
     begin
       ReplaceCategory(ExtensionsNode, 'gpxx:', NewSymbol);
       ReplaceCategory(ExtensionsNode, 'wptx1:', NewSymbol);
+      if (ProcessOptions.ProcessAddrWayPt) then
+      begin
+        ReplaceAddrWayPt(ExtensionsNode, 'gpxx:');
+        ReplaceAddrWayPt(ExtensionsNode, 'wptx1:');
+      end;
     end;
   end;
-
-  if (ProcessCategory in [pcfWayPt]) and
-     (ProcessOptions.ProcessAddrWayPt) then
-  begin
-    ExtensionsNode := RtePtNode.find('extensions');
-    if (ExtensionsNode <> nil) then
-    begin
-      ReplaceAddrWayPt(ExtensionsNode, 'gpxx:');
-      ReplaceAddrWayPt(ExtensionsNode, 'wptx1:');
-    end;
-  end;
-
 end;
 
 procedure TGPXFile.AddWayPointFromRoute(const RtePtNode: TXmlVsNode;
                                         const WayPointName: string;
+                                        const ViaPt: boolean;
+                                        const Symbol: string;
                                         const Category: string;
-                                        const Symbol: string);
+                                        const Route: string);
 var
   NewNode, ExtensionsNode: TXmlVsNode;
 begin
   NewNode := CurrentWayPointFromRoute.AddChild('wpt');
+  if (ViaPt) then
+    AddWptPoint(NewNode,
+                RtePtNode,
+                WayPointName,
+                TProcessPointType.pptViaPt,
+                Symbol)
+  else
+    AddWptPoint(NewNode,
+                RtePtNode,
+                WayPointName,
+                TProcessPointType.pptShapePt,
+                Symbol);
 
-  AddWptPoint(NewNode,
-              RtePtNode,
-              WayPointName,
-              TProcessCategoryFor.pcfViaPt,
-              Symbol);
+  ExtensionsNode := NewNode.AddChild('extensions');
+  if (ViaPt) then
+    ExtensionsNode.AddChild('trp:ViaPoint')
+  else
+    ExtensionsNode.AddChild('trp:ShapingPoint');
 
-  if (pcfViaPt in ProcessOptions.ProcessCategoryFor) then
-  begin
-    ExtensionsNode := NewNode.AddChild('extensions');
-    AddCategory(ExtensionsNode, 'gpxx:', Category);
-    AddCategory(ExtensionsNode, 'wptx1:', Category);
-  end;
+  AddRouteCategory(ExtensionsNode, 'gpxx:', Category, Route);
+  AddRouteCategory(ExtensionsNode, 'wptx1:', Category, Route);
 end;
 
 procedure TGPXFile.AddViaOrShapePoint(const RtePtNode: TXmlVsNode;
                                       const ViaOrShapingPointName: string;
                                       const Symbol: string;
-                                      const ProcessCategory: TProcessCategoryFor;
+                                      const ProcessPointType: TProcessPointType;
                                       const Category: string);
 var NewNode, ExtensionsNode: TXmlVsNode;
     DefinedSymbol, Distance: string;
@@ -891,49 +966,43 @@ begin
   AddWptPoint(NewNode,
               RtePtNode,
               ViaOrShapingPointName,
-              ProcessCategory,
+              ProcessPointType,
               DefinedSymbol,
               Distance);
 
-  if ([pcfViaPt, pcfShapePt] * ProcessOptions.ProcessCategoryFor <> []) then
-  begin
-    ExtensionsNode := NewNode.AddChild('extensions');
-    if (ProcessCategory = pcfViaPt) then
-      ExtensionsNode.AddChild('trp:ViaPoint');
-    if (ProcessCategory = pcfShapePt) then
-      ExtensionsNode.AddChild('trp:ShapingPoint');
-    AddCategory(ExtensionsNode, 'gpxx:', Category);
-    AddCategory(ExtensionsNode, 'wptx1:', Category);
-  end;
-
+  ExtensionsNode := NewNode.AddChild('extensions');
+  if (ProcessPointType = pptViaPt) then
+    ExtensionsNode.AddChild('trp:ViaPoint');
+  if (ProcessPointType = pptShapePt) then
+    ExtensionsNode.AddChild('trp:ShapingPoint');
 end;
 
 procedure TGPXFile.AddBeginPoint(const RtePtNode: TXmlVsNode;
                                 const ViaPointName: string;
                                 const Symbol: string);
 begin
-  AddViaOrShapePoint(RtePtNode, ViaPointName, Symbol, TProcessCategoryFor.pcfViaPt, ProcessOptions.Beginstr);
+  AddViaOrShapePoint(RtePtNode, ViaPointName, Symbol, TProcessPointType.pptViaPt, ProcessOptions.Beginstr);
 end;
 
 procedure TGPXFile.AddEndPoint(const RtePtNode: TXmlVsNode;
                               const ViaPointName: string;
                               const Symbol: string);
 begin
-  AddViaOrShapePoint(RtePtNode, ViaPointName, Symbol, TProcessCategoryFor.pcfViaPt, ProcessOptions.EndStr);
+  AddViaOrShapePoint(RtePtNode, ViaPointName, Symbol, TProcessPointType.pptViaPt, ProcessOptions.EndStr);
 end;
 
 procedure TGPXFile.AddViaPoint(const RtePtNode: TXmlVsNode;
                               const ViaPointName: string;
                               const Symbol: string);
 begin
-  AddViaOrShapePoint(RtePtNode, ViaPointName, Symbol, TProcessCategoryFor.pcfViaPt, ProcessOptions.ViaPointCategory);
+  AddViaOrShapePoint(RtePtNode, ViaPointName, Symbol, TProcessPointType.pptViaPt, ProcessOptions.ViaPointCategory);
 end;
 
 procedure TGPXFile.AddShapingPoint(const RtePtNode: TXmlVsNode;
                                    const ShapingPointName: string;
                                    const Symbol: string);
 begin
-  AddViaOrShapePoint(RtePtNode, ShapingPointName, Symbol, TProcessCategoryFor.pcfShapePt, ProcessOptions.ShapingPointCategory);
+  AddViaOrShapePoint(RtePtNode, ShapingPointName, Symbol, TProcessPointType.pptShapePt, ProcessOptions.ShapingPointCategory);
 end;
 
 procedure TGPXFile.AddWayPoint(const RtePtNode: TXmlVsNode;
@@ -945,7 +1014,7 @@ begin
   AddWptPoint(NewNode,
               RtePtNode,
               WayPointName,
-              TProcessCategoryFor.pcfWayPt);
+              TProcessPointType.pptWayPt);
 
   ExtensionsNode := RtePtNode.Find('extensions');
   if (ExtensionsNode = nil) then
@@ -974,6 +1043,7 @@ var ExtensionNode: TXmlVSNode;
     MapSeg, NewDescPos: integer;
 {$ENDIF}
 begin
+  Symbol := FindSubNodeValue(RtePtNode, 'sym');
   RtePtExtensions := RtePtNode.Find('extensions');
   if (RtePtExtensions = nil) then
     exit;
@@ -992,6 +1062,8 @@ begin
   if (Cnt = 1) then
   begin
     WptName := FindSubNodeValue(RtePtNode, 'name');
+    if (Symbol = '') then
+      Symbol := ProcessOptions.BeginSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
       ClearSubClass(ExtensionNode);
@@ -1039,9 +1111,9 @@ begin
     end;
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, WptName, ProcessOptions.BeginStr, Symbol);
+      AddWayPointFromRoute(RtePtNode, WptName, true, Symbol, ProcessOptions.BeginStr, RouteName);
 
-    if (ProcessOptions.ProcessViaPts) then
+    if (ProcessOptions.ProcessCreateRoutePoints) then
       AddBeginPoint(RtePtNode, WptName, Symbol);
   end;
 
@@ -1049,6 +1121,8 @@ begin
   if (Cnt = LastCnt) then
   begin
     WptName := FindSubNodeValue(RtePtNode, 'name');
+    if (Symbol = '') then
+      Symbol := ProcessOptions.EndSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
       ClearSubClass(ExtensionNode);
@@ -1067,9 +1141,9 @@ begin
     end;
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, WptName, ProcessOptions.EndStr, Symbol);
+      AddWayPointFromRoute(RtePtNode, WptName, true, Symbol, ProcessOptions.EndStr, RouteName);
 
-    if (ProcessOptions.ProcessViaPts) then
+    if (ProcessOptions.ProcessCreateRoutePoints) then
     begin
       if (ProcessOptions.ProcessDistance) then
         ComputeDistance(RtePtNode);
@@ -1082,27 +1156,31 @@ begin
   begin
     if (ProcessOptions.ProcessDistance) then
       ComputeDistance(RtePtNode);
-    inc(ViaPoint);
+    inc(ShapingPointCnt);
 
     case (ProcessOptions.ShapingPointName) of
       TShapingPointName.Unchanged:
         ShapePtName := FindSubNodeValue(RtePtNode, 'name');
       TShapingPointName.Route_Sequence:
-        ShapePtName := Format('%s_%3.3d', [RouteName, ViaPoint]);
+        ShapePtName := Format('%s_%3.3d', [RouteName, ShapingPointCnt]);
       TShapingPointName.Route_Distance:
         ShapePtName := Format('%s_%3.3d %s', [RouteName, Round(TotalDistance), DistanceStr]);
       TShapingPointName.Sequence_Route:
-        ShapePtName := Format('%3.3d_%s', [ViaPoint, RouteName]);
+        ShapePtName := Format('%3.3d_%s', [ShapingPointCnt, RouteName]);
       TShapingPointName.Distance_Route:
         ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), DistanceStr, RouteName]);
     end;
+
+    if (Symbol = '') or
+       (Symbol = ProcessOptions.DefShapePtSymbol) then
+      Symbol := ProcessOptions.DefShapingPointSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
       ClearSubClass(ExtensionNode);
 
     if (ProcessOptions.ProcessShape) then
     begin
-
+      Symbol := ProcessOptions.DefShapePtSymbol;
       UnglitchNode(RtePtNode, ExtensionNode, TGPXString(ShapePtName));
 
       RenameNode(RtePtNode, ShapePtName);
@@ -1111,11 +1189,14 @@ begin
         LookUpAddrRtePt(RtePtNode);
 
       if (ProcessOptions.ProcessFlags) then
-        RenameSubNode(RtePtNode, 'sym', ProcessOptions.DefShapePtSymbol); // Symbol for shaping and via points.
+        RenameSubNode(RtePtNode, 'sym', Symbol); // Symbol for shaping and via points.
 
     end;
-    if (ProcessOptions.ProcessViaPts) then
-      AddShapingPoint(RtePtNode, ShapePtName, ProcessOptions.ShapingPointSymbol);
+    if (ProcessOptions.ProcessCreateRoutePoints) then
+      AddShapingPoint(RtePtNode, ShapePtName, Symbol);
+
+    if (ProcessOptions.ProcessWayPtsFromRoute) then
+      AddWayPointFromRoute(RtePtNode, ShapePtName, false, Symbol, ProcessOptions.ShapingPointCategory, RouteName);
   end;
 
   // Via point
@@ -1123,6 +1204,9 @@ begin
      (Cnt <> LastCnt) and
      (RtePtViaPoint <> nil) then
   begin
+    if (Symbol = '') then
+      Symbol := ProcessOptions.DefViaPointSymbol;
+
     if (ProcessOptions.ProcessSubClass) then
       ClearSubClass(ExtensionNode);
 
@@ -1133,12 +1217,11 @@ begin
         LookUpAddrRtePt(RtePtNode);
     end;
 
-    Symbol := ProcessOptions.ViaPointSymbol;
-    if (ProcessOptions.ProcessViaPts) then
+    if (ProcessOptions.ProcessCreateRoutePoints) then
       AddViaPoint(RtePtNode, ViaPtName, Symbol);
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, ViaPtName, ProcessOptions.ViaPointCategory, Symbol);
+      AddWayPointFromRoute(RtePtNode, ViaPtName, true, Symbol, ProcessOptions.ViaPointCategory, RouteName);
   end;
 
   if (ProcessOptions.ProcessDistance) and
@@ -1176,7 +1259,7 @@ begin
     CurrentRouteTrackName := RteNameNode.NodeValue;
   ExtensionsNode := RteNode.Find('extensions');
 
-  ViaPoint := 0;
+  ShapingPointCnt := 0;
 
   if (ProcessOptions.ProcessWayPtsFromRoute) then
   begin
@@ -1184,7 +1267,7 @@ begin
     CurrentWayPointFromRoute.NodeValue := CurrentRouteTrackName;
   end;
 
-  if (ProcessOptions.ProcessViaPts) then
+  if (ProcessOptions.ProcessCreateRoutePoints) then
   begin
     CurrentViaPointRoute := FRouteViaPointList.Add(CurrentRouteTrackName);
     CurrentViaPointRoute.NodeValue := CurrentRouteTrackName;
@@ -1206,7 +1289,9 @@ begin
     end;
   end;
 
-  if (ProcessOptions.ProcessShape) then
+  if (ProcessOptions.ProcessBegin) or
+     (ProcessOptions.ProcessEnd) or
+     (ProcessOptions.ProcessShape) then
   begin
     if (ExtensionsNode <> nil) then
       ReplaceAutoName(ExtensionsNode, 'false');
@@ -1240,7 +1325,7 @@ begin
 
   ExtensionsNode := TrkNode.Find('extensions');
 
-  if (ProcessOptions.ProcessViaPts) then
+  if (ProcessOptions.ProcessCreateRoutePoints) then
   begin
     CurrentViaPointRoute := FRouteViaPointList.Add(CurrentRouteTrackName);
     CurrentViaPointRoute.NodeValue := CurrentRouteTrackName;
@@ -1286,7 +1371,7 @@ begin
       end;
     end;
 
-    if (ProcessOptions.ProcessViaPts) then
+    if (ProcessOptions.ProcessCreateRoutePoints) then
     begin
       if (LastTrkPtNode <> nil) then
       begin
@@ -1470,8 +1555,9 @@ begin
   FOnFunctionPrefs := FunctionPrefs;
   FOnSavePrefs := SavePrefs;
   FOutStringList := OutStringList;
+{$IFDEF TRIPOBJECTS}
   FSeqNo := SeqNo;
-
+{$ENDIF}
   CreateGlobals;
 end;
 
@@ -1616,7 +1702,7 @@ begin
     if ((ProcessOptions.ProcessViaPtsInWayPts) or (ProcessOptions.ProcessShapePtsInWayPts)) and
        (ProcessOptions.ProcessWayPtsFromRoute) then
     begin
-      for RouteWayPoints in FRouteViaPointList do
+      for RouteWayPoints in FWayPointFromRouteList do
       begin
         WptXml.Clear;
         WptRoot := InitGarminGpx(WptXml);
@@ -1657,78 +1743,56 @@ var
   S: TBufferedFileStream;
   CatId: integer;
   BmpId: integer;
-  ViaPtName: string;
-  ViaPointList: TStringList;
+  IsViaPt: boolean;
+  ExtensionsNode: TXmlVSNode;
 begin
   OutFile := ChangeFileExt(FOutDir + FBaseFile, '.gpi');
   S := TBufferedFileStream.Create(OutFile, fmCreate);
   GPIFile := TGPI.Create(GPIVersion);
   GPIFile.WriteHeader(S);
-  PoiGroup := GPIFile.CreatePOIGroup(TGPXString(FBaseFile));
+  PoiGroup := GPIFile.CreatePOIGroup(TGPXString(ProcessOptions.CatGPX + FBaseFile));
 
-  if (ProcessOptions.ProcessTracks) then
+  if (ProcessOptions.ProcessWayPtsInGpi) then
   begin
-    CatId := PoiGroup.AddCat(GPXCategory(FBaseFile)); // GPX filename
-
-    if (ProcessOptions.ProcessWayPtsInGpi) then
+    for WayPoint in FWayPointList do
     begin
-      for WayPoint in FWayPointList do
+      if (WayPointNotProcessed(WayPoint)) then
+      begin
+        CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
+        BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+        PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+      end;
+    end;
+  end;
+
+// Create Way points, from Via, or Shaping points in routes.
+// Create a file per route/track
+  if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
+     (ProcessOptions.ProcessWayPtsFromRoute) then
+  begin
+    for RouteWayPoints in FWayPointFromRouteList do
+    begin
+      CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
+
+      for WayPoint in RouteWayPoints.ChildNodes do
       begin
         if (WayPointNotProcessed(WayPoint)) then
         begin
-          BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-          PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
-        end;
-      end;
-    end;
+          IsViaPt := false;
+          ExtensionsNode := WayPoint.find('extensions');
+          if (ExtensionsNode <> nil) then
+            IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
 
-    if (ProcessOptions.ProcessViaPtsInGpi) then
-    begin
-      for RouteWayPoints in FWayPointFromRouteList do
-      begin
-        for WayPoint in RouteWayPoints.ChildNodes do
-        begin
-          if (WayPointNotProcessed(WayPoint)) then
+          if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
+             ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
           begin
             BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
             PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
           end;
         end;
       end;
+
     end;
-
-  end;
-
-  if (ProcessOptions.ProcessShapePtsInGpi) then // Default False
-  begin
-    ViaPointList := TStringList.Create;
-    ViaPointList.Sorted := true;
-    ViaPointList.Duplicates := TDuplicates.dupIgnore;
-    try
-      // Build list of Via points in WayPointFromRouteList. Must be excluded.
-      for RouteWayPoints in FWayPointFromRouteList do
-        for WayPoint in RouteWayPoints.ChildNodes do
-          ViaPointList.Add(FindSubNodeValue(WayPoint, 'name'));
-
-      for RouteWayPoints in FRouteViaPointList do
-      begin
-        CatId := PoiGroup.AddCat(GPXCategory(RouteWayPoints.NodeValue)); // RouteName
-
-        for WayPoint in RouteWayPoints.ChildNodes do
-        begin
-          ViaPtName := FindSubNodeValue(WayPoint, 'name');
-          if (ViaPointList.IndexOf(ViaPtName) < 0) and  // Dont want Via points here
-             (WayPointNotProcessed(WayPoint)) then      // Dont want duplictes
-          begin
-            BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-            PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
-          end;
-        end;
-      end;
-    finally
-      ViaPointList.Free;
-    end;
-
   end;
 
   POIGroup.Write(S);
@@ -1791,7 +1855,7 @@ begin
         end;
         Folder := Helper.WritePointsEnd;
 
-        if (ProcessOptions.ProcessViaPts) then
+        if (ProcessOptions.ProcessCreateRoutePoints) then
         begin
           for RouteWayPoint in FRouteViaPointList do
           begin
@@ -1899,7 +1963,7 @@ begin
         end;
         Helper.WritePointsEnd;
 
-        if (ProcessOptions.ProcessViaPts) then
+        if (ProcessOptions.ProcessCreateRoutePoints) then
         begin
           helper.WritePlacesStart;
           for RouteWayPoint in FRouteViaPointList do
@@ -2001,7 +2065,7 @@ begin
         end;
         FOutStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
-        if (ProcessOptions.ProcessViaPts) then
+        if (ProcessOptions.ProcessCreateRoutePoints) then
         begin
           for RouteWayPoint in FRouteViaPointList do
           begin
@@ -2446,7 +2510,7 @@ begin
 
     for Func in AllFuncs  do
     begin
-      GpxFileObj.WayPointsProcessedList.Clear;
+      GpxFileObj.FWayPointsProcessedList.Clear;
       case Func of
         PostProcess:
           GpxFileObj.DoPostProcess;

@@ -1,5 +1,9 @@
 ﻿unit UFrmTripManager;
 
+{$IFDEF DEBUG}
+{.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
+{$ENDIF}
+
 interface
 
 uses
@@ -745,10 +749,10 @@ begin
 
   // Revert to default (startup) locations
   ReadDefaultFolders;
-
+{$IFNDEF DEBUG_TRANSFER}
   // Also checks for connected MTP
   BgDeviceClick(BgDevice);
-
+{$ENDIF}
   if (FrmTransferOptions.ShowModal <> ID_OK) then
     exit;
 
@@ -779,7 +783,7 @@ begin
 
       if (SameText(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TransferRoute', ''), BooleanValues[true])) then
         CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)), false);
-
+    {$IFNDEF DEBUG_TRANSFER}
       Rc := FindFirst(GetRoutesTmp + '\*.*', faAnyFile - faDirectory, Fs);
       while (Rc = 0) do
       begin
@@ -813,13 +817,16 @@ begin
         Rc := FindNext(Fs);
       end;
       FindClose(Fs);
+    {$ENDIF}
     end;
   finally
     SetCursor(CrNormal);
   end;
+{$IFNDEF DEBUG_TRANSFER}
   EdFileSysFolder.Text := ShellTreeView1.Path;
   FSavedFolderId := SavedFolderId;
   ListFiles;
+{$ENDIF}
 end;
 
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
@@ -3490,27 +3497,12 @@ procedure TFrmTripManager.OnSetFixedPrefs(Sender: TObject);
 begin
   with Sender as TProcessOptions do
   begin
-    TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');
-//TODO add keys in FrmAdvancedSettings
-    KMLTrackColor := '';
-    OSMTrackColor := 'Magenta';
-    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
-    DefaultProximityStr := '500';
-
-    ProcessTracks := true;
-    ProcessSubClass := true;
     ProcessBegin := false;
     ProcessEnd := false;
     ProcessVia := false;
-    ProcessViaPts := true;
     ProcessShape := false;
-    ShapingPointName := TShapingPointName.Unchanged;
 
-    ProcessAddrBegin := false;
-    ProcessAddrEnd := false;
-    ProcessAddrVia := false;
-    ProcessAddrShape := false;
-    ProcessAddrWayPt := false;
+    TrackColor := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'TrackColor', '');
 
     // Lookup Messages
     LookUpWindow := FrmTripManager.Handle;
@@ -3531,6 +3523,7 @@ end;
 
 procedure TFrmTripManager.OnSetTransferPrefs(Sender: TObject);
 begin
+// For creating Waypoints from routes, transferred as Waypoint<name>.gpx, or <name>.gpx
   with Sender as TProcessOptions do
   begin
     ProcessWayPtsInWayPts := SameText
@@ -3550,10 +3543,6 @@ begin
 end;
 
 procedure TFrmTripManager.OnSetPostProcessPrefs(Sender: TObject);
-var
-  WayPtList: TStringList;
-  ProcessWpt: boolean;
-  WayPtCat: integer;
 begin
   with Sender as TProcessOptions do
   begin
@@ -3571,26 +3560,8 @@ begin
     ProcessAddrEnd := SameText
       (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndAddress', BooleanValues[true]), BooleanValues[true]);
 
-    WayPtList := TStringList.Create;
-    try
-      WayPtList.Text := ProcessCategoryPick;
-      ProcessWpt := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true]);
-      WayPtCat := WayPtList.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', WayPtList[WayPtList.Count -1]));
-      ProcessCategory := [];
-      if (ProcessWpt) then
-      begin
-        case WayPtCat of
-          1: Include(ProcessCategory, pcSymbol);
-          2: Include(ProcessCategory, pcGPX);
-          3: begin
-               Include(ProcessCategory, pcSymbol);
-               Include(ProcessCategory, pcGPX);
-              end;
-        end;
-      end;
-    finally
-      WayPtList.Free;
-    end;
+    SetProcessCategory(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true],
+                       GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', 'Symbol + GPX filename'));
 
     ProcessWayPtsInWayPts := SameText
       (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
@@ -3637,6 +3608,13 @@ begin
       (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[true]), BooleanValues[true]);
     ProcessShapePtsInGpi := SameText
       (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[true]), BooleanValues[true]);
+
+//TODO add keys in FrmAdvancedSettings
+    KMLTrackColor := '';
+    OSMTrackColor := ''; // Magenta
+
+    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
+    DefaultProximityStr := '500';
   end;
 end;
 
