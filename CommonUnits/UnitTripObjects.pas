@@ -2172,9 +2172,22 @@ begin
   result := // SizeOf UDbHandle
             Swap32(FValue.UdbHandleSize) -
             // SizeOf fixed part (excluding Unknown3)
+            (SizeOf(FValue) - SizeOf(FValue.Unknown3) - SizeOf(FValue.CalcStatus)) -
+            // SizeOf UdbDir's
+            (FValue.UDbDirCount * SizeOf(TUdbDirValue));
+
+(* Bug fixes for enabling Win64
+SizeOf(FValue.Unknown3) = 4 for 32 bits, 8 for 64 bits
+SizeOf(TUdbDir) = 4 for 32 bits, 8 for 64 bits. But should be the size of the record.
+Because Unnoticed until now, because this function gets called when a trip is not calculated and UDbDirCount=0.
+
+  result := // SizeOf UDbHandle
+            Swap32(FValue.UdbHandleSize) -
+            // SizeOf fixed part (excluding Unknown3)
             (SizeOf(FValue) - SizeOf(FValue.UdbHandleSize) - Sizeof(FValue.CalcStatus)) -
             // SizeOf UdbDir's
             (FValue.UDbDirCount * SizeOf(TUdbDir));
+*)
 end;
 
 procedure TmUdbDataHndl.WritePrefix(AStream: TMemoryStream);
@@ -2275,7 +2288,6 @@ begin
     AStream.Read(AnUdbHandle.FValue.UdbHandleSize, SizeOf(AnUdbHandle.FValue.UdbHandleSize));
     AStream.Read(AnUdbHandle.FValue.CalcStatus, SizeOf(AnUdbHandle.FValue.CalcStatus));
     AStream.Read(AnUdbHandle.FValue.Unknown2[0], SizeOf(AnUdbHandle.FValue.Unknown2));
-//TODO: Is it a Word, or a Cardinal? No need to swap...
     AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));
 
     AnUdbHandle.FValue.AllocUnknown3; // Default to XT
@@ -2435,7 +2447,7 @@ begin
   // Be sure to recalculate all items.
   ResetCalculation;
 
-  FSubLength := 6; //TODO Why 6?
+  FSubLength := 6; //We need to add 6, but can figure out why.
   for ANItem in ItemList do
   begin
     if (ANItem is TBaseItem) then

@@ -9,6 +9,15 @@ uses
   System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Grids;
 
 type
+
+// For Win64. Disable ASM. Change integer to NativeInt
+{$IFDEF WIN32}
+  {$DEFINE ASM_ENABLED}
+  TPointerInt = integer;
+{$ELSE}
+  TPointerInt = NativeInt;
+{$ENDIF}
+
   // @exclude
   TGridCoord = Vcl.Grids.TGridCoord;
 
@@ -186,7 +195,7 @@ type
      - mInCharField: cursor in character pane (True) or hex number pane
   *)
   TBCHBookmark = record
-    mPosition: integer;
+    mPosition: TPointerInt;
     mInCharField: boolean;
   end;
 
@@ -365,22 +374,16 @@ type
   // @exclude(stream class for internal storage/undo)
   TBCHMemoryStream = class(TMemoryStream)
   private
-
-    function PointerAt(const APosition, ACount: Integer): Pointer;
+    function PointerAt(const APosition, ACount: TPointerInt): Pointer;
   protected
-
   public
-
-    function GetAddress(const Index, Count: integer): PByte;
-    procedure ReadBufferAt(var Buffer; const APosition, ACount: Integer);
-    procedure WriteBufferAt(const Buffer; const APosition, ACount: Integer);
-    procedure Move(const AFromPos, AToPos, ACount: Integer);
-    procedure TranslateToAnsi(const FromTranslation: TBCHTranslationKind; const
-      APosition, ACount: integer);
-    procedure TranslateFromAnsi(const ToTranslation: TBCHTranslationKind; const
-      APosition, ACount: integer);
-    function GetAsHex(const APosition, ACount: integer; const SwapNibbles:
-      Boolean): string;
+    function GetAddress(const Index, Count: TPointerInt): PByte;
+    procedure ReadBufferAt(var Buffer; const APosition, ACount: TPointerInt);
+    procedure WriteBufferAt(const Buffer; const APosition, ACount: TPointerInt);
+    procedure Move(const AFromPos, AToPos, ACount: TPointerInt);
+    procedure TranslateToAnsi(const FromTranslation: TBCHTranslationKind; const APosition, ACount: TPointerInt);
+    procedure TranslateFromAnsi(const ToTranslation: TBCHTranslationKind; const APosition, ACount: TPointerInt);
+    function GetAsHex(const APosition, ACount: TPointerInt; const SwapNibbles: Boolean): string;
   end;
 
   //@exclude
@@ -423,9 +426,8 @@ type
      - ADefaultDraw: if set to True (default), default drawing isperformed after the event handler returns.
        if set to false, the event handler must do all cell painting.
   *)
-  TBCHDrawCellEvent = procedure(Sender: TObject; ACanvas: TCanvas; ACol, ARow:
-    Integer; var AWideText: WideString; ARect: TRect; var ADefaultDraw: Boolean)
-    of object;
+  TBCHDrawCellEvent = procedure(Sender: TObject; ACanvas: TCanvas; ACol, ARow: TPointerInt;
+    var AWideText: WideString; ARect: TRect; var ADefaultDraw: Boolean) of object;
 
   // protected ancestor of the hex editor components
 
@@ -461,8 +463,8 @@ type
     FBookmarks: TBCHBookmarks;
     FSelStart,
       FSelPosition,
-      FSelEnd: integer;
-    FSelBeginPosition: integer;
+      FSelEnd: TPointerInt;
+    FSelBeginPosition: TPointerInt;
     FTranslation: TBCHTranslationKind;
     FCaretKind: TBCHCaretKind;
     FReplaceUnprintableCharsBy: char;
@@ -472,11 +474,11 @@ type
     FHideSelection: boolean;
     FGraySelOnLostFocus: boolean;
     FOnProgress: TBCHProgressEvent;
-    FMouseDownCol,
-      FMouseDownRow: integer;
+    FMouseDownCol: integer;
+      FMouseDownRow: TPointerInt;
     FShowDrag: boolean;
-    FDropCol,
-      FDropRow: integer;
+    FDropCol: integer;
+      FDropRow: TPointerInt;
     FOnInvalidKey,
       FOnTopLeftChanged: TNotifyEvent;
 
@@ -488,11 +490,11 @@ type
     FOffsetFormat: TBCHOffsetFormat;
     FSelectionPossible: boolean;
     FBookmarkBitmap: TBitmap;
-    FCursorList: array of integer;
+    FCursorList: array of TPointerInt;
     FHasCustomBMP: boolean;
     FStreamFileName: string;
     FHasFile: boolean;
-    FMaxUndo: integer;
+    FMaxUndo: TPointerInt;
     FHexChars: array[0..15] of char;
     FHexLowerCase: boolean;
     FOnChange: TNotifyEvent;
@@ -511,7 +513,7 @@ type
     FUnicodeBigEndian: Boolean;
     FMaskedChars: string;
 
-    FDrawDataPosition: integer;
+    FDrawDataPosition: TPointerInt;
     FDrawDataPositionIsHex: boolean;
     FOnDrawCell: TBCHDrawCellEvent;
 
@@ -527,8 +529,7 @@ type
 
     procedure RecalcBytesPerRow;
     function IsFileSizeFixed: boolean;
-    procedure InternalErase(const KeyWasBackspace: boolean; const UndoDesc:
-      string = '');
+    procedure InternalErase(const KeyWasBackspace: boolean; const UndoDesc: string = '');
     procedure SetReadOnlyView(const Value: boolean);
     procedure SetCaretKind(const Value: TBCHCaretKind);
     procedure SetFocusFrame(const Value: boolean);
@@ -541,7 +542,7 @@ type
     procedure SetReadOnlyFile(const Value: boolean);
     procedure SetTranslation(const Value: TBCHTranslationKind);
     procedure SetModified(const Value: boolean);
-    procedure SetChanged(DataPos: integer; const Value: boolean);
+    procedure SetChanged(DataPos: TPointerInt; const Value: boolean);
     procedure SetFixedFileSize(const Value: boolean);
     procedure SetAllowInsertMode(const Value: boolean);
     function GetInsertMode: boolean;
@@ -551,14 +552,14 @@ type
     function CalcColCount: integer;
     function GetLastCharCol: integer;
     function GetPropColCount: integer;
-    function GetPropRowCount: integer;
+    function GetPropRowCount: TPointerInt;
     function GetMouseOverSelection: boolean;
     function CursorOverSelection(const X, Y: integer): boolean;
     function MouseOverFixed(const X, Y: integer): boolean;
-    procedure AdjustBookmarks(const From, Offset: integer);
+    procedure AdjustBookmarks(const From, Offset: TPointerInt);
     procedure IntSetCaretPos(const X, Y, ACol: integer);
-    procedure TruncMaxPosition(var DataPos: integer);
-    procedure SetSelection(DataPos, StartPos, EndPos: integer);
+    procedure TruncMaxPosition(var DataPos: TPointerInt);
+    procedure SetSelection(DataPos, StartPos, EndPos: TPointerInt);
     function GetCurrentValue: integer;
     procedure SetInsertMode(const Value: boolean);
     function GetModified: boolean;
@@ -573,54 +574,49 @@ type
     // show or hide caret depending on row/col in view
     procedure CheckSetCaret;
     // get the row according to the given buffer position
-    function GetRow(const DataPos: integer): integer;
+    function GetRow(const DataPos: TPointerInt): TPointerInt;
     // invalid key pressed (in ebcdic)
     procedure WrongKey;
 
     // create an inverting caret bitmap
     procedure CreateCaretGlyph;
     // get start of selection
-    function GetSelStart: integer;
+    function GetSelStart: TPointerInt;
     // get end of selection
-    function GetSelEnd: integer;
+    function GetSelEnd: TPointerInt;
     // get selection count
-    function GetSelCount: integer;
+    function GetSelCount: TPointerInt;
     // set selection start
-    procedure SetSelStart(aValue: integer);
+    procedure SetSelStart(aValue: TPointerInt);
     // set selection end
-    procedure SetSelEnd(aValue: integer);
-    procedure SetSelCount(aValue: integer);
+    procedure SetSelEnd(aValue: TPointerInt);
+    procedure SetSelCount(aValue: TPointerInt);
     // position the caret in the given field
     procedure SetInCharField(const Value: boolean);
     // is the caret in the char field ?
     function GetInCharField: boolean;
     // insert a buffer (internal)
     procedure InternalInsertBuffer(Buffer: PAnsiChar; const Size, Position:
-      integer);
+      TPointerInt);
     // append some data (int)
-    procedure InternalAppendBuffer(Buffer: PAnsiChar; const Size: integer);
+    procedure InternalAppendBuffer(Buffer: PAnsiChar; const Size: TPointerInt);
     // store the caret properties
-    procedure InternalGetCurSel(var StartPos, EndPos, ACol, ARow: integer);
+    procedure InternalGetCurSel(var StartPos, EndPos: TPointerInt; var ACol: integer; var ARow: TPointerInt);
     // delete data
-    procedure InternalDelete(StartPos, EndPos, ACol, ARow: integer);
+    procedure InternalDelete(StartPos, EndPos: TPointerInt; ACol: integer; ARow: TPointerInt);
     // delete one half byte
-    function InternalDeleteNibble(const Pos: integer;
-      const HighNibble: boolean): boolean;
+    function InternalDeleteNibble(const Pos: TPointerInt; const HighNibble: boolean): boolean;
     // insert half byte
-    function InternalInsertNibble(const Pos: integer; const HighNibble:
-      boolean): boolean;
+    function InternalInsertNibble(const Pos: TPointerInt; const HighNibble: boolean): boolean;
     // used by nibble functions
-    function CreateShift4BitStream(const StartPos: integer; var FName:
-      TFileName): TFileStream;
+    function CreateShift4BitStream(const StartPos: TPointerInt; var FName: TFileName): TFileStream;
     // convert a given amount of data from ansi to something different and vice versa
-    procedure InternalConvertRange(const aFrom, aTo: integer; const aTransFrom,
-      aTransTo: TBCHTranslationKind);
+    procedure InternalConvertRange(const aFrom, aTo: TPointerInt; const aTransFrom, aTransTo: TBCHTranslationKind);
     // move data in buffer to a different position
-    procedure MoveFileMem(const aFrom, aTo, aCount: integer);
+    procedure MoveFileMem(const aFrom, aTo, aCount: TPointerInt);
     function GetBookmark(Index: byte): TBCHBookmark;
     procedure SetBookmark(Index: byte; const Value: TBCHBookmark);
-    procedure SetBookmarkVals(const Index: byte; const Position: integer; const
-      InCharField: boolean);
+    procedure SetBookmarkVals(const Index: byte; const Position: TPointerInt; const InCharField: boolean);
     procedure SetDrawGridLines(const Value: boolean);
     procedure SetGutterWidth(const Value: integer);
     // images have changed
@@ -641,17 +637,17 @@ type
     procedure SetShowRuler(const Value: boolean);
     procedure SetBytesPerUnit(const Value: integer);
     procedure SetRulerString;
-    procedure CheckSelectUnit(var AStart, AEnd: Integer);
+    procedure CheckSelectUnit(var AStart, AEnd: TPointerInt);
     procedure SetRulerBytesPerUnit(const Value: integer);
     procedure SetShowPositionIfNotFocused(const Value: Boolean);
-    function GetDataAt(Index: integer): Byte;
-    procedure SetDataAt(Index: integer; const Value: Byte);
+    function GetDataAt(Index: TPointerInt): Byte;
+    procedure SetDataAt(Index: TPointerInt; const Value: Byte);
     procedure SetUnicodeCharacters(const Value: Boolean);
     procedure SetUnicodeBigEndian(const Value: Boolean);
     procedure SetAutoBytesPerRow(const Value: Boolean);
-    function GetPositionAtCursor(const ACol, ARow: integer): integer;
+    function GetPositionAtCursor(const ACol, ARow: TPointerInt): TPointerInt;
     function GetIsCharFieldCol(const ACol: integer): Boolean;
-    procedure SetDataSize(const Value: integer);
+    procedure SetDataSize(const Value: TPointerInt);
     procedure SetBlockSize(const Value: Integer);
     procedure SetSepCharBlocks(const Value: boolean);
     procedure SetRulerNumberBase(const Value: byte);
@@ -668,14 +664,11 @@ type
     FModified: boolean;
 
     // @exclude(overwrite mouse wheel for zooming)
-    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean;
-      override;
+    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
     // @exclude(overwrite mouse wheel for zooming)
-    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean;
-      override;
+    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean; override;
     // Make Compiler happy
-    procedure DrawCell(ACol, ARow: Longint; ARect: TRect;
-      AState: TGridDrawState); override;
+    procedure DrawCell(ACol, ARow: Longint; ARect: TRect; AState: TGridDrawState); override;
     // @exclude(actually used bytes per unit)
     property UsedRulerBytesPerUnit: Integer read FUsedRulerBytesPerUnit;
     // @exclude(True: cells are currently to be selected)
@@ -690,18 +683,18 @@ type
     // @exclude(fire OnSelectionChange)
     procedure SelectionChanged; virtual;
     // @exclude(set a new selection)
-    procedure NewSelection(SelFrom, SelTo: integer);
+    procedure NewSelection(SelFrom, SelTo: TPointerInt);
     // @exclude(get the current mouse position)
     function CheckMouseCoord(var X, Y: integer): TGridCoord;
     // @exclude(assure the value is a multiple of FBytesPerUnit)
-    procedure CheckUnit(var AValue: Integer);
+    procedure CheckUnit(var AValue: TPointerInt);
     // call changed on every undo creation for OnChange event
     procedure Changed; virtual;
     // returns the drop file position after a drag'n'drop operation
-    function DropPosition: integer;
+    function DropPosition: TPointerInt;
     // copy a stream to a second one and fire the OnProgress handler
     procedure Stream2Stream(strFrom, strTo: TStream; const Operation:
-      TBCHProgressKind; const Count: integer = -1);
+      TBCHProgressKind; const Count: TPointerInt = -1);
     (* allows descendants to take special action if contents are to be saved
      to the file from where the data was load *)
     procedure PrepareOverwriteDiskFile; virtual;
@@ -716,7 +709,7 @@ type
     // adjust cell widths/heigths depending on font, offset format, bytes per row/column...
     procedure AdjustMetrics;
     // get the size of the contained data
-    function GetDataSize: integer;
+    function GetDataSize: TPointerInt;
     // @exclude(calculate the grid sizes)
     procedure CalcSizes;
     // @exclude(select one cell)
@@ -747,32 +740,29 @@ type
     procedure CMFontChanged(var Message: TMessage); message CM_FONTCHANGED;
     // @exclude(change a byte at the given position)
     procedure IntChangeByte(const aOldByte, aNewByte: byte;
-      aPos, aCol, aRow: integer; const UndoDesc: string = '');
+      aPos, aCol, aRow: TPointerInt; const UndoDesc: string = '');
     // @exclude(change two bytes at the given position)
     procedure IntChangeWideChar(const aOldChar, aNewChar: WideChar; aPos, aCol,
-      aRow: integer; const UndoDesc: string = '');
+      aRow: TPointerInt; const UndoDesc: string = '');
     // @exclude(keydown handler)
     procedure KeyDown(var Key: word; Shift: TShiftState); override;
     // @exclude(keyup handler)
     //procedure KeyUp(var Key: word; Shift: TShiftState); override;
     // @exclude(has this byte been modified ?)
-    function HasChanged(aPos: integer): boolean;
+    function HasChanged(aPos: TPointerInt): boolean;
     // @exclude(make a selection)
-    procedure Select(const aCurCol, aCurRow, aNewCol, aNewRow: integer);
+    procedure Select(const aCurCol, aCurRow, aNewCol, aNewRow: TPointerInt);
     // @exclude(mouse down handler)
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y:
-      integer); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: integer); override;
     // @exclude(mouse move handler)
     procedure MouseMove(Shift: TShiftState; X, Y: integer); override;
     // @exclude(mouse up handler)
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: integer);
       override;
     // @exclude(is undo record creation possible?)
-    function CanCreateUndo(const aKind: TBCHUndoFlag; const aCount, aReplCount:
-      integer): Boolean; virtual;
+    function CanCreateUndo(const aKind: TBCHUndoFlag; const aCount, aReplCount: TPointerInt): Boolean; virtual;
     // @exclude(add an undo to the undo buffer)
-    procedure CreateUndo(const aKind: TBCHUndoFlag; const aPos, aCount,
-      aReplCount: integer; const sDesc: string = '');
+    procedure CreateUndo(const aKind: TBCHUndoFlag; const aPos, aCount, aReplCount: TPointerInt; const sDesc: string = '');
     // @exclude(after loading)
     procedure Loaded; override;
     // @exclude(override CreateWnd)
@@ -794,8 +784,7 @@ type
     // number of bytes to show in each row
     property BytesPerRow: integer read FBytesPerRow write SetBytesPerRow;
     // number of bytes to show in each column
-    property BytesPerColumn: integer read GetBytesPerColumn write
-      SetBytesPerColumn default 2;
+    property BytesPerColumn: integer read GetBytesPerColumn write SetBytesPerColumn default 2;
     (* translation kind of the data (used to show characters on and to handle key presses in the char pane),
        (see also @link(TBCHTranslationKind))
     *)
@@ -848,22 +837,18 @@ type
     (* if this handler is assigned, the @link(OffsetFormat) is not used to
        create "line numbers", but the application tells the editor how to format the offset text
     *)
-    property OnGetOffsetText: TBCPHGetOffsetTextEvent read FOnGetOffsetText write
-      FOnGetOffsetText;
+    property OnGetOffsetText: TBCPHGetOffsetTextEvent read FOnGetOffsetText write FOnGetOffsetText;
 
     (* how many bytes form one block in a row? blocks are separated by a one character wide blank.
        -1 means no block separation (see also @link(SeparateBlocksInCharField)) *)
-    property BytesPerBlock: Integer read FBlockSize write SetBlockSize default
-      -1;
+    property BytesPerBlock: Integer read FBlockSize write SetBlockSize default -1;
 
     (* if @link(BytesPerBlock) is used, this property tells the editor whether it should
        separate blocks of bytes in the character pane too or not *)
-    property SeparateBlocksInCharField: boolean read FSepCharBlocks write
-      SetSepCharBlocks default True;
+    property SeparateBlocksInCharField: boolean read FSepCharBlocks write SetSepCharBlocks default True;
 
     // look of the editor's caret (see @link(TBCHCaretKind))
-    property CaretKind: TBCHCaretKind read FCaretKind write SetCaretKind default
-      ckAuto;
+    property CaretKind: TBCHCaretKind read FCaretKind write SetCaretKind default ckAuto;
     // colors to display (see @link(TBCHColors))
     property Colors: TBCHColors read FColors write SetColors;
     (* if FocusFrame is set to True, the current caret position will be displayed in the
@@ -876,16 +861,13 @@ type
        0C). if set to False, hex values will be displayed in usual order. this
        setting also affects hex data input and hex-string conversions
     *)
-    property SwapNibbles: boolean read GetSwapNibbles write SetSwapNibbles
-      default False;
+    property SwapNibbles: boolean read GetSwapNibbles write SetSwapNibbles default False;
     // replace @link(MaskedChars) with the following character in the character pane
-    property MaskChar: char read FReplaceUnprintableCharsBy write SetMaskChar
-      stored False;
+    property MaskChar: char read FReplaceUnprintableCharsBy write SetMaskChar stored False;
     (* if set to True, the data size is readonly, e.g. no data may be appended, deleted
        or inserted, just overwriting is allowed. this also affects @link(InsertMode).
     *)
-    property NoSizeChange: boolean read FFixedFileSize write SetFixedFileSize
-      default False;
+    property NoSizeChange: boolean read FFixedFileSize write SetFixedFileSize default False;
     (* if set to False, switching between overwrite and insert mode is not allowed
        (see also @link(InsertMode) and @link(NoSizeChange))
     *)
@@ -900,27 +882,23 @@ type
     property ReadOnlyView: boolean read FReadOnlyView write SetReadOnlyView
       default False;
     // hide the current selection when the hex editor looses focus (see also @link(GraySelectionIfNotFocused))
-    property HideSelection: boolean read FHideSelection write SetHideSelection
-      default False;
+    property HideSelection: boolean read FHideSelection write SetHideSelection default False;
     (* if set to True and @link(HideSelection) is False, then the current selection will be
        grayed when the hex editor looses focus (the values from the @link(Colors) property will
        be converted to grayscale colors)
     *)
-    property GraySelectionIfNotFocused: boolean read FGraySelOnLostFocus write
-      SetGraySelectionIfNotFocused default False;
+    property GraySelectionIfNotFocused: boolean read FGraySelOnLostFocus write SetGraySelectionIfNotFocused default False;
     (* this event is called in @link(LoadFromFile), @link(SaveToFile), @link(Find) and
        @link(FindWithWildcard) routines, so a progress indicator may be updated
        (see also @link(TBCHProgressEvent), @link(FindProgress))
     *)
-    property OnProgress: TBCHProgressEvent read FOnProgress write
-      FOnProgress;
+    property OnProgress: TBCHProgressEvent read FOnProgress write FOnProgress;
     (* this event is fired if an invalid character has been typed (like non-hex characters
        in the hex pane)
     *)
     property OnInvalidKey: TNotifyEvent read FOnInvalidKey write FOnInvalidKey;
     // this event is fired if the first visible row or column have been changed (e.g. on scrolling)
-    property OnTopLeftChanged: TNotifyEvent read FOnTopLeftChanged write
-      FOnTopLeftChanged;
+    property OnTopLeftChanged: TNotifyEvent read FOnTopLeftChanged write FOnTopLeftChanged;
     // returns the current selection in hex format ('00010203...') as string, uses @link(SwapNibbles)
     function GetSelectionAsHex: string;
     (* replace the current selection by a string containing data in hex format ('00 01 02 03' or similar),
@@ -934,40 +912,33 @@ type
     // if set to True, a grid is drawn
     property DrawGridLines: boolean read FDrawGridLines write SetDrawGridLines;
     // width of the offset display gutter, if set to -1, automatically adjust the gutter's width
-    property GutterWidth: integer read FGutterWidth write SetGutterWidth default
-      -1;
+    property GutterWidth: integer read FGutterWidth write SetGutterWidth default -1;
     (* bitmap containing 20 10x10 pixels pictures for bokkmarks (they are displayed in the offset
       gutter), the first ten pictures represent the bookmarks 0(10)..9, if they are set in the
       hexpane, the last 10 pics are shown if bookmarks are set in the character pane (see also
       @link(TBCHBookMark))
     *)
-    property BookmarkBitmap: TBitmap read FBookmarkBitmap write SetBookmarkBitmap
-      stored HasCustomBookmarkBitmap;
+    property BookmarkBitmap: TBitmap read FBookmarkBitmap write SetBookmarkBitmap stored HasCustomBookmarkBitmap;
 
     // maximum memory that is used for undo storage (in bytes, approximately)
-    property MaxUndo: integer read FMaxUndo write FMaxUndo default 1024 * 1024;
+    property MaxUndo: TPointerInt read FMaxUndo write FMaxUndo default 1024 * 1024;
     (* insert mode (typed characters are inserted at the current position) or
        overwrite mode (typed characters replace values at the current position), see also
        @link(AllowInsertMode), @link(NoSizeChange) and @link(ReadOnlyView)
     *)
-    property InsertMode: boolean read GetInsertMode write SetInsertMode default
-      False;
+    property InsertMode: boolean read GetInsertMode write SetInsertMode default False;
     // if set to True, hex data and hex offsets are displayed in lower case
-    property HexLowerCase: boolean read FHexLowerCase write SetHexLowerCase
-      default False;
+    property HexLowerCase: boolean read FHexLowerCase write SetHexLowerCase default False;
     // this event is called on every data change (load/empty/undo/redo)
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     // if set to True, a 3d line is drawn at the right of the offset gutter
-    property DrawGutter3D: boolean read FDrawGutter3D write SetDrawGutter3D
-      default True;
+    property DrawGutter3D: boolean read FDrawGutter3D write SetDrawGutter3D default True;
     // if set to True, a ruler is shown above the first row
-    property ShowRuler: boolean read FShowRuler write SetShowRuler default
-      False;
+    property ShowRuler: boolean read FShowRuler write SetShowRuler default False;
     (* number base (i.e. radix) for the ruler display (2-16), tells the component
        which number format to use when drawing the ruler
     *)
-    property RulerNumberBase: byte read FRulerNumberBase write SetRulerNumberBase
-      default 16;
+    property RulerNumberBase: byte read FRulerNumberBase write SetRulerNumberBase default 16;
     (* setting this property changes the way how mouse/keyboard selection
        works:<br>
        e.g. if set to two, two bytes will be treated as a unit, that means you
@@ -975,35 +946,29 @@ type
        also drag/drop and clipboard pasting is affected (data size
        is always a multiple of BytesPerUnit). See also @link(RulerBytesPerUnit)
     *)
-    property BytesPerUnit: integer read FBytesPerUnit write SetBytesPerUnit
-      default 1;
+    property BytesPerUnit: integer read FBytesPerUnit write SetBytesPerUnit default 1;
     (* setting this property affects the offset/ruler drawing:<br>
        e.g. if set to two, two bytes will be treated as a unit, that means the
        offset and ruler values will step by one each two bytes.
        if this property is set to -1, it will use the value of the
        @link(BytesPerUnit) property
     *)
-    property RulerBytesPerUnit: integer read FRulerBytesPerUnit write
-      SetRulerBytesPerUnit default -1;
+    property RulerBytesPerUnit: integer read FRulerBytesPerUnit write SetRulerBytesPerUnit default -1;
     // mark the current position even if the editor is not focused
-    property ShowPositionIfNotFocused: Boolean read FShowPositionIfNotFocused
-      write SetShowPositionIfNotFocused default False;
+    property ShowPositionIfNotFocused: Boolean read FShowPositionIfNotFocused write SetShowPositionIfNotFocused default False;
     (* if set to True, the character pane displays unicode characters
        and the @link(BytesPerUnit) property is set to 2. @link(Translation) is
        set to tkAsIs. @link(BytesPerRow) and @link(BytesPerColumn) must be a
        multiple of two to be able to use the unicode mode.
        see also @link(UnicodeBigEndian)
     *)
-    property UnicodeChars: Boolean read FUnicodeCharacters write
-      SetUnicodeCharacters default False;
+    property UnicodeChars: Boolean read FUnicodeCharacters write SetUnicodeCharacters default False;
     (* if set to True, big endian unicode mode is used if @link(UnicodeChars) is
        enabled
     *)
-    property UnicodeBigEndian: Boolean read FUnicodeBigEndian write
-      SetUnicodeBigEndian default False;
+    property UnicodeBigEndian: Boolean read FUnicodeBigEndian write SetUnicodeBigEndian default False;
     // this event is fired when the selection/caret position has changed
-    property OnSelectionChanged: TNotifyEvent read FOnSelectionChanged write
-      FOnSelectionChanged;
+    property OnSelectionChanged: TNotifyEvent read FOnSelectionChanged write FOnSelectionChanged;
 
     // use this event to implement owner drawing. see also @link(TBCHDrawCellEvent)
     property OnDrawCell: TBCHDrawCellEvent read FOnDrawCell write FOnDrawCell;
@@ -1016,11 +981,14 @@ type
     procedure ReadMaskChar(Reader: TReader);
     procedure ReadMaskChar_I(Reader: TReader);
     procedure WriteMaskChar_I(Writer: TWriter);
+
+    // return the memory address at the given stream position after checking bounaries
+    function GetFastPointer(const Index, Count: TPointerInt): PByte;
+    // @exclude(use TBCHexEditor.WriteBuffer!)
+    procedure SetMemory(const Index: TPointerInt; const Value: char);
   public
     { Public-Deklarationen }
 
-    // return the memory address at the given stream position after checking bounaries
-    function GetFastPointer(const Index, Count: integer): PByte;
     //@exclude()
     constructor Create(aOwner: TComponent); override;
     //@exclude()
@@ -1030,7 +998,7 @@ type
     (* during OnDrawCell event handlers, this property tells the data position currently
        being drawn (-1, if offset or ruler are drawn)
     *)
-    property DrawDataPosition: integer read FDrawDataPosition;
+    property DrawDataPosition: TPointerInt read FDrawDataPosition;
 
     (* during OnDrawCell event handlers, this property tells whether the cell is
        to be drawn in selected style (only valid if DrawDataPosition <> -1)
@@ -1038,14 +1006,12 @@ type
     property IsDrawDataSelected: boolean read FIsDrawDataSelected;
 
     // @exclude(use TBCHexEditor.ReadBuffer!)
-    function GetMemory(const Index: Integer): char;
+    function GetMemory(const Index: TPointerInt): char;
     (* @exclude(see http://info.borland.com/devsupport/delphi/fixes/delphi4/vcl.html,
       ref 279)
     *)
 
     function CanFocus: Boolean; override;
-    // @exclude(use TBCHexEditor.WriteBuffer!)
-    procedure SetMemory(const Index: integer; const Value: char);
 
     (* this property is valid only in the @link(OnGetOffsetText) event. if True,
        the component asks for the string of the highest possible offset, if False,
@@ -1057,19 +1023,17 @@ type
     (* synchronize another TCustomBCHexEditor view (top, left, selection),
        the optional SyncOffset parameter may be used for a different viewpoint
     *)
-    procedure SyncView(Source: TCustomBCHexEditor; SyncOffset: integer = 0);
+    procedure SyncView(Source: TCustomBCHexEditor; SyncOffset: TPointerInt = 0);
     // return the offset of the first displayed data
-    function DisplayStart: integer;
+    function DisplayStart: TPointerInt;
     // return the offset of the last displayed data
-    function DisplayEnd: integer;
+    function DisplayEnd: TPointerInt;
     // is the given position part of the selection?
-    function IsSelected(const APosition: integer): boolean;
+    function IsSelected(const APosition: TPointerInt): boolean;
     // calculate a data position from a col/row pair
-    property PositionAtCursor[const ACol, ARow: integer]: integer read
-    GetPositionAtCursor;
+    property PositionAtCursor[const ACol, ARow: TPointerInt]: TPointerInt read GetPositionAtCursor;
     // is the given col in the hex or the character pane?
-    property IsCharFieldCol[const ACol: integer]: Boolean read
-    GetIsCharFieldCol;
+    property IsCharFieldCol[const ACol: integer]: Boolean read GetIsCharFieldCol;
     // this byte value is used to fill the data when setting @link(DataSize)
     // enlarges the stream
     property SetDataSizeFillByte: Byte read FSetDataSizeFillByte write
@@ -1079,33 +1043,31 @@ type
     (* each call to UndoBeginUpdate increments an internal counter that prevents using
        undo storage and also disables undo functionality (see also @link(UndoEndUpdate))
     *)
-    function UndoBeginUpdate: integer; virtual;
+    function UndoBeginUpdate: TPointerInt; virtual;
     (* each call to UndoEndUpdate decrements an internal counter that prevents using
        undo storage and also disables undo functionality. the return value is the value
        of this counter. if the counter is reset to zero, undo creation is permitted again
        (see also @link(UndoBeginUpdate))
     *)
-    function UndoEndUpdate: integer; virtual;
+    function UndoEndUpdate: TPointerInt; virtual;
     // remove selection state from all data
     procedure ResetSelection(const aDraw: boolean);
     // see @link(GetSelectionAsHex) and @link(SetSelectionAsHex)
-    property SelectionAsHex: string read GetSelectionAsHex write
-      SetSelectionAsHex;
+    property SelectionAsHex: string read GetSelectionAsHex write SetSelectionAsHex;
     // see @link(GetSelectionAsText) and @link(SetSelectionAsText)
-    property SelectionAsText: AnsiString read GetSelectionAsText write
-      SetSelectionAsText;
-    function GetOffsetString(const Position: cardinal): string; virtual;
+    property SelectionAsText: AnsiString read GetSelectionAsText write SetSelectionAsText;
+    function GetOffsetString(const Position: TPointerInt): string; virtual;
     (* returns the given position as it would be drawn in the offset gutter, exception:
       if @link(OffsetFormat) is set to an empty string, returns the hexadecimal representation
       of the Position value (see also @link(GetOffsetString))
     *)
-    function GetAnyOffsetString(const Position: integer): string; virtual;
+    function GetAnyOffsetString(const Position: TPointerInt): string; virtual;
     // returns the height of one row in pixels
     function RowHeight: integer;
     // free the undo storage (discard all possible undo steps)
     procedure ResetUndo;
     // set the current position (like TStream.Seek)
-    function Seek(const aOffset, aOrigin: integer): integer;
+    function Seek(const aOffset, aOrigin: TPointerInt): TPointerInt;
     (* searches for text or data in the data buffer, returns the find position (-1, if data have not been found):<br><br>
        - aBuffer: data to search for<br>
        - aCount: size of data in aBuffer<br>
@@ -1114,10 +1076,8 @@ type
        - IgnoreCase: if True, lowercase and uppercase characters are treated as if they were equal<br>
        - SearchText: if True, the current @link(Translation) is taken into account when searching textual data<br><br>
     *)
-    function Find(aPattern: Pointer; aCount: integer; const aStart,
-      aEnd: integer): integer; overload;
-    function Find(aPattern: string; const aStart, aEnd: integer;
-      const IgnoreCase: boolean): integer; overload;
+    function Find(aPattern: Pointer; aCount: TPointerInt; const aStart, aEnd: TPointerInt): TPointerInt; overload;
+    function Find(aPattern: string; const aStart, aEnd: TPointerInt; const IgnoreCase: boolean): TPointerInt; overload;
     (* searches for text or data in the data buffer using a wildcard character
        returns the find position (-1, if data have not been found):<br><br>
        - aPattern: data to search for<br>
@@ -1130,11 +1090,11 @@ type
       store a selection as undo record, so you can restore the selection start and end by using
       @link(Undo). this can be useful e.g. to show position of replaced data
     *)
-    procedure AddSelectionUndo(const AStart, ACount: integer);
+    procedure AddSelectionUndo(const AStart, ACount: TPointerInt);
     // read data into a buffer
-    procedure ReadBuffer(var Buffer; const Index, Count: Integer);
+    procedure ReadBuffer(var Buffer; const Index, Count: TPointerInt);
     // write a buffer to the file data
-    procedure WriteBuffer(const Buffer; const Index, Count: Integer); virtual;
+    procedure WriteBuffer(const Buffer; const Index, Count: TPointerInt); virtual;
     // delete the currently selected data
     procedure DeleteSelection(const UndoDesc: string = '');
     // load the contents of a stream into the data buffer
@@ -1147,8 +1107,7 @@ type
     procedure SaveToFile(const Filename: string;
       const aUnModify: boolean = True);
     // save a range of bytes to a stream
-    procedure SaveRangeToStream(Strm: TStream; const APosition, ACount:
-      integer);
+    procedure SaveRangeToStream(Strm: TStream; const APosition, ACount: TPointerInt);
     // undo the last modification, multiple undos are possible
     function Undo: boolean;
     // discard the last undo action (only one single redo is possible)
@@ -1158,48 +1117,44 @@ type
     (* returns a buffer containing parts of the data buffer's contents. the buffer is allocated
        in this routine and must be freed by the caller
     *)
-    function BufferFromFile(const aPos: integer; var aCount: integer): PChar;
+    function BufferFromFile(const aPos: TPointerInt; var aCount: TPointerInt): PChar;
     // insert some data at the specified position into the data buffer
-    procedure InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: integer; const
-      UndoDesc: string = ''; const MoveCursor: Boolean = True);
+    procedure InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: TPointerInt;
+      const UndoDesc: string = ''; const MoveCursor: Boolean = True);
     // append some data at the end of the data buffer
-    procedure AppendBuffer(aBuffer: PAnsiChar; const aSize: integer; const UndoDesc:
-      string = ''; const MoveCursor: Boolean = True);
+    procedure AppendBuffer(aBuffer: PAnsiChar; const aSize: TPointerInt; const UndoDesc: string = '';
+      const MoveCursor: Boolean = True);
     // replace the currently selected data with some other data
-    procedure ReplaceSelection(aBuffer: PAnsiChar; aSize: integer; const UndoDesc:
-      string = ''; const MoveCursor: Boolean = True);
+    procedure ReplaceSelection(aBuffer: PAnsiChar; aSize: TPointerInt; const UndoDesc: string = '';
+      const MoveCursor: Boolean = True);
     // replace some amount of data
-    function Replace(aBuffer: PChar; aPosition, aOldCount, aNewCount: integer;
-      const UndoDesc:
-      string = ''; const MoveCursor: Boolean = False): integer;
+    function Replace(aBuffer: PChar; aPosition, aOldCount, aNewCount: TPointerInt;
+      const UndoDesc: string = ''; const MoveCursor: Boolean = False): TPointerInt;
     // get the current data position (depending on the cursor/caret)
-    function GetCursorPos: integer;
+    function GetCursorPos: TPointerInt;
     // delete 4 bits (=half byte = nibble) from the data buffer (see also @link(InsertNibble))
-    function DeleteNibble(const aPos: integer; const HighNibble: boolean; const
-      UndoDesc: string = ''): boolean;
+    function DeleteNibble(const aPos: TPointerInt; const HighNibble: boolean; const UndoDesc: string = ''): boolean;
     // insert 4 bits (0000) into the data buffer (see also @link(DeleteNibble))
-    function InsertNibble(const aPos: integer; const HighNibble: boolean; const
-      UndoDesc: string = ''): boolean;
+    function InsertNibble(const aPos: TPointerInt; const HighNibble: boolean; const UndoDesc: string = ''): boolean;
     // convert a part of the data buffer's content from one character table to a different one
-    procedure ConvertRange(const aFrom, aTo: integer; const aTransFrom,
-      aTransTo: TBCHTranslationKind; const UndoDesc: string = '');
+    procedure ConvertRange(const aFrom, aTo: TPointerInt;
+      const aTransFrom, aTransTo: TBCHTranslationKind; const UndoDesc: string = '');
     (* returns the data position of the top left cell and also whether the caret is in the
        character pane, see also @link(SetTopLeftPosition)
     *)
-    function GetTopLeftPosition(var oInCharField: boolean): integer;
+    function GetTopLeftPosition(var oInCharField: boolean): TPointerInt;
     (* set top left cell to the given data position and also whether the caret is in the
        character pane (see also @link(GetTopLeftPosition))
     *)
-    procedure SetTopLeftPosition(const aPosition: integer; const aInCharField:
-      boolean);
+    procedure SetTopLeftPosition(const aPosition: TPointerInt; const aInCharField: boolean);
     (* show a drop position marker on the cell at the given mouse cursor position
       (see also @link(HideDragCell))
     *)
-    function ShowDragCell(const X, Y: integer): integer;
+    function ShowDragCell(const X, Y: TPointerInt): TPointerInt;
     // hide the drop position marker (see also @link(ShowDragCell))
     procedure HideDragCell;
     // combine two or more changes, so @link(Undo) will discard the at once
-    procedure CombineUndo(const aCount: integer; const sDesc: string = '');
+    procedure CombineUndo(const aCount: TPointerInt; const sDesc: string = '');
     (* translate a byte from the current @link(Translation) to the Windows Codepage
       (see also @link(TranslateFromAnsiChar))
     *)
@@ -1209,11 +1164,11 @@ type
     *)
     function TranslateFromAnsiChar(const aByte: byte): WideChar;
     // retrieve or set the selection start
-    property SelStart: integer read GetSelStart write SetSelStart;
+    property SelStart: TPointerInt read GetSelStart write SetSelStart;
     // retrieve or set the selection end
-    property SelEnd: integer read GetSelEnd write SetSelEnd;
+    property SelEnd: TPointerInt read GetSelEnd write SetSelEnd;
     // retrieve or set the size of the selected data
-    property SelCount: integer read GetSelCount write SetSelCount;
+    property SelCount: TPointerInt read GetSelCount write SetSelCount;
     // is @link(Undo) possible?
     property CanUndo: boolean read GetCanUndo;
     // is @link(Redo) possible?
@@ -1229,9 +1184,9 @@ type
     // retrieves or stores the amount of data in the data buffer
     // when enlarging the data stream, the @link(SetDataSizeFillByte) property
     // tells which value to use to fill the new data
-    property DataSize: integer read GetDataSize write SetDataSize;
+    property DataSize: TPointerInt read GetDataSize write SetDataSize;
     // array to the data buffer's content
-    property Data[Index: integer]: Byte read GetDataAt write SetDataAt;
+    property Data[Index: TPointerInt]: Byte read GetDataAt write SetDataAt;
     // retrieve or set the data as string
     property AsText: AnsiString read GetAsText write SetAsText;
     // retrieve or set the data as hex formatted string (00 01 02 03...)
@@ -1242,12 +1197,12 @@ type
     property Bookmark[Index: byte]: TBCHBookmark read GetBookmark write
     SetBookmark;
     // has the byte at the given position been modified ? (only in overwrite mode)
-    property ByteChanged[index: integer]: boolean read HasChanged write
+    property ByteChanged[index: TPointerInt]: boolean read HasChanged write
     SetChanged;
     // retrieves the number of columns (grid columns)
     property ColCountRO: integer read GetPropColCount;
     // retrieves the number of rows (grid rows)
-    property RowCountRO: integer read GetPropRowCount;
+    property RowCountRO: TPointerInt read GetPropRowCount;
     // returns True if the mouse cursor is positionned over selected data
     property MouseOverSelection: boolean read GetMouseOverSelection;
     // get the data value at the current caret position, returns -1 if an error occured
@@ -1460,12 +1415,12 @@ type
   PBCHUndoRec = ^TBCHUndoRec;
   // @exclude(undo storage record)
   TBCHUndoRec = packed record
-    DataLen: integer;
+    DataLen: TPointerInt;
     Flags: TBCHUndoFlags;
-    CurPos: integer;
-    Pos, Count, ReplCount: cardinal;
+    CurPos: TPointerInt;
+    Pos, Count, ReplCount: TPointerInt;
     CurTranslation: TBCHTranslationKind;
-    CurBPU: Integer;
+    CurBPU: TPointerInt;
     Buffer: byte;
   end;
 
@@ -1473,28 +1428,26 @@ type
   TBCHUndoStorage = class(TMemoryStream)
   private
     FCount,
-      FUpdateCount: integer;
+      FUpdateCount: TPointerInt;
     FEditor: TCustomBCHexEditor;
     FDescription: string;
     FRedoPointer,
       FLastUndo: PBCHUndoRec;
-    FLastUndoSize: integer;
+    FLastUndoSize: TPointerInt;
     FLastUndoDesc: string;
-    procedure SetCount(const Value: integer);
+    procedure SetCount(const Value: TPointerInt);
     procedure ResetRedo;
     procedure CreateRedo(const Rec: TBCHUndoRec);
     function GetUndoKind(const Flags: TBCHUndoFlags): TBCHUndoFlag;
-    procedure AddSelection(const APos, ACount: integer);
-    function ReadUndoRecord(var aUR: TBCHUndoRec; var SDescription: string):
-      TBCHUndoFlag;
+    procedure AddSelection(const APos, ACount: TPointerInt);
+    function ReadUndoRecord(var aUR: TBCHUndoRec; var SDescription: string): TBCHUndoFlag;
     function GetLastUndoKind: TBCHUndoFlag;
 
   public
     constructor Create(AEditor: TCustomBCHexEditor);
     destructor Destroy; override;
-    procedure SetSize(NewSize: longint); override;
-    procedure CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount:
-      integer; const SDescription: string = '');
+    procedure SetSize(const NewSize: Int64); override;
+    procedure CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt; const SDescription: string = '');
     function CanUndo: boolean;
     function CanRedo: boolean;
     function Redo: boolean;
@@ -1503,8 +1456,8 @@ type
     function EndUpdate: integer;
     procedure Reset(AResetRedo: boolean = True);
     procedure RemoveLastUndo;
-    property Count: integer read FCount write SetCount;
-    property UpdateCount: integer read FUpdateCount;
+    property Count: TPointerInt read FCount write SetCount;
+    property UpdateCount: TPointerInt read FUpdateCount;
     property Description: string read FDescription;
     property UndoKind: TBCHUndoFlag read GetLastUndoKind;
   end;
@@ -1567,14 +1520,14 @@ const
 (* translate a hexadecimal data representation ("a000 cc45 d3 42"...) to binary data
  (see @link(SwapNibbles) for the meaning of the SwapNibbles value)
 *)
-function ConvertHexToBin(aFrom: PChar; aTo: PAnsiChar; const aCount: integer; const
-  SwapNibbles: boolean; var BytesTranslated: integer): PAnsiChar;
+function ConvertHexToBin(aFrom: PChar; aTo: PAnsiChar; const aCount: TPointerInt;
+  const SwapNibbles: boolean; var BytesTranslated: TPointerInt): PAnsiChar;
 
 (* translate binary data to its hex representation (see @link(ConvertHexToBin)),
    (see @link(SwapNibbles) for the meaning of the SwapNibbles value)
 *)
-function ConvertBinToHex(aFrom: PAnsiChar; aTo: PChar; const aCount: integer; const
-  SwapNibbles: boolean): PChar;
+function ConvertBinToHex(aFrom: PAnsiChar; aTo: PChar; const aCount: TPointerInt;
+  const SwapNibbles: boolean): PChar;
 
 // convert X and Y into a TGridCoord record
 function GridCoord(aX, aY: longint): TGridCoord;
@@ -1591,10 +1544,14 @@ function GetTempName: string;
   <br>
   hint: Radix must be in the range of 2..16*)
 function IntToRadix(Value: integer; Radix: byte): string;
+{$IFDEF ASM_ENABLED}
 function IntToRadix64(Value: int64; Radix: byte): string;
+{$ENDIF}
 // translate an integer to a radix coded string and left fill with 0 (see also @link(IntToRadix))
 function IntToRadixLen(Value: integer; Radix, Len: byte): string;
+{$IFDEF ASM_ENABLED}
 function IntToRadixLen64(Value: int64; Radix, Len: byte): string;
+{$ENDIF}
 // translate an integer to an octal string (see also @link(IntToRadix))
 function IntToOctal(const Value: integer): string;
 
@@ -1607,6 +1564,7 @@ function RadixToInt64(Value: string; Radix: byte): int64;
 
 (* 64 bit unsigned integer arithmetics *)
 
+{$IFDEF ASM_ENABLED}
 // division of two unsigned int64 values, may raise an exception on error
 function DivideU64(const Dividend, Divisor: int64): int64;
 // division of two unsigned int64 values, returns false if an error occurred
@@ -1632,7 +1590,7 @@ function SubtractU64(const Minuend, Subtrahend: int64): int64;
 // subtraction of two unsigned int64 values, returns false if an error occurred
 function TrySubtractU64(const Minuend, Subtrahend: int64;
   var Val: int64): boolean;
-
+{$ENDIF}
 (* try to find the correct radix (based on prefix/suffix) and return the number, known
    prefixes/suffixes are:<br>
    0x&lt;number&gt;, 0X&lt;number&gt;, $&lt;number&gt;, &lt;number&gt;h, &lt;number&gt;H: radix 16<br>
@@ -1658,18 +1616,16 @@ function FadeToGray(aColor: TColor): TColor;
   - bBuffer: pointer to target data, must be allocated (may equal to aBuffer)<br>
   - aCount: number of bytes to translate
 *)
-procedure TranslateBufferFromAnsi(const TType: TBCHTranslationKind; aBuffer,
-  bBuffer: PAnsiChar; const aCount: integer);
+procedure TranslateBufferFromAnsi(const TType: TBCHTranslationKind; aBuffer, bBuffer: PAnsiChar; const aCount: TPointerInt);
 // translate data from a different character set to Ansi (see also @link(TranslateBufferFromAnsi))
-procedure TranslateBufferToAnsi(const TType: TBCHTranslationKind; aBuffer,
-  bBuffer: PAnsiChar; const aCount: integer);
+procedure TranslateBufferToAnsi(const TType: TBCHTranslationKind; aBuffer, bBuffer: PAnsiChar; const aCount: TPointerInt);
 
 // compatibility
 
 // returns the lower of the two numbers
-function Min(a1, a2: integer): integer;
+function Min(a1, a2: TPointerInt): TPointerInt;
 // returns the higer of the two numbers
-function Max(a1, a2: integer): integer;
+function Max(a1, a2: TPointerInt): TPointerInt;
 
 var
   (* translation tables for tkCustom *)
@@ -1763,10 +1719,9 @@ end;
 
 // translate the buffer from ANSI to the given translation mode
 
-procedure TranslateBufferFromAnsi(const TType: TBCHTranslationKind; aBuffer,
-  bBuffer: PAnsiChar; const aCount: integer);
+procedure TranslateBufferFromAnsi(const TType: TBCHTranslationKind; aBuffer, bBuffer: PAnsiChar; const aCount: TPointerInt);
 var
-  LIntLoop: integer;
+  LIntLoop: TPointerInt;
 begin
   case TType of
     // changed 04/18/04: bBuffer and aBuffer were interchanged!
@@ -1792,10 +1747,9 @@ end;
 
 // translate the buffer to ANSI from the given translation mode
 
-procedure TranslateBufferToAnsi(const TType: TBCHTranslationKind; aBuffer,
-  bBuffer: PAnsiChar; const aCount: integer);
+procedure TranslateBufferToAnsi(const TType: TBCHTranslationKind; aBuffer, bBuffer: PAnsiChar; const aCount: TPointerInt);
 var
-  LIntLoop: integer;
+  LIntLoop: TPointerInt;
 begin
   case TType of
     tkAsIs: Move(aBuffer^, bBuffer^, aCount);
@@ -1896,7 +1850,7 @@ end;
 
 // return the lesser value
 
-function Min(a1, a2: integer): integer;
+function Min(a1, a2: TPointerInt): TPointerInt;
 begin
   if a1 < a2 then
     Result := a1
@@ -1906,7 +1860,7 @@ end;
 
 // return the bigger value
 
-function Max(a1, a2: integer): integer;
+function Max(a1, a2: TPointerInt): TPointerInt;
 begin
   if a1 > a2 then
     Result := a1
@@ -1924,11 +1878,11 @@ end;
 
 // convert '00 01 02...' to binary data
 
-function ConvertHexToBin(aFrom: PChar; aTo: PAnsiChar; const aCount: integer;
-  const SwapNibbles: boolean; var BytesTranslated: integer): PAnsiChar;
+function ConvertHexToBin(aFrom: PChar; aTo: PAnsiChar; const aCount: TPointerInt;
+  const SwapNibbles: boolean; var BytesTranslated: TPointerInt): PAnsiChar;
 var
   LBoolHi: boolean;
-  LIntLoop: integer;
+  LIntLoop: TPointerInt;
   LBytCurrent: byte;
   LChrCurrent: char;
 begin
@@ -1961,12 +1915,12 @@ end;
 
 // convert binary data to '00 01 02...'
 
-function ConvertBinToHex(aFrom: PAnsiChar; aTo: PChar; const aCount: integer;
+function ConvertBinToHex(aFrom: PAnsiChar; aTo: PChar; const aCount: TPointerInt;
   const SwapNibbles: boolean): PChar;
 var
-  LIntLoop: integer;
+  LIntLoop: TPointerInt;
   LByteCurrent: byte;
-  LIntLoop2: integer;
+  LIntLoop2: TPointerInt;
 begin
   Result := aTo;
   LIntLoop2 := 0;
@@ -1995,11 +1949,12 @@ function IntToRadix(Value: integer; Radix: byte): string;
 begin
   Result := IntToRadixLen(Value, Radix, 0);
 end;
-
+{$IFDEF ASM_ENABLED}
 function IntToRadix64(Value: int64; Radix: byte): string;
 begin
   Result := IntToRadixLen64(Value, Radix, 0);
 end;
+{$ENDIF}
 
 // translate an integer to a radix coded string and left fill with 0
 
@@ -2020,7 +1975,7 @@ end;
 // this code is derived from assembler code written by
 // Norbert Juffa, found on "the assembly gems page"
 // (http://www.df.lth.se/~john_e/)
-
+{$IFDEF ASM_ENABLED}
 procedure _UModDiv64;
 begin
   asm
@@ -2409,7 +2364,7 @@ begin
   while Length(Result) < Len do
     Result := '0' + Result;
 end;
-
+{$ENDIF}
 // translate an integer value to an octal string
 
 function IntToOctal(const Value: integer): string;
@@ -2726,7 +2681,7 @@ begin
   CheckSetCaret;
 end;
 
-function TCustomBCHexEditor.GetDataSize: integer;
+function TCustomBCHexEditor.GetDataSize: TPointerInt;
 begin
   Result := FDataStorage.Size;
 end;
@@ -2762,8 +2717,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SaveRangeToStream(Strm: TStream; const APosition,
-  ACount: integer);
+procedure TCustomBCHexEditor.SaveRangeToStream(Strm: TStream; const APosition, ACount: TPointerInt);
 begin
   WaitCursor;
   try
@@ -2874,7 +2828,7 @@ end;
 
 procedure TCustomBCHexEditor.CalcSizes;
 var
-  LIntRows: integer;
+  LIntRows: TPointerInt;
 begin
   if FModifiedBytes.Size > DataSize then
     FModifiedBytes.Size := DataSize;
@@ -2949,7 +2903,7 @@ end;
 
 // get the position of the drag'n'drop marker
 
-function TCustomBCHexEditor.DropPosition: integer;
+function TCustomBCHexEditor.DropPosition: TPointerInt;
 var
   LBoolInCharField: boolean;
 begin
@@ -2967,10 +2921,10 @@ begin
 end;
 
 procedure TCustomBCHexEditor.Stream2Stream(strFrom, strTo: TStream;
-  const Operation: TBCHProgressKind; const Count: integer = -1);
+  const Operation: TBCHProgressKind; const Count: TPointerInt = -1);
 var
   LBytProgress, LBytLastProgress: byte;
-  LIntRemain, LIntRead, LIntCount: integer;
+  LIntRemain, LIntRead, LIntCount: TPointerInt;
   LBoolCancel: boolean;
   LStrFile: string;
 
@@ -3016,7 +2970,7 @@ end;
 function TCustomBCHexEditor.SelectCell(ACol, ARow: longint): boolean;
 var
   LRctCellRect: TRect;
-  LIntNewPosition, LIntPrevPosition: integer;
+  LIntNewPosition, LIntPrevPosition: TPointerInt;
 begin
   if DataSize > 0 then
     Result := CheckSelectCell(aCol, aRow)
@@ -3127,7 +3081,7 @@ begin
     Result := 0;
 end;
 
-function TCustomBCHexEditor.GetRow(const DataPos: integer): integer;
+function TCustomBCHexEditor.GetRow(const DataPos: TPointerInt): TPointerInt;
 begin
   Result := (DataPos div FBytesPerRow) + GRID_FIXED;
 end;
@@ -3421,7 +3375,7 @@ end;
 {-------------------------------------------------------------------------------}
 
 procedure TCustomBCHexEditor.IntChangeByte(const aOldByte, aNewByte: byte; aPos,
-  aCol, aRow: integer; const UndoDesc: string = '');
+  aCol, aRow: TPointerInt; const UndoDesc: string = '');
 begin
   if aOldByte = aNewByte then
     Exit;
@@ -3439,7 +3393,7 @@ begin
 end;
 
 procedure TCustomBCHexEditor.IntChangeWideChar(const aOldChar, aNewChar:
-  WideChar; aPos, aCol, aRow: integer; const UndoDesc: string);
+  WideChar; aPos, aCol, aRow: TPointerInt; const UndoDesc: string);
 var
   LBArrOld: packed array[0..1] of Byte absolute aOldChar;
   LBArrNew: packed array[0..1] of Byte absolute aNewChar;
@@ -3464,9 +3418,9 @@ end;
 
 procedure TCustomBCHexEditor.KeyDown(var Key: word; Shift: TShiftState);
 var
-  LIntCol: integer;
+  LIntCol: TPointerInt;
   LgrcPosition: TGridCoord;
-  LIntRow: integer;
+  LIntRow: TPointerInt;
 begin
   if Assigned(OnKeyDown) then
     OnKeyDown(self, Key, Shift);
@@ -3752,7 +3706,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.HasChanged(aPos: integer): boolean;
+function TCustomBCHexEditor.HasChanged(aPos: TPointerInt): boolean;
 begin
   Result := False;
   if InsertMode then
@@ -3762,7 +3716,7 @@ begin
     Result := FModifiedBytes.Bits[aPos];
 end;
 
-function TCustomBCHexEditor.IsSelected(const APosition: integer): boolean;
+function TCustomBCHexEditor.IsSelected(const APosition: TPointerInt): boolean;
 begin
   Result := False;
   if (FSelPosition <> -1) and (APosition >= FSelStart) and (APosition <= FSelEnd)
@@ -3772,7 +3726,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.NewSelection(SelFrom, SelTo: integer);
+procedure TCustomBCHexEditor.NewSelection(SelFrom, SelTo: TPointerInt);
 begin
   CheckSelectUnit(SelFrom, SelTo);
   SetSelection(SelFrom, Min(SelFrom, SelTo), Max(SelFrom, SelTo));
@@ -3930,8 +3884,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.Select(const aCurCol, aCurRow, aNewCol, aNewRow:
-  integer);
+procedure TCustomBCHexEditor.Select(const aCurCol, aCurRow, aNewCol, aNewRow: TPointerInt);
 var
   LIntOldStart,
     //LIntOldEnd,
@@ -3986,8 +3939,7 @@ begin
     Invalidate;
 end;
 
-procedure TCustomBCHexEditor.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X, Y: integer);
+procedure TCustomBCHexEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: integer);
 var
   LgrcDummy: TGridCoord;
   lboolInherited: boolean;
@@ -4038,8 +3990,7 @@ begin
     OnMouseDown(self, Button, Shift, X, Y);
 end;
 
-procedure TCustomBCHexEditor.InternalGetCurSel(var StartPos, EndPos, ACol, ARow:
-  integer);
+procedure TCustomBCHexEditor.InternalGetCurSel(var StartPos, EndPos: TPointerInt; var ACol: integer; var ARow: TPointerInt);
 begin
   if FSelPosition = -1 then
   begin
@@ -4063,14 +4014,13 @@ begin
     FModifiedBytes.Size := StartPos;
 end;
 
-function TCustomBCHexEditor.CreateShift4BitStream(const StartPos: integer; var
-  FName: TFileName): TFileStream;
+function TCustomBCHexEditor.CreateShift4BitStream(const StartPos: TPointerInt; var FName: TFileName): TFileStream;
 var
   LByt1,
     LByt2: byte;
   LBytBuffer: array[0..511] of byte;
   LIntLoop,
-    LIntRead: integer;
+    LIntRead: TPointerInt;
 begin
   Result := nil;
   if StartPos >= DataSize then
@@ -4096,12 +4046,11 @@ begin
   Result.Position := 0;
 end;
 
-function TCustomBCHexEditor.InternalInsertNibble(const Pos: integer; const
-  HighNibble: boolean): boolean;
+function TCustomBCHexEditor.InternalInsertNibble(const Pos: TPointerInt; const HighNibble: boolean): boolean;
 var
   LfstNibbleStream: TFileStream;
   LStrFName: TFileName;
-  LIntOldSize: integer;
+  LIntOldSize: TPointerInt;
   LByteFirst,
     LByteLast: byte;
 begin
@@ -4141,8 +4090,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.InsertNibble(const aPos: integer; const HighNibble:
-  boolean; const UndoDesc: string = ''): boolean;
+function TCustomBCHexEditor.InsertNibble(const aPos: TPointerInt; const HighNibble: boolean; const UndoDesc: string = ''): boolean;
 const
   L_BytAppend: byte = 0;
 begin
@@ -4171,8 +4119,7 @@ begin
   Changed;
 end;
 
-function TCustomBCHexEditor.InternalDeleteNibble(const Pos: integer; const
-  HighNibble: boolean): boolean;
+function TCustomBCHexEditor.InternalDeleteNibble(const Pos: TPointerInt; const HighNibble: boolean): boolean;
 var
   LfstNibbleStream: TFileStream;
   LStrFName: TFileName;
@@ -4211,8 +4158,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.DeleteNibble(const aPos: integer; const HighNibble:
-  boolean; const UndoDesc: string = ''): boolean;
+function TCustomBCHexEditor.DeleteNibble(const aPos: TPointerInt; const HighNibble: boolean; const UndoDesc: string = ''): boolean;
 begin
   Result := False;
 
@@ -4231,10 +4177,9 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.InternalConvertRange(const aFrom, aTo: integer;
-  const aTransFrom, aTransTo: TBCHTranslationKind);
+procedure TCustomBCHexEditor.InternalConvertRange(const aFrom, aTo: TPointerInt; const aTransFrom, aTransTo: TBCHTranslationKind);
 var
-  LIntSize: integer;
+  LIntSize: TPointerInt;
 begin
   LIntSize := (aTo - aFrom) + 1;
   WaitCursor;
@@ -4246,8 +4191,8 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.ConvertRange(const aFrom, aTo: integer; const
-  aTransFrom, aTransTo: TBCHTranslationKind; const UndoDesc: string = '');
+procedure TCustomBCHexEditor.ConvertRange(const aFrom, aTo: TPointerInt;
+  const aTransFrom, aTransTo: TBCHTranslationKind; const UndoDesc: string = '');
 begin
   if aFrom > aTo then
     Exit;
@@ -4266,8 +4211,7 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.InternalDelete(StartPos, EndPos, ACol, ARow:
-  integer);
+procedure TCustomBCHexEditor.InternalDelete(StartPos, EndPos: TPointerInt; ACol: integer; ARow: TPointerInt);
 var
   LgrdEndPos: TGridCoord;
   LIntNewCol: integer;
@@ -4305,9 +4249,9 @@ end;
 procedure TCustomBCHexEditor.DeleteSelection(const UndoDesc: string = '');
 var
   LIntSelStart,
-    LIntSelEnd,
-    LIntCol,
-    LIntRow: integer;
+    LIntSelEnd: TPointerInt;
+    LIntCol: integer;
+    LIntRow: TPointerInt;
 begin
   InternalGetCurSel(LIntSelStart, LIntSelEnd, LIntCol, LIntRow);
   CreateUndo(ufKindByteRemoved, LIntSelStart, LIntSelEnd - LIntSelStart,
@@ -4317,8 +4261,8 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.CreateUndo(const aKind: TBCHUndoFlag; const aPos,
-  aCount, aReplCount: integer; const sDesc: string = '');
+procedure TCustomBCHexEditor.CreateUndo(const aKind: TBCHUndoFlag; const aPos, aCount, aReplCount: TPointerInt;
+  const sDesc: string = '');
 begin
 
   if CanCreateUndo(aKind, aCount, aReplCount) then
@@ -4361,7 +4305,7 @@ begin
     Result := UNDO_NOUNDO;
 end;
 
-function TCustomBCHexEditor.GetSelStart: integer;
+function TCustomBCHexEditor.GetSelStart: TPointerInt;
 begin
   if FSelPosition = -1 then
   begin
@@ -4371,7 +4315,7 @@ begin
     Result := FSelPosition;
 end;
 
-function TCustomBCHexEditor.GetSelEnd: integer;
+function TCustomBCHexEditor.GetSelEnd: TPointerInt;
 begin
   if FSelPosition = -1 then
     Result := GetPosAtCursor(Col, Row)
@@ -4383,7 +4327,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SetSelStart(aValue: integer);
+procedure TCustomBCHexEditor.SetSelStart(aValue: TPointerInt);
 begin
   if (aValue < 0) or (aValue >= DataSize) then
     raise EBCHexEditor.Create(ERR_INVALID_SELSTART)
@@ -4395,7 +4339,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SetSelEnd(aValue: integer);
+procedure TCustomBCHexEditor.SetSelEnd(aValue: TPointerInt);
 begin
   if (aValue < -1) or (aValue >= DataSize) then
     raise EBCHexEditor.Create(ERR_INVALID_SELEND)
@@ -4411,7 +4355,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SetSelCount(aValue: integer);
+procedure TCustomBCHexEditor.SetSelCount(aValue: TPointerInt);
 begin
   SetSelEnd(Min(SelStart+aValue-1, DataSize-1));
 end;
@@ -4543,9 +4487,9 @@ begin
 end;
 
 procedure TCustomBCHexEditor.InternalAppendBuffer(Buffer: PAnsiChar; const Size:
-  integer);
+  TPointerInt);
 var
-  LIntSize: integer;
+  LIntSize: TPointerInt;
 begin
   if DataSize = 0 then
   begin
@@ -4560,9 +4504,9 @@ begin
 end;
 
 procedure TCustomBCHexEditor.InternalInsertBuffer(Buffer: PAnsiChar; const Size,
-  Position: integer);
+  Position: TPointerInt);
 var
-  LIntSize: integer;
+  LIntSize: TPointerInt;
 begin
   if DataSize = 0 then
   begin
@@ -4581,8 +4525,8 @@ begin
   CalcSizes;
 end;
 
-procedure TCustomBCHexEditor.InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos:
-  integer; const UndoDesc: string = ''; const MoveCursor: Boolean = True);
+procedure TCustomBCHexEditor.InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: TPointerInt;
+  const UndoDesc: string = ''; const MoveCursor: Boolean = True);
 begin
   //FDataStorage.CheckBounds(aPos);
   CreateUndo(ufKindInsertBuffer, aPos, aSize, 0, UndoDesc);
@@ -4606,10 +4550,10 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.AppendBuffer(aBuffer: PAnsiChar; const aSize: integer;
-  const UndoDesc: string = ''; const MoveCursor: Boolean = True);
+procedure TCustomBCHexEditor.AppendBuffer(aBuffer: PAnsiChar; const aSize: TPointerInt; const UndoDesc: string = '';
+  const MoveCursor: Boolean = True);
 var
-  LIntSize: integer;
+  LIntSize: TPointerInt;
 begin
   if (not Assigned(aBuffer)) or (aSize = 0) then
     Exit;
@@ -4630,13 +4574,13 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.ReplaceSelection(aBuffer: PAnsiChar; aSize: integer;
-  const UndoDesc: string = ''; const MoveCursor: Boolean = True);
+procedure TCustomBCHexEditor.ReplaceSelection(aBuffer: PAnsiChar; aSize: TPointerInt; const UndoDesc: string = '';
+  const MoveCursor: Boolean = True);
 var
   LIntStart,
-    LIntEnd,
-    LIntCol,
-    LIntRow: integer;
+    LIntEnd: TPointerInt;
+    LIntCol: integer;
+    LIntRow: TPointerInt;
   LBoolInCharField: boolean;
 begin
   // auswahl berechnen
@@ -4676,7 +4620,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SetChanged(DataPos: integer; const Value: boolean);
+procedure TCustomBCHexEditor.SetChanged(DataPos: TPointerInt; const Value: boolean);
 begin
   if InsertMode then
     FModifiedBytes.Size := 0;
@@ -4688,12 +4632,12 @@ begin
   FModifiedBytes[DataPos] := Value;
 end;
 
-procedure TCustomBCHexEditor.MoveFileMem(const aFrom, aTo, aCount: integer);
+procedure TCustomBCHexEditor.MoveFileMem(const aFrom, aTo, aCount: TPointerInt);
 begin
   FDataStorage.Move(aFrom, aTo, aCount);
 end;
 
-function TCustomBCHexEditor.GetCursorPos: integer;
+function TCustomBCHexEditor.GetCursorPos: TPointerInt;
 begin
   Result := GetPosAtCursor(Col, Row);
   if Result < 0 then
@@ -4703,7 +4647,7 @@ begin
     Result := Max(0, DataSize - 1)
 end;
 
-function TCustomBCHexEditor.GetSelCount: integer;
+function TCustomBCHexEditor.GetSelCount: TPointerInt;
 begin
   if FSelPosition = -1 then
     Result := 0
@@ -4719,8 +4663,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.BufferFromFile(const aPos: integer; var aCount:
-  integer): PChar;
+function TCustomBCHexEditor.BufferFromFile(const aPos: TPointerInt; var aCount: TPointerInt): PChar;
 begin
   if (aPos < 0) or (aPos >= DataSize) then
     raise EBCHexEditor.Create(ERR_INVALID_BUFFERFROMFILE)
@@ -4810,11 +4753,10 @@ begin
   Result := FBytesPerCol div 2;
 end;
 
-function TCustomBCHexEditor.Find(aPattern: Pointer; aCount: integer; const aStart,
-  aEnd: integer): integer;
+function TCustomBCHexEditor.Find(aPattern: Pointer; aCount: TPointerInt; const aStart, aEnd: TPointerInt): TPointerInt;
 var
-  I: Integer;
-  J: Integer;
+  I: TPointerInt;
+  J: TPointerInt;
   LData: PAnsiChar;
 begin
   LData := PAnsiChar(GetFastPointer(aStart, aEnd - AStart));
@@ -4831,8 +4773,7 @@ begin
   Result := -1;
 end;
 
-function TCustomBCHexEditor.Find(aPattern: string; const aStart, aEnd: integer;
-  const IgnoreCase: boolean): integer;
+function TCustomBCHexEditor.Find(aPattern: string; const aStart, aEnd: TPointerInt; const IgnoreCase: boolean): TPointerInt;
 var
   LData: string;
   LPattern: string;
@@ -4865,8 +4806,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.AddSelectionUndo(const AStart,
-  ACount: integer);
+procedure TCustomBCHexEditor.AddSelectionUndo(const AStart,  ACount: TPointerInt);
 begin
   CreateUndo(ufKindSelection, AStart, aCount, 0, '');
 end;
@@ -4902,9 +4842,9 @@ begin
     DoSetCellWidth(0, FGutterWidth);
 end;
 
-function TCustomBCHexEditor.Seek(const aOffset, aOrigin: integer): integer;
+function TCustomBCHexEditor.Seek(const aOffset, aOrigin: TPointerInt): TPointerInt;
 var
-  LIntPos: integer;
+  LIntPos: TPointerInt;
 begin
   Result := -1;
   LIntPos := GetCursorPos;
@@ -4998,7 +4938,7 @@ end;
 procedure TCustomBCHexEditor.SetAsHex(const Value: string);
 var
   LpszBuffer: PAnsiChar;
-  LIntAmount: integer;
+  LIntAmount: TPointerInt;
 begin
   if DataSize > 0 then
   begin
@@ -5009,8 +4949,7 @@ begin
 
   GetMem(LpszBuffer, Length(Value) * SizeOf(Value[1]));
   try
-    ConvertHexToBin(@Value[1], LpszBuffer, Length(Value), SwapNibbles,
-      LIntAmount);
+    ConvertHexToBin(@Value[1], LpszBuffer, Length(Value), SwapNibbles, LIntAmount);
     ReplaceSelection(LpszBuffer, LIntAmount);
   finally
     FreeMem(LpszBuffer);
@@ -5067,12 +5006,11 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.InternalErase(const KeyWasBackspace: boolean; const
-  UndoDesc: string = '');
+procedure TCustomBCHexEditor.InternalErase(const KeyWasBackspace: boolean; const UndoDesc: string = '');
 var
-  LIntPos: integer;
-  LIntSavePos: integer;
-  LIntCount: integer;
+  LIntPos: TPointerInt;
+  LIntSavePos: TPointerInt;
+  LIntCount: TPointerInt;
 begin
   LIntPos := GetCursorPos div FBytesPerUnit * FBytesPerUnit;
   LIntCount := FBytesPerUnit;
@@ -5189,15 +5127,13 @@ begin
   Result := ColCount - 1;
 end;
 
-function TCustomBCHexEditor.GetTopLeftPosition(var oInCharField: boolean):
-  integer;
+function TCustomBCHexEditor.GetTopLeftPosition(var oInCharField: boolean): TPointerInt;
 begin
   Result := GetPosAtCursor(Max(LeftCol, GRID_FIXED), TopRow);
   oInCharField := InCharField;
 end;
 
-procedure TCustomBCHexEditor.SetTopLeftPosition(const aPosition: integer; const
-  aInCharField: boolean);
+procedure TCustomBCHexEditor.SetTopLeftPosition(const aPosition: TPointerInt; const aInCharField: boolean);
 begin
   with GetCursorAtPos(aPosition, aInCharField) do
   begin
@@ -5211,16 +5147,16 @@ begin
   Result := inherited ColCount;
 end;
 
-function TCustomBCHexEditor.GetPropRowCount: integer;
+function TCustomBCHexEditor.GetPropRowCount: TPointerInt;
 begin
   Result := inherited RowCount;
 end;
 
-function TCustomBCHexEditor.ShowDragCell(const X, Y: integer): integer;
+function TCustomBCHexEditor.ShowDragCell(const X, Y: TPointerInt): TPointerInt;
 var
   LIntDragPos,
     LIntMouseX,
-    LIntMouseY: integer;
+    LIntMouseY: TPointerInt;
   LCoord: TGridCoord;
 begin
   LCoord := MouseCoord(X, Y);
@@ -5287,8 +5223,7 @@ begin
   Invalidate;
 end;
 
-procedure TCustomBCHexEditor.CombineUndo(const aCount: integer; const sDesc:
-  string = '');
+procedure TCustomBCHexEditor.CombineUndo(const aCount: TPointerInt; const sDesc: string = '');
 begin
   CreateUndo(ufKindCombined, 0, aCount, 0, sDesc);
 end;
@@ -5427,7 +5362,7 @@ begin
     HideDragCell;
 end;
 
-procedure TCustomBCHexEditor.AdjustBookmarks(const From, Offset: integer);
+procedure TCustomBCHexEditor.AdjustBookmarks(const From, Offset: TPointerInt);
 var
   LIntLoop: integer;
   LBoolChanged: boolean;
@@ -5464,7 +5399,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.TruncMaxPosition(var DataPos: integer);
+procedure TCustomBCHexEditor.TruncMaxPosition(var DataPos: TPointerInt);
 begin
   if DataPos >= DataSize then
   begin
@@ -5522,7 +5457,7 @@ begin
 end;
 
 procedure TCustomBCHexEditor.SetSelection(DataPos, StartPos, EndPos:
-  integer);
+  TPointerInt);
 begin
   //CheckSelectUnit(StartPos, EndPos);
   FSelEnd := Max(-1, Min(EndPos, DataSize - 1));
@@ -5636,9 +5571,9 @@ begin
     FOnTopLeftChanged(self);
 end;
 
-function TCustomBCHexEditor.GetOffsetString(const Position: cardinal): string;
+function TCustomBCHexEditor.GetOffsetString(const Position: TPointerInt): string;
 var
-  I: Integer;
+  I: TPointerInt;
 begin
   Result := '';
   if Assigned(FOnGetOffsetText) and (not FOffsetHandler) then
@@ -5672,7 +5607,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.GetAnyOffsetString(const Position: integer): string;
+function TCustomBCHexEditor.GetAnyOffsetString(const Position: TPointerInt): string;
 begin
   if FOffsetFormat.Format = '' then
     Result := IntToRadix(Position, 16)
@@ -5699,8 +5634,7 @@ begin
   SetBookmarkVals(Index, Value.mPosition, Value.mInCharField);
 end;
 
-procedure TCustomBCHexEditor.SetBookmarkVals(const Index: byte; const Position:
-  integer; const InCharField: boolean);
+procedure TCustomBCHexEditor.SetBookmarkVals(const Index: byte; const Position: TPointerInt; const InCharField: boolean);
 begin
   if Index > 9 then
     raise EBCHexEditor.Create(ERR_INVALID_BOOKMARK);
@@ -6270,7 +6204,7 @@ end;
 procedure TCustomBCHexEditor.SetSelectionAsHex(const s: string);
 var
   LStrData: AnsiString;
-  LIntAmount: integer;
+  LIntAmount: TPointerInt;
 begin
   if s <> '' then
   begin
@@ -6307,12 +6241,12 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.UndoBeginUpdate: integer;
+function TCustomBCHexEditor.UndoBeginUpdate: TPointerInt;
 begin
   Result := FUndoStorage.BeginUpdate;
 end;
 
-function TCustomBCHexEditor.UndoEndUpdate: integer;
+function TCustomBCHexEditor.UndoEndUpdate: TPointerInt;
 begin
   Result := FUndoStorage.EndUpdate;
 end;
@@ -6441,7 +6375,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.DisplayEnd: integer;
+function TCustomBCHexEditor.DisplayEnd: TPointerInt;
 begin
   if DataSize < 1 then
     Result := -1
@@ -6450,7 +6384,7 @@ begin
       BytesPerRow));
 end;
 
-function TCustomBCHexEditor.DisplayStart: integer;
+function TCustomBCHexEditor.DisplayStart: TPointerInt;
 begin
   if DataSize < 1 then
     Result := -1
@@ -6519,7 +6453,7 @@ begin
     FRulerCharString := UpperCase(FRulerCharString);
 end;
 
-procedure TCustomBCHexEditor.CheckSelectUnit(var AStart, AEnd: Integer);
+procedure TCustomBCHexEditor.CheckSelectUnit(var AStart, AEnd: TPointerInt);
 begin
   // assure that the selection covers a whole unit
   if AStart <= AEnd then
@@ -6542,7 +6476,7 @@ end;
 
 // make sure the value is a multiple of FBytesPerUnit
 
-procedure TCustomBCHexEditor.CheckUnit(var AValue: Integer);
+procedure TCustomBCHexEditor.CheckUnit(var AValue: TPointerInt);
 begin
   AValue := AValue div FBytesPerUnit * FBytesPerUnit;
 end;
@@ -6557,10 +6491,9 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SyncView(Source: TCustomBCHexEditor;
-  SyncOffset: integer = 0);
+procedure TCustomBCHexEditor.SyncView(Source: TCustomBCHexEditor; SyncOffset: TPointerInt = 0);
 var
-  curPos, SelS, SelE: integer;
+  curPos, SelS, SelE: TPointerInt;
   coord: TGridCoord;
 begin
   if FIsViewSyncing or Source.FIsViewSyncing then
@@ -6670,26 +6603,24 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.GetDataAt(Index: integer): Byte;
+function TCustomBCHexEditor.GetDataAt(Index: TPointerInt): Byte;
 begin
 {$R-}
   Result := GetFastPointer(Index,1)^;
 end;
 
-procedure TCustomBCHexEditor.SetDataAt(Index: integer; const Value: Byte);
+procedure TCustomBCHexEditor.SetDataAt(Index: TPointerInt; const Value: Byte);
 begin
   GetFastPointer(Index, 1)^ := Value;
   Changed;
 end;
 
-procedure TCustomBCHexEditor.ReadBuffer(var Buffer; const Index, Count:
-  Integer);
+procedure TCustomBCHexEditor.ReadBuffer(var Buffer; const Index, Count: TPointerInt);
 begin
   Move(GetFastPointer(Index, Count)^, Buffer, Count);
 end;
 
-procedure TCustomBCHexEditor.WriteBuffer(const Buffer; const Index, Count:
-  Integer);
+procedure TCustomBCHexEditor.WriteBuffer(const Buffer; const Index, Count: TPointerInt);
 begin
   Move(Buffer, GetFastPointer(Index,Count)^, Count);
   Changed;
@@ -6712,14 +6643,14 @@ end;
 
 // legacy, do not use
 
-function TCustomBCHexEditor.GetMemory(const Index: Integer): char;
+function TCustomBCHexEditor.GetMemory(const Index: TPointerInt): char;
 begin
   Result := Char(Data[Index])
 end;
 
 // legacy, do not use
 
-procedure TCustomBCHexEditor.SetMemory(const Index: integer; const Value: char);
+procedure TCustomBCHexEditor.SetMemory(const Index: TPointerInt; const Value: char);
 begin
   Data[Index] := Ord(Value);
 end;
@@ -6761,8 +6692,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.GetPositionAtCursor(const ACol,
-  ARow: integer): integer;
+function TCustomBCHexEditor.GetPositionAtCursor(const ACol, ARow: TPointerInt): TPointerInt;
 var
   LBoolInCharField: Boolean;
 begin
@@ -6793,12 +6723,11 @@ begin
   Result := (not IsFileSizeFixed) and FAllowInsertMode and (not FReadOnlyView)
 end;
 
-function TCustomBCHexEditor.Replace(aBuffer: PChar; aPosition, aOldCount,
-  aNewCount: integer;
-  const UndoDesc: string = ''; const MoveCursor: Boolean = False): integer;
+function TCustomBCHexEditor.Replace(aBuffer: PChar; aPosition, aOldCount, aNewCount: TPointerInt;
+  const UndoDesc: string = ''; const MoveCursor: Boolean = False): TPointerInt;
 var
   LBoolInCharField: boolean;
-  LIntSize: integer;
+  LIntSize: TPointerInt;
 begin
   //FDataStorage.CheckBounds((Abs(aPosition) + Abs(aOldCount)) - 1);
   LIntSize := DataSize;
@@ -6877,7 +6806,7 @@ begin
   CheckSetCaret;
 end;
 
-function TCustomBCHexEditor.GetFastPointer(const Index, Count: integer): PByte;
+function TCustomBCHexEditor.GetFastPointer(const Index, Count: TPointerInt): PByte;
 begin
   Result := FDataStorage.GetAddress(Index, Count);
 end;
@@ -6894,9 +6823,7 @@ begin
   MoveColRow(LgrcPosition.x, LgrcPosition.y, True, True)
 end;
 
-function TCustomBCHexEditor.CanCreateUndo(const aKind: TBCHUndoFlag; const
-  aCount,
-  aReplCount: integer): Boolean;
+function TCustomBCHexEditor.CanCreateUndo(const aKind: TBCHUndoFlag; const aCount, aReplCount: TPointerInt): Boolean;
 begin
   Result := False;
   if DataSize > 0 then
@@ -6920,10 +6847,10 @@ begin
 
 end;
 
-procedure TCustomBCHexEditor.SetDataSize(const Value: integer);
+procedure TCustomBCHexEditor.SetDataSize(const Value: TPointerInt);
 var
-  iPos: Integer;
-  iSize: integer;
+  iPos: TPointerInt;
+  iSize: TPointerInt;
 begin
   iSize := DataSize;
   if Value <> iSize then
@@ -7023,8 +6950,7 @@ begin
   Writer.WriteInteger(Byte(FReplaceUnprintableCharsBy));
 end;
 
-function TCustomBCHexEditor.DoMouseWheelDown(Shift: TShiftState;
-  MousePos: TPoint): boolean;
+function TCustomBCHexEditor.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean;
 begin
   if Shift <> [] then
     Result := inherited DoMouseWheelDown(Shift, MousePos)
@@ -7038,8 +6964,7 @@ begin
   end;
 end;
 
-function TCustomBCHexEditor.DoMouseWheelUp(Shift: TShiftState;
-  MousePos: TPoint): boolean;
+function TCustomBCHexEditor.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): boolean;
 begin
   if Shift <> [] then
     Result := inherited DoMouseWheelUp(Shift, MousePos)
@@ -7052,10 +6977,9 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.DrawCell(ACol, ARow: Longint; ARect: TRect;
-  AState: TGridDrawState);
+procedure TCustomBCHexEditor.DrawCell(ACol, ARow: Longint; ARect: TRect; AState: TGridDrawState);
 begin
-  raise Exception.Create('DrawCell should not nbe called');
+  raise Exception.Create('DrawCell should not be called');
 end;
 
 procedure TCustomBCHexEditor.CheckSetCaret;
@@ -7306,7 +7230,7 @@ type
   TUndoSelRec = packed record
     SelStart,
       SelEnd,
-      SelPos: integer;
+      SelPos: TPointerInt;
   end;
 
 constructor TBCHUndoStorage.Create(AEditor: TCustomBCHexEditor);
@@ -7336,10 +7260,10 @@ begin
   Result := (FCount > 0) and (FUpdateCount < 1) and (Size > 0);
 end;
 
-procedure TBCHUndoStorage.CreateUndo(aKind: TBCHUndoFlag; APosition, ACount,
-  AReplaceCount: integer; const SDescription: string);
+procedure TBCHUndoStorage.CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt;
+  const SDescription: string);
 var
-  urPos: integer;
+  urPos: TPointerInt;
 
   function PUndoRec: PBCHUndoRec;
   begin
@@ -7347,9 +7271,9 @@ var
   end;
   //LPurUndoRec: PMPHUndoRec;
 
-  procedure NewFillBuffer(ASize: integer);
+  procedure NewFillBuffer(ASize: TPointerInt);
   var
-    i: integer;
+    i: TPointerInt;
   begin
     i := Position;
     urPos := i;
@@ -7391,7 +7315,7 @@ var
 
   procedure DeleteOldestUndoRec;
   var
-    LintRecSize: integer;
+    LintRecSize: TPointerInt;
   begin
     begin
       if Size < 4 then
@@ -7419,10 +7343,10 @@ var
     end;
   end;
 
-  procedure UpdateUndoRecord(Length: integer = 0);
+  procedure UpdateUndoRecord(Length: TPointerInt = 0);
   var
     LRecSelection: TUndoSelRec;
-    i: integer;
+    i: TPointerInt;
   begin
     PUndoRec^.DataLen := SizeOf(TBCHUndoRec) + Length + 4;
     if ufFlagHasSelection in PUndoRec^.Flags then
@@ -7589,8 +7513,7 @@ function TBCHUndoStorage.Undo: boolean;
     LRecSel: TUndoSelRec;
     LCoord: TGridCoord;
   begin
-    LCoord := FEditor.GetCursorAtPos(aBuffer.CurPos, ufFlagInCharField in
-      aBuffer.Flags);
+    LCoord := FEditor.GetCursorAtPos(aBuffer.CurPos, ufFlagInCharField in aBuffer.Flags);
     with LCoord do
     begin
       if not (ufFlagInCharField in aBuffer.Flags) then
@@ -7628,7 +7551,7 @@ function TBCHUndoStorage.Undo: boolean;
 var
   LEnumUndo: TBCHUndoFlag;
   LRecUndo: TBCHUndoRec;
-  LIntLoop: integer;
+  LIntLoop: TPointerInt;
   s: string;
 begin
   Result := False;
@@ -7665,7 +7588,7 @@ begin
           PopulateUndo(LRecUndo);
           FEditor.AdjustBookmarks(LRecUndo.Pos - LRecUndo.Count,
             LRecUndo.Count);
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           FEditor.Invalidate;
           RemoveLastUndo;
@@ -7676,7 +7599,7 @@ begin
             -1, 0);
           PopulateUndo(LRecUndo);
           FEditor.AdjustBookmarks(LRecUndo.Pos, -LRecUndo.Count);
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           FEditor.Invalidate;
           RemoveLastUndo;
@@ -7705,7 +7628,7 @@ begin
           PopulateUndo(LRecUndo);
           FEditor.AdjustBookmarks(LRecUndo.Pos + LRecUndo.ReplCount,
             LRecUndo.ReplCount - LRecUndo.Count);
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             // was:
             // FEditor.FModifiedBytes.Size := Max(0, LRecUndo.Pos - 1);
             // line above might lead to an integer overflow
@@ -7724,7 +7647,7 @@ begin
           FEditor.Col := GRID_FIXED;
           FEditor.FDataStorage.Size := LRecUndo.Pos;
           FEditor.CalcSizes;
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           PopulateUndo(LRecUndo);
           FEditor.Invalidate;
@@ -7737,7 +7660,7 @@ begin
           FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in
             LRecUndo.Flags);
           PopulateUndo(LRecUndo);
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           FEditor.FDataStorage.Size := FEditor.FDataStorage.Size - 1;
           FEditor.CalcSizes;
@@ -7751,7 +7674,7 @@ begin
           FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in
             LRecUndo.Flags);
           PopulateUndo(LRecUndo);
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           FEditor.FDataStorage.Size := FEditor.FDataStorage.Size - 1;
           FEditor.CalcSizes;
@@ -7763,7 +7686,7 @@ begin
           FEditor.WriteBuffer(PChar(Memory)[Position - 1], LRecUndo.Pos,
             LRecUndo.Count);
           PopulateUndo(LRecUndo);
-          if DWORD(FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
+          if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           FEditor.Invalidate;
           RemoveLastUndo;
@@ -7786,7 +7709,7 @@ procedure TBCHUndoStorage.RemoveLastUndo;
 var
   LRecUndo: TBCHUndoRec;
   LSStDesc: shortstring;
-  LIntRecOffs: integer;
+  LIntRecOffs: TPointerInt;
 begin
   if Size < sizeof(TBCHUndoRec) then
     Reset(False)
@@ -7834,7 +7757,7 @@ begin
   end;
 end;
 
-procedure TBCHUndoStorage.SetSize(NewSize: integer);
+procedure TBCHUndoStorage.SetSize(const NewSize: Int64);
 begin
   inherited;
   if NewSize < sizeof(TBCHUndoRec) then
@@ -7851,7 +7774,7 @@ begin
     ResetRedo;
 end;
 
-procedure TBCHUndoStorage.SetCount(const Value: integer);
+procedure TBCHUndoStorage.SetCount(const Value: TPointerInt);
 begin
   FCount := Value;
   if FCount < 1 then
@@ -8005,7 +7928,7 @@ end;
 
 procedure TBCHUndoStorage.CreateRedo(const Rec: TBCHUndoRec);
 var
-  LIntDataSize: integer;
+  LIntDataSize: TPointerInt;
 
   procedure AllocRedoPointer;
   begin
@@ -8125,11 +8048,11 @@ begin
       Break;
 end;
 
-procedure TBCHUndoStorage.AddSelection(const APos, ACount: integer);
+procedure TBCHUndoStorage.AddSelection(const APos, ACount: TPointerInt);
 var
   P: PBCHUndoRec;
   PSel: PUndoSelRec;
-  LIntRecOffset: integer;
+  LIntRecOffset: TPointerInt;
 begin
   if CanUndo then
   begin
@@ -8155,14 +8078,12 @@ begin
     else
       PSel^.SelEnd := APos + Acount - 1;
     PSel^.SelPos := PSel^.SelStart;
-  end;
-end;
+  end;                               end;
 
-function TBCHUndoStorage.ReadUndoRecord(
-  var aUR: TBCHUndoRec; var SDescription: string): TBCHUndoFlag;
+function TBCHUndoStorage.ReadUndoRecord(var aUR: TBCHUndoRec; var SDescription: string): TBCHUndoFlag;
 var
-  LIntRecOffs: integer;
-  LIntPos: integer;
+  LIntRecOffs: TPointerInt;
+  LIntPos: TPointerInt;
 begin
   Position := Size - 4;
   Read(LIntRecOffs, 4);
@@ -8173,11 +8094,11 @@ begin
   begin
     LIntPos := Position;
     try
-      Position := size - 4 - sizeof(integer);
+      Position := size - 4 - sizeof(TPointerInt);
       if ufFlagHasSelection in aUr.Flags then
         Seek(-sizeof(TUndoSelRec), soFromCurrent);
-      Read(LIntRecOffs, sizeof(integer));
-      Seek(-(LIntRecOffs + sizeof(integer)), soFromCurrent);
+      Read(LIntRecOffs, sizeof(TPointerInt));
+      Seek(-(LIntRecOffs + sizeof(TPointerInt)), soFromCurrent);
       SetLength(SDescription, LIntRecOffs);
       Read(SDescription[1], LIntRecOffs);
     finally
@@ -8214,39 +8135,36 @@ end;
 const
   MAX_PER_BLOCK = $F000;
 
-function TBCHMemoryStream.GetAddress(const Index, Count: integer): PByte;
+function TBCHMemoryStream.GetAddress(const Index, Count: TPointerInt): PByte;
 begin
   if (Index < 0) or ((Index+Count) > Size) then
     raise EBCHexEditor.Create(ERR_DATA_BOUNDS);
-  Result := Pointer(Cardinal(Memory)+Cardinal(Index));
+  Result := Pointer(TPointerInt(Memory)+(Index));
 end;
 
-function TBCHMemoryStream.GetAsHex(const APosition, ACount: integer;
-  const SwapNibbles: Boolean): string;
+function TBCHMemoryStream.GetAsHex(const APosition, ACount: TPointerInt; const SwapNibbles: Boolean): string;
 begin
   SetLength(Result, ACount * 2);
   if ACount > 0 then
     ConvertBinToHex(PointerAt(APosition, ACount), @Result[1], ACount, SwapNibbles);
 end;
 
-procedure TBCHMemoryStream.Move(const AFromPos, AToPos, ACount: Integer);
+procedure TBCHMemoryStream.Move(const AFromPos, AToPos, ACount: TPointerInt);
 begin
   MoveMemory(PointerAt(AToPos, ACount), PointerAt(AFromPos, ACount), ACount);
 end;
 
-function TBCHMemoryStream.PointerAt(const APosition, ACount: Integer): Pointer;
+function TBCHMemoryStream.PointerAt(const APosition, ACount: TPointerInt): Pointer;
 begin
   Result := GetAddress(APosition, ACount);
 end;
 
-procedure TBCHMemoryStream.ReadBufferAt(var Buffer; const APosition,
-  ACount: Integer);
+procedure TBCHMemoryStream.ReadBufferAt(var Buffer; const APosition, ACount: TPointerInt);
 begin
   System.Move(GetAddress(APosition, ACount)^, Buffer, ACount);
 end;
 
-procedure TBCHMemoryStream.TranslateFromAnsi(const ToTranslation:
-  TBCHTranslationKind; const APosition, ACount: integer);
+procedure TBCHMemoryStream.TranslateFromAnsi(const ToTranslation: TBCHTranslationKind; const APosition, ACount: TPointerInt);
 begin
   if ToTranslation = tkAsIs then
     Exit; // no translation needed
@@ -8255,8 +8173,7 @@ begin
       PointerAt(APosition, ACount), ACount);
 end;
 
-procedure TBCHMemoryStream.TranslateToAnsi(const FromTranslation:
-  TBCHTranslationKind; const APosition, ACount: integer);
+procedure TBCHMemoryStream.TranslateToAnsi(const FromTranslation: TBCHTranslationKind; const APosition, ACount: TPointerInt);
 begin
   if FromTranslation = tkAsIs then
     Exit; // no translation needed
@@ -8265,8 +8182,7 @@ begin
       PointerAt(APosition, ACount), ACount);
 end;
 
-procedure TBCHMemoryStream.WriteBufferAt(const Buffer; const APosition,
-  ACount: Integer);
+procedure TBCHMemoryStream.WriteBufferAt(const Buffer; const APosition, ACount: TPointerInt);
 begin
   System.Move(Buffer, GetAddress(APosition, ACount)^, ACount);
 end;
@@ -8278,4 +8194,3 @@ initialization
   InitializeCustomTables;
 
 end.
-
