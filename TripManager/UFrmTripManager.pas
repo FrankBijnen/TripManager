@@ -171,6 +171,7 @@ type
     ChkZoomToPoint: TCheckBox;
     SbPostProcess: TStatusBar;
     LblBounds: TLabel;
+    BtnUndo: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -247,6 +248,7 @@ type
     procedure PopupTripEditPopup(Sender: TObject);
     procedure PCTTripInfoResize(Sender: TObject);
     procedure ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure BtnUndoClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -1026,6 +1028,13 @@ begin
   PopupTripEdit.Popup(Pt.X, Pt.Y);
 end;
 
+procedure TFrmTripManager.BtnUndoClick(Sender: TObject);
+begin
+//TODO Fix undo?
+// Doesn't seem to work in original
+  HexEdit.Undo;
+end;
+
 procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
 var
   Writer: TTextWriter;
@@ -1457,6 +1466,7 @@ begin
   HexEdit := TBCHexEditor.Create(Self);
   HexEdit.Parent := HexPanel;
   HexEdit.Align := alClient;
+  HexEdit.ShowPositionIfNotFocused := true;
   HexEdit.OnKeyPress := HexEditKeyPress;
   HexEdit.OnKeyDown := HexEditKeyDown;
   VlTripInfo.OnSelectionMoved := VlTripInfoSelectionMoved;

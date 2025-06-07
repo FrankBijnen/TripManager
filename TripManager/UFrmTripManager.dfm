@@ -472,6 +472,18 @@ object FrmTripManager: TFrmTripManager
             TabOrder = 0
             OnClick = BtnSaveTripGpiFileClick
           end
+          object BtnUndo: TButton
+            Left = 132
+            Top = 1
+            Width = 131
+            Height = 23
+            Align = alLeft
+            Caption = 'Undo'
+            Enabled = False
+            TabOrder = 1
+            Visible = False
+            OnClick = BtnUndoClick
+          end
         end
       end
     end
