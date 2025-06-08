@@ -15,7 +15,7 @@ type
   {$DEFINE ASM_ENABLED}
   TPointerInt = integer;
 {$ELSE}
-  TPointerInt = NativeInt;
+  TPointerInt = IntPtr;
 {$ENDIF}
 
   // @exclude
@@ -340,8 +340,7 @@ type
     // background color
     property Background: TColor read FBackground write SetBackground;
     // background color of modified bytes (in overwrite mode)
-    property ChangedBackground: TColor read FChangedBackground write
-      SetChangedBackground;
+    property ChangedBackground: TColor read FChangedBackground write SetChangedBackground;
     // foreground color of modified bytes (in overwrite mode)
     property ChangedText: TColor read FChangedText write SetChangedText;
     // color of the cursor and position frame in the second pane
@@ -353,21 +352,17 @@ type
     // foreground color of even columns
     property EvenColumn: TColor read FEvenColumn write SetEvenColumn;
     // background color of the current line in the offset pane (gutter)
-    property CurrentOffsetBackground: TColor read FCurrentOffsetBackground write
-      SetCurrentOffsetBackground;
+    property CurrentOffsetBackground: TColor read FCurrentOffsetBackground write SetCurrentOffsetBackground;
     // background color of the offset pane (gutter)
-    property OffsetBackground: TColor read FOffsetBackground write
-      SetOffsetBackground;
+    property OffsetBackground: TColor read FOffsetBackground write SetOffsetBackground;
     // foreground color of the current line in the offset pane (gutter)
     property CurrentOffset: TColor read FCurrentOffset write SetCurrentOffset;
     // pen color of the grid
     property Grid: TColor read FGrid write SetGrid;
     // color of a cursor frame in a non-focused editor
-    property NonFocusCursorFrame: TColor read FNonFocusCursorFrame write
-      SetNonFocusCursorFrame;
+    property NonFocusCursorFrame: TColor read FNonFocusCursorFrame write SetNonFocusCursorFrame;
     // background color of the active field (hex/chars)
-    property ActiveFieldBackground: TColor read FActiveFieldBackground write
-      SetActiveFieldBackground;
+    property ActiveFieldBackground: TColor read FActiveFieldBackground write SetActiveFieldBackground;
 
   end;
 
@@ -512,21 +507,15 @@ type
     FUnicodeCharacters: Boolean;
     FUnicodeBigEndian: Boolean;
     FMaskedChars: string;
-
     FDrawDataPosition: TPointerInt;
     FDrawDataPositionIsHex: boolean;
     FOnDrawCell: TBCHDrawCellEvent;
-
     FOnBookmarkChanged: TNotifyEvent;
-
     FIsDrawDataSelected: boolean;
-
     FSetDataSizeFillByte: Byte;
     FRulerNumberBase: byte;
     property Color;
-
     function IsInsertModePossible: boolean;
-
     procedure RecalcBytesPerRow;
     function IsFileSizeFixed: boolean;
     procedure InternalErase(const KeyWasBackspace: boolean; const UndoDesc: string = '');
@@ -621,7 +610,6 @@ type
     // images have changed
     procedure BookmarkBitmapChanged(Sender: TObject);
     procedure SetBookmarkBitmap(const Value: TBitmap);
-
     // free alloc'd memory of one of the storage streams;
     procedure FreeStorage(FreeUndo: boolean = False);
     function GetCanUndo: boolean;
@@ -656,12 +644,10 @@ type
     FRulerString: string;
     // @exclude()
     FRulerCharString: string;
-
     // @exclude(used by TBCHexEditorEx for internal drag 'n' drop)
     FFixedFileSizeOverride: boolean;
     // @exclude(used by TBCHexEditorEx for internal undo changing)
     FModified: boolean;
-
     // @exclude(overwrite mouse wheel for zooming)
     function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): boolean; override;
     // @exclude(overwrite mouse wheel for zooming)
@@ -673,8 +659,7 @@ type
     // @exclude(True: cells are currently to be selected)
     property IsSelecting: boolean read FIsSelecting;
     // @exclude(True: MouseUp resets selection)
-    property MouseUpCanResetSel: boolean read FMouseUpCanResetSel write
-      FMouseUpCanResetSel;
+    property MouseUpCanResetSel: boolean read FMouseUpCanResetSel write FMouseUpCanResetSel;
     // @exclude(memory stream which contains the undo/redo data)
     property UndoStorage: TBCHUndoStorage read FUndoStorage;
     // @exclude(stream that contains the data)
@@ -692,8 +677,7 @@ type
     // returns the drop file position after a drag'n'drop operation
     function DropPosition: TPointerInt;
     // copy a stream to a second one and fire the OnProgress handler
-    procedure Stream2Stream(strFrom, strTo: TStream; const Operation:
-      TBCHProgressKind; const Count: TPointerInt = -1);
+    procedure Stream2Stream(strFrom, strTo: TStream; const Operation: TBCHProgressKind; const Count: TPointerInt = -1);
     (* allows descendants to take special action if contents are to be saved
      to the file from where the data was load *)
     procedure PrepareOverwriteDiskFile; virtual;
@@ -716,8 +700,7 @@ type
     // @exclude(get the data position depending on col and row)
     function GetPosAtCursor(const aCol, aRow: integer): integer;
     // @exclude(vice versa)
-    function GetCursorAtPos(const aPos: integer; const aChars: boolean):
-      TGridCoord;
+    function GetCursorAtPos(const aPos: integer; const aChars: boolean): TGridCoord;
     // @exclude(get the column of the other field (hex<->char))
     function GetOtherFieldCol(const aCol: integer): integer;
     // @exclude(get the column of the other field (hex<->char))
@@ -731,8 +714,7 @@ type
     // @exclude(posted message to update the caret position)
     procedure CMINTUPDATECARET(var Msg: TMessage); message CM_INTUPDATECARET;
     // @exclude(posted message to fire an OnSelectionChanged event)
-    procedure CMSelectionChanged(var Msg: TMessage); message
-      CM_SELECTIONCHANGED;
+    procedure CMSelectionChanged(var Msg: TMessage); message CM_SELECTIONCHANGED;
     // @exclude(for shortcuts)
     procedure WMGetDlgCode(var Msg: TWMGetDlgCode); message WM_GETDLGCODE;
     // @exclude(readjust grid sizes after font has changed)
@@ -756,8 +738,7 @@ type
     // @exclude(mouse move handler)
     procedure MouseMove(Shift: TShiftState; X, Y: integer); override;
     // @exclude(mouse up handler)
-    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: integer);
-      override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: integer); override;
     // @exclude(is undo record creation possible?)
     function CanCreateUndo(const aKind: TBCHUndoFlag; const aCount, aReplCount: TPointerInt): Boolean; virtual;
     // @exclude(add an undo to the undo buffer)
@@ -787,8 +768,7 @@ type
     (* translation kind of the data (used to show characters on and to handle key presses in the char pane),
        (see also @link(TBCHTranslationKind))
     *)
-    property Translation: TBCHTranslationKind read FTranslation write
-      SetTranslation;
+    property Translation: TBCHTranslationKind read FTranslation write SetTranslation;
     (* offset display ("line numbers") format, in the form<br>
        [r|c|&lt;HEXNUM&gt;%][-|&lt;HEXNUM&gt;!]&lt;HEXNUM&gt;:[Prefix]|[Suffix]<br>
        (&lt;HEXNUM&gt; means a number in hexadecimal format (without prefix/suffix))<br><br>
@@ -832,20 +812,16 @@ type
        <li>this field may be omitted</li></ul>
     *)
     property OffsetFormat: string read GetOffsetFormat write SetOffsetFormat;
-
     (* if this handler is assigned, the @link(OffsetFormat) is not used to
        create "line numbers", but the application tells the editor how to format the offset text
     *)
     property OnGetOffsetText: TBCPHGetOffsetTextEvent read FOnGetOffsetText write FOnGetOffsetText;
-
     (* how many bytes form one block in a row? blocks are separated by a one character wide blank.
        -1 means no block separation (see also @link(SeparateBlocksInCharField)) *)
     property BytesPerBlock: Integer read FBlockSize write SetBlockSize default -1;
-
     (* if @link(BytesPerBlock) is used, this property tells the editor whether it should
        separate blocks of bytes in the character pane too or not *)
     property SeparateBlocksInCharField: boolean read FSepCharBlocks write SetSepCharBlocks default True;
-
     // look of the editor's caret (see @link(TBCHCaretKind))
     property CaretKind: TBCHCaretKind read FCaretKind write SetCaretKind default ckAuto;
     // colors to display (see @link(TBCHColors))
@@ -870,8 +846,7 @@ type
     (* if set to False, switching between overwrite and insert mode is not allowed
        (see also @link(InsertMode) and @link(NoSizeChange))
     *)
-    property AllowInsertMode: boolean read FAllowInsertMode write
-      SetAllowInsertMode default True;
+    property AllowInsertMode: boolean read FAllowInsertMode write SetAllowInsertMode default True;
     (* if set to True, the Tab key is used to switch the caret between hex and character pane.
        if set to False, the Tab key can be used to switch between controls. then the
        combination CTRL+T is used to switch the panes
@@ -918,7 +893,6 @@ type
       @link(TBCHBookMark))
     *)
     property BookmarkBitmap: TBitmap read FBookmarkBitmap write SetBookmarkBitmap stored HasCustomBookmarkBitmap;
-
     // maximum memory that is used for undo storage (in bytes, approximately)
     property MaxUndo: TPointerInt read FMaxUndo write FMaxUndo default 1024 * 1024;
     (* insert mode (typed characters are inserted at the current position) or
@@ -968,26 +942,19 @@ type
     property UnicodeBigEndian: Boolean read FUnicodeBigEndian write SetUnicodeBigEndian default False;
     // this event is fired when the selection/caret position has changed
     property OnSelectionChanged: TNotifyEvent read FOnSelectionChanged write FOnSelectionChanged;
-
     // use this event to implement owner drawing. see also @link(TBCHDrawCellEvent)
     property OnDrawCell: TBCHDrawCellEvent read FOnDrawCell write FOnDrawCell;
-
     // fire OnBookmarkChanged
     procedure BookmarkChanged; virtual;
-
     procedure DoSetCellWidth(const Index: integer; Value: integer);
     procedure DefineProperties(Filer: TFiler); override;
     procedure ReadMaskChar(Reader: TReader);
     procedure ReadMaskChar_I(Reader: TReader);
     procedure WriteMaskChar_I(Writer: TWriter);
-
     // return the memory address at the given stream position after checking bounaries
     function GetFastPointer(const Index, Count: TPointerInt): PByte;
-    // @exclude(use TBCHexEditor.WriteBuffer!)
-    procedure SetMemory(const Index: TPointerInt; const Value: char);
   public
     { Public-Deklarationen }
-
     //@exclude()
     constructor Create(aOwner: TComponent); override;
     //@exclude()
@@ -1003,15 +970,7 @@ type
        to be drawn in selected style (only valid if DrawDataPosition <> -1)
     *)
     property IsDrawDataSelected: boolean read FIsDrawDataSelected;
-
-    // @exclude(use TBCHexEditor.ReadBuffer!)
-    function GetMemory(const Index: TPointerInt): char;
-    (* @exclude(see http://info.borland.com/devsupport/delphi/fixes/delphi4/vcl.html,
-      ref 279)
-    *)
-
     function CanFocus: Boolean; override;
-
     (* this property is valid only in the @link(OnGetOffsetText) event. if True,
        the component asks for the string of the highest possible offset, if False,
        a row's offset text is queried
@@ -1035,8 +994,7 @@ type
     property IsCharFieldCol[const ACol: integer]: Boolean read GetIsCharFieldCol;
     // this byte value is used to fill the data when setting @link(DataSize)
     // enlarges the stream
-    property SetDataSizeFillByte: Byte read FSetDataSizeFillByte write
-      FSetDataSizeFillByte;
+    property SetDataSizeFillByte: Byte read FSetDataSizeFillByte write FSetDataSizeFillByte;
     // has data been load from/saved to a file (or is the filename valid)
     property HasFile: boolean read FHasFile write FHasFile;
     (* each call to UndoBeginUpdate increments an internal counter that prevents using
@@ -1103,8 +1061,7 @@ type
     // save the contents of the data buffer into a stream
     procedure SaveToStream(Strm: TStream);
     // save the contents of the data buffer to a file
-    procedure SaveToFile(const Filename: string;
-      const aUnModify: boolean = True);
+    procedure SaveToFile(const Filename: string; const aUnModify: boolean = True);
     // save a range of bytes to a stream
     procedure SaveRangeToStream(Strm: TStream; const APosition, ACount: TPointerInt);
     // undo the last modification, multiple undos are possible
@@ -1118,8 +1075,8 @@ type
     *)
     function BufferFromFile(const aPos: TPointerInt; var aCount: TPointerInt): PChar;
     // insert some data at the specified position into the data buffer
-    procedure InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: TPointerInt;
-      const UndoDesc: string = ''; const MoveCursor: Boolean = True);
+    procedure InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: TPointerInt; const UndoDesc: string = '';
+      const MoveCursor: Boolean = True);
     // append some data at the end of the data buffer
     procedure AppendBuffer(aBuffer: PAnsiChar; const aSize: TPointerInt; const UndoDesc: string = '';
       const MoveCursor: Boolean = True);
@@ -1136,8 +1093,8 @@ type
     // insert 4 bits (0000) into the data buffer (see also @link(DeleteNibble))
     function InsertNibble(const aPos: TPointerInt; const HighNibble: boolean; const UndoDesc: string = ''): boolean;
     // convert a part of the data buffer's content from one character table to a different one
-    procedure ConvertRange(const aFrom, aTo: TPointerInt;
-      const aTransFrom, aTransTo: TBCHTranslationKind; const UndoDesc: string = '');
+    procedure ConvertRange(const aFrom, aTo: TPointerInt; const aTransFrom, aTransTo: TBCHTranslationKind;
+      const UndoDesc: string = '');
     (* returns the data position of the top left cell and also whether the caret is in the
        character pane, see also @link(SetTopLeftPosition)
     *)
@@ -1193,11 +1150,9 @@ type
     // name of the file that has been loaded into the data buffer
     property Filename: string read FFileName;
     // retrieve or set bookmarks programmatically (see also @link(TBCHBookmark))
-    property Bookmark[Index: byte]: TBCHBookmark read GetBookmark write
-    SetBookmark;
+    property Bookmark[Index: byte]: TBCHBookmark read GetBookmark write SetBookmark;
     // has the byte at the given position been modified ? (only in overwrite mode)
-    property ByteChanged[index: TPointerInt]: boolean read HasChanged write
-    SetChanged;
+    property ByteChanged[index: TPointerInt]: boolean read HasChanged write SetChanged;
     // retrieves the number of columns (grid columns)
     property ColCountRO: integer read GetPropColCount;
     // retrieves the number of rows (grid rows)
@@ -1225,15 +1180,13 @@ type
     // first visible row (grid row)
     property TopRow;
     // this event is fired when a bookmark is added/modifed/removed
-    property OnBookmarkChanged: TNotifyEvent read FOnBookmarkChanged write
-      FOnBookmarkChanged;
+    property OnBookmarkChanged: TNotifyEvent read FOnBookmarkChanged write FOnBookmarkChanged;
     // call this procedure to navigate to a bookmarked position
     function GotoBookmark(const Index: integer): boolean;
     // call this function if the external offset formatting changed (see @link(OnGetOffsetText))
     procedure UpdateGetOffsetText;
     // center the current position vertically
     procedure CenterCursorPosition;
-
   end;
 
   // published hex editor component
@@ -1283,10 +1236,8 @@ type
     property OnExit;
     // @exclude(inherited)
     property OnKeyDown;
-
     // @exclude(inherited)
     property OnKeyPress;
-
     // @exclude(inherited)
     property OnKeyUp;
     // @exclude(inherited)
@@ -1363,7 +1314,6 @@ type
     property GutterWidth;
     // see inherited @inherited
     property BookmarkBitmap;
-
     // see inherited @inherited
     property MaxUndo;
     // see inherited @inherited
@@ -1394,10 +1344,8 @@ type
     property UnicodeChars;
     // see inherited @inherited
     property UnicodeBigEndian;
-
     // see inherited @inherited
     property OnDrawCell;
-
     // see inherited @inherited
     property OnBookmarkChanged;
     // see inherited @inherited
@@ -1413,17 +1361,6 @@ type
   // @exclude(undo storage record)
   PBCHUndoRec = ^TBCHUndoRec;
   // @exclude(undo storage record)
-
-//  TBCHUndoRec = packed record
-//    DataLen: integer;
-//    Flags: TBCHUndoFlags;
-//    CurPos: integer;
-//    Pos, Count, ReplCount: cardinal;
-//    CurTranslation: TBCHTranslationKind;
-//    CurBPU: Integer;
-//    Buffer: byte;
-//  end;
-
   TBCHUndoRec = packed record
     DataLen: TPointerInt;
     Flags: TBCHUndoFlags;
@@ -1686,19 +1623,14 @@ resourcestring
   ERR_INVALID_BOOKMARKBMP = 'Invalid bookmark bitmap (must be 10 x 200 px)';
   ERR_CANCELLED = 'Operation cancelled';
   ERR_MISSING_FORMATCHAR = 'Missing char in offset format: %s';
-  ERR_INVALID_FORMATRADIX =
-    'Invalid radix in offset format (%xh), allowed: 02h..10h';
-  ERR_INVALID_RADIXCHAR =
-    'Invalid character %s, cannot convert using radix %xh';
+  ERR_INVALID_FORMATRADIX = 'Invalid radix in offset format (%xh), allowed: 02h..10h';
+  ERR_INVALID_RADIXCHAR = 'Invalid character %s, cannot convert using radix %xh';
   ERR_INVALID_BPU = 'Invalid bytes per unit value %d, allowed: 1,2,4,8';
   ERR_INVALID_BPU_U = 'BytesPerUnit must be set to 2 in unicode mode';
-  ERR_INVALID_RBPU =
-    'Invalid ruler bytes per unit value %d, allowed: -1,1,2,4,8';
+  ERR_INVALID_RBPU = 'Invalid ruler bytes per unit value %d, allowed: -1,1,2,4,8';
   ERR_DATA_BOUNDS = 'Data position/length out of data bounds';
-  ERR_NO_TRANSLATION_IN_UNICODE_MODE =
-    'Translations cannot be used in unicode mode';
+  ERR_NO_TRANSLATION_IN_UNICODE_MODE = 'Translations cannot be used in unicode mode';
   ERR_ODD_FILESIZE_UNICODE = 'Cannot use unicode mode with odd-sized files';
-
   ERR_FIXED_FILESIZE = 'Cannot change fixed filesize';
   ERR_NOUNDO = 'Cannot update undo storage';
 
@@ -1852,14 +1784,12 @@ begin
 end;
 
 // is that key pressed ?
-
 function IsKeyDown(aKey: integer): boolean;
 begin
   Result := (GetKeyState(aKey) and (not 1)) <> 0;
 end;
 
 // return the lesser value
-
 function Min(a1, a2: TPointerInt): TPointerInt;
 begin
   if a1 < a2 then
@@ -1869,7 +1799,6 @@ begin
 end;
 
 // return the bigger value
-
 function Max(a1, a2: TPointerInt): TPointerInt;
 begin
   if a1 > a2 then
@@ -1879,7 +1808,6 @@ begin
 end;
 
 // cast x,y to grid coord
-
 function GridCoord(aX, aY: longint): TGridCoord;
 begin
   Result.x := aX;
@@ -1887,7 +1815,6 @@ begin
 end;
 
 // convert '00 01 02...' to binary data
-
 function ConvertHexToBin(aFrom: PChar; aTo: PAnsiChar; const aCount: TPointerInt;
   const SwapNibbles: boolean; var BytesTranslated: TPointerInt): PAnsiChar;
 var
@@ -1913,8 +1840,7 @@ begin
       if LBoolHi then
       begin
         if SwapNibbles then
-          aTo[BytesTranslated] := AnsiChar(((LBytCurrent and 15) * 16) or
-            ((LBytCurrent and $F0) shr 4))
+          aTo[BytesTranslated] := AnsiChar(((LBytCurrent and 15) * 16) or ((LBytCurrent and $F0) shr 4))
         else
           aTo[BytesTranslated] := AnsiChar(LBytCurrent);
 
@@ -1947,18 +1873,17 @@ begin
       aTo[LIntLoop2 + 1] := UpCase(HEX_UPPER[(LByteCurrent and 15) + 1]);
       aTo[LIntLoop2] := UpCase(HEX_UPPER[(LByteCurrent shr 4) + 1])
     end;
-
     Inc(LIntLoop2, 2);
   end;
   aTO[LIntLoop2] := #0;
 end;
 
 // translate an integer to a radix coded string
-
 function IntToRadix(Value: integer; Radix: byte): string;
 begin
   Result := IntToRadixLen(Value, Radix, 0);
 end;
+
 {$IFDEF ASM_ENABLED}
 function IntToRadix64(Value: int64; Radix: byte): string;
 begin
@@ -1967,7 +1892,6 @@ end;
 {$ENDIF}
 
 // translate an integer to a radix coded string and left fill with 0
-
 function IntToRadixLen(Value: integer; Radix, Len: byte): string;
 var
   LCrdTemp: cardinal absolute Value;
@@ -2375,15 +2299,14 @@ begin
     Result := '0' + Result;
 end;
 {$ENDIF}
-// translate an integer value to an octal string
 
+// translate an integer value to an octal string
 function IntToOctal(const Value: integer): string;
 begin
   Result := IntToRadix(Value, 8);
 end;
 
 // translate a radix coded string into an integer
-
 function RadixToInt(Value: string; Radix: byte): integer;
 var
   LCrdTemp: cardinal absolute Result;
@@ -2419,7 +2342,6 @@ end;
    %<number>, <number>%: radix 2<br>
    otherwise: radix 10
 *)
-
 function CheckRadixToInt(Value: string): integer;
 begin
   // hex
@@ -2469,14 +2391,12 @@ begin
 end;
 
 // translate an octal to an integer
-
 function OctalToInt(const Value: string): integer;
 begin
   Result := RadixToInt(Value, 8);
 end;
 
 // swap lo and high byte of a widechar
-
 procedure SwapWideChar(var WChar: WideChar);
 var
   LWrdChar: word absolute WChar;
@@ -2485,19 +2405,16 @@ begin
 end;
 
 // fade a color to a gray value
-
 function FadeToGray(aColor: TColor): TColor;
 var
   LBytGray: byte;
 begin
   aColor := ColorToRGB(aColor);
-  LBytGray := HiByte(GetRValue(aColor) * 74 + GetGValue(aColor) * 146 +
-    GetBValue(aColor) * 36);
+  LBytGray := HiByte(GetRValue(aColor) * 74 + GetGValue(aColor) * 146 + GetBValue(aColor) * 36);
   Result := RGB(LBytGray, LBytGray, LBytGray);
 end;
 
 (* TCustomMPHexEditor *)
-
 constructor TCustomBCHexEditor.Create(aOwner: TComponent);
 var
   LIntLoop: integer;
@@ -2610,7 +2527,6 @@ end;
 
 destructor TCustomBCHexEditor.Destroy;
 begin
-
   FCursorList := nil;
   FBookmarkBitmap.OnChange := nil;
   FreeStorage;
@@ -2657,23 +2573,22 @@ begin
   else
     LIntLoop := Pred(FBytesPerRow);
   for LIntLoop := 0 to LIntLoop do
-    //FBytesPerRowDup + 1 to (FBytesPerRow * 3) - 1 do
   begin
-    if (FUsedRulerBytesPerUnit > 1) and ((LIntLoop mod FUsedRulerBytesPerUnit)
-      = Pred(FUsedRulerBytesPerUnit)) and (not FUnicodeCharacters) then
+    if (FUsedRulerBytesPerUnit > 1) and ((LIntLoop mod FUsedRulerBytesPerUnit) = Pred(FUsedRulerBytesPerUnit)) and
+       (not FUnicodeCharacters) then
       LIntChWidth := (FCharWidth * 3 div 2) + 1
     else
       LIntChWidth := FCharWidth + 1;
     if not FUnicodeCharacters then
     begin
-      if (FBlockSize > 1) and FSepCharBlocks and ((LIntLoop mod FBlockSize) =
-        Pred(FBlockSize)) then
+      if (FBlockSize > 1) and FSepCharBlocks and ((LIntLoop mod FBlockSize) = Pred(FBlockSize)) then
         Inc(LIntChWidth, FCharWidth);
     end
     else
     begin
-      if (FBlockSize > 1) and FSepCharBlocks and ((LIntLoop mod (FBlockSize div
-        2)) = Pred(FBlockSize div 2)) then
+      if (FBlockSize > 1) and
+         FSepCharBlocks and
+         ((LIntLoop mod (FBlockSize div 2)) = Pred(FBlockSize div 2)) then
         Inc(LIntChWidth, FCharWidth);
     end;
     DoSetCellWidth(LIntLoop + GRID_FIXED + FBytesPerRowDup + 1, LIntChWidth);
@@ -2719,7 +2634,6 @@ begin
   WaitCursor;
   try
     FDataStorage.Position := 0;
-
     Stream2Stream(FDataStorage, Strm, pkSave);
   finally
     Invalidate;
@@ -2739,8 +2653,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.SaveToFile(const Filename: string;
-  const aUnModify: boolean = True);
+procedure TCustomBCHexEditor.SaveToFile(const Filename: string; const aUnModify: boolean = True);
 var
   LfstFile: TFileStream;
 begin
@@ -2754,7 +2667,6 @@ begin
     FHasFile := True;
 
     if aUnModify then
-
     begin
       FModifiedBytes.Size := 0;
       FModified := False;
@@ -2762,8 +2674,7 @@ begin
       FFileName := Filename;
       FDataStorage.Position := 0;
 
-      ResetUndo
-
+      ResetUndo;
     end;
   finally
     FStreamFileName := '';
@@ -2782,10 +2693,7 @@ begin
         Strm.Position := 0;
         FDataStorage.Size := Strm.Size;
         FDataStorage.Position := 0;
-
         Stream2Stream(Strm, FDataStorage, pkLoad);
-        //FDataStorage.CopyFrom(Strm, Strm.Size - Strm.Position);
-
         FDataStorage.Position := 0;
       finally
         with FUndoStorage do
@@ -2912,7 +2820,6 @@ begin
 end;
 
 // get the position of the drag'n'drop marker
-
 function TCustomBCHexEditor.DropPosition: TPointerInt;
 var
   LBoolInCharField: boolean;
@@ -2930,8 +2837,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.Stream2Stream(strFrom, strTo: TStream;
-  const Operation: TBCHProgressKind; const Count: TPointerInt = -1);
+procedure TCustomBCHexEditor.Stream2Stream(strFrom, strTo: TStream; const Operation: TBCHProgressKind; const Count: TPointerInt = -1);
 var
   LBytProgress, LBytLastProgress: byte;
   LIntRemain, LIntRead, LIntCount: TPointerInt;
@@ -2954,8 +2860,7 @@ begin
   while LIntRemain > 0 do
   begin
     LBytProgress := Round(((LIntCount - LIntRemain) / LIntCount) * 100);
-    if (LBytProgress <> LBytLastProgress) or (LIntRemain <=
-      BCH_FILEIO_BLOCKSIZE) then
+    if (LBytProgress <> LBytLastProgress) or (LIntRemain <= BCH_FILEIO_BLOCKSIZE) then
     begin
       if LIntRemain <= BCH_FILEIO_BLOCKSIZE then
         LBytLastProgress := 100
@@ -2963,8 +2868,7 @@ begin
         LBytLastProgress := LBytProgress;
       if Assigned(FOnProgress) then
       begin
-        FOnProgress(self, Operation, LStrFile, LBytLastProgress,
-          LBoolCancel);
+        FOnProgress(self, Operation, LStrFile, LBytLastProgress, LBoolCancel);
         if LBoolCancel then
           raise EBCHexEditor.Create(ERR_CANCELLED);
       end
@@ -2986,8 +2890,8 @@ begin
     Result := CheckSelectCell(aCol, aRow)
   else
   begin
-    if not ((aCol = GRID_FIXED) or (aCol = Max(GetOtherFieldColCheck(GRID_FIXED)
-      , GRID_FIXED)) and (aRow = GRID_FIXED)) then
+    if not ((aCol = GRID_FIXED) or
+       (aCol = Max(GetOtherFieldColCheck(GRID_FIXED), GRID_FIXED)) and (aRow = GRID_FIXED)) then
       Result := False
     else
     begin
@@ -3004,7 +2908,8 @@ begin
   if Result then
   begin
     // neu zeichnen
-    if (aCol <> Col) or (aRow <> Row) then
+    if (aCol <> Col) or
+       (aRow <> Row) then
       Invalidate;
 
     if FIsSelecting then
@@ -3096,8 +3001,7 @@ begin
   Result := (DataPos div FBytesPerRow) + GRID_FIXED;
 end;
 
-function TCustomBCHexEditor.GetCursorAtPos(const aPos: integer;
-  const aChars: boolean): TGridCoord;
+function TCustomBCHexEditor.GetCursorAtPos(const aPos: integer; const aChars: boolean): TGridCoord;
 var
   LIntCol: integer;
 begin
@@ -3188,8 +3092,8 @@ begin
 
       // überprüfen, ob außerhalb der DateiGröße
       LIntPos := GetPosAtCursor(aCol, aRow);
-      if (LIntPos >= DataSize) and not (InsertMode and (LIntPos = DataSize) and
-        (FPosInCharField or ((aCol mod 2) = 0))) then
+      if (LIntPos >= DataSize) and
+         not (InsertMode and (LIntPos = DataSize) and (FPosInCharField or ((aCol mod 2) = 0))) then
       begin
         if (not InsertMode) then
           LgrcEndCoords := GetCursorAtPos(DataSize - 1, InCharField)
@@ -3232,9 +3136,7 @@ var
   LgrcPosition: TGridCoord;
   LWChrOldData: WideChar;
   LWrdKey: Word;
-
   LChr: Char;
-
 begin
 
   LChrCharW := WideChar(Msg.CharCode);
@@ -3383,9 +3285,8 @@ end;
 // Change la valeur du byte
 // Renseigne la structure Undo
 {-------------------------------------------------------------------------------}
-
-procedure TCustomBCHexEditor.IntChangeByte(const aOldByte, aNewByte: byte; aPos,
-  aCol, aRow: TPointerInt; const UndoDesc: string = '');
+procedure TCustomBCHexEditor.IntChangeByte(const aOldByte, aNewByte: byte; aPos, aCol, aRow: TPointerInt;
+  const UndoDesc: string = '');
 begin
   if aOldByte = aNewByte then
     Exit;
@@ -3402,8 +3303,8 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.IntChangeWideChar(const aOldChar, aNewChar:
-  WideChar; aPos, aCol, aRow: TPointerInt; const UndoDesc: string);
+procedure TCustomBCHexEditor.IntChangeWideChar(const aOldChar, aNewChar: WideChar; aPos, aCol, aRow: TPointerInt;
+  const UndoDesc: string);
 var
   LBArrOld: packed array[0..1] of Byte absolute aOldChar;
   LBArrNew: packed array[0..1] of Byte absolute aNewChar;
@@ -3483,8 +3384,7 @@ begin
         begin
           // scroll down one page
           LIntRow := Min(RowCount - 1, Row + VisibleRowCount - 1);
-          TopRow := Min(Max(GRID_FIXED, RowCount - VisibleRowCount),
-            TopRow + VisibleRowCount - 1);
+          TopRow := Min(Max(GRID_FIXED, RowCount - VisibleRowCount), TopRow + VisibleRowCount - 1);
           LIntCol := Col;
           if LIntRow > 0 then
           begin
@@ -3501,16 +3401,14 @@ begin
           if not FPosInCharField then
             MoveColRow(GRID_FIXED, GRID_FIXED, True, True)
           else
-            MoveColRow(Max(GRID_FIXED, GetOtherFieldCol(GRID_FIXED)),
-              GRID_FIXED, True, True);
+            MoveColRow(Max(GRID_FIXED, GetOtherFieldCol(GRID_FIXED)), GRID_FIXED, True, True);
         end
         else
         begin // normaler zeilenstart
           if not FPosInCharField then
             MoveColRow(GRID_FIXED, Row, True, True)
           else
-            MoveColRow(Max(GRID_FIXED, GetOtherFieldCol(GRID_FIXED)),
-              Row, True, True);
+            MoveColRow(Max(GRID_FIXED, GetOtherFieldCol(GRID_FIXED)), Row, True, True);
         end;
       end;
 
@@ -3545,7 +3443,9 @@ begin
       end;
 
     VK_LEFT, VK_BACK:
-      if (InsertMode and (not FReadOnlyView)) and (Key = VK_BACK) then
+      if (InsertMode and
+         (not FReadOnlyView)) and
+         (Key = VK_BACK) then
       begin
         if SelCount > 0 then
           DeleteSelection
@@ -3554,7 +3454,8 @@ begin
       end
       else if (not (ssCTRL in Shift)) then
       begin
-        if FIsSelecting or (FUnicodeCharacters and FPosInCharField) then
+        if FIsSelecting or
+           (FUnicodeCharacters and FPosInCharField) then
           LIntCol := GetPosAtCursor(Col, Row) - FBytesPerUnit
         else
           LIntCol := GetPosAtCursor(Col, Row) - 1;
@@ -3604,7 +3505,8 @@ begin
       begin
         if (not (ssCTRL in Shift)) then
         begin
-          if FIsSelecting or (FUnicodeCharacters and FPosInCharField) then
+          if FIsSelecting or
+             (FUnicodeCharacters and FPosInCharField) then
             LIntCol := GetPosAtCursor(Col, Row) + FBytesPerUnit
           else
             LIntCol := GetPosAtCursor(Col, Row) + 1;
@@ -3632,8 +3534,8 @@ begin
               else
               begin
                 LIntCol := LIntCol + 1;
-                if (LIntCol < DataSize) or ((LIntCol = DataSize) and InsertMode)
-                  then
+                if (LIntCol < DataSize) or
+                   ((LIntCol = DataSize) and InsertMode) then
                 begin
                   LgrcPosition := GetCursorAtPos(LIntCol, FPosInCharField);
                   MoveColRow(LgrcPosition.x, LgrcPosition.y, True, True);
@@ -3660,7 +3562,7 @@ begin
           begin
             MoveColRow(LIntCol, LIntRow, True, True);
           end
-          end;
+        end;
       end;
 
     VK_UP:
@@ -3673,7 +3575,7 @@ begin
           begin
             MoveColRow(LIntCol, LIntRow, True, True);
           end
-          end;
+        end;
       end;
 
     Word('T'): if (ssCtrl in Shift) then
@@ -3729,8 +3631,9 @@ end;
 function TCustomBCHexEditor.IsSelected(const APosition: TPointerInt): boolean;
 begin
   Result := False;
-  if (FSelPosition <> -1) and (APosition >= FSelStart) and (APosition <= FSelEnd)
-    then
+  if (FSelPosition <> -1) and
+     (APosition >= FSelStart) and
+     (APosition <= FSelEnd) then
   begin
     Result := True
   end;
@@ -3789,13 +3692,17 @@ begin
     if LStrTemp <> '' then
     begin
       // bytes per unit
-      if (Length(LStrTemp) >= 2) and (UpCase(LStrTemp[1]) = 'R') and (LStrTemp[2] = '%') then
+      if (Length(LStrTemp) >= 2) and
+         (UpCase(LStrTemp[1]) = 'R') and
+         (LStrTemp[2] = '%') then
       begin
         Flags := Flags + [offCalcRow];
         Delete(LStrTemp, 1, 2);
         _BytesPerUnit := BytesPerRow;
       end
-      else if (Length(LStrTemp) >= 2) and (UpCase(LStrTemp[1]) = 'C') and (LStrTemp[2] = '%') then
+      else if (Length(LStrTemp) >= 2) and
+              (UpCase(LStrTemp[1]) = 'C') and
+              (LStrTemp[2] = '%') then
       begin
         Flags := Flags + [offCalcColumn];
         Delete(LStrTemp, 1, 2);
@@ -3805,7 +3712,7 @@ begin
       begin
         LIntTemp := 1;
         while (LIntTemp <= Length(LStrTemp)) and
-          CharInSet(LStrTemp[LIntTemp], ['0'..'9', 'A'..'F', 'a'..'f']) do
+              CharInSet(LStrTemp[LIntTemp], ['0'..'9', 'A'..'F', 'a'..'f']) do
           Inc(LIntTemp);
         if Copy(LStrTemp, LIntTemp, 1) = '%' then
         begin
@@ -3819,7 +3726,6 @@ begin
           else
           begin
             _BytesPerUnit := RadixToInt(Copy(LStrTemp, 1, LIntTemp - 1), 16);
-            //  StrToInt('$'+Copy(LStrTemp, 1, LIntTemp-1));
             Delete(LStrTemp, 1, LIntTemp);
           end;
         end
@@ -3897,43 +3803,18 @@ end;
 procedure TCustomBCHexEditor.Select(const aCurCol, aCurRow, aNewCol, aNewRow: TPointerInt);
 var
   LIntOldStart,
-    //LIntOldEnd,
   LIntNewStart,
     LIntNewEnd: integer;
 begin
-  //LIntOldEnd := FSelEnd;
-  //LIntOldStart := FSelStart;
   LIntNewStart := GetPosAtCursor(aNewCol, aNewRow);
   if FSelPosition = -1 then
   begin
     LIntOldStart := LIntNewStart;
-    //LIntOldEnd := LIntNewStart;
     LIntNewEnd := GetPosAtCursor(aCurCol, aCurRow);
     NewSelection(LIntNewEnd, LIntOldStart); // abcd
-    //SetSelection(LIntNewEnd, Min(LIntOldStart, LIntNewEnd), Max(LIntNewEnd,
-      //LIntOldEnd));
-    //RedrawPos(FSelStart, FSelEnd)
   end
   else
-    //begin
-    NewSelection(FSelPosition, LIntNewStart); // abcd
-  (*// testen, ob neue selection  /\ liegt als fSelPO
-  // wenn ja, dann start = sel, ende = selpo
-  if LIntNewStart < FSelPosition then
-  begin
-    NewSelection(FSelPosition, LIntNewStart);// abcd
-    //SetSelection(FSelPosition, LIntNewStart, FSelPosition);
-    //RedrawPos(Min(FSelStart, LIntOldStart), Max(FSelStart, LIntOldStart));
-    //RedrawPos(Min(FSelEnd, LIntOldEnd), Max(FSelEnd, LIntOldEnd));
-  end
-  else
-  begin
-    NewSelection(FSelPosition, LIntNewStart); //abcd
-    //SetSelection(FSelPosition, FSelPosition, LIntNewStart);
-    //RedrawPos(Min(FSelStart, LIntOldStart), Max(FSelStart, LIntOldStart));
-    //RedrawPos(Min(FSelEnd, LIntOldEnd), Max(FSelEnd, LIntOldEnd));
-  end;
-end;*)
+    NewSelection(FSelPosition, LIntNewStart);
 end;
 
 procedure TCustomBCHexEditor.ResetSelection(const aDraw: boolean);
@@ -3945,7 +3826,8 @@ begin
   SetSelection(-1, -1, -1);
   FSelBeginPosition := -1;
 
-  if aDraw and ((LIntOldStart > -1) or (LIntOldStart > -1)) then
+  if aDraw and
+     ((LIntOldStart > -1) or (LIntOldStart > -1)) then
     Invalidate;
 end;
 
@@ -3989,14 +3871,17 @@ begin
       FIsSelecting := True;
   end;
 
-  if (Button = mbLeft) and MouseOverSelection then
+  if (Button = mbLeft) and
+     MouseOverSelection then
   begin
     FMouseDownCol := x;
     FMouseDownRow := y;
     FMouseUpCanResetSel := True;
   end;
 
-  if (not lBoolInherited) and (Assigned(OnMouseDown)) and Focused then
+  if (not lBoolInherited) and
+     (Assigned(OnMouseDown)) and
+     Focused then
     OnMouseDown(self, Button, Shift, X, Y);
 end;
 
@@ -4070,7 +3955,6 @@ begin
     Exit;
 
   LIntOldSize := FDataStorage.Size;
-
   WaitCursor;
   try
     // nun zuerst alle restlichen bits verschieben
@@ -4114,7 +3998,8 @@ begin
     Exit;
   end;
 
-  if (aPos >= DataSize) or (aPos < 0) then
+  if (aPos >= DataSize) or
+     (aPos < 0) then
     Exit;
 
   CreateUndo(ufKindNibbleInsert, aPos, 0, 0, UndoDesc);
@@ -4201,8 +4086,8 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.ConvertRange(const aFrom, aTo: TPointerInt;
-  const aTransFrom, aTransTo: TBCHTranslationKind; const UndoDesc: string = '');
+procedure TCustomBCHexEditor.ConvertRange(const aFrom, aTo: TPointerInt; const aTransFrom, aTransTo: TBCHTranslationKind;
+  const UndoDesc: string = '');
 begin
   if aFrom > aTo then
     Exit;
@@ -4279,7 +4164,6 @@ begin
     if FUndoStorage.UpdateCount = 0 then
       FUndoStorage.CreateUndo(aKind, aPos, aCount, aReplCount, sDesc);
     FModified := True;
-    //Changed;
   end
   else
     raise EBCHexEditor.Create(ERR_NOUNDO);
@@ -4338,7 +4222,8 @@ end;
 
 procedure TCustomBCHexEditor.SetSelStart(aValue: TPointerInt);
 begin
-  if (aValue < 0) or (aValue >= DataSize) then
+  if (aValue < 0) or
+     (aValue >= DataSize) then
     raise EBCHexEditor.Create(ERR_INVALID_SELSTART)
   else
   begin
@@ -4350,7 +4235,8 @@ end;
 
 procedure TCustomBCHexEditor.SetSelEnd(aValue: TPointerInt);
 begin
-  if (aValue < -1) or (aValue >= DataSize) then
+  if (aValue < -1) or
+     (aValue >= DataSize) then
     raise EBCHexEditor.Create(ERR_INVALID_SELEND)
   else
   begin
@@ -4397,7 +4283,8 @@ end;
 procedure TCustomBCHexEditor.CreateWnd;
 begin
   inherited;
-  if (csDesigning in ComponentState) or (FFileName = '---') then
+  if (csDesigning in ComponentState) or
+     (FFileName = '---') then
     CreateEmptyFile(UNNAMED_FILE);
 end;
 
@@ -4460,8 +4347,9 @@ var
 begin
   if FAutoBytesPerRow and (not FSetAutoBytesPerRow) then
     Exit;
-  if ((Value < 1) or (Value > 256)) or
-    (FUnicodeCharacters and ((Value mod 2) <> 0)) then
+  if ((Value < 1) or
+     (Value > 256)) or
+     (FUnicodeCharacters and ((Value mod 2) <> 0)) then
     raise EBCHexEditor.Create(ERR_INVALID_BYTESPERLINE)
   else if FBytesPerRow <> Value then
   begin
@@ -4479,7 +4367,8 @@ begin
     FIntLastHexCol := (GRID_FIXED + FBytesPerRowDup - 1);
     SetRulerString;
     CalcSizes;
-    if (LIntPos >= DataSize) or (InsertMode and (LIntPos > DataSize)) then
+    if (LIntPos >= DataSize) or
+       (InsertMode and (LIntPos > DataSize)) then
       LIntPos := DataSize - 1;
 
     LCoord := GetCursorAtPos(LIntPos, LBoolInCharField);
@@ -4495,8 +4384,7 @@ begin
   end;
 end;
 
-procedure TCustomBCHexEditor.InternalAppendBuffer(Buffer: PAnsiChar; const Size:
-  TPointerInt);
+procedure TCustomBCHexEditor.InternalAppendBuffer(Buffer: PAnsiChar; const Size: TPointerInt);
 var
   LIntSize: TPointerInt;
 begin
@@ -4533,8 +4421,8 @@ begin
   CalcSizes;
 end;
 
-procedure TCustomBCHexEditor.InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: TPointerInt;
-  const UndoDesc: string = ''; const MoveCursor: Boolean = True);
+procedure TCustomBCHexEditor.InsertBuffer(aBuffer: PAnsiChar; const aSize, aPos: TPointerInt; const UndoDesc: string = '';
+  const MoveCursor: Boolean = True);
 begin
   //FDataStorage.CheckBounds(aPos);
   CreateUndo(ufKindInsertBuffer, aPos, aSize, 0, UndoDesc);
@@ -4563,7 +4451,8 @@ procedure TCustomBCHexEditor.AppendBuffer(aBuffer: PAnsiChar; const aSize: TPoin
 var
   LIntSize: TPointerInt;
 begin
-  if (not Assigned(aBuffer)) or (aSize = 0) then
+  if (not Assigned(aBuffer)) or
+     (aSize = 0) then
     Exit;
 
   CreateUndo(ufKindAppendBuffer, DataSize, aSize, 0, UndoDesc);
@@ -4665,7 +4554,8 @@ end;
 
 procedure TCustomBCHexEditor.SetReadOnlyFile(const Value: boolean);
 begin
-  if Value and (not FIsFileReadonly) then
+  if Value and
+     (not FIsFileReadonly) then
   begin
     FIsFileReadonly := True;
   end;
@@ -4673,7 +4563,8 @@ end;
 
 function TCustomBCHexEditor.BufferFromFile(const aPos: TPointerInt; var aCount: TPointerInt): PChar;
 begin
-  if (aPos < 0) or (aPos >= DataSize) then
+  if (aPos < 0) or
+     (aPos >= DataSize) then
     raise EBCHexEditor.Create(ERR_INVALID_BUFFERFROMFILE)
   else
   begin
@@ -4802,7 +4693,9 @@ begin
 
     SetLength(LData, (aEnd - AStart) div 2);
     if (not UnicodeChars) then
-      MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, PAnsiChar(GetFastPointer(aStart, aEnd - AStart)), aEnd - AStart, PChar(LData), Length(LData))
+      MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS,
+                          PAnsiChar(GetFastPointer(aStart, aEnd - AStart)),
+                          aEnd - AStart, PChar(LData), Length(LData))
     else
       MoveMemory(PChar(LData), GetFastPointer(aStart, aEnd - AStart), aEnd - AStart);
     if (IgnoreCase) then
@@ -4838,11 +4731,9 @@ begin
   begin
     with FOffsetFormat do
       if offCalcWidth in Flags then
-        MinWidth := Length(IntToRadix(((RowCount - 3) * FBytesPerRow) div
-          _BytesPerUnit, Radix));
+        MinWidth := Length(IntToRadix(((RowCount - 3) * FBytesPerRow) div _BytesPerUnit, Radix));
 
-    FOffSetDisplayWidth := Length(GetOffsetString((RowCount - 3) * FBytesPerRow))
-      + 1;
+    FOffSetDisplayWidth := Length(GetOffsetString((RowCount - 3) * FBytesPerRow)) + 1;
   end;
   if FGutterWidth = -1 then
     DoSetCellWidth(0, FOffSetDisplayWidth * FCharWidth + 20 + 1)
@@ -4985,8 +4876,7 @@ begin
   if (DataSize < 1) or (SelCount < 1) then
     Result := ''
   else
-    Result := FDataStorage.GetAsHex(Min(SelStart, SelEnd), SelCount,
-      SwapNibbles);
+    Result := FDataStorage.GetAsHex(Min(SelStart, SelEnd), SelCount, SwapNibbles);
 end;
 
 function TCustomBCHexEditor.GetInsertMode: boolean;
@@ -5040,8 +4930,7 @@ begin
     if LIntPos = 0 then
       Exit; // Can't delete at offset -1
 
-    CreateUndo(ufKindByteRemoved, LIntPos - LIntCount, LIntCount,
-      0, UndoDesc);
+    CreateUndo(ufKindByteRemoved, LIntPos - LIntCount, LIntCount, 0, UndoDesc);
 
     InternalDelete(LIntPos - LIntCount, LIntPos, Col, Row);
     if LIntSavePos = LIntPos then
@@ -5068,8 +4957,7 @@ end;
 procedure TCustomBCHexEditor.WMGetDlgCode(var Msg: TWMGetDlgCode);
 begin
   inherited;
-  Msg.Result := Msg.Result or DLGC_WANTARROWS or DLGC_WANTCHARS or
-    DLGC_WANTALLKEYS;
+  Msg.Result := Msg.Result or DLGC_WANTARROWS or DLGC_WANTCHARS or DLGC_WANTALLKEYS;
   if FWantTabs then
     Msg.Result := Msg.Result or DLGC_WANTTAB
   else
@@ -5286,11 +5174,11 @@ begin
 
   if FMouseUpCanResetSel then
   begin
-    FMouseUpCanResetSel := (LgrcCoords.x = FMouseDownCol) and
-      (LgrcCoords.y = FMouseDownRow);
+    FMouseUpCanResetSel := (LgrcCoords.x = FMouseDownCol) and (LgrcCoords.y = FMouseDownRow);
   end;
 
-  if (Shift = []) and (CursorOverSelection(X, Y) or MouseOverFixed(X, Y)) then
+  if (Shift = []) and
+     (CursorOverSelection(X, Y) or MouseOverFixed(X, Y)) then
     Cursor := crArrow
   else
     Cursor := crIBeam;
@@ -5306,7 +5194,8 @@ begin
   WinApi.Windows.GetCursorPos(LPtMouse);
   LPtMouse := ScreenToClient(LPtMouse);
   LgrcCoord := CheckMouseCoord(LPtMouse.X, LPtMouse.Y);
-  if (LGrcCoord.X <> -1) and (LGrcCoord.Y <> -1) then
+  if (LGrcCoord.X <> -1) and
+     (LGrcCoord.Y <> -1) then
     inherited;
 end;
 
@@ -5321,8 +5210,7 @@ begin
     LRctCell := CellRect(Result.X, Result.Y);
     if (LRctCell.Left + (FCharWidth div 2)) <= X then
     begin
-      if not (Result.X in [GetLastCharCol, FBytesPerRowDup + GRID_FIXED - 1])
-        then
+      if not (Result.X in [GetLastCharCol, FBytesPerRowDup + GRID_FIXED - 1]) then
       begin
         X := LRctCell.Right + 1;
         Inc(Result.X);
@@ -5337,7 +5225,6 @@ begin
         Result.Y := Result.Y + 1;
         Result.X := FBytesPerRowDup + 1 + GRID_FIXED;
         X := CellRect(Result.X, Result.Y - 1).Left;
-        //Dec(X, FCharWidth * FBytesPerRow);
       end;
     end
     else if Result.X = (FBytesPerRowDup + GRID_FIXED - 1) then
@@ -5348,7 +5235,6 @@ begin
         Result.Y := Result.Y + 1;
         Result.X := GRID_FIXED;
         X := CellRect(Result.X, Result.Y - 1).Left;
-        //Dec(X, FCharWidth * FBytesPerRow);
       end;
     end;
   end;
@@ -5464,10 +5350,8 @@ begin
   Result := FModified and ((DataSize > 0) or FileExists(FileName));
 end;
 
-procedure TCustomBCHexEditor.SetSelection(DataPos, StartPos, EndPos:
-  TPointerInt);
+procedure TCustomBCHexEditor.SetSelection(DataPos, StartPos, EndPos: TPointerInt);
 begin
-  //CheckSelectUnit(StartPos, EndPos);
   FSelEnd := Max(-1, Min(EndPos, DataSize - 1));
   FSelPosition := Max(-1, Min(DataPos, DataSize - 1));
   FSelStart := Max(-1, Min(StartPos, DataSize - 1));
@@ -5489,7 +5373,8 @@ procedure TCustomBCHexEditor.RecalcBytesPerRow;
         Inc(Result, FCharWidth);
         if ((LIntCnt mod FBytesPerCol) = 1) then
           Inc(Result, FCharWidth);
-        if (FBlockSize > 1) and ((LIntCnt mod (FBlockSize * 2)) = 1) then
+        if (FBlockSize > 1) and
+           ((LIntCnt mod (FBlockSize * 2)) = 1) then
           Inc(Result, FCharWidth);
       end;
     end;
@@ -5499,21 +5384,24 @@ procedure TCustomBCHexEditor.RecalcBytesPerRow;
       LIntCnt := Pred(BPR);
     for LIntCnt := 0 to LIntCnt do
     begin
-      if (FUsedRulerBytesPerUnit > 1) and ((LIntCnt mod FUsedRulerBytesPerUnit)
-        = Pred(FUsedRulerBytesPerUnit)) and (not FUnicodeCharacters) then
+      if (FUsedRulerBytesPerUnit > 1) and
+         ((LIntCnt mod FUsedRulerBytesPerUnit) = Pred(FUsedRulerBytesPerUnit)) and
+         (not FUnicodeCharacters) then
         Inc(Result, (FCharWidth * 3 div 2) + 1)
       else
         Inc(Result, FCharWidth + 1);
       if not FUnicodeCharacters then
       begin
-        if (FBlockSize > 1) and FSepCharBlocks and ((LIntCnt mod FBlockSize) =
-          Pred(FBlockSize)) then
+        if (FBlockSize > 1) and
+            FSepCharBlocks and
+           ((LIntCnt mod FBlockSize) = Pred(FBlockSize)) then
           Inc(Result, FCharWidth);
       end
       else
       begin
-        if (FBlockSize > 1) and FSepCharBlocks and ((LIntCnt mod (FBlockSize div
-          2)) = Pred(FBlockSize div 2)) then
+        if (FBlockSize > 1) and
+           FSepCharBlocks and
+           ((LIntCnt mod (FBlockSize div 2)) = Pred(FBlockSize div 2)) then
           Inc(Result, FCharWidth);
       end;
     end;
@@ -5584,7 +5472,8 @@ var
   I: TPointerInt;
 begin
   Result := '';
-  if Assigned(FOnGetOffsetText) and (not FOffsetHandler) then
+  if Assigned(FOnGetOffsetText) and
+     (not FOffsetHandler) then
   begin
     FOffsetHandler := True;
     try
@@ -5636,8 +5525,7 @@ begin
   Result := FBookmarks[Index];
 end;
 
-procedure TCustomBCHexEditor.SetBookmark(Index: byte; const Value:
-  TBCHBookmark);
+procedure TCustomBCHexEditor.SetBookmark(Index: byte; const Value: TBCHBookmark);
 begin
   SetBookmarkVals(Index, Value.mPosition, Value.mInCharField);
 end;
@@ -5683,9 +5571,7 @@ var
   LColTextColor, LColTextBackColor, LColBackColor: TColor;
   LIntPenWidthSave: integer;
   LrecSize: TSize;
-
   LBoolDraw: Boolean;
-
   LBoolFocused: boolean;
   LRect2: TRect;
   LIntLastCol: integer;
@@ -5693,8 +5579,7 @@ var
   // get the width of a wide text
   function GetTextWidthW: Integer;
   begin
-    GetTextExtentPoint32W(Canvas.Handle, PWideChar(LWStrOutput),
-      Length(LWStrOutput), LrecSize);
+    GetTextExtentPoint32W(Canvas.Handle, PWideChar(LWStrOutput), Length(LWStrOutput), LrecSize);
     Result := LRecSize.cx;
   end;
 
@@ -5706,19 +5591,15 @@ var
       Brush.Color := TestColor(LColBackColor);
       Font.Color := LColTextColor;
       SetBKColor(Handle, ColorToRGB(TestColor(LColTextBackColor)));
-      LRect2 := LRctWhere; //Rect(Left, Top, Left + FCharWidth, Bottom);
+      LRect2 := LRctWhere;
       LRect2.Right := Left + FCharWidth;
-      //SetTextColor(Handle, ColorToRGB(LColTextColor));
-
       LBoolDraw := True;
       if Assigned(FOnDrawCell) then
       begin
         if LIntCurCol = 0 then
-          FOnDrawCell(self, Canvas, LIntCurCol, LIntCurRow, LWStrOutput,
-            LRctWhere, LBoolDraw)
+          FOnDrawCell(self, Canvas, LIntCurCol, LIntCurRow, LWStrOutput, LRctWhere, LBoolDraw)
         else
-          FOnDrawCell(self, Canvas, LIntCurCol, LIntCurRow, LWStrOutput, LRect2,
-            LBoolDraw)
+          FOnDrawCell(self, Canvas, LIntCurCol, LIntCurRow, LWStrOutput, LRect2, LBoolDraw)
       end;
       if LBoolDraw then
       begin
@@ -5764,11 +5645,9 @@ var
     (* auf bookmark prüfen *)
     for LIntLoop := 0 to 9 do
       with FBookmarks[lIntLoop] do
-        if (mPosition > -1) and ((mPosition div FBytesPerRow) = (LIntCurRow -
-          GRID_FIXED)) then
+        if (mPosition > -1) and ((mPosition div FBytesPerRow) = (LIntCurRow - GRID_FIXED)) then
           with LRctWhere do
-            FBookmarkImageList.Draw(Canvas, Left + 3, ((Bottom - Top - 10) div 2)
-              + Top, lIntLoop + (10 * integer(mInCharField)));
+            FBookmarkImageList.Draw(Canvas, Left + 3, ((Bottom - Top - 10) div 2) + Top, lIntLoop + (10 * integer(mInCharField)));
   end;
 
   // draw a ruler cell
@@ -5829,12 +5708,10 @@ var
         if FUnicodeCharacters then
         begin
           LWChrOutput := #0;
-          ReadBuffer(LWChrOutput, LIntDataPos, Min(2, LIntDataSize -
-            LIntDataPos));
+          ReadBuffer(LWChrOutput, LIntDataPos, Min(2, LIntDataSize - LIntDataPos));
           if FUnicodeBigEndian then
             SwapWideChar(LWChrOutput);
-          if (Pos(LWChrOutput, FMaskedChars) > 0)
-            then
+          if (Pos(LWChrOutput, FMaskedChars) > 0) then
             LWChrOutput := WideChar(FReplaceUnprintableCharsBy);
         end
         else
@@ -5842,8 +5719,8 @@ var
       end;
 
       // testen ob byte geändert
-      LBoolChanged := (HasChanged(LIntDataPos)) or ((FUnicodeCharacters and
-        bIsCharCell) and HasChanged(LIntDataPos + 1));
+      LBoolChanged := (HasChanged(LIntDataPos)) or
+                      ((FUnicodeCharacters and bIsCharCell) and HasChanged(LIntDataPos + 1));
       LBoolOddCol := (((LIntCurCol - GRID_FIXED) div FBytesPerCol) mod 2) = 0;
 
       if LBoolChanged then
@@ -5873,16 +5750,17 @@ var
       begin
 
         FIsDrawDataSelected := True;
-
         if (not FHideSelection) or LBoolFocused then
         begin
-          if (LIntCurCol < LIntLastCol) and (LIntCurCol <> FIntLastHexCol)
-            and (LIntDataPos <> Max(FSelStart, FSelEnd)) then
+          if (LIntCurCol < LIntLastCol) and
+             (LIntCurCol <> FIntLastHexCol) and
+             (LIntDataPos <> Max(FSelStart, FSelEnd)) then
             LColBackColor := Invert(LColBackColor);
           LColTextBackColor := Invert(LColTextBackColor);
           LColTextColor := Invert(LColTextColor);
 
-          if FGraySelOnLostFocus and (not LBoolFocused) then
+          if FGraySelOnLostFocus and
+             (not LBoolFocused) then
           begin
             LColTextBackColor := FadeToGray(LColTextBackColor);
             LColTextColor := FadeToGray(LColTextColor);
@@ -5891,24 +5769,21 @@ var
       end
 
       else
-        FIsDrawDataSelected := False
-;
+        FIsDrawDataSelected := False;
 
       with Canvas, LRctWhere do
       begin
         Brush.Color := TestColor(LColBackColor);
         Font.Color := LColTextColor;
         SetBKColor(Handle, ColorToRGB(TestColor(LColTextBackColor)));
-        LRect2 := LRctWhere; //Rect(Left, Top, Left + FCharWidth, Bottom);
+        LRect2 := LRctWhere;
         LRect2.Right := Left + FCharWidth;
-        //SetTextColor(Handle, ColorToRGB(LColTextColor));
 
         LBoolDraw := True;
         if Assigned(FOnDrawCell) then
         begin
           LWStrOutput := LWChrOutput;
-          FOnDrawCell(self, Canvas, LIntCurCol, LIntCurRow, LWStrOutput, LRect2,
-            LBoolDraw);
+          FOnDrawCell(self, Canvas, LIntCurCol, LIntCurRow, LWStrOutput, LRect2, LBoolDraw);
           LWChrOutput := (LWStrOutput+#0)[1];
         end;
         if LBoolDraw then
@@ -5917,20 +5792,20 @@ var
           FillRect(LRctWhere);
           LIntOldFontSize := Canvas.Font.Size;
           if FUnicodeCharacters then
-            while (Canvas.Font.Size > 1) and GetTextExtentPoint32W(Canvas.Handle, @LWChrOutput,
-              1, LrecSize) and (LRecSize.cx > (LRect2.Right - LRect2.Left)) do
+            while (Canvas.Font.Size > 1) and
+                  GetTextExtentPoint32W(Canvas.Handle, @LWChrOutput, 1, LrecSize) and
+                  (LRecSize.cx > (LRect2.Right - LRect2.Left)) do
               Canvas.Font.Size := Canvas.Font.Size -1;
-          ExtTextOutW(Handle, Left, Top,
-            ETO_CLIPPED or ETO_OPAQUE, @LRect2, @LWChrOutput,
-            1, nil);
+          ExtTextOutW(Handle, Left, Top, ETO_CLIPPED or ETO_OPAQUE, @LRect2, @LWChrOutput, 1, nil);
           if FUnicodeCharacters then
             Canvas.Font.Size := LIntOldFontSize;
-
         end
         else
           LBoolDraw := True;
 
-        if FShowDrag and (LIntCurCol = FDropCol) and (LIntCurRow = FDropRow) then
+        if FShowDrag and
+           (LIntCurCol = FDropCol) and
+           (LIntCurRow = FDropRow) then
         begin
           LIntPenWidthSave := Pen.Width;
           try
@@ -5957,29 +5832,23 @@ var
             if GetOtherFieldColCheck(Col) = (LIntCurCol - 1) then
               with LRctWhere do
                 if FFocusFrame then
-                  Canvas.DrawFocusRect(Rect(
-                    CellRect(LIntCurCol-1, LIntCurRow).Left,
-                    Top, Left + FCharWidth, Bottom - 1))
+                  Canvas.DrawFocusRect(Rect(CellRect(LIntCurCol-1, LIntCurRow).Left, Top, Left + FCharWidth, Bottom - 1))
                 else
                 begin
                   Canvas.Pen.Color := FColors.CursorFrame;
                   Canvas.Brush.Style := bsClear;
-                  Canvas.Rectangle(CellRect(LIntCurCol-1, LIntCurRow).Left, Top,
-                    Left + FCharWidth, Bottom - 1);
+                  Canvas.Rectangle(CellRect(LIntCurCol-1, LIntCurRow).Left, Top, Left + FCharWidth, Bottom - 1);
                 end;
           end
           else if GetOtherFieldColCheck(Col) = (LIntCurCol - 3) then
             with LRctWhere do
               if FFocusFrame then
-                Canvas.DrawFocusRect(Rect(
-                  CellRect(LIntCurCol-3, LIntCurRow).Left, Top,
-                  Left + FCharWidth, Bottom - 1))
+                Canvas.DrawFocusRect(Rect(CellRect(LIntCurCol-3, LIntCurRow).Left, Top, Left + FCharWidth, Bottom - 1))
               else
               begin
                 Canvas.Pen.Color := FColors.CursorFrame;
                 Canvas.Brush.Style := bsClear;
-                Canvas.Rectangle(CellRect(LIntCurCol-3, LIntCurRow).Left, Top,
-                  Left + FCharWidth, Bottom - 1);
+                Canvas.Rectangle(CellRect(LIntCurCol-3, LIntCurRow).Left, Top, Left + FCharWidth, Bottom - 1);
               end;
         end;
       end
@@ -5989,8 +5858,7 @@ var
         begin
           with LRctWhere do
             if FFocusFrame then
-              Canvas.DrawFocusRect(Rect(Left, Top, Left + FCharWidth, Bottom -
-                1))
+              Canvas.DrawFocusRect(Rect(Left, Top, Left + FCharWidth, Bottom - 1))
             else
             begin
               Canvas.Pen.Color := FColors.CursorFrame;
@@ -6003,8 +5871,9 @@ var
     else
     begin
       // possibly draw a mark at the current position when not focused
-      if FShowPositionIfNotFocused and (LIntCurRow = Row) and (Col = LIntCurCol)
-        then
+      if FShowPositionIfNotFocused and
+         (LIntCurRow = Row) and
+         (Col = LIntCurCol) then
       begin
         with LRctWhere do
           if FFocusFrame then
@@ -6029,9 +5898,7 @@ var
   end;
 
   // draw
-  procedure DrawCells(ACol, ARow: longint; StartX, StartY, StopX, StopY:
-    integer;
-    Kind: TKindOfCell);
+  procedure DrawCells(ACol, ARow: longint; StartX, StartY, StopX, StopY: integer; Kind: TKindOfCell);
   begin
     LIntCurRow := ARow;
     LRctWhere.Top := StartY;
@@ -6125,27 +5992,22 @@ begin
       // oben links, fixed
       DrawCells(0, 0, 0, 0, Horz.FixedBoundary, Vert.FixedBoundary, kocEmpty);
       // oben, fixed
-      DrawCells(LeftCol, 0, Horz.FixedBoundary, 0, Horz.GridBoundary,
-        Vert.FixedBoundary, kocRuler);
+      DrawCells(LeftCol, 0, Horz.FixedBoundary, 0, Horz.GridBoundary, Vert.FixedBoundary, kocRuler);
     end;
     // links, fixed
-    DrawCells(0, TopRow, 0, Vert.FixedBoundary, Horz.FixedBoundary,
-      Vert.GridBoundary, kocOffset);
+    DrawCells(0, TopRow, 0, Vert.FixedBoundary, Horz.FixedBoundary, Vert.GridBoundary, kocOffset);
     // daten
-    DrawCells(LeftCol, TopRow, Horz.FixedBoundary, Vert.FixedBoundary,
-      Horz.GridBoundary, Vert.GridBoundary, kocData);
+    DrawCells(LeftCol, TopRow, Horz.FixedBoundary, Vert.FixedBoundary, Horz.GridBoundary, Vert.GridBoundary, kocData);
 
     // paint unoccupied space on the right
     if Horz.GridBoundary < Horz.GridExtent then
     begin
       Canvas.Brush.Color := TestColor(Color);
-      Canvas.FillRect(Rect(Horz.GridBoundary, 0, Horz.GridExtent,
-        Vert.GridBoundary));
+      Canvas.FillRect(Rect(Horz.GridBoundary, 0, Horz.GridExtent, Vert.GridBoundary));
 
       // fixed (ruler)
       Canvas.Brush.Color := TestColor(FColors.OffsetBackground);
-      Canvas.FillRect(Rect(Horz.GridBoundary, 0, Horz.GridExtent, RowHeights[0]
-        + RowHeights[1]));
+      Canvas.FillRect(Rect(Horz.GridBoundary, 0, Horz.GridExtent, RowHeights[0] + RowHeights[1]));
     end;
 
     // paint unoccupied space on bottom
@@ -6153,13 +6015,11 @@ begin
     begin
       // hex + chars
       Canvas.Brush.Color := TestColor(Color);
-      Canvas.FillRect(Rect(ColWidths[0] + 1, Vert.GridBoundary, Horz.GridExtent,
-        Vert.GridExtent));
+      Canvas.FillRect(Rect(ColWidths[0] + 1, Vert.GridBoundary, Horz.GridExtent, Vert.GridExtent));
 
       // fixed (position gutter)
       Canvas.Brush.Color := TestColor(FColors.OffsetBackground);
-      Canvas.FillRect(Rect(0, Vert.GridBoundary, ColWidths[0],
-        Vert.GridExtent));
+      Canvas.FillRect(Rect(0, Vert.GridBoundary, ColWidths[0], Vert.GridExtent));
     end;
 
     LIntTop := RowHeights[0] + RowHeights[1];
@@ -6283,8 +6143,7 @@ procedure TCustomBCHexEditor.BookmarkBitmapChanged(Sender: TObject);
 begin
   // invalidieren
   FBookmarkImageList.Clear;
-  FBookmarkImageList.AddMasked(FBookmarkBitmap, FBookmarkBitmap.Canvas.Pixels[0,
-    0]);
+  FBookmarkImageList.AddMasked(FBookmarkBitmap, FBookmarkBitmap.Canvas.Pixels[0, 0]);
   if HandleAllocated then
     Invalidate;
 end;
@@ -6295,7 +6154,8 @@ begin
     FBookmarkBitmap.LoadFromResourceName(HINSTANCE, 'BOOKMARKICONS')
   else
   begin
-    if (Value.Width <> 200) or (Value.Height <> 10) then
+    if (Value.Width <> 200) or
+       (Value.Height <> 10) then
       raise EBCHexEditor.Create(ERR_INVALID_BOOKMARKBMP);
     FBookmarkBitmap.Assign(Value);
   end;
@@ -6388,8 +6248,7 @@ begin
   if DataSize < 1 then
     Result := -1
   else
-    Result := Min((DataSize - 1), (DisplayStart - 1) + (VisibleRowCount *
-      BytesPerRow));
+    Result := Min((DataSize - 1), (DisplayStart - 1) + (VisibleRowCount * BytesPerRow));
 end;
 
 function TCustomBCHexEditor.DisplayStart: TPointerInt;
@@ -6649,20 +6508,6 @@ begin
   CheckSetCaret;
 end;
 
-// legacy, do not use
-
-function TCustomBCHexEditor.GetMemory(const Index: TPointerInt): char;
-begin
-  Result := Char(Data[Index])
-end;
-
-// legacy, do not use
-
-procedure TCustomBCHexEditor.SetMemory(const Index: TPointerInt; const Value: char);
-begin
-  Data[Index] := Ord(Value);
-end;
-
 procedure TCustomBCHexEditor.SetUnicodeCharacters(const Value: Boolean);
 begin
   if FUnicodeCharacters <> Value then
@@ -6828,7 +6673,7 @@ begin
     LgrcPosition := GetCursorAtPos(DataSize - 1, FPosInCharField)
   else
     LgrcPosition := GetCursorAtPos(DataSize, FPosInCharField);
-  MoveColRow(LgrcPosition.x, LgrcPosition.y, True, True)
+  MoveColRow(LgrcPosition.x, LgrcPosition.y, True, True);
 end;
 
 function TCustomBCHexEditor.CanCreateUndo(const aKind: TBCHUndoFlag; const aCount, aReplCount: TPointerInt): Boolean;
@@ -6843,10 +6688,8 @@ begin
 
   // check for NoSizeChange
   if IsFileSizeFixed and Result then
-    if (aKind in [ufKindByteRemoved, ufKindInsertBuffer, ufKindAppendBuffer,
-      ufKindNibbleInsert,
-        ufKindNibbleDelete]) or
-      ((aKind = ufKindReplace) and (aCount <> aReplCount)) then
+    if (aKind in [ufKindByteRemoved, ufKindInsertBuffer, ufKindAppendBuffer, ufKindNibbleInsert, ufKindNibbleDelete]) or
+       ((aKind = ufKindReplace) and (aCount <> aReplCount)) then
       Result := False;
 
   if (not Result) and ((aKind = ufKindCombined) and (FUndoStorage.Count >= aCount)) then
@@ -6866,7 +6709,9 @@ begin
 
     // new in 12-16-2003: don't allow change of datasize if nosizechange
     // and (new datasize <> 0 and old datasize <> 0)
-    if (Value <> 0) and (iSize <> 0) and IsFileSizeFixed then
+    if (Value <> 0) and
+       (iSize <> 0) and
+       IsFileSizeFixed then
       raise EBCHexEditor.Create(ERR_FIXED_FILESIZE);
 
     FFixedFileSizeOverride := True;
@@ -6924,8 +6769,7 @@ procedure TCustomBCHexEditor.DefineProperties(Filer: TFiler);
 begin
   inherited;
   Filer.DefineProperty('MaskChar', ReadMaskChar, nil, False);
-  Filer.DefineProperty('MaskChar_AsInteger', ReadMaskChar_I, WriteMaskChar_I,
-    FReplaceUnprintableCharsBy <> '.');
+  Filer.DefineProperty('MaskChar_AsInteger', ReadMaskChar_I, WriteMaskChar_I, FReplaceUnprintableCharsBy <> '.');
 end;
 
 procedure TCustomBCHexEditor.ReadMaskChar(Reader: TReader);
@@ -6964,8 +6808,7 @@ begin
   else
   begin
     // scroll down one page
-    TopRow := Min(Max(GRID_FIXED, RowCount - VisibleRowCount),
-      TopRow + VisibleRowCount - 1);
+    TopRow := Min(Max(GRID_FIXED, RowCount - VisibleRowCount),TopRow + VisibleRowCount - 1);
     CheckSetCaret;
     Result := True;
   end;
@@ -7107,7 +6950,7 @@ begin
   begin
     FChangedBackground := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7117,7 +6960,7 @@ begin
   begin
     FCurrentOffsetBackground := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7127,7 +6970,7 @@ begin
   begin
     FNonFocusCursorFrame := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7137,7 +6980,7 @@ begin
   begin
     FChangedText := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7147,7 +6990,7 @@ begin
   begin
     FCursorFrame := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7157,7 +7000,7 @@ begin
   begin
     FEvenColumn := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7167,7 +7010,7 @@ begin
   begin
     FOddColumn := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7177,7 +7020,7 @@ begin
   begin
     FOffset := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7187,7 +7030,7 @@ begin
   begin
     FOffsetBackground := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7197,7 +7040,7 @@ begin
   begin
     FCurrentOffset := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7213,7 +7056,7 @@ begin
   begin
     FGrid := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
@@ -7223,16 +7066,14 @@ begin
   begin
     FActiveFieldBackground := Value;
     if Assigned(fParent) then
-      fParent.Invalidate;
+      FParent.Invalidate;
   end;
 end;
 
 { TBCHUndoStorage }
 
 type
-
   // undo storage
-
   PUndoSelRec = ^TUndoSelRec;
   TUndoSelRec = packed record
     SelStart,
@@ -7264,7 +7105,9 @@ end;
 
 function TBCHUndoStorage.CanUndo: boolean;
 begin
-  Result := (FCount > 0) and (FUpdateCount < 1) and (Size > 0);
+  Result := (FCount > 0) and
+            (FUpdateCount < 1) and
+            (Size > 0);
 end;
 
 procedure TBCHUndoStorage.CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt; const SDescription: string);
@@ -7273,19 +7116,12 @@ var
 
   function PUndoRec: PBCHUndoRec;
   begin
-    Result := PBCHUndoRec(@(PByteArray(Memory)[urPos]));
+    Result := PBCHUndoRec(@(PByte(Memory)[urPos]));
   end;
-  //LPurUndoRec: PMPHUndoRec;
 
   procedure NewFillBuffer(ASize: TPointerInt);
-  var
-    i: TPointerInt;
   begin
-    i := Position;
-    urPos := i;
-    (*if FEditor.FSelPosition > -1 then
-      ASize := ASize+sizeof(TUndoSelRec);*)
-
+    urPos := Position;
     Size := Size + sizeof(TBCHUndoRec) + ASize;
 
     FillChar(PUndoRec^, SizeOf(TBCHUndoRec) + ASize, 0);
@@ -7340,7 +7176,7 @@ var
         end
         else
         begin
-          Move(PByteArray(Memory)[LIntRecSize], Memory^, Size - LIntRecSize);
+          Move(PByte(Memory)[LIntRecSize], Memory^, Size - LIntRecSize);
           Size := Size - LIntRecSize;
           if FCount > 0 then
             Dec(FCount);
@@ -7398,7 +7234,9 @@ begin
     else
       FDescription := STRS_UNDODESC[aKind];
 
-    while (FEditor.FMaxUndo > 0) and (FCount > 0) and (Size > FEditor.FMaxUndo) do
+    while (FEditor.FMaxUndo > 0) and
+          (FCount > 0) and
+          (Size > FEditor.FMaxUndo) do
       DeleteOldestUndoRec;
 
     Position := Size;
@@ -7411,7 +7249,8 @@ begin
           FEditor.ReadBuffer(LPtrBytes^, aPosition, aCount);
           if FEditor.HasChanged(aPosition) then
             Include(PUndoRec.Flags, ufFlagByte1Changed);
-          if (aCount = 2) and FEditor.HasChanged(aPosition + 1) then
+          if (aCount = 2) and
+             FEditor.HasChanged(aPosition + 1) then
             Include(PUndoRec.Flags, ufFlagByte2Changed);
           UpdateUndoRecord(aCount - 1);
         end;
@@ -7575,7 +7414,7 @@ begin
     case LEnumUndo of
       ufKindBytesChanged:
         begin
-          FEditor.WriteBuffer(PByteArray(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
+          FEditor.WriteBuffer(PByte(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
           FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in LRecUndo.Flags);
           if LRecUndo.Count = 2 then
             FEditor.SetChanged(LRecUndo.Pos + 1, ufFlagByte2Changed in LRecUndo.Flags);
@@ -7673,7 +7512,7 @@ begin
         end;
       ufKindConvert:
         begin
-          FEditor.WriteBuffer(PByteArray(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
+          FEditor.WriteBuffer(PByte(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
           PopulateUndo(LRecUndo);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
@@ -7783,9 +7622,7 @@ function TBCHUndoStorage.Redo: boolean;
   begin
     with FRedoPointer^ do
     begin
-//TODO  Check
-      Move(PByteArray(FRedoPointer)[FRedoPointer^.DataLen], FEditor.FBookmarks, sizeof(TBCHBookmarks));
-
+      Move(PByte(FRedoPointer)[FRedoPointer^.DataLen], FEditor.FBookmarks, sizeof(TBCHBookmarks));
       LCoord := FEditor.GetCursorAtPos(CurPos, ufFlagInCharField in Flags);
       with LCoord do
       begin
@@ -7793,27 +7630,21 @@ function TBCHUndoStorage.Redo: boolean;
           if FEditor.DataSize > 0 then
             if ufFlag2ndByteCol in Flags then
               x := x + 1;
-
         FEditor.MoveColRow(x, y, True, True);
       end;
       FEditor.FModified := ufFlagModified in Flags;
       FEditor.InsertMode := (ufFlagInsertMode in Flags);
-//TODO Check
-      with PUndoSelRec(@(PByteArray(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
+      with PUndoSelRec(@(PByte(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
         FEditor.SetSelection(SelPos, SelStart, SelEnd);
-
       FEditor.Translation := CurTranslation;
       FEditor.FTranslation := CurTranslation;
       FEditor.UnicodeChars := (ufFlagIsUnicode in Flags);
       FEditor.UnicodeBigEndian := (ufFlagIsUnicodeBigEndian in Flags);
       FEditor.BytesPerUnit := CurBPU;
-
       FEditor.InCharField := ufFlagInCharField in Flags;
-
       FEditor.SetChanged(Pos, ufFlagByte1Changed in Flags);
       if _2Bytes then
         FEditor.SetChanged(Pos + 1, ufFlagByte2Changed in Flags);
-
       // restore last undo record
       if Assigned(FLastUndo) then
       begin
@@ -7825,7 +7656,6 @@ function TBCHUndoStorage.Redo: boolean;
         FLastUndoSize := 0;
       end;
       FDescription := FLastUndoDesc;
-
       FEditor.Invalidate;
       FEditor.BookmarkChanged;
     end;
@@ -7941,10 +7771,8 @@ var
         Include(Flags, ufFlagModified);
     end;
 
-//TODO Check
-    Move(FEditor.FBookmarks, PByteArray(FRedoPointer)[FRedoPointer^.DataLen], sizeof(TBCHBookmarks));
-
-    with PUndoSelRec(@(PByteArray(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
+    Move(FEditor.FBookmarks, PByte(FRedoPointer)[FRedoPointer^.DataLen], sizeof(TBCHBookmarks));
+    with PUndoSelRec(@(PByte(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
     begin
       SelStart := FEditor.FSelStart;
       SelPos := FEditor.FSelPosition;
@@ -7957,11 +7785,10 @@ begin
 
   // simple redo, store bookmarks, selection, insertmode, col, row, charfield...
   // and bytes to save
-
   case GetUndoKind(Rec.Flags) of
     ufKindBytesChanged:
       begin
-        LIntDataSize := Rec.Count;
+        LIntDataSize := Rec.Count - 1;
         AllocRedoPointer;
         if FEditor.HasChanged(Rec.Pos) then
           Include(FRedoPointer^.Flags, ufFlagByte1Changed);
@@ -8099,7 +7926,6 @@ begin
 end;
 
 // initialize tkCustom translation tables
-
 procedure InitializeCustomTables;
 var
   LBytLoop: byte;
