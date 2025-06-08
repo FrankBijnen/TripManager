@@ -5,8 +5,8 @@
         <FrameworkType>VCL</FrameworkType>
         <MainSource>TripManager.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
+        <Config Condition="'$(Config)'==''">Release</Config>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
         <ProjectName Condition="'$(ProjectName)'==''">TripManager</ProjectName>
@@ -132,8 +132,8 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>177</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manage trips on the zūmo XT(2);FileVersion=1.5.0.177;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>178</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manage trips on the zūmo XT(2);FileVersion=1.5.0.178;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
         <VerInfo_MinorVer>5</VerInfo_MinorVer>
     </PropertyGroup>

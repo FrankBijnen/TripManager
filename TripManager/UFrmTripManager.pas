@@ -60,6 +60,11 @@ type
 
   TCoordinatesAppliedEvent = procedure(Sender: Tobject; Coords: string) of object;
 
+  TBCHexEditor = class(BCHexEditor.TBCHexEditor)
+  public
+    property UndoStorage;
+  end;
+
   TFrmTripManager = class(TForm)
     HSplitterDevFiles_Info: TSplitter;
     ImageList: TImageList;
@@ -171,7 +176,6 @@ type
     ChkZoomToPoint: TCheckBox;
     SbPostProcess: TStatusBar;
     LblBounds: TLabel;
-    BtnUndo: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -248,7 +252,6 @@ type
     procedure PopupTripEditPopup(Sender: TObject);
     procedure PCTTripInfoResize(Sender: TObject);
     procedure ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure BtnUndoClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -1026,13 +1029,6 @@ begin
   Pt.Y := Y;
   Pt := TButton(Sender).ClientToScreen(Pt);
   PopupTripEdit.Popup(Pt.X, Pt.Y);
-end;
-
-procedure TFrmTripManager.BtnUndoClick(Sender: TObject);
-begin
-//TODO Fix undo?
-// Doesn't seem to work in original
-  HexEdit.Undo;
 end;
 
 procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
@@ -3192,6 +3188,9 @@ end;
 procedure TFrmTripManager.LoadHex(const FileName: string);
 begin
   HexEdit.LoadFromFile(FileName);
+// Disable Undo
+  if (HexEdit.UndoStorage.UpdateCount < 1) then
+    HexEdit.UndoBeginUpdate;
   BtnSaveTripGpiFile.Enabled := true;
 end;
 

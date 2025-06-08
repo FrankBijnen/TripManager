@@ -596,8 +596,7 @@ type
     // is the caret in the char field ?
     function GetInCharField: boolean;
     // insert a buffer (internal)
-    procedure InternalInsertBuffer(Buffer: PAnsiChar; const Size, Position:
-      TPointerInt);
+    procedure InternalInsertBuffer(Buffer: PAnsiChar; const Size, Position: TPointerInt);
     // append some data (int)
     procedure InternalAppendBuffer(Buffer: PAnsiChar; const Size: TPointerInt);
     // store the caret properties
@@ -1414,13 +1413,23 @@ type
   // @exclude(undo storage record)
   PBCHUndoRec = ^TBCHUndoRec;
   // @exclude(undo storage record)
+
+//  TBCHUndoRec = packed record
+//    DataLen: integer;
+//    Flags: TBCHUndoFlags;
+//    CurPos: integer;
+//    Pos, Count, ReplCount: cardinal;
+//    CurTranslation: TBCHTranslationKind;
+//    CurBPU: Integer;
+//    Buffer: byte;
+//  end;
+
   TBCHUndoRec = packed record
     DataLen: TPointerInt;
     Flags: TBCHUndoFlags;
-    CurPos: TPointerInt;
-    Pos, Count, ReplCount: TPointerInt;
+    CurPos, Pos, Count, ReplCount: TPointerInt;
     CurTranslation: TBCHTranslationKind;
-    CurBPU: TPointerInt;
+    CurBPU: integer;
     Buffer: byte;
   end;
 
@@ -1447,7 +1456,8 @@ type
     constructor Create(AEditor: TCustomBCHexEditor);
     destructor Destroy; override;
     procedure SetSize(const NewSize: Int64); override;
-    procedure CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt; const SDescription: string = '');
+    procedure CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt;
+                         const SDescription: string = '');
     function CanUndo: boolean;
     function CanRedo: boolean;
     function Redo: boolean;
@@ -4261,8 +4271,7 @@ begin
   Changed;
 end;
 
-procedure TCustomBCHexEditor.CreateUndo(const aKind: TBCHUndoFlag; const aPos, aCount, aReplCount: TPointerInt;
-  const sDesc: string = '');
+procedure TCustomBCHexEditor.CreateUndo(const aKind: TBCHUndoFlag; const aPos, aCount, aReplCount: TPointerInt; const sDesc: string = '');
 begin
 
   if CanCreateUndo(aKind, aCount, aReplCount) then
@@ -4503,8 +4512,7 @@ begin
   CalcSizes;
 end;
 
-procedure TCustomBCHexEditor.InternalInsertBuffer(Buffer: PAnsiChar; const Size,
-  Position: TPointerInt);
+procedure TCustomBCHexEditor.InternalInsertBuffer(Buffer: PAnsiChar; const Size, Position: TPointerInt);
 var
   LIntSize: TPointerInt;
 begin
@@ -6841,8 +6849,7 @@ begin
       ((aKind = ufKindReplace) and (aCount <> aReplCount)) then
       Result := False;
 
-  if (not Result) and ((aKind = ufKindCombined) and (FUndoStorage.Count >=
-    aCount)) then
+  if (not Result) and ((aKind = ufKindCombined) and (FUndoStorage.Count >= aCount)) then
     Result := True;
 
 end;
@@ -7260,14 +7267,13 @@ begin
   Result := (FCount > 0) and (FUpdateCount < 1) and (Size > 0);
 end;
 
-procedure TBCHUndoStorage.CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt;
-  const SDescription: string);
+procedure TBCHUndoStorage.CreateUndo(aKind: TBCHUndoFlag; APosition, ACount, AReplaceCount: TPointerInt; const SDescription: string);
 var
   urPos: TPointerInt;
 
   function PUndoRec: PBCHUndoRec;
   begin
-    Result := PBCHUndoRec(@(PChar(Memory)[urPos]))
+    Result := PBCHUndoRec(@(PAnsiChar(Memory)[urPos]));
   end;
   //LPurUndoRec: PMPHUndoRec;
 
@@ -7318,7 +7324,7 @@ var
     LintRecSize: TPointerInt;
   begin
     begin
-      if Size < 4 then
+      if Size < SizeOf(TPointerInt) then
       begin
         Size := 0;
         FCount := 0;
@@ -7326,7 +7332,7 @@ var
       else
       begin
         Seek(0, soFromBeginning);
-        Read(LIntRecSize, sizeof(integer));
+        Read(LIntRecSize, SizeOf(TPointerInt));
         if LIntRecSize < sizeof(TBCHUndoRec) then
         begin
           Size := 0;
@@ -7334,7 +7340,7 @@ var
         end
         else
         begin
-          Move(PChar(Memory)[LIntRecSize], Memory^, Size - LIntRecSize);
+          Move(PAnsiChar(Memory)[LIntRecSize], Memory^, Size - LIntRecSize);
           Size := Size - LIntRecSize;
           if FCount > 0 then
             Dec(FCount);
@@ -7346,21 +7352,21 @@ var
   procedure UpdateUndoRecord(Length: TPointerInt = 0);
   var
     LRecSelection: TUndoSelRec;
-    i: TPointerInt;
+    I: TPointerInt;
   begin
-    PUndoRec^.DataLen := SizeOf(TBCHUndoRec) + Length + 4;
+    PUndoRec^.DataLen := SizeOf(TBCHUndoRec) + Length + SizeOf(TPointerInt);
     if ufFlagHasSelection in PUndoRec^.Flags then
       Inc(PUndoRec^.DataLen, sizeof(TUndoSelRec));
     if ufFlagHasDescription in PUndoRec^.Flags then
-      Inc(PUndoRec^.DataLen, system.Length(SDescription) + sizeof(i));
+      Inc(PUndoRec^.DataLen, system.Length(SDescription) + sizeof(I));
 
     Position := Size;
     if ufFlagHasDescription in PUndoRec^.Flags then
     begin
       write(Sdescription[1], system.Length(SDescription));
-      i := system.Length(sDescription);
-      write(i, sizeof(i));
-      Length := Length + i + sizeof(i);
+      I := system.Length(sDescription);
+      write(I, sizeof(I));
+      Length := Length + I + sizeof(I);
     end;
 
     if ufFlagHasSelection in PUndoRec^.Flags then
@@ -7375,8 +7381,8 @@ var
       Length := Length + sizeof(LRecSelection);
     end;
 
-    Length := SizeOf(TBCHUndoRec) + 4 + Length;
-    Write(Length, 4);
+    Length := SizeOf(TBCHUndoRec) + SizeOf(TPointerInt)  + Length;
+    Write(Length, SizeOf(Length) );
   end;
 
 var
@@ -7392,14 +7398,11 @@ begin
     else
       FDescription := STRS_UNDODESC[aKind];
 
-    while (FEditor.FMaxUndo > 0) and (FCount > 0) and (Size > FEditor.FMaxUndo)
-      do
+    while (FEditor.FMaxUndo > 0) and (FCount > 0) and (Size > FEditor.FMaxUndo) do
       DeleteOldestUndoRec;
 
     Position := Size;
-
     Inc(FCount);
-
     case aKind of
       ufKindBytesChanged:
         begin
@@ -7527,7 +7530,7 @@ function TBCHUndoStorage.Undo: boolean;
     FEditor.InsertMode := (ufFlagInsertMode in aBuffer.Flags);
     if ufFlagHasSelection in aBuffer.Flags then
     begin
-      Position := Size - 4 - sizeof(LRecSel);
+      Position := Size - SizeOf(TPointerInt) - sizeof(LRecSel);
       Read(LRecSel, sizeof(LRecSel));
       with LRecSel do
       begin
@@ -7552,7 +7555,7 @@ var
   LEnumUndo: TBCHUndoFlag;
   LRecUndo: TBCHUndoRec;
   LIntLoop: TPointerInt;
-  s: string;
+  S: string;
 begin
   Result := False;
   if not CanUndo then
@@ -7564,30 +7567,27 @@ begin
   if Size >= sizeof(TBCHUndoRec) then
   begin
     // letzten eintrag lesen
-    LEnumUndo := ReadUndoRecord(LRecUndo, s);
+    LEnumUndo := ReadUndoRecord(LRecUndo, S);
+
     // redo erstellen
     CreateRedo(LRecUndo);
+
     case LEnumUndo of
       ufKindBytesChanged:
         begin
-          FEditor.WriteBuffer(PChar(Memory)[Position - 1], LRecUndo.Pos,
-            LRecUndo.Count);
-          FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in
-            LRecUndo.Flags);
+          FEditor.WriteBuffer(PAnsiChar(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
+          FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in LRecUndo.Flags);
           if LRecUndo.Count = 2 then
-            FEditor.SetChanged(LRecUndo.Pos + 1, ufFlagByte2Changed in
-              LRecUndo.Flags);
+            FEditor.SetChanged(LRecUndo.Pos + 1, ufFlagByte2Changed in LRecUndo.Flags);
           PopulateUndo(LRecUndo);
           FEditor.Invalidate;
           RemoveLastUndo;
         end;
       ufKindByteRemoved:
         begin
-          FEditor.InternalInsertBuffer(Pointer(Cardinal(Memory) + Position - 1),
-            LRecUndo.Count, LRecUndo.Pos);
+          FEditor.InternalInsertBuffer(Pointer(Int64(Memory) + Position), LRecUndo.Count, LRecUndo.Pos);
           PopulateUndo(LRecUndo);
-          FEditor.AdjustBookmarks(LRecUndo.Pos - LRecUndo.Count,
-            LRecUndo.Count);
+          FEditor.AdjustBookmarks(LRecUndo.Pos - LRecUndo.Count, LRecUndo.Count);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
           FEditor.Invalidate;
@@ -7595,8 +7595,7 @@ begin
         end;
       ufKindInsertBuffer:
         begin
-          FEditor.InternalDelete(LRecUndo.Pos, LRecUndo.Pos + LRecUndo.Count,
-            -1, 0);
+          FEditor.InternalDelete(LRecUndo.Pos, LRecUndo.Pos + LRecUndo.Count, -1, 0);
           PopulateUndo(LRecUndo);
           FEditor.AdjustBookmarks(LRecUndo.Pos, -LRecUndo.Count);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
@@ -7612,26 +7611,19 @@ begin
       ufKindAllData:
         begin
           FEditor.FDataStorage.Size := LRecUndo.Count;
-          FEditor.FDataStorage.WriteBufferAt(Pointer(Cardinal(Memory) + Position
-            - 1)^, 0,
-            LRecUndo.Count);
+          FEditor.FDataStorage.WriteBufferAt(Pointer(Int64(Memory) + Position)^, 0, LRecUndo.Count);
           FEditor.CalcSizes;
           PopulateUndo(LRecUndo);
           RemoveLastUndo;
         end;
       ufKindReplace:
         begin
-          FEditor.InternalDelete(LRecUndo.Pos, LRecUndo.Pos + LRecUndo.Count,
-            -1, 0);
-          FEditor.InternalInsertBuffer(Pointer(Cardinal(Memory) + Position - 1),
-            LRecUndo.ReplCount, LRecUndo.Pos);
+          FEditor.InternalDelete(LRecUndo.Pos, LRecUndo.Pos + LRecUndo.Count, -1, 0);
+          FEditor.InternalInsertBuffer(Pointer(Int64(Memory) + Position), LRecUndo.ReplCount, LRecUndo.Pos);
           PopulateUndo(LRecUndo);
           FEditor.AdjustBookmarks(LRecUndo.Pos + LRecUndo.ReplCount,
             LRecUndo.ReplCount - LRecUndo.Count);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
-            // was:
-            // FEditor.FModifiedBytes.Size := Max(0, LRecUndo.Pos - 1);
-            // line above might lead to an integer overflow
           begin
             if LRecUndo.Pos > 0 then
               FEditor.FModifiedBytes.Size := LRecUndo.Pos - 1
@@ -7657,8 +7649,7 @@ begin
         begin
           FEditor.InternalDeleteNibble(LRecUndo.Pos, False);
           FEditor.Data[LRecUndo.Pos] := LRecUndo.Buffer;
-          FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in
-            LRecUndo.Flags);
+          FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in LRecUndo.Flags);
           PopulateUndo(LRecUndo);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
@@ -7671,8 +7662,7 @@ begin
         begin
           FEditor.InternalInsertNibble(LRecUndo.Pos, False);
           FEditor.Data[LRecUndo.Pos] := LRecUndo.Buffer;
-          FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in
-            LRecUndo.Flags);
+          FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in LRecUndo.Flags);
           PopulateUndo(LRecUndo);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
@@ -7683,8 +7673,7 @@ begin
         end;
       ufKindConvert:
         begin
-          FEditor.WriteBuffer(PChar(Memory)[Position - 1], LRecUndo.Pos,
-            LRecUndo.Count);
+          FEditor.WriteBuffer(PAnsiChar(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
           PopulateUndo(LRecUndo);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
@@ -7715,8 +7704,8 @@ begin
     Reset(False)
   else
   begin
-    Position := Size - 4;
-    Read(LIntRecOffs, 4);
+    Position := Size - SizeOf(LIntRecOffs);
+    Read(LIntRecOffs, SizeOf(LIntRecOffs));
     // restore record in case of a redo
     Seek(-LIntRecOffs, soFromCurrent);
     ReAllocMem(FLastUndo, LIntRecOffs);
@@ -7794,8 +7783,7 @@ function TBCHUndoStorage.Redo: boolean;
   begin
     with FRedoPointer^ do
     begin
-      Move(PChar(FRedoPointer)[FRedoPointer^.DataLen], FEditor.FBookmarks,
-        sizeof(TBCHBookmarks));
+      Move(PChar(FRedoPointer)[FRedoPointer^.DataLen], FEditor.FBookmarks, sizeof(TBCHBookmarks));
 
       LCoord := FEditor.GetCursorAtPos(CurPos, ufFlagInCharField in Flags);
       with LCoord do
@@ -7810,8 +7798,7 @@ function TBCHUndoStorage.Redo: boolean;
       FEditor.FModified := ufFlagModified in Flags;
       FEditor.InsertMode := (ufFlagInsertMode in Flags);
 
-      with PUndoSelRec(@(PChar(FRedoPointer)[FRedoPointer^.DataLen +
-        sizeof(TBCHBookmarks)]))^ do
+      with PUndoSelRec(@(PChar(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
         FEditor.SetSelection(SelPos, SelStart, SelEnd);
 
       FEditor.Translation := CurTranslation;
@@ -7849,20 +7836,17 @@ begin
     case GetUndoKind(FRedoPointer^.Flags) of
       ufKindBytesChanged:
         begin
-          FEditor.WriteBuffer(FRedoPointer^.Buffer,
-            FRedoPointer^.Pos, FRedoPointer^.Count);
+          FEditor.WriteBuffer(FRedoPointer^.Buffer, FRedoPointer^.Pos, FRedoPointer^.Count);
           SetEditorStateFromRedoRec(FRedoPointer^.Count = 2);
         end;
       ufKindByteRemoved:
         begin
-          FEditor.InternalDelete(FRedoPointer^.Pos,
-            FRedoPointer^.Pos + FRedoPointer^.Count, -1, 0);
+          FEditor.InternalDelete(FRedoPointer^.Pos, FRedoPointer^.Pos + FRedoPointer^.Count, -1, 0);
           SetEditorStateFromRedoRec;
         end;
       ufKindInsertBuffer:
         begin
-          FEditor.InternalInsertBuffer(PAnsiChar(@(FRedoPointer^.Buffer)),
-            FRedoPointer^.Count, FRedoPointer^.Pos);
+          FEditor.InternalInsertBuffer(PAnsiChar(@(FRedoPointer^.Buffer)), FRedoPointer^.Count, FRedoPointer^.Pos);
           SetEditorStateFromRedoRec;
         end;
       ufKindSelection:
@@ -7872,39 +7856,32 @@ begin
       ufKindAllData:
         begin
           FEditor.FDataStorage.Size := FRedoPointer^.Count;
-          FEditor.FDataStorage.WriteBufferAt(FRedoPointer^.Buffer, 0,
-            FRedoPointer^.Count);
+          FEditor.FDataStorage.WriteBufferAt(FRedoPointer^.Buffer, 0, FRedoPointer^.Count);
           FEditor.CalcSizes;
           SetEditorStateFromRedoRec;
         end;
       ufKindReplace:
         begin
-          FEditor.InternalDelete(FRedoPointer^.Pos,
-            FRedoPointer^.Pos + FRedoPointer^.ReplCount, -1, 0);
-          FEditor.InternalInsertBuffer(PAnsiChar(@(FRedoPointer^.Buffer)),
-            FRedoPointer^.Count, FRedoPointer^.Pos);
+          FEditor.InternalDelete(FRedoPointer^.Pos, FRedoPointer^.Pos + FRedoPointer^.ReplCount, -1, 0);
+          FEditor.InternalInsertBuffer(PAnsiChar(@(FRedoPointer^.Buffer)), FRedoPointer^.Count, FRedoPointer^.Pos);
           SetEditorStateFromRedoRec;
         end;
       ufKindConvert:
         begin
-          FEditor.InternalDelete(FRedoPointer^.Pos,
-            FRedoPointer^.Pos + FRedoPointer^.Count, -1, 0);
-          FEditor.InternalInsertBuffer(PAnsiChar(@(FRedoPointer^.Buffer)),
-            FRedoPointer^.Count, FRedoPointer^.Pos);
+          FEditor.InternalDelete(FRedoPointer^.Pos, FRedoPointer^.Pos + FRedoPointer^.Count, -1, 0);
+          FEditor.InternalInsertBuffer(PAnsiChar(@(FRedoPointer^.Buffer)), FRedoPointer^.Count, FRedoPointer^.Pos);
           SetEditorStateFromRedoRec;
         end;
       ufKindAppendBuffer:
         begin
-          FEditor.InternalAppendBuffer(PAnsiChar(@(FRedoPointer^.Buffer)),
-            FRedoPointer^.Count);
+          FEditor.InternalAppendBuffer(PAnsiChar(@(FRedoPointer^.Buffer)), FRedoPointer^.Count);
           SetEditorStateFromRedoRec;
         end;
       ufKindNibbleInsert,
         ufKindNibbleDelete:
         begin
           FEditor.FDataStorage.Size := FRedoPointer^.Count;
-          FEditor.FDataStorage.WriteBufferAt(FRedoPointer^.Buffer, 0,
-            FRedoPointer^.Count);
+          FEditor.FDataStorage.WriteBufferAt(FRedoPointer^.Buffer, 0, FRedoPointer^.Count);
           FEditor.CalcSizes;
           SetEditorStateFromRedoRec;
         end;
@@ -7932,8 +7909,7 @@ var
 
   procedure AllocRedoPointer;
   begin
-    GetMem(FRedoPointer, sizeof(TBCHUndoRec) + sizeof(TBCHBookmarks) +
-      sizeof(TUndoSelRec) + LIntDataSize);
+    GetMem(FRedoPointer, sizeof(TBCHUndoRec) + sizeof(TBCHBookmarks) + sizeof(TUndoSelRec) + LIntDataSize);
     FRedoPointer^.Flags := [GetUndoKind(Rec.Flags)];
     FRedoPointer^.DataLen := sizeof(TBCHUndoRec) + LIntDataSize;
   end;
@@ -7963,10 +7939,8 @@ var
       if FEditor.FModified then
         Include(Flags, ufFlagModified);
     end;
-    Move(FEditor.FBookmarks, PChar(FRedoPointer)[FRedoPointer^.DataLen],
-      sizeof(TBCHBookmarks));
-    with PUndoSelRec(@(PChar(FRedoPointer)[FRedoPointer^.DataLen +
-      sizeof(TBCHBookmarks)]))^ do
+    Move(FEditor.FBookmarks, PChar(FRedoPointer)[FRedoPointer^.DataLen], sizeof(TBCHBookmarks));
+    with PUndoSelRec(@(PChar(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
     begin
       SelStart := FEditor.FSelStart;
       SelPos := FEditor.FSelPosition;
@@ -8022,10 +7996,9 @@ begin
       end;
     ufKindAppendBuffer:
       begin
-        LIntDataSize := FEditor.DataSize - integer(Rec.Pos);
+        LIntDataSize := FEditor.DataSize - TPointerInt(Rec.Pos);
         AllocRedoPointer;
-        FEditor.ReadBuffer(FRedoPointer^.Buffer, Rec.Pos, FEditor.DataSize -
-          integer(Rec.Pos));
+        FEditor.ReadBuffer(FRedoPointer^.Buffer, Rec.Pos, FEditor.DataSize - TPointerInt(Rec.Pos));
         FinishRedoPointer;
       end;
     ufKindNibbleInsert,
@@ -8056,57 +8029,59 @@ var
 begin
   if CanUndo then
   begin
-    Position := Size - 4;
-    Read(LIntRecOffset, 4);
+    Position := Size - SizeOf(LIntRecOffset);
+    Read(LIntRecOffset, SizeOf(LIntRecOffset));
     Seek(-LIntRecOffset, soFromCurrent);
-    P := Pointer(Cardinal(Memory) + Position);
+    P := Pointer(Int64(Memory) + Position);
     if not (ufFlagHasSelection in P^.Flags) then
     begin
       Size := Size + SizeOf(TUndoSelRec);
-      P := Pointer(Cardinal(Memory) + Position);
+      P := Pointer(Int64(Memory) + Position);
       Include(P^.Flags, ufFlagHasSelection);
       Inc(P^.DataLen, sizeof(TUndoSelRec));
       Inc(LIntRecOffset, sizeof(TUndoSelRec));
-      Seek(-4, soFromEnd);
-      WriteBuffer(LIntRecOffset, 4);
+      Seek(-SizeOf(LIntRecOffset), soFromEnd);
+      WriteBuffer(LIntRecOffset, SizeOf(LIntRecOffset));
     end;
     P^.CurPos := APos;
-    PSel := Pointer(Cardinal(Memory) + size - 4 - sizeof(TUndoSelRec));
+    PSel := Pointer(Int64(Memory) + size - SizeOf(LIntRecOffset) - sizeof(TUndoSelRec));
     PSel^.SelStart := APos;
     if aCount = 0 then
       PSel^.SelEnd := -1
     else
       PSel^.SelEnd := APos + Acount - 1;
     PSel^.SelPos := PSel^.SelStart;
-  end;                               end;
+  end;
+end;
 
 function TBCHUndoStorage.ReadUndoRecord(var aUR: TBCHUndoRec; var SDescription: string): TBCHUndoFlag;
 var
   LIntRecOffs: TPointerInt;
   LIntPos: TPointerInt;
+
 begin
-  Position := Size - 4;
-  Read(LIntRecOffs, 4);
+  Position := Size - SizeOf(LIntRecOffs);
+  Read(LIntRecOffs, SizeOf(LIntRecOffs));
   Seek(-LIntRecOffs, soFromCurrent);
   Read(aUR, SizeOf(TBCHUndoRec));
-  Result := GetUndoKind(aUr.Flags);
-  if ufFlagHasDescription in aUr.Flags then
-  begin
-    LIntPos := Position;
-    try
-      Position := size - 4 - sizeof(TPointerInt);
+  LIntPos := Position - Sizeof(aUR.Buffer);
+  try
+    Result := GetUndoKind(aUr.Flags);
+    if ufFlagHasDescription in aUr.Flags then
+    begin
+      Position := size - SizeOf(LIntRecOffs) - sizeof(TPointerInt);
       if ufFlagHasSelection in aUr.Flags then
         Seek(-sizeof(TUndoSelRec), soFromCurrent);
       Read(LIntRecOffs, sizeof(TPointerInt));
       Seek(-(LIntRecOffs + sizeof(TPointerInt)), soFromCurrent);
       SetLength(SDescription, LIntRecOffs);
       Read(SDescription[1], LIntRecOffs);
-    finally
-      Position := LIntPos;
-    end;
-  end
-  else
-    SDescription := '';
+    end
+    else
+      SDescription := '';
+  finally
+    Position := LIntPos;
+  end;
 end;
 
 function TBCHUndoStorage.GetLastUndoKind: TBCHUndoFlag;
