@@ -2588,13 +2588,18 @@ end;
 
 procedure TFrmTripManager.HexEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (ssCtrl in Shift) and
-     (Chr(Key) = 'C') then
+  if (ssCtrl in Shift) then
   begin
-    if (ssShift in Shift) then
-      Clipboard.AsText := String(HexEdit.SelectionAsText)
-    else
-      Clipboard.AsText := String(HexEdit.SelectionAsHex);
+    case Chr(Key) of
+      'C': begin
+             if (ssShift in Shift) then
+               Clipboard.AsText := String(HexEdit.SelectionAsText)
+             else
+               Clipboard.AsText := String(HexEdit.SelectionAsHex);
+           end;
+      'Z': HexEdit.Undo;
+      'Y': HexEdit.Redo;
+    end;
   end;
 end;
 
@@ -3188,9 +3193,12 @@ end;
 procedure TFrmTripManager.LoadHex(const FileName: string);
 begin
   HexEdit.LoadFromFile(FileName);
+
+//TODO
 // Disable Undo
-  if (HexEdit.UndoStorage.UpdateCount < 1) then
-    HexEdit.UndoBeginUpdate;
+//  if (HexEdit.UndoStorage.UpdateCount < 1) then
+//    HexEdit.UndoBeginUpdate;
+
   BtnSaveTripGpiFile.Enabled := true;
 end;
 

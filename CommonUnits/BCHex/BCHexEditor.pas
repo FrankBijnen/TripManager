@@ -7273,7 +7273,7 @@ var
 
   function PUndoRec: PBCHUndoRec;
   begin
-    Result := PBCHUndoRec(@(PAnsiChar(Memory)[urPos]));
+    Result := PBCHUndoRec(@(PByteArray(Memory)[urPos]));
   end;
   //LPurUndoRec: PMPHUndoRec;
 
@@ -7340,7 +7340,7 @@ var
         end
         else
         begin
-          Move(PAnsiChar(Memory)[LIntRecSize], Memory^, Size - LIntRecSize);
+          Move(PByteArray(Memory)[LIntRecSize], Memory^, Size - LIntRecSize);
           Size := Size - LIntRecSize;
           if FCount > 0 then
             Dec(FCount);
@@ -7575,7 +7575,7 @@ begin
     case LEnumUndo of
       ufKindBytesChanged:
         begin
-          FEditor.WriteBuffer(PAnsiChar(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
+          FEditor.WriteBuffer(PByteArray(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
           FEditor.SetChanged(LRecUndo.Pos, ufFlagByte1Changed in LRecUndo.Flags);
           if LRecUndo.Count = 2 then
             FEditor.SetChanged(LRecUndo.Pos + 1, ufFlagByte2Changed in LRecUndo.Flags);
@@ -7673,7 +7673,7 @@ begin
         end;
       ufKindConvert:
         begin
-          FEditor.WriteBuffer(PAnsiChar(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
+          FEditor.WriteBuffer(PByteArray(Memory)[Position], LRecUndo.Pos, LRecUndo.Count);
           PopulateUndo(LRecUndo);
           if (FEditor.FModifiedBytes.Size) >= (LRecUndo.Pos) then
             FEditor.FModifiedBytes.Size := LRecUndo.Pos;
@@ -7783,7 +7783,8 @@ function TBCHUndoStorage.Redo: boolean;
   begin
     with FRedoPointer^ do
     begin
-      Move(PChar(FRedoPointer)[FRedoPointer^.DataLen], FEditor.FBookmarks, sizeof(TBCHBookmarks));
+//TODO  Check
+      Move(PByteArray(FRedoPointer)[FRedoPointer^.DataLen], FEditor.FBookmarks, sizeof(TBCHBookmarks));
 
       LCoord := FEditor.GetCursorAtPos(CurPos, ufFlagInCharField in Flags);
       with LCoord do
@@ -7797,8 +7798,8 @@ function TBCHUndoStorage.Redo: boolean;
       end;
       FEditor.FModified := ufFlagModified in Flags;
       FEditor.InsertMode := (ufFlagInsertMode in Flags);
-
-      with PUndoSelRec(@(PChar(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
+//TODO Check
+      with PUndoSelRec(@(PByteArray(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
         FEditor.SetSelection(SelPos, SelStart, SelEnd);
 
       FEditor.Translation := CurTranslation;
@@ -7939,23 +7940,28 @@ var
       if FEditor.FModified then
         Include(Flags, ufFlagModified);
     end;
-    Move(FEditor.FBookmarks, PChar(FRedoPointer)[FRedoPointer^.DataLen], sizeof(TBCHBookmarks));
-    with PUndoSelRec(@(PChar(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
+
+//TODO Check
+    Move(FEditor.FBookmarks, PByteArray(FRedoPointer)[FRedoPointer^.DataLen], sizeof(TBCHBookmarks));
+
+    with PUndoSelRec(@(PByteArray(FRedoPointer)[FRedoPointer^.DataLen + sizeof(TBCHBookmarks)]))^ do
     begin
       SelStart := FEditor.FSelStart;
       SelPos := FEditor.FSelPosition;
       SelEnd := FEditor.FSelEnd;
     end;
+
   end;
 begin
   ResetRedo;
+
   // simple redo, store bookmarks, selection, insertmode, col, row, charfield...
   // and bytes to save
 
   case GetUndoKind(Rec.Flags) of
     ufKindBytesChanged:
       begin
-        LIntDataSize := Rec.Count - 1;
+        LIntDataSize := Rec.Count;
         AllocRedoPointer;
         if FEditor.HasChanged(Rec.Pos) then
           Include(FRedoPointer^.Flags, ufFlagByte1Changed);
