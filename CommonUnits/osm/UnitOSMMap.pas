@@ -162,7 +162,8 @@ begin
   Html.Add('  }');
 
   Html.Add('  function SendMessage(msg, parm1, parm2){');
-  Html.Add('     window.chrome.webview.postMessage({ msg: msg, parm1: parm1, parm2: parm2});');
+  Html.Add('     if (window && window.chrome)');
+  Html.Add('        window.chrome.webview.postMessage({ msg: msg, parm1: parm1, parm2: parm2});');
   Html.Add('  }');
 
   Html.Add('  function GetLocation(Func){');
@@ -217,14 +218,16 @@ begin
   Html.Add('     if (popup) { map.removePopup(popup); popup = null};');
   Html.Add('  }');
 
-  Html.Add('  function AddRoutePoint(Id, RoutePoint, PointLat, PointLon, Color){');
+  Html.Add('  function AddRoutePoint(Id, RoutePoint, PointLat, PointLon, Color, InLayer){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
   Html.Add('     var feature = new OpenLayers.Feature.Vector(');
   Html.Add('         new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat))');
-  Html.Add('     RoutePointsLayer[Id] = new OpenLayers.Layer.Vector(RoutePoint,');
-  Html.Add('         { styleMap: new OpenLayers.StyleMap( { pointRadius: 6, fillColor: Color, fillOpacity: 0.5 } ) }); ');
+  Html.Add('     if (!RoutePointsLayer[Id]) {');
+  Html.Add('        RoutePointsLayer[Id] = new OpenLayers.Layer.Vector(RoutePoint,');
+  Html.Add('            { styleMap: new OpenLayers.StyleMap( { pointRadius: 6, fillColor: Color, fillOpacity: 0.5 } ) }); ');
+  Html.Add('     }');
   Html.Add('     RoutePointsLayer[Id].addFeatures(feature);');
-  Html.Add('     RoutePointsLayer[Id].displayInLayerSwitcher = false;');
+  Html.Add('     RoutePointsLayer[Id].displayInLayerSwitcher = InLayer;');
   Html.Add('     map.addLayer(RoutePointsLayer[Id]);');
 
   // routepoints needed for CreateExtent
@@ -318,7 +321,8 @@ begin
 end;
 
 function InstallOpenLayers2: boolean;
-const Ol2Files: array[0..14,0..1] of string  = (
+const
+  Ol2Files: array[0..14,0..1] of string  = (
     ('OL2_OpenLayers',      'OpenLayers.js'),
     ('OL2_OpenStreetMap',   'OpenStreetMap.js'),
     ('OL2_img_cpr',         'img\cloud-popup-relative.png'),

@@ -2002,13 +2002,14 @@ end;
 
 procedure TGPXFile.DoCreateOSMPoints;
 var
-  Trackname, Lon, Lat, DisplayColor, Symbol, Color: string;
+  Trackname, Lon, Lat, DisplayColor, Color, ShowInLayerSwitcher, RoutePointName: string;
   RouteWayPoint, WayPoint: TXmlVSNode;
   WayPointAttribute: TXmlVSAttribute;
   Track : TXmlVSNode;
   TrackPoint: TXmlVSNode;
+  RtePtExtensions: TXmlVSNode;
   TrackPoints: integer;
-  RoutePoints: integer;
+  ViaPoints, RouteId, RoutePointId: integer;
   TrackPointAttribute: TXmlVSAttribute;
 begin
   FrmSelectGPX := TFrmSelectGPX.Create(nil);
@@ -2039,7 +2040,8 @@ begin
         ProcessOptions.TrackColor := FrmSelectGPX.CmbOverruleColor.Text;
       ProcessOptions.DoPrefSaved;
 
-      RoutePoints := 0;
+      ViaPoints := FTrackList.Count;
+      RouteId := 0;
       for Track in FTrackList do
       begin
         Trackname := Track.Name;
@@ -2063,7 +2065,7 @@ begin
           FOutStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
           Inc(TrackPoints);
         end;
-        FOutStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
+        FOutStringList.Add(Format('CreateTrack("Line: %s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
         if (ProcessOptions.ProcessCreateRoutePoints) then
         begin
@@ -2071,6 +2073,7 @@ begin
           begin
             if (RouteWayPoint.NodeValue <> Track.NodeValue) then
               continue;
+            Inc(RouteID);
             for WayPoint in RouteWayPoint.ChildNodes do
             begin
               Lon := '0';
@@ -2082,20 +2085,26 @@ begin
                 if (WayPointAttribute.Name = 'lat') then
                   lat := WayPointAttribute.Value;
               end;
-
-              Symbol := FindSubNodeValue(WayPoint, 'sym');
-              if (ContainsText(Symbol, 'red')) or
-                 (ContainsText(Symbol, 'flag')) then
-                Color := 'red'
-              else
-                color := 'blue';
-              FOutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s");',
-                                        [RoutePoints,
-                                         EscapeDQuote(FindSubNodeValue(WayPoint, 'name')),
+              RoutePointId := RouteID;
+              RoutePointName := Format('Pts: %s', [EscapeDQuote(Track.NodeValue)]);
+              Color := 'blue';
+              ShowInLayerSwitcher := 'true';
+              RtePtExtensions := WayPoint.Find('extensions');
+              if (RtePtExtensions <> nil) and
+                 (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
+              begin
+                RoutePointId := ViaPoints;
+                RoutePointName := EscapeDQuote(FindSubNodeValue(WayPoint, 'name'));
+                Color := 'red';
+                Inc(ViaPoints);
+              end;
+              FOutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s", %s);',
+                                        [RoutePointId,
+                                         RoutePointName,
                                          lat,
                                          lon,
-                                         Color]));
-              Inc(RoutePoints);
+                                         Color,
+                                         ShowInLayerSwitcher]));
             end;
           end;
         end;

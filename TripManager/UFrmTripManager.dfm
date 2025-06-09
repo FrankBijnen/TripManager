@@ -482,7 +482,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 631
-        Height = 26
+        Height = 28
         Align = alTop
         BevelOuter = bvNone
         Font.Charset = DEFAULT_CHARSET
@@ -494,10 +494,15 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 0
         OnResize = AdvPanel_MapTopResize
         object SpeedBtn_MapClear: TSpeedButton
+          AlignWithMargins = True
           Left = 0
-          Top = 0
+          Top = 1
           Width = 60
           Height = 26
+          Margins.Left = 0
+          Margins.Top = 1
+          Margins.Right = 0
+          Margins.Bottom = 1
           Align = alLeft
           Caption = 'Clear map'
           OnClick = SpeedBtn_MapClearClick
@@ -506,19 +511,25 @@ object FrmTripManager: TFrmTripManager
           ExplicitHeight = 22
         end
         object BtnGeoSearch: TSpeedButton
+          AlignWithMargins = True
           Left = 60
-          Top = 0
+          Top = 1
           Width = 60
           Height = 26
+          Margins.Left = 0
+          Margins.Top = 1
+          Margins.Right = 0
+          Margins.Bottom = 1
           Align = alLeft
           Caption = 'Search'
           OnClick = BtnGeoSearchClick
+          ExplicitTop = 0
           ExplicitHeight = 22
         end
         object SpltRoutePoint: TSplitter
           Left = 656
           Top = 0
-          Height = 26
+          Height = 28
           ExplicitLeft = 545
           ExplicitTop = 5
           ExplicitHeight = 100
@@ -528,7 +539,7 @@ object FrmTripManager: TFrmTripManager
           Left = 305
           Top = 3
           Width = 143
-          Height = 20
+          Height = 22
           Hint = 'Use Ctrl+Click on the map to set the Lat/Lon values'
           Align = alLeft
           MaxLength = 127
@@ -543,19 +554,20 @@ object FrmTripManager: TFrmTripManager
           Left = 120
           Top = 0
           Width = 106
-          Height = 26
+          Height = 28
           Align = alLeft
           Caption = 'Apply Coordinates'
           Enabled = False
           TabOrder = 1
           OnClick = BtnApplyCoordsClick
+          ExplicitHeight = 26
         end
         object LblRoutePoint: TEdit
           AlignWithMargins = True
           Left = 662
           Top = 3
           Width = 29
-          Height = 20
+          Height = 22
           Align = alClient
           ReadOnly = True
           TabOrder = 2
@@ -566,28 +578,30 @@ object FrmTripManager: TFrmTripManager
           Left = 226
           Top = 0
           Width = 76
-          Height = 26
+          Height = 28
           Align = alLeft
           Caption = 'Coordinates'
           ParentBackground = False
           TabOrder = 3
+          ExplicitHeight = 26
         end
         object PnlRoutePoint: TPanel
           Left = 451
           Top = 0
           Width = 76
-          Height = 26
+          Height = 28
           Align = alLeft
           Caption = 'Route/Point'
           ParentBackground = False
           TabOrder = 4
+          ExplicitHeight = 26
         end
         object LblRoute: TEdit
           AlignWithMargins = True
           Left = 530
           Top = 3
           Width = 123
-          Height = 20
+          Height = 22
           Align = alLeft
           ReadOnly = True
           TabOrder = 5
@@ -653,9 +667,9 @@ object FrmTripManager: TFrmTripManager
       end
       object EdgeBrowser1: TEdgeBrowser
         Left = 0
-        Top = 26
+        Top = 28
         Width = 631
-        Height = 322
+        Height = 320
         Align = alClient
         TabOrder = 2
         AllowSingleSignOnUsingOSPrimaryAccount = False
@@ -665,6 +679,8 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
+        ExplicitTop = 26
+        ExplicitHeight = 322
       end
     end
   end
@@ -795,6 +811,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -802,7 +819,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

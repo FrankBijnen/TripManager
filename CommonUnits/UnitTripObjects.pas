@@ -2663,9 +2663,9 @@ end;
 
 procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const DisplayColor: string = 'Magenta');
 var
-  Coords, Color, PointName: string;
+  Coords, Color, ShowInLayerSwitcher, PointName, RoutePointName: string;
   TrackPoints: integer;
-  RoutePoints: integer;
+  RoutePointId, ViaPoints: integer;
   TripName: TmTripName;
   AllRoutes: TmAllRoutes;
   UdbDataHndl: TmUdbDataHndl;
@@ -2695,32 +2695,40 @@ begin
   end;
   IsCalculated := (TrackPoints > 0);
 
+  ViaPoints := 10;
   Locations := TmLocations(GetItem('mLocations'));
   if (Assigned(Locations)) then
   begin
-    RoutePoints := 0;
     for Location in Locations.Locations do
     begin
       if (Location is TLocation) then
       begin
-        inc(RoutePoints);
         Coords := '';
         Color := 'blue';
-        PointName := '';
+        ShowInLayerSwitcher := 'true';
+        RoutePointId := 0;
         for ANItem in TLocation(Location).LocationItems do
         begin
           if (ANItem is TmAttr) then
           begin
-            if (Pos('Via', TmAttr(ANItem).AsString) =1) then
-              Color := 'red'
-            else
-              Color := 'blue';
+            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
+            begin
+              Color := 'red';
+              RoutePointId := ViaPoints;
+              Inc(ViaPoints);
+            end;
           end;
           if (ANItem is TmName) then
-            PointName := TmName(ANItem).AsString;
+            PointName := EscapeDQuote(TmName(ANItem).AsString);
+
           if (ANItem is TmScPosn) then
             Coords := TmScPosn(ANItem).GetMapCoords;
         end;
+
+        if (RoutePointId > 0) then
+          RoutePointName := PointName // Show name of Via's
+        else
+          RoutePointName := Format('Pts: %s', [EscapeDQuote(TripName.AsString)]); // Combine all Shapings
 
         if (IsCalculated = false) then
         begin
@@ -2728,14 +2736,15 @@ begin
           Inc(TrackPoints);
         end;
 
-        OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, "%s");',
-                                 [RoutePoints,
-                                  EscapeDQuote(PointName),
+        OutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, "%s", %s);',
+                                 [RoutePointId,
+                                  RoutePointName,
                                   Coords,
-                                  Color]));
+                                  Color,
+                                  ShowInLayerSwitcher]));
       end;
     end;
-    OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));
+    OutStringList.Add(Format('CreateTrack("Line: %s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));
 
   end;
 end;
