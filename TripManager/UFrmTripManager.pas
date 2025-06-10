@@ -15,7 +15,7 @@ uses
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
-  Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellList, TripManager_ValEdit,
+  Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
   ListViewSort, UnitTripObjects, UnitGpi;
 
 const
@@ -85,7 +85,7 @@ type
     CmbDevices: TComboBox;
     PnlXTLeft: TPanel;
     PnlFileSys: TPanel;
-    ShellTreeView1: TShellTreeView;
+    ShellTreeView1: TripManager_ShellTree.TShellTreeView;
     VSplitterFile_Sys: TSplitter;
     ShellListView1: TripManager_ShellList.TShellListView;
     PnlXt2FileSys: TPanel;

@@ -20,6 +20,7 @@ uses
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
   TripManager_MultiContext in 'TripManager_MultiContext.pas',
+  TripManager_ShellTree in 'TripManager_ShellTree.pas',
   TripManager_ShellList in 'TripManager_ShellList.pas',
   TripManager_ValEdit in 'TripManager_ValEdit.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
@@ -45,7 +46,7 @@ uses
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
-
+  
 {$R *.res}
 
 begin
