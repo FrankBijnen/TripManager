@@ -406,38 +406,20 @@ begin
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
-  FrmSelectGPX := TFrmSelectGPX.Create(Self);
   GPXFile := TGPXFile.Create(OpenTrip.FileName, OnSetAnalyzePrefs, nil);
   try
     GPXFile.AnalyzeGpx;
-
-    if (GPXFile.WayPointList.Count > 0) then
-      FrmSelectGPX.AllTracks.Add('-' + #9 +
-                                 IntToStr(GPXFile.WayPointList.Count) + #9 +
-                                 'Waypoints' + #9 +
-                                 'Wpt');
-    if (GPXFile.RouteViaPointList.Count > 0) then
-    begin
-      for RoutePoints in GPXFile.RouteViaPointList do
-      begin
-        if (RoutePoints.ChildNodes.Count > 0) then
-          FrmSelectGPX.AllTracks.Add('-' + #9 +
-                                     IntToStr(RoutePoints.ChildNodes.Count) + #9 +
-                                     RoutePoints.NodeValue + #9 +
-                                     'Rte');
-      end;
-    end;
-
-    FrmSelectGPX.LoadTracks('-');
     SetCursor(CrNormal);
-    FrmSelectGPX.Caption := 'Import route points from: ' + ExtractFileName(OpenTrip.FileName);
-    if (FrmSelectGPX.ShowModal = mrOk) then
+
+    if (GPXFile.ShowSelectTracks('Import route points from: ' + ExtractFileName(OpenTrip.FileName),
+                                 'Select Waypoints/Routes',
+                                 TTagsToShow.WptRte)) then
     begin
       DmRoutePoints.CdsRoutePoints.DisableControls;
       try
         DmRoutePoints.CdsRoutePoints.Last;
 
-        for AnItem in FrmSelectGPX.LvTracks.Items do
+        for AnItem in GPXFile.FrmSelectGPX.LvTracks.Items do
         begin
           if not (AnItem.Checked) then
             continue;
@@ -465,7 +447,6 @@ begin
       end;
     end;
   finally
-    FrmSelectGPX.Free;
     GPXFile.Free;
     SetCursor(CrNormal);
   end;

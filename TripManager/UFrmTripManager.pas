@@ -60,11 +60,6 @@ type
 
   TCoordinatesAppliedEvent = procedure(Sender: Tobject; Coords: string) of object;
 
-  TBCHexEditor = class(BCHexEditor.TBCHexEditor)
-  public
-    property UndoStorage;
-  end;
-
   TFrmTripManager = class(TForm)
     HSplitterDevFiles_Info: TSplitter;
     ImageList: TImageList;
@@ -3193,12 +3188,6 @@ end;
 procedure TFrmTripManager.LoadHex(const FileName: string);
 begin
   HexEdit.LoadFromFile(FileName);
-
-//TODO
-// Disable Undo
-//  if (HexEdit.UndoStorage.UpdateCount < 1) then
-//    HexEdit.UndoBeginUpdate;
-
   BtnSaveTripGpiFile.Enabled := true;
 end;
 
@@ -3627,9 +3616,6 @@ begin
       (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[true]), BooleanValues[true]);
 
 //TODO add keys in FrmAdvancedSettings
-    KMLTrackColor := '';
-    OSMTrackColor := ''; // Magenta
-
     GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
     DefaultProximityStr := '500';
   end;

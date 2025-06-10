@@ -68,7 +68,6 @@ begin
   Application.CreateForm(TFrmAdvSettings, FrmAdvSettings);
   Application.CreateForm(TFrmNewTrip, FrmNewTrip);
   Application.CreateForm(TFrmTripEditor, FrmTripEditor);
-  Application.CreateForm(TFrmSelectGPX, FrmSelectGPX);
   Application.CreateForm(TFGeoSearch, FGeoSearch);
   Application.CreateForm(TFrmPlaces, FrmPlaces);
   Application.Run;

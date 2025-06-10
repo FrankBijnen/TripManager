@@ -560,7 +560,6 @@ object FrmTripManager: TFrmTripManager
           Enabled = False
           TabOrder = 1
           OnClick = BtnApplyCoordsClick
-          ExplicitHeight = 26
         end
         object LblRoutePoint: TEdit
           AlignWithMargins = True
@@ -583,7 +582,6 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Coordinates'
           ParentBackground = False
           TabOrder = 3
-          ExplicitHeight = 26
         end
         object PnlRoutePoint: TPanel
           Left = 451
@@ -594,7 +592,6 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Route/Point'
           ParentBackground = False
           TabOrder = 4
-          ExplicitHeight = 26
         end
         object LblRoute: TEdit
           AlignWithMargins = True
@@ -679,8 +676,6 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
-        ExplicitTop = 26
-        ExplicitHeight = 322
       end
     end
   end
@@ -811,7 +806,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -819,7 +813,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
