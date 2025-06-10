@@ -2443,6 +2443,9 @@ begin
   FHexLowerCase := True;
   SetHexLowerCase(False);
   DoubleBuffered := True;
+  // Try to reduce flicker
+  DoubleBufferedMode := TDoubleBufferedMode.dbmRequested;
+
   FBookmarkBitmap := TBitmap.Create;
   FCursorList := nil;
   FHasCustomBMP := False;
@@ -6066,7 +6069,6 @@ begin
 
   if UseRightToLeftAlignment then
     ChangeGridOrientation(False);
-
 end;
 
 procedure TCustomBCHexEditor.SetSelectionAsHex(const s: string);
