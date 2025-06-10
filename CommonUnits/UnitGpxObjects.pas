@@ -7,7 +7,8 @@ uses
   System.Classes, System.SysUtils,
   WinApi.Windows, System.Math,
   Xml.XMLIntf, UnitVerySimpleXml,
-  kml_helper, OSM_helper,
+  kml_helper,
+  UfrmSelectGpx,
 {$IFDEF MAPUTILS}
   UnitMapUtils,
 {$ENDIF}
@@ -17,7 +18,8 @@ uses
 {$IFDEF GEOCODE}
   UnitGeoCode,
 {$ENDIF}
-  UnitGPI, UnitBMP;
+  UnitGPI, UnitBMP,
+  Vcl.ComCtrls;
 
 var
   OnSetFixedPrefs: TNotifyEvent;
@@ -35,8 +37,27 @@ type
     Lon: double;
   end;
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
-              CreateOSM, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints);
+              CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints);
 
+const
+  IdTrip          = 0;
+  IdTrack         = 1;
+  IdCompleteRoute = 2; // Only Transfer
+  IdStrippedRoute = 3;
+  IdWayPoint      = 4;
+    IdWayPointWpt = 5;
+    IdWayPointVia = 6;
+    IdWayPointShp = 7;
+  IdGpi           = 8;
+    IdGpiWayPt    = 9;
+    IdGpiViaPt    = 10;
+    IdGpiShpPt    = 11;
+  IdKml           = 12; // Only Additional
+  IdHtml          = 13; // Only Additional
+  TripFilesFor    = 'Trip files (No import required, but will recalculate. Selected model: %s)';
+
+type
+  TGPXFuncArray = Array of TGPXFunc;
   TProcessOptions = class
     LookUpWindow: Hwnd;                       // 0, Window handle
                                               // Used to send progress messages when looking up addresses
@@ -121,8 +142,6 @@ type
     ProcessAddrWayPt: boolean;                // False
     DefTrackColor: string;                    // Blue, Used if no Displaycolor found in <trk>
     TrackColor: string;                       // '', The Track color possible changed by user. Saved in Registry
-    KMLTrackColor: string;                    // '', Override the KML track color? '' = Use original
-    OSMTrackColor: string;                    // Magenta, Override the OSM (html) track color? '' = Use original
 
     DefWaypointSymbol: string;                // Flag, Green, Default symbol for Via and Shaping points in GPX
     CatSymbol: string;                        // Symbol:, used in created Waypoints/GPI
@@ -144,6 +163,9 @@ type
     destructor Destroy; override;
     procedure DoPrefSaved;
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
+    class procedure SetPrefs(TvSelections: TTreeview; TripManagerReg_Key: string);
+    class function StorePrefs(TvSelections: TTreeview; TripManagerReg_Key: string): TGPXFuncArray;
+
   end;
 
   TGPXFile = class
@@ -260,6 +282,13 @@ type
     procedure ProcessGPXNode(GpxNode: TXmlVSNode);
     procedure StripRtePt(const RtePtNode: TXmlVSNode);
     procedure StripRte(const RteNode: TXmlVSNode);
+    procedure Track2OSMTrackPoints(Track: TXmlVSNode;
+                                  RouteId: integer;
+                                  var FirstViaPointId: integer;
+                                  TrackStringList: TStringList);
+
+
+
 {$IFDEF TRIPOBJECTS}
     function CreateLocations(RtePts: TXmlVSNodeList): integer;
     procedure CreateTrip_XT(const TripName, CalculationMode, TransportMode: string;
@@ -270,6 +299,7 @@ type
 
 {$ENDIF}
   public
+    var FrmSelectGpx: TFrmSelectGPX;
     constructor Create(const GPXFile:string;
                        const FunctionPrefs, SavePrefs: TNotifyEvent); overload;
     constructor Create(const GPXFile:string;
@@ -278,12 +308,13 @@ type
                        const OutStringList: TStringList = nil;
                        const SeqNo: cardinal = 0); overload;
     destructor Destroy; override;
+    function ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow): boolean;
     procedure DoPostProcess;
     procedure DoCreateTracks;
     procedure DoCreateWayPoints;
     procedure DoCreatePOI;
     procedure DoCreateKML;
-    procedure DoCreateOSM;
+    procedure DoCreateHTML;
     procedure DoCreateOSMPoints;
     procedure DoCreatePOLY;
     procedure DoCreateRoutes;
@@ -311,7 +342,7 @@ function InitGarminGpx(GarminGPX: TXmlVSDocument): TXmlVSNode;
 implementation
 
 uses
-  System.TypInfo, System.DateUtils, System.StrUtils, UnitStringUtils, UfrmSelectGpx;
+  System.TypInfo, System.DateUtils, System.StrUtils, UnitStringUtils, UnitOSMMap;
 
 // Not configurable
 const
@@ -394,8 +425,6 @@ begin
 
   DefTrackColor := 'Blue';
   TrackColor := '';
-  KMLTrackColor := '';
-  OSMTrackColor := 'Magenta';
 
   DefWaypointSymbol := 'Flag, Green';
   CatSymbol := 'Symbol:';
@@ -455,6 +484,95 @@ begin
     end;
   finally
     WayPtList.Free;
+  end;
+end;
+
+class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview; TripManagerReg_Key: string);
+begin
+  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ZumoModel')]);
+  TvSelections.Items[IdTrip].Checked :=
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrip', BooleanValues[true]) = BooleanValues[true]);
+
+  TvSelections.Items[IdTrack].Checked :=
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrack', BooleanValues[true]) = BooleanValues[true]);
+
+  TvSelections.Items[IdStrippedRoute].Checked :=
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncRoute', BooleanValues[true]) = BooleanValues[true]);
+
+  TvSelections.Items[IdWayPoint].Checked :=
+    (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPoint', BooleanValues[false]) = BooleanValues[true]);
+    TvSelections.Items[IdWayPointWpt].Checked := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[true]), BooleanValues[true]);
+    TvSelections.Items[IdWayPointVia].Checked := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[false]), BooleanValues[true]);
+    TvSelections.Items[IdWayPointShp].Checked := SameText
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[false]), BooleanValues[true]);
+
+    TvSelections.Items[IdGpi].Checked :=
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpi', BooleanValues[true]) = BooleanValues[true]);
+      TvSelections.Items[IdGpiWayPt].Checked := SameText
+        (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[true]), BooleanValues[true]);
+      TvSelections.Items[IdGpiViaPt].Checked := SameText
+        (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[false]), BooleanValues[true]);
+      TvSelections.Items[IdGpiShpPt].Checked := SameText
+        (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[false]), BooleanValues[true]);
+
+  if (TvSelections.Items.Count-1 = IdHtml) then
+  begin
+    TvSelections.Items[IdKml].Checked :=
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncKml', BooleanValues[true]) = BooleanValues[true]);
+    TvSelections.Items[IdHtml].Checked :=
+      (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncHtml', BooleanValues[true]) = BooleanValues[true]);
+  end;
+  TvSelections.FullExpand;
+end;
+
+class function TProcessOptions.StorePrefs(TvSelections: TTreeview; TripManagerReg_Key: string): TGPXFuncArray;
+begin
+  if (TvSelections.Items[IdStrippedRoute].Checked) and
+     (TvSelections.Items[IdCompleteRoute].Checked) then
+    raise exception.Create('Only one route option can be selected!');
+
+
+  SetLength(result, 0);
+
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrip', BooleanValues[TvSelections.Items[IdTrip].Checked]);
+  if (TvSelections.Items[IdTrip].Checked) then
+    result := result + [TGPXFunc.CreateTrips];
+
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncTrack', BooleanValues[TvSelections.Items[IdTrack].Checked]);
+  if (TvSelections.Items[IdTrack].Checked) then
+    result := result + [TGPXFunc.CreateTracks];
+
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncRoute', BooleanValues[TvSelections.Items[IdStrippedRoute].Checked]);
+  if (TvSelections.Items[IdStrippedRoute].Checked) then
+    result := result + [TGPXFunc.CreateRoutes];
+
+  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPoint', BooleanValues[TvSelections.Items[IdWayPoint].Checked]);
+  if (TvSelections.Items[IdWayPoint].Checked) then
+    result := result + [TGPXFunc.CreateWayPoints];
+
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointWpt', BooleanValues[TvSelections.Items[IdWayPointWpt].Checked]);
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointVia', BooleanValues[TvSelections.Items[IdWayPointVia].Checked]);
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncWayPointShape', BooleanValues[TvSelections.Items[IdWayPointShp].Checked]);
+
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpi', BooleanValues[TvSelections.Items[IdGpi].Checked]);
+    if (TvSelections.Items[IdGpi].Checked) then
+      result := result + [TGPXFunc.CreatePOI];
+
+      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiWayPt', BooleanValues[TvSelections.Items[IdGpiWayPt].Checked]);
+      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiViaPt', BooleanValues[TvSelections.Items[IdGpiViaPt].Checked]);
+      SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncGpiShpPt', BooleanValues[TvSelections.Items[IdGpiShpPt].Checked]);
+
+  if (TvSelections.Items.Count-1 = IdHtml) then
+  begin
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncKml', BooleanValues[TvSelections.Items[IdKml].Checked]);
+    if (TvSelections.Items[IdKml].Checked) then
+      result := result + [TGPXFunc.CreateKML];
+
+    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'FuncHtml', BooleanValues[TvSelections.Items[IdHtml].Checked]);
+    if (TvSelections.Items[IdHtml].Checked) then
+      result := result + [TGPXFunc.CreateHTML];
   end;
 end;
 
@@ -542,6 +660,7 @@ end;
 
 procedure TGPXfile.FreeGlobals;
 begin
+  FrmSelectGpx.Free;
   FProcessOptions.Free;
   FreeAndNil(FRouteViaPointList);
   FreeAndNil(FWayPointFromRouteList);
@@ -560,6 +679,7 @@ begin
   FTrackList := TXmlVSNodeList.Create;
   FWayPointsProcessedList := TStringList.Create;
   FXmlDocument := TXmlVSDocument.Create;
+  FrmSelectGpx := TFrmSelectGPX.Create(nil);
 end;
 
 procedure TGPXfile.ClearGlobals;
@@ -1581,6 +1701,63 @@ begin
   ProcessGPX;
 end;
 
+function TGPXfile.ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow): boolean;
+var
+  Track, RoutePoints: TXmlVSNode;
+  DisplayColor: string;
+begin
+  case TagsToShow of
+    TTagsToShow.RteTrk:
+      begin
+        for Track in FTrackList do
+        begin
+          if (Track.Find('extensions') <> nil) then
+            DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
+          else
+            DisplayColor := ProcessOptions.DefTrackColor;
+          FrmSelectGPX.AllTracks.Add(DisplayColor + #9 +
+                                     IntToStr(Track.ChildNodes.Count) + #9 +
+                                     Track.Name + #9 +
+                                     FindSubNodeValue(Track, 'desc'));
+        end;
+      end;
+    TTagsToShow.WptRte:
+      begin
+
+        if (WayPointList.Count > 0) then
+          FrmSelectGPX.AllTracks.Add('-' + #9 +
+                                     IntToStr(WayPointList.Count) + #9 +
+                                     'Waypoints' + #9 +
+                                     'Wpt');
+        if (RouteViaPointList.Count > 0) then
+        begin
+          for RoutePoints in RouteViaPointList do
+          begin
+            if (RoutePoints.ChildNodes.Count > 0) then
+              FrmSelectGPX.AllTracks.Add('-' + #9 +
+                                         IntToStr(RoutePoints.ChildNodes.Count) + #9 +
+                                         RoutePoints.NodeValue + #9 +
+                                         'Rte');
+          end;
+        end;
+      end;
+  end;
+
+  FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow);
+  FrmSelectGPX.Caption := Caption;
+  FrmSelectGPX.PnlTop.Caption := SubCaption;
+  result := (FrmSelectGPX.ShowModal = ID_OK);
+
+  if (result) then
+  begin
+    if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then
+      ProcessOptions.TrackColor := ''
+    else
+      ProcessOptions.TrackColor := FrmSelectGPX.CmbOverruleColor.Text;
+    ProcessOptions.DoPrefSaved;
+  end;
+end;
+
 procedure TGPXfile.DoPostProcess;
 begin
   FXmlDocument.Encoding := 'utf-8';
@@ -1599,32 +1776,9 @@ var
 
 begin
   TracksProcessed := TStringList.Create;
-  FrmSelectGPX := TFrmSelectGPX.Create(nil);
   TracksXml := TXmlVSDocument.Create;
   try
     TracksRoot := InitGarminGpx(TracksXml);
-
-    for Track in FTrackList do
-    begin
-      if (Track.Find('extensions') <> nil) then
-        DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
-      else
-        DisplayColor := ProcessOptions.DefTrackColor;
-      FrmSelectGPX.AllTracks.Add(DisplayColor + #9 +
-                                 IntToStr(Track.ChildNodes.Count) + #9 +
-                                 Track.Name + #9 +
-                                 FindSubNodeValue(Track, 'desc'));
-    end;
-    FrmSelectGPX.Caption := 'Create Tracks from: '+ ExtractFileName(FGPXFile);
-    FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor);
-    if FrmSelectGPX.ShowModal <> ID_OK then
-        exit;
-
-    if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then
-      ProcessOptions.TrackColor := ''
-    else
-      ProcessOptions.TrackColor := FrmSelectGPX.CmbOverruleColor.Text;
-    ProcessOptions.DoPrefSaved;
 
     for Track in FTrackList do
     begin
@@ -1664,7 +1818,6 @@ begin
   finally
     TracksXml.Free;
     TracksProcessed.Free;
-    FrmSelectGPX.Free;
   end;
 end;
 
@@ -1810,9 +1963,7 @@ var
   Folder: IXMLNode;
   TrackPoint: TXmlVSNode;
   TrackPointAttribute: TXmlVSAttribute;
-  TrackExtension: TXmlVSNode;
   Helper: TKMLHelper;
-
 begin
   OutFile := FOutDir + ChangeFileExt(ExtractFileName(FGPXFile), '.kml');
   Helper := TKMLHelper.Create(OutFile);
@@ -1825,15 +1976,10 @@ begin
     begin
       for Track in FTrackList do
       begin
-        DisplayColor := ProcessOptions.DefTrackColor;
-        if (ProcessOptions.KMLTrackColor <> '') then
-          DisplayColor := ProcessOptions.KMLTrackColor
-        else
-        begin
-          TrackExtension := Track.Find('extensions');
-          if (TrackExtension <> nil) then
-            DisplayColor := GetTrackColor(TrackExtension.Find('gpxx:TrackExtension'));
-        end;
+        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name);
+        if (DisplayColor = '') then
+          continue;
+
         Helper.WritePointsStart(Track.NodeValue, DisplayColor);
         for TrackPoint in Track.ChildNodes do
         begin
@@ -1893,227 +2039,134 @@ begin
   end;
 end;
 
-procedure TGPXFile.DoCreateOSM;
+procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
+                                        RouteId: integer;
+                                        var FirstViaPointId: integer;
+                                        TrackStringList: TStringList);
 var
-  OutFile, Lon, Lat, Ele, DisplayColor, Cmt: string;
+  Trackname, Lon, Lat, DisplayColor, Color, ShowInLayerSwitcher, RoutePointName: string;
   RouteWayPoint, WayPoint: TXmlVSNode;
   WayPointAttribute: TXmlVSAttribute;
-  Track : TXmlVSNode;
   TrackPoint: TXmlVSNode;
+  RtePtExtensions: TXmlVSNode;
   TrackPoints: integer;
+  RoutePointId: integer;
   TrackPointAttribute: TXmlVSAttribute;
-  Helper: TOSMHelper;
 begin
-
-  if (ProcessOptions.ProcessTracks) then
+  TrackStringList.Clear;
+  Trackname := Track.Name;
+  TrackPoints := 0;
+  for TrackPoint in Track.ChildNodes do
   begin
-    for Track in FTrackList do
+    if (TrackPoint.Name <> 'trkpt') then
+      continue;
+    Lon := '0';
+    Lat := '0';
+    for TrackPointAttribute in TrackPoint.AttributeList do
     begin
-      OutFile := FOutDir + ChangeFileExt(EscapeFileName(Track.NodeValue), '.html');
-      if (ProcessOptions.OSMTrackColor <> '') then
-        DisplayColor := ProcessOptions.OSMTrackColor
-      else
-        DisplayColor := FindSubNodeValue(Track.Find('extensions').
-                                               Find('gpxx:TrackExtension'),
-                                         'gpxx:DisplayColor');
-      Helper := TOSMHelper.Create(OutFile);
-      Helper.FormatSettings := GetLocaleSetting;
-      Helper.WriteHeader(DisplayColor);
-      Helper.WritePointsStart(Track.NodeValue);
-      try
-        TrackPoints := 0;
-        for TrackPoint in Track.ChildNodes do
-        begin
-          if (TrackPoint.Name <> 'trkpt') then
-            continue;
-          Lon := '0';
-          Lat := '0';
-          Ele := '0';
-          for TrackPointAttribute in TrackPoint.AttributeList do
-          begin
-            if (TrackPointAttribute.Name = 'lon') then
-              Lon := TrackPointAttribute.Value;
-            if (TrackPointAttribute.Name = 'lat') then
-              Lat := TrackPointAttribute.Value;
-          end;
-          inc(TrackPoints);
-          Helper.WritePoint(Lon, Lat, Ele);
-        end;
-        if (TrackPoints = 0) then // Direct route? Write via points
-        begin
-          for RouteWayPoint in FRouteViaPointList do
-          begin
-            if (RouteWayPoint.NodeValue <> Track.NodeValue) then
-              continue;
-            for WayPoint in RouteWayPoint.ChildNodes do
-            begin
-              Lon := '0';
-              Lat := '0';
-              Ele := '0';
-              for WayPointAttribute in WayPoint.AttributeList do
-              begin
-                if (WayPointAttribute.Name = 'lon') then
-                  lon := WayPointAttribute.Value;
-                if (WayPointAttribute.Name = 'lat') then
-                  lat := WayPointAttribute.Value;
-              end;
-              Helper.WritePoint(Lon, Lat, Ele);
-            end;
-          end;
-        end;
-        Helper.WritePointsEnd;
+      if (TrackPointAttribute.Name = 'lon') then
+        Lon := TrackPointAttribute.Value;
+      if (TrackPointAttribute.Name = 'lat') then
+        Lat := TrackPointAttribute.Value;
+    end;
+    TrackStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
+    Inc(TrackPoints);
+  end;
+  TrackStringList.Add(Format('CreateTrack("Line: %s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
-        if (ProcessOptions.ProcessCreateRoutePoints) then
+  if (ProcessOptions.ProcessCreateRoutePoints) then
+  begin
+    for RouteWayPoint in FRouteViaPointList do
+    begin
+      if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+        continue;
+      Inc(RouteID);
+
+      for WayPoint in RouteWayPoint.ChildNodes do
+      begin
+        Lon := '0';
+        Lat := '0';
+        for WayPointAttribute in WayPoint.AttributeList do
         begin
-          helper.WritePlacesStart;
-          for RouteWayPoint in FRouteViaPointList do
-          begin
-            if (RouteWayPoint.NodeValue <> Track.NodeValue) then
-              continue;
-            for WayPoint in RouteWayPoint.ChildNodes do
-            begin
-              Lon := '0';
-              Lat := '0';
-              Ele := '0';
-              for WayPointAttribute in WayPoint.AttributeList do
-              begin
-                if (WayPointAttribute.Name = 'lon') then
-                  lon := WayPointAttribute.Value;
-                if (WayPointAttribute.Name = 'lat') then
-                  lat := WayPointAttribute.Value;
-              end;
-              Cmt := FindSubNodeValue(WayPoint, 'cmt');
-              if (Pos(#10, Cmt) > 0) then
-                Cmt := Copy(Cmt, 1, Pos(#10, Cmt) -1);
-              Helper.WritePlace( Format('%s,%s ', [lon, lat], Helper.FormatSettings),
-                                 FindSubNodeValue(WayPoint, 'name'),
-                                 Cmt);
-            end;
-          end;
-          Helper.WritePlacesEnd;
-          Helper.WriteFooter;
+          if (WayPointAttribute.Name = 'lon') then
+            lon := WayPointAttribute.Value;
+          if (WayPointAttribute.Name = 'lat') then
+            lat := WayPointAttribute.Value;
         end;
-      finally
-        Helper.Free;
+        RoutePointId := RouteID;
+        RoutePointName := Format('Pts: %s', [EscapeDQuote(Track.NodeValue)]);
+        Color := 'blue';
+        ShowInLayerSwitcher := 'true';
+        RtePtExtensions := WayPoint.Find('extensions');
+        if (RtePtExtensions <> nil) and
+           (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
+        begin
+          RoutePointId := FirstViaPointId;
+          RoutePointName := EscapeDQuote(FindSubNodeValue(WayPoint, 'name'));
+          Color := 'red';
+          Inc(FirstViaPointId);
+        end;
+        TrackStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s", %s);',
+                                   [RoutePointId,
+                                    RoutePointName,
+                                    lat,
+                                    lon,
+                                    Color,
+                                    ShowInLayerSwitcher]));
       end;
     end;
+  end;
+end;
+
+procedure TGPXFile.DoCreateHTML;
+var
+  OutFile: string;
+  Track : TXmlVSNode;
+  FirstViaPointId, RouteId: integer;
+  TrackPointList: TStringList;
+begin
+  TrackPointList := TStringList.Create;
+  try
+    FirstViaPointId := 1;
+    RouteId := 0;
+    for Track in FTrackList do
+    begin
+      if (FrmSelectGPX.TrackSelectedColor(Track.Name) = '') then
+        continue;
+      Track2OSMTrackPoints(Track, RouteId, FirstViaPointId, TrackPointList);
+      OutFile := FOutDir + ChangeFileExt(EscapeFileName(Track.NodeValue), '.html');
+      CreateOSMMapHtml(OutFile, TrackPointList);
+    end;
+  finally
+    TrackPointList.Free;
   end;
 end;
 
 procedure TGPXFile.DoCreateOSMPoints;
 var
-  Trackname, Lon, Lat, DisplayColor, Color, ShowInLayerSwitcher, RoutePointName: string;
-  RouteWayPoint, WayPoint: TXmlVSNode;
-  WayPointAttribute: TXmlVSAttribute;
   Track : TXmlVSNode;
-  TrackPoint: TXmlVSNode;
-  RtePtExtensions: TXmlVSNode;
-  TrackPoints: integer;
-  ViaPoints, RouteId, RoutePointId: integer;
-  TrackPointAttribute: TXmlVSAttribute;
+  FirstViaPointId, RouteId: integer;
+  TrackPointList: TStringList;
 begin
-  FrmSelectGPX := TFrmSelectGPX.Create(nil);
+  FOutStringList.Clear;
+  TrackPointList := TStringList.Create;
   try
-    FOutStringList.Clear;
-
-    if (ProcessOptions.ProcessTracks) then
+    FirstViaPointId := FTrackList.Count;
+    RouteId := 0;
+    for Track in FTrackList do
     begin
-      for Track in FTrackList do
-      begin
-        if (Track.Find('extensions') <> nil) then
-          DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
-        else
-          DisplayColor := ProcessOptions.DefTrackColor;
-        FrmSelectGPX.AllTracks.Add(DisplayColor + #9 +
-                                   IntToStr(Track.ChildNodes.Count) + #9 +
-                                   Track.Name + #9 +
-                                   FindSubNodeValue(Track, 'desc'));
-      end;
-      FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor);
-      FrmSelectGPX.Caption := 'Show ' + ExtractFileName(FGPXFile) + ' on Map';
-      if FrmSelectGPX.ShowModal <> ID_OK then
-          exit;
+      if (FrmSelectGPX.TrackSelectedColor(Track.Name) = '') then
+        continue;
 
-      if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then
-        ProcessOptions.TrackColor := ''
-      else
-        ProcessOptions.TrackColor := FrmSelectGPX.CmbOverruleColor.Text;
-      ProcessOptions.DoPrefSaved;
-
-      ViaPoints := FTrackList.Count;
-      RouteId := 0;
-      for Track in FTrackList do
-      begin
-        Trackname := Track.Name;
-        DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
-        if (DisplayColor = '') then
-          continue;
-        TrackPoints := 0;
-        for TrackPoint in Track.ChildNodes do
-        begin
-          if (TrackPoint.Name <> 'trkpt') then
-            continue;
-          Lon := '0';
-          Lat := '0';
-          for TrackPointAttribute in TrackPoint.AttributeList do
-          begin
-            if (TrackPointAttribute.Name = 'lon') then
-              Lon := TrackPointAttribute.Value;
-            if (TrackPointAttribute.Name = 'lat') then
-              Lat := TrackPointAttribute.Value;
-          end;
-          FOutStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
-          Inc(TrackPoints);
-        end;
-        FOutStringList.Add(Format('CreateTrack("Line: %s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
-
-        if (ProcessOptions.ProcessCreateRoutePoints) then
-        begin
-          for RouteWayPoint in FRouteViaPointList do
-          begin
-            if (RouteWayPoint.NodeValue <> Track.NodeValue) then
-              continue;
-            Inc(RouteID);
-            for WayPoint in RouteWayPoint.ChildNodes do
-            begin
-              Lon := '0';
-              Lat := '0';
-              for WayPointAttribute in WayPoint.AttributeList do
-              begin
-                if (WayPointAttribute.Name = 'lon') then
-                  lon := WayPointAttribute.Value;
-                if (WayPointAttribute.Name = 'lat') then
-                  lat := WayPointAttribute.Value;
-              end;
-              RoutePointId := RouteID;
-              RoutePointName := Format('Pts: %s', [EscapeDQuote(Track.NodeValue)]);
-              Color := 'blue';
-              ShowInLayerSwitcher := 'true';
-              RtePtExtensions := WayPoint.Find('extensions');
-              if (RtePtExtensions <> nil) and
-                 (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
-              begin
-                RoutePointId := ViaPoints;
-                RoutePointName := EscapeDQuote(FindSubNodeValue(WayPoint, 'name'));
-                Color := 'red';
-                Inc(ViaPoints);
-              end;
-              FOutStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s", %s);',
-                                        [RoutePointId,
-                                         RoutePointName,
-                                         lat,
-                                         lon,
-                                         Color,
-                                         ShowInLayerSwitcher]));
-            end;
-          end;
-        end;
-      end;
+      Track2OSMTrackPoints(Track, RouteId, FirstViaPointId, TrackPointList);
+      Inc(RouteId);
+      FOutStringList.AddStrings(TrackPointList);
     end;
   finally
-    FrmSelectGPX.Free;
+    TrackPointList.Free;
   end;
 end;
+
 
 procedure TGPXFile.DoCreatePOLY;
 var
@@ -2490,6 +2543,7 @@ class procedure TGPXFile.PerformFunctions(const AllFuncs: array of TGPXFunc;
 var
   Func: TGPXFunc;
   GpxFileObj: TGPXFile;
+  SubCaption: string;
 begin
 
   GpxFileObj := TGPXFile.Create(GPXFile, ForceOutDir, FunctionPrefs, SavePrefs, OutStringList, SeqNo);
@@ -2503,7 +2557,7 @@ begin
         CreateWayPoints,
         CreatePOI,
         CreateKML,
-        CreateOSM,
+        CreateHTML,
         CreatePOLY,
         CreateRoutes,
         CreateTrips:
@@ -2516,6 +2570,44 @@ begin
     end;
 
     GpxFileObj.ProcessGPX;
+
+    SubCaption := '';
+    for Func in AllFuncs do
+    begin
+      case Func of
+        CreateTracks:
+        begin
+          if (SubCaption <> '') then
+            SubCaption := SubCaption + ', ';
+          SubCaption := SubCaption + 'Tracks';
+        end;
+        CreateKML:
+        begin
+          if (SubCaption <> '') then
+            SubCaption := SubCaption + ', ';
+          SubCaption := SubCaption + 'Kml';
+        end;
+        CreateHTML:
+        begin
+          if (SubCaption <> '') then
+            SubCaption := SubCaption + ', ';
+          SubCaption := SubCaption + 'Html';
+        end;
+        CreateOSMPoints:
+        begin
+          if (SubCaption <> '') then
+            SubCaption := SubCaption + ', ';
+          SubCaption := SubCaption + 'Map';
+        end;
+      end;
+    end;
+    if (SubCaption <> '') then
+    begin
+      if (not GpxFileObj.ShowSelectTracks(ExtractFileName(GPXFile),
+                                          Format('Select Rte/Trk to add to %s', [SubCaption]),
+                                          TTagsToShow.RteTrk)) then
+        exit;
+    end;
 
     for Func in AllFuncs  do
     begin
@@ -2531,13 +2623,13 @@ begin
           GpxFileObj.DoCreatePOI;
         CreateKML:
           GpxFileObj.DoCreateKML;
-        CreateOSM:
-          GpxFileObj.DoCreateOSM;
+        CreateHTML:
+          GpxFileObj.DoCreateHTML;
         CreateOSMPoints:
           GpxFileObj.DoCreateOSMPoints;
         CreatePOLY:
           GpxFileObj.DoCreatePOLY;
-        TGPXFunc.CreateTrips:
+        CreateTrips:
           GpxFileObj.DoCreateTrips;
       end;
     end;

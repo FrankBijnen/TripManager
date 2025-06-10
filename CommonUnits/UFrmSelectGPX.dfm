@@ -89,7 +89,7 @@ object FrmSelectGPX: TFrmSelectGPX
       TabOrder = 1
     end
   end
-  object PnlClear: TPanel
+  object PnlColor: TPanel
     Left = 0
     Top = 29
     Width = 489

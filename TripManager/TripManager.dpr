@@ -30,7 +30,6 @@ uses
   mtp_helper in '..\CommonUnits\Mtp\mtp_helper.pas',
   UnitMtpDevice in '..\CommonUnits\Mtp\UnitMtpDevice.pas',
   PortableDeviceApiLib_TLB in '..\CommonUnits\Mtp\PortableDeviceApiLib_TLB.pas',
-  OSM_helper in '..\CommonUnits\osm\OSM_helper.pas',
   UnitOSMMap in '..\CommonUnits\osm\UnitOSMMap.pas',
   Vcl.Shell.ShellConsts in '..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellConsts.pas',
   Vcl.Shell.ShellCtrls in '..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellCtrls.pas',

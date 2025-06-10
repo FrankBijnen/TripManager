@@ -689,7 +689,8 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo,
   Vcl.Dialogs,
-  OSM_helper, UnitStringUtils;
+  UnitOSMMap, // TODO Remove
+  UnitStringUtils;
 
 const
   Coord_Decimals = '%1.6f';

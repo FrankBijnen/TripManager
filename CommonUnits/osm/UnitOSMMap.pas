@@ -6,7 +6,10 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
   Vcl.Edge;
 
-procedure ShowMap(Browser: TEdgeBrowser; Home: string = '');
+function CreateOSMMapHtml(Home: string; UseOl2Local: boolean = true): boolean; overload;
+function CreateOSMMapHtml: boolean; overload;
+function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; overload;
+function OSMColor(GPXColor: string): string;
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
 
 const
@@ -16,24 +19,24 @@ const
   OSMGetBounds      = 'GetBounds';
   OSMGetRoutePoint  = 'GetRoutePoint';
   InitialZoom_Point = '15';
-  InitialZoom_Home  = '12';
-  InitialZoom_NoHome= '20';
+  InitialZoom       = '12';
 
 type
   TOSMHelper = class(TObject)
   private
     HasData: boolean;
-    Scaled: integer;
     OsmFormatSettings: TFormatSettings;
     Html: TStringList;
     FInitialZoom: string;
     FPathName: string;
     FHome: string;
-    procedure WriteHeader;
+    FTrackPoints: TStringList;
+    procedure WriteHeader(const UseOl2Local: boolean);
     procedure WriteTrackPoints;
     procedure WriteFooter;
   public
-    constructor Create(const APathName, AHome, AInitialZoom: string);
+    constructor Create(const APathName, AHome, AInitialZoom: string); overload;
+    constructor Create(const APathName: string; ATrackPoints: TStringList); overload;
     destructor Destroy; override;
   end;
 
@@ -46,7 +49,6 @@ uses
   UnitStringUtils;
 
 var
-  UseOl2Local: boolean;
   Ol2Installed: boolean;
 
 constructor TOSMHelper.Create(const APathName, AHome, AInitialZoom: string);
@@ -59,6 +61,13 @@ begin
   FInitialZoom := AInitialZoom;
   Html := TStringList.Create;
   HasData := false;
+  FTrackPoints := nil;
+end;
+
+constructor TOSMHelper.Create(const APathName: string; ATrackPoints: TStringList);
+begin
+  Create(APathName, '', InitialZoom_Point);
+  FTrackPoints := ATrackPoints;
 end;
 
 destructor TOSMHelper.Destroy;
@@ -69,7 +78,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TOSMHelper.WriteHeader;
+procedure TOSMHelper.WriteHeader(const UseOl2Local: boolean);
 begin
   HasData := false;
   Html.Clear;
@@ -287,21 +296,28 @@ begin
     Html.Add('  AddTrkPoint(1, ' + FHome + ');');
     HasData := true;
   end;
-  Rc := System.SysUtils.FindFirst(GetTracksTmp, faAnyFile - faDirectory, Fs);
-  while (Rc = 0) do
+  if (FTrackPoints <> nil) then
   begin
-    F := TStringList.Create;
-    try
-      F.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFileDir(GetTracksTmp)) + Fs.Name);
-      if (F.Count > 0) then
-      begin
-        HasData := true;
-        Html.AddStrings(F);
+    Html.AddStrings(FTrackPoints);
+  end
+  else
+  begin
+    Rc := System.SysUtils.FindFirst(GetTracksTmp, faAnyFile - faDirectory, Fs);
+    while (Rc = 0) do
+    begin
+      F := TStringList.Create;
+      try
+        F.LoadFromFile(IncludeTrailingPathDelimiter(ExtractFileDir(GetTracksTmp)) + Fs.Name);
+        if (F.Count > 0) then
+        begin
+          HasData := true;
+          Html.AddStrings(F);
+        end;
+      finally
+        F.Free;
       end;
-    finally
-      F.Free;
+      Rc := System.SysUtils.FindNext(Fs);
     end;
-    Rc := System.SysUtils.FindNext(Fs);
   end;
   Html.Add('  }');
 end;
@@ -363,7 +379,7 @@ begin
   end;
 end;
 
-procedure ShowMap(Browser: TEdgeBrowser; Home: string = '');
+function CreateOSMMapHtml(Home: string; UseOl2Local: boolean = true): boolean;
 var
   OsmHelper: TOSMHelper;
 begin
@@ -375,19 +391,55 @@ begin
       UseOl2Local := false;
   end;
 
-  if (Home = '') then
-    OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom_NoHome)
-  else
-    OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom_Home);
+  OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom);
   try
-    OsmHelper.Scaled := Browser.ScaleValue(100);
-    OsmHelper.WriteHeader;
+    OsmHelper.WriteHeader(UseOl2Local);
     OsmHelper.WriteFooter;
+    result := OsmHelper.HasData;
   finally
     OsmHelper.Free;
   end;
-  if (OsmHelper.HasData) then
-    Browser.Navigate(GetHtmlTmp);
+end;
+
+function CreateOSMMapHtml: boolean; overload;
+begin
+  result := CreateOSMMapHtml('', true);
+end;
+
+function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; overload;
+var
+  OsmHelper: TOSMHelper;
+begin
+  OsmHelper := TOSMHelper.Create(HtmlName, TrackPoints);
+  try
+    OsmHelper.WriteHeader(false);
+    OsmHelper.WriteFooter;
+    result := OsmHelper.HasData;
+  finally
+    OsmHelper.Free;
+  end;
+end;
+
+function OSMColor(GPXColor: string): string;
+begin
+  result := '#ff00ff';
+  if SameText(GPXColor, 'Black')       then begin result := '#000000'; exit; end;
+  if SameText(GPXColor, 'DarkRed')     then begin result := '#8b0000'; exit; end;
+  if SameText(GPXColor, 'DarkGreen')   then begin result := '#006400'; exit; end;
+  if SameText(GPXColor, 'DarkYellow')  then begin result := '#b5b820'; exit; end;
+  if SameText(GPXColor, 'DarkBlue')    then begin result := '#00008b'; exit; end;
+  if SameText(GPXColor, 'DarkMagenta') then begin result := '#8b008b'; exit; end;
+  if SameText(GPXColor, 'DarkCyan')    then begin result := '#008b8b'; exit; end;
+  if SameText(GPXColor, 'LightGray')   then begin result := '#cccccc'; exit; end;
+  if SameText(GPXColor, 'DarkGray')    then begin result := '#444444'; exit; end;
+  if SameText(GPXColor, 'Red')         then begin result := '#ff0000'; exit; end;
+  if SameText(GPXColor, 'Green')       then begin result := '#00ff00'; exit; end;
+  if SameText(GPXColor, 'Yellow')      then begin result := '#ffff00'; exit; end;
+  if SameText(GPXColor, 'Blue')        then begin result := '#0000ff'; exit; end;
+  if SameText(GPXColor, 'Magenta')     then begin result := '#ff00ff'; exit; end;
+  if SameText(GPXColor, 'Cyan')        then begin result := '#00ffff'; exit; end;
+  if SameText(GPXColor, 'White')       then begin result := '#ffffff'; exit; end;
+  if SameText(GPXColor, 'Transparent') then begin result := '#ffffff'; exit; end;
 end;
 
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
@@ -406,7 +458,6 @@ end;
 
 initialization
 begin
-  UseOl2Local := true;
   Ol2Installed := false;
 end;
 

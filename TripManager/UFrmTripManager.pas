@@ -724,7 +724,8 @@ var
   Lat, Lon: string;
   Place: TPlace;
 begin
-  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
+  if (CreateOSMMapHtml(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates))) then
+    EdgeBrowser1.Navigate(GetHtmlTmp);
 
   GetCoordsOfPlace('', Lat, Lon);
   if (Lat <> '') and
@@ -1705,7 +1706,7 @@ procedure TFrmTripManager.ShellListView1Click(Sender: TObject);
 var
   Ext: string;
   AnItem: TlistItem;
-  HasGpxSelected: boolean;
+  HasGpxSelected, HasTripSelected: boolean;
 begin
   BtnTransferToDevice.Enabled := false;
   BtnAddToMap.Enabled :=  false;
@@ -1716,6 +1717,7 @@ begin
     exit;
 
   HasGpxSelected := false;
+  HasTripSelected := false;
   for AnItem in ShellListView1.Items do
   begin
     if (AnItem.Selected = false) or
@@ -1723,15 +1725,14 @@ begin
       continue;
 
     Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
-    HasGpxSelected := ContainsText(Ext, GpxExtension);
-    if (HasGpxSelected) then
-      break;
+    HasGpxSelected := HasGpxSelected or ContainsText(Ext, GpxExtension);
+    HasTripSelected := HasTripSelected or ContainsText(Ext, TripExtension);
   end;
 
   BtnPostProcess.Enabled := HasGpxSelected;
   BtnCreateAdditional.Enabled := HasGpxSelected;
   BtnTransferToDevice.Enabled := HasGpxSelected;
-  BtnAddToMap.Enabled := HasGpxSelected and
+  BtnAddToMap.Enabled := (HasGpxSelected or HasTripSelected) and
                          (ShellListView1.SelCount = 1);
 
   if (ContainsText(Ext, TripExtension)) then
@@ -1807,7 +1808,8 @@ end;
 procedure TFrmTripManager.SpeedBtn_MapClearClick(Sender: TObject);
 begin
   DeleteTempFiles(GetOSMTemp, GetTracksMask);
-  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
+  if (CreateOSMMapHtml(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates))) then
+    EdgeBrowser1.Navigate(GetHtmlTmp);
 end;
 
 procedure TFrmTripManager.BtnAddToMapClick(Sender: TObject);
@@ -1854,7 +1856,11 @@ begin
                                               ExtractFileName(ShellListView1.SelectedFolder.PathName),
                                               GetTracksExt]));
     end;
-    ShowMap(EdgeBrowser1);
+//    ShowMap(EdgeBrowser1);
+
+    if (CreateOSMMapHtml) then
+      EdgeBrowser1.Navigate(GetHtmlTmp);
+
   finally
     OsmTrack.Free;
   end;
@@ -1871,7 +1877,10 @@ begin
     CurrentTrip.CreateOSMPoints(OsmTrack,
                                 GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,  TripColor_Key, 'Magenta'));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
-    ShowMap(EdgeBrowser1);
+//    ShowMap(EdgeBrowser1);
+
+    if (CreateOSMMapHtml) then
+      EdgeBrowser1.Navigate(GetHtmlTmp);
   finally
     OsmTrack.Free;
   end;
@@ -1896,7 +1905,11 @@ begin
 	  Inc(Cnt);	
     end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
-    ShowMap(EdgeBrowser1);
+//    ShowMap(EdgeBrowser1);
+
+    if (CreateOSMMapHtml) then
+      EdgeBrowser1.Navigate(GetHtmlTmp);
+
   finally
     OsmTrack.Free;
   end;
@@ -3648,7 +3661,9 @@ begin
     WindowState := TWindowState.wsNormal;
   ReadColumnSettings;
 
-  ShowMap(EdgeBrowser1, GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates));
+  if (CreateOSMMapHtml(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, SavedMapPosition_Key, DefaultCoordinates))) then
+    EdgeBrowser1.Navigate(GetHtmlTmp);
+
 end;
 
 // Drag and Drop methods

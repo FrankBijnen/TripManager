@@ -9,6 +9,8 @@ uses
   Vcl.StdCtrls, Vcl.Buttons, Vcl.Menus;
 
 type
+  TTagsToShow = (WptRte, RteTrk);
+
   TFrmSelectGPX = class(TForm)
     LvTracks: TListView;
     PnlTop: TPanel;
@@ -18,7 +20,7 @@ type
     PopupMenu1: TPopupMenu;
     CheckAll1: TMenuItem;
     CheckNone1: TMenuItem;
-    PnlClear: TPanel;
+    PnlColor: TPanel;
     CmbOverruleColor: TComboBox;
     lblChangeColor: TLabel;
     procedure CheckAll1Click(Sender: TObject);
@@ -29,14 +31,15 @@ type
     procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
+    FTagsToShow: TTagsToShow;
   public
     { Public declarations }
     AllTracks: TStringList;
-    procedure LoadTracks(DisplayColor: string);
+    procedure LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow);
     function TrackSelectedColor(const TrackName: string): string;
   end;
 
-var FrmSelectGPX: TFrmSelectGPX;
+//var FrmSelectGPX: TFrmSelectGPX;
 
 implementation
 
@@ -48,18 +51,25 @@ const
   TypeColumn = 1;
   ColorColumn = 1;
 
-procedure TFrmSelectGPX.LoadTracks(DisplayColor: string);
+procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow);
 var
   Indx: integer;
   Name, Color, Points, FromRoute: string;
   LVItem: TListItem;
 begin
 
-  if (DisplayColor = '-') then
-  begin
-    PnlClear.Visible := false;
-    PnlTop.Caption := 'Select Waypoints/Route';
-    LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte';
+  FTagsToShow := TagsToShow;
+  case FTagsToShow of
+    TTagsToShow.WptRte:
+      begin
+        PnlColor.Visible := false;
+        LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte';
+      end;
+    TTagsToShow.RteTrk:
+      begin
+        PnlColor.Visible := true;
+        LvTracks.Columns[TypeColumn].Caption := 'Rte/Trk';
+      end;
   end;
 
   LvTracks.Items.Clear;
@@ -71,7 +81,7 @@ begin
     Name := NextField(FromRoute, Chr(9));
     LVItem := LvTracks.Items.Add;
     LVItem.Caption := Name;
-    LVItem.Checked := (DisplayColor <> '-');
+    LVItem.Checked := (FTagsToShow = TTagsToShow.RteTrk);
     LVItem.SubItems.Add(FromRoute);
     if (DisplayColor = '') then
       LVItem.SubItems.Add(Color)
@@ -104,7 +114,7 @@ var
   AnItem: TlistItem;
 begin
   if (CmbOverruleColor.ItemIndex = 0) then
-    LoadTracks('')
+    LoadTracks('', FTagsToShow)
   else
   begin
     for AnItem in LvTracks.Items do
