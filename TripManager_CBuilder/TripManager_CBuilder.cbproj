@@ -85,9 +85,9 @@
         <SanitizedProjectName>TripManager_CBuilder</SanitizedProjectName>
         <VerInfo_Locale>1043</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <IncludePath>..\TripManager\;$(IncludePath)</IncludePath>
+        <IncludePath>..\CommonUnits\VerySimpleXml\;..\CommonUnits\Vcl.ShellControls\;..\CommonUnits\osm\;..\CommonUnits\Mtp\;..\CommonUnits\LVSort\;..\CommonUnits\kml\;..\CommonUnits\DirMon\;..\CommonUnits\BCHex\;..\CommonUnits\osm\Resources\;..\CommonUnits\;..\TripManager\;$(IncludePath)</IncludePath>
         <DCC_UnitSearchPath>..\CommonUnits;..\CommonUnits\BCHex;..\CommonUnits\DirMon;..\CommonUnits\kml;..\CommonUnits\LVSort;..\CommonUnits\Mtp;..\CommonUnits\osm;..\CommonUnits\VerySimpleXml;..\CommonUnits\Vcl.ShellControls;..\TripManager;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <ILINK_LibraryPath>..\TripManager\;..\CommonUnits;..\CommonUnits\BCHex;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <ILINK_LibraryPath>..\CommonUnits\VerySimpleXml\;..\CommonUnits\Vcl.ShellControls\;..\CommonUnits\osm\;..\CommonUnits\Mtp\;..\CommonUnits\LVSort\;..\CommonUnits\kml\;..\CommonUnits\DirMon\;..\CommonUnits\BCHex\;..\CommonUnits\osm\Resources\;..\CommonUnits\;..\TripManager\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <Custom_Styles>&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;</Custom_Styles>
         <Defines>TRIPOBJECTS;$(Defines)</Defines>
@@ -162,67 +162,142 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
+        <DelphiCompile Include="..\CommonUnits\BCHex\BCHexEditor.pas">
+            <BuildOrder>17</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\DirMon\Monitor.pas">
+            <BuildOrder>18</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\kml\kml_helper.pas">
+            <BuildOrder>19</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\kml\ogckml23.pas">
+            <BuildOrder>20</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\LVSort\ListViewSort.pas">
+            <BuildOrder>21</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\MsgLoop.pas">
+            <BuildOrder>32</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\Mtp\mtp_helper.pas">
+            <BuildOrder>22</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\Mtp\PortableDeviceApiLib_TLB.pas">
+            <BuildOrder>23</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\Mtp\UnitMtpDevice.pas">
+            <BuildOrder>24</BuildOrder>
+        </DelphiCompile>
+        <ResourceCompile Include="..\CommonUnits\osm\Resources\OpenLayers2.rc">
+            <Form>OpenLayers2.res</Form>
+            <BuildOrder>16</BuildOrder>
+        </ResourceCompile>
+        <DelphiCompile Include="..\CommonUnits\osm\UnitOSMMap.pas">
+            <BuildOrder>25</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UFrmGeoSearch.pas">
+            <Form>FGeoSearch</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>36</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UFrmPlaces.pas">
+            <Form>FrmPlaces</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>37</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UFrmSelectGPX.pas">
+            <Form>FrmSelectGPX</Form>
+            <FormType>dfm</FormType>
+            <BuildOrder>38</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitBmp.pas">
+            <BuildOrder>33</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitGeoCode.pas">
+            <BuildOrder>34</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitGpi.pas">
+            <BuildOrder>35</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitGpxObjects.pas">
+            <BuildOrder>36</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitStringUtils.pas">
+            <BuildOrder>37</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitTripObjects.pas">
+            <BuildOrder>38</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellConsts.pas">
+            <BuildOrder>26</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellCtrls.pas">
+            <BuildOrder>27</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas">
+            <BuildOrder>28</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas">
+            <BuildOrder>29</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\TripManager\TripManager_MultiContext.pas">
-            <BuildOrder>3</BuildOrder>
+            <BuildOrder>29</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\TripManager_ShellList.pas">
             <BuildOrder>4</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\TripManager_ShellTree.pas">
+            <BuildOrder>21</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\TripManager\TripManager_ValEdit.pas">
+            <BuildOrder>22</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UDmRoutePoints.pas">
             <Form>DmRoutePoints</Form>
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
-            <BuildOrder>4</BuildOrder>
+            <BuildOrder>38</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmAdditional.pas">
             <Form>FrmAdditional</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>5</BuildOrder>
+            <BuildOrder>31</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmAdvSettings.pas">
             <Form>FrmAdvSettings</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>6</BuildOrder>
+            <BuildOrder>32</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmDateDialog.pas">
             <Form>FrmDateDialog</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>7</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\TripManager\UFrmGeoSearch.pas">
-            <Form>FGeoSearch</Form>
-            <FormType>dfm</FormType>
-            <BuildOrder>8</BuildOrder>
+            <BuildOrder>33</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmNewTrip.pas">
             <Form>FrmNewTrip</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>9</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\TripManager\UFrmPlaces.pas">
-            <Form>FrmPlaces</Form>
-            <FormType>dfm</FormType>
-            <BuildOrder>10</BuildOrder>
+            <BuildOrder>34</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmPostProcess.pas">
             <Form>FrmPostProcess</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>11</BuildOrder>
+            <BuildOrder>35</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmTransferOptions.pas">
             <Form>FrmTransferOptions</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>12</BuildOrder>
+            <BuildOrder>36</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmTripEditor.pas">
             <Form>FrmTripEditor</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>13</BuildOrder>
+            <BuildOrder>37</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmTripManager.pas">
             <Form>FrmTripManager</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>14</BuildOrder>
+            <BuildOrder>38</BuildOrder>
         </DelphiCompile>
         <CppCompile Include="TripManager_CBuilder.cpp">
             <BuildOrder>0</BuildOrder>
@@ -230,17 +305,18 @@
         <None Include="TripManager_CBuilderPCH2.h">
             <BuildOrder>8</BuildOrder>
         </None>
-        <FormResources Include="..\TripManager\UDmRoutePoints.dfm"/>
+        <FormResources Include="..\CommonUnits\UFrmGeoSearch.dfm"/>
+        <FormResources Include="..\CommonUnits\UFrmPlaces.dfm"/>
+        <FormResources Include="..\CommonUnits\UFrmSelectGPX.dfm"/>
         <FormResources Include="..\TripManager\UFrmAdditional.dfm"/>
         <FormResources Include="..\TripManager\UFrmAdvSettings.dfm"/>
         <FormResources Include="..\TripManager\UFrmDateDialog.dfm"/>
-        <FormResources Include="..\TripManager\UFrmGeoSearch.dfm"/>
         <FormResources Include="..\TripManager\UFrmNewTrip.dfm"/>
-        <FormResources Include="..\TripManager\UFrmPlaces.dfm"/>
         <FormResources Include="..\TripManager\UFrmPostProcess.dfm"/>
         <FormResources Include="..\TripManager\UFrmTransferOptions.dfm"/>
         <FormResources Include="..\TripManager\UFrmTripEditor.dfm"/>
         <FormResources Include="..\TripManager\UFrmTripManager.dfm"/>
+        <FormResources Include="..\TripManager\UDmRoutePoints.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
