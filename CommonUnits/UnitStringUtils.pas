@@ -41,7 +41,7 @@ function GetTracksMask: string;
 function GetTracksTmp: string;
 function GetOSMTemp: string;
 function GetRoutesTmp: string;
-
+function GPX2HTMLColor(GPXColor: string): string;
 function VerInfo(IncludeCompany: boolean = false): string;
 
 var
@@ -356,6 +356,28 @@ begin
   if (ShResult <> 0) and (ShOp.fAnyOperationsAborted = false) then
     ShowMessage(Format('Remove directory failed code %u', [ShResult]));
   result := (ShResult = 0);
+end;
+
+function GPX2HTMLColor(GPXColor: string): string;
+begin
+  result := 'ff00ff';
+  if (GPXColor = 'Black')       then exit('000000');
+  if (GPXColor = 'DarkRed')     then exit('8b0000');
+  if (GPXColor = 'DarkGreen')   then exit('006400');
+  if (GPXColor = 'DarkYellow')  then exit('b5b820');
+  if (GPXColor = 'DarkBlue')    then exit('00008b');
+  if (GPXColor = 'DarkMagenta') then exit('8b008b');
+  if (GPXColor = 'DarkCyan')    then exit('008b8b');
+  if (GPXColor = 'LightGray')   then exit('cccccc');
+  if (GPXColor = 'DarkGray')    then exit('444444');
+  if (GPXColor = 'Red')         then exit('ff0000');
+  if (GPXColor = 'Green')       then exit('00ff00');
+  if (GPXColor = 'Yellow')      then exit('ffff00');
+  if (GPXColor = 'Blue')        then exit('0000ff');
+  if (GPXColor = 'Magenta')     then exit('ff00ff');
+  if (GPXColor = 'Cyan')        then exit('00ffff');
+  if (GPXColor = 'White')       then exit('ffffff');
+  if (GPXColor = 'Transparent') then exit('ffffff');
 end;
 
 function VerInfo(IncludeCompany: boolean = false): string;

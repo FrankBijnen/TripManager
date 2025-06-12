@@ -52,28 +52,14 @@ const KML_StyleUrl = 'm_ylw-pushpin';
 implementation
 
 uses
-  Winapi.ShellAPI, WinApi.Windows;
+  Winapi.ShellAPI, WinApi.Windows, UnitStringUtils;
 
 function KMLColor(GPXColor: string): string;
+var
+  HTMLColor: string;
 begin
-  result := 'ffff00ff';
-  if (GPXColor = 'Black')       then exit('ff000000');
-  if (GPXColor = 'DarkRed')     then exit('ff00008b');
-  if (GPXColor = 'DarkGreen')   then exit('ff006400');
-  if (GPXColor = 'DarkYellow')  then exit('ff20b8b5');
-  if (GPXColor = 'DarkBlue')    then exit('ff8b0000');
-  if (GPXColor = 'DarkMagenta') then exit('ff8b008b');
-  if (GPXColor = 'DarkCyan')    then exit('ff8b8b00');
-  if (GPXColor = 'LightGray')   then exit('ffcccccc');
-  if (GPXColor = 'DarkGray')    then exit('ff444444');
-  if (GPXColor = 'Red')         then exit('ff0000ff');
-  if (GPXColor = 'Green')       then exit('ff00ff00');
-  if (GPXColor = 'Yellow')      then exit('ff00ffff');
-  if (GPXColor = 'Blue')        then exit('ffff0000');
-  if (GPXColor = 'Magenta')     then exit('ffff00ff');
-  if (GPXColor = 'Cyan')        then exit('ffffff00');
-  if (GPXColor = 'White')       then exit('ffffffff');
-  if (GPXColor = 'Transparent') then exit('ffffffff');
+  HTMLColor := GPX2HTMLColor(GPXColor);
+  result := Format('ff%s%s%s', [Copy(HTMLColor, 5,2), Copy(HTMLColor, 3, 2), Copy(HTMLColor, 1, 2)]);
 end;
 
 function GetNodeAsType(ANewDoc: IXMLNode; Aname: string; SomeType: TXMLNodeClass): IXMLNode;

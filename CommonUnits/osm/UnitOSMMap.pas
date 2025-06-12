@@ -422,24 +422,7 @@ end;
 
 function OSMColor(GPXColor: string): string;
 begin
-  result := '#ff00ff';
-  if SameText(GPXColor, 'Black')       then begin result := '#000000'; exit; end;
-  if SameText(GPXColor, 'DarkRed')     then begin result := '#8b0000'; exit; end;
-  if SameText(GPXColor, 'DarkGreen')   then begin result := '#006400'; exit; end;
-  if SameText(GPXColor, 'DarkYellow')  then begin result := '#b5b820'; exit; end;
-  if SameText(GPXColor, 'DarkBlue')    then begin result := '#00008b'; exit; end;
-  if SameText(GPXColor, 'DarkMagenta') then begin result := '#8b008b'; exit; end;
-  if SameText(GPXColor, 'DarkCyan')    then begin result := '#008b8b'; exit; end;
-  if SameText(GPXColor, 'LightGray')   then begin result := '#cccccc'; exit; end;
-  if SameText(GPXColor, 'DarkGray')    then begin result := '#444444'; exit; end;
-  if SameText(GPXColor, 'Red')         then begin result := '#ff0000'; exit; end;
-  if SameText(GPXColor, 'Green')       then begin result := '#00ff00'; exit; end;
-  if SameText(GPXColor, 'Yellow')      then begin result := '#ffff00'; exit; end;
-  if SameText(GPXColor, 'Blue')        then begin result := '#0000ff'; exit; end;
-  if SameText(GPXColor, 'Magenta')     then begin result := '#ff00ff'; exit; end;
-  if SameText(GPXColor, 'Cyan')        then begin result := '#00ffff'; exit; end;
-  if SameText(GPXColor, 'White')       then begin result := '#ffffff'; exit; end;
-  if SameText(GPXColor, 'Transparent') then begin result := '#ffffff'; exit; end;
+  result := Format('#%s', [GPX2HTMLColor(GPXColor)]);
 end;
 
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);

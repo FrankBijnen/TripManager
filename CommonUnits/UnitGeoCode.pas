@@ -8,10 +8,6 @@ uses
   Vcl.Edge;
 
 const
-  GeoCodeUrl              = 'GeoCodeUrl';
-  GeoCodeApiKey           = 'GeoCodeApiKey';
-  AddressFormat           = 'AddressFormat';
-  ThrottleGeoCode         = 'ThrottleGeoCode';
   DefState                = 'ISO3166-2-lvl4,state';
   DefCity                 = 'village,town,city,municipality,hamlet';
   DefRoadHouse            = 'road+house_number';
@@ -474,10 +470,10 @@ end;
 // https://wiki.openstreetmap.org/wiki/Key:place
 procedure ReadGeoCodeSettings;
 begin
-  GeoSettings.GeoCodeUrl := GetRegistry(GeoCodeUrl, 'https://geocode.maps.co');
-  GeoSettings.GeoCodeApiKey := GetRegistry(GeoCodeApiKey, '');
-  GeoSettings.AddressFormat := GetRegistry(AddressFormat, DefState + '|' + DefCity + '|' + DefRoadHouse);
-  GeoSettings.ThrottleGeoCode := GetRegistry(ThrottleGeoCode, 1000);
+  GeoSettings.GeoCodeUrl := GetRegistry(Reg_GeoCodeUrl, 'https://geocode.maps.co');
+  GeoSettings.GeoCodeApiKey := GetRegistry(Reg_GeoCodeApiKey, '');
+  GeoSettings.AddressFormat := GetRegistry(Reg_AddressFormat, DefState + '|' + DefCity + '|' + DefRoadHouse);
+  GeoSettings.ThrottleGeoCode := GetRegistry(Reg_ThrottleGeoCode, 1000);
 end;
 
 procedure ReadCoordCache;

@@ -159,13 +159,13 @@ type
     FOnSetFuncPrefs: TNotifyEvent;
     FOnSavePrefs: TNotifyEvent;
 
-    constructor Create(OnSetFuncPrefs, OnSavePrefs: TNotifyEvent);
+    constructor Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
     destructor Destroy; override;
     procedure DoPrefSaved;
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
+    function DistanceStr: string;
     class procedure SetPrefs(TvSelections: TTreeview);
     class function StorePrefs(TvSelections: TTreeview): TGPXFuncArray;
-
   end;
 
   TGPXFile = class
@@ -185,7 +185,6 @@ type
     CurrentCoord: TCoord;
     TotalDistance: double;
     CurrentDistance: double;
-    DistanceStr: string;
     PrevCoord: TCoord;
 
     FXmlDocument: TXmlVSDocument;
@@ -355,7 +354,6 @@ const
   DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
   DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
   UnglitchTreshold: double = 0.0005; // In Km. ==> 50 Cm
-  BooleanValues: array[boolean] of string = ('False', 'True');
 
 var
   FormatSettings: TFormatSettings;
@@ -371,7 +369,7 @@ begin
   end;
 end;
 
-constructor TProcessOptions.Create(OnSetFuncPrefs, OnSavePrefs: TNotifyEvent);
+constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
 begin
   inherited Create;
   FOnSetFuncPrefs := OnSetFuncPrefs;
@@ -487,6 +485,14 @@ begin
   end;
 end;
 
+function TProcessOptions.DistanceStr: string;
+begin
+  if (DistanceUnit = TDistanceUnit.duMi) then
+    result := 'Mi'
+  else
+    result := 'Km';
+end;
+
 class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview);
 begin
   TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
@@ -501,10 +507,10 @@ begin
     TvSelections.Items[IdWayPointVia].Checked := GetRegistry(Reg_FuncWayPointVia, false);
     TvSelections.Items[IdWayPointShp].Checked := GetRegistry(Reg_FuncWayPointShape, false);
 
-    TvSelections.Items[IdGpi].Checked := GetRegistry(Reg_FuncGpi, true);
-      TvSelections.Items[IdGpiWayPt].Checked := GetRegistry(Reg_FuncGpiWayPt, true);
-      TvSelections.Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
-      TvSelections.Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
+  TvSelections.Items[IdGpi].Checked := GetRegistry(Reg_FuncGpi, true);
+    TvSelections.Items[IdGpiWayPt].Checked := GetRegistry(Reg_FuncGpiWayPt, true);
+    TvSelections.Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
+    TvSelections.Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
 
   if (TvSelections.Items.Count-1 = IdHtml) then
   begin
@@ -542,13 +548,13 @@ begin
     SetRegistry(Reg_FuncWayPointVia, TvSelections.Items[IdWayPointVia].Checked);
     SetRegistry(Reg_FuncWayPointShape, TvSelections.Items[IdWayPointShp].Checked);
 
-    SetRegistry(Reg_FuncGpi, TvSelections.Items[IdGpi].Checked);
-    if (TvSelections.Items[IdGpi].Checked) then
-      result := result + [TGPXFunc.CreatePOI];
+  SetRegistry(Reg_FuncGpi, TvSelections.Items[IdGpi].Checked);
+  if (TvSelections.Items[IdGpi].Checked) then
+    result := result + [TGPXFunc.CreatePOI];
 
-      SetRegistry(Reg_FuncGpiWayPt, TvSelections.Items[IdGpiWayPt].Checked);
-      SetRegistry(Reg_FuncGpiViaPt, TvSelections.Items[IdGpiViaPt].Checked);
-      SetRegistry(Reg_FuncGpiShpPt, TvSelections.Items[IdGpiShpPt].Checked);
+    SetRegistry(Reg_FuncGpiWayPt, TvSelections.Items[IdGpiWayPt].Checked);
+    SetRegistry(Reg_FuncGpiViaPt, TvSelections.Items[IdGpiViaPt].Checked);
+    SetRegistry(Reg_FuncGpiShpPt, TvSelections.Items[IdGpiShpPt].Checked);
 
   if (TvSelections.Items.Count-1 = IdHtml) then
   begin
@@ -599,7 +605,7 @@ begin
     result := '%3.0f'
   else
     result := '%4.0f';
-  result := result + ' ' + DistanceStr;
+  result := result + ' ' + ProcessOptions.DistanceStr;
 end;
 
 function TGPXfile.Coord2Float(ACoord: LongInt): string;
@@ -676,11 +682,6 @@ begin
   FWayPointList.Clear;
   FTrackList.Clear;
   FWayPointsProcessedList.Clear;
-
-  if (ProcessOptions.DistanceUnit = TDistanceUnit.duMi) then
-    DistanceStr := 'Mi'
-  else
-    DistanceStr := 'Km';
 end;
 
 procedure TGPXfile.CloneAttributes(FromNode, ToNode: TXmlVsNode);
@@ -1270,11 +1271,11 @@ begin
       TShapingPointName.Route_Sequence:
         ShapePtName := Format('%s_%3.3d', [RouteName, ShapingPointCnt]);
       TShapingPointName.Route_Distance:
-        ShapePtName := Format('%s_%3.3d %s', [RouteName, Round(TotalDistance), DistanceStr]);
+        ShapePtName := Format('%s_%3.3d %s', [RouteName, Round(TotalDistance), Processoptions.DistanceStr]);
       TShapingPointName.Sequence_Route:
         ShapePtName := Format('%3.3d_%s', [ShapingPointCnt, RouteName]);
       TShapingPointName.Distance_Route:
-        ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), DistanceStr, RouteName]);
+        ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), Processoptions.DistanceStr, RouteName]);
     end;
 
     if (Symbol = '') or
@@ -1559,6 +1560,28 @@ begin
 
   result.SetAttribute('creator', 'TDBWare');
   result.SetAttribute('version', '1.1');
+end;
+
+function HTMLColor(GPXColor: string): string;
+begin
+  result := 'ff00ff';
+  if SameText(GPXColor, 'Black')       then exit('000000');
+  if SameText(GPXColor, 'DarkRed')     then exit('8b0000');
+  if SameText(GPXColor, 'DarkGreen')   then exit('006400');
+  if SameText(GPXColor, 'DarkYellow')  then exit('b5b820');
+  if SameText(GPXColor, 'DarkBlue')    then exit('00008b');
+  if SameText(GPXColor, 'DarkMagenta') then exit('8b008b');
+  if SameText(GPXColor, 'DarkCyan')    then exit('008b8b');
+  if SameText(GPXColor, 'LightGray')   then exit('cccccc');
+  if SameText(GPXColor, 'DarkGray')    then exit('444444');
+  if SameText(GPXColor, 'Red')         then exit('ff0000');
+  if SameText(GPXColor, 'Green')       then exit('00ff00');
+  if SameText(GPXColor, 'Yellow')      then exit('ffff00');
+  if SameText(GPXColor, 'Blue')        then exit('0000ff');
+  if SameText(GPXColor, 'Magenta')     then exit('ff00ff');
+  if SameText(GPXColor, 'Cyan')        then exit('00ffff');
+  if SameText(GPXColor, 'White')       then exit('ffffff');
+  if SameText(GPXColor, 'Transparent') then exit('ffffff');
 end;
 
 function TGPXfile.WayPointNotProcessed(WayPoint: TXmlVSNode): boolean;

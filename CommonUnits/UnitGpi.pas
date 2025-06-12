@@ -1,6 +1,6 @@
 unit UnitGpi;
 {$WARN SYMBOL_PLATFORM OFF}
-{$J+}
+
 interface
 
 uses
@@ -12,8 +12,12 @@ type
 
 const GpiName: TGPXString = 'my.gpi';
       GpiVersion: Word = 0;
-      GpiSymbolsDir: TGPXString = 'Symbols\24x24\';
       DefTransparentColor: DWORD = $00ff00ff;
+//TODO
+{$J+}
+      GpiSymbolsDir: TGPXString = 'Symbols\24x24\';
+{$J-}
+
 type
 
   TGPXWayPoint = class
