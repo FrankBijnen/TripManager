@@ -62,7 +62,7 @@ type
 
 function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0; UseCache: boolean = true): TPlace;
 procedure GetCoordsOfPlace(const Place: string; var Lat, Lon: string);
-procedure ReadGeoCodeSettings(const Reg_Key: string);
+procedure ReadGeoCodeSettings;
 procedure ClearCoordCache;
 
 const
@@ -79,7 +79,7 @@ uses
   System.Variants, System.JSON,  System.NetEncoding, System.Math, System.StrUtils, System.DateUtils,
   Vcl.Dialogs,
   REST.Types, REST.Client, REST.Utils,
-  UnitStringUtils,
+  UnitStringUtils, UnitRegistry,
   UFrmPLaces, UFrmGeoSearch;
 
 const
@@ -472,13 +472,12 @@ begin
 end;
 
 // https://wiki.openstreetmap.org/wiki/Key:place
-procedure ReadGeoCodeSettings(const Reg_Key: string);
+procedure ReadGeoCodeSettings;
 begin
-  GeoSettings.GeoCodeUrl := GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, GeoCodeUrl, 'https://geocode.maps.co');
-  GeoSettings.GeoCodeApiKey := GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, GeoCodeApiKey, '');
-  GeoSettings.AddressFormat := GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, AddressFormat,
-                                                DefState + '|' + DefCity + '|' + DefRoadHouse);
-  GeoSettings.ThrottleGeoCode := StrToInt(GetRegistryValue(HKEY_CURRENT_USER, Reg_Key, ThrottleGeoCode, '1000'));
+  GeoSettings.GeoCodeUrl := GetRegistry(GeoCodeUrl, 'https://geocode.maps.co');
+  GeoSettings.GeoCodeApiKey := GetRegistry(GeoCodeApiKey, '');
+  GeoSettings.AddressFormat := GetRegistry(AddressFormat, DefState + '|' + DefCity + '|' + DefRoadHouse);
+  GeoSettings.ThrottleGeoCode := GetRegistry(ThrottleGeoCode, 1000);
 end;
 
 procedure ReadCoordCache;

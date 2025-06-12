@@ -7,12 +7,6 @@ uses
   Data.DB, Datasnap.DBClient,
   UnitTripObjects;
 
-const
-  BooleanTrue = 'True';
-  BooleanFalse = 'False';
-
-  BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
-  RtePt = 'RtePt ';
 
 type
   TOnGetMapCoords = function: string of object;
@@ -91,6 +85,13 @@ uses
   UnitGeoCode, UnitStringUtils, UnitVerySimpleXml, UnitGpxObjects;
 
 {$R *.dfm}
+
+const
+  BooleanTrue = 'True';
+  BooleanFalse = 'False';
+
+  BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
+  RtePt = 'RtePt ';
 
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization

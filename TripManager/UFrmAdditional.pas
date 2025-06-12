@@ -33,19 +33,19 @@ var
 implementation
 
 uses
-  UnitStringUtils, UFrmAdvSettings;
+  UnitStringUtils;
 
 {$R *.dfm}
 
 procedure TFrmAdditional.SetPrefs;
 begin
-  TProcessOptions.SetPrefs(TvSelections, TripManagerReg_Key);
+  TProcessOptions.SetPrefs(TvSelections);
   TvSelections.Items[IdCompleteRoute].Enabled := false;
 end;
 
 procedure TFrmAdditional.StorePrefs;
 begin
-  Funcs := TProcessOptions.StorePrefs(TvSelections, TripManagerReg_Key);
+  Funcs := TProcessOptions.StorePrefs(TvSelections);
 end;
 
 procedure TFrmAdditional.TvSelectionsCheckStateChanging(Sender: TCustomTreeView; Node: TTreeNode; NewCheckState,

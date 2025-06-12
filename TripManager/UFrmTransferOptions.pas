@@ -38,7 +38,7 @@ uses
 
 procedure TFrmTransferOptions.SetPrefs;
 begin
-  TProcessOptions.SetPrefs(TvSelections, TripManagerReg_Key);
+  TProcessOptions.SetPrefs(TvSelections);
   MemoDestinations.Text :=
     'Files will be transferred to:' + #13 + #10 + #13 + #10 +
     'Trip files: ' + FrmTripManager.DeviceFolder[0] + #13 + #10 +
@@ -48,7 +48,7 @@ end;
 
 procedure TFrmTransferOptions.StorePrefs;
 begin
-  Funcs := TProcessOptions.StorePrefs(TvSelections, TripManagerReg_Key);
+  Funcs := TProcessOptions.StorePrefs(TvSelections);
 end;
 
 procedure TFrmTransferOptions.FormClose(Sender: TObject; var Action: TCloseAction);

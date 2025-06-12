@@ -3,9 +3,8 @@ unit UnitStringUtils;
 interface
 
 uses
-  System.Sysutils, System.Variants, Winapi.ShellAPI, System.Win.Registry, System.Classes,
-  Winapi.Windows;
-
+  System.Sysutils, System.Variants, System.Classes,
+  Winapi.ShellAPI, Winapi.Windows;
 
 type
   T4Bytes = array[0..3] of byte;
@@ -30,8 +29,6 @@ procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);
 procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD); overload;
 
 procedure DebugMsg(const Msg: array of variant);
-function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
-procedure SetRegistryValue(const ARootKey: HKEY; const KeyName, Name, Value: string);
 function TempFilename(const Prefix: string): string;
 function GetAppData: string;
 function EscapeHtml(const HTML: string): string;
@@ -230,35 +227,6 @@ begin
   for I := 0 to high(Msg) do
     FMsg := Format('%s,%s', [FMsg, VarToStr(Msg[I])]);
   OutputDebugString(PChar(FMsg));
-end;
-
-function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string=''): string;
-var Registry: TRegistry;
-begin
-  Registry := TRegistry.Create(KEY_READ);
-  try
-    Registry.RootKey := ARootKey;
-    // False because we do not want to create it if it doesn't exist
-    if (Registry.OpenKey(KeyName, False)) then
-      result := Registry.ReadString(Name);
-  finally
-    Registry.Free;
-  end;
-  if (result = '') then
-    result := Default;
-end;
-
-procedure SetRegistryValue(const ARootKey: HKEY; const KeyName, Name, Value: string);
-var Registry: TRegistry;
-begin
-  Registry := TRegistry.Create(KEY_WRITE);
-  try
-    Registry.RootKey := ARootKey;
-    Registry.OpenKey(KeyName, True);
-    Registry.WriteString(Name, Value);
-  finally
-    Registry.Free;
-  end;
 end;
 
 function TempPath: string;

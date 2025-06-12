@@ -45,8 +45,9 @@ uses
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
-  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
-  
+  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
+  UnitRegistry in 'UnitRegistry.pas';
+
 {$R *.res}
 
 begin

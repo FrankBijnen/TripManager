@@ -8,29 +8,27 @@ uses
   Vcl.Menus,
   UnitGeoCode;
 
-const
-  TripManagerReg_Key      = 'Software\TDBware\TripManager';
-  PrefFileSysFolder_Key   = 'PrefFileSysFolder';
-  PrefFileSysFolder_Val   = 'rfDesktop';
-  PrefDev_Key             = 'PrefDevice';
-  PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
-  PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
-  PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
-  PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
-  PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
-  PrefDevPoiFolder_Val    = 'Internal Storage\POI';
-  WarnModel_Key           = 'WarnModel';
-  TripColor_Key           = 'TripColor';
-  Maximized_Key           = 'Maximized';
-  WidthColumns_Key        = 'WidthColumns';
-  SortColumn_Key          = 'SortColumn';
-  SortAscending_Key       = 'SortAscending';
-  RoutePointTimeOut_Key   = 'RoutePointTimeOut';
-  RoutePointTimeOut_Val   = '5000';
-  GeoSearchTimeOut_Key    = 'GeoSearchTimeOut';
-  GeoSearchTimeOut_Val    = '8000';
-
-  BooleanValues: array[boolean] of string = ('False', 'True');
+//const
+//  TripManagerReg_Key      = 'Software\TDBware\TripManager';
+//  PrefFileSysFolder_Key   = 'PrefFileSysFolder';
+//  PrefFileSysFolder_Val   = 'rfDesktop';
+//  PrefDev_Key             = 'PrefDevice';
+//  PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
+//  PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
+//  PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
+//  PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
+//  PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
+//  PrefDevPoiFolder_Val    = 'Internal Storage\POI';
+//  WarnModel_Key           = 'WarnModel';
+//  TripColor_Key           = 'TripColor';
+//  Maximized_Key           = 'Maximized';
+//  WidthColumns_Key        = 'WidthColumns';
+//  SortColumn_Key          = 'SortColumn';
+//  SortAscending_Key       = 'SortAscending';
+//  RoutePointTimeOut_Key   = 'RoutePointTimeOut';
+//  RoutePointTimeOut_Val   = '5000';
+//  GeoSearchTimeOut_Key    = 'GeoSearchTimeOut';
+//  GeoSearchTimeOut_Val    = '8000';
 
 type
   TFrmAdvSettings = class(TForm)
@@ -91,7 +89,7 @@ implementation
 
 uses
   System.UITypes,
-  UnitStringUtils, UFrmTripManager, UnitGpi, UnitTripObjects;
+  UnitStringUtils, UFrmTripManager, UnitRegistry, UnitGpi, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -128,7 +126,7 @@ var
   begin
     AGrid.Cells[0, ARow] := AKey;
     AGrid.Cells[1, ARow] := ADesc;
-    AGrid.Cells[2, ARow] := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AKey, DefaultValue);
+    AGrid.Cells[2, ARow] := GetRegistry(AKey, DefaultValue);
     ARow := ARow + 1;
   end;
 
@@ -139,20 +137,20 @@ begin
 
     CurRow := 1;
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
-    AddGridLine(GridGeneralSettings, CurRow, Maximized_Key,       'False', 'Start TripManager maximized');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Preferred device and folders-');
-    AddGridLine(GridGeneralSettings, CurRow, PrefDev_Key,             XTName,                 'Default device to use');
-    AddGridLine(GridGeneralSettings, CurRow, PrefDevTripsFolder_Key,  PrefDevTripsFolder_Val, 'Default trips folder');
-    AddGridLine(GridGeneralSettings, CurRow, PrefDevGpxFolder_Key,    PrefDevGPXFolder_Val,   'Default GPX folder');
-    AddGridLine(GridGeneralSettings, CurRow, PrefDevPoiFolder_Key,    PrefDevPoiFolder_Val,   'Default GPI folder');
-    AddGridLine(GridGeneralSettings, CurRow, PrefFileSysFolder_Key,   PrefFileSysFolder_Val,  'Last used Windows folder');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDev_Key,             XTName,                 'Default device to use');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Map display-');
-    AddGridLine(GridGeneralSettings, CurRow, GeoSearchTimeOut_Key,    GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
-    AddGridLine(GridGeneralSettings, CurRow, RoutePointTimeOut_Key,   RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_GeoSearchTimeOut_Key,    Reg_GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_RoutePointTimeOut_Key,   Reg_RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
 
     GridGeneralSettings.RowCount := CurRow;
     AddGridHeader(GridGeneralSettings);
@@ -168,9 +166,9 @@ begin
     CurRow := 1;
 
     AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Way point files (*.gpx)-');
-    AddGridLine(GridTransferDevice, CurRow, 'FuncWayPointWpt',   'True',  'Add original Way points');
-    AddGridLine(GridTransferDevice, CurRow, 'FuncWayPointVia',   'False', 'Add Via points from route');
-    AddGridLine(GridTransferDevice, CurRow, 'FuncWayPointShape', 'False', 'Add Shaping points from route');
+    AddGridLine(GridTransferDevice, CurRow, Reg_FuncWayPointWpt,   'True',  'Add original Way points');
+    AddGridLine(GridTransferDevice, CurRow, Reg_FuncWayPointVia,   'False', 'Add Via points from route');
+    AddGridLine(GridTransferDevice, CurRow, Reg_FuncWayPointShape, 'False', 'Add Shaping points from route');
     AddGridLine(GridTransferDevice, CurRow, '');
 
     AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Poi files (*.gpi)-');
@@ -205,7 +203,7 @@ begin
   end;
 
   GridGeoCodeSettings.RowCount := GridGeoCodeSettings.FixedRows +1;
-  ReadGeoCodeSettings(TripManagerReg_Key);
+  ReadGeoCodeSettings;
   GridGeoCodeSettings.BeginUpdate;
   try
 
@@ -269,8 +267,7 @@ begin
   begin
     if (AGrid.Cells[0, Index] = '') then
       continue;
-    SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key,
-                     AGrid.Cells[0, Index], AGrid.Cells[2, Index]);
+    SetRegistry(AGrid.Cells[0, Index], AGrid.Cells[2, Index]);
   end;
 end;
 
@@ -281,8 +278,7 @@ begin
   SaveGrid(GridXT2Settings);
   SaveGrid(GridGeoCodeSettings);
 
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, AddressFormat,
-                   ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
+  SetRegistry(AddressFormat, ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
 end;
 
 procedure TFrmAdvSettings.BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

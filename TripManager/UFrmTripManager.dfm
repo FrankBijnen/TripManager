@@ -150,7 +150,7 @@ object FrmTripManager: TFrmTripManager
           Left = 303
           Top = 5
           Width = 68
-          Height = 21
+          Height = 23
           Margins.Left = 1
           Margins.Top = 4
           Margins.Right = 1
@@ -439,7 +439,7 @@ object FrmTripManager: TFrmTripManager
     Top = 275
     Width = 639
     Height = 406
-    ActivePage = TsOSMMap
+    ActivePage = TsHex
     Align = alClient
     TabOrder = 1
     object TsHex: TTabSheet
@@ -451,7 +451,11 @@ object FrmTripManager: TFrmTripManager
         Height = 378
         Align = alClient
         Color = clWhite
+        DoubleBuffered = True
+        DoubleBufferedMode = dbmRequested
+        FullRepaint = False
         ParentBackground = False
+        ParentDoubleBuffered = False
         TabOrder = 0
         object PnlHexEditTrip: TPanel
           Left = 1
@@ -625,12 +629,11 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True

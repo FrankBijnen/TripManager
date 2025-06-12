@@ -67,7 +67,7 @@ var
 implementation
 
 uses
-  System.TypInfo, UnitStringUtils, UnitGpxObjects, UFrmAdvSettings;
+  System.TypInfo, UnitRegistry, UnitStringUtils, UnitGpxObjects, UFrmAdvSettings;
 
 {$R *.dfm}
 
@@ -129,61 +129,64 @@ end;
 procedure TFrmPostProcess.SetPrefs;
 var
   WayPtList: TStringList;
+  DefProcessOptions: TProcessOptions;
 begin
+  DefProcessOptions := TProcessOptions.Create(nil, nil);
   WayPtList := TStringList.Create;
   try
     WayPtList.Text := ProcessCategoryPick;
-    ChkProcessBegin.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessBegin', BooleanValues[true]) = BooleanValues[true]);
-    CmbBeginSymbol.ItemIndex := CmbBeginSymbol.Items.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginSymbol', 'Flag, Red'));
-    EdBeginStr.Text := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginStr', 'Begin');
-    ChkBeginAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginAddress', BooleanValues[false]) = BooleanValues[true]);
+    ChkProcessBegin.Checked := GetRegistry(Reg_ProcessBegin, true);
+    CmbBeginSymbol.ItemIndex := CmbBeginSymbol.Items.IndexOf(GetRegistry(Reg_BeginSymbol, DefProcessOptions.BeginSymbol));
+    EdBeginStr.Text := GetRegistry(Reg_BeginStr, DefProcessOptions.BeginStr);
+    ChkBeginAddress.Checked := GetRegistry(Reg_BeginAddress, false);
 
-    ChkProcessEnd.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessEnd', BooleanValues[true]) = BooleanValues[true]);
-    CmbEndSymbol.ItemIndex := CmbEndSymbol.Items.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndSymbol', 'Flag, Blue'));
-    EdEndStr.Text := GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndStr', 'End');
-    ChkEndAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndAddress', BooleanValues[false]) = BooleanValues[true]);
+    ChkProcessEnd.Checked := GetRegistry(Reg_ProcessEnd, true);
+    CmbEndSymbol.ItemIndex := CmbEndSymbol.Items.IndexOf(GetRegistry(Reg_EndSymbol, DefProcessOptions.EndSymbol));
+    EdEndStr.Text := GetRegistry(Reg_EndStr, DefProcessOptions.EndStr);
+    ChkEndAddress.Checked := GetRegistry(Reg_EndAddress, false);
 
-    ChkProcessWpt.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[true]) = BooleanValues[true]);
-    CmbWayPtCat.ItemIndex := WayPtList.IndexOf(GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', WayPtList[WayPtList.Count -1]));
-    ChkWayPtAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'WayPtAddress', BooleanValues[false]) = BooleanValues[true]);
+    ChkProcessWpt.Checked := GetRegistry(Reg_ProcessWpt, true);
+    CmbWayPtCat.ItemIndex := WayPtList.IndexOf(GetRegistry(Reg_ProcessCategory, WayPtList[WayPtList.Count -1]));
+    ChkWayPtAddress.Checked := GetRegistry(Reg_WayPtAddress, false);
 
-    ChkProcessVia.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessVia', BooleanValues[true]) = BooleanValues[true]);
-    ChkViaAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ViaAddress', BooleanValues[false]) = BooleanValues[true]);
+    ChkProcessVia.Checked := GetRegistry(Reg_ProcessVia, true);
+    ChkViaAddress.Checked := GetRegistry(Reg_ViaAddress, false);
 
-    ChkProcessShape.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessShape', BooleanValues[true]) = BooleanValues[true]);
+    ChkProcessShape.Checked := GetRegistry(Reg_ProcessShape, true);
     CmbShapingName.ItemIndex := GetEnumValue(TypeInfo(TShapingPointName),
-                                  GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ShapingName', 'Route_Distance'));
+      GetRegistry(Reg_ShapingName, GetEnumName(TypeInfo(TShapingPointName), Ord(DefProcessOptions.ShapingPointName))));
     CmbDistanceUnit.ItemIndex := GetEnumValue(TypeInfo(TDistanceUnit),
-                                   GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'DistanceUnit', 'duKm'));
-    ChkShapeAddress.Checked := (GetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ShapeAddress', BooleanValues[false]) = BooleanValues[true]);
+      GetRegistry(Reg_DistanceUnit, GetEnumName(TypeInfo(TDistanceUnit), Ord(DefProcessOptions.DistanceUnit))));
+    ChkShapeAddress.Checked := GetRegistry(Reg_ShapeAddress, false);
   finally
     WayPtList.Free;
+    DefProcessOptions.Free;
   end;
 end;
 
 procedure TFrmPostProcess.StorePrefs;
 begin
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessBegin', BooleanValues[ChkProcessBegin.Checked]);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginSymbol', CmbBeginSymbol.Text);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginStr', EdBeginStr.Text);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'BeginAddress', BooleanValues[ChkBeginAddress.Checked]);
+  SetRegistry(Reg_ProcessBegin, ChkProcessBegin.Checked);
+  SetRegistry(Reg_BeginSymbol, CmbBeginSymbol.Text);
+  SetRegistry(Reg_BeginStr, EdBeginStr.Text);
+  SetRegistry(Reg_BeginAddress, ChkBeginAddress.Checked);
 
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessEnd', BooleanValues[ChkProcessEnd.Checked]);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndSymbol', CmbEndSymbol.Text);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndStr', EdEndStr.Text);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'EndAddress', BooleanValues[ChkEndAddress.Checked]);
+  SetRegistry(Reg_ProcessEnd, ChkProcessEnd.Checked);
+  SetRegistry(Reg_EndSymbol, CmbEndSymbol.Text);
+  SetRegistry(Reg_EndStr, EdEndStr.Text);
+  SetRegistry(Reg_EndAddress, ChkEndAddress.Checked);
 
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessWpt', BooleanValues[ChkProcessWpt.Checked]);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessCategory', CmbWayPtCat.Text);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'WayPtAddress', BooleanValues[ChkWayPtAddress.Checked]);
+  SetRegistry(Reg_ProcessWpt, ChkProcessWpt.Checked);
+  SetRegistry(Reg_ProcessCategory, CmbWayPtCat.Text);
+  SetRegistry(Reg_WayPtAddress, ChkWayPtAddress.Checked);
 
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessVia', BooleanValues[ChkProcessVia.Checked]);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ViaAddress', BooleanValues[ChkViaAddress.Checked]);
+  SetRegistry(Reg_ProcessVia, ChkProcessVia.Checked);
+  SetRegistry(Reg_ViaAddress, ChkViaAddress.Checked);
 
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ProcessShape', BooleanValues[ChkProcessShape.Checked]);
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ShapingName', GetEnumName(TypeInfo(TShapingPointName), CmbShapingName.ItemIndex) );
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'DistanceUnit', GetEnumName(TypeInfo(TDistanceUnit), CmbDistanceUnit.ItemIndex) );
-  SetRegistryValue(HKEY_CURRENT_USER, TripManagerReg_Key, 'ShapeAddress', BooleanValues[ChkShapeAddress.Checked]);
+  SetRegistry(Reg_ProcessShape, ChkProcessShape.Checked);
+  SetRegistry(Reg_ShapingName, GetEnumName(TypeInfo(TShapingPointName), CmbShapingName.ItemIndex) );
+  SetRegistry(Reg_DistanceUnit, GetEnumName(TypeInfo(TDistanceUnit), CmbDistanceUnit.ItemIndex) );
+  SetRegistry(Reg_ShapeAddress, BooleanValues[ChkShapeAddress.Checked]);
 end;
 
 procedure TFrmPostProcess.FormClose(Sender: TObject; var Action: TCloseAction);
