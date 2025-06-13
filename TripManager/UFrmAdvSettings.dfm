@@ -97,7 +97,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
-        ExplicitWidth = 548
         RowHeights = (
           24
           24
@@ -122,7 +121,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
-        ExplicitWidth = 548
         RowHeights = (
           24
           24
@@ -170,7 +168,6 @@ object FrmAdvSettings: TFrmAdvSettings
           Align = alTop
           Caption = 'Result'
           TabOrder = 1
-          ExplicitWidth = 546
         end
         object MemoResult: TMemo
           Left = 1
@@ -192,7 +189,6 @@ object FrmAdvSettings: TFrmAdvSettings
           Align = alTop
           Caption = 'Address format'
           TabOrder = 2
-          ExplicitWidth = 546
           object BtnBuilder: TButton
             Left = 4
             Top = 4
@@ -218,7 +214,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 1
         StyleElements = []
-        ExplicitWidth = 548
         RowHeights = (
           24
           24
@@ -233,7 +228,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Height = 33
         Align = alTop
         TabOrder = 2
-        ExplicitWidth = 548
         object BtnValidate: TButton
           Left = 4
           Top = 3

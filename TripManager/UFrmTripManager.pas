@@ -1693,7 +1693,6 @@ begin
     exit;
   OsmTrack := TStringList.Create;
   try
-  //TODO Add to advanced settings
     CurrentTrip.CreateOSMPoints(OsmTrack, OSMColor(GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val)));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     if (CreateOSMMapHtml) then
@@ -3350,6 +3349,10 @@ begin
     VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, XT2_VehicleProfileHash);
     VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId);
 
+    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Symbols\' +
+                       GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
+    DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
+
     ProcessCategory := [];
   end;
 end;
@@ -3419,10 +3422,6 @@ begin
     ProcessWayPtsInGpi := GetRegistry(Reg_FuncGpiWayPt, true);
     ProcessViaPtsInGpi := GetRegistry(Reg_FuncGpiViaPt, false);
     ProcessShapePtsInGpi := GetRegistry(Reg_FuncGpiShpPt, false);
-
-//TODO add keys in FrmAdvancedSettings
-    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)))) + 'Symbols\80x80\';
-    DefaultProximityStr := '500';
   end;
 end;
 

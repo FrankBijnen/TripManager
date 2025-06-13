@@ -248,7 +248,7 @@ begin
   Html.Add('     POILayer[Id] = new OpenLayers.Layer.Vector(PoiName, {');
   Html.Add('         styleMap: new OpenLayers.StyleMap({');
   Html.Add('             externalGraphic: ImageFile,');
-  Html.Add('             graphicWidth: 20, graphicHeight: 20, graphicYOffset: -20,');
+  Html.Add('             graphicWidth: 20, graphicHeight: 20, graphicXOffset: -10, graphicYOffset: -10,');
   Html.Add('             title: PoiName');
   Html.Add('         })');
   Html.Add('     });');

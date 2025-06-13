@@ -20,6 +20,8 @@ const
   Reg_FuncGpiShpPt            = 'FuncGpiShpPt';
   Reg_FuncKml                 = 'FuncKml';
   Reg_FuncHtml                = 'FuncHtml';
+  Reg_GPISymbolSize           = 'GPISymbolsSize';
+  Reg_GPIProximity            = 'GPIProximity';
 
   Reg_TrackColor              = 'TrackColor';
   Reg_ExploreUuid             = 'ExploreUuid';

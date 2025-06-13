@@ -128,6 +128,10 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Map display-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_GeoSearchTimeOut_Key,    Reg_GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
     AddGridLine(GridGeneralSettings, CurRow, Reg_RoutePointTimeOut_Key,   Reg_RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_TripColor_Key,           Reg_TripColor_Val,          'Trip file color on Map. Choose from:');
+    AddGridLine(GridGeneralSettings, CurRow, '',                          '',                         'Black, (Dark)Red, (Dark)Green');
+    AddGridLine(GridGeneralSettings, CurRow, '',                          '',                         '(Dark)Yellow, (Dark)Blue, (Dark)Magenta');
+    AddGridLine(GridGeneralSettings, CurRow, '',                          '',                         '(Dark)Cyan, LightGray, DarkGray, White');
 
     GridGeneralSettings.RowCount := CurRow;
     AddGridHeader(GridGeneralSettings);
@@ -149,9 +153,12 @@ begin
     AddGridLine(GridTransferDevice, CurRow, '');
 
     AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Poi files (*.gpi)-');
-    AddGridLine(GridTransferDevice, CurRow, 'FuncGpiWayPt',      'True', 'Add original Way points');
-    AddGridLine(GridTransferDevice, CurRow, 'FuncGpiViaPt',      'False', 'Add Via points from route');
-    AddGridLine(GridTransferDevice, CurRow, 'FuncGpiShpPt',      'False', 'Add Shaping points from route');
+    AddGridLine(GridTransferDevice, CurRow, Reg_FuncGpiWayPt,      'True',  'Add original Way points');
+    AddGridLine(GridTransferDevice, CurRow, Reg_FuncGpiViaPt,      'False', 'Add Via points from route');
+    AddGridLine(GridTransferDevice, CurRow, Reg_FuncGpiShpPt,      'False', 'Add Shaping points from route');
+    AddGridLine(GridTransferDevice, CurRow, Reg_GPISymbolSize,     '80x80', 'Size of symbols (24x24 48x48 or 80x80)');
+    AddGridLine(GridTransferDevice, CurRow, Reg_GPIProximity,      '500',   'Default proximity for alerts in meters');
+
     GridTransferDevice.RowCount := CurRow;
 
     AddGridHeader(GridTransferDevice);

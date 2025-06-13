@@ -396,6 +396,7 @@ begin
   ProcessWayPtsInGpi := true;
   ProcessViaPtsInGpi := true;
   ProcessShapePtsInGpi := false;
+  GPISymbolsDir := DefGpiSymbolsDir;
   DefaultProximityStr := '';
 
   ProcessCategory := [pcSymbol, pcGPX];
