@@ -151,6 +151,7 @@ private:
 	TTripFileUpdate FTripFileCanceled;
 	TTripFileUpdate FTripFileUpdated;
 	TRoutePointsShowing FRoutePointsShowing;
+	void __fastcall OnSetAnalyzePrefs(System::TObject* Sender);
 	void __fastcall CopyToClipBoard(bool Cut);
 	
 public:

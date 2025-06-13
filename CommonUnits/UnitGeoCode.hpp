@@ -81,7 +81,6 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-#define TripManagerReg_Key L"Software\\TDBware\\TripManager"
 #define GeoCodeUrl L"GeoCodeUrl"
 #define GeoCodeApiKey L"GeoCodeApiKey"
 #define AddressFormat L"AddressFormat"
@@ -96,10 +95,10 @@ static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
 extern DELPHI_PACKAGE GEOsettingsRec GeoSettings;
 extern DELPHI_PACKAGE TExecRestEvent ExecRestEvent;
 extern DELPHI_PACKAGE System::UnicodeString GeoCodeCache;
-extern DELPHI_PACKAGE TPlace* __fastcall GetPlaceOfCoords(const System::UnicodeString Lat, const System::UnicodeString Lon, HWND hWnd = (HWND)(0x0), unsigned Msg = (unsigned)(0x0));
+extern DELPHI_PACKAGE TPlace* __fastcall GetPlaceOfCoords(const System::UnicodeString Lat, const System::UnicodeString Lon, HWND hWnd = (HWND)(0x0), unsigned Msg = (unsigned)(0x0), bool UseCache = true);
 extern DELPHI_PACKAGE void __fastcall ClearCoordCache();
 extern DELPHI_PACKAGE void __fastcall GetCoordsOfPlace(const System::UnicodeString Place, System::UnicodeString &Lat, System::UnicodeString &Lon);
-extern DELPHI_PACKAGE void __fastcall ReadGeoCodeSettings();
+extern DELPHI_PACKAGE void __fastcall ReadGeoCodeSettings(const System::UnicodeString Reg_Key);
 }	/* namespace Unitgeocode */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITGEOCODE)
 using namespace Unitgeocode;

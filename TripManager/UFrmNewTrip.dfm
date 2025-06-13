@@ -43,7 +43,6 @@ object FrmNewTrip: TFrmNewTrip
     Height = 33
     Align = alBottom
     TabOrder = 0
-    ExplicitTop = 125
     DesignSize = (
       562
       33)
@@ -87,6 +86,5 @@ object FrmNewTrip: TFrmNewTrip
     ReadOnly = True
     TabOrder = 2
     Text = 'EdResultFile'
-    ExplicitTop = 101
   end
 end

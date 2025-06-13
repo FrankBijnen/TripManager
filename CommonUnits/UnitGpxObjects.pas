@@ -156,6 +156,8 @@ type
     VehicleId: string;                        // Defaults for XT2
     {$ENDIF}
 
+    GPISymbolsDir: UTF8String;
+
     FOnSetFuncPrefs: TNotifyEvent;
     FOnSavePrefs: TNotifyEvent;
 
@@ -285,9 +287,6 @@ type
                                   RouteId: integer;
                                   var FirstViaPointId: integer;
                                   TrackStringList: TStringList);
-
-
-
 {$IFDEF TRIPOBJECTS}
     function CreateLocations(RtePts: TXmlVSNodeList): integer;
     procedure CreateTrip_XT(const TripName, CalculationMode, TransportMode: string;
@@ -295,7 +294,6 @@ type
 
     procedure CreateTrip_XT2(const TripName, CalculationMode, TransportMode: string;
                              ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
-
 {$ENDIF}
   public
     var FrmSelectGpx: TFrmSelectGPX;
@@ -336,8 +334,6 @@ type
 end;
 
 
-function InitGarminGpx(GarminGPX: TXmlVSDocument): TXmlVSNode;
-
 implementation
 
 uses
@@ -357,17 +353,6 @@ const
 
 var
   FormatSettings: TFormatSettings;
-
-function GetLocaleSetting: TFormatSettings;
-begin
-  // Get Windows settings, and modify decimal separator and negcurr
-  Result := TFormatSettings.Create(GetThreadLocale);
-  with Result do
-  begin
-    DecimalSeparator := '.'; // The decimal separator is a . PERIOD!
-    NegCurrFormat := 11;
-  end;
-end;
 
 constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
 begin
@@ -1547,21 +1532,6 @@ begin
   end;
 end;
 
-function InitGarminGpx(GarminGPX: TXmlVSDocument): TXmlVSNode;
-begin
-  GarminGPX.Clear;
-  GarminGPX.Encoding := 'utf-8';
-  result := GarminGPX.AddChild('gpx', TXmlVSNodeType.ntDocument);
-  result.SetAttribute('xmlns',       'http://www.topografix.com/GPX/1/1');
-  result.SetAttribute('xmlns:gpxx',  'http://www.garmin.com/xmlschemas/GpxExtensions/v3');
-  result.SetAttribute('xmlns:wptx1', 'http://www.garmin.com/xmlschemas/WaypointExtension/v1');
-  result.SetAttribute('xmlns:ctx',   'http://www.garmin.com/xmlschemas/CreationTimeExtension/v1');
-  result.SetAttribute('xmlns:trp',   'http://www.garmin.com/xmlschemas/TripExtensions/v1');
-
-  result.SetAttribute('creator', 'TDBWare');
-  result.SetAttribute('version', '1.1');
-end;
-
 function HTMLColor(GPXColor: string): string;
 begin
   result := 'ff00ff';
@@ -1625,7 +1595,7 @@ begin
     Lat         := TGPXString(WayPoint.AttributeList.Find('lat').Value);
     Lon         := TGPXString(WayPoint.AttributeList.Find('lon').Value);
     Proximity   := 0;
-    if (ProcessOptions.DefaultProximityStr <> '') then // From INI file
+    if (ProcessOptions.DefaultProximityStr <> '') then
       Proximity := StrToInt(ProcessOptions.DefaultProximityStr);
     Speed       := GetSpeedFromName(string(result.Name));
 
@@ -1656,7 +1626,7 @@ end;
 
 function TGPXfile.GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
 begin
-  result := TGPXBitmap.Create;
+  result := TGPXBitmap.Create(ProcessOptions.GPISymbolsDir);
   result.Bitmap := TGPXString(FindSubNodeValue(WayPoint, 'sym'));
 end;
 
@@ -2177,7 +2147,6 @@ begin
     TrackPointList.Free;
   end;
 end;
-
 
 procedure TGPXFile.DoCreatePOLY;
 var

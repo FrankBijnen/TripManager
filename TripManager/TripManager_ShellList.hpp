@@ -80,6 +80,7 @@ public:
 	HIDESBASE void __fastcall Refresh();
 	HIDESBASE void __fastcall ColumnClick(Vcl::Comctrls::TListColumn* Column);
 	virtual void __fastcall SetFocus();
+	System::UnicodeString __fastcall PathForParsing(Vcl::Shell::Shellctrls::TShellFolder* AFolder);
 	__property bool ColumnSorted = {read=FColumnSorted, write=SetColumnSorted, nodefault};
 	__property int SortColumn = {read=FSortColumn, write=FSortColumn, nodefault};
 	__property Listviewsort::THeaderSortState SortState = {read=FSortState, write=FSortState, nodefault};

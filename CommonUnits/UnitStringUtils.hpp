@@ -20,6 +20,7 @@
 #include <System.Variants.hpp>
 #include <Winapi.ShellAPI.hpp>
 #include <System.Win.Registry.hpp>
+#include <System.Classes.hpp>
 #include <Winapi.Windows.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -44,6 +45,8 @@ extern DELPHI_PACKAGE int __fastcall Swap32(int I)/* overload */;
 extern DELPHI_PACKAGE float __fastcall Swap32(float I)/* overload */;
 extern DELPHI_PACKAGE double __fastcall CoordAsDec(const System::UnicodeString ACoord);
 extern DELPHI_PACKAGE bool __fastcall ValidLatLon(const System::UnicodeString Lat, const System::UnicodeString Lon);
+extern DELPHI_PACKAGE void __fastcall PrepStream(System::Classes::TMemoryStream* TmpStream, const unsigned *Buffer, const System::NativeInt Buffer_High)/* overload */;
+extern DELPHI_PACKAGE void __fastcall PrepStream(System::Classes::TMemoryStream* TmpStream, const unsigned Count, const System::Word *Buffer, const System::NativeInt Buffer_High)/* overload */;
 extern DELPHI_PACKAGE void __fastcall CheckHRGuid(HRESULT HR);
 extern DELPHI_PACKAGE void __fastcall AdjustLatLon(System::UnicodeString &Lat, System::UnicodeString &Lon, int No_Decimals);
 extern DELPHI_PACKAGE void __fastcall ParseLatLon(const System::UnicodeString LatLon, System::UnicodeString &Lat, System::UnicodeString &Lon);

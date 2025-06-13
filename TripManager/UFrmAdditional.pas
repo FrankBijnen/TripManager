@@ -32,9 +32,6 @@ var
 
 implementation
 
-uses
-  UnitStringUtils;
-
 {$R *.dfm}
 
 procedure TFrmAdditional.SetPrefs;

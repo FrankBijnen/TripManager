@@ -8,28 +8,6 @@ uses
   Vcl.Menus,
   UnitGeoCode;
 
-//const
-//  TripManagerReg_Key      = 'Software\TDBware\TripManager';
-//  PrefFileSysFolder_Key   = 'PrefFileSysFolder';
-//  PrefFileSysFolder_Val   = 'rfDesktop';
-//  PrefDev_Key             = 'PrefDevice';
-//  PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
-//  PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
-//  PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
-//  PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
-//  PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
-//  PrefDevPoiFolder_Val    = 'Internal Storage\POI';
-//  WarnModel_Key           = 'WarnModel';
-//  TripColor_Key           = 'TripColor';
-//  Maximized_Key           = 'Maximized';
-//  WidthColumns_Key        = 'WidthColumns';
-//  SortColumn_Key          = 'SortColumn';
-//  SortAscending_Key       = 'SortAscending';
-//  RoutePointTimeOut_Key   = 'RoutePointTimeOut';
-//  RoutePointTimeOut_Val   = '5000';
-//  GeoSearchTimeOut_Key    = 'GeoSearchTimeOut';
-//  GeoSearchTimeOut_Val    = '8000';
-
 type
   TFrmAdvSettings = class(TForm)
     BtnOK: TButton;
@@ -58,7 +36,6 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
-
     procedure BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure Clear1Click(Sender: TObject);
     procedure StatePlaceRoadnr1Click(Sender: TObject);
@@ -89,7 +66,7 @@ implementation
 
 uses
   System.UITypes,
-  UnitStringUtils, UFrmTripManager, UnitRegistry, UnitGpi, UnitTripObjects;
+  UnitStringUtils, UnitRegistry, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -209,9 +186,9 @@ begin
 
     CurRow := 1;
     AddGridLine(GridGeoCodeSettings, CurRow, '', '', '-GeoCode settings-');
-    AddGridLine(GridGeoCodeSettings, CurRow, GeoCodeUrl,       GeoSettings.GeoCodeUrl,    'Open URL in a browser for more info.');
-    AddGridLine(GridGeoCodeSettings, CurRow, GeoCodeApiKey,    GeoSettings.GeoCodeApiKey, 'Enter your API_Key here and click Validate');
-    AddGridLine(GridGeoCodeSettings, CurRow, ThrottleGeoCode,  IntToStr(GeoSettings.ThrottleGeoCode), 'Minimum time in ms between calls');
+    AddGridLine(GridGeoCodeSettings, CurRow, Reg_GeoCodeUrl,       GeoSettings.GeoCodeUrl,    'Open URL in a browser for more info.');
+    AddGridLine(GridGeoCodeSettings, CurRow, Reg_GeoCodeApiKey,    GeoSettings.GeoCodeApiKey, 'Enter your API_Key here and click Validate');
+    AddGridLine(GridGeoCodeSettings, CurRow, Reg_ThrottleGeoCode,  IntToStr(GeoSettings.ThrottleGeoCode), 'Minimum time in ms between calls');
     GridGeoCodeSettings.RowCount := CurRow;
 
     AddGridHeader(GridGeoCodeSettings);
@@ -278,7 +255,7 @@ begin
   SaveGrid(GridXT2Settings);
   SaveGrid(GridGeoCodeSettings);
 
-  SetRegistry(AddressFormat, ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
+  SetRegistry(Reg_AddressFormat, ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
 end;
 
 procedure TFrmAdvSettings.BtnBuilderMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

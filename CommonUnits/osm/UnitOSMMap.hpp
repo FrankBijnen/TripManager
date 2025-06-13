@@ -36,18 +36,19 @@ class PASCALIMPLEMENTATION TOSMHelper : public System::TObject
 	
 private:
 	bool HasData;
-	int Scaled;
 	System::Sysutils::TFormatSettings OsmFormatSettings;
 	System::Classes::TStringList* Html;
 	System::UnicodeString FInitialZoom;
 	System::UnicodeString FPathName;
 	System::UnicodeString FHome;
-	void __fastcall WriteHeader();
+	System::Classes::TStringList* FTrackPoints;
+	void __fastcall WriteHeader(const bool UseOl2Local);
 	void __fastcall WriteTrackPoints();
 	void __fastcall WriteFooter();
 	
 public:
-	__fastcall TOSMHelper(const System::UnicodeString APathName, const System::UnicodeString AHome, const System::UnicodeString AInitialZoom);
+	__fastcall TOSMHelper(const System::UnicodeString APathName, const System::UnicodeString AHome, const System::UnicodeString AInitialZoom)/* overload */;
+	__fastcall TOSMHelper(const System::UnicodeString APathName, System::Classes::TStringList* ATrackPoints)/* overload */;
 	__fastcall virtual ~TOSMHelper();
 };
 
@@ -60,11 +61,11 @@ static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
 #define OSMGetBounds L"GetBounds"
 #define OSMGetRoutePoint L"GetRoutePoint"
 #define InitialZoom_Point L"15"
-#define InitialZoom_Home L"12"
-#define InitialZoom_NoHome L"20"
-#define PopupTimeout L"3000"
-#define GeoSearchTimeout L"8000"
-extern DELPHI_PACKAGE void __fastcall ShowMap(Vcl::Edge::TEdgeBrowser* Browser, System::UnicodeString Home = System::UnicodeString());
+#define InitialZoom L"12"
+extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml(System::UnicodeString Home, bool UseOl2Local = true)/* overload */;
+extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml()/* overload */;
+extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml(System::UnicodeString HtmlName, System::Classes::TStringList* TrackPoints)/* overload */;
+extern DELPHI_PACKAGE System::UnicodeString __fastcall OSMColor(System::UnicodeString GPXColor);
 extern DELPHI_PACKAGE void __fastcall ParseJsonMessage(const System::UnicodeString Message, System::UnicodeString &Msg, System::UnicodeString &Parm1, System::UnicodeString &Parm2);
 }	/* namespace Unitosmmap */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITOSMMAP)

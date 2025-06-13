@@ -3,6 +3,7 @@ program TripManager;
 {$R 'OpenLayers2.res' '..\CommonUnits\osm\Resources\OpenLayers2.rc'}
 
 uses
+{.$DEFINE Debug_CallStack}
   {$IFDEF Debug_CallStack}
   UnitStackTrace in 'UnitStackTrace.pas',
   {$ENDIF }
@@ -44,9 +45,11 @@ uses
   UnitStringUtils in '..\CommonUnits\UnitStringUtils.pas',
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
+  UnitRegistry in 'UnitRegistry.pas',
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
-  UnitRegistry in 'UnitRegistry.pas';
+  TripManager_DBGrid in 'TripManager_DBGrid.pas',
+  TripManager_GridSelItem in 'TripManager_GridSelItem.pas';
 
 {$R *.res}
 

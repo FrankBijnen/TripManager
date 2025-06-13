@@ -48,13 +48,19 @@ TBitMapReader = class
   Pb: Pointer;
   ColPat: array of byte;
   ScanLines: array of byte;
-  constructor Create(ABitMap: UTF8String);
+  constructor Create;
+  procedure Load(ABitMap: UTF8String);
   destructor Destroy; override;
 end;
 
 implementation
 
-constructor TBitMapReader.Create(ABitMap: UTF8String);
+constructor TBitMapReader.Create;
+begin
+  inherited;
+end;
+
+procedure TBitMapReader.Load(ABitMap: UTF8String);
 var F: file;
     Idstr: TIDString;
     Y, RowLength: integer;
@@ -131,9 +137,7 @@ begin
     RowLength := (BitmapInfoHeader.biWidth * BitmapInfoHeader.biBitCount) div 8;
     SetLength(ScanLines, BitmapInfoHeader.biHeight * RowLength);
     for Y := BitmapInfoHeader.biHeight - 1 downto 0 do
-    begin
       BlockRead(F, ScanLines[Y * RowLength], RowLength, amt);
-    end;
 
   finally
     CloseFile(F);

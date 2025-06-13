@@ -150,7 +150,7 @@ object FrmTripManager: TFrmTripManager
           Left = 303
           Top = 5
           Width = 68
-          Height = 23
+          Height = 21
           Margins.Left = 1
           Margins.Top = 4
           Margins.Right = 1

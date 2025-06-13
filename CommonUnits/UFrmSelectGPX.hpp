@@ -38,6 +38,8 @@ namespace Ufrmselectgpx
 //-- forward type declarations -----------------------------------------------
 class DELPHICLASS TFrmSelectGPX;
 //-- type declarations -------------------------------------------------------
+enum DECLSPEC_DENUM TTagsToShow : unsigned char { WptRte, RteTrk };
+
 class PASCALIMPLEMENTATION TFrmSelectGPX : public Vcl::Forms::TForm
 {
 	typedef Vcl::Forms::TForm inherited;
@@ -51,7 +53,7 @@ __published:
 	Vcl::Menus::TPopupMenu* PopupMenu1;
 	Vcl::Menus::TMenuItem* CheckAll1;
 	Vcl::Menus::TMenuItem* CheckNone1;
-	Vcl::Extctrls::TPanel* PnlClear;
+	Vcl::Extctrls::TPanel* PnlColor;
 	Vcl::Stdctrls::TComboBox* CmbOverruleColor;
 	Vcl::Stdctrls::TLabel* lblChangeColor;
 	void __fastcall CheckAll1Click(System::TObject* Sender);
@@ -61,9 +63,12 @@ __published:
 	void __fastcall FormCreate(System::TObject* Sender);
 	void __fastcall FormDestroy(System::TObject* Sender);
 	
+private:
+	TTagsToShow FTagsToShow;
+	
 public:
 	System::Classes::TStringList* AllTracks;
-	void __fastcall LoadTracks(System::UnicodeString DisplayColor);
+	void __fastcall LoadTracks(System::UnicodeString DisplayColor, TTagsToShow TagsToShow);
 	System::UnicodeString __fastcall TrackSelectedColor(const System::UnicodeString TrackName);
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmSelectGPX(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
@@ -78,7 +83,6 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-extern DELPHI_PACKAGE TFrmSelectGPX* FrmSelectGPX;
 }	/* namespace Ufrmselectgpx */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UFRMSELECTGPX)
 using namespace Ufrmselectgpx;

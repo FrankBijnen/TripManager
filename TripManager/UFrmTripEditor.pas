@@ -3,23 +3,15 @@ unit UFrmTripEditor;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Vcl.StdCtrls, Vcl.Buttons, System.Classes,
-  Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, Vcl.ComCtrls, Data.DB, Vcl.DBCtrls, Vcl.Grids, Vcl.DBGrids,
-  UnitTripObjects, Vcl.Mask, Vcl.Menus, Vcl.ToolWin, Vcl.BaseImageCollection, Vcl.ImageCollection, System.ImageList, Vcl.ImgList,
-  Vcl.VirtualImageList, Vcl.Dialogs;
+  System.Classes,
+  Winapi.Windows, Winapi.Messages,
+  Vcl.Forms, Vcl.StdCtrls, Vcl.Buttons, Vcl.Controls, Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.DBCtrls,
+  Vcl.Mask, Vcl.Menus, Vcl.ToolWin, Vcl.BaseImageCollection, Vcl.ImageCollection, System.ImageList, Vcl.ImgList,
+  Vcl.VirtualImageList, Vcl.Dialogs, Vcl.Grids, Vcl.DBGrids,
+  Data.DB,
+  UnitTripObjects, TripManager_DBGrid;
 
 type
-
-  TDBGrid = class(Vcl.DBGrids.TDBGrid)
-  private
-    FirstSel: integer;
-    procedure SelectRange;
-  protected
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X: Integer; Y: Integer); override;
-  public
-    constructor Create(AOwner: TComponent); override;
-    property InplaceEditor;
-  end;
 
   TTripFileUpdate = TNotifyEvent;
   TRoutePointsShowing = procedure(Sender: TObject; Showing: boolean) of object;
@@ -28,7 +20,7 @@ type
     PnlBottom: TPanel;
     BtnOk: TBitBtn;
     BtnCancel: TBitBtn;
-    DBGRoutePoints: TDBGrid;
+    DBGRoutePoints: TripManager_DBGrid.TDBGrid;
     PnlRoute: TPanel;
     DbTripName: TDBEdit;
     DBCRoutePreference: TDBComboBox;
@@ -96,7 +88,6 @@ type
     FTripFileCanceled: TTripFileUpdate;
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
-    procedure OnSetAnalyzePrefs(Sender: TObject);
     procedure CopyToClipBoard(Cut: boolean);
   public
     { Public declarations }
@@ -120,60 +111,9 @@ implementation
 uses
   System.SysUtils, System.Math,
   Vcl.Clipbrd,
-  UFrmSelectGPX,
-  UDmRoutePoints, UnitStringUtils, UnitVerySimpleXml, UnitGeoCode, UnitGpxObjects, UFrmAdvSettings;
+  UDmRoutePoints, UnitStringUtils;
 
 {$R *.dfm}
-
-{ TDBGrid }
-
-constructor TDBGrid.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  FirstSel := -1;
-end;
-
-procedure TDBGrid.SelectRange;
-var
-  CurrentRec: integer;
-  MyBook: TBookmark;
-begin
-  SelectedRows.Clear;
-
-  if (FirstSel < 1) or
-     (FirstSel > DataSource.DataSet.RecordCount) or
-     (FirstSel = DataSource.DataSet.RecNo) then
-    exit;
-
-  DataSource.DataSet.DisableControls;
-  MyBook := DataSource.DataSet.GetBookmark;
-  try
-    for CurrentRec := Min(FirstSel, DataSource.DataSet.RecNo) to
-                      Max(FirstSel, DataSource.DataSet.RecNo) do
-    begin
-      DataSource.DataSet.RecNo := CurrentRec;
-      SelectedRows.CurrentRowSelected := true;
-    end;
-    DataSource.DataSet.GotoBookmark(MyBook);
-  finally
-    DataSource.DataSet.EnableControls;
-    DataSource.DataSet.FreeBookmark(MyBook);
-  end;
-end;
-
-procedure TDBGrid.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  inherited;
-
-  if (ssCtrl in Shift) then
-    exit;
-
-  if not (ssShift in Shift) then
-    FirstSel := DataSource.DataSet.RecNo;
-  SelectRange;
-end;
-
-{ FrmRoutePoints }
 
 procedure TFrmTripEditor.BtnCancelClick(Sender: TObject);
 begin
@@ -201,11 +141,6 @@ begin
     FTripFileUpdated(Self);
 
   Close;
-end;
-
-procedure TFrmTripEditor.OnSetAnalyzePrefs(Sender: TObject);
-begin
-  TProcessOptions(Sender).ProcessTracks := false;
 end;
 
 procedure TFrmTripEditor.CopyToClipBoard(Cut: boolean);
@@ -251,6 +186,17 @@ end;
 procedure TFrmTripEditor.Cut1Click(Sender: TObject);
 begin
   CopyToClipBoard(true);
+end;
+
+procedure TFrmTripEditor.Import1Click(Sender: TObject);
+begin
+  OpenTrip.Filter := '*.gpx|*.gpx';
+  OpenTrip.InitialDir := CurPath;
+  OpenTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
+  if not OpenTrip.Execute then
+    exit;
+
+  DmRoutePoints.ImportFromGPX(OpenTrip.FileName);
 end;
 
 procedure TFrmTripEditor.ExportGpx(Sender: TObject);
@@ -334,122 +280,12 @@ begin
   if (CurDevice) then
     GrpRoute.Caption := 'Device ';
   GrpRoute.Caption := GrpRoute.Caption + ExtractFileName(CurFile);
-  TbLookupAddress.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-
   DBCRoutePreference.Items.Text := DmRoutePoints.RoutePickList;
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
   DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
 
   CmbModel.ItemIndex := Ord(CurTripList.ZumoModel);
-end;
-
-procedure TFrmTripEditor.Import1Click(Sender: TObject);
-var
-  CrNormal,CrWait: HCURSOR;
-  GPXFile: TGPXFile;
-  RoutePoints, RoutePoint: TXmlVSNode;
-  AnItem: TListItem;
-
-  procedure AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
-  var
-    ExtensionsNode, WayPointExtension, Address, AddressChild: TXmlVSNode;
-    Lat, Lon, AddressLine: string;
-  begin
-    DmRoutePoints.CdsRoutePoints.Insert;
-    DmRoutePoints.CdsRoutePointsName.AsString := FindSubNodeValue(ARoutePoint, 'name');
-    Lat := ARoutePoint.Attributes['lat'];
-    Lon := ARoutePoint.Attributes['lon'];
-    AdjustLatLon(Lat, Lon, 6);
-    DmRoutePoints.CdsRoutePointsLat.AsString := Lat;
-    DmRoutePoints.CdsRoutePointsLon.AsString := Lon;
-    ExtensionsNode := ARoutePoint.Find('extensions');
-    if (FromWpt) then
-    begin
-      DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := true;
-      AddressLine := '';
-      if (ExtensionsNode <> nil) then
-      begin
-        Address := nil;
-        WayPointExtension := ExtensionsNode.find('gpxx:WaypointExtension');
-        if (WayPointExtension <> nil) then
-          Address := WayPointExtension.Find('gpxx:Address');
-        if (Address <> nil) then
-        begin
-          for AddressChild in Address.ChildNodes do
-          begin
-            if (AddressLine <> '') then
-              AddressLine := AddressLine + ', ';
-            AddressLine := AddressLine + AddressChild.NodeValue;
-          end;
-        end;
-      end;
-      DmRoutePoints.CdsRoutePointsAddress.AsString := AddressLine;
-    end
-    else
-    begin
-      DmRoutePoints.CdsRoutePointsAddress.AsString := FindSubNodeValue(ARoutePoint, 'cmt');
-      if (DmRoutePoints.CdsRoutePointsAddress.AsString = '') then
-        DmRoutePoints.CdsRoutePointsAddress.AsString := DmRoutePoints.AddressFromCoords(Lat, Lon);
-      if (ExtensionsNode <> nil) then
-        DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
-    end;
-    DmRoutePoints.CdsRoutePoints.Post;
-  end;
-
-begin
-  OpenTrip.Filter := '*.gpx|*.gpx';
-  OpenTrip.InitialDir := CurPath;
-  OpenTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
-  if not OpenTrip.Execute then
-    exit;
-
-  CrWait := LoadCursor(0,IDC_WAIT);
-  CrNormal := SetCursor(CrWait);
-  GPXFile := TGPXFile.Create(OpenTrip.FileName, OnSetAnalyzePrefs, nil);
-  try
-    GPXFile.AnalyzeGpx;
-    SetCursor(CrNormal);
-
-    if (GPXFile.ShowSelectTracks('Import route points from: ' + ExtractFileName(OpenTrip.FileName),
-                                 'Select Waypoints/Routes',
-                                 TTagsToShow.WptRte)) then
-    begin
-      DmRoutePoints.CdsRoutePoints.DisableControls;
-      try
-        DmRoutePoints.CdsRoutePoints.Last;
-
-        for AnItem in GPXFile.FrmSelectGPX.LvTracks.Items do
-        begin
-          if not (AnItem.Checked) then
-            continue;
-
-          if (AnItem.SubItems[0] = 'Wpt') then
-          begin
-            for RoutePoint in GPXFile.WayPointList do
-              AddRoutePoint(RoutePoint, true);
-            continue;
-          end;
-
-          for RoutePoints in GPXFile.RouteViaPointList do
-          begin
-            if (RoutePoints.NodeName <> AnItem.Caption) then
-              continue;
-            for RoutePoint in RoutePoints.ChildNodes do
-              AddRoutePoint(RoutePoint, false);
-          end;
-
-        end;
-      finally
-        DmRoutePoints.CdsRoutePoints.EnableControls;
-        if Assigned(DmRoutePoints.OnRouteUpdated) then
-          DmRoutePoints.OnRouteUpdated(Self);
-      end;
-    end;
-  finally
-    GPXFile.Free;
-    SetCursor(CrNormal);
-  end;
 end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);

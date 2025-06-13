@@ -53,6 +53,7 @@
 #include <BCHexEditor.hpp>
 #include <UnitMtpDevice.hpp>
 #include <mtp_helper.hpp>
+#include <TripManager_ShellTree.hpp>
 #include <TripManager_ShellList.hpp>
 #include <TripManager_ValEdit.hpp>
 #include <ListViewSort.hpp>
@@ -120,7 +121,7 @@ __published:
 	Vcl::Stdctrls::TComboBox* CmbDevices;
 	Vcl::Extctrls::TPanel* PnlXTLeft;
 	Vcl::Extctrls::TPanel* PnlFileSys;
-	Vcl::Shell::Shellctrls::TShellTreeView* ShellTreeView1;
+	Tripmanager_shelltree::TShellTreeView* ShellTreeView1;
 	Vcl::Extctrls::TSplitter* VSplitterFile_Sys;
 	Tripmanager_shelllist::TShellListView* ShellListView1;
 	Vcl::Extctrls::TPanel* PnlXt2FileSys;
@@ -280,6 +281,7 @@ __published:
 	void __fastcall NewtripWindows1Click(System::TObject* Sender);
 	void __fastcall PopupTripEditPopup(System::TObject* Sender);
 	void __fastcall PCTTripInfoResize(System::TObject* Sender);
+	void __fastcall ShellListView1KeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	
 private:
 	System::UnicodeString PrefDevice;
@@ -294,14 +296,16 @@ private:
 	Bchexeditor::TBCHexEditor* HexEdit;
 	Unittripobjects::TTripList* ATripList;
 	Unitgpi::TPOIList* APOIList;
-	TMapReq FMapReq;
-	double EdgeZoom;
 	int WarnRecalc;
 	bool WarnModel;
 	int WarnOverWrite;
 	System::Classes::TStringList* ModifiedList;
 	Monitor::TDirectoryMonitor* DirectoryMonitor;
 	TCoordinatesAppliedEvent FOnCoordinatesApplied;
+	TMapReq FMapReq;
+	double EdgeZoom;
+	System::UnicodeString RoutePointTimeOut;
+	System::UnicodeString GeoSearchTimeOut;
 	void __fastcall DirectoryEvent(System::TObject* Sender, Monitor::TDirectoryMonitorAction Action, const System::WideString FileName);
 	MESSAGE void __fastcall FileSysDrop(Winapi::Messages::TWMDropFiles &Msg);
 	Unittripobjects::TmScPosn* __fastcall SelectedScPosn();
@@ -347,6 +351,11 @@ private:
 	void __fastcall ReadDefaultFolders();
 	void __fastcall ReadColumnSettings();
 	void __fastcall WriteColumnSettings();
+	void __fastcall OnSetFixedPrefs(System::TObject* Sender);
+	void __fastcall OnSetTransferPrefs(System::TObject* Sender);
+	void __fastcall OnSetPostProcessPrefs(System::TObject* Sender);
+	void __fastcall OnSetAdditionalPrefs(System::TObject* Sender);
+	void __fastcall OnSavePrefs(System::TObject* Sender);
 	void __fastcall ReadSettings();
 	void __fastcall ClearTripInfo();
 	void __fastcall EditTrip(bool NewFile);

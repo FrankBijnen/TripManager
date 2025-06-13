@@ -1,4 +1,5 @@
 unit UnitStringUtils;
+{$WARN SYMBOL_PLATFORM OFF}
 
 interface
 
@@ -42,6 +43,7 @@ function GetTracksTmp: string;
 function GetOSMTemp: string;
 function GetRoutesTmp: string;
 function GPX2HTMLColor(GPXColor: string): string;
+function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
 
 var
@@ -380,6 +382,17 @@ begin
   if (GPXColor = 'Transparent') then exit('ffffff');
 end;
 
+function GetLocaleSetting: TFormatSettings;
+begin
+  // Get Windows settings, and modify decimal separator and negcurr
+  Result := TFormatSettings.Create(GetThreadLocale);
+  with Result do
+  begin
+    DecimalSeparator := '.'; // The decimal separator is a . PERIOD!
+    NegCurrFormat := 11;
+  end;
+end;
+
 function VerInfo(IncludeCompany: boolean = false): string;
 var
   S: string;
@@ -427,7 +440,6 @@ begin
 end;
 
 initialization
-
 begin
   FloatFormatSettings.ThousandSeparator := ',';
   FloatFormatSettings.DecimalSeparator := '.';

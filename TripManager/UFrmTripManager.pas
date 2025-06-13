@@ -357,82 +357,14 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, Winapi.ShellAPI, Vcl.Clipbrd,
-   UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGpxObjects, MsgLoop, UnitVerySimpleXml, UnitGeoCode, UDmRoutePoints,
+  UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGpxObjects, MsgLoop, UnitGeoCode, UDmRoutePoints,
+  TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
 
 const
   DupeCount = 10;
 
 {$R *.dfm}
-
-type
-  TGridSelItem = class(TObject)
-  private
-    FBaseItem: TBaseItem;
-    FSelStart: integer;
-    FSelLength: integer;
-  public
-    constructor Create(ABaseItem: TBaseItem;
-                       ASelLength: integer = -1;
-                       ASelStart: integer = -1); overload;
-    constructor Create(ASelLength, ASelStart: integer); overload;
-    property BaseItem: TBaseItem read FBaseItem;
-    property SelStart: integer read FSelStart;
-    property SelLength: integer read FSelLength;
-    class function GridSelItem(AValueListEditor: TValueListEditor; ARow: integer): TGridSelItem;
-    class function BaseDataItem(AValueListEditor: TValueListEditor; ARow: integer): TBaseDataItem;
-  end;
-
-constructor TGridSelItem.Create(ABaseItem: TBaseItem;
-                                ASelLength: integer = -1;
-                                ASelStart: integer = -1);
-begin
-  inherited Create;
-  FBaseItem := ABaseItem;
-
-  FSelStart := integer(FBaseItem.SelStart);
-  if (ASelStart <> -1) then
-    FSelStart := FSelStart + ASelStart;
-
-  FSelLength := ASelLength;
-  if (FSelLength = -1) then
-    FSelLength := integer(FBaseItem.SelEnd) - FSelStart;
-end;
-
-constructor TGridSelItem.Create(ASelLength, ASelStart: integer);
-begin
-  inherited Create;
-  FBaseItem := nil;
-  FSelStart := ASelStart;
-  FSelLength := ASelLength;
-end;
-
-class function TGridSelItem.GridSelItem(AValueListEditor: TValueListEditor; ARow: integer): TGridSelItem;
-begin
-  result := nil;
-
-  if (ARow < 0) or
-     (ARow > AValueListEditor.Strings.Count -1) then
-    exit;
-
-  if (AValueListEditor.Strings.Objects[ARow] <> nil) and
-     (AValueListEditor.Strings.Objects[ARow] is TGridSelItem)  then
-    result := TGridSelItem(AValueListEditor.Strings.Objects[ARow]);
-end;
-
-class function TGridSelItem.BaseDataItem(AValueListEditor: TValueListEditor; ARow: integer): TBaseDataItem;
-var
-  AGridSel: TGridSelItem;
-begin
-  result := nil;
-  AGridSel := TGridSelItem.GridSelItem(AValueListEditor, ARow);
-  if not Assigned(AGridSel) then
-    exit;
-
-  if (AGridSel.FBaseItem <> nil) and
-     (AGridSel.FBaseItem is TBaseDataItem) then
-    result := TBaseDataItem(AGridSel.FBaseItem);
-end;
 
 function OffsetInRecord(const Base; const Field): integer;
 begin
@@ -462,7 +394,8 @@ begin
   if (CmbModel.ItemIndex <> Ord(TZumoModel.XT)) and
      (CmbModel.ItemIndex <> Ord(TZumoModel.XT2)) then
   begin
-    Rc := MessageDlg('Trip files created may not work for selected model.', TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbIgnore], 0);
+    Rc := MessageDlg('Trip files created may not work for selected model.',
+                     TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbIgnore], 0);
     if (Rc = ID_IGNORE) then
       SetRegistry(Reg_WarnModel_Key, 'False');
     WarnModel := false;
@@ -791,7 +724,9 @@ begin
         else if (ContainsText(ExtractFileExt(Fs.Name), GpxExtension)) then
           SetCurrentPath(DeviceFolder[1])
         else if (ContainsText(ExtractFileExt(Fs.Name), GPIExtension)) then
-          SetCurrentPath(DeviceFolder[2]);
+          SetCurrentPath(DeviceFolder[2])
+        else
+          continue;
 
         CurrentObjectid := GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TempFile);
         if (CurrentObjectid <> '') then
@@ -1025,10 +960,6 @@ begin
 end;
 
 procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
-var
-  Writer: TTextWriter;
-  Lst: TStringList;
-  Index: integer;
 begin
   SaveTrip.Filter := '*.csv|*.csv';
   SaveTrip.InitialDir := ShellTreeView1.Path;
@@ -1036,41 +967,10 @@ begin
   if not SaveTrip.Execute then
     exit;
 
-  Writer := TStreamWriter.Create(SaveTrip.FileName, false, TEncoding.UTF8);
-  try
-    Lst := TStringList.Create;
-    try
-      Lst.QuoteChar := '"';
-      Lst.Delimiter := ';';
-
-      Lst.AddStrings(['Key', 'Value']);
-      Writer.WriteLine(Lst.DelimitedText);
-
-      for Index := 0 to VlTripInfo.Strings.Count -1 do
-      begin
-        Lst.Clear;
-        Lst.AddStrings([#9 + VlTripInfo.Strings.KeyNames[Index], #9 + VlTripInfo.Strings.ValueFromIndex[Index]]);
-        Writer.WriteLine(Lst.DelimitedText);
-      end;
-    finally
-      lst.Free;
-    end;
-  finally
-    Writer.Free;
-  end;
+  VlTripInfo.SaveAsCSV(SaveTrip.FileName);
 end;
 
 procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
-var
-  Xml: TXmlVSDocument;
-  XMLRoot: TXmlVSNode;
-  Rte, RtePt, Trk, TrkSeg, TrkPt: TXmlVSNode;
-  Locations: TmLocations;
-  AllRoutes: TmAllRoutes;
-  AnUdbHandle: TmUdbDataHndl;
-  ANUdbDir: TUdbDir;
-  Location, ANItem: TBaseItem;
-  ViaPointType, PointName, Lat, Lon, Address: string;
 begin
   if not Assigned(ATripList) then
     exit;
@@ -1081,84 +981,7 @@ begin
   if not SaveTrip.Execute then
     exit;
 
-  XML := TXmlVSDocument.Create;
-  try
-    XMLRoot := InitGarminGpx(XML);
-    Rte := XMLRoot.AddChild('rte');
-    Rte.AddChild('name').NodeValue := TBaseDataItem(ATripList.GetItem('mTripName')).AsString;
-
-    Locations := TmLocations(ATripList.GetItem('mLocations'));
-    if not (Assigned(Locations)) then
-      exit;
-
-    for Location in Locations.Locations do
-    begin
-      if (Location is TLocation) then
-      begin
-        RtePt := Rte.AddChild('rtept');
-        ViaPointType := 'trp:ShapingPoint';
-        PointName := '';
-        Lat := '';
-        Lon := '';
-        Address := '';
-        for ANItem in TLocation(Location).LocationItems do
-        begin
-
-          if (ANItem is TmAttr) then
-          begin
-            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
-              ViaPointType := 'trp:ViaPoint'
-            else
-              ViaPointType := 'trp:ShapingPoint';
-          end;
-
-          if (ANItem is TmName) then
-            PointName := TmName(ANItem).AsString;
-
-          if (ANItem is TmScPosn) then
-          begin
-            Lon := TmScPosn(ANItem).MapCoords;
-            Lat := Trim(NextField(Lon, ','));
-            Lon := Trim(Lon);
-          end;
-
-          if (ANItem is TmAddress) then
-            Address := TmAddress(ANItem).AsString;
-
-        end;
-        RtePt.Attributes['lat'] := Lat;
-        RtePt.Attributes['lon'] := Lon;
-        RtePt.AddChild('name').NodeValue := PointName;
-        RtePt.AddChild('cmt').NodeValue := Address;
-        RtePt.AddChild('desc').NodeValue := Address;
-        RtePt.AddChild('extensions').AddChild(ViaPointType);
-      end;
-    end;
-
-    AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
-    if Assigned(AllRoutes) then
-    begin
-      Trk := XMLRoot.AddChild('trk');
-      Trk.AddChild('name').NodeValue := TBaseDataItem(ATripList.GetItem('mTripName')).AsString;
-      for AnUdbHandle in AllRoutes.Items do
-      begin
-        TrkSeg := Trk.AddChild('trkseg');
-        for ANUdbDir in AnUdbHandle.Items do
-        begin
-          TrkPt := TrkSeg.AddChild('trkpt');
-          Lon := ANUdbDir.MapCoords;
-          Lat := Trim(NextField(Lon, ','));
-          Lon := Trim(Lon);
-          TrkPt.Attributes['lat'] := Lat;
-          TrkPt.Attributes['lon'] := Lon;
-        end;
-      end;
-    end;
-
-    XML.SaveToFile(SaveTrip.FileName);
-  finally
-    Xml.Free;
-  end;
+  ATripList.SaveAsGPX(SaveTrip.FileName);
 end;
 
 procedure TFrmTripManager.SaveTripGpiFile;
@@ -1853,7 +1676,6 @@ begin
                                               ExtractFileName(ShellListView1.SelectedFolder.PathName),
                                               GetTracksExt]));
     end;
-//    ShowMap(EdgeBrowser1);
 
     if (CreateOSMMapHtml) then
       EdgeBrowser1.Navigate(GetHtmlTmp);
@@ -1872,7 +1694,7 @@ begin
   OsmTrack := TStringList.Create;
   try
   //TODO Add to advanced settings
-    CurrentTrip.CreateOSMPoints(OsmTrack, GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val));
+    CurrentTrip.CreateOSMPoints(OsmTrack, OSMColor(GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val)));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     if (CreateOSMMapHtml) then
       EdgeBrowser1.Navigate(GetHtmlTmp);

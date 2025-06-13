@@ -77,6 +77,12 @@ const
   Reg_SavedMapPosition_Key    = 'SavedMapPosition';
   Reg_DefaultCoordinates      = '48.854918, 2.346558'; // Somewhere in Paris
 
+  Reg_GeoCodeUrl              = 'GeoCodeUrl';
+  Reg_GeoCodeApiKey           = 'GeoCodeApiKey';
+  Reg_AddressFormat           = 'AddressFormat';
+  Reg_ThrottleGeoCode         = 'ThrottleGeoCode';
+
+
   BooleanValues: array[boolean] of string = ('False', 'True');
 
 function GetRegistry(const Name: string; const Default: string = ''): string; overload;

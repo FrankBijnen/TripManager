@@ -43,6 +43,8 @@ class DELPHICLASS TBCHexEditor;
 struct TBCHUndoRec;
 class DELPHICLASS TBCHUndoStorage;
 //-- type declarations -------------------------------------------------------
+typedef int TPointerInt;
+
 using Vcl::Grids::TGridCoord;
 
 enum DECLSPEC_DENUM TBCHCharConvType : unsigned char { cctFromAnsi, cctToAnsi };
@@ -78,7 +80,7 @@ public:
 struct DECLSPEC_DRECORD TBCHBookmark
 {
 public:
-	int mPosition;
+	TPointerInt mPosition;
 	bool mInCharField;
 };
 
@@ -166,16 +168,16 @@ class PASCALIMPLEMENTATION TBCHMemoryStream : public System::Classes::TMemoryStr
 	typedef System::Classes::TMemoryStream inherited;
 	
 private:
-	void * __fastcall PointerAt(const int APosition, const int ACount);
+	void * __fastcall PointerAt(const TPointerInt APosition, const TPointerInt ACount);
 	
 public:
-	Winapi::Windows::PByte __fastcall GetAddress(const int Index, const int Count);
-	void __fastcall ReadBufferAt(void *Buffer, const int APosition, const int ACount);
-	void __fastcall WriteBufferAt(const void *Buffer, const int APosition, const int ACount);
-	void __fastcall Move(const int AFromPos, const int AToPos, const int ACount);
-	void __fastcall TranslateToAnsi(const TBCHTranslationKind FromTranslation, const int APosition, const int ACount);
-	void __fastcall TranslateFromAnsi(const TBCHTranslationKind ToTranslation, const int APosition, const int ACount);
-	System::UnicodeString __fastcall GetAsHex(const int APosition, const int ACount, const bool SwapNibbles);
+	Winapi::Windows::PByte __fastcall GetAddress(const TPointerInt Index, const TPointerInt Count);
+	void __fastcall ReadBufferAt(void *Buffer, const TPointerInt APosition, const TPointerInt ACount);
+	void __fastcall WriteBufferAt(const void *Buffer, const TPointerInt APosition, const TPointerInt ACount);
+	void __fastcall Move(const TPointerInt AFromPos, const TPointerInt AToPos, const TPointerInt ACount);
+	void __fastcall TranslateToAnsi(const TBCHTranslationKind FromTranslation, const TPointerInt APosition, const TPointerInt ACount);
+	void __fastcall TranslateFromAnsi(const TBCHTranslationKind ToTranslation, const TPointerInt APosition, const TPointerInt ACount);
+	System::UnicodeString __fastcall GetAsHex(const TPointerInt APosition, const TPointerInt ACount, const bool SwapNibbles);
 public:
 	/* TMemoryStream.Destroy */ inline __fastcall virtual ~TBCHMemoryStream() { }
 	
@@ -203,7 +205,7 @@ public:
 };
 
 
-typedef void __fastcall (__closure *TBCHDrawCellEvent)(System::TObject* Sender, Vcl::Graphics::TCanvas* ACanvas, int ACol, int ARow, System::WideString &AWideText, const Winapi::Windows::TRect &ARect, bool &ADefaultDraw);
+typedef void __fastcall (__closure *TBCHDrawCellEvent)(System::TObject* Sender, Vcl::Graphics::TCanvas* ACanvas, TPointerInt ACol, TPointerInt ARow, System::WideString &AWideText, const Winapi::Windows::TRect &ARect, bool &ADefaultDraw);
 
 class PASCALIMPLEMENTATION TCustomBCHexEditor : public Vcl::Grids::TCustomGrid
 {
@@ -241,10 +243,10 @@ private:
 	System::UnicodeString FFileName;
 	System::Classes::TBits* FModifiedBytes;
 	TBCHBookmarks FBookmarks;
-	int FSelStart;
-	int FSelPosition;
-	int FSelEnd;
-	int FSelBeginPosition;
+	TPointerInt FSelStart;
+	TPointerInt FSelPosition;
+	TPointerInt FSelEnd;
+	TPointerInt FSelBeginPosition;
 	TBCHTranslationKind FTranslation;
 	TBCHCaretKind FCaretKind;
 	System::WideChar FReplaceUnprintableCharsBy;
@@ -255,10 +257,10 @@ private:
 	bool FGraySelOnLostFocus;
 	TBCHProgressEvent FOnProgress;
 	int FMouseDownCol;
-	int FMouseDownRow;
+	TPointerInt FMouseDownRow;
 	bool FShowDrag;
 	int FDropCol;
-	int FDropRow;
+	TPointerInt FDropRow;
 	System::Classes::TNotifyEvent FOnInvalidKey;
 	System::Classes::TNotifyEvent FOnTopLeftChanged;
 	bool FAutoBytesPerRow;
@@ -273,7 +275,7 @@ private:
 	bool FHasCustomBMP;
 	System::UnicodeString FStreamFileName;
 	bool FHasFile;
-	int FMaxUndo;
+	TPointerInt FMaxUndo;
 	System::StaticArray<System::WideChar, 16> FHexChars;
 	bool FHexLowerCase;
 	System::Classes::TNotifyEvent FOnChange;
@@ -291,7 +293,7 @@ private:
 	bool FUnicodeCharacters;
 	bool FUnicodeBigEndian;
 	System::UnicodeString FMaskedChars;
-	int FDrawDataPosition;
+	TPointerInt FDrawDataPosition;
 	bool FDrawDataPositionIsHex;
 	TBCHDrawCellEvent FOnDrawCell;
 	System::Classes::TNotifyEvent FOnBookmarkChanged;
@@ -315,7 +317,7 @@ private:
 	void __fastcall SetReadOnlyFile(const bool Value);
 	void __fastcall SetTranslation(const TBCHTranslationKind Value);
 	void __fastcall SetModified(const bool Value);
-	void __fastcall SetChanged(int DataPos, const bool Value);
+	void __fastcall SetChanged(TPointerInt DataPos, const bool Value);
 	void __fastcall SetFixedFileSize(const bool Value);
 	void __fastcall SetAllowInsertMode(const bool Value);
 	bool __fastcall GetInsertMode();
@@ -325,14 +327,14 @@ private:
 	int __fastcall CalcColCount();
 	int __fastcall GetLastCharCol();
 	int __fastcall GetPropColCount();
-	int __fastcall GetPropRowCount();
+	TPointerInt __fastcall GetPropRowCount();
 	bool __fastcall GetMouseOverSelection();
 	bool __fastcall CursorOverSelection(const int X, const int Y);
 	bool __fastcall MouseOverFixed(const int X, const int Y);
-	void __fastcall AdjustBookmarks(const int From, const int Offset);
+	void __fastcall AdjustBookmarks(const TPointerInt From, const TPointerInt Offset);
 	void __fastcall IntSetCaretPos(const int X, const int Y, const int ACol);
-	void __fastcall TruncMaxPosition(int &DataPos);
-	HIDESBASE void __fastcall SetSelection(int DataPos, int StartPos, int EndPos);
+	void __fastcall TruncMaxPosition(TPointerInt &DataPos);
+	HIDESBASE void __fastcall SetSelection(TPointerInt DataPos, TPointerInt StartPos, TPointerInt EndPos);
 	int __fastcall GetCurrentValue();
 	void __fastcall SetInsertMode(const bool Value);
 	bool __fastcall GetModified();
@@ -344,29 +346,29 @@ private:
 	System::UnicodeString __fastcall GetAsHex();
 	HIDESBASE MESSAGE void __fastcall WMTimer(Winapi::Messages::TWMTimer &Msg);
 	void __fastcall CheckSetCaret();
-	int __fastcall GetRow(const int DataPos);
+	TPointerInt __fastcall GetRow(const TPointerInt DataPos);
 	void __fastcall WrongKey();
 	void __fastcall CreateCaretGlyph();
-	int __fastcall GetSelStart();
-	int __fastcall GetSelEnd();
-	int __fastcall GetSelCount();
-	void __fastcall SetSelStart(int aValue);
-	void __fastcall SetSelEnd(int aValue);
-	void __fastcall SetSelCount(int aValue);
+	TPointerInt __fastcall GetSelStart();
+	TPointerInt __fastcall GetSelEnd();
+	TPointerInt __fastcall GetSelCount();
+	void __fastcall SetSelStart(TPointerInt aValue);
+	void __fastcall SetSelEnd(TPointerInt aValue);
+	void __fastcall SetSelCount(TPointerInt aValue);
 	void __fastcall SetInCharField(const bool Value);
 	bool __fastcall GetInCharField();
-	void __fastcall InternalInsertBuffer(char * Buffer, const int Size, const int Position);
-	void __fastcall InternalAppendBuffer(char * Buffer, const int Size);
-	void __fastcall InternalGetCurSel(int &StartPos, int &EndPos, int &ACol, int &ARow);
-	void __fastcall InternalDelete(int StartPos, int EndPos, int ACol, int ARow);
-	bool __fastcall InternalDeleteNibble(const int Pos, const bool HighNibble);
-	bool __fastcall InternalInsertNibble(const int Pos, const bool HighNibble);
-	System::Classes::TFileStream* __fastcall CreateShift4BitStream(const int StartPos, System::Sysutils::TFileName &FName);
-	void __fastcall InternalConvertRange(const int aFrom, const int aTo, const TBCHTranslationKind aTransFrom, const TBCHTranslationKind aTransTo);
-	void __fastcall MoveFileMem(const int aFrom, const int aTo, const int aCount);
+	void __fastcall InternalInsertBuffer(char * Buffer, const TPointerInt Size, const TPointerInt Position);
+	void __fastcall InternalAppendBuffer(char * Buffer, const TPointerInt Size);
+	void __fastcall InternalGetCurSel(TPointerInt &StartPos, TPointerInt &EndPos, int &ACol, TPointerInt &ARow);
+	void __fastcall InternalDelete(TPointerInt StartPos, TPointerInt EndPos, int ACol, TPointerInt ARow);
+	bool __fastcall InternalDeleteNibble(const TPointerInt Pos, const bool HighNibble);
+	bool __fastcall InternalInsertNibble(const TPointerInt Pos, const bool HighNibble);
+	System::Classes::TFileStream* __fastcall CreateShift4BitStream(const TPointerInt StartPos, System::Sysutils::TFileName &FName);
+	void __fastcall InternalConvertRange(const TPointerInt aFrom, const TPointerInt aTo, const TBCHTranslationKind aTransFrom, const TBCHTranslationKind aTransTo);
+	void __fastcall MoveFileMem(const TPointerInt aFrom, const TPointerInt aTo, const TPointerInt aCount);
 	TBCHBookmark __fastcall GetBookmark(System::Byte Index);
 	void __fastcall SetBookmark(System::Byte Index, const TBCHBookmark &Value);
-	void __fastcall SetBookmarkVals(const System::Byte Index, const int Position, const bool InCharField);
+	void __fastcall SetBookmarkVals(const System::Byte Index, const TPointerInt Position, const bool InCharField);
 	void __fastcall SetDrawGridLines(const bool Value);
 	void __fastcall SetGutterWidth(const int Value);
 	void __fastcall BookmarkBitmapChanged(System::TObject* Sender);
@@ -383,17 +385,17 @@ private:
 	void __fastcall SetShowRuler(const bool Value);
 	void __fastcall SetBytesPerUnit(const int Value);
 	void __fastcall SetRulerString();
-	void __fastcall CheckSelectUnit(int &AStart, int &AEnd);
+	void __fastcall CheckSelectUnit(TPointerInt &AStart, TPointerInt &AEnd);
 	void __fastcall SetRulerBytesPerUnit(const int Value);
 	void __fastcall SetShowPositionIfNotFocused(const bool Value);
-	System::Byte __fastcall GetDataAt(int Index);
-	void __fastcall SetDataAt(int Index, const System::Byte Value);
+	System::Byte __fastcall GetDataAt(TPointerInt Index);
+	void __fastcall SetDataAt(TPointerInt Index, const System::Byte Value);
 	void __fastcall SetUnicodeCharacters(const bool Value);
 	void __fastcall SetUnicodeBigEndian(const bool Value);
 	void __fastcall SetAutoBytesPerRow(const bool Value);
-	int __fastcall GetPositionAtCursor(const int ACol, const int ARow);
+	TPointerInt __fastcall GetPositionAtCursor(const TPointerInt ACol, const TPointerInt ARow);
 	bool __fastcall GetIsCharFieldCol(const int ACol);
-	void __fastcall SetDataSize(const int Value);
+	void __fastcall SetDataSize(const TPointerInt Value);
 	void __fastcall SetBlockSize(const int Value);
 	void __fastcall SetSepCharBlocks(const bool Value);
 	void __fastcall SetRulerNumberBase(const System::Byte Value);
@@ -413,19 +415,19 @@ protected:
 	__property TBCHUndoStorage* UndoStorage = {read=FUndoStorage};
 	__property TBCHMemoryStream* DataStorage = {read=FDataStorage};
 	virtual void __fastcall SelectionChanged();
-	void __fastcall NewSelection(int SelFrom, int SelTo);
+	void __fastcall NewSelection(TPointerInt SelFrom, TPointerInt SelTo);
 	TGridCoord __fastcall CheckMouseCoord(int &X, int &Y);
-	void __fastcall CheckUnit(int &AValue);
+	void __fastcall CheckUnit(TPointerInt &AValue);
 	HIDESBASE virtual void __fastcall Changed();
-	int __fastcall DropPosition();
-	void __fastcall Stream2Stream(System::Classes::TStream* strFrom, System::Classes::TStream* strTo, const TBCHProgressKind Operation, const int Count = 0xffffffff);
+	TPointerInt __fastcall DropPosition();
+	void __fastcall Stream2Stream(System::Classes::TStream* strFrom, System::Classes::TStream* strTo, const TBCHProgressKind Operation, const TPointerInt Count = 0xffffffff);
 	virtual void __fastcall PrepareOverwriteDiskFile();
 	void __fastcall WaitCursor();
 	void __fastcall OldCursor();
 	virtual void __fastcall Paint();
 	DYNAMIC void __fastcall TopLeftChanged();
 	void __fastcall AdjustMetrics();
-	int __fastcall GetDataSize();
+	TPointerInt __fastcall GetDataSize();
 	void __fastcall CalcSizes();
 	virtual bool __fastcall SelectCell(System::LongInt ACol, System::LongInt ARow);
 	int __fastcall GetPosAtCursor(const int aCol, const int aRow);
@@ -439,16 +441,16 @@ protected:
 	MESSAGE void __fastcall CMSelectionChanged(Winapi::Messages::TMessage &Msg);
 	HIDESBASE MESSAGE void __fastcall WMGetDlgCode(Winapi::Messages::TWMGetDlgCode &Msg);
 	HIDESBASE MESSAGE void __fastcall CMFontChanged(Winapi::Messages::TMessage &Message);
-	void __fastcall IntChangeByte(const System::Byte aOldByte, const System::Byte aNewByte, int aPos, int aCol, int aRow, const System::UnicodeString UndoDesc = System::UnicodeString());
-	void __fastcall IntChangeWideChar(const System::WideChar aOldChar, const System::WideChar aNewChar, int aPos, int aCol, int aRow, const System::UnicodeString UndoDesc = System::UnicodeString());
+	void __fastcall IntChangeByte(const System::Byte aOldByte, const System::Byte aNewByte, TPointerInt aPos, TPointerInt aCol, TPointerInt aRow, const System::UnicodeString UndoDesc = System::UnicodeString());
+	void __fastcall IntChangeWideChar(const System::WideChar aOldChar, const System::WideChar aNewChar, TPointerInt aPos, TPointerInt aCol, TPointerInt aRow, const System::UnicodeString UndoDesc = System::UnicodeString());
 	DYNAMIC void __fastcall KeyDown(System::Word &Key, System::Classes::TShiftState Shift);
-	bool __fastcall HasChanged(int aPos);
-	void __fastcall Select(const int aCurCol, const int aCurRow, const int aNewCol, const int aNewRow);
+	bool __fastcall HasChanged(TPointerInt aPos);
+	void __fastcall Select(const TPointerInt aCurCol, const TPointerInt aCurRow, const TPointerInt aNewCol, const TPointerInt aNewRow);
 	DYNAMIC void __fastcall MouseDown(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
 	DYNAMIC void __fastcall MouseMove(System::Classes::TShiftState Shift, int X, int Y);
 	DYNAMIC void __fastcall MouseUp(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
-	virtual bool __fastcall CanCreateUndo(const TBCHUndoFlag aKind, const int aCount, const int aReplCount);
-	void __fastcall CreateUndo(const TBCHUndoFlag aKind, const int aPos, const int aCount, const int aReplCount, const System::UnicodeString sDesc = System::UnicodeString());
+	virtual bool __fastcall CanCreateUndo(const TBCHUndoFlag aKind, const TPointerInt aCount, const TPointerInt aReplCount);
+	void __fastcall CreateUndo(const TBCHUndoFlag aKind, const TPointerInt aPos, const TPointerInt aCount, const TPointerInt aReplCount, const System::UnicodeString sDesc = System::UnicodeString());
 	virtual void __fastcall Loaded();
 	virtual void __fastcall CreateWnd();
 	HIDESBASE MESSAGE void __fastcall WMSetFocus(Winapi::Messages::TWMSetFocus &Msg);
@@ -486,7 +488,7 @@ protected:
 	__property bool DrawGridLines = {read=FDrawGridLines, write=SetDrawGridLines, nodefault};
 	__property int GutterWidth = {read=FGutterWidth, write=SetGutterWidth, default=-1};
 	__property Vcl::Graphics::TBitmap* BookmarkBitmap = {read=FBookmarkBitmap, write=SetBookmarkBitmap, stored=HasCustomBookmarkBitmap};
-	__property int MaxUndo = {read=FMaxUndo, write=FMaxUndo, default=1048576};
+	__property TPointerInt MaxUndo = {read=FMaxUndo, write=FMaxUndo, default=1048576};
 	__property bool InsertMode = {read=GetInsertMode, write=SetInsertMode, default=0};
 	__property bool HexLowerCase = {read=FHexLowerCase, write=SetHexLowerCase, default=0};
 	__property System::Classes::TNotifyEvent OnChange = {read=FOnChange, write=FOnChange};
@@ -506,85 +508,83 @@ protected:
 	void __fastcall ReadMaskChar(System::Classes::TReader* Reader);
 	void __fastcall ReadMaskChar_I(System::Classes::TReader* Reader);
 	void __fastcall WriteMaskChar_I(System::Classes::TWriter* Writer);
+	Winapi::Windows::PByte __fastcall GetFastPointer(const TPointerInt Index, const TPointerInt Count);
 	
 public:
-	Winapi::Windows::PByte __fastcall GetFastPointer(const int Index, const int Count);
 	__fastcall virtual TCustomBCHexEditor(System::Classes::TComponent* aOwner);
 	__fastcall virtual ~TCustomBCHexEditor();
 	__property System::UnicodeString MaskedChars = {read=FMaskedChars, write=SetMaskedChars};
-	__property int DrawDataPosition = {read=FDrawDataPosition, nodefault};
+	__property TPointerInt DrawDataPosition = {read=FDrawDataPosition, nodefault};
 	__property bool IsDrawDataSelected = {read=FIsDrawDataSelected, nodefault};
-	System::WideChar __fastcall GetMemory(const int Index);
 	DYNAMIC bool __fastcall CanFocus();
-	void __fastcall SetMemory(const int Index, const System::WideChar Value);
 	__property bool IsMaxOffset = {read=FIsMaxOffset, nodefault};
 	void __fastcall SeekToEOF();
-	void __fastcall SyncView(TCustomBCHexEditor* Source, int SyncOffset = 0x0);
-	int __fastcall DisplayStart();
-	int __fastcall DisplayEnd();
-	bool __fastcall IsSelected(const int APosition);
-	__property int PositionAtCursor[const int ACol][const int ARow] = {read=GetPositionAtCursor};
+	void __fastcall SyncView(TCustomBCHexEditor* Source, TPointerInt SyncOffset = 0x0);
+	TPointerInt __fastcall DisplayStart();
+	TPointerInt __fastcall DisplayEnd();
+	bool __fastcall IsSelected(const TPointerInt APosition);
+	__property TPointerInt PositionAtCursor[const TPointerInt ACol][const TPointerInt ARow] = {read=GetPositionAtCursor};
 	__property bool IsCharFieldCol[const int ACol] = {read=GetIsCharFieldCol};
 	__property System::Byte SetDataSizeFillByte = {read=FSetDataSizeFillByte, write=FSetDataSizeFillByte, nodefault};
 	__property bool HasFile = {read=FHasFile, write=FHasFile, nodefault};
-	virtual int __fastcall UndoBeginUpdate();
-	virtual int __fastcall UndoEndUpdate();
+	virtual TPointerInt __fastcall UndoBeginUpdate();
+	virtual TPointerInt __fastcall UndoEndUpdate();
 	void __fastcall ResetSelection(const bool aDraw);
 	__property System::UnicodeString SelectionAsHex = {read=GetSelectionAsHex, write=SetSelectionAsHex};
 	__property System::AnsiString SelectionAsText = {read=GetSelectionAsText, write=SetSelectionAsText};
-	virtual System::UnicodeString __fastcall GetOffsetString(const unsigned Position);
-	virtual System::UnicodeString __fastcall GetAnyOffsetString(const int Position);
+	virtual System::UnicodeString __fastcall GetOffsetString(const TPointerInt Position);
+	virtual System::UnicodeString __fastcall GetAnyOffsetString(const TPointerInt Position);
 	int __fastcall RowHeight();
 	void __fastcall ResetUndo();
-	int __fastcall Seek(const int aOffset, const int aOrigin);
-	int __fastcall Find(void * aPattern, int aCount, const int aStart, const int aEnd)/* overload */;
-	int __fastcall Find(System::UnicodeString aPattern, const int aStart, const int aEnd, const bool IgnoreCase)/* overload */;
-	void __fastcall AddSelectionUndo(const int AStart, const int ACount);
-	void __fastcall ReadBuffer(void *Buffer, const int Index, const int Count);
-	virtual void __fastcall WriteBuffer(const void *Buffer, const int Index, const int Count);
+	TPointerInt __fastcall Seek(const TPointerInt aOffset, const TPointerInt aOrigin);
+	TPointerInt __fastcall Find(void * aPattern, TPointerInt aCount, const TPointerInt aStart, const TPointerInt aEnd)/* overload */;
+	TPointerInt __fastcall Find(System::UnicodeString aPattern, const TPointerInt aStart, const TPointerInt aEnd, const bool IgnoreCase)/* overload */;
+	void __fastcall AddSelectionUndo(const TPointerInt AStart, const TPointerInt ACount);
+	void __fastcall ReadBuffer(void *Buffer, const TPointerInt Index, const TPointerInt Count);
+	virtual void __fastcall WriteBuffer(const void *Buffer, const TPointerInt Index, const TPointerInt Count);
 	void __fastcall DeleteSelection(const System::UnicodeString UndoDesc = System::UnicodeString());
 	void __fastcall LoadFromStream(System::Classes::TStream* Strm);
 	void __fastcall LoadFromFile(const System::UnicodeString Filename);
 	void __fastcall SaveToStream(System::Classes::TStream* Strm);
 	void __fastcall SaveToFile(const System::UnicodeString Filename, const bool aUnModify = true);
-	void __fastcall SaveRangeToStream(System::Classes::TStream* Strm, const int APosition, const int ACount);
+	void __fastcall SaveRangeToStream(System::Classes::TStream* Strm, const TPointerInt APosition, const TPointerInt ACount);
 	bool __fastcall Undo();
 	bool __fastcall Redo();
 	void __fastcall CreateEmptyFile(const System::UnicodeString TempName);
-	System::WideChar * __fastcall BufferFromFile(const int aPos, int &aCount);
-	void __fastcall InsertBuffer(char * aBuffer, const int aSize, const int aPos, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = true);
-	void __fastcall AppendBuffer(char * aBuffer, const int aSize, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = true);
-	void __fastcall ReplaceSelection(char * aBuffer, int aSize, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = true);
-	int __fastcall Replace(System::WideChar * aBuffer, int aPosition, int aOldCount, int aNewCount, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = false);
-	int __fastcall GetCursorPos();
-	bool __fastcall DeleteNibble(const int aPos, const bool HighNibble, const System::UnicodeString UndoDesc = System::UnicodeString());
-	bool __fastcall InsertNibble(const int aPos, const bool HighNibble, const System::UnicodeString UndoDesc = System::UnicodeString());
-	void __fastcall ConvertRange(const int aFrom, const int aTo, const TBCHTranslationKind aTransFrom, const TBCHTranslationKind aTransTo, const System::UnicodeString UndoDesc = System::UnicodeString());
-	int __fastcall GetTopLeftPosition(bool &oInCharField);
-	void __fastcall SetTopLeftPosition(const int aPosition, const bool aInCharField);
-	int __fastcall ShowDragCell(const int X, const int Y);
+	System::WideChar * __fastcall BufferFromFile(const TPointerInt aPos, TPointerInt &aCount);
+	void __fastcall InsertBuffer(char * aBuffer, const TPointerInt aSize, const TPointerInt aPos, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = true);
+	void __fastcall AppendBuffer(char * aBuffer, const TPointerInt aSize, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = true);
+	void __fastcall ReplaceSelection(char * aBuffer, TPointerInt aSize, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = true);
+	TPointerInt __fastcall Replace(System::WideChar * aBuffer, TPointerInt aPosition, TPointerInt aOldCount, TPointerInt aNewCount, const System::UnicodeString UndoDesc = System::UnicodeString(), const bool MoveCursor = false);
+	TPointerInt __fastcall GetCursorPos();
+	bool __fastcall DeleteNibble(const TPointerInt aPos, const bool HighNibble, const System::UnicodeString UndoDesc = System::UnicodeString());
+	bool __fastcall InsertNibble(const TPointerInt aPos, const bool HighNibble, const System::UnicodeString UndoDesc = System::UnicodeString());
+	void __fastcall ConvertRange(const TPointerInt aFrom, const TPointerInt aTo, const TBCHTranslationKind aTransFrom, const TBCHTranslationKind aTransTo, const System::UnicodeString UndoDesc = System::UnicodeString());
+	TPointerInt __fastcall GetTopLeftPosition(bool &oInCharField);
+	void __fastcall SetTopLeftPosition(const TPointerInt aPosition, const bool aInCharField);
+	TPointerInt __fastcall ShowDragCell(const TPointerInt X, const TPointerInt Y);
 	void __fastcall HideDragCell();
-	void __fastcall CombineUndo(const int aCount, const System::UnicodeString sDesc = System::UnicodeString());
+	void __fastcall CombineUndo(const TPointerInt aCount, const System::UnicodeString sDesc = System::UnicodeString());
 	System::WideChar __fastcall TranslateToAnsiChar(const System::Byte aByte);
 	System::WideChar __fastcall TranslateFromAnsiChar(const System::Byte aByte);
-	__property int SelStart = {read=GetSelStart, write=SetSelStart, nodefault};
-	__property int SelEnd = {read=GetSelEnd, write=SetSelEnd, nodefault};
-	__property int SelCount = {read=GetSelCount, write=SetSelCount, nodefault};
+	__property TPointerInt SelStart = {read=GetSelStart, write=SetSelStart, nodefault};
+	__property TPointerInt SelEnd = {read=GetSelEnd, write=SetSelEnd, nodefault};
+	__property TPointerInt SelCount = {read=GetSelCount, write=SetSelCount, nodefault};
 	__property bool CanUndo = {read=GetCanUndo, nodefault};
 	__property bool CanRedo = {read=GetCanRedo, nodefault};
 	__property bool InCharField = {read=GetInCharField, write=SetInCharField, nodefault};
 	__property System::UnicodeString UndoDescription = {read=GetUndoDescription};
 	__property bool ReadOnlyFile = {read=FIsFileReadonly, write=SetReadOnlyFile, nodefault};
 	__property bool Modified = {read=GetModified, write=SetModified, nodefault};
-	__property int DataSize = {read=GetDataSize, write=SetDataSize, nodefault};
-	__property System::Byte Data[int Index] = {read=GetDataAt, write=SetDataAt};
+	__property TPointerInt DataSize = {read=GetDataSize, write=SetDataSize, nodefault};
+	__property System::Byte Data[TPointerInt Index] = {read=GetDataAt, write=SetDataAt};
 	__property System::AnsiString AsText = {read=GetAsText, write=SetAsText};
 	__property System::UnicodeString AsHex = {read=GetAsHex, write=SetAsHex};
 	__property System::UnicodeString Filename = {read=FFileName};
 	__property TBCHBookmark Bookmark[System::Byte Index] = {read=GetBookmark, write=SetBookmark};
-	__property bool ByteChanged[int index] = {read=HasChanged, write=SetChanged};
+	__property bool ByteChanged[TPointerInt index] = {read=HasChanged, write=SetChanged};
 	__property int ColCountRO = {read=GetPropColCount, nodefault};
-	__property int RowCountRO = {read=GetPropRowCount, nodefault};
+	__property TPointerInt RowCountRO = {read=GetPropRowCount, nodefault};
 	__property bool MouseOverSelection = {read=GetMouseOverSelection, nodefault};
 	__property int CurrentValue = {read=GetCurrentValue, nodefault};
 	void __fastcall SelectAll();
@@ -708,12 +708,12 @@ typedef TBCHUndoRec *PBCHUndoRec;
 struct DECLSPEC_DRECORD TBCHUndoRec
 {
 public:
-	int DataLen;
+	TPointerInt DataLen;
 	TBCHUndoFlags Flags;
-	int CurPos;
-	unsigned Pos;
-	unsigned Count;
-	unsigned ReplCount;
+	TPointerInt CurPos;
+	TPointerInt Pos;
+	TPointerInt Count;
+	TPointerInt ReplCount;
 	TBCHTranslationKind CurTranslation;
 	int CurBPU;
 	System::Byte Buffer;
@@ -727,27 +727,27 @@ class PASCALIMPLEMENTATION TBCHUndoStorage : public System::Classes::TMemoryStre
 	typedef System::Classes::TMemoryStream inherited;
 	
 private:
-	int FCount;
-	int FUpdateCount;
+	TPointerInt FCount;
+	TPointerInt FUpdateCount;
 	TCustomBCHexEditor* FEditor;
 	System::UnicodeString FDescription;
 	PBCHUndoRec FRedoPointer;
 	PBCHUndoRec FLastUndo;
-	int FLastUndoSize;
+	TPointerInt FLastUndoSize;
 	System::UnicodeString FLastUndoDesc;
-	void __fastcall SetCount(const int Value);
+	void __fastcall SetCount(const TPointerInt Value);
 	void __fastcall ResetRedo();
 	void __fastcall CreateRedo(const TBCHUndoRec &Rec);
 	TBCHUndoFlag __fastcall GetUndoKind(const TBCHUndoFlags Flags);
-	void __fastcall AddSelection(const int APos, const int ACount);
+	void __fastcall AddSelection(const TPointerInt APos, const TPointerInt ACount);
 	TBCHUndoFlag __fastcall ReadUndoRecord(TBCHUndoRec &aUR, System::UnicodeString &SDescription);
 	TBCHUndoFlag __fastcall GetLastUndoKind();
 	
 public:
 	__fastcall TBCHUndoStorage(TCustomBCHexEditor* AEditor);
 	__fastcall virtual ~TBCHUndoStorage();
-	virtual void __fastcall SetSize(System::LongInt NewSize)/* overload */;
-	void __fastcall CreateUndo(TBCHUndoFlag aKind, int APosition, int ACount, int AReplaceCount, const System::UnicodeString SDescription = System::UnicodeString());
+	virtual void __fastcall SetSize(const __int64 NewSize)/* overload */;
+	void __fastcall CreateUndo(TBCHUndoFlag aKind, TPointerInt APosition, TPointerInt ACount, TPointerInt AReplaceCount, const System::UnicodeString SDescription = System::UnicodeString());
 	bool __fastcall CanUndo();
 	bool __fastcall CanRedo();
 	bool __fastcall Redo();
@@ -756,14 +756,14 @@ public:
 	int __fastcall EndUpdate();
 	void __fastcall Reset(bool AResetRedo = true);
 	void __fastcall RemoveLastUndo();
-	__property int Count = {read=FCount, write=SetCount, nodefault};
-	__property int UpdateCount = {read=FUpdateCount, nodefault};
+	__property TPointerInt Count = {read=FCount, write=SetCount, nodefault};
+	__property TPointerInt UpdateCount = {read=FUpdateCount, nodefault};
 	__property System::UnicodeString Description = {read=FDescription};
 	__property TBCHUndoFlag UndoKind = {read=GetLastUndoKind, nodefault};
 	/* Hoisted overloads: */
 	
 public:
-	inline void __fastcall  SetSize(const __int64 NewSize){ System::Classes::TMemoryStream::SetSize(NewSize); }
+	inline void __fastcall  SetSize(System::LongInt NewSize){ System::Classes::TMemoryStream::SetSize(NewSize); }
 	
 };
 
@@ -817,15 +817,15 @@ extern DELPHI_PACKAGE TBCHCharConv BCHCustomCharConv;
 #define BCHOffsetHex L"-!10:0x|"
 #define BCHOffsetDec L"a:|"
 #define BCHOffsetOct L"0!8:o|"
-extern DELPHI_PACKAGE void __fastcall TranslateBufferFromAnsi(const TBCHTranslationKind TType, char * aBuffer, char * bBuffer, const int aCount);
-extern DELPHI_PACKAGE void __fastcall TranslateBufferToAnsi(const TBCHTranslationKind TType, char * aBuffer, char * bBuffer, const int aCount);
+extern DELPHI_PACKAGE void __fastcall TranslateBufferFromAnsi(const TBCHTranslationKind TType, char * aBuffer, char * bBuffer, const TPointerInt aCount);
+extern DELPHI_PACKAGE void __fastcall TranslateBufferToAnsi(const TBCHTranslationKind TType, char * aBuffer, char * bBuffer, const TPointerInt aCount);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTempName();
 extern DELPHI_PACKAGE bool __fastcall IsKeyDown(int aKey);
-extern DELPHI_PACKAGE int __fastcall Min(int a1, int a2);
-extern DELPHI_PACKAGE int __fastcall Max(int a1, int a2);
+extern DELPHI_PACKAGE TPointerInt __fastcall Min(TPointerInt a1, TPointerInt a2);
+extern DELPHI_PACKAGE TPointerInt __fastcall Max(TPointerInt a1, TPointerInt a2);
 extern DELPHI_PACKAGE TGridCoord __fastcall GridCoord(System::LongInt aX, System::LongInt aY);
-extern DELPHI_PACKAGE char * __fastcall ConvertHexToBin(System::WideChar * aFrom, char * aTo, const int aCount, const bool SwapNibbles, int &BytesTranslated);
-extern DELPHI_PACKAGE System::WideChar * __fastcall ConvertBinToHex(char * aFrom, System::WideChar * aTo, const int aCount, const bool SwapNibbles);
+extern DELPHI_PACKAGE char * __fastcall ConvertHexToBin(System::WideChar * aFrom, char * aTo, const TPointerInt aCount, const bool SwapNibbles, TPointerInt &BytesTranslated);
+extern DELPHI_PACKAGE System::WideChar * __fastcall ConvertBinToHex(char * aFrom, System::WideChar * aTo, const TPointerInt aCount, const bool SwapNibbles);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall IntToRadix(int Value, System::Byte Radix);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall IntToRadix64(__int64 Value, System::Byte Radix);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall IntToRadixLen(int Value, System::Byte Radix, System::Byte Len);

@@ -131,7 +131,7 @@ var
   WayPtList: TStringList;
   DefProcessOptions: TProcessOptions;
 begin
-  DefProcessOptions := TProcessOptions.Create(nil, nil);
+  DefProcessOptions := TProcessOptions.Create;
   WayPtList := TStringList.Create;
   try
     WayPtList.Text := ProcessCategoryPick;

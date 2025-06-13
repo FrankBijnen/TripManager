@@ -676,9 +676,10 @@ type
     function GetRoutePoint(RoutePointId: integer): Tlocation;
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
-    procedure CreateOSMPoints(const OutStringList: TStringList; const DisplayColor: string = 'Magenta');
+    procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
     procedure CreateTemplate(const AModel: TZumoModel; TripName: string);
+    procedure SaveAsGPX(const GPXFile: string);
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
     property ZumoModel: TZumoModel read GetZumoModel;
@@ -689,8 +690,7 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo,
   Vcl.Dialogs,
-  UnitOSMMap, // TODO Remove
-  UnitStringUtils;
+  UnitStringUtils, UnitVerySimpleXml;
 
 const
   Coord_Decimals = '%1.6f';
@@ -2662,7 +2662,7 @@ begin
   end;
 end;
 
-procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const DisplayColor: string = 'Magenta');
+procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
 var
   Coords, Color, ShowInLayerSwitcher, PointName, RoutePointName: string;
   TrackPoints: integer;
@@ -2745,7 +2745,7 @@ begin
                                   ShowInLayerSwitcher]));
       end;
     end;
-    OutStringList.Add(Format('CreateTrack("Line: %s", ''%s'');', [EscapeDQuote(TripName.AsString), OSMColor(DisplayColor)]));
+    OutStringList.Add(Format('CreateTrack("Line: %s", ''%s'');', [EscapeDQuote(TripName.AsString), HTMLColor]));
 
   end;
 end;
@@ -2898,7 +2898,6 @@ procedure TTripList.CreateTemplate_XT2(const TripName: string);
 var
   TmpStream: TMemoryStream;
   Uid: TGuid;
-
 begin
   TmpStream := TMemoryStream.Create;
   try
@@ -2968,6 +2967,99 @@ begin
       CreateTemplate_XT(TripName);
   end;
 end;
+
+procedure TTripList.SaveAsGPX(const GPXFile: string);
+var
+  Xml: TXmlVSDocument;
+  XMLRoot: TXmlVSNode;
+  Rte, RtePt, Trk, TrkSeg, TrkPt: TXmlVSNode;
+  Locations: TmLocations;
+  AllRoutes: TmAllRoutes;
+  AnUdbHandle: TmUdbDataHndl;
+  ANUdbDir: TUdbDir;
+  Location, ANItem: TBaseItem;
+  ViaPointType, PointName, Lat, Lon, Address: string;
+begin
+  XML := TXmlVSDocument.Create;
+  try
+    XMLRoot := InitGarminGpx(XML);
+    Rte := XMLRoot.AddChild('rte');
+    Rte.AddChild('name').NodeValue := TBaseDataItem(GetItem('mTripName')).AsString;
+
+    Locations := TmLocations(GetItem('mLocations'));
+    if not (Assigned(Locations)) then
+      exit;
+
+    for Location in Locations.Locations do
+    begin
+      if (Location is TLocation) then
+      begin
+        RtePt := Rte.AddChild('rtept');
+        ViaPointType := 'trp:ShapingPoint';
+        PointName := '';
+        Lat := '';
+        Lon := '';
+        Address := '';
+        for ANItem in TLocation(Location).LocationItems do
+        begin
+
+          if (ANItem is TmAttr) then
+          begin
+            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
+              ViaPointType := 'trp:ViaPoint'
+            else
+              ViaPointType := 'trp:ShapingPoint';
+          end;
+
+          if (ANItem is TmName) then
+            PointName := TmName(ANItem).AsString;
+
+          if (ANItem is TmScPosn) then
+          begin
+            Lon := TmScPosn(ANItem).MapCoords;
+            Lat := Trim(NextField(Lon, ','));
+            Lon := Trim(Lon);
+          end;
+
+          if (ANItem is TmAddress) then
+            Address := TmAddress(ANItem).AsString;
+
+        end;
+        RtePt.Attributes['lat'] := Lat;
+        RtePt.Attributes['lon'] := Lon;
+        RtePt.AddChild('name').NodeValue := PointName;
+        RtePt.AddChild('cmt').NodeValue := Address;
+        RtePt.AddChild('desc').NodeValue := Address;
+        RtePt.AddChild('extensions').AddChild(ViaPointType);
+      end;
+    end;
+
+    AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
+    if Assigned(AllRoutes) then
+    begin
+      Trk := XMLRoot.AddChild('trk');
+      Trk.AddChild('name').NodeValue := TBaseDataItem(GetItem('mTripName')).AsString;
+      for AnUdbHandle in AllRoutes.Items do
+      begin
+        TrkSeg := Trk.AddChild('trkseg');
+        for ANUdbDir in AnUdbHandle.Items do
+        begin
+          TrkPt := TrkSeg.AddChild('trkpt');
+          Lon := ANUdbDir.MapCoords;
+          Lat := Trim(NextField(Lon, ','));
+          Lon := Trim(Lon);
+          TrkPt.Attributes['lat'] := Lat;
+          TrkPt.Attributes['lon'] := Lon;
+        end;
+      end;
+    end;
+
+    XML.SaveToFile(GPXFile);
+  finally
+    Xml.Free;
+  end;
+end;
+
 
 initialization
 

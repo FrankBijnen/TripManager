@@ -5,8 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
   Data.DB, Datasnap.DBClient,
-  UnitTripObjects;
-
+  UnitTripObjects, UnitVerySimpleXml;
 
 type
   TOnGetMapCoords = function: string of object;
@@ -52,6 +51,9 @@ type
     function CheckEmptyField(Sender: TField): boolean;
     procedure SetAddressFromCoords(Sender: TObject; Coords: string);
     procedure SetDefaultName(IdToAssign: integer);
+    procedure OnSetAnalyzePrefs(Sender: TObject);
+    procedure AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
+
   public
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
@@ -63,7 +65,8 @@ type
     function AddressFromCoords(const Lat, Lon: string): string;
     procedure LookUpAddress;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
-    procedure ExportToGPX(GPXFile: string);
+    procedure ImportFromGPX(const GPXFile: string);
+    procedure ExportToGPX(const GPXFile: string);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
@@ -81,8 +84,8 @@ implementation
 uses
   System.StrUtils, System.Variants, System.DateUtils,
   Winapi.Windows,
-  Vcl.Dialogs,
-  UnitGeoCode, UnitStringUtils, UnitVerySimpleXml, UnitGpxObjects;
+  Vcl.Dialogs, Vcl.ComCtrls,
+  UnitGeoCode, UnitStringUtils, UnitGpxObjects, UFrmSelectGPX;
 
 {$R *.dfm}
 
@@ -575,7 +578,9 @@ var
 begin
   Place := GetPlaceOfCoords(CdsRoutePointsLat.AsString,
                             CdsRoutePointsLon.AsString);
-  if (Place <> nil) then
+  if (Place = nil) then
+    CdsRoutePointsAddress.AsString := AddressFromCoords(CdsRoutePointsLat.AsString, CdsRoutePointsLon.AsString)
+  else
     CdsRoutePointsAddress.AsString := Place.RoutePlace;
 end;
 
@@ -588,7 +593,115 @@ begin
   CdsRoutePoints.Post;
 end;
 
-procedure TDmRoutePoints.ExportToGPX(GPXFile: string);
+procedure TDmRoutePoints.OnSetAnalyzePrefs(Sender: TObject);
+begin
+  TProcessOptions(Sender).ProcessTracks := false;
+end;
+
+
+
+procedure TDmRoutePoints.AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
+var
+  ExtensionsNode, WayPointExtension, Address, AddressChild: TXmlVSNode;
+  Lat, Lon, AddressLine: string;
+begin
+  DmRoutePoints.CdsRoutePoints.Insert;
+  DmRoutePoints.CdsRoutePointsName.AsString := FindSubNodeValue(ARoutePoint, 'name');
+  Lat := ARoutePoint.Attributes['lat'];
+  Lon := ARoutePoint.Attributes['lon'];
+  AdjustLatLon(Lat, Lon, 6);
+  DmRoutePoints.CdsRoutePointsLat.AsString := Lat;
+  DmRoutePoints.CdsRoutePointsLon.AsString := Lon;
+  ExtensionsNode := ARoutePoint.Find('extensions');
+  if (FromWpt) then
+  begin
+    DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := true;
+    AddressLine := '';
+    if (ExtensionsNode <> nil) then
+    begin
+      Address := nil;
+      WayPointExtension := ExtensionsNode.find('gpxx:WaypointExtension');
+      if (WayPointExtension <> nil) then
+        Address := WayPointExtension.Find('gpxx:Address');
+      if (Address <> nil) then
+      begin
+        for AddressChild in Address.ChildNodes do
+        begin
+          if (AddressLine <> '') then
+            AddressLine := AddressLine + ', ';
+          AddressLine := AddressLine + AddressChild.NodeValue;
+        end;
+      end;
+    end;
+    DmRoutePoints.CdsRoutePointsAddress.AsString := AddressLine;
+  end
+  else
+  begin
+    DmRoutePoints.CdsRoutePointsAddress.AsString := FindSubNodeValue(ARoutePoint, 'cmt');
+    if (DmRoutePoints.CdsRoutePointsAddress.AsString = '') then
+      DmRoutePoints.CdsRoutePointsAddress.AsString := DmRoutePoints.AddressFromCoords(Lat, Lon);
+    if (ExtensionsNode <> nil) then
+      DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+  end;
+  DmRoutePoints.CdsRoutePoints.Post;
+end;
+
+procedure TDmRoutePoints.ImportFromGPX(const GPXFile: string);
+var
+  CrNormal,CrWait: HCURSOR;
+  RoutePoints, RoutePoint: TXmlVSNode;
+  AnItem: TListItem;
+  GPXFileObj: TGPXFile;
+begin
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  GPXFileObj := TGPXFile.Create(GPXFile, OnSetAnalyzePrefs, nil);
+  try
+    GPXFileObj.AnalyzeGpx;
+    SetCursor(CrNormal);
+
+    if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
+                                    'Select Waypoints/Routes',
+                                     TTagsToShow.WptRte)) then
+    begin
+      DmRoutePoints.CdsRoutePoints.DisableControls;
+      try
+        DmRoutePoints.CdsRoutePoints.Last;
+
+        for AnItem in GPXFileObj.FrmSelectGPX.LvTracks.Items do
+        begin
+          if not (AnItem.Checked) then
+            continue;
+
+          if (AnItem.SubItems[0] = 'Wpt') then
+          begin
+            for RoutePoint in GPXFileObj.WayPointList do
+              AddRoutePoint(RoutePoint, true);
+            continue;
+          end;
+
+          for RoutePoints in GPXFileObj.RouteViaPointList do
+          begin
+            if (RoutePoints.NodeName <> AnItem.Caption) then
+              continue;
+            for RoutePoint in RoutePoints.ChildNodes do
+              AddRoutePoint(RoutePoint, false);
+          end;
+
+        end;
+      finally
+        DmRoutePoints.CdsRoutePoints.EnableControls;
+        if Assigned(DmRoutePoints.OnRouteUpdated) then
+          DmRoutePoints.OnRouteUpdated(Self);
+      end;
+    end;
+  finally
+    GPXFileObj.Free;
+    SetCursor(CrNormal);
+  end;
+end;
+
+procedure TDmRoutePoints.ExportToGPX(const GPXFile: string);
 var
   Xml: TXmlVSDocument;
   XMLRoot: TXmlVSNode;
@@ -596,7 +709,7 @@ var
   DefProcessOptions: TProcessOptions;
 begin
   XML := TXmlVSDocument.Create;
-  DefProcessOptions := TProcessOptions.Create(nil, nil);
+  DefProcessOptions := TProcessOptions.Create;
   CdsRoutePoints.DisableControls;
   try
     XMLRoot := InitGarminGpx(XML);

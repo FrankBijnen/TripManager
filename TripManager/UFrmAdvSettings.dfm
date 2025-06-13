@@ -36,7 +36,6 @@ object FrmAdvSettings: TFrmAdvSettings
       Default = True
       ModalResult = 1
       TabOrder = 0
-      ExplicitLeft = 392
     end
     object BtnCancel: TButton
       Left = 510
@@ -48,7 +47,6 @@ object FrmAdvSettings: TFrmAdvSettings
       Caption = 'Cancel'
       ModalResult = 2
       TabOrder = 1
-      ExplicitLeft = 479
     end
   end
   object PctMain: TPageControl
@@ -75,7 +73,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
-        ExplicitWidth = 548
         RowHeights = (
           24
           24
