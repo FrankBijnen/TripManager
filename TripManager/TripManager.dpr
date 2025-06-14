@@ -24,6 +24,8 @@ uses
   TripManager_ShellTree in 'TripManager_ShellTree.pas',
   TripManager_ShellList in 'TripManager_ShellList.pas',
   TripManager_ValEdit in 'TripManager_ValEdit.pas',
+  TripManager_DBGrid in 'TripManager_DBGrid.pas',
+  TripManager_GridSelItem in 'TripManager_GridSelItem.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
   ogckml23 in '..\CommonUnits\kml\ogckml23.pas',
@@ -45,11 +47,10 @@ uses
   UnitStringUtils in '..\CommonUnits\UnitStringUtils.pas',
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
+  UnitUSBEvent in '..\CommonUnits\USBEvent\UnitUSBEvent.pas',
   UnitRegistry in 'UnitRegistry.pas',
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
-  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
-  TripManager_DBGrid in 'TripManager_DBGrid.pas',
-  TripManager_GridSelItem in 'TripManager_GridSelItem.pas';
+  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
 
 {$R *.res}
 

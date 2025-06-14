@@ -629,11 +629,12 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 13
+          Height = 24
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True

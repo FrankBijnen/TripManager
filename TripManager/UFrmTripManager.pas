@@ -16,7 +16,7 @@ uses
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
   Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  ListViewSort, UnitTripObjects, UnitGpi;
+  ListViewSort, UnitTripObjects, UnitGpi, UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -272,8 +272,9 @@ type
     EdgeZoom: double;
     RoutePointTimeOut: string;
     GeoSearchTimeOut: string;
-
+    USBEvent: TUSBEvent;
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
+    procedure USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     function SelectedScPosn: TmScPosn;
     function SelectedLocation: TLocation;
@@ -295,6 +296,7 @@ type
     procedure FreeCustomData(const ACustomData: pointer);
     procedure FreeDevices;
     procedure GuessModel(const FriendlyName: string);
+    function DeviceIdInList(const DeviceName: string): integer;
     procedure SelectDevice(const Indx: integer); overload;
     procedure SelectDevice(const Device: string); overload;
     function GetItemType(const AListview: TListView): TDirType;
@@ -411,15 +413,9 @@ begin
     CmbModel.ItemIndex := Ord(TZumoModel.XT);
 end;
 
+// No need to close manually.
 procedure TFrmTripManager.CloseDevice;
 begin
-  try
-    if Assigned(CurrentDevice) and
-       Assigned(CurrentDevice.PortableDev) then
-      CurrentDevice.PortableDev.Close;
-  except
-
-  end;
   CurrentDevice := nil;
 end;
 
@@ -1275,6 +1271,11 @@ begin
   ModifiedList.Sorted := true;
   ModifiedList.Duplicates := TDuplicates.dupIgnore;
 
+  USBEvent := TUSBEvent.Create;
+  USBEvent.OnUSBChange := USBChangeEvent;
+  if not USBEvent.RegisterUSBHandler(GUID_DEVINTERFACE_WPD) then
+    ShowMessage('Failed to register WPD Events');
+
   HexEdit := TBCHexEditor.Create(Self);
   HexEdit.Parent := HexPanel;
   HexEdit.Align := alClient;
@@ -1312,6 +1313,9 @@ procedure TFrmTripManager.FormDestroy(Sender: TObject);
 begin
   DirectoryMonitor.Free;
   ModifiedList.Free;
+  if not USBEvent.UnRegisterUSBHandler then
+    ShowMessage('Failed to unregister USB Events');
+  USBEvent.Free;
 
   ClearTripInfo;
   ATripList.Free;
@@ -3603,6 +3607,51 @@ begin
   SelectModifiedFiles;
 
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
+end;
+
+function TFrmTripManager.DeviceIdInList(const DeviceName: string): integer;
+var
+  Index: integer;
+begin
+  result := -1;
+  for Index := 0 to DeviceList.Count -1 do
+  begin
+    if (SameText(TMTP_Device(DeviceList[Index]).Device, DeviceName)) then
+      exit(Index);
+  end;
+end;
+
+procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
+var
+  Index: integer;
+begin
+  SbPostProcess.Panels[0].Text := VendorId + ProductId; // If not found in Devicelist
+  if (Inserted = false) then
+  begin
+    SbPostProcess.Panels[1].Text := 'Disconnected';
+    Index := DeviceIdInList(DeviceName);  // List before remove
+    if (Index > -1) then
+      SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
+  end;
+
+  BtnRefreshClick(BtnRefresh);
+
+  if (Inserted) then
+  begin
+    SbPostProcess.Panels[1].Text := 'Connected';
+    Index := DeviceIdInList(DeviceName); // List after insert
+    if (Index > -1) then
+    begin
+      SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
+      if (TMTP_Device(DeviceList[Index]).FriendlyName = PrefDevice) then
+      begin
+        SbPostProcess.Panels[1].Text := 'Selected';
+        SelectDevice(PrefDevice);
+        ReadDefaultFolders;
+        BgDeviceClick(BgDevice);
+      end;
+    end;
+  end;
 end;
 
 end.
