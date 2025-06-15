@@ -4,18 +4,22 @@
 #define MyAppName "TripManager"
 #define MyAppVersion GetVersionNumbersString('..\Win32\TripManager.exe')
 #define MyAppPublisher "TDBware"
+#define ExeName "TripManager.exe" 
+#define DefaultDirName "{code:DefaultDir}\TripManager" 
+#define MyAppId "{{33018F95-765A-49CA-B6FC-0B3AB06701BD}" 
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{33018F95-765A-49CA-B6FC-0B3AB06701BD}
+AppId={#MyAppId}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={commonpf}\{#MyAppName}
+DefaultDirName={#DefaultDirName}
 DisableDirPage=no
 DefaultGroupName={#MyAppName}
+UninstallDisplayIcon={app}\{#ExeName}
 OutputDir=.
 OutputBaseFilename=setup_{#MyAppName}
 Compression=lzma2/normal
@@ -23,31 +27,30 @@ LZMANumBlockThreads=16
 LZMAUseSeparateProcess=yes
 SolidCompression=no
 RestartIfNeededByRun=no
+ArchitecturesInstallIn64BitMode=x64compatible
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[Components]
+Name: ExecutableWin32;                  Description: "Install Executable (Win32)";            types: full;          Check: Win32;
+Name: ExecutableWin64;                  Description: "Install Executable (Win64)";            types: full;          Check: Win64;
+Name: Symbols;                          Description: "Install Symbols";                       types: full;
+
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "..\Win32\TripManager.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\Win32\WebView2Loader.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\Win32\TripManager.exe";       DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
+Source: "..\Win32\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
+
+Source: "..\Win64\TripManager.exe";       DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
+Source: "..\Win64\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 ; Images
-Source: "..\Win32\Symbols\*"; Excludes: "*.png,*.jbf,*.db"; DestDir: "{app}\Symbols"; Flags: recursesubdirs
+Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: recursesubdirs; Excludes: "*.png,*.jbf,*.db"
 
 [Registry]
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx";
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell";
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop"; ValueName: MUIVerb; ValueType: string; ValueData: "GPX Tools"; Flags: uninsdeletekey
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop"; ValueName: subcommands; ValueType: string; ValueData: ""; Flags: uninsdeletekey
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell"; Flags: uninsdeletekey
-;
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell\a_unglitch"; ValueType: string; ValueData: "Unglitch, Create tracks and routes"; Flags: uninsdeletekey
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell\a_unglitch\command"; ValueType: string; ValueData: """{app}\UnGlitch.exe"" ""%L"""; Flags: uninsdeletekey
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell\f_createadditional"; ValueType: string; ValueData: "Create additional files (Via points, Google, OSM and POI)"; Flags: uninsdeletekey
-;Root: HKCR; Subkey: "SystemFileAssociations\\.gpx\\shell\myactiontop\shell\f_createadditional\command"; ValueType: string; ValueData: """{app}\CreateAdditional.exe"" ""%L"""; Flags: uninsdeletekey
 
 ; attempt to remove previous version icon installed on userdesktop. New one is autodesktop
 [InstallDelete]
@@ -58,3 +61,53 @@ Name: "{group}\{#MyAppName}";         Filename: "{app}\TripManager.exe"
 Name: "{autodesktop}\{#MyAppName}";   Filename: "{app}\TripManager.exe";              tasks: desktopicon;
 
 [Run]
+
+[Code]
+
+{ @TLama's function from https://stackoverflow.com/q/14392921/850848 }
+function CmdLineParamExists(const Value: string): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 1 to ParamCount do
+    if CompareText(ParamStr(I), Value) = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
+
+function Win32: boolean;
+begin
+  result := (not IsWin64) or CmdLineParamExists('/Win32');
+end;
+
+function Win64: boolean;
+begin
+  result := not Win32;
+end;
+
+function DefaultDir(Param: string): string;
+begin
+  result := ExpandConstant('{autopf}');
+  if (IsWin64) and
+     (CmdLineParamExists('/Win32')) then
+    result := ExpandConstant('{autopf32}');
+end;
+
+function InitializeSetup(): Boolean;
+var
+  RegKey: string;
+  ErrorCode: integer;
+  UninstallString: string;
+begin
+  Result := true;
+  RegKey := 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#MyAppId}') + '_is1';
+  if RegQueryStringValue(HKLM, RegKey, 'UninstallString', UninstallString) and
+     (Is64BitInstallMode) then
+  begin   
+    MsgBox('Setup needs to uninstall the currently installed platform first.' + #10 + UninstallString, mbConfirmation, MB_OK);
+    ShellExec('', UninstallString, '/SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ErrorCode);
+  end;    
+end;
