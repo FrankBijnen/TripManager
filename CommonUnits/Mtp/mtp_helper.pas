@@ -291,10 +291,8 @@ const
   WPD_DEVICE_FRIENDLY_NAME_FMTID : TGuid = '{26D4979A-E643-4626-9E2B-736DC0C92FDC}';
   WPD_DEVICE_FRIENDLY_NAME_PID = 12;
 
-
   WPD_RESOURCE_DEFAULT_FMTID : TGuid = '{E81E79BE-34F0-41BF-B53F-F1A06AE87842}';
   WPD_RESOURCE_DEFAULT_PID = 0;
-
 
   WPD_PROPERTY_ATTRIBUTE_FORM_FMTID : TGuid = '{ab7943d8-6332-445f-a00d-8d5ef1e96f37}';
   WPD_PROPERTY_ATTRIBUTE_FORM_PID = 2;
@@ -349,7 +347,7 @@ function GetIdForFile(PortableDev: IMTPDevice;
                       AListItem: TListItem = nil): string;
 function GetFileFromDevice(PortableDev: IMTPDevice; SFile, SSaveTo, NFile: WideString): Boolean;
 function DelFileFromDevice(PortableDev: IMTPDevice; SFile: WideString): Boolean;
-function RenameObject(Device: IMTPDevice; ObjectId, NewName: WideString): Boolean;
+function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): Boolean;
 function TransferNewFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString;
                                  NewName: WideString = ''): WideString;
 function TransferExistingFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
@@ -461,7 +459,7 @@ end;
 //        For the Zumo XT it is enough to just modify original name. For other device we may need object_name also.
 const BoolFalse = 0;
 
-function RenameObject(Device: IMTPDevice; ObjectId, NewName: WideString): boolean;
+function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): boolean;
 var Content: IPortableDeviceContent;
     Properties: IPortableDeviceProperties;
     Attributes: IPortableDeviceValues;
@@ -470,13 +468,13 @@ var Content: IPortableDeviceContent;
     CanWrite: integer;
     Hr: HResult;
 
-// In PortableDeviceApiLib_TLB some methods have 'var', and thus require a variable. a 'const' would be better!
+// In PortableDeviceApiLib_TLB some methods have 'var', and thus require a variable.
     ObjectOriginalNameKey: PortableDeviceApiLib_TLB._tagpropertykey;
     CanWriteKey: PortableDeviceApiLib_TLB._tagpropertykey;
 
 begin
   result := false;
-  Hr := Device.Content(Content);
+  Hr := PortableDev.Content(Content);
   if (Hr <> S_OK) then
     exit;
 

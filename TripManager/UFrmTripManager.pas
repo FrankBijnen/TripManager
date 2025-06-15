@@ -2670,16 +2670,17 @@ begin
           raise exception.Create(Format('File %s exists!', [TripFilename]));
 
         // Rename
-        AnItem.Caption := TripFilename;
-        RenameObject(CurrentDevice.PortableDev, ABase_Data.ObjectId, AnItem.Caption);
-        TripFilename := CopyFileToTmp(AnItem);
+        AnItem.Caption := TripFilename; // Change caption
+        RenameObject(CurrentDevice.PortableDev, ABase_Data.ObjectId, TripFilename);
+        GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TripFilename, AnItem); // Get modified data
 
         // reload trip, and change mFilename
+        TripFilename := CopyFileToTmp(AnItem);  // First copy to tmp
         TmpTripList.LoadFromFile(TripFilename);
-        TmFileName (TmpTripList.GetItem('mFileName')).AsString := Format('0:/.System/Trips/%s.trip', [TripName]);
+        TmFileName(TmpTripList.GetItem('mFileName')).AsString := Format('0:/.System/Trips/%s.trip', [TripName]);
         TmpTripList.SaveToFile(TripFilename);
 
-        // Write to dev
+        // Write back to dev
         CopyFileFromTmp(TripFilename, AnItem);
       end;
     finally

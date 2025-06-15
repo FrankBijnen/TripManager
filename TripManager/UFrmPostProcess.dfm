@@ -397,7 +397,7 @@ object FrmPostProcess: TFrmPostProcess
       'With routes:'
       
         '- It clears the subclass field for Via and Shaping points. Preve' +
-        'nts renaming on the XT'
+        'nts renaming on the XT(2)'
       '- It puts the Shaping points on the road. AKA unglitching'
       ''
       'Optionally:'
