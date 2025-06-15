@@ -277,6 +277,8 @@ type
     USBEvent: TUSBEvent;
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
     procedure USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
+    procedure ConnectedDeviceChanged(const Device, Status: string);
+
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     function SelectedScPosn: TmScPosn;
     function SelectedLocation: TLocation;
@@ -295,7 +297,7 @@ type
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
 
-    procedure FreeCustomData(const ACustomData: pointer);
+    procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
@@ -1334,7 +1336,7 @@ begin
   PctHexOsm.ActivePageIndex := 1;
 end;
 
-procedure TFrmTripManager.FreeCustomData(const ACustomData: pointer);
+procedure TFrmTripManager.FreeDeviceData(const ACustomData: pointer);
 begin
   if (Assigned(ACustomData)) then
   begin
@@ -1349,7 +1351,7 @@ begin
   if (Assigned(DeviceList)) then
   begin
     for Indx := 0 to DeviceList.Count - 1 do
-      FreeCustomData(DeviceList[Indx]);
+      FreeDeviceData(DeviceList[Indx]);
     FreeAndNil(DeviceList);
   end;
   CmbDevices.Items.Clear;
@@ -1359,6 +1361,7 @@ procedure TFrmTripManager.GetDeviceList;
 var
   Index: integer;
 begin
+  CurrentDevice := nil;
   FreeDevices;
   LstFiles.Clear;
   DeviceList := GetDevices;
@@ -3634,7 +3637,14 @@ end;
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
   Index: integer;
+  SelectedDeviceName: string;
 begin
+  // Save currently selected device name
+  if Assigned(CurrentDevice) then
+    SelectedDeviceName := CurrentDevice.FriendlyName
+  else
+    SelectedDeviceName := '';
+
   // Removed USB device is our connected device?
   if (Inserted = false) and
      (Assigned(CurrentDevice)) and
@@ -3642,39 +3652,50 @@ begin
   begin
     Index := DeviceIdInList(DeviceName);  // List before remove
     if (Index > -1) then
-      SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
-    SbPostProcess.Panels[1].Text := 'Disconnected';
-
-    SelectDevice('');
-    ReadDefaultFolders;
-
-    StatusTimer.Enabled := false;
-    StatusTimer.Enabled := true;
+      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Disconnected');
   end;
 
-  // Always update the device list
-  BtnRefreshClick(BtnRefresh);
+  // rebuild device list
+  GetDeviceList;
 
-  // Inserted USB device is our preferred device?
-  if (Inserted) then
+  // Select the previously selected device and reload the file list
+  if (SelectedDeviceName <> '') then
+  begin
+    SelectDevice(SelectedDeviceName);
+    if CheckDevice(false) then
+      ReloadFileList;
+  end;
+
+  // No Device connected and inserted USB device is our preferred device?
+  if (Inserted) and
+     (SelectedDeviceName = '') then
   begin
     Index := DeviceIdInList(DeviceName); // List after insert
-    if (Index > -1) then
+    if (Index > -1) and
+       (TMTP_Device(DeviceList[Index]).FriendlyName = PrefDevice) then
     begin
-      if (TMTP_Device(DeviceList[Index]).FriendlyName = PrefDevice) then
-      begin
-        SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
-        SbPostProcess.Panels[1].Text := 'Connected';
+      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Connected');
 
-        SelectDevice(PrefDevice);
-        ReadDefaultFolders;
-        BgDeviceClick(BgDevice);
-
-        StatusTimer.Enabled := false;
-        StatusTimer.Enabled := true;
-      end;
+      CmbDevices.ItemIndex := Index;
+      SelectDevice(Index);
+      BgDeviceClick(BgDevice);
     end;
   end;
+end;
+
+
+procedure TFrmTripManager.ConnectedDeviceChanged(const Device, Status: string);
+begin
+  SbPostProcess.Panels[0].Text := Device;
+  SbPostProcess.Panels[1].Text := Status;
+
+  CurrentDevice := nil;
+  ReadDefaultFolders;
+  TvTrip.Items.Clear;
+  ClearTripInfo;
+
+  StatusTimer.Enabled := false;
+  StatusTimer.Enabled := true;
 end;
 
 procedure TFrmTripManager.StatusTimerTimer(Sender: TObject);
@@ -3685,4 +3706,3 @@ begin
 end;
 
 end.
-
