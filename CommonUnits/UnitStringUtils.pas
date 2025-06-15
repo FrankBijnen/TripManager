@@ -417,7 +417,11 @@ begin
       GetFileVersionInfo(PChar(S), 0, N, Buf);
       S := 'ProductName';
       result := QueryItem(S);
-      result := S + ': ' + #9 + result + #10;
+{$IFDEF WIN64}
+      result := S + ': ' + #9 + result + ' (Win64)' + #10;
+{$ELSE}
+      result := S + ': ' + #9 + result + ' (Win32)' + #10;
+{$ENDIF}
       S := 'FileDescription';
       result := result + S + ': ' + #9 + QueryItem(S) + #10;
       S := 'FileVersion';

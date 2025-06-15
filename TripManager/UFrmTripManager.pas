@@ -168,6 +168,7 @@ type
     ChkZoomToPoint: TCheckBox;
     SbPostProcess: TStatusBar;
     LblBounds: TLabel;
+    StatusTimer: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -244,6 +245,7 @@ type
     procedure PopupTripEditPopup(Sender: TObject);
     procedure PCTTripInfoResize(Sender: TObject);
     procedure ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure StatusTimerTimer(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -762,9 +764,10 @@ procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
 var
   DeviceName: string;
 begin
-  DeviceName := PrefDevice;
   if Assigned(CurrentDevice) then
-    DeviceName := CurrentDevice.FriendlyName;
+    DeviceName := CurrentDevice.FriendlyName
+  else
+    DeviceName := PrefDevice;
 
   GetDeviceList;
   try
@@ -1013,13 +1016,15 @@ begin
 
   // Save Device settings
   SetRegistry(Reg_PrefDev_Key, CurrentDevice.FriendlyName);
-  GuessModel(CurrentDevice.FriendlyName);
-
   case (BgDevice.ItemIndex) of
     0: SetRegistry(Reg_PrefDevTripsFolder_Key, GetDevicePath(FCurrentPath));
     1: SetRegistry(Reg_PrefDevGpxFolder_Key, GetDevicePath(FCurrentPath));
     2: SetRegistry(Reg_PrefDevPoiFolder_Key, GetDevicePath(FCurrentPath));
   end;
+
+  PrefDevice := GetRegistry(Reg_PrefDev_Key, XTName);
+  GuessModel(PrefDevice);
+  ReadDefaultFolders;
 end;
 
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
@@ -1332,7 +1337,10 @@ end;
 procedure TFrmTripManager.FreeCustomData(const ACustomData: pointer);
 begin
   if (Assigned(ACustomData)) then
+  begin
+    TMTP_Device(ACustomData).PortableDev := nil;
     TMTP_Device(ACustomData).Free;
+  end;
 end;
 
 procedure TFrmTripManager.FreeDevices;
@@ -1369,7 +1377,6 @@ begin
     exit;
 
   CurrentDevice := DeviceList[Indx];
-  CurrentDevice.PortableDev := nil;
   if not ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev, false) then
     raise exception.Create(Format('Device %s could not be opened.', [CurrentDevice.FriendlyName]));
 
@@ -1391,10 +1398,11 @@ begin
   for Index := 0 to DeviceList.Count - 1 do
   begin
     // Does this device match our registry setting? Select right away
-    if (TMTP_Device(DeviceList[Index]).FriendlyName = Device) then
+    if (SameText(TMTP_Device(DeviceList[Index]).FriendlyName, Device)) then
     begin
       CmbDevices.ItemIndex := Index;
       SelectDevice(Index);
+      break;
     end;
   end;
 end;
@@ -2932,7 +2940,8 @@ end;
 
 procedure TFrmTripManager.LstFilesDeletion(Sender: TObject; Item: TListItem);
 begin
-  FreeCustomData(Item.Data);
+  if Assigned(Item.Data) then
+    FreeAndNil(TMTP_Data(Item.Data));
 end;
 
 procedure TFrmTripManager.LstFilesItemChecked(Sender: TObject; Item: TListItem);
@@ -3625,33 +3634,53 @@ procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceN
 var
   Index: integer;
 begin
-  SbPostProcess.Panels[0].Text := VendorId + ProductId; // If not found in Devicelist
-  if (Inserted = false) then
+  // Removed USB device is our connected device?
+  if (Inserted = false) and
+     (Assigned(CurrentDevice)) and
+     (SameText(CurrentDevice.Device, DeviceName)) then
   begin
-    SbPostProcess.Panels[1].Text := 'Disconnected';
     Index := DeviceIdInList(DeviceName);  // List before remove
     if (Index > -1) then
       SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
+    SbPostProcess.Panels[1].Text := 'Disconnected';
+
+    SelectDevice('');
+    ReadDefaultFolders;
+
+    StatusTimer.Enabled := false;
+    StatusTimer.Enabled := true;
   end;
 
+  // Always update the device list
   BtnRefreshClick(BtnRefresh);
 
+  // Inserted USB device is our preferred device?
   if (Inserted) then
   begin
-    SbPostProcess.Panels[1].Text := 'Connected';
     Index := DeviceIdInList(DeviceName); // List after insert
     if (Index > -1) then
     begin
-      SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
       if (TMTP_Device(DeviceList[Index]).FriendlyName = PrefDevice) then
       begin
-        SbPostProcess.Panels[1].Text := 'Selected';
+        SbPostProcess.Panels[0].Text := TMTP_Device(DeviceList[Index]).FriendlyName;
+        SbPostProcess.Panels[1].Text := 'Connected';
+
         SelectDevice(PrefDevice);
         ReadDefaultFolders;
         BgDeviceClick(BgDevice);
+
+        StatusTimer.Enabled := false;
+        StatusTimer.Enabled := true;
       end;
     end;
   end;
+end;
+
+procedure TFrmTripManager.StatusTimerTimer(Sender: TObject);
+begin
+  TTimer(Sender).Enabled := false;
+  SbPostProcess.Panels[0].Text := '';
+  SbPostProcess.Panels[1].Text := '';
 end;
 
 end.

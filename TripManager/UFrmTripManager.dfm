@@ -1200,4 +1200,10 @@ object FrmTripManager: TFrmTripManager
       OnClick = MnuTripEditClick
     end
   end
+  object StatusTimer: TTimer
+    Interval = 5000
+    OnTimer = StatusTimerTimer
+    Left = 209
+    Top = 130
+  end
 end

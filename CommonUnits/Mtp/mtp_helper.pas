@@ -843,6 +843,7 @@ begin
       AMTP_Device.Description := Trim(DevDescription);
       AMTP_Device.FriendlyName := Trim(DevFriendlyName);
       AMTP_Device.Device := GetDevId(Trim(PDevs[I]));
+      AMTP_Device.PortableDev := nil;
       result.Add(AMTP_Device);
     end;
   end;
