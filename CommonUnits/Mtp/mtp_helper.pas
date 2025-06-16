@@ -18,10 +18,11 @@ uses
 const
   CLIENT_NAME : WideString = 'TDbware';
   CLIENT_MAJOR_VER = 1;
-  CLIENT_MINOR_VER = 0;
+  CLIENT_MINOR_VER = 1;
   CLIENT_REVISION  = 0;
 
 const
+  CLSID_WPD_NAMESPACE_EXTENSION: TGUID = '{35786D3C-B075-49B9-88DD-029876E11C01}';
   CLASS_PortableDeviceValues: TGUID = '{0c15d503-d017-47ce-9016-7b3f978721cc}';
   CLASS_PortableDevicePropVariantCollection: TGUID = '{08a99e2f-6d6d-4b80-af5a-baf2bcbe4cb9}';
   CLASS_PortableDeviceKeyCollection: TGUID = '{de2d022d-2480-43be-97f0-d1fa2cf98f4f}';
@@ -287,6 +288,9 @@ const
 
   WPD_CLIENT_DESIRED_ACCESS_FMTID : TGuid = '{204D9F0C-2292-4080-9F42-40664E70F859}';
   WPD_CLIENT_DESIRED_ACCESS_PID = 9;
+
+  WPD_CLIENT_EVENT_COOKIE_FMTID : TGuid = '{204D9F0C-2292-4080-9F42-40664E70F859}';
+  WPD_CLIENT_EVENT_COOKIE_PID = 11;
 
   WPD_DEVICE_FRIENDLY_NAME_FMTID : TGuid = '{26D4979A-E643-4626-9E2B-736DC0C92FDC}';
   WPD_DEVICE_FRIENDLY_NAME_PID = 12;
@@ -655,6 +659,12 @@ begin
   Dev_Val.fmtid := WPD_CLIENT_REVISION_FMTID;
   Dev_Val.pid := WPD_CLIENT_REVISION_PID;
   PortableDeviceValues.SetUnsignedIntegerValue(Dev_Val, CLIENT_REVISION);
+
+  // Setting this Cookie prevents hanging after delete, rename save etc.
+  // https://stackoverflow.com/questions/62951711/windowsportabledevice-iportabledevicecontentdelete-causes-my-device-to-hang-h
+  Dev_Val.fmtid := WPD_CLIENT_EVENT_COOKIE_FMTID;
+  Dev_Val.pid := WPD_CLIENT_EVENT_COOKIE_PID;
+  PortableDeviceValues.SetStringValue(Dev_Val, PWideChar(GuidToString(CLSID_WPD_NAMESPACE_EXTENSION)));
 
   // Set access
   Dev_Val.fmtid := WPD_CLIENT_DESIRED_ACCESS_FMTID;
@@ -1262,6 +1272,7 @@ begin
   PFiles.Add(Prop_Var);
 
   //delete
+  PRes := nil;
   Result := (Content.Delete(0, PFiles, PRes) = S_OK); //recursion ??
 end;
 

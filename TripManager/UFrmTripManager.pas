@@ -738,7 +738,7 @@ begin
             continue;
           end;
           if (not DelFileFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
-            raise Exception.Create(Format('Could not overwrite file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
+            raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
         end;
 
         EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
@@ -2597,8 +2597,10 @@ begin
       if (ABase_Data.IsFolder) then
         continue;
 
-      DelFileFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId);
+      if not DelFileFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId) then
+        raise Exception.Create(Format('Could not remove file: %s on %s', [ANitem.Caption, CurrentDevice.FriendlyName]));
     end;
+
     ReloadFileList;
   finally
     SetCursor(CrNormal);
@@ -2674,7 +2676,9 @@ begin
 
         // Rename
         AnItem.Caption := TripFilename; // Change caption
-        RenameObject(CurrentDevice.PortableDev, ABase_Data.ObjectId, TripFilename);
+        if not RenameObject(CurrentDevice.PortableDev, ABase_Data.ObjectId, TripFilename) then
+          raise exception.Create('Rename failed on device');
+
         GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TripFilename, AnItem); // Get modified data
 
         // reload trip, and change mFilename
