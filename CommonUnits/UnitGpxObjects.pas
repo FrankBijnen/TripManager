@@ -485,8 +485,9 @@ begin
 
   TvSelections.Items[IdTrack].Checked := GetRegistry(Reg_FuncTrack, true);
 
-  TvSelections.Items[IdStrippedRoute].Checked := GetRegistry(Reg_FuncRoute, true);
-
+  TvSelections.Items[IdStrippedRoute].Checked := GetRegistry(Reg_FuncStrippedRoute, true);
+  TvSelections.Items[IdCompleteRoute].Checked := TvSelections.Items[IdCompleteRoute].Enabled and
+                                                   GetRegistry(Reg_FuncCompleteRoute, false);
   TvSelections.Items[IdWayPoint].Checked := GetRegistry(Reg_FuncWayPoint, false);
     TvSelections.Items[IdWayPointWpt].Checked := GetRegistry(Reg_FuncWayPointWpt, true);
     TvSelections.Items[IdWayPointVia].Checked := GetRegistry(Reg_FuncWayPointVia, false);
@@ -497,11 +498,11 @@ begin
     TvSelections.Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
     TvSelections.Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
 
-  if (TvSelections.Items.Count-1 = IdHtml) then
-  begin
-    TvSelections.Items[IdKml].Checked := GetRegistry(Reg_FuncKml, true);
-    TvSelections.Items[IdHtml].Checked := GetRegistry(Reg_FuncHtml, true);
-  end;
+  TvSelections.Items[IdKml].Checked := TvSelections.Items[IdKml].Enabled and
+                                         GetRegistry(Reg_FuncKml, true);
+  TvSelections.Items[IdHtml].Checked := TvSelections.Items[IdHtml].Enabled and
+                                          GetRegistry(Reg_FuncHtml, true);
+
   TvSelections.FullExpand;
 end;
 
@@ -521,9 +522,12 @@ begin
   if (TvSelections.Items[IdTrack].Checked) then
     result := result + [TGPXFunc.CreateTracks];
 
-  SetRegistry(Reg_FuncRoute, TvSelections.Items[IdStrippedRoute].Checked);
+  SetRegistry(Reg_FuncStrippedRoute, TvSelections.Items[IdStrippedRoute].Checked);
   if (TvSelections.Items[IdStrippedRoute].Checked) then
     result := result + [TGPXFunc.CreateRoutes];
+
+  if (TvSelections.Items[IdCompleteRoute].Enabled) then
+    SetRegistry(Reg_FuncCompleteRoute, TvSelections.Items[IdCompleteRoute].Checked);
 
   SetRegistry(Reg_FuncWayPoint, TvSelections.Items[IdWayPoint].Checked);
   if (TvSelections.Items[IdWayPoint].Checked) then
@@ -541,12 +545,15 @@ begin
     SetRegistry(Reg_FuncGpiViaPt, TvSelections.Items[IdGpiViaPt].Checked);
     SetRegistry(Reg_FuncGpiShpPt, TvSelections.Items[IdGpiShpPt].Checked);
 
-  if (TvSelections.Items.Count-1 = IdHtml) then
+  if (TvSelections.Items[IdKml].Enabled) then
   begin
     SetRegistry(Reg_FuncKml, TvSelections.Items[IdKml].Checked);
     if (TvSelections.Items[IdKml].Checked) then
       result := result + [TGPXFunc.CreateKML];
+  end;
 
+  if (TvSelections.Items[IdHtml].Enabled) then
+  begin
     SetRegistry(Reg_FuncHtml, TvSelections.Items[IdHtml].Checked);
     if (TvSelections.Items[IdHtml].Checked) then
       result := result + [TGPXFunc.CreateHTML];

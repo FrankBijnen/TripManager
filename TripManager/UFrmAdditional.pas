@@ -36,8 +36,8 @@ implementation
 
 procedure TFrmAdditional.SetPrefs;
 begin
-  TProcessOptions.SetPrefs(TvSelections);
   TvSelections.Items[IdCompleteRoute].Enabled := false;
+  TProcessOptions.SetPrefs(TvSelections);
 end;
 
 procedure TFrmAdditional.StorePrefs;

@@ -38,7 +38,10 @@ uses
 
 procedure TFrmTransferOptions.SetPrefs;
 begin
+  TvSelections.Items[IdKml].Enabled := false;
+  TvSelections.Items[IdHtml].Enabled := false;
   TProcessOptions.SetPrefs(TvSelections);
+
   MemoDestinations.Text :=
     'Files will be transferred to:' + #13 + #10 + #13 + #10 +
     'Trip files: ' + FrmTripManager.DeviceFolder[0] + #13 + #10 +

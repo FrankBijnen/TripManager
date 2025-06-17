@@ -15,8 +15,8 @@ uses
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
-  Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  ListViewSort, UnitTripObjects, UnitGpxObjects, UnitGpi, UnitUSBEvent;
+  Monitor, BCHexEditor, ListViewSort, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
+  UnitMtpDevice, UnitTripObjects, UnitGpxObjects, UnitGpi, UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -726,7 +726,7 @@ begin
                                 OnSetTransferPrefs, OnSavePrefs,
                                 GetRoutesTmp, nil, AnItem.Index);
 
-      if (GetRegistry(Reg_TransferRoute, false)) then
+      if (GetRegistry(Reg_FuncCompleteRoute, false)) then
         CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)), false);
     {$IFNDEF DEBUG_TRANSFER}
       Rc := FindFirst(GetRoutesTmp + '\*.*', faAnyFile - faDirectory, Fs);

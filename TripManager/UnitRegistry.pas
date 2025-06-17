@@ -9,7 +9,8 @@ const
   Reg_TripManagerKey          = 'Software\TDBware\TripManager';
   Reg_FuncTrip                = 'FuncTrip';
   Reg_FuncTrack               = 'FuncTrack';
-  Reg_FuncRoute               = 'FuncRoute';
+  Reg_FuncStrippedRoute       = 'FuncStrippedRoute';
+  Reg_FuncCompleteRoute       = 'FuncCompleteRoute';
   Reg_FuncWayPoint            = 'FuncWayPoint';
   Reg_FuncWayPointWpt         = 'FuncWayPointWpt';
   Reg_FuncWayPointVia         = 'FuncWayPointVia';
@@ -75,7 +76,6 @@ const
   Reg_GeoSearchTimeOut_Key    = 'GeoSearchTimeOut';
   Reg_GeoSearchTimeOut_Val    = '8000';
 
-  Reg_TransferRoute           = 'TransferRoute';
   Reg_SavedMapPosition_Key    = 'SavedMapPosition';
   Reg_DefaultCoordinates      = '48.854918, 2.346558'; // Somewhere in Paris
 
