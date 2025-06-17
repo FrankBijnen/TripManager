@@ -26,7 +26,6 @@ type
     function CheckTripExists: boolean;
   public
     { Public declarations }
-
     SavedFolderId: string;
     CurrentDevice: TMTP_Device;
     DevicePath: string;

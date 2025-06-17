@@ -53,7 +53,6 @@ type
     procedure SetDefaultName(IdToAssign: integer);
     procedure OnSetAnalyzePrefs(Sender: TObject);
     procedure AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
-
   public
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
@@ -92,7 +91,6 @@ uses
 const
   BooleanTrue = 'True';
   BooleanFalse = 'False';
-
   BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
   RtePt = 'RtePt ';
 

@@ -1,5 +1,4 @@
 unit TripManager_MultiContext;
-
 // Interface to allow custom commands in contextmenu of ShellList
 
 interface
@@ -14,7 +13,6 @@ procedure InvokeMultiContextMenu(Owner: TWinControl; AFolder: TShellFolder; Mous
 implementation
 
 // Contextmenu supporting multi select
-
 procedure InvokeMultiContextMenu(Owner: TWinControl; AFolder: TShellFolder; MousePos: TPoint;
                                  var ICM2: IContextMenu2; AFileList: TStrings = nil);
 var
