@@ -130,7 +130,9 @@ begin
   Html.Add('              featureover: function(e) {');
   Html.Add('              e.feature.renderIntent = "select";');
   Html.Add('              e.feature.layer.drawFeature(e.feature);');
-  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", e.feature.layer.name, e.feature.layer.displayInLayerSwitcher);');
+  Html.Add('              var parm1 = (e.feature.layer.name) ? e.feature.layer.name : "";');
+  Html.Add('              var parm2 = (e.feature.url) ? e.feature.url : "";');
+  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", parm1, parm2);');
   Html.Add('              }');
   Html.Add('           },');
   Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
@@ -227,20 +229,20 @@ begin
   Html.Add('     if (popup) { map.removePopup(popup); popup = null};');
   Html.Add('  }');
 
-  Html.Add('  function AddRoutePoint(Id, RoutePoint, PointLat, PointLon, Color, InLayer){');
+  Html.Add('  function AddRoutePoint(IdLayer, LayerName, RoutePointName, PointLat, PointLon, Color){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
   Html.Add('     var feature = new OpenLayers.Feature.Vector(');
   Html.Add('         new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat))');
-  Html.Add('     if (!RoutePointsLayer[Id]) {');
-  Html.Add('        RoutePointsLayer[Id] = new OpenLayers.Layer.Vector(RoutePoint,');
+  Html.Add('     feature.url = RoutePointName;'); // Use URL for routepoint name
+  Html.Add('     if (!RoutePointsLayer[IdLayer]) {');
+  Html.Add('        RoutePointsLayer[IdLayer] = new OpenLayers.Layer.Vector(LayerName,');
   Html.Add('            { styleMap: new OpenLayers.StyleMap( { pointRadius: 6, fillColor: Color, fillOpacity: 0.5 } ) }); ');
   Html.Add('     }');
-  Html.Add('     RoutePointsLayer[Id].addFeatures(feature);');
-  Html.Add('     RoutePointsLayer[Id].displayInLayerSwitcher = InLayer;');
-  Html.Add('     map.addLayer(RoutePointsLayer[Id]);');
-
+  Html.Add('     RoutePointsLayer[IdLayer].addFeatures(feature);');
+  Html.Add('     RoutePointsLayer[IdLayer].displayInLayerSwitcher = true;');
+  Html.Add('     map.addLayer(RoutePointsLayer[IdLayer]);');
   // routepoints needed for CreateExtent
-  Html.Add('     routepoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
+  Html.Add('     routepoints[IdLayer] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  }');
 
   Html.Add('  function AddPOI(Id, PoiName, PointLat, PointLon, ImageFile){');

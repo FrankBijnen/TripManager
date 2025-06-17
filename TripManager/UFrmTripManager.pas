@@ -16,7 +16,7 @@ uses
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
   Monitor, BCHexEditor, UnitMtpDevice, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  ListViewSort, UnitTripObjects, UnitGpi, UnitUSBEvent;
+  ListViewSort, UnitTripObjects, UnitGpxObjects, UnitGpi, UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -323,6 +323,8 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
+    procedure CheckSupportedModel(const ZumoModel: TZumoModel; const AllFuncs: array of TGPXFunc);
+
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
@@ -345,7 +347,6 @@ type
   public
     { Public declarations }
     DeviceFolder: array[0..2] of string;
-    procedure CheckSupportedModel;
     procedure ReloadTripOnMap(Sender: TObject);
     procedure RoutePointsShowing(Sender: TObject; Showing: boolean);
     procedure RoutePointUpdated(Sender: TObject);
@@ -363,7 +364,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, Winapi.ShellAPI, Vcl.Clipbrd,
-  UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGpxObjects, MsgLoop, UnitGeoCode, UDmRoutePoints,
+  MsgLoop, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UDmRoutePoints,
   TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
 
@@ -391,20 +392,33 @@ begin
   FindClose(Fs);
 end;
 
-procedure TFrmTripManager.CheckSupportedModel;
+procedure TFrmTripManager.CheckSupportedModel(const ZumoModel: TZumoModel; const AllFuncs: array of TGPXFunc);
 var
   Rc: integer;
+  GPXFunc: TGPXFunc;
 begin
   if not WarnModel then
     exit;
-  if (CmbModel.ItemIndex <> Ord(TZumoModel.XT)) and
-     (CmbModel.ItemIndex <> Ord(TZumoModel.XT2)) then
+
+  for GPXFunc in AllFuncs do
   begin
-    Rc := MessageDlg('Trip files created may not work for selected model.',
-                     TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbIgnore], 0);
-    if (Rc = ID_IGNORE) then
-      SetRegistry(Reg_WarnModel_Key, 'False');
-    WarnModel := false;
+    case GPXFunc of
+      TGPXFunc.CreateTrips:
+      begin
+        case ZumoModel of
+          TZumoModel.XT,
+          TZumoModel.XT2:;  // Fall thru
+          else
+            begin
+              Rc := MessageDlg('Trip files created may not work for selected model.',
+                               TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbIgnore], 0);
+              if (Rc = ID_IGNORE) then
+                SetRegistry(Reg_WarnModel_Key, 'False');
+              WarnModel := false;
+            end;
+        end;
+      end;
+    end;
   end;
 end;
 
@@ -693,7 +707,7 @@ begin
   WarnOverWrite := mrNone;
 
   try
-    CheckSupportedModel;
+    CheckSupportedModel(TZumoModel(CmbModel.ItemIndex), FrmTransferOptions.Funcs);
     SetRegistry(Reg_ZumoModel, CmbModel.Text);
 
     for AnItem in ShellListView1.Items do
@@ -1182,10 +1196,10 @@ begin
 
   if (Msg = OSMGetRoutePoint) then
   begin
-    if (SameText(Parm2, 'false')) then
-      LblRoutePoint.Text := Parm1
-    else
+    if (Parm1 <> '') then
       LblRoute.Text := Parm1;
+    if (Parm2 <> '') then
+      LblRoutePoint.Text := Parm2;
     exit;
   end;
 
@@ -1736,8 +1750,6 @@ begin
 	  Inc(Cnt);	
     end;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
-//    ShowMap(EdgeBrowser1);
-
     if (CreateOSMMapHtml) then
       EdgeBrowser1.Navigate(GetHtmlTmp);
 
@@ -3013,7 +3025,7 @@ begin
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   try
-    CheckSupportedModel;
+    CheckSupportedModel(TZumoModel(CmbModel.ItemIndex), FrmAdditional.Funcs);
     SetRegistry(Reg_ZumoModel, CmbModel.Text);
 
     for AnItem in ShellListView1.Items do

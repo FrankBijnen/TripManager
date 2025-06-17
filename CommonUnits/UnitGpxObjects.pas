@@ -284,9 +284,8 @@ type
     procedure StripRtePt(const RtePtNode: TXmlVSNode);
     procedure StripRte(const RteNode: TXmlVSNode);
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
-                                  RouteId: integer;
-                                  var FirstViaPointId: integer;
-                                  TrackStringList: TStringList);
+                                   var TrackId: integer;
+                                   TrackStringList: TStringList);
 {$IFDEF TRIPOBJECTS}
     function CreateLocations(RtePts: TXmlVSNodeList): integer;
     procedure CreateTrip_XT(const TripName, CalculationMode, TransportMode: string;
@@ -2020,17 +2019,16 @@ begin
 end;
 
 procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
-                                        RouteId: integer;
-                                        var FirstViaPointId: integer;
+                                        var TrackId: integer;
                                         TrackStringList: TStringList);
 var
-  Trackname, Lon, Lat, DisplayColor, Color, ShowInLayerSwitcher, RoutePointName: string;
+  Trackname, Lon, Lat, DisplayColor, Color, LayerName, RoutePointName: string;
   RouteWayPoint, WayPoint: TXmlVSNode;
   WayPointAttribute: TXmlVSAttribute;
   TrackPoint: TXmlVSNode;
   RtePtExtensions: TXmlVSNode;
   TrackPoints: integer;
-  RoutePointId: integer;
+  LayerId: integer;
   TrackPointAttribute: TXmlVSAttribute;
 begin
   TrackStringList.Clear;
@@ -2054,7 +2052,6 @@ begin
     TrackStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
     Inc(TrackPoints);
   end;
-  TrackStringList.Add(Format('CreateTrack("Line: %s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 
   if (ProcessOptions.ProcessCreateRoutePoints) then
   begin
@@ -2062,7 +2059,6 @@ begin
     begin
       if (RouteWayPoint.NodeValue <> Track.NodeValue) then
         continue;
-      Inc(RouteID);
 
       for WayPoint in RouteWayPoint.ChildNodes do
       begin
@@ -2075,47 +2071,50 @@ begin
           if (WayPointAttribute.Name = 'lat') then
             lat := WayPointAttribute.Value;
         end;
-        RoutePointId := RouteID;
-        RoutePointName := Format('Pts: %s', [EscapeDQuote(Track.NodeValue)]);
+        RoutePointName := EscapeDQuote(FindSubNodeValue(WayPoint, 'name'));
+
+        LayerId := TrackId + 1;
+        LayerName := Format('Shape: %s', [EscapeDQuote(Trackname)]);
         Color := 'blue';
-        ShowInLayerSwitcher := 'true';
+
         RtePtExtensions := WayPoint.Find('extensions');
         if (RtePtExtensions <> nil) and
            (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
         begin
-          RoutePointId := FirstViaPointId;
-          RoutePointName := EscapeDQuote(FindSubNodeValue(WayPoint, 'name'));
+          LayerId := TrackId;
+          LayerName := Format('Via: %s', [EscapeDQuote(Trackname)]);
           Color := 'red';
-          Inc(FirstViaPointId);
         end;
-        TrackStringList.Add(Format('AddRoutePoint(%d, "%s", %s, %s, "%s", %s);',
-                                   [RoutePointId,
+
+        TrackStringList.Add(Format('AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
+                                   [LayerId,
+                                    LayerName,
                                     RoutePointName,
                                     lat,
                                     lon,
-                                    Color,
-                                    ShowInLayerSwitcher]));
+                                    Color]));
       end;
+      Inc(TrackId, 2);
     end;
   end;
+  TrackStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
 end;
 
 procedure TGPXFile.DoCreateHTML;
 var
   OutFile: string;
   Track : TXmlVSNode;
-  FirstViaPointId, RouteId: integer;
+  TrackId: integer;
   TrackPointList: TStringList;
 begin
   TrackPointList := TStringList.Create;
   try
-    FirstViaPointId := 1;
-    RouteId := 0;
     for Track in FTrackList do
     begin
       if (FrmSelectGPX.TrackSelectedColor(Track.Name) = '') then
         continue;
-      Track2OSMTrackPoints(Track, RouteId, FirstViaPointId, TrackPointList);
+      TrackId := 0; // We get a new HTML file for every track/route
+      Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       OutFile := FOutDir + ChangeFileExt(EscapeFileName(Track.NodeValue), '.html');
       CreateOSMMapHtml(OutFile, TrackPointList);
     end;
@@ -2127,21 +2126,19 @@ end;
 procedure TGPXFile.DoCreateOSMPoints;
 var
   Track : TXmlVSNode;
-  FirstViaPointId, RouteId: integer;
+  TrackId: integer;
   TrackPointList: TStringList;
 begin
   FOutStringList.Clear;
   TrackPointList := TStringList.Create;
   try
-    FirstViaPointId := FTrackList.Count;
-    RouteId := 0;
+    TrackId := 0;
     for Track in FTrackList do
     begin
       if (FrmSelectGPX.TrackSelectedColor(Track.Name) = '') then
         continue;
 
-      Track2OSMTrackPoints(Track, RouteId, FirstViaPointId, TrackPointList);
-      Inc(RouteId);
+      Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       FOutStringList.AddStrings(TrackPointList);
     end;
   finally
