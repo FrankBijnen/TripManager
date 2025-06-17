@@ -107,7 +107,9 @@ begin
   if RegQueryStringValue(HKLM, RegKey, 'UninstallString', UninstallString) and
      (Is64BitInstallMode) then
   begin   
-    MsgBox('Setup needs to uninstall the currently installed platform first.' + #10 + UninstallString, mbConfirmation, MB_OK);
-    ShellExec('', UninstallString, '/SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ErrorCode);
+    result := MsgBox('The current TripManager version needs to be uninstalled before continuing. Uninstall now?' + #10 + 
+                     UninstallString, mbConfirmation, MB_YESNO) = IDYES;
+    if (result) then
+      ShellExec('', UninstallString, '/SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ErrorCode);
   end;    
 end;
