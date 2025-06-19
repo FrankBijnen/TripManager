@@ -134,6 +134,7 @@ type
     ProcessShapePtsInGpi: boolean;            // False, Add Shaping points to <Gpx_name>.gpi
                                               // Category 'Route:<Route_name>
     DefaultProximityStr: string;              // 500, Default proximity for alerts (meters)
+    GPISymbolsDir: UTF8String;                // Symbols\24x24\ Sets the size of the GPI Symbols
 
     ProcessDistance: boolean;                 // True, Compute distance. Added in KML, and name of shaping points
     DistanceUnit: TDistanceUnit;              // duKm, Kilometers.
@@ -155,8 +156,6 @@ type
     VehicleProfileHash: string;               // Defaults for XT2
     VehicleId: string;                        // Defaults for XT2
     {$ENDIF}
-
-    GPISymbolsDir: UTF8String;
 
     FOnSetFuncPrefs: TNotifyEvent;
     FOnSavePrefs: TNotifyEvent;
@@ -479,31 +478,39 @@ begin
 end;
 
 class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview);
+var
+  SavedStateChanging: TTVCheckStateChangingEvent;
 begin
-  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
-  TvSelections.Items[IdTrip].Checked := GetRegistry(Reg_FuncTrip, true);
+  // Cant uncheck when node is not enabled
+  SavedStateChanging := TvSelections.OnCheckStateChanging;
+  TvSelections.OnCheckStateChanging := nil;
+  try
+    TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
+    TvSelections.Items[IdTrip].Checked := GetRegistry(Reg_FuncTrip, true);
 
-  TvSelections.Items[IdTrack].Checked := GetRegistry(Reg_FuncTrack, true);
+    TvSelections.Items[IdTrack].Checked := GetRegistry(Reg_FuncTrack, true);
 
-  TvSelections.Items[IdStrippedRoute].Checked := GetRegistry(Reg_FuncStrippedRoute, true);
-  TvSelections.Items[IdCompleteRoute].Checked := TvSelections.Items[IdCompleteRoute].Enabled and
-                                                   GetRegistry(Reg_FuncCompleteRoute, false);
-  TvSelections.Items[IdWayPoint].Checked := GetRegistry(Reg_FuncWayPoint, false);
-    TvSelections.Items[IdWayPointWpt].Checked := GetRegistry(Reg_FuncWayPointWpt, true);
-    TvSelections.Items[IdWayPointVia].Checked := GetRegistry(Reg_FuncWayPointVia, false);
-    TvSelections.Items[IdWayPointShp].Checked := GetRegistry(Reg_FuncWayPointShape, false);
+    TvSelections.Items[IdStrippedRoute].Checked := GetRegistry(Reg_FuncStrippedRoute, true);
+    TvSelections.Items[IdCompleteRoute].Checked := TvSelections.Items[IdCompleteRoute].Enabled and
+                                                     GetRegistry(Reg_FuncCompleteRoute, false);
+    TvSelections.Items[IdWayPoint].Checked := GetRegistry(Reg_FuncWayPoint, false);
+      TvSelections.Items[IdWayPointWpt].Checked := GetRegistry(Reg_FuncWayPointWpt, true);
+      TvSelections.Items[IdWayPointVia].Checked := GetRegistry(Reg_FuncWayPointVia, false);
+      TvSelections.Items[IdWayPointShp].Checked := GetRegistry(Reg_FuncWayPointShape, false);
 
-  TvSelections.Items[IdGpi].Checked := GetRegistry(Reg_FuncGpi, true);
-    TvSelections.Items[IdGpiWayPt].Checked := GetRegistry(Reg_FuncGpiWayPt, true);
-    TvSelections.Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
-    TvSelections.Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
+    TvSelections.Items[IdGpi].Checked := GetRegistry(Reg_FuncGpi, true);
+      TvSelections.Items[IdGpiWayPt].Checked := GetRegistry(Reg_FuncGpiWayPt, true);
+      TvSelections.Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
+      TvSelections.Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
 
-  TvSelections.Items[IdKml].Checked := TvSelections.Items[IdKml].Enabled and
-                                         GetRegistry(Reg_FuncKml, true);
-  TvSelections.Items[IdHtml].Checked := TvSelections.Items[IdHtml].Enabled and
-                                          GetRegistry(Reg_FuncHtml, true);
-
-  TvSelections.FullExpand;
+    TvSelections.Items[IdKml].Checked := TvSelections.Items[IdKml].Enabled and
+                                           GetRegistry(Reg_FuncKml, true);
+    TvSelections.Items[IdHtml].Checked := TvSelections.Items[IdHtml].Enabled and
+                                            GetRegistry(Reg_FuncHtml, true);
+  finally
+    TvSelections.OnCheckStateChanging := SavedStateChanging;
+    TvSelections.FullExpand;
+  end;
 end;
 
 class function TProcessOptions.StorePrefs(TvSelections: TTreeview): TGPXFuncArray;

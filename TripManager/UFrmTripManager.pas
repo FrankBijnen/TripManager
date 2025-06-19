@@ -169,6 +169,7 @@ type
     SbPostProcess: TStatusBar;
     LblBounds: TLabel;
     StatusTimer: TTimer;
+    BtnSendTo: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -246,6 +247,8 @@ type
     procedure PCTTripInfoResize(Sender: TObject);
     procedure ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure StatusTimerTimer(Sender: TObject);
+    procedure CmbModelChange(Sender: TObject);
+    procedure BtnSendToClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -331,9 +334,9 @@ type
     procedure ReadColumnSettings;
     procedure WriteColumnSettings;
     procedure OnSetFixedPrefs(Sender: TObject);
-    procedure OnSetTransferPrefs(Sender: TObject);
+    procedure OnSetDevicePrefs(Sender: TObject);
     procedure OnSetPostProcessPrefs(Sender: TObject);
-    procedure OnSetAdditionalPrefs(Sender: TObject);
+    procedure OnSetWindowsFolderPrefs(Sender: TObject);
     procedure OnSavePrefs(Sender: TObject);
 
     procedure ReadSettings;
@@ -366,7 +369,7 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, Winapi.ShellAPI, Vcl.Clipbrd,
   MsgLoop, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UDmRoutePoints,
   TripManager_GridSelItem,
-  UFrmDateDialog, UFrmPostProcess, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
+  UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
 
 const
   DupeCount = 10;
@@ -429,6 +432,8 @@ begin
     CmbModel.ItemIndex := Ord(TZumoModel.XT2)
   else if (ContainsText(FriendlyName, XTName)) then
     CmbModel.ItemIndex := Ord(TZumoModel.XT);
+  SetRegistry(Reg_CurrentDevice, FriendlyName);
+  SetRegistry(Reg_ZumoModel, CmbModel.Text);
 end;
 
 // No need to close manually.
@@ -681,6 +686,129 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.BtnSendToClick(Sender: TObject);
+var
+  CrWait, CRNormal: HCURSOR;
+  GPXFile, TempFile, CurrentObjectId, SavedFolderId: string;
+  AnItem: TListItem;
+  Fs: TSearchRec;
+  Rc: integer;
+begin
+  if (ShellListView1.SelectedFolder = nil) then
+    exit;
+
+  // Revert to default (startup) locations
+  ReadDefaultFolders;
+  FrmSendTo.HasCurrentDevice := CheckDevice(false);
+
+  if (FrmSendTo.ShowModal <> ID_OK) then
+    exit;
+
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  SavedFolderId := FSavedFolderId;
+  WarnOverWrite := mrNone;
+
+  try
+{$IFNDEF DEBUG_TRANSFER}
+    // Also checks for connected MTP
+    if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
+      BgDeviceClick(BgDevice);
+{$ENDIF}
+    CheckSupportedModel(TZumoModel(CmbModel.ItemIndex), FrmSendTo.Funcs);
+
+    for AnItem in ShellListView1.Items do
+    begin
+      if (AnItem.Selected = false) then
+        continue;
+      if (ShellListView1.Folders[AnItem.Index].IsFolder) then
+        continue;
+      GPXFile := ShellListView1.Folders[AnItem.Index].PathName;
+      if not (ContainsText(ExtractFileExt(GPXFile), GpxExtension)) then
+        continue;
+
+      case FrmSendTo.SendToDest of
+        TSendToDest.stDevice:
+          begin
+            // Clean up 'Routes' Temp directory.
+            DeleteTempFiles(GetRoutesTmp, '*.*');
+            TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
+                                      OnSetDevicePrefs, OnSavePrefs,
+                                      GetRoutesTmp, nil, AnItem.Index);
+
+            // Need to copy the complete route?
+            if (GetRegistry(Reg_FuncCompleteRoute, false)) then
+              CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)), false);
+
+            {$IFNDEF DEBUG_TRANSFER}
+            // The Temp directory 'Routes' now has all the files to send.
+            // Do the transfer, based on Extension.
+            Rc := FindFirst(GetRoutesTmp + '\*.*', faAnyFile - faDirectory, Fs);
+            while (Rc = 0) do
+            begin
+              TempFile := Fs.Name;
+              if (ContainsText(ExtractFileExt(Fs.Name), TripExtension)) then
+                SetCurrentPath(DeviceFolder[0])
+              else if (ContainsText(ExtractFileExt(Fs.Name), GpxExtension)) then
+                SetCurrentPath(DeviceFolder[1])
+              else if (ContainsText(ExtractFileExt(Fs.Name), GPIExtension)) then
+                SetCurrentPath(DeviceFolder[2])
+              else
+                continue;
+
+              // Overwrite?
+              CurrentObjectid := GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TempFile);
+              if (CurrentObjectid <> '') then
+              begin
+                ShowWarnOverWrite(TempFile);
+                if (WarnOverWrite in [mrNo, mrNoToAll]) then
+                begin
+                  Rc := FindNext(Fs);
+                  continue;
+                end;
+                if (not DelFileFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
+                  raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
+              end;
+
+              // Transfer
+              EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
+              EdFileSysFolder.Update;
+              TempFile := IncludeTrailingPathDelimiter(GetRoutesTmp) + TempFile;
+
+              // Did the transfer work?
+              if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
+                raise Exception.Create(Format('Could not overwrite file: %s on %s',
+                                              [ExtractFileName(TempFile), CurrentDevice.FriendlyName]));
+
+              Rc := FindNext(Fs);
+            end;
+            FindClose(Fs);
+            {$ENDIF}
+          end;
+        TSendToDest.stWindows:
+          begin
+            TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
+                                      OnSetWindowsFolderPrefs, OnSavePrefs,
+                                      '', nil, AnItem.Index);
+          end;
+      end;
+    end;
+  finally
+    EdFileSysFolder.Text := ShellTreeView1.Path;
+    FSavedFolderId := SavedFolderId;
+    SetCursor(CrNormal);
+  end;
+
+  case FrmSendTo.SendToDest of
+    TSendToDest.stDevice:
+      {$IFNDEF DEBUG_TRANSFER}ListFiles{$ENDIF};
+    TSendToDest.stWindows:
+      BtnRefreshFileSysClick(Sender);
+  end;
+
+end;
+
+//TODO deprecated
 procedure TFrmTripManager.BtnTransferToDeviceClick(Sender: TObject);
 var
   CrWait, CRNormal: HCURSOR;
@@ -694,10 +822,7 @@ begin
 
   // Revert to default (startup) locations
   ReadDefaultFolders;
-{$IFNDEF DEBUG_TRANSFER}
-  // Also checks for connected MTP
-  BgDeviceClick(BgDevice);
-{$ENDIF}
+
   if (FrmTransferOptions.ShowModal <> ID_OK) then
     exit;
 
@@ -707,8 +832,11 @@ begin
   WarnOverWrite := mrNone;
 
   try
+{$IFNDEF DEBUG_TRANSFER}
+    // Also checks for connected MTP
+    BgDeviceClick(BgDevice);
+{$ENDIF}
     CheckSupportedModel(TZumoModel(CmbModel.ItemIndex), FrmTransferOptions.Funcs);
-    SetRegistry(Reg_ZumoModel, CmbModel.Text);
 
     for AnItem in ShellListView1.Items do
     begin
@@ -723,7 +851,7 @@ begin
 
       DeleteTempFiles(GetRoutesTmp, '*.*');
       TGPXFile.PerformFunctions(FrmTransferOptions.Funcs, GPXFile,
-                                OnSetTransferPrefs, OnSavePrefs,
+                                OnSetDevicePrefs, OnSavePrefs,
                                 GetRoutesTmp, nil, AnItem.Index);
 
       if (GetRegistry(Reg_FuncCompleteRoute, false)) then
@@ -1436,6 +1564,11 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.CmbModelChange(Sender: TObject);
+begin
+  SetRegistry(Reg_ZumoModel, CmbModel.Text);
+end;
+
 function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
 var P: integer;
 begin
@@ -1557,9 +1690,11 @@ var
   AnItem: TlistItem;
   HasGpxSelected, HasTripSelected: boolean;
 begin
-  BtnTransferToDevice.Enabled := false;
   BtnAddToMap.Enabled :=  false;
+  BtnSendTo.Enabled := false;
   BtnPostProcess.Enabled := false;
+//TODO deprecated
+  BtnTransferToDevice.Enabled := false;
   BtnCreateAdditional.Enabled := false;
 
   if (ShellListView1.SelectedFolder = nil) then
@@ -1578,11 +1713,13 @@ begin
     HasTripSelected := HasTripSelected or ContainsText(Ext, TripExtension);
   end;
 
-  BtnPostProcess.Enabled := HasGpxSelected;
-  BtnCreateAdditional.Enabled := HasGpxSelected;
-  BtnTransferToDevice.Enabled := HasGpxSelected;
   BtnAddToMap.Enabled := (HasGpxSelected or HasTripSelected) and
                          (ShellListView1.SelCount = 1);
+  BtnSendTo.Enabled := HasGpxSelected;
+  BtnPostProcess.Enabled := HasGpxSelected;
+//TODO deprecated
+  BtnCreateAdditional.Enabled := HasGpxSelected;
+  BtnTransferToDevice.Enabled := HasGpxSelected;
 
   if (ContainsText(Ext, TripExtension)) then
     LoadTripFile(ShellListView1.SelectedFolder.PathName, false);
@@ -3011,6 +3148,7 @@ begin
   EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, "%s", %s);', [FMapReq.Desc, FMapReq.Coords, FMapReq.Zoom, FMapReq.TimeOut]));
 end;
 
+//TODO deprecated
 procedure TFrmTripManager.CreateAdditionalClick(Sender: TObject);
 var
   AnItem: TListItem;
@@ -3019,6 +3157,7 @@ var
 begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
+
   if FrmAdditional.ShowModal <> ID_OK then
     exit;
 
@@ -3026,7 +3165,6 @@ begin
   CrNormal := SetCursor(CrWait);
   try
     CheckSupportedModel(TZumoModel(CmbModel.ItemIndex), FrmAdditional.Funcs);
-    SetRegistry(Reg_ZumoModel, CmbModel.Text);
 
     for AnItem in ShellListView1.Items do
     begin
@@ -3037,7 +3175,7 @@ begin
       Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
       if (ContainsText(Ext, GpxExtension)) then
         TGPXFile.PerformFunctions(FrmAdditional.Funcs, ShellListView1.Folders[AnItem.Index].PathName,
-                                  OnSetAdditionalPrefs, OnSavePrefs,
+                                  OnSetWindowsFolderPrefs, OnSavePrefs,
                                   '', nil, AnItem.Index);
     end;
 
@@ -3390,7 +3528,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.OnSetTransferPrefs(Sender: TObject);
+procedure TFrmTripManager.OnSetDevicePrefs(Sender: TObject);
 begin
 // For creating Waypoints from routes, transferred as Waypoint<name>.gpx, or <name>.gpx
   with Sender as TProcessOptions do
@@ -3444,7 +3582,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.OnSetAdditionalPrefs(Sender: TObject);
+procedure TFrmTripManager.OnSetWindowsFolderPrefs(Sender: TObject);
 begin
   with Sender as TProcessOptions do
   begin
@@ -3479,6 +3617,10 @@ begin
   GeoSearchTimeOut := GetRegistry(Reg_GeoSearchTimeOut_Key, Reg_GeoSearchTimeOut_Val);
   ReadGeoCodeSettings;
   BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
+  BtnSendTo.Visible := GetRegistry(Reg_EnableSendTo, False);
+  BtnTransferToDevice.Visible := not BtnSendTo.Visible;
+  BtnCreateAdditional.Visible := not BtnSendTo.Visible;
+
   if (GetRegistry(Reg_Maximized_Key, False)) then
     WindowState := TWindowState.wsMaximized
   else

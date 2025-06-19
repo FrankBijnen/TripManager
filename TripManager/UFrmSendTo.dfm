@@ -1,10 +1,10 @@
-object FrmTransferOptions: TFrmTransferOptions
+object FrmSendTo: TFrmSendTo
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'Transfer options'
-  ClientHeight = 473
-  ClientWidth = 559
+  Caption = 'Send to'
+  ClientHeight = 527
+  ClientWidth = 527
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,70 +15,116 @@ object FrmTransferOptions: TFrmTransferOptions
   OnClose = FormClose
   OnShow = FormShow
   TextHeight = 15
-  object PnlBot: TPanel
-    Left = 0
-    Top = 440
-    Width = 559
-    Height = 33
-    Align = alBottom
-    TabOrder = 0
-    DesignSize = (
-      559
-      33)
-    object BtnCancel: TBitBtn
-      Left = 469
-      Top = 5
-      Width = 75
-      Height = 25
-      Anchors = [akRight, akBottom]
-      Kind = bkCancel
-      NumGlyphs = 2
-      TabOrder = 0
-    end
-    object BitBtn2: TBitBtn
-      Left = 383
-      Top = 5
-      Width = 75
-      Height = 25
-      Anchors = [akRight, akBottom]
-      Kind = bkOK
-      NumGlyphs = 2
-      TabOrder = 1
-    end
-  end
-  object MemoTransfer: TMemo
-    Left = 0
+  object PnlTop: TPanel
+    AlignWithMargins = True
+    Left = 10
     Top = 0
-    Width = 559
-    Height = 81
+    Width = 517
+    Height = 34
+    Margins.Left = 10
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 0
     Align = alTop
-    Color = clInfoBk
+    Alignment = taLeftJustify
+    BevelOuter = bvNone
+    Caption = 'Choose destination of the files'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    ExplicitWidth = 466
+  end
+  object PCTDestination: TPageControl
+    Left = 0
+    Top = 34
+    Width = 527
+    Height = 103
+    ActivePage = TabDevice
+    Align = alTop
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
-    Font.Style = []
-    Lines.Strings = (
-      'Transfer selected GPX files to your device.'
-      ''
-      
-        'The GPX files should contain one or more valid routes. or Way po' +
-        'ints.'
-      'Tracks will be created automatically if required.')
+    Font.Style = [fsBold]
     ParentFont = False
-    ReadOnly = True
-    TabOrder = 1
+    TabHeight = 40
+    TabOrder = 3
+    OnChange = PCTDestinationChange
+    OnChanging = PCTDestinationChanging
+    ExplicitWidth = 476
+    object TabDevice: TTabSheet
+      Caption = 'Send to Device'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
+      object MemoTransfer: TMemo
+        Left = 0
+        Top = 0
+        Width = 519
+        Height = 53
+        Align = alClient
+        Color = clInfoBk
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        Lines.Strings = (
+          
+            'The GPX files should contain one or more valid routes. or Way po' +
+            'ints.'
+          'Tracks will be created automatically if required.')
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 0
+        ExplicitWidth = 468
+        ExplicitHeight = 31
+      end
+    end
+    object TabFolder: TTabSheet
+      Caption = 'Send to folder'
+      ImageIndex = 1
+      object MemoAdditional: TMemo
+        Left = 0
+        Top = 0
+        Width = 519
+        Height = 53
+        Align = alClient
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        Lines.Strings = (
+          
+            'These files dont need to be created to load routes onto the Zumo' +
+            ', but can be useful as a backup, '
+          'or to share with other people.')
+        ParentFont = False
+        ReadOnly = True
+        TabOrder = 0
+        ExplicitWidth = 468
+        ExplicitHeight = 31
+      end
+    end
   end
   object TvSelections: TTreeView
     Left = 0
-    Top = 169
-    Width = 559
-    Height = 271
+    Top = 225
+    Width = 527
+    Height = 269
     Align = alClient
     AutoExpand = True
     CheckBoxes = True
     Indent = 19
-    TabOrder = 2
+    TabOrder = 1
     OnCheckStateChanging = TvSelectionsCheckStateChanging
     Items.NodeData = {
       070800000009540054007200650065004E006F0064006500B100000000000000
@@ -125,11 +171,49 @@ object FrmTransferOptions: TFrmTransferOptions
       007400680029000000490000000000000000000000FFFFFFFFFFFFFFFF000000
       000100000000000000000115480054004D004C002000660069006C0065007300
       200028004F0053004D0020006D006100700073002900}
+    ExplicitTop = 203
+    ExplicitWidth = 476
+    ExplicitHeight = 289
+  end
+  object PnlBot: TPanel
+    Left = 0
+    Top = 494
+    Width = 527
+    Height = 33
+    Align = alBottom
+    TabOrder = 0
+    ExplicitTop = 492
+    ExplicitWidth = 476
+    DesignSize = (
+      527
+      33)
+    object BtnCancel: TBitBtn
+      Left = 437
+      Top = 5
+      Width = 75
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Kind = bkCancel
+      NumGlyphs = 2
+      TabOrder = 0
+      ExplicitLeft = 386
+    end
+    object BtnOk: TBitBtn
+      Left = 351
+      Top = 5
+      Width = 75
+      Height = 25
+      Anchors = [akRight, akBottom]
+      Kind = bkOK
+      NumGlyphs = 2
+      TabOrder = 1
+      ExplicitLeft = 300
+    end
   end
   object MemoDestinations: TMemo
     Left = 0
-    Top = 81
-    Width = 559
+    Top = 137
+    Width = 527
     Height = 88
     Align = alTop
     Color = clInfoBk
@@ -142,6 +226,8 @@ object FrmTransferOptions: TFrmTransferOptions
       'MemoDestinations')
     ParentFont = False
     ReadOnly = True
-    TabOrder = 3
+    TabOrder = 4
+    ExplicitTop = 115
+    ExplicitWidth = 476
   end
 end

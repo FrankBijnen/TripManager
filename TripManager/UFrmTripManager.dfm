@@ -157,6 +157,7 @@ object FrmTripManager: TFrmTripManager
           Align = alRight
           TabOrder = 3
           Text = 'Unknown'
+          OnChange = CmbModelChange
           Items.Strings = (
             'XT'
             'XT2'
@@ -331,7 +332,7 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnTransferToDevice: TButton
           AlignWithMargins = True
-          Left = 261
+          Left = 366
           Top = 4
           Width = 99
           Height = 24
@@ -371,7 +372,7 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnPostProcess: TButton
           AlignWithMargins = True
-          Left = 366
+          Left = 471
           Top = 4
           Width = 85
           Height = 24
@@ -382,7 +383,7 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnCreateAdditional: TButton
           AlignWithMargins = True
-          Left = 457
+          Left = 562
           Top = 4
           Width = 85
           Height = 24
@@ -390,6 +391,17 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Additional files'
           TabOrder = 5
           OnClick = CreateAdditionalClick
+        end
+        object BtnSendTo: TButton
+          AlignWithMargins = True
+          Left = 261
+          Top = 4
+          Width = 99
+          Height = 24
+          Align = alLeft
+          Caption = 'Send to'
+          TabOrder = 6
+          OnClick = BtnSendToClick
         end
       end
       object PnlBotFileSys: TPanel

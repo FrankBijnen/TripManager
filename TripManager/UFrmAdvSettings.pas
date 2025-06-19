@@ -115,10 +115,11 @@ begin
     CurRow := 1;
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_EnableSendTo,        'False', 'Enable Send to');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Preferred device and folders-');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDev_Key,             XTName,                 'Default device to use');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDev_Key,             XTName,                     'Default device to use');
     AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
     AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
     AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');

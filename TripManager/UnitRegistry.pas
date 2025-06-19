@@ -31,6 +31,7 @@ const
   Reg_VehicleId               = 'VehicleId';
 
   Reg_ProcessBegin            = 'ProcessBegin';
+  Reg_CurrentDevice           = 'CurrentDevice';
   Reg_ZumoModel               = 'ZumoModel';
   Reg_BeginSymbol             = 'BeginSymbol';
   Reg_BeginStr                = 'BeginStr';
@@ -83,6 +84,7 @@ const
   Reg_GeoCodeApiKey           = 'GeoCodeApiKey';
   Reg_AddressFormat           = 'AddressFormat';
   Reg_ThrottleGeoCode         = 'ThrottleGeoCode';
+  Reg_EnableSendTo            = 'EnableSendTo';
 
 
   BooleanValues: array[boolean] of string = ('False', 'True');

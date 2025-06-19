@@ -17,6 +17,8 @@ type
     TvSelections: TTreeview;
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure TvSelectionsCheckStateChanging(Sender: TCustomTreeView; Node: TTreeNode; NewCheckState, OldCheckState: TNodeCheckState;
+      var AllowChange: Boolean);
   private
     procedure SetPrefs;
     procedure StorePrefs;
@@ -52,6 +54,12 @@ end;
 procedure TFrmTransferOptions.StorePrefs;
 begin
   Funcs := TProcessOptions.StorePrefs(TvSelections);
+end;
+
+procedure TFrmTransferOptions.TvSelectionsCheckStateChanging(Sender: TCustomTreeView; Node: TTreeNode; NewCheckState,
+  OldCheckState: TNodeCheckState; var AllowChange: Boolean);
+begin
+  AllowChange := Node.Enabled;
 end;
 
 procedure TFrmTransferOptions.FormClose(Sender: TObject; var Action: TCloseAction);

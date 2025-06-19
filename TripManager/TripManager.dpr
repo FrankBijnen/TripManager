@@ -2,8 +2,9 @@ program TripManager;
 
 {$R 'OpenLayers2.res' '..\CommonUnits\osm\Resources\OpenLayers2.rc'}
 
-uses
 {.$DEFINE Debug_CallStack}
+
+uses
   {$IFDEF Debug_CallStack}
   UnitStackTrace in 'UnitStackTrace.pas',
   {$ENDIF }
@@ -15,8 +16,9 @@ uses
   UFrmTripManager in 'UFrmTripManager.pas' {FrmTripManager},
   UFrmPostProcess in 'UFrmPostProcess.pas' {FrmPostProcess},
   UFrmDateDialog in 'UFrmDateDialog.pas' {FrmDateDialog},
-  UFrmAdditional in 'UFrmAdditional.pas' {FrmAdditional},
   UFrmTransferOptions in 'UFrmTransferOptions.pas' {FrmTransferOptions},
+  UFrmAdditional in 'UFrmAdditional.pas' {FrmAdditional},
+  UFrmSendTo in 'UFrmSendTo.pas' {FrmSendTo},
   UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
@@ -26,6 +28,7 @@ uses
   TripManager_ValEdit in 'TripManager_ValEdit.pas',
   TripManager_DBGrid in 'TripManager_DBGrid.pas',
   TripManager_GridSelItem in 'TripManager_GridSelItem.pas',
+  UnitRegistry in 'UnitRegistry.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
   ogckml23 in '..\CommonUnits\kml\ogckml23.pas',
@@ -48,7 +51,6 @@ uses
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
   UnitUSBEvent in '..\CommonUnits\USBEvent\UnitUSBEvent.pas',
-  UnitRegistry in 'UnitRegistry.pas',
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
 
@@ -69,11 +71,12 @@ begin
   Application.CreateForm(TFrmPostProcess, FrmPostProcess);
   Application.CreateForm(TFrmDateDialog, FrmDateDialog);
   Application.CreateForm(TFrmAdditional, FrmAdditional);
-  Application.CreateForm(TFrmTransferOptions, FrmTransferOptions);
+  Application.CreateForm(TFrmSendTo, FrmSendTo);
   Application.CreateForm(TFrmAdvSettings, FrmAdvSettings);
   Application.CreateForm(TFrmNewTrip, FrmNewTrip);
   Application.CreateForm(TFrmTripEditor, FrmTripEditor);
   Application.CreateForm(TFGeoSearch, FGeoSearch);
   Application.CreateForm(TFrmPlaces, FrmPlaces);
+  Application.CreateForm(TFrmTransferOptions, FrmTransferOptions);
   Application.Run;
 end.

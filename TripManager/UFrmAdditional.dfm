@@ -22,7 +22,6 @@ object FrmAdditional: TFrmAdditional
     Height = 33
     Align = alBottom
     TabOrder = 0
-    ExplicitTop = 342
     DesignSize = (
       462
       33)
@@ -120,6 +119,5 @@ object FrmAdditional: TFrmAdditional
       007400680029000000490000000000000000000000FFFFFFFFFFFFFFFF000000
       000100000000000000000115480054004D004C002000660069006C0065007300
       200028004F0053004D0020006D006100700073002900}
-    ExplicitHeight = 270
   end
 end
