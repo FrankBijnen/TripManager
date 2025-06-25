@@ -24,7 +24,6 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'How to use'
     TabOrder = 0
-    ExplicitWidth = 603
     object MemoTasks: TMemo
       Left = 2
       Top = 17
@@ -51,8 +50,6 @@ object FrmSendTo: TFrmSendTo
       ReadOnly = True
       TabOrder = 0
       StyleElements = [seFont, seBorder]
-      ExplicitWidth = 599
-      ExplicitHeight = 82
     end
   end
   object GrpSelDestination: TGroupBox
@@ -68,7 +65,7 @@ object FrmSendTo: TFrmSendTo
       Top = 17
       Width = 588
       Height = 86
-      ActivePage = TabDevice
+      ActivePage = TabFolder
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -83,7 +80,6 @@ object FrmSendTo: TFrmSendTo
       TabStop = False
       OnChange = PCTDestinationChange
       OnChanging = PCTDestinationChanging
-      ExplicitHeight = 93
       object TabDevice: TTabSheet
         Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
@@ -119,8 +115,6 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
-          ExplicitWidth = 591
-          ExplicitHeight = 64
         end
       end
       object TabFolder: TTabSheet
@@ -144,13 +138,12 @@ object FrmSendTo: TFrmSendTo
               'used as a backup, or to share.'
             ''
             
-              'In addtion the .kml and .html formats can be selected for use in' +
-              ' other software.')
+              'In addition the .kml and .html formats can be selected for use i' +
+              'n other software.')
           ParentFont = False
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
-          ExplicitWidth = 591
         end
       end
     end
@@ -163,8 +156,6 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Destination device and folder(s)'
     TabOrder = 3
-    ExplicitTop = 304
-    ExplicitWidth = 603
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
@@ -199,8 +190,6 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Model used for creating .trip files'
     TabOrder = 2
-    ExplicitTop = 338
-    ExplicitWidth = 603
     object LblModel: TLabel
       AlignWithMargins = True
       Left = 7
@@ -279,9 +268,6 @@ object FrmSendTo: TFrmSendTo
       006B006D006C00290000003F0000000000000000000000FFFFFFFFFFFFFFFF00
       00000001000000000000000001104F0053004D0020006D006100700073002000
       28002E0068006D0074006C002900}
-    ExplicitTop = 376
-    ExplicitWidth = 603
-    ExplicitHeight = 102
   end
   object PnlBot: TPanel
     Left = 0
@@ -290,8 +276,6 @@ object FrmSendTo: TFrmSendTo
     Height = 33
     Align = alBottom
     TabOrder = 6
-    ExplicitTop = 497
-    ExplicitWidth = 603
     DesignSize = (
       592
       33)
@@ -333,7 +317,5 @@ object FrmSendTo: TFrmSendTo
     Height = 19
     Panels = <>
     SimplePanel = True
-    ExplicitTop = 478
-    ExplicitWidth = 603
   end
 end
