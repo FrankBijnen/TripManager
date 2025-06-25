@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ComCtrls, System.ImageList, Vcl.ImgList,
-  UnitGpxObjects;
+  UnitGpxDefs;
 
 type
   TFrmAdditional = class(TForm)
@@ -32,10 +32,14 @@ var
 
 implementation
 
+uses
+  UnitRegistry, UnitTripObjects, UnitProcessOptions;
+
 {$R *.dfm}
 
 procedure TFrmAdditional.SetPrefs;
 begin
+  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
   TvSelections.Items[IdCompleteRoute].Enabled := false;
   TProcessOptions.SetPrefs(TvSelections);
 end;

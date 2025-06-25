@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ComCtrls, System.ImageList, Vcl.ImgList,
-  UnitGpxObjects;
+  UnitGpxDefs;
 
 type
   TFrmTransferOptions = class(TForm)
@@ -34,12 +34,13 @@ var
 implementation
 
 uses
-  UnitStringUtils, UFrmAdvSettings, UFrmTripManager;
+  UnitProcessOptions, UnitStringUtils, UnitRegistry, UnitTripObjects, UFrmAdvSettings, UFrmTripManager;
 
 {$R *.dfm}
 
 procedure TFrmTransferOptions.SetPrefs;
 begin
+  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
   TvSelections.Items[IdKml].Enabled := false;
   TvSelections.Items[IdHtml].Enabled := false;
   TProcessOptions.SetPrefs(TvSelections);

@@ -52,9 +52,7 @@ Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Componen
 
 [Registry]
 
-; attempt to remove previous version icon installed on userdesktop. New one is autodesktop
 [InstallDelete]
-Type: files; Name: "{userdesktop}\TripManager.lnk";                                   tasks: desktopicon;
 
 [Icons]
 Name: "{group}\{#MyAppName}";         Filename: "{app}\TripManager.exe"

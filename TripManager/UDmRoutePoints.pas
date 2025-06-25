@@ -84,7 +84,7 @@ uses
   System.StrUtils, System.Variants, System.DateUtils,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
-  UnitGeoCode, UnitStringUtils, UnitGpxObjects, UFrmSelectGPX;
+  UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxObjects, UFrmSelectGPX;
 
 {$R *.dfm}
 
@@ -595,8 +595,6 @@ procedure TDmRoutePoints.OnSetAnalyzePrefs(Sender: TObject);
 begin
   TProcessOptions(Sender).ProcessTracks := false;
 end;
-
-
 
 procedure TDmRoutePoints.AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
 var

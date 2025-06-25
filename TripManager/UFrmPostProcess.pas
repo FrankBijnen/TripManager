@@ -67,13 +67,12 @@ var
 implementation
 
 uses
-  System.TypInfo, UnitRegistry, UnitStringUtils, UnitGpxObjects, UFrmAdvSettings;
+  System.TypInfo, UnitRegistry, UnitStringUtils, UnitGpxDefs, UnitProcessOptions, UFrmAdvSettings;
 
 {$R *.dfm}
 
 const
   SymbolsDir = 'Symbols\24x24';
-  BooleanValues: array[boolean] of string = ('False', 'True');
 
 procedure TFrmPostProcess.LoadSymbols;
 var

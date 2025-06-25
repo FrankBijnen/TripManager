@@ -16,7 +16,7 @@ uses
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
   Monitor, BCHexEditor, ListViewSort, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  UnitMtpDevice, UnitTripObjects, UnitGpxObjects, UnitGpi, UnitUSBEvent;
+  UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -249,6 +249,7 @@ type
     procedure StatusTimerTimer(Sender: TObject);
     procedure CmbModelChange(Sender: TObject);
     procedure BtnSendToClick(Sender: TObject);
+    procedure VlTripInfoDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
   private
     { Private declarations }
     PrefDevice: string;
@@ -367,7 +368,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, Winapi.ShellAPI, Vcl.Clipbrd,
-  MsgLoop, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UDmRoutePoints,
+  MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UDmRoutePoints,
   TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
 
@@ -1721,9 +1722,10 @@ begin
   BtnCreateAdditional.Enabled := HasGpxSelected;
   BtnTransferToDevice.Enabled := HasGpxSelected;
 
+  Ext := ExtractFileExt(ShellListView1.SelectedFolder.PathName);
   if (ContainsText(Ext, TripExtension)) then
-    LoadTripFile(ShellListView1.SelectedFolder.PathName, false);
-  if (ContainsText(Ext, GPIExtension)) then
+    LoadTripFile(ShellListView1.SelectedFolder.PathName, false)
+  else if (ContainsText(Ext, GPIExtension)) then
     LoadGPiFile(ShellListView1.SelectedFolder.PathName, false);
 end;
 
@@ -2540,6 +2542,16 @@ begin
      (ssCtrl in Shift) then
     with TValueListEditor(Sender) do
       Clipboard.AsText := Cells[Col, Row];
+end;
+
+procedure TFrmTripManager.VlTripInfoDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
+begin
+//  with TValueListEditor(Sender), TValueListEditor(Sender).Canvas do
+//  begin
+//    Brush.Style := bsSolid;
+//    Brush.Color := $ff00ff;
+//    Font.Color := $BB0000;
+//    TextRect(Rect, Rect.Left + 4, Rect.Top + 2, Cells[ACol, ARow]);
 end;
 
 procedure TFrmTripManager.VlTripInfoEditButtonClick(Sender: TObject);
@@ -3606,7 +3618,7 @@ end;
 
 procedure TFrmTripManager.ReadSettings;
 begin
-  UnitGpxObjects.OnSetFixedPrefs := OnSetFixedPrefs;
+  UnitProcessOptions.OnSetFixedPrefs := OnSetFixedPrefs;
 
   PrefDevice := GetRegistry(Reg_PrefDev_Key, XTName);
   GuessModel(PrefDevice);
@@ -3617,7 +3629,7 @@ begin
   GeoSearchTimeOut := GetRegistry(Reg_GeoSearchTimeOut_Key, Reg_GeoSearchTimeOut_Val);
   ReadGeoCodeSettings;
   BtnGeoSearch.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-  BtnSendTo.Visible := GetRegistry(Reg_EnableSendTo, False);
+  BtnSendTo.Visible := GetRegistry(Reg_EnableSendTo, True);
   BtnTransferToDevice.Visible := not BtnSendTo.Visible;
   BtnCreateAdditional.Visible := not BtnSendTo.Visible;
 

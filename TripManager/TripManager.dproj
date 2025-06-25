@@ -134,14 +134,14 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>211</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.211;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>217</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.217;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>211</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.211;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>217</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.217;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <ItemGroup>
@@ -204,9 +204,6 @@
         <DCCReference Include="..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas"/>
         <DCCReference Include="..\CommonUnits\MsgLoop.pas"/>
-        <DCCReference Include="..\CommonUnits\UFrmSelectGPX.pas">
-            <Form>FrmSelectGPX</Form>
-        </DCCReference>
         <DCCReference Include="..\CommonUnits\UnitBmp.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGeoCode.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpi.pas"/>
@@ -214,6 +211,11 @@
         <DCCReference Include="..\CommonUnits\UnitTripObjects.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxObjects.pas"/>
         <DCCReference Include="..\CommonUnits\USBEvent\UnitUSBEvent.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitGpxDefs.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitProcessOptions.pas"/>
+        <DCCReference Include="..\CommonUnits\UFrmSelectGPX.pas">
+            <Form>FrmSelectGPX</Form>
+        </DCCReference>
         <DCCReference Include="..\CommonUnits\UFrmGeoSearch.pas">
             <Form>FGeoSearch</Form>
         </DCCReference>

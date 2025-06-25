@@ -765,6 +765,7 @@ object FrmTripManager: TFrmTripManager
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
           PopupMenu = PopupTripInfo
           TabOrder = 0
+          OnDrawCell = VlTripInfoDrawCell
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
           OnStringsChange = VlTripInfoStringsChange

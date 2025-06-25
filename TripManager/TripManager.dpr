@@ -43,7 +43,6 @@ uses
   UnitVerySimpleXml in '..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas',
   Xml.VerySimple in '..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas',
   MsgLoop in '..\CommonUnits\MsgLoop.pas',
-  UFrmSelectGPX in '..\CommonUnits\UFrmSelectGPX.pas' {FrmSelectGPX},
   UnitBmp in '..\CommonUnits\UnitBmp.pas',
   UnitGeoCode in '..\CommonUnits\UnitGeoCode.pas',
   UnitGpi in '..\CommonUnits\UnitGpi.pas',
@@ -51,6 +50,9 @@ uses
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
   UnitUSBEvent in '..\CommonUnits\USBEvent\UnitUSBEvent.pas',
+  UnitGpxDefs in '..\CommonUnits\UnitGpxDefs.pas',
+  UnitProcessOptions in '..\CommonUnits\UnitProcessOptions.pas',
+  UFrmSelectGPX in '..\CommonUnits\UFrmSelectGPX.pas' {FrmSelectGPX},
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
 
