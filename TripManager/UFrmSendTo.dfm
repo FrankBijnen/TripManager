@@ -3,8 +3,8 @@ object FrmSendTo: TFrmSendTo
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Send to'
-  ClientHeight = 530
-  ClientWidth = 603
+  ClientHeight = 584
+  ClientWidth = 592
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,130 +16,160 @@ object FrmSendTo: TFrmSendTo
   OnCreate = FormCreate
   OnShow = FormShow
   TextHeight = 15
-  object PnlTop: TPanel
-    AlignWithMargins = True
-    Left = 10
-    Top = 0
-    Width = 593
-    Height = 34
-    Margins.Left = 10
-    Margins.Top = 0
-    Margins.Right = 0
-    Margins.Bottom = 0
-    Align = alTop
-    Alignment = taLeftJustify
-    BevelOuter = bvNone
-    Caption = 'Choose destination'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Segoe UI'
-    Font.Style = [fsBold]
-    ParentFont = False
-    TabOrder = 0
-  end
-  object PCTDestination: TPageControl
+  object GrpTasks: TGroupBox
     Left = 0
-    Top = 34
-    Width = 603
-    Height = 102
-    ActivePage = TabDevice
+    Top = 0
+    Width = 592
+    Height = 89
     Align = alTop
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Segoe UI'
-    Font.Style = [fsBold]
-    MultiLine = True
-    ParentFont = False
-    RaggedRight = True
-    TabHeight = 35
-    TabOrder = 1
-    TabStop = False
-    OnChange = PCTDestinationChange
-    OnChanging = PCTDestinationChanging
-    object TabDevice: TTabSheet
-      Caption = 'Send to device'
+    Caption = 'How to use'
+    TabOrder = 0
+    ExplicitWidth = 603
+    object MemoTasks: TMemo
+      Left = 2
+      Top = 17
+      Width = 588
+      Height = 70
+      TabStop = False
+      Align = alClient
+      Color = clInfoBk
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = []
+      Lines.Strings = (
+        '- Choose destination.'
+        
+          '- Verify the destination device and folders(s). (If required cor' +
+          'rect on the main screen.)'
+        
+          '- Verify the model used for creating .trip files, if applicable.' +
+          ' (If required correct on the main screen.)'
+        '- Check the file types to send and click OK.')
       ParentFont = False
-      object MemoTransfer: TMemo
-        Left = 0
-        Top = 0
-        Width = 595
-        Height = 57
-        TabStop = False
-        Align = alClient
-        Color = clInfoBk
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -12
-        Font.Name = 'Segoe UI'
-        Font.Style = []
-        Lines.Strings = (
-          
-            #39'Send to device'#39' takes the selected GPX files, containing valid ' +
-            'routes, or Way points, and stores them on the '
-          
-            'device in the Destination folders converted to the desired forma' +
-            't. Conversion to .trip and .gpi format will be '
-          
-            'done automatically. Creation of tracks, stripped routes and wayp' +
-            'oints is supported for the .gpx format.')
-        ParentFont = False
-        ReadOnly = True
-        TabOrder = 0
-        StyleElements = [seFont, seBorder]
-        ExplicitHeight = 53
-      end
+      ReadOnly = True
+      TabOrder = 0
+      StyleElements = [seFont, seBorder]
+      ExplicitWidth = 599
+      ExplicitHeight = 82
     end
-    object TabFolder: TTabSheet
-      Caption = 'Send to folder'
-      ImageIndex = 1
-      object MemoAdditional: TMemo
-        Left = 0
-        Top = 0
-        Width = 595
-        Height = 57
-        Align = alClient
-        Color = clInfoBk
+  end
+  object GrpSelDestination: TGroupBox
+    Left = 0
+    Top = 89
+    Width = 592
+    Height = 105
+    Align = alTop
+    Caption = 'Choose destination'
+    TabOrder = 1
+    object PCTDestination: TPageControl
+      Left = 2
+      Top = 17
+      Width = 588
+      Height = 86
+      ActivePage = TabDevice
+      Align = alClient
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      MultiLine = True
+      ParentFont = False
+      RaggedRight = True
+      TabHeight = 20
+      TabOrder = 0
+      TabStop = False
+      OnChange = PCTDestinationChange
+      OnChanging = PCTDestinationChanging
+      ExplicitHeight = 93
+      object TabDevice: TTabSheet
+        Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
-        Lines.Strings = (
-          
-            'Use '#39'Send to folder'#39' to save the files to a folder. This can be ' +
-            'used as a backup, or to share.'
-          ''
-          
-            'In addtion the .kml and .html formats can be selected for use in' +
-            ' other software.')
         ParentFont = False
-        ReadOnly = True
-        TabOrder = 0
-        StyleElements = [seFont, seBorder]
-        ExplicitHeight = 53
+        object MemoTransfer: TMemo
+          Left = 0
+          Top = 0
+          Width = 580
+          Height = 56
+          TabStop = False
+          Align = alClient
+          Color = clInfoBk
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          Lines.Strings = (
+            
+              #39'Send to device'#39' takes the selected GPX files, containing valid ' +
+              'routes, or Way points, and stores them on the '
+            
+              'device in the Destination folders converted to the desired forma' +
+              't. Conversion to .trip and .gpi format will be '
+            
+              'done automatically. Creation of tracks, stripped routes and wayp' +
+              'oints is supported for the .gpx format.')
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+          StyleElements = [seFont, seBorder]
+          ExplicitWidth = 591
+          ExplicitHeight = 64
+        end
+      end
+      object TabFolder: TTabSheet
+        Caption = 'Send to folder'
+        ImageIndex = 1
+        object MemoAdditional: TMemo
+          Left = 0
+          Top = 0
+          Width = 580
+          Height = 56
+          Align = alClient
+          Color = clInfoBk
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -12
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          Lines.Strings = (
+            
+              'Use '#39'Send to folder'#39' to save the files to a folder. This can be ' +
+              'used as a backup, or to share.'
+            ''
+            
+              'In addtion the .kml and .html formats can be selected for use in' +
+              ' other software.')
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+          StyleElements = [seFont, seBorder]
+          ExplicitWidth = 591
+        end
       end
     end
   end
   object GrpDestination: TGroupBox
     Left = 0
-    Top = 174
-    Width = 603
+    Top = 194
+    Width = 592
     Height = 34
     Align = alTop
-    Caption = 'Destination folders'
+    Caption = 'Destination device and folder(s)'
     TabOrder = 3
+    ExplicitTop = 304
+    ExplicitWidth = 603
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 589
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -158,24 +188,24 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
-      ExplicitTop = 18
       ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
     Left = 0
-    Top = 136
-    Width = 603
+    Top = 228
+    Width = 592
     Height = 38
     Align = alTop
     Caption = 'Model used for creating .trip files'
     TabOrder = 2
-    ExplicitTop = 132
+    ExplicitTop = 338
+    ExplicitWidth = 603
     object LblModel: TLabel
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 589
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -194,15 +224,14 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
-      ExplicitTop = 18
       ExplicitWidth = 3
     end
   end
   object TvSelections: TTreeView
     Left = 0
-    Top = 208
-    Width = 603
-    Height = 270
+    Top = 266
+    Width = 592
+    Height = 266
     Align = alClient
     AutoExpand = True
     CheckBoxes = True
@@ -210,6 +239,7 @@ object FrmSendTo: TFrmSendTo
     ParentShowHint = False
     ShowHint = False
     TabOrder = 4
+    OnCheckStateChanged = TvSelectionsCheckStateChanged
     OnCheckStateChanging = TvSelectionsCheckStateChanging
     OnCollapsing = TvSelectionsCollapsing
     OnHint = TvSelectionsHint
@@ -249,23 +279,25 @@ object FrmSendTo: TFrmSendTo
       006B006D006C00290000003F0000000000000000000000FFFFFFFFFFFFFFFF00
       00000001000000000000000001104F0053004D0020006D006100700073002000
       28002E0068006D0074006C002900}
-    ExplicitTop = 282
-    ExplicitHeight = 220
+    ExplicitTop = 376
+    ExplicitWidth = 603
+    ExplicitHeight = 102
   end
   object PnlBot: TPanel
     Left = 0
-    Top = 497
-    Width = 603
+    Top = 551
+    Width = 592
     Height = 33
     Align = alBottom
     TabOrder = 6
-    ExplicitTop = 521
+    ExplicitTop = 497
+    ExplicitWidth = 603
     DesignSize = (
-      603
+      592
       33)
     object BtnCancel: TBitBtn
-      Left = 513
-      Top = 5
+      Left = 509
+      Top = 4
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -274,8 +306,8 @@ object FrmSendTo: TFrmSendTo
       TabOrder = 1
     end
     object BtnOk: TBitBtn
-      Left = 432
-      Top = 6
+      Left = 428
+      Top = 4
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
@@ -283,14 +315,25 @@ object FrmSendTo: TFrmSendTo
       NumGlyphs = 2
       TabOrder = 0
     end
+    object BtnHelp: TBitBtn
+      Left = 6
+      Top = 4
+      Width = 100
+      Height = 25
+      Kind = bkHelp
+      NumGlyphs = 2
+      TabOrder = 2
+      OnClick = BtnHelpClick
+    end
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 478
-    Width = 603
+    Top = 532
+    Width = 592
     Height = 19
     Panels = <>
     SimplePanel = True
-    ExplicitTop = 502
+    ExplicitTop = 478
+    ExplicitWidth = 603
   end
 end
