@@ -112,7 +112,7 @@ type
     N3: TMenuItem;
     Setselectedtripstosaved1: TMenuItem;
     Setselectedtripstoimported1: TMenuItem;
-    Delete1: TMenuItem;
+    DeleteFiles: TMenuItem;
     N2: TMenuItem;
     Rename1: TMenuItem;
     TripGpiTimer: TTimer;
@@ -170,6 +170,10 @@ type
     LblBounds: TLabel;
     StatusTimer: TTimer;
     BtnSendTo: TButton;
+    N8: TMenuItem;
+    N9: TMenuItem;
+    DeleteDirs: TMenuItem;
+    NewDirectory: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -204,7 +208,7 @@ type
     procedure SetSelectedTrips(Sender: TObject);
     procedure BtnSetDeviceDefaultClick(Sender: TObject);
     procedure TripGpiTimerTimer(Sender: TObject);
-    procedure Delete1Click(Sender: TObject);
+    procedure DeleteFilesClick(Sender: TObject);
     procedure RenameFile(Sender: TObject);
     procedure Setdeparturedatetimeofselected1Click(Sender: TObject);
     procedure Renameselectedtripfilestotripname1Click(Sender: TObject);
@@ -249,7 +253,8 @@ type
     procedure StatusTimerTimer(Sender: TObject);
     procedure CmbModelChange(Sender: TObject);
     procedure BtnSendToClick(Sender: TObject);
-    procedure VlTripInfoDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
+    procedure DeleteDirsClick(Sender: TObject);
+    procedure NewDirectoryClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -320,6 +325,7 @@ type
     function CopyFileToTmp(const AListItem: TListItem): string;
     procedure CopyFileFromTmp(const LocalFile: string; const AListItem: TListItem);
     procedure ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
+    procedure DeleteObjects(const AllowRecurse: boolean);
     procedure ReloadFileList;
     procedure SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
     procedure CheckFile(const AListItem: TListItem);
@@ -767,7 +773,7 @@ begin
                   Rc := FindNext(Fs);
                   continue;
                 end;
-                if (not DelFileFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
+                if (not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
                   raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
               end;
 
@@ -880,7 +886,7 @@ begin
             Rc := FindNext(Fs);
             continue;
           end;
-          if (not DelFileFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
+          if (not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
             raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
         end;
 
@@ -2669,6 +2675,8 @@ begin
   if not Assigned(ABaseDataItem) then
     exit;
 
+  OpenTrip.DefaultExt := 'trip';
+  OpenTrip.Filter := '*.trip|*.trip';
   OpenTrip.InitialDir := ShellTreeView1.Path;
   if not (OpenTrip.Execute) then
     exit;
@@ -2699,12 +2707,14 @@ var AMenuItem: TMenuItem;
 begin
   for AMenuItem in TPopupMenu(Sender).Items do
   begin
-    AMenuItem.Enabled := (AMenuItem.GroupIndex = 1) or
+    AMenuItem.Enabled := ((AMenuItem.GroupIndex = 1) and (AMenuItem.Enabled)) or
                          ((AMenuItem.GroupIndex = 2) and DeviceFile and (BgDevice.ItemIndex = 0));
   end;
 end;
 
-procedure TFrmTripManager.Delete1Click(Sender: TObject);
+procedure TFrmTripManager.DeleteObjects(const AllowRecurse: boolean);
+const
+  ObjectName: array[boolean] of string = ('Files', 'Folders + Sub folders');
 var
   ANitem: TlistItem;
   ABase_Data: TBASE_Data;
@@ -2716,37 +2726,50 @@ begin
   UnSafeExt := false;
   UnlockFiles := false;
 
-  // Count Selected files, excluding folders
+  // Count Selected Files, or Directories
   SelCount := 0;
   for ANitem in LstFiles.Items do
   begin
     if not (ANitem.Selected) then
       continue;
+    // Check file, or dir
     ABase_Data := TBASE_Data(ANitem.Data);
-    if (ABase_Data.IsFolder) then
+    if (ABase_Data.IsFolder <> AllowRecurse) then
       continue;
-    UnSafeExt := not ( (ContainsText(ANitem.SubItems[2], GpxExtension)) or
-                       (ContainsText(ANitem.SubItems[2], TripExtension)) or
-                       (ContainsText(ANitem.SubItems[2], GPIExtension))
-                     );
-    UnlockFiles := UnlockFiles or
-       (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, ChangeFileExt(ANitem.Caption, '.' + UnlExtension) ) <> '');
 
+    // Extension check only for file
+    if (AllowRecurse = false) then
+    begin
+      UnSafeExt := not ( (ContainsText(ANitem.SubItems[2], GpxExtension)) or
+                         (ContainsText(ANitem.SubItems[2], TripExtension)) or
+                         (ContainsText(ANitem.SubItems[2], GPIExtension))
+                       );
+      UnlockFiles := UnlockFiles or
+         (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, ChangeFileExt(ANitem.Caption, '.' + UnlExtension) ) <> '');
+    end;
     Inc(SelCount);
   end;
 
-  if UnlockFiles and (MessageDlg('Selected files have unlock files and are unsafe to delete. Continue?',
-                 TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
-    exit;
+  // Extension check only for file
+  if (AllowRecurse = false) then
+  begin
+    if UnlockFiles and (MessageDlg('Selected files have unlock files and are unsafe to delete. Continue?',
+                   TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
+      exit;
 
-  if UnSafeExt and (MessageDlg('Selected files have extensions that are unsafe to delete. Continue?',
-                 TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
-    exit;
+    if UnSafeExt and (MessageDlg('Selected files have extensions that are unsafe to delete. Continue?',
+                   TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
+      exit;
+  end;
 
-  if (MessageDlg(Format('%d Files will be deleted from %s.', [SelCount, CurrentDevice.FriendlyName]),
+  // Prompt for verification
+  if (MessageDlg(Format('%d %s will be deleted from %s.', [SelCount,
+                                                           ObjectName[AllowRecurse],
+                                                           CurrentDevice.FriendlyName]),
                  TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
     exit;
 
+  // Do the work
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   try
@@ -2755,17 +2778,43 @@ begin
       if not (ANitem.Selected) then
         continue;
       ABase_Data := TBASE_Data(ANitem.Data);
-      if (ABase_Data.IsFolder) then
+      if (ABase_Data.IsFolder <> AllowRecurse) then
         continue;
 
-      if not DelFileFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId) then
-        raise Exception.Create(Format('Could not remove file: %s on %s', [ANitem.Caption, CurrentDevice.FriendlyName]));
+      if not DelFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId, AllowRecurse) then
+        raise Exception.Create(Format('Could not remove %s: %s on %s', [ObjectName[AllowRecurse],
+                                                                        ANitem.Caption,
+                                                                        CurrentDevice.FriendlyName]));
     end;
 
     ReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
+end;
+
+procedure TFrmTripManager.DeleteFilesClick(Sender: TObject);
+begin
+  DeleteObjects(false);
+end;
+
+procedure TFrmTripManager.DeleteDirsClick(Sender: TObject);
+begin
+  DeleteObjects(true);
+end;
+
+procedure TFrmTripManager.NewDirectoryClick(Sender: TObject);
+var
+  NewName: string;
+begin
+  CheckDevice;
+  if not (InputQuery('Create folder', 'Type a name', NewName)) then
+    exit;
+
+  if not CreatePath(CurrentDevice.PortableDev, FSavedFolderId, NewName) then
+    raise Exception.Create('Folder could not be created!');
+
+  ReloadFileList;
 end;
 
 procedure TFrmTripManager.RenameFile(Sender: TObject);
@@ -3008,9 +3057,10 @@ begin
 end;
 
 procedure TFrmTripManager.ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
-var ABASE_Data: TBASE_Data;
-    SParent: Widestring;
-    CrWait, CrNormal: HCURSOR;
+var
+  ABASE_Data: TBASE_Data;
+  SParent: Widestring;
+  CrWait, CrNormal: HCURSOR;
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
@@ -3354,6 +3404,9 @@ var
   GPIRec: TGPI;
 
 begin
+  if (Assigned(ATripList)) then
+    ATripList.Clear;
+
   TsTripGpiInfo.Caption := 'POI(gpi) info';
   AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
 
@@ -3632,6 +3685,8 @@ begin
   BtnSendTo.Visible := GetRegistry(Reg_EnableSendTo, True);
   BtnTransferToDevice.Visible := not BtnSendTo.Visible;
   BtnCreateAdditional.Visible := not BtnSendTo.Visible;
+  DeleteDirs.Enabled := GetRegistry(Reg_EnableDirFuncs, false);
+  NewDirectory.Enabled := GetRegistry(Reg_EnableDirFuncs, false);
 
   if (GetRegistry(Reg_Maximized_Key, False)) then
     WindowState := TWindowState.wsMaximized
@@ -3852,7 +3907,6 @@ begin
     end;
   end;
 end;
-
 
 procedure TFrmTripManager.ConnectedDeviceChanged(const Device, Status: string);
 begin

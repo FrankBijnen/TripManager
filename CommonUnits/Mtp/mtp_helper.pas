@@ -273,7 +273,6 @@ const
   WPD_OBJECT_CAN_DELETE_FMTID : TGuid = '{EF6B490D-5CD8-437A-AFFC-DA8B60EE4A3C}';
   WPD_OBJECT_CAN_DELETE_PID = 26;
 
-
   WPD_CLIENT_NAME_FMTID : TGuid = '{204D9F0C-2292-4080-9F42-40664E70F859}';
   WPD_CLIENT_NAME_PID = 2;
 
@@ -336,6 +335,9 @@ const
 
   WPD_DEVICE_OBJECT_ID = 'DEVICE';
 
+  PORTABLE_DEVICE_DELETE_NO_RECURSION    = 0;
+  PORTABLE_DEVICE_DELETE_WITH_RECURSION  = 1;
+
 function FirstStorageIDs(PortableDev: IMTPDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
 function GetFirstStorageID(PortableDev: IMTPDevice): WideString;
 function ReadFilesFromDevice(PortableDev: IMTPDevice;
@@ -350,7 +352,8 @@ function GetIdForFile(PortableDev: IMTPDevice;
                       SFile: WideString;
                       AListItem: TListItem = nil): string;
 function GetFileFromDevice(PortableDev: IMTPDevice; SFile, SSaveTo, NFile: WideString): Boolean;
-function DelFileFromDevice(PortableDev: IMTPDevice; SFile: WideString): Boolean;
+function DelFromDevice(PortableDev: IMTPDevice; SFile: WideString; const Recurse: Boolean = false): Boolean;
+function CreatePath(PortableDev: IMTPDevice; Parent, DirName: WideString): Boolean;
 function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): Boolean;
 function TransferNewFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString;
                                  NewName: WideString = ''): WideString;
@@ -365,7 +368,8 @@ uses
 
 // For documentation purposes only
 function DisplayFunctionalCategory(Cat_Id: WideString): String;
-var G: TGuid;
+var
+  G: TGuid;
 begin
   Result := Cat_Id;
   if Cat_Id='' then
@@ -388,7 +392,8 @@ begin
 end;
 
 function DisplayContentType(Content_Id: WideString): String;
-var G: TGuid;
+var
+  G: TGuid;
 begin
   Result := Content_Id;
   if Content_Id='' then
@@ -464,17 +469,17 @@ end;
 const BoolFalse = 0;
 
 function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): boolean;
-var Content: IPortableDeviceContent;
-    Properties: IPortableDeviceProperties;
-    Attributes: IPortableDeviceValues;
-    Results: IPortableDeviceValues;
-    ObjectPropertiesToWrite: IPortableDeviceValues;
-    CanWrite: integer;
-    Hr: HResult;
-
+var
+  Content: IPortableDeviceContent;
+  Properties: IPortableDeviceProperties;
+  Attributes: IPortableDeviceValues;
+  Results: IPortableDeviceValues;
+  ObjectPropertiesToWrite: IPortableDeviceValues;
+  CanWrite: integer;
+  Hr: HResult;
 // In PortableDeviceApiLib_TLB some methods have 'var', and thus require a variable.
-    ObjectOriginalNameKey: PortableDeviceApiLib_TLB._tagpropertykey;
-    CanWriteKey: PortableDeviceApiLib_TLB._tagpropertykey;
+  ObjectOriginalNameKey: PortableDeviceApiLib_TLB._tagpropertykey;
+  CanWriteKey: PortableDeviceApiLib_TLB._tagpropertykey;
 
 begin
   result := false;
@@ -520,8 +525,9 @@ begin
 end;
 
 function IsDirectory(Prop_Val: IPortableDeviceValues): Boolean;
-var Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-    Prop_Guid: TGUID;
+var
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  Prop_Guid: TGUID;
 begin
   Result := False;
 
@@ -539,7 +545,8 @@ begin
 end;
 
 procedure PropVariantToString(PropVarValue: Tag_Inner_PROPVARIANT; var SVal: WideString);
-var PValues: IPortableDeviceValues;
+var
+  PValues: IPortableDeviceValues;
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
   Hr: HResult;
   PVal: PWideChar;
@@ -588,8 +595,9 @@ begin
 end;
 
 function PropValToName(Prop_Val: IPortableDeviceValues): PWideChar;
-var Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-    Hr: Hresult;
+var
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  Hr: Hresult;
 begin
   Hr := S_False;
   if (IsDirectory(Prop_Val)) then
@@ -615,8 +623,9 @@ begin
 end;
 
 procedure StringToPropVariant(SVal: WideString; var PropVarValue: Tag_Inner_PROPVARIANT);
-var PValues: IPortableDeviceValues;
-    Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+var
+  PValues: IPortableDeviceValues;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   PValues :=  CreateComObject(CLASS_PortableDeviceValues) as IPortableDeviceValues;
   if VarIsClear(PValues) then Exit;
@@ -631,9 +640,10 @@ begin
 end;
 
 function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = true): Boolean;
-var PortableDeviceValues: IPortableDeviceValues;
-    Hr: HResult;
-    Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+var
+  PortableDeviceValues: IPortableDeviceValues;
+  Hr: HResult;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   Result := False;
   PortableDev := CoPortableDeviceFTM.Create;
@@ -682,7 +692,8 @@ begin
 end;
 
 procedure EnumFunctionalCategoryObjects(Capabilities: IPortableDeviceCapabilities; SCat: WideString);
-var SResultText: WideString;
+var
+  SResultText: WideString;
   PCategoryObjs: IPortableDevicePropVariantCollection;
   ICount: Cardinal;
   I: integer;
@@ -713,12 +724,13 @@ begin
 end;
 
 procedure EnumContentTypes(Capabilities: IPortableDeviceCapabilities; SCat: WideString);
-var SResultText: WideString;
-    ContentTypes: IPortableDevicePropVariantCollection;
-    ICount: Cardinal;
-    I: integer;
-    Prop_Var: Tag_Inner_PROPVARIANT;
-    GCat: TGuid;
+var
+  SResultText: WideString;
+  ContentTypes: IPortableDevicePropVariantCollection;
+  ICount: Cardinal;
+  I: integer;
+  Prop_Var: Tag_Inner_PROPVARIANT;
+  GCat: TGuid;
 begin
   if SCat = '' then
     exit;
@@ -743,10 +755,11 @@ begin
 end;
 
 procedure EnumSupportedCommands(Capabilities: IPortableDeviceCapabilities);
-var CmdKeys: IPortableDeviceKeyCollection;
-    ICount: Cardinal;
-    I: integer;
-    Cmd_Key: PortableDeviceApiLib_TLB._tagpropertykey;
+var
+  CmdKeys: IPortableDeviceKeyCollection;
+  ICount: Cardinal;
+  I: integer;
+  Cmd_Key: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   if VarIsClear(Capabilities) then
     exit;
@@ -765,12 +778,13 @@ begin
 end;
 
 procedure EnumDevCapabilities(PortableDev: IPortableDevice);
-var SResultText: WideString;
-    Capabilities: IPortableDeviceCapabilities;
-    PCategories: IPortableDevicePropVariantCollection;
-    ICount: Cardinal;
-    I: integer;
-    Prop_Var: Tag_Inner_PROPVARIANT;
+var
+  SResultText: WideString;
+  Capabilities: IPortableDeviceCapabilities;
+  PCategories: IPortableDevicePropVariantCollection;
+  ICount: Cardinal;
+  I: integer;
+  Prop_Var: Tag_Inner_PROPVARIANT;
 begin
   if VarIsClear(PortableDev) then
     exit;
@@ -887,16 +901,17 @@ end;
 
 procedure FillObjectProperties(ObjId: PWideChar; Prop: IPortableDeviceProperties;
                                AListItems: TListItems; AListItem: TListItem); overload;
-var ObjName: PWideChar;
-    PropVar: Tag_Inner_PROPVARIANT;
-    ObjDate: TDateTime;
-    DateOriginal, TimeOriginal: string;
-    ObjSize: int64;
-    Keys: IPortableDeviceKeyCollection;
-    Prop_Val: IPortableDeviceValues;
-    Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-    AMTP_Data: TMTP_Data;
-    Hr: Hresult;
+var
+  ObjName: PWideChar;
+  PropVar: Tag_Inner_PROPVARIANT;
+  ObjDate: TDateTime;
+  DateOriginal, TimeOriginal: string;
+  ObjSize: int64;
+  Keys: IPortableDeviceKeyCollection;
+  Prop_Val: IPortableDeviceValues;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  AMTP_Data: TMTP_Data;
+  Hr: Hresult;
 begin
   //Get object prop.
   Prop.GetSupportedProperties(ObjId, Keys);
@@ -973,15 +988,16 @@ function EnumContentsOfFolder(Content: IPortableDeviceContent;
                               ParentId: WideString;
                               Lst: TListItems;
                               Parents: Widestring = ''): PWideChar;
-var ObjectIds: IEnumPortableDeviceObjectIDs;
-    ObjId: PWideChar;
-    Fetched: Cardinal;
-    Keys: IPortableDeviceKeyCollection;
-    Prop: IPortableDeviceProperties;
-    Prop_Val: IPortableDeviceValues;
-    Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-    AMTP_Data: TMTP_Data;
-    CrNormal, CrWait: HCURSOR;
+var
+  ObjectIds: IEnumPortableDeviceObjectIDs;
+  ObjId: PWideChar;
+  Fetched: Cardinal;
+  Keys: IPortableDeviceKeyCollection;
+  Prop: IPortableDeviceProperties;
+  Prop_Val: IPortableDeviceValues;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  AMTP_Data: TMTP_Data;
+  CrNormal, CrWait: HCURSOR;
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
@@ -1027,12 +1043,13 @@ begin
 end;
 
 function GetParents(AContent: IPortableDeviceContent; SParent: string; Parents: WideString):string;
-var Prop: IPortableDeviceProperties;
-    Prop_Val: IPortableDeviceValues;
-    Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-    Keys: IPortableDeviceKeyCollection;
-    ParentName: PWideChar;
-    Hr: Hresult;
+var
+  Prop: IPortableDeviceProperties;
+  Prop_Val: IPortableDeviceValues;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  Keys: IPortableDeviceKeyCollection;
+  ParentName: PWideChar;
+  Hr: Hresult;
 begin
   AContent.Properties(Prop);
   Prop.GetSupportedProperties(PWideChar(SParent), Keys);
@@ -1060,8 +1077,9 @@ function ReadFilesFromDevice(PortableDev: IMTPDevice;
                              Lst: TListItems;
                              SParent: WideString;
                              var CompletePath: WideString):PWideChar;
-var Content: IPortableDeviceContent;
-    CrNormal, CrWait: HCURSOR;
+var
+  Content: IPortableDeviceContent;
+  CrNormal, CrWait: HCURSOR;
 begin
   Result := '';
   CrWait := LoadCursor(0,IDC_WAIT);
@@ -1084,14 +1102,15 @@ end;
 function FindItemInFolder(Content: IPortableDeviceContent;
                           FolderId, FileId: WideString;
                           var FriendlyPath: string): PWideChar;
-var ObjectIds: IEnumPortableDeviceObjectIDs;
-    ObjId, ObjName, PersistentId: PWideChar;
-    PersistentIdString: string;
-    Fetched: Cardinal;
-    Keys: IPortableDeviceKeyCollection;
-    Prop: IPortableDeviceProperties;
-    Prop_Val: IPortableDeviceValues;
-    Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+var
+  ObjectIds: IEnumPortableDeviceObjectIDs;
+  ObjId, ObjName, PersistentId: PWideChar;
+  PersistentIdString: string;
+  Fetched: Cardinal;
+  Keys: IPortableDeviceKeyCollection;
+  Prop: IPortableDeviceProperties;
+  Prop_Val: IPortableDeviceValues;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   result := '';
   if (FolderId = '') then
@@ -1154,9 +1173,10 @@ function GetIdForFile(PortableDev: IMTPDevice;
                       SPath: WideString;
                       SFile: WideString;
                       AListItem: TListItem = nil): string;
-var Prop: IPortableDeviceProperties;
-    Content: IPortableDeviceContent;
-    FriendlyName: string;
+var
+  Prop: IPortableDeviceProperties;
+  Content: IPortableDeviceContent;
+  FriendlyName: string;
 begin
   if PortableDev.Content(Content) <> S_OK then
     exit;
@@ -1171,11 +1191,11 @@ end;
 function GetIdForPath(PortableDev: IMTPDevice;
                       SPath: WideString;
                       var FriendlyPath: string): string;
-var Content: IPortableDeviceContent;
-    CrNormal, CrWait: HCURSOR;
-    SFolder: string;
-
-    CurPath, CompletePath: string;
+var
+  Content: IPortableDeviceContent;
+  CrNormal, CrWait: HCURSOR;
+  SFolder: string;
+  CurPath, CompletePath: string;
 
     procedure TraversePath(CurPath, Parent, CompletePath: string;
                            var FolderId, FriendlyPath, FileId: string);
@@ -1207,14 +1227,15 @@ begin
 end;
 
 function GetFileFromDevice(PortableDev: IMTPDevice; SFile, SSaveTo, NFile: WideString): Boolean;
-var Content: IPortableDeviceContent;
-    Resources: IPortableDeviceResources;
-    ITransferSize, IReadBytes: FixedUInt;
-    Res_Prop: PortableDeviceApiLib_TLB._tagpropertykey;
-    FDevStream: IStream;
-    FFileStream: TFileStream;
-    Buf: array of Byte;
-    CrNormal,CrWait: HCURSOR;
+var
+  Content: IPortableDeviceContent;
+  Resources: IPortableDeviceResources;
+  ITransferSize, IReadBytes: FixedUInt;
+  Res_Prop: PortableDeviceApiLib_TLB._tagpropertykey;
+  FDevStream: IStream;
+  FFileStream: TFileStream;
+  Buf: array of Byte;
+  CrNormal,CrWait: HCURSOR;
 begin
   Result := False;
   CrWait := LoadCursor(0,IDC_WAIT);
@@ -1253,10 +1274,11 @@ begin
   end;
 end;
 
-function DelFileFromDevice(PortableDev: IMTPDevice; SFile: WideString): Boolean;
-var Content: IPortableDeviceContent;
-    Prop_Var: Tag_Inner_PROPVARIANT;
-    PFiles, PRes: IPortableDevicePropVariantCollection;
+function DelFromDevice(PortableDev: IMTPDevice; SFile: WideString; const Recurse: Boolean = false): Boolean;
+var
+  Content: IPortableDeviceContent;
+  Prop_Var: Tag_Inner_PROPVARIANT;
+  PFiles, PRes: IPortableDevicePropVariantCollection;
 begin
   Result := False;
 
@@ -1273,14 +1295,17 @@ begin
 
   //delete
   PRes := nil;
-  Result := (Content.Delete(0, PFiles, PRes) = S_OK); //recursion ??
+  if (Recurse) then
+    Result := (Content.Delete(PORTABLE_DEVICE_DELETE_WITH_RECURSION, PFiles, PRes) = S_OK)
+  else
+    Result := (Content.Delete(PORTABLE_DEVICE_DELETE_NO_RECURSION, PFiles, PRes) = S_OK);
 end;
 
-procedure GetRequiredPropertiesForContent(Parent: WideString; FileName: WideString;
+procedure GetRequiredPropertiesForContent(Parent: WideString; ObjectName: WideString;
   ISize: Cardinal; var PPObjectProperties: IPortableDeviceValues);
-
-var Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-    PropVar: tag_inner_PROPVARIANT;
+var
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  PropVar: tag_inner_PROPVARIANT;
 begin
   //parent id
   Dev_Val.fmtid := WPD_OBJECT_PARENT_ID_FMTID;
@@ -1290,14 +1315,14 @@ begin
   //object name
   Dev_Val.fmtid := WPD_OBJECT_NAME_FMTID;
   Dev_Val.pid := WPD_OBJECT_NAME_PID;
-  PPObjectProperties.SetStringValue(Dev_Val, PWideChar(FileName));
+  PPObjectProperties.SetStringValue(Dev_Val, PWideChar(ObjectName));
 
-  //file name
+  //original file name, can be a folder
   Dev_Val.fmtid := WPD_OBJECT_ORIGINAL_FILE_NAME_FMTID;
   Dev_Val.pid := WPD_OBJECT_ORIGINAL_FILE_NAME_PID;
-  PPObjectProperties.SetStringValue(Dev_Val, PWideChar(FileName));
+  PPObjectProperties.SetStringValue(Dev_Val, PWideChar(ObjectName));
 
-  //size
+  //size, can be 0
   Dev_Val.fmtid := WPD_OBJECT_SIZE_FMTID;
   Dev_Val.pid := WPD_OBJECT_SIZE_PID;
   PPObjectProperties.SetUnsignedLargeIntegerValue(Dev_Val, ISize);
@@ -1319,21 +1344,64 @@ begin
 
 end;
 
+// Additionally sets the type to folder.
+procedure GetRequiredPropertiesForDir(Parent: WideString; DirName: WideString;
+  var PPObjectProperties: IPortableDeviceValues);
+var
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  Dev_Guid: TGUID;
+begin
+  //common properties
+  GetRequiredPropertiesForContent(Parent, DirName, 0, PPObjectProperties);
+
+  //type folder
+  Dev_Val.fmtid := WPD_OBJECT_CONTENT_TYPE_FMTID;
+  Dev_Val.pid := WPD_OBJECT_CONTENT_TYPE_PID;
+  Dev_Guid := WPD_CONTENT_TYPE_FOLDER;
+  PPObjectProperties.SetGuidValue(Dev_Val, Dev_Guid);
+
+end;
+
+function CreatePath(PortableDev: IMTPDevice; Parent, DirName: WideString): Boolean;
+var
+  Content: IPortableDeviceContent;
+  PValues: IPortableDeviceValues;
+  ppszObjectID: PWideChar;
+  HR: HResult;
+begin
+  result := false;
+  if PortableDev.Content(Content) <> S_OK then
+    exit;
+
+  PValues := CreateComObject(CLASS_PortableDeviceValues) as IPortableDeviceValues;
+  if VarIsClear(PValues) then
+    exit;
+
+  GetRequiredPropertiesForDir(Parent, DirName, PValues);
+  if (PValues = nil) then
+    exit;
+
+  ppszObjectID := nil;
+  HR := Content.CreateObjectWithPropertiesOnly(PValues, ppszObjectID);
+  result := (HR = S_OK);
+end;
+
 // See for more info
 //https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/transferring-an-image-or-music-file-to-the-device
 function TransferNewFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString;
                                  NewName: WideString = ''): WideString;
-var Content: IPortableDeviceContent;
-    PortableStream:  IPortableDeviceDataStream;
-    ITransferSize, IReadBytes, IWritten: FixedUint;
-    FDevStream: IStream;
-    PValues: IPortableDeviceValues;
-    FFileStream: TFileStream;
-    Buf: array of Byte;
-    NameOnDev: WideString;
-    PPszCookie: PWideChar;
-    ppszObjectID: PWideChar;
-    HR: HResult;
+var
+  Content: IPortableDeviceContent;
+  PortableStream:  IPortableDeviceDataStream;
+  ITransferSize, IReadBytes, IWritten: FixedUint;
+  FDevStream: IStream;
+  PValues: IPortableDeviceValues;
+  FFileStream: TFileStream;
+  Buf: array of Byte;
+  NameOnDev: WideString;
+  PPszCookie: PWideChar;
+  ppszObjectID: PWideChar;
+  HR: HResult;
 begin
   Result := '';
   if PortableDev.Content(Content) <> S_OK then
@@ -1361,6 +1429,7 @@ begin
     if VarIsClear(FDevStream) then
       exit;
     SetLength(Buf, ITransferSize);
+
     //transfer to dev. stream
     //read source stream using buffer
     repeat
@@ -1393,13 +1462,14 @@ end;
 const TempExtension = '.tmp';
 
 function TransferExistingFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
-var MTP_Data: TMTP_Data;
-    Content: IPortableDeviceContent;
-    Prop: IPortableDeviceProperties;
-    OriginalName: WideString;
-    TempName: WideString;
-    NewObjectId: WideString;
-    OldObjectId: WideString;
+var
+  MTP_Data: TMTP_Data;
+  Content: IPortableDeviceContent;
+  Prop: IPortableDeviceProperties;
+  OriginalName: WideString;
+  TempName: WideString;
+  NewObjectId: WideString;
+  OldObjectId: WideString;
 begin
   result := false;
 
@@ -1427,7 +1497,7 @@ begin
 
 // Now delete the old object
 // If this fails, for some reason, the file will exist twice on the device.
-  if not DelFileFromDevice(PortableDev, OldObjectId) then
+  if not DelFromDevice(PortableDev, OldObjectId) then
     exit;
 
 // Rename back to original file

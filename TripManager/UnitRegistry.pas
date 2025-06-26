@@ -85,7 +85,7 @@ const
   Reg_AddressFormat           = 'AddressFormat';
   Reg_ThrottleGeoCode         = 'ThrottleGeoCode';
   Reg_EnableSendTo            = 'EnableSendTo';
-
+  Reg_EnableDirFuncs          = 'EnableDirFuncs';
 
   BooleanValues: array[boolean] of string = ('False', 'True');
 

@@ -993,15 +993,29 @@ object FrmTripManager: TFrmTripManager
       Caption = '-'
       GroupIndex = 1
     end
-    object Delete1: TMenuItem
+    object DeleteFiles: TMenuItem
       Caption = 'Delete selected files'
       GroupIndex = 1
-      OnClick = Delete1Click
+      OnClick = DeleteFilesClick
     end
     object Rename1: TMenuItem
       Caption = 'Rename file'
       GroupIndex = 1
       OnClick = RenameFile
+    end
+    object N9: TMenuItem
+      Caption = '-'
+      GroupIndex = 1
+    end
+    object DeleteDirs: TMenuItem
+      Caption = 'Delete selected folders (incl. sub folders)'
+      GroupIndex = 1
+      OnClick = DeleteDirsClick
+    end
+    object NewDirectory: TMenuItem
+      Caption = 'New folder'
+      GroupIndex = 1
+      OnClick = NewDirectoryClick
     end
     object N1: TMenuItem
       Caption = '-'

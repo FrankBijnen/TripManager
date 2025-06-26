@@ -116,6 +116,7 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
     AddGridLine(GridGeneralSettings, CurRow, Reg_EnableSendTo,        'True',  'Enable Send to');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Preferred device and folders-');
