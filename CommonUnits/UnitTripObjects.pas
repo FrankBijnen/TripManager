@@ -32,6 +32,7 @@ type
   TRoutePoint       = (rpVia              = 0,
                        rpShaping          = 1,
                        rpShapingXT2       = 2);
+  TUdbDirStatus     = (udsUnchecked, udsOK, udsRoadNotFound, udsCoordsNotFound);
 
 { Elementary data types }
 const
@@ -225,7 +226,7 @@ type
     function GetMapCoords: string; override;
     procedure SetMapCoords(ACoords: string); override;
   public
-    constructor Create(ALat, ALon: single); reintroduce;
+    constructor Create(ALat, ALon: double); reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
   end;
@@ -561,9 +562,10 @@ type
   TUdbDir = class(TBaseItem)
   private
     FValue:            TUdbDirValue;
+    FUdbDirStatus:     TUdbDirStatus;
     constructor Create(AName: WideString;
-                       ALat: single = 0;
-                       ALon: single = 0;
+                       ALat: double = 0;
+                       ALon: double = 0;
                        APointType: byte = $03;
                        ADirection: byte = $24); reintroduce;
 
@@ -580,6 +582,7 @@ type
     property DisplayName: string read GetName;
     property UdbDirValue: TUdbDirValue read FValue;
     property MapCoords: string read GetMapCoords;
+    property Status: TUdbDirStatus read FUdbDirStatus write FUdbDirStatus;
   end;
   TUdbDirList = Tlist<TUdbDir>;
 
@@ -716,12 +719,12 @@ end;
 
 function CoordAsDec(CoordInt: integer): double;
 begin
-  result := SimpleRoundTo(CoordInt / 4294967296 * 360, -6);
+  result := SimpleRoundTo(CoordInt / 4294967296 * 360, -10);
 end;
 
 function CoordAsInt(CoordDec: double): integer;
 begin
-  result := Round(SimpleRoundTo(CoordDec, -6) * 4294967296 / 360);
+  result := Round(SimpleRoundTo(CoordDec, -10) * 4294967296 / 360);
 end;
 
 function CoordsAsPosn(const LatLon: string): TPosnValue;
@@ -1230,7 +1233,7 @@ begin
 end;
 
 {*** ScPosn ***}
-constructor TmScPosn.Create(ALat, ALon: single);
+constructor TmScPosn.Create(ALat, ALon: double);
 begin
   inherited Create('mScPosn', Sizeof(FValue), dtPosn);
   FValue.ScnSize := Swap32(SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon));
@@ -2048,8 +2051,8 @@ begin
 end;
 
 constructor TUdbDir.Create(AName: WideString;
-                           ALat: single = 0;
-                           ALon: single = 0;
+                           ALat: double = 0;
+                           ALon: double = 0;
                            APointType: byte = $03;
                            ADirection: byte = $24);
 begin
@@ -2060,6 +2063,7 @@ begin
   FValue.Lon := Swap32(CoordAsInt(ALon));
   FValue.SubClass.PointType := APointType;
   FValue.SubClass.Direction := ADirection;
+  FUdbDirStatus := TUdbDirStatus.udsUnchecked;
 end;
 
 procedure TUdbDir.WritePrefix(AStream: TMemoryStream);

@@ -1,6 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{FA021510-8F2E-4C31-82F0-7E17E8625D63}</ProjectGuid>
+        <ProjectGuid>{FA021510-8F2E-4C31-82F0-7E17E8625D64}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
         <Projects Include="TripManager.dproj">
@@ -35,7 +35,7 @@
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
     <ItemGroup Condition="'$(BuildGroup)'=='Release'">
         <BuildGroupProject Include="TripManager.dproj">
-            <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA4}</ProjectGuid>
+            <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA5}</ProjectGuid>
             <Configurations>Release</Configurations>
             <Platforms>Win32;Win64</Platforms>
             <Enabled>True</Enabled>

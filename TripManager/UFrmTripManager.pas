@@ -171,6 +171,7 @@ type
     StatusTimer: TTimer;
     BtnSendTo: TButton;
     N8: TMenuItem;
+    Compare1: TMenuItem;
     N9: TMenuItem;
     DeleteDirs: TMenuItem;
     NewDirectory: TMenuItem;
@@ -253,6 +254,9 @@ type
     procedure StatusTimerTimer(Sender: TObject);
     procedure CmbModelChange(Sender: TObject);
     procedure BtnSendToClick(Sender: TObject);
+    procedure VlTripInfoBeforeDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
+    procedure Compare1Click(Sender: TObject);
+    procedure PopupTripInfoPopup(Sender: TObject);
     procedure DeleteDirsClick(Sender: TObject);
     procedure NewDirectoryClick(Sender: TObject);
   private
@@ -373,15 +377,20 @@ var
 implementation
 
 uses
-  System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, Winapi.ShellAPI, Vcl.Clipbrd,
-  MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UDmRoutePoints,
-  TripManager_GridSelItem,
-  UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip;
+  System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo,
+  Winapi.ShellAPI, Vcl.Clipbrd,
+  MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
+  UDmRoutePoints, TripManager_GridSelItem,
+  UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
+  UFrmSelectGPX;
 
 const
   DupeCount = 10;
 
 {$R *.dfm}
+
+var
+  FormatSettings: TFormatSettings;
 
 function OffsetInRecord(const Base; const Field): integer;
 begin
@@ -1122,7 +1131,8 @@ end;
 
 procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
 begin
-  if not Assigned(ATripList) then
+  if not Assigned(ATripList) or
+     (ATripList.ItemList.Count = 0) then
     exit;
 
   SaveTrip.Filter := '*.gpx|*.gpx';
@@ -1132,6 +1142,44 @@ begin
     exit;
 
   ATripList.SaveAsGPX(SaveTrip.FileName);
+end;
+
+procedure TFrmTripManager.Compare1Click(Sender: TObject);
+var
+  GPXFileObj: TGPXFile;
+  CrWait, CrNormal: HCURSOR;
+  Messages: TStringList;
+begin
+  if (ATripList = nil) then
+    exit;
+
+  OpenTrip.DefaultExt := 'gpx';
+  OpenTrip.Filter := '*.gpx|*.gpx';
+  OpenTrip.InitialDir := ShellTreeView1.Path;
+  OpenTrip.FileName := ChangeFileExt(ExtractFileName(ShellTreeView1.Path), '.gpx');
+  if not OpenTrip.Execute then
+    exit;
+
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
+  Messages := TStringList.Create;
+  try
+    GPXFileObj.AnalyzeGpx;
+    if (GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
+                                    'Select Route/Track',
+                                     TTagsToShow.RteTrk, false)) then
+    begin
+      SetCursor(CrWait);
+      GPXFileObj.CompareTrip(ATripList, Messages);
+      Clipboard.AsText := Messages.Text;
+    end;
+  finally
+    Messages.Free;
+    GPXFileObj.Free;
+    SetCursor(CrNormal);
+    VlTripInfo.Invalidate;
+  end;
 end;
 
 procedure TFrmTripManager.SaveTripGpiFile;
@@ -1192,6 +1240,14 @@ end;
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
   MnuTripNewMTP.Enabled := CheckDevice(false);
+end;
+
+procedure TFrmTripManager.PopupTripInfoPopup(Sender: TObject);
+begin
+  SaveGPX1.Enabled := (ATripList <> nil) and
+                      (ATripList.ItemList.Count > 0);
+
+  Compare1.Enabled := SaveGPX1.Enabled;
 end;
 
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);
@@ -1439,6 +1495,7 @@ begin
   HexEdit.OnKeyPress := HexEditKeyPress;
   HexEdit.OnKeyDown := HexEditKeyDown;
   VlTripInfo.OnSelectionMoved := VlTripInfoSelectionMoved;
+  VlTripInfo.OnBeforeDrawCell := VlTripInfoBeforeDrawCell;
 
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
@@ -2189,8 +2246,8 @@ var
   procedure AddUdbDir(AnUdbDir: TUdbDir; ZoomToPoint: boolean);
   begin
     VlTripInfo.Strings.AddPair(AnUdbDir.DisplayName, Format('MapSegment: %s RoadId: %s PointType: %d Lat: %1.6f Lon: %1.6f',
-                                 [IntToHex(AnUdbDir.UdbDirValue.SubClass.MapSegment, 8),
-                                  IntToHex(AnUdbDir.UdbDirValue.SubClass.RoadId, 8),
+                                 [IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8),
+                                  IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8),
                                   AnUdbDir.UdbDirValue.SubClass.PointType,
                                   AnUdbDir.Lat,
                                   AnUdbDir.Lon]),
@@ -2536,10 +2593,18 @@ procedure TFrmTripManager.TvTripCustomDrawItem(Sender: TCustomTreeView; Node: TT
   var DefaultDraw: Boolean);
 begin
   if (Node.Data <> nil) and
-     (TObject(Node.Data) is TUdbDir) and
-     ( (TUdbDir(Node.Data).UdbDirValue.SubClass.PointType = $3) or
-       (TUdbDir(Node.Data).IsTurn) )  then
-    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
+     (TObject(Node.Data) is TUdbDir) then
+  begin
+    if (TUdbDir(Node.Data).UdbDirValue.SubClass.PointType = $3) or
+       (TUdbDir(Node.Data).IsTurn)  then
+      Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
+    case (TUdbDir(Node.Data).Status) of
+      TUdbDirStatus.udsRoadNotFound:
+        Sender.Canvas.Brush.Color := clWebYellow;
+      TUdbDirStatus.udsCoordsNotFound:
+        Sender.Canvas.Brush.Color := clWebOrange;
+    end;
+  end;
 end;
 
 procedure TFrmTripManager.ValueListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2550,14 +2615,23 @@ begin
       Clipboard.AsText := Cells[Col, Row];
 end;
 
-procedure TFrmTripManager.VlTripInfoDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
+procedure TFrmTripManager.VlTripInfoBeforeDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
+var
+  AGridSelItem: TGridSelItem;
 begin
-//  with TValueListEditor(Sender), TValueListEditor(Sender).Canvas do
-//  begin
-//    Brush.Style := bsSolid;
-//    Brush.Color := $ff00ff;
-//    Font.Color := $BB0000;
-//    TextRect(Rect, Rect.Left + 4, Rect.Top + 2, Cells[ACol, ARow]);
+  AGridSelItem := TGridSelItem.GridSelItem(VlTripInfo, ARow -1);
+  if (AGridSelItem = nil) or
+     not (AGridSelItem.BaseItem is TUdbDir) then
+    exit;
+  if (ACol = 0) then
+  begin
+    case (TUdbDir(AGridSelItem.BaseItem).Status) of
+      TUdbDirStatus.udsRoadNotFound:
+        VlTripInfo.Canvas.Brush.Color := clWebYellow;
+      TUdbDirStatus.udsCoordsNotFound:
+        VlTripInfo.Canvas.Brush.Color := clWebOrange;
+    end;
+  end;
 end;
 
 procedure TFrmTripManager.VlTripInfoEditButtonClick(Sender: TObject);
@@ -3928,5 +4002,10 @@ begin
   SbPostProcess.Panels[0].Text := '';
   SbPostProcess.Panels[1].Text := '';
 end;
+
+initialization
+  FormatSettings.ThousandSeparator := ',';
+  FormatSettings.DecimalSeparator := '.';
+
 
 end.

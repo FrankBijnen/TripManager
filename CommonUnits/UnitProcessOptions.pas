@@ -120,8 +120,10 @@ type
     procedure DoPrefSaved;
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
     function DistanceStr: string;
+{$IFDEF REGISTRY}
     class procedure SetPrefs(TvSelections: TTreeview);
     class function StorePrefs(TvSelections: TTreeview): TGPXFuncArray;
+{$ENDIF}
   end;
 
 var
@@ -147,7 +149,10 @@ implementation
 
 uses
   System.SysUtils,
-  UnitStringUtils, UnitRegistry;
+{$IFDEF REGISTRY}
+  UnitRegistry,
+{$ENDIF}
+  UnitStringUtils;
 
 constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
 begin
@@ -274,6 +279,7 @@ begin
     result := 'Km';
 end;
 
+{$IFDEF REGISTRY}
 class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview);
 var
   SavedStateChanging: TTVCheckStateChangingEvent;
@@ -378,5 +384,6 @@ begin
       result := result + [TGPXFunc.CreateHTML];
   end;
 end;
+{$ENDIF}
 
 end.

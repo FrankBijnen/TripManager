@@ -641,12 +641,11 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -765,7 +764,6 @@ object FrmTripManager: TFrmTripManager
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
           PopupMenu = PopupTripInfo
           TabOrder = 0
-          OnDrawCell = VlTripInfoDrawCell
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
           OnStringsChange = VlTripInfoStringsChange
@@ -1186,6 +1184,7 @@ object FrmTripManager: TFrmTripManager
     end
   end
   object PopupTripInfo: TPopupMenu
+    OnPopup = PopupTripInfoPopup
     Left = 378
     Top = 393
     object CopyValueFromTrip: TMenuItem
@@ -1202,6 +1201,13 @@ object FrmTripManager: TFrmTripManager
     object SaveGPX1: TMenuItem
       Caption = 'Save GPX'
       OnClick = SaveGPX1Click
+    end
+    object N8: TMenuItem
+      Caption = '-'
+    end
+    object Compare1: TMenuItem
+      Caption = 'Compare'
+      OnClick = Compare1Click
     end
   end
   object SaveTrip: TSaveDialog

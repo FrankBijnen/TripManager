@@ -73,6 +73,7 @@ type
     function GetSpeedFromName(WptName: string): integer;
     function GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
     function GPXCategory(Category: string): TGPXCategory;
+    function GetRouteNode(RouteName: string): TXmlVSNode;
 
     procedure FreeGlobals;
     procedure CreateGlobals;
@@ -159,7 +160,7 @@ type
                        const OutStringList: TStringList = nil;
                        const SeqNo: cardinal = 0); overload;
     destructor Destroy; override;
-    function ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow): boolean;
+    function ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckAll: boolean): boolean;
     procedure DoPostProcess;
     procedure DoCreateTracks;
     procedure DoCreateWayPoints;
@@ -172,6 +173,7 @@ type
     procedure DoCreateTrips;
 {$IFDEF TRIPOBJECTS}
     procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
+    procedure CompareTrip(const ATripList: TTripList; const Messages: TStrings);
 {$ENDIF}
     procedure AnalyzeGpx;
     property WayPointList: TXmlVSNodeList read FWayPointList;
@@ -191,7 +193,8 @@ end;
 implementation
 
 uses
-  System.TypInfo, System.DateUtils, System.StrUtils, UnitStringUtils, UnitRegistry, UnitOSMMap;
+  System.TypInfo, System.DateUtils, System.StrUtils,
+  UnitStringUtils, UnitOSMMap;
 
 // Not configurable
 const
@@ -207,6 +210,7 @@ const
 
 var
   FormatSettings: TFormatSettings;
+
 function TGPXfile.CoordFromAttribute(Atributes: TXmlVSAttributeList): TCoord;
 begin
   result.Lat := StrToFloat(Atributes.Find('lat').Value, FormatSettings);
@@ -1334,7 +1338,25 @@ begin
   ProcessGPX;
 end;
 
-function TGPXfile.ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow): boolean;
+function TGPXfile.GetRouteNode(RouteName: string): TXmlVSNode;
+var
+  GpxNode: TXmlVSNode;
+  RouteNode: TXmlVSNode;
+begin
+  result := nil;
+  for GpxNode in FXmlDocument.ChildNodes do
+  begin
+    if (GpxNode.Name = 'gpx') then
+    begin
+      for RouteNode in GpxNode.ChildNodes do
+        if (RouteNode.Name = 'rte') and
+           (FindSubNodeValue(RouteNode, 'name') = RouteName) then
+           exit(RouteNode);
+    end;
+  end;
+end;
+
+function TGPXfile.ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckAll: boolean): boolean;
 var
   Track, RoutePoints: TXmlVSNode;
   DisplayColor: string;
@@ -1376,7 +1398,7 @@ begin
       end;
   end;
 
-  FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow);
+  FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow, CheckAll);
   FrmSelectGPX.Caption := Caption;
   FrmSelectGPX.PnlTop.Caption := SubCaption;
   result := (FrmSelectGPX.ShowModal = ID_OK);
@@ -1390,6 +1412,161 @@ begin
     ProcessOptions.DoPrefSaved;
   end;
 end;
+
+{$IFDEF TRIPOBJECTS}
+const
+  LatLonFormat = '%1.5f';
+
+procedure TGPXfile.CompareTrip(const ATripList: TTripList; const Messages: TStrings);
+var
+  RtePtCount, UdbDirCount: integer;
+  AllRoutes: TmAllRoutes;
+  AnUdbHandle: TmUdbDataHndl;
+  AnUdbDir: TUdbDir;
+  RouteSelected, ScanRtePt, NextRtePt: TXmlVSNode;
+  ExtensionsNode, RoutePointExtensionNode, GpxxRptNode: TXmlVSNode;
+  AnItem: TListItem;
+  Coord: TCoord;
+  CLat, CLon, CTLat, CTLon: string;
+  CMapSegRoad, CTMapSegRoad: string;
+begin
+  Messages.Clear;
+  AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
+  if (AllRoutes = nil) then
+    exit;
+
+  RouteSelected := nil;
+  for AnItem in FrmSelectGPX.LvTracks.Items do
+  begin
+    if not (AnItem.Checked) then
+      continue;
+
+    if (AnItem.SubItems[0] = 'Rte') then
+    begin
+      for RouteSelected in RouteViaPointList do
+      begin
+        if (RouteSelected.NodeName = AnItem.Caption) then
+          break;
+      end;
+    end;
+  end;
+  if (RouteSelected = nil) then
+    exit;
+
+  Messages.Add(Format('Checking %s', [RouteSelected.NodeName]));
+
+  RouteSelected := GetRouteNode(RouteSelected.NodeName);
+  if (RouteSelected = nil) then
+    exit;
+
+  NextRtePt := RouteSelected.Find('rtept');
+  if (NextRtePt = nil) then
+    exit;
+
+  RtePtCount := 0;
+  ScanRtePt := NextRtePt;
+  while (ScanRtePt <> nil) do
+  begin
+    if (ScanRtePt.Name = 'rtept') then
+      Inc(RtePtCount);
+    ScanRtePt := ScanRtePt.NextSibling;
+  end;
+
+  UdbDirCount := 0;
+  for AnUdbHandle in AllRoutes.Items do
+  begin
+    for AnUdbDir in AnUdbHandle.Items do
+    begin
+      AnUdbDir.Status := udsUnchecked;
+      if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
+        Inc(UdbDirCount);
+    end;
+  end;
+
+  if (UdbDirCount <> RtePtCount) then
+    raise Exception.Create('Number of Route points differ');
+
+  GpxxRptNode := nil;
+
+  for AnUdbHandle in AllRoutes.Items do
+  begin
+    for AnUdbDir in AnUdbHandle.Items do
+    begin
+      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
+        continue;
+      CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
+                      IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8);
+      CTLat := Format(LatLonFormat, [AnUdbDir.Lat], FormatSettings);
+      CTLon := Format(LatLonFormat, [AnUdbDir.Lon], FormatSettings);
+
+      if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
+      begin
+        Coord := CoordFromAttribute(NextRtePt.AttributeList);
+        CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
+        CLon := Format(LatLonFormat, [Coord.Lon], FormatSettings);
+
+        if (CTLat <> CLat) or
+           (CTLon <> CLon) or
+           (AnUdbDir.DisplayName <> FindSubNodeValue(NextRtePt, 'name')) then
+        begin
+          Messages.Add(Format('Route point:%s failed. Lat:%s Lon:%s Potential match:%s Lat:%s Lon:%s.',
+                              [AnUdbDir.DisplayName,
+                               CTLat, CTLon,
+                               FindSubNodeValue(NextRtePt, 'name'),
+                               CLat, CLon]));
+          AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
+        end;
+
+        // Init GpxxRptNode
+        GpxxRptNode := nil;
+        RoutePointExtensionNode := nil;
+        ExtensionsNode := NextRtePt.Find('extensions');
+        if (ExtensionsNode <> nil) then
+          RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
+        if (RoutePointExtensionNode <> nil) then
+          GpxxRptNode := RoutePointExtensionNode.Find('gpxx:rpt');
+
+        // Point to next segment
+        NextRtePt := NextRtePt.NextSibling;
+        continue;
+      end;
+      if (GpxxRptNode = nil) then
+        continue;
+
+      ScanRtePt := GpxxRptNode;
+      while (ScanRtePt <> nil) do
+      begin
+        if (ScanRtePt.Name = 'gpxx:rpt') then
+        begin
+          CMapSegRoad := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
+          if (CMapSegRoad <> '') then
+          begin
+            Coord := CoordFromAttribute(ScanRtePt.AttributeList);
+            CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
+            CLon := Format(LatLonFormat, [Coord.Lon], FormatSettings);
+            if ((CTLat = CLat) and (CTLon = CLon)) or
+               (CTMapSegRoad = CMapSegRoad) then
+            begin
+              GpxxRptNode := ScanRtePt;
+              break;
+            end;
+          end;
+        end;
+
+        ScanRtePt := ScanRtePt.NextSibling;
+      end;
+      if (ScanRtePt = nil) then
+      begin
+        Messages.Add(Format('Road:%s failed. MapSeg + Road:%s, Lat:%s Lon:%s.',
+                            [AnUdbDir.DisplayName,
+                             CTMapSegRoad,
+                             CTLat, CTLon]));
+        AnUdbDir.Status := TUdbDirStatus.udsRoadNotFound;
+      end;
+    end;
+  end;
+end;
+{$ENDIF}
 
 procedure TGPXfile.DoPostProcess;
 begin
@@ -2237,7 +2414,7 @@ begin
     begin
       if (not GpxFileObj.ShowSelectTracks(ExtractFileName(GPXFile),
                                           Format('Select Rte/Trk to add to %s', [SubCaption]),
-                                          TTagsToShow.RteTrk)) then
+                                          TTagsToShow.RteTrk, true)) then
         exit;
     end;
 

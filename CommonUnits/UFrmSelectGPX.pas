@@ -35,7 +35,7 @@ type
   public
     { Public declarations }
     AllTracks: TStringList;
-    procedure LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow);
+    procedure LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckAll: boolean);
     function TrackSelectedColor(const TrackName: string): string;
   end;
 
@@ -51,7 +51,7 @@ const
   TypeColumn = 1;
   ColorColumn = 1;
 
-procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow);
+procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckAll: boolean);
 var
   Indx: integer;
   Name, Color, Points, FromRoute: string;
@@ -81,7 +81,7 @@ begin
     Name := NextField(FromRoute, Chr(9));
     LVItem := LvTracks.Items.Add;
     LVItem.Caption := Name;
-    LVItem.Checked := (FTagsToShow = TTagsToShow.RteTrk);
+    LVItem.Checked := CheckAll;
     LVItem.SubItems.Add(FromRoute);
     if (DisplayColor = '') then
       LVItem.SubItems.Add(Color)
@@ -114,7 +114,7 @@ var
   AnItem: TlistItem;
 begin
   if (CmbOverruleColor.ItemIndex = 0) then
-    LoadTracks('', FTagsToShow)
+    LoadTracks('', FTagsToShow, FTagsToShow = TTagsToShow.RteTrk)
   else
   begin
     for AnItem in LvTracks.Items do
