@@ -22,6 +22,7 @@ uses
   UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
+  UFrmShowLog in 'UFrmShowLog.pas' {FrmShowLog},
   UnitRegistryKeys in 'UnitRegistryKeys.pas',
   TripManager_MultiContext in 'TripManager_MultiContext.pas',
   TripManager_ShellTree in 'TripManager_ShellTree.pas',
@@ -80,5 +81,6 @@ begin
   Application.CreateForm(TFGeoSearch, FGeoSearch);
   Application.CreateForm(TFrmPlaces, FrmPlaces);
   Application.CreateForm(TFrmTransferOptions, FrmTransferOptions);
+  Application.CreateForm(TFrmShowLog, FrmShowLog);
   Application.Run;
 end.

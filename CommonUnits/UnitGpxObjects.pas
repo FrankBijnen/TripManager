@@ -1430,11 +1430,17 @@ var
   Coord: TCoord;
   CLat, CLon, CTLat, CTLon: string;
   CMapSegRoad, CTMapSegRoad: string;
+  CheckSegmentOK: boolean;
+  CheckRouteOK: boolean;
+  StartSegmentLine: integer;
 begin
   Messages.Clear;
   AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
   if (AllRoutes = nil) then
+  begin
+    Messages.Add('Can not find mAllRoutes in trip.');
     exit;
+  end;
 
   RouteSelected := nil;
   for AnItem in FrmSelectGPX.LvTracks.Items do
@@ -1452,17 +1458,22 @@ begin
     end;
   end;
   if (RouteSelected = nil) then
+  begin
+    Messages.Add('No route/track selected.');
     exit;
+  end;
 
-  Messages.Add(Format('Checking %s', [RouteSelected.NodeName]));
-
+  Messages.Add(Format('Checking: %s', [RouteSelected.NodeName]));
   RouteSelected := GetRouteNode(RouteSelected.NodeName);
-  if (RouteSelected = nil) then
+  if (RouteSelected = nil) then // Should not happen
     exit;
 
   NextRtePt := RouteSelected.Find('rtept');
   if (NextRtePt = nil) then
+  begin
+    Messages.Add('No <rtept> in GPX.');
     exit;
+  end;
 
   RtePtCount := 0;
   ScanRtePt := NextRtePt;
@@ -1485,16 +1496,23 @@ begin
   end;
 
   if (UdbDirCount <> RtePtCount) then
-    raise Exception.Create('Number of Route points differ');
+  begin
+    Messages.Add('Number of route points do not match in trip and gpx route.' + #13#10 +
+                 'Use Compare track.');
+    exit;
+  end;
 
+  CheckSegmentOK := true;
+  CheckRouteOK := true;
+  StartSegmentLine := -1;
   GpxxRptNode := nil;
-
   for AnUdbHandle in AllRoutes.Items do
   begin
     for AnUdbDir in AnUdbHandle.Items do
     begin
       if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
         continue;
+
       CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
                       IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8);
       CTLat := Format(LatLonFormat, [AnUdbDir.Lat], FormatSettings);
@@ -1502,6 +1520,11 @@ begin
 
       if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
       begin
+        if (StartSegmentLine > -1) and
+           (CheckSegmentOK = false) then
+          Messages[StartSegmentLine] := Messages[StartSegmentLine] + ' NOT OK';
+        CheckSegmentOK := true;
+        StartSegmentLine := Messages.Add(Format('Checking Segment: %s', [AnUdbDir.DisplayName]));
         Coord := CoordFromAttribute(NextRtePt.AttributeList);
         CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
         CLon := Format(LatLonFormat, [Coord.Lon], FormatSettings);
@@ -1510,7 +1533,9 @@ begin
            (CTLon <> CLon) or
            (AnUdbDir.DisplayName <> FindSubNodeValue(NextRtePt, 'name')) then
         begin
-          Messages.Add(Format('Route point:%s failed. Lat:%s Lon:%s Potential match:%s Lat:%s Lon:%s.',
+          CheckSegmentOK := false;
+          CheckRouteOK := false;
+          Messages.Add(Format('Route point:%s check failed. Lat:%s Lon:%s Potential match:%s Lat:%s Lon:%s.',
                               [AnUdbDir.DisplayName,
                                CTLat, CTLon,
                                FindSubNodeValue(NextRtePt, 'name'),
@@ -1556,9 +1581,12 @@ begin
 
         ScanRtePt := ScanRtePt.NextSibling;
       end;
+
       if (ScanRtePt = nil) then
       begin
-        Messages.Add(Format('Road:%s failed. MapSeg + Road:%s, Lat:%s Lon:%s.',
+        CheckSegmentOK := false;
+        CheckRouteOK := false;
+        Messages.Add(Format('Road:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s.',
                             [AnUdbDir.DisplayName,
                              CTMapSegRoad,
                              CTLat, CTLon]));
@@ -1566,6 +1594,8 @@ begin
       end;
     end;
   end;
+  if (CheckRouteOK = false) then
+    Messages[0] := Messages[0] + ' NOT OK';
 end;
 {$ENDIF}
 

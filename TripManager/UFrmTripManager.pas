@@ -382,7 +382,7 @@ uses
   MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
-  UFrmSelectGPX;
+  UFrmSelectGPX, UFrmShowLog;
 
 const
   DupeCount = 10;
@@ -1148,7 +1148,6 @@ procedure TFrmTripManager.Compare1Click(Sender: TObject);
 var
   GPXFileObj: TGPXFile;
   CrWait, CrNormal: HCURSOR;
-  Messages: TStringList;
 begin
   if (ATripList = nil) then
     exit;
@@ -1163,7 +1162,6 @@ begin
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
-  Messages := TStringList.Create;
   try
     GPXFileObj.AnalyzeGpx;
     if (GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
@@ -1171,11 +1169,11 @@ begin
                                      TTagsToShow.RteTrk, false)) then
     begin
       SetCursor(CrWait);
-      GPXFileObj.CompareTrip(ATripList, Messages);
-      Clipboard.AsText := Messages.Text;
+      GPXFileObj.CompareTrip(ATripList, FrmShowLog.MemoLog.Lines);
+      Clipboard.AsText := FrmShowLog.MemoLog.Lines.Text;
+      FrmShowLog.Show;
     end;
   finally
-    Messages.Free;
     GPXFileObj.Free;
     SetCursor(CrNormal);
     VlTripInfo.Invalidate;
