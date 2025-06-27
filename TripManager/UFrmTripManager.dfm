@@ -762,7 +762,7 @@ object FrmTripManager: TFrmTripManager
           Width = 364
           Height = 309
           Align = alClient
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goThumbTracking]
           PopupMenu = PopupTripInfo
           TabOrder = 0
           OnEditButtonClick = VlTripInfoEditButtonClick

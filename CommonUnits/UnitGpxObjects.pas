@@ -1557,7 +1557,12 @@ begin
         continue;
       end;
       if (GpxxRptNode = nil) then
-        continue;
+      begin
+        Messages.Add('No <gpxx:rpt> in GPX file. Non Basecamp origin?');
+        CheckSegmentOK := false;
+        CheckRouteOK := false;
+        break;
+      end;
 
       ScanRtePt := GpxxRptNode;
       while (ScanRtePt <> nil) do
