@@ -11,7 +11,7 @@ uses
   System.Classes, System.SysUtils, System.Types,
   Winapi.Windows, Winapi.Messages, Winapi.CommCtrl, Winapi.ShlObj, WinApi.ActiveX,
   Vcl.Shell.ShellCtrls, Vcl.Shell.ShellConsts, Vcl.ComCtrls, Vcl.Controls,
-  ListViewSort;
+  UnitListViewSort;
 
 // Extend ShellListview, keeping the same Type. So we dont have to register it in the IDE
 // Extended to support:

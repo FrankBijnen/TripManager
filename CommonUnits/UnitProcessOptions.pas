@@ -8,9 +8,25 @@ uses
   Vcl.ComCtrls,
   UnitGpxDefs, UnitTripObjects, UnitGpi;
 
-//TODO Deprecated
 const
+//TODO Deprecated
   TripFilesFor    = 'Trip files (No import required, but will recalculate. Selected model: %s)';
+
+  Reg_FuncTrip                = 'FuncTrip';
+  Reg_FuncTrack               = 'FuncTrack';
+  Reg_FuncStrippedRoute       = 'FuncStrippedRoute';
+  Reg_FuncCompleteRoute       = 'FuncCompleteRoute';
+  Reg_FuncWayPoint            = 'FuncWayPoint';
+  Reg_FuncWayPointWpt         = 'FuncWayPointWpt';
+  Reg_FuncWayPointVia         = 'FuncWayPointVia';
+  Reg_FuncWayPointShape       = 'FuncWayPointShape';
+  Reg_FuncGpi                 = 'FuncGpi';
+  Reg_FuncGpiWayPt            = 'FuncGpiWayPt';
+  Reg_FuncGpiViaPt            = 'FuncGpiViaPt';
+  Reg_FuncGpiShpPt            = 'FuncGpiShpPt';
+  Reg_FuncKml                 = 'FuncKml';
+  Reg_FuncHtml                = 'FuncHtml';
+
 
 type
   TProcessOptions = class
@@ -42,6 +58,8 @@ type
                                               // Also used as category
       EndSymbol: string;                      // Flag, Blue
                                               // Also used as category
+
+    ProcessWpt: boolean;                      // False, Process Way points, add categories
 
     ProcessShape: boolean;                    // True, Allow Unglitch,
                                               //       ClearSubClass(ProcessSubClass)
@@ -120,10 +138,8 @@ type
     procedure DoPrefSaved;
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
     function DistanceStr: string;
-{$IFDEF REGISTRY}
     class procedure SetPrefs(TvSelections: TTreeview);
     class function StorePrefs(TvSelections: TTreeview): TGPXFuncArray;
-{$ENDIF}
   end;
 
 var
@@ -149,9 +165,7 @@ implementation
 
 uses
   System.SysUtils,
-{$IFDEF REGISTRY}
   UnitRegistry,
-{$ENDIF}
   UnitStringUtils;
 
 constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
@@ -179,6 +193,8 @@ begin
     DefShapingPointSymbol := 'Navaid, Blue';
     ShapingPointCategory := 'Shape';
     DefShapePtSymbol := 'Waypoint';
+
+  ProcessWpt := false;
 
   ProcessVia := true;
     DefViaPointSymbol := 'Navaid, Red';
@@ -279,7 +295,6 @@ begin
     result := 'Km';
 end;
 
-{$IFDEF REGISTRY}
 class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview);
 var
   SavedStateChanging: TTVCheckStateChangingEvent;
@@ -384,6 +399,5 @@ begin
       result := result + [TGPXFunc.CreateHTML];
   end;
 end;
-{$ENDIF}
 
 end.

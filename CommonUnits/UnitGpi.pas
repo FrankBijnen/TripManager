@@ -10,10 +10,13 @@ uses
 type
   TGPXString = UTF8String;
 
-const GpiName: TGPXString = 'my.gpi';
-      GpiVersion: Word = 0;
-      DefTransparentColor: DWORD = $00ff00ff;
-      DefGpiSymbolsDir = 'Symbols\24x24\';
+const
+  GpiName: TGPXString         = 'my.gpi';
+  GpiVersion: Word            = 0;
+  DefTransparentColor: DWORD  = $00ff00ff;
+  DefGpiSymbolsDir            = 'Symbols\24x24\';
+  Reg_GPISymbolSize           = 'GPISymbolsSize';
+  Reg_GPIProximity            = 'GPIProximity';
 
 type
 

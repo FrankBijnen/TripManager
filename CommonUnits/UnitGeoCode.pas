@@ -15,6 +15,13 @@ const
   DefCountry              = 'country';
   DefPostalCode           = 'postcode';
 
+  Reg_GeoCodeUrl          = 'GeoCodeUrl';
+  Reg_GeoCodeApiKey       = 'GeoCodeApiKey';
+  Reg_AddressFormat       = 'AddressFormat';
+  Reg_ThrottleGeoCode     = 'ThrottleGeoCode';
+  Reg_EnableSendTo        = 'EnableSendTo';
+  Reg_EnableDirFuncs      = 'EnableDirFuncs';
+
 type
 
   TExecRestEvent = procedure(Url, Response: string; Succes: boolean) of object;

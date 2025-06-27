@@ -71,12 +71,13 @@
         <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
         <SanitizedProjectName>TripManager</SanitizedProjectName>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.0;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
-        <DCC_Define>NOMIDL;TRIPOBJECTS;GEOCODE;REGISTRY;$(DCC_Define)</DCC_Define>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.0;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <DCC_Define>NOMIDL;TRIPOBJECTS;GEOCODE;$(DCC_Define)</DCC_Define>
         <Custom_Styles>&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;</Custom_Styles>
         <VerInfo_MinorVer>5</VerInfo_MinorVer>
         <DCC_MapFile>3</DCC_MapFile>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_UnitSearchPath>..\CommonUnits\Vcl.ShellControls;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_UsePackage>DBXSqliteDriver;IndyIPCommon;RESTComponents;bindcompdbx;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;ShellControls;vclFireDAC;IndySystem;bindcompvclsmp;tethering;svnui;bindcompvclwinx;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;SqlDir260;TeeDB;FireDAC;vcltouch;vcldb;bindcompfmx;svn;tdbrad11;FireDACSqliteDriver;FireDACPgDriver;inetdb;QR5RunNBDEDRAD10;FMXTee;soaprtl;DbxCommonDriver;FmxTeeUI;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;vcledge;fmxobj;vclwinx;Tee;rtl;OverbyteIcsD101Run;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;PKIECtrl24;RESTBackendComponents;nrfviewer;TeeUI;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
@@ -109,13 +110,14 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manage trips on the zūmo XT(2);FileVersion=1.5.0.0;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manage trips on the zūmo XT(2);FileVersion=1.5.0.0;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <DCC_WriteableConstants>false</DCC_WriteableConstants>
+        <DCC_WriteableConstants>true</DCC_WriteableConstants>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manage trips on the zūmo XT(2);FileVersion=1.5.0.0;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manage trips on the zūmo XT(2);FileVersion=1.5.0.0;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
         <VerInfo_Debug>true</VerInfo_Debug>
     </PropertyGroup>
@@ -125,19 +127,19 @@
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.203;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.203;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
         <VerInfo_Build>203</VerInfo_Build>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>227</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.227;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>229</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.229;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>227</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.227;InternalName=Tripmanager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=Tripmanager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>229</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.229;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -178,24 +180,23 @@
         <DCCReference Include="UFrmNewTrip.pas">
             <Form>FrmNewTrip</Form>
         </DCCReference>
+        <DCCReference Include="UnitRegistryKeys.pas"/>
         <DCCReference Include="TripManager_MultiContext.pas"/>
         <DCCReference Include="TripManager_ShellTree.pas"/>
         <DCCReference Include="TripManager_ShellList.pas"/>
         <DCCReference Include="TripManager_ValEdit.pas"/>
         <DCCReference Include="TripManager_DBGrid.pas"/>
         <DCCReference Include="TripManager_GridSelItem.pas"/>
-        <DCCReference Include="UnitRegistry.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitRegistry.pas"/>
         <DCCReference Include="..\CommonUnits\BCHex\BCHexEditor.pas"/>
         <DCCReference Include="..\CommonUnits\DirMon\Monitor.pas"/>
         <DCCReference Include="..\CommonUnits\kml\ogckml23.pas"/>
         <DCCReference Include="..\CommonUnits\kml\kml_helper.pas"/>
-        <DCCReference Include="..\CommonUnits\LVSort\ListViewSort.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitListViewSort.pas"/>
         <DCCReference Include="..\CommonUnits\Mtp\mtp_helper.pas"/>
         <DCCReference Include="..\CommonUnits\Mtp\UnitMtpDevice.pas"/>
         <DCCReference Include="..\CommonUnits\Mtp\PortableDeviceApiLib_TLB.pas"/>
         <DCCReference Include="..\CommonUnits\osm\UnitOSMMap.pas"/>
-        <DCCReference Include="..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellConsts.pas"/>
-        <DCCReference Include="..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellCtrls.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas"/>
         <DCCReference Include="..\CommonUnits\MsgLoop.pas"/>
@@ -205,7 +206,7 @@
         <DCCReference Include="..\CommonUnits\UnitStringUtils.pas"/>
         <DCCReference Include="..\CommonUnits\UnitTripObjects.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxObjects.pas"/>
-        <DCCReference Include="..\CommonUnits\USBEvent\UnitUSBEvent.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitUSBEvent.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxDefs.pas"/>
         <DCCReference Include="..\CommonUnits\UnitProcessOptions.pas"/>
         <DCCReference Include="..\CommonUnits\UFrmSelectGPX.pas">

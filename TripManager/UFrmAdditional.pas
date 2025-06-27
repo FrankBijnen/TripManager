@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  UnitRegistry, UnitTripObjects, UnitProcessOptions;
+  UnitRegistry, UnitRegistryKeys, UnitTripObjects, UnitProcessOptions;
 
 {$R *.dfm}
 

@@ -22,24 +22,23 @@ uses
   UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
+  UnitRegistryKeys in 'UnitRegistryKeys.pas',
   TripManager_MultiContext in 'TripManager_MultiContext.pas',
   TripManager_ShellTree in 'TripManager_ShellTree.pas',
   TripManager_ShellList in 'TripManager_ShellList.pas',
   TripManager_ValEdit in 'TripManager_ValEdit.pas',
   TripManager_DBGrid in 'TripManager_DBGrid.pas',
   TripManager_GridSelItem in 'TripManager_GridSelItem.pas',
-  UnitRegistry in 'UnitRegistry.pas',
+  UnitRegistry in '..\CommonUnits\UnitRegistry.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
   ogckml23 in '..\CommonUnits\kml\ogckml23.pas',
   kml_helper in '..\CommonUnits\kml\kml_helper.pas',
-  ListViewSort in '..\CommonUnits\LVSort\ListViewSort.pas',
+  UnitListViewSort in '..\CommonUnits\UnitListViewSort.pas',
   mtp_helper in '..\CommonUnits\Mtp\mtp_helper.pas',
   UnitMtpDevice in '..\CommonUnits\Mtp\UnitMtpDevice.pas',
   PortableDeviceApiLib_TLB in '..\CommonUnits\Mtp\PortableDeviceApiLib_TLB.pas',
   UnitOSMMap in '..\CommonUnits\osm\UnitOSMMap.pas',
-  Vcl.Shell.ShellConsts in '..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellConsts.pas',
-  Vcl.Shell.ShellCtrls in '..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellCtrls.pas',
   UnitVerySimpleXml in '..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas',
   Xml.VerySimple in '..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas',
   MsgLoop in '..\CommonUnits\MsgLoop.pas',
@@ -49,7 +48,7 @@ uses
   UnitStringUtils in '..\CommonUnits\UnitStringUtils.pas',
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
-  UnitUSBEvent in '..\CommonUnits\USBEvent\UnitUSBEvent.pas',
+  UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitGpxDefs in '..\CommonUnits\UnitGpxDefs.pas',
   UnitProcessOptions in '..\CommonUnits\UnitProcessOptions.pas',
   UFrmSelectGPX in '..\CommonUnits\UFrmSelectGPX.pas' {FrmSelectGPX},
@@ -62,6 +61,7 @@ begin
 {$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := true;
 {$ENDIF}
+  Application.Title := 'TripManager';
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

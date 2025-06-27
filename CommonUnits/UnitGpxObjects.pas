@@ -645,7 +645,8 @@ begin
     AddChild('sym').NodeValue := NewSymbol;
   end;
 
-  if (ProcessPointType in [pptWayPt]) then
+  if (ProcessOptions.ProcessWpt) and
+     (ProcessPointType in [pptWayPt]) then
   begin
     ExtensionsNode := RtePtNode.find('extensions');
     if (ExtensionsNode <> nil) then

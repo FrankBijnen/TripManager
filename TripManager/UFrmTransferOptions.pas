@@ -34,7 +34,7 @@ var
 implementation
 
 uses
-  UnitProcessOptions, UnitStringUtils, UnitRegistry, UnitTripObjects, UFrmAdvSettings, UFrmTripManager;
+  UnitProcessOptions, UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitTripObjects, UFrmAdvSettings, UFrmTripManager;
 
 {$R *.dfm}
 

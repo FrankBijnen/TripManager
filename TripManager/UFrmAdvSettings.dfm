@@ -3,7 +3,7 @@ object FrmAdvSettings: TFrmAdvSettings
   Top = 0
   BorderStyle = bsSizeToolWin
   Caption = 'Advanced settings'
-  ClientHeight = 557
+  ClientHeight = 574
   ClientWidth = 587
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,12 +17,13 @@ object FrmAdvSettings: TFrmAdvSettings
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 526
+    Top = 543
     Width = 587
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitTop = 526
     DesignSize = (
       587
       31)
@@ -53,17 +54,18 @@ object FrmAdvSettings: TFrmAdvSettings
     Left = 0
     Top = 0
     Width = 587
-    Height = 526
+    Height = 543
     ActivePage = TabGeneral
     Align = alClient
     TabOrder = 1
+    ExplicitHeight = 526
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
         Left = 0
         Top = 0
         Width = 579
-        Height = 496
+        Height = 513
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -73,6 +75,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
+        ExplicitHeight = 496
         RowHeights = (
           24
           24
@@ -204,7 +207,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Left = 0
         Top = 33
         Width = 579
-        Height = 160
+        Height = 177
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -214,6 +217,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 1
         StyleElements = []
+        ExplicitHeight = 160
         RowHeights = (
           24
           24

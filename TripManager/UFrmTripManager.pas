@@ -15,8 +15,8 @@ uses
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
 
-  Monitor, BCHexEditor, ListViewSort, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent;
+  Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
+  UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -379,7 +379,7 @@ implementation
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo,
   Winapi.ShellAPI, Vcl.Clipbrd,
-  MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
+  MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX;
@@ -3700,7 +3700,9 @@ begin
       EndSymbol := GetRegistry(Reg_EndSymbol, EndSymbol);
       EndStr := GetRegistry(Reg_EndStr, EndStr);
       ProcessAddrEnd := GetRegistry(Reg_EndAddress, false);
-      SetProcessCategory(GetRegistry(Reg_ProcessWpt, false),
+
+      ProcessWpt := GetRegistry(Reg_ProcessWpt, false);
+      SetProcessCategory(ProcessWpt,
                          GetRegistry(Reg_ProcessCategory, WayPtList[WayPtList.Count -1]));
 
       ProcessWayPtsInWayPts := GetRegistry(Reg_FuncWayPointWpt, true);

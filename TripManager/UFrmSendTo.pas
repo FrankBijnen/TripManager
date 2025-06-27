@@ -61,7 +61,7 @@ var
 implementation
 
 uses
-  UnitProcessOptions, UnitRegistry, UnitStringUtils;
+  UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils;
 
 {$R *.dfm}
 

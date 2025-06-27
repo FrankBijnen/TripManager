@@ -66,7 +66,7 @@ implementation
 
 uses
   System.UITypes,
-  UnitStringUtils, UnitRegistry, UnitTripObjects;
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects;
 
 {$R *.dfm}
 
