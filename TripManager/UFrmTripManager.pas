@@ -171,10 +171,11 @@ type
     StatusTimer: TTimer;
     BtnSendTo: TButton;
     N8: TMenuItem;
-    Compare1: TMenuItem;
+    CompareGpxRoute: TMenuItem;
     N9: TMenuItem;
     DeleteDirs: TMenuItem;
     NewDirectory: TMenuItem;
+    CompareGPXtrack: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -255,10 +256,11 @@ type
     procedure CmbModelChange(Sender: TObject);
     procedure BtnSendToClick(Sender: TObject);
     procedure VlTripInfoBeforeDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
-    procedure Compare1Click(Sender: TObject);
+    procedure CompareGpxRouteClick(Sender: TObject);
     procedure PopupTripInfoPopup(Sender: TObject);
     procedure DeleteDirsClick(Sender: TObject);
     procedure NewDirectoryClick(Sender: TObject);
+    procedure CompareGPXtrackClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -1144,7 +1146,7 @@ begin
   ATripList.SaveAsGPX(SaveTrip.FileName);
 end;
 
-procedure TFrmTripManager.Compare1Click(Sender: TObject);
+procedure TFrmTripManager.CompareGpxRouteClick(Sender: TObject);
 var
   GPXFileObj: TGPXFile;
   CrWait, CrNormal: HCURSOR;
@@ -1155,7 +1157,7 @@ begin
   OpenTrip.DefaultExt := 'gpx';
   OpenTrip.Filter := '*.gpx|*.gpx';
   OpenTrip.InitialDir := ShellTreeView1.Path;
-  OpenTrip.FileName := ChangeFileExt(ExtractFileName(ShellTreeView1.Path), '.gpx');
+  OpenTrip.FileName := '';
   if not OpenTrip.Execute then
     exit;
 
@@ -1165,12 +1167,48 @@ begin
   try
     GPXFileObj.AnalyzeGpx;
     if (GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
-                                    'Select Route/Track',
-                                     TTagsToShow.RteTrk, false)) then
+                                    'Select Route',
+                                     TTagsToShow.Rte, ATripList.GetValue('mTripName'))) then
     begin
       SetCursor(CrWait);
-      GPXFileObj.CompareTrip(ATripList, FrmShowLog.MemoLog.Lines);
-      Clipboard.AsText := FrmShowLog.MemoLog.Lines.Text;
+      GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items);
+      Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
+      FrmShowLog.Show;
+    end;
+  finally
+    GPXFileObj.Free;
+    SetCursor(CrNormal);
+    VlTripInfo.Invalidate;
+  end;
+end;
+
+procedure TFrmTripManager.CompareGPXtrackClick(Sender: TObject);
+var
+  GPXFileObj: TGPXFile;
+  CrWait, CrNormal: HCURSOR;
+begin
+  if (ATripList = nil) then
+    exit;
+
+  OpenTrip.DefaultExt := 'gpx';
+  OpenTrip.Filter := '*.gpx|*.gpx';
+  OpenTrip.InitialDir := ShellTreeView1.Path;
+  OpenTrip.FileName := '';
+  if not OpenTrip.Execute then
+    exit;
+
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
+  try
+    GPXFileObj.AnalyzeGpx;
+    if (GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
+                                    'Select Track',
+                                     TTagsToShow.Trk, ATripList.GetValue('mTripName'))) then
+    begin
+      SetCursor(CrWait);
+      GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items);
+      Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
       FrmShowLog.Show;
     end;
   finally
@@ -1245,7 +1283,8 @@ begin
   SaveGPX1.Enabled := (ATripList <> nil) and
                       (ATripList.ItemList.Count > 0);
 
-  Compare1.Enabled := SaveGPX1.Enabled;
+  CompareGpxRoute.Enabled := SaveGPX1.Enabled;
+  CompareGpxTrack.Enabled := SaveGPX1.Enabled;
 end;
 
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);

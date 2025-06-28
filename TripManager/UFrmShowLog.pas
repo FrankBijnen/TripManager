@@ -10,7 +10,7 @@ type
   TFrmShowLog = class(TForm)
     PnlBot: TPanel;
     BtnClose: TBitBtn;
-    MemoLog: TMemo;
+    LbLog: TListBox;
     procedure BtnCloseClick(Sender: TObject);
   private
     { Private declarations }

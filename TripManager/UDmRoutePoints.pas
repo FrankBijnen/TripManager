@@ -658,11 +658,11 @@ begin
 
     if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
                                     'Select Waypoints/Routes',
-                                     TTagsToShow.WptRte, false)) then
+                                     TTagsToShow.WptRte, CdsRoutePointsName.AsString)) then
     begin
-      DmRoutePoints.CdsRoutePoints.DisableControls;
+      CdsRoutePoints.DisableControls;
       try
-        DmRoutePoints.CdsRoutePoints.Last;
+        CdsRoutePoints.Last;
 
         for AnItem in GPXFileObj.FrmSelectGPX.LvTracks.Items do
         begin
@@ -686,9 +686,9 @@ begin
 
         end;
       finally
-        DmRoutePoints.CdsRoutePoints.EnableControls;
-        if Assigned(DmRoutePoints.OnRouteUpdated) then
-          DmRoutePoints.OnRouteUpdated(Self);
+        CdsRoutePoints.EnableControls;
+        if Assigned(OnRouteUpdated) then
+          OnRouteUpdated(Self);
       end;
     end;
   finally

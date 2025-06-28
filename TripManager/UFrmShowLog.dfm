@@ -18,8 +18,6 @@ object FrmShowLog: TFrmShowLog
     Height = 33
     Align = alBottom
     TabOrder = 0
-    ExplicitLeft = -22
-    ExplicitWidth = 646
     DesignSize = (
       624
       33)
@@ -35,20 +33,13 @@ object FrmShowLog: TFrmShowLog
       OnClick = BtnCloseClick
     end
   end
-  object MemoLog: TMemo
+  object LbLog: TListBox
     Left = 0
     Top = 0
     Width = 624
     Height = 408
     Align = alClient
-    Lines.Strings = (
-      'MemoLog')
-    ReadOnly = True
-    ScrollBars = ssBoth
+    ItemHeight = 15
     TabOrder = 1
-    ExplicitLeft = 56
-    ExplicitTop = 80
-    ExplicitWidth = 185
-    ExplicitHeight = 89
   end
 end

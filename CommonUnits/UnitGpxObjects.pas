@@ -74,6 +74,7 @@ type
     function GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
     function GPXCategory(Category: string): TGPXCategory;
     function GetRouteNode(RouteName: string): TXmlVSNode;
+    function GetTrackNode(TrackName: string): TXmlVSNode;
 
     procedure FreeGlobals;
     procedure CreateGlobals;
@@ -160,7 +161,7 @@ type
                        const OutStringList: TStringList = nil;
                        const SeqNo: cardinal = 0); overload;
     destructor Destroy; override;
-    function ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckAll: boolean): boolean;
+    function ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckMask: string): boolean;
     procedure DoPostProcess;
     procedure DoCreateTracks;
     procedure DoCreateWayPoints;
@@ -173,7 +174,8 @@ type
     procedure DoCreateTrips;
 {$IFDEF TRIPOBJECTS}
     procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
-    procedure CompareTrip(const ATripList: TTripList; const Messages: TStrings);
+    procedure CompareGpxRoute(const ATripList: TTripList; const Messages: TStrings);
+    procedure CompareGpxTrack(const ATripList: TTripList; const Messages: TStrings);
 {$ENDIF}
     procedure AnalyzeGpx;
     property WayPointList: TXmlVSNodeList read FWayPointList;
@@ -206,7 +208,7 @@ const
   DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
   DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
   DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
-  UnglitchTreshold: double = 0.0005; // In Km. ==> 50 Cm
+  UnglitchTreshold: double = 0.0005;      // In Km. ==> 50 Cm
 
 var
   FormatSettings: TFormatSettings;
@@ -1357,24 +1359,55 @@ begin
   end;
 end;
 
-function TGPXfile.ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckAll: boolean): boolean;
+function TGPXfile.GetTrackNode(TrackName: string): TXmlVSNode;
+var
+  GpxNode: TXmlVSNode;
+  TrackNode: TXmlVSNode;
+begin
+  result := nil;
+  for GpxNode in FXmlDocument.ChildNodes do
+  begin
+    if (GpxNode.Name = 'gpx') then
+    begin
+      for TrackNode in GpxNode.ChildNodes do
+        if (TrackNode.Name = 'trk') and
+           (FindSubNodeValue(TrackNode, 'name') = TrackName) then
+           exit(TrackNode);
+    end;
+  end;
+end;
+
+function TGPXfile.ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckMask: string): boolean;
 var
   Track, RoutePoints: TXmlVSNode;
-  DisplayColor: string;
+  DisplayColor, RteTrk: string;
 begin
   case TagsToShow of
+    TTagsToShow.Rte,
+    TTagsToShow.Trk,
     TTagsToShow.RteTrk:
       begin
         for Track in FTrackList do
         begin
+          RteTrk := FindSubNodeValue(Track, 'desc');
+          case TagsToShow of
+            TTagsToShow.Rte:
+              if not SameText(RteTrk, 'rte') then
+                continue;
+            TTagsToShow.Trk:
+              if not SameText(RteTrk, 'trk') then
+                continue;
+          end;
+
           if (Track.Find('extensions') <> nil) then
             DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
           else
             DisplayColor := ProcessOptions.DefTrackColor;
+
           FrmSelectGPX.AllTracks.Add(DisplayColor + #9 +
                                      IntToStr(Track.ChildNodes.Count) + #9 +
                                      Track.Name + #9 +
-                                     FindSubNodeValue(Track, 'desc'));
+                                     RteTrk);
         end;
       end;
     TTagsToShow.WptRte:
@@ -1399,7 +1432,7 @@ begin
       end;
   end;
 
-  FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow, CheckAll);
+  FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow, CheckMask);
   FrmSelectGPX.Caption := Caption;
   FrmSelectGPX.PnlTop.Caption := SubCaption;
   result := (FrmSelectGPX.ShowModal = ID_OK);
@@ -1418,18 +1451,18 @@ end;
 const
   LatLonFormat = '%1.5f';
 
-procedure TGPXfile.CompareTrip(const ATripList: TTripList; const Messages: TStrings);
+procedure TGPXfile.CompareGpxRoute(const ATripList: TTripList; const Messages: TStrings);
 var
   RtePtCount, UdbDirCount: integer;
   AllRoutes: TmAllRoutes;
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir: TUdbDir;
-  RouteSelected, ScanRtePt, NextRtePt: TXmlVSNode;
-  ExtensionsNode, RoutePointExtensionNode, GpxxRptNode: TXmlVSNode;
+  RouteSelected, ScanRtePt: TXmlVSNode;
+  ExtensionsNode, RoutePointExtensionNode, NextRtePt, GpxxRptNode: TXmlVSNode;
   AnItem: TListItem;
   Coord: TCoord;
   CLat, CLon, CTLat, CTLon: string;
-  CMapSegRoad, CTMapSegRoad: string;
+  CTMapSegRoad: string;
   CheckSegmentOK: boolean;
   CheckRouteOK: boolean;
   StartSegmentLine: integer;
@@ -1448,7 +1481,7 @@ begin
     if not (AnItem.Checked) then
       continue;
 
-    if (AnItem.SubItems[0] = 'Rte') then
+    if (SameText(AnItem.SubItems[0], 'Rte')) then
     begin
       for RouteSelected in RouteViaPointList do
       begin
@@ -1459,7 +1492,7 @@ begin
   end;
   if (RouteSelected = nil) then
   begin
-    Messages.Add('No route/track selected.');
+    Messages.Add('No route selected.');
     exit;
   end;
 
@@ -1497,7 +1530,7 @@ begin
 
   if (UdbDirCount <> RtePtCount) then
   begin
-    Messages.Add('Number of route points do not match in trip and gpx route.' + #13#10 +
+    Messages.Add('Number of route points does not match in trip and gpx route.' + #13#10 +
                  'Use Compare track.');
     exit;
   end;
@@ -1510,7 +1543,8 @@ begin
   begin
     for AnUdbDir in AnUdbHandle.Items do
     begin
-      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
+      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) or
+         (AnUdbDir.UdbDirValue.SubClass.PointType = 33) then // Dont check UdbDir's just before or after a route point
         continue;
 
       CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
@@ -1524,6 +1558,7 @@ begin
            (CheckSegmentOK = false) then
           Messages[StartSegmentLine] := Messages[StartSegmentLine] + ' NOT OK';
         CheckSegmentOK := true;
+        Messages.Add('**********************************');
         StartSegmentLine := Messages.Add(Format('Checking Segment: %s', [AnUdbDir.DisplayName]));
         Coord := CoordFromAttribute(NextRtePt.AttributeList);
         CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
@@ -1569,21 +1604,17 @@ begin
       begin
         if (ScanRtePt.Name = 'gpxx:rpt') then
         begin
-          CMapSegRoad := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
-          if (CMapSegRoad <> '') then
+          Coord := CoordFromAttribute(ScanRtePt.AttributeList);
+          CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
+          CLon := Format(LatLonFormat, [Coord.Lon], FormatSettings);
+
+          // Perfect Match
+          if ((CTLat = CLat) and (CTLon = CLon)) then
           begin
-            Coord := CoordFromAttribute(ScanRtePt.AttributeList);
-            CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
-            CLon := Format(LatLonFormat, [Coord.Lon], FormatSettings);
-            if ((CTLat = CLat) and (CTLon = CLon)) or
-               (CTMapSegRoad = CMapSegRoad) then
-            begin
-              GpxxRptNode := ScanRtePt;
-              break;
-            end;
+            GpxxRptNode := ScanRtePt;
+            break;
           end;
         end;
-
         ScanRtePt := ScanRtePt.NextSibling;
       end;
 
@@ -1591,11 +1622,147 @@ begin
       begin
         CheckSegmentOK := false;
         CheckRouteOK := false;
-        Messages.Add(Format('Road:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s.',
+        Messages.Add(Format('Coords:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s',
                             [AnUdbDir.DisplayName,
                              CTMapSegRoad,
                              CTLat, CTLon]));
-        AnUdbDir.Status := TUdbDirStatus.udsRoadNotFound;
+        AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
+      end;
+    end;
+  end;
+  if (CheckRouteOK = false) then
+    Messages[0] := Messages[0] + ' NOT OK';
+end;
+
+procedure TGPXfile.CompareGpxTrack(const ATripList: TTripList; const Messages: TStrings);
+var
+  AllRoutes: TmAllRoutes;
+  AnUdbHandle: TmUdbDataHndl;
+  AnUdbDir: TUdbDir;
+  TrackSelected, ScanTrkSeg, ScanTrkPt, NextTrkSeg, NextTrkPt: TXmlVSNode;
+  AnItem: TListItem;
+  Coord: TCoord;
+  CoordsMatched: boolean;
+  CTMapSegRoad: string;
+  CLat, CLon, CTLat, CTLon: string;
+  CheckSegmentOK: boolean;
+  CheckRouteOK: boolean;
+  StartSegmentLine: integer;
+begin
+  Messages.Clear;
+  AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
+  if (AllRoutes = nil) then
+  begin
+    Messages.Add('Can not find mAllRoutes in trip.');
+    exit;
+  end;
+
+  TrackSelected := nil;
+  for AnItem in FrmSelectGPX.LvTracks.Items do
+  begin
+    if not (AnItem.Checked) then
+      continue;
+
+    if (SameText(AnItem.SubItems[0], 'Trk')) then
+    begin
+      for TrackSelected in RouteViaPointList do
+      begin
+        if (TrackSelected.NodeName = AnItem.Caption) then
+          break;
+      end;
+    end;
+  end;
+  if (TrackSelected = nil) then
+  begin
+    Messages.Add('No track selected.');
+    exit;
+  end;
+
+  Messages.Add(Format('Checking: %s', [TrackSelected.NodeName]));
+  TrackSelected := GetTrackNode(TrackSelected.NodeName);
+  if (TrackSelected = nil) then // Should not happen
+    exit;
+
+  NextTrkSeg := TrackSelected.Find('trkseg');
+  if (NextTrkSeg = nil) then
+  begin
+    Messages.Add('No <trkseg> in GPX.');
+    exit;
+  end;
+
+  NextTrkPt := NextTrkSeg.Find('trkpt');
+  if (NextTrkPt = nil) then
+  begin
+    Messages.Add('No <trkpt> in GPX.');
+    exit;
+  end;
+
+  CheckSegmentOK := true;
+  CheckRouteOK := true;
+  StartSegmentLine := -1;
+  for AnUdbHandle in AllRoutes.Items do
+  begin
+    for AnUdbDir in AnUdbHandle.Items do
+    begin
+      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) or
+         (AnUdbDir.UdbDirValue.SubClass.PointType = 33) then // Dont check UdbDir's just before or after a route point
+        continue;
+
+      CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
+                      IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8);
+      CTLat := Format(LatLonFormat, [AnUdbDir.Lat], FormatSettings);
+      CTLon := Format(LatLonFormat, [AnUdbDir.Lon], FormatSettings);
+
+      if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
+      begin
+        if (StartSegmentLine > -1) and
+           (CheckSegmentOK = false) then
+          Messages[StartSegmentLine] := Messages[StartSegmentLine] + ' NOT OK';
+        CheckSegmentOK := true;
+        Messages.Add('**********************************');
+        StartSegmentLine := Messages.Add(Format('Checking Segment: %s', [AnUdbDir.DisplayName]));
+
+        continue;
+      end;
+
+      ScanTrkSeg := NextTrkSeg;
+      ScanTrkPt := NextTrkPt;
+      while (ScanTrkSeg <> nil) do      // TrkSeg loop
+      begin
+        CoordsMatched := false;
+        while (ScanTrkPt <> nil) do     // TrkPt loop
+        begin
+          Coord := CoordFromAttribute(ScanTrkPt.AttributeList);
+          CLat := Format(LatLonFormat, [Coord.Lat], FormatSettings);
+          CLon := Format(LatLonFormat, [Coord.Lon], FormatSettings);
+
+          // Matched Coordinates
+          if ((CTLat = CLat) and (CTLon = CLon)) then
+          begin
+            CoordsMatched := true;
+            NextTrkSeg := ScanTrkSeg;
+            NextTrkPt := ScanTrkPt;
+            break;
+          end;
+          ScanTrkPt := ScanTrkPt.NextSibling;
+        end;
+        if CoordsMatched then
+          break;
+        ScanTrkSeg := ScanTrkSeg.NextSibling;
+        if (ScanTrkSeg = nil) then
+          break;
+        ScanTrkPt := ScanTrkSeg.Find('trkpt');
+      end;
+
+      if (ScanTrkPt = nil) then
+      begin
+        CheckSegmentOK := false;
+        CheckRouteOK := false;
+        Messages.Add(Format('Coords:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s',
+                            [AnUdbDir.DisplayName,
+                             CTMapSegRoad,
+                             CTLat, CTLon]));
+        AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
       end;
     end;
   end;
@@ -2450,7 +2617,7 @@ begin
     begin
       if (not GpxFileObj.ShowSelectTracks(ExtractFileName(GPXFile),
                                           Format('Select Rte/Trk to add to %s', [SubCaption]),
-                                          TTagsToShow.RteTrk, true)) then
+                                          TTagsToShow.RteTrk, '*')) then
         exit;
     end;
 

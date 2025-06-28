@@ -44,6 +44,7 @@ type
     GrpSelDestHeight: integer;
     FrmHeight: integer;
     ShowHelp: boolean;
+    procedure EnableItems;
     procedure UpdateDesign;
     procedure SetPrefs;
     procedure StorePrefs;
@@ -82,6 +83,22 @@ const
     'Send a KML file. To display in Google Earth, or other compatible application.',
     'Send a HTML file. To display in a browser.');
 
+procedure TFrmSendTo.EnableItems;
+begin
+  case PCTDestination.ActivePageIndex of
+    0:begin
+        TvSelections.Items[IdCompleteRoute].Enabled := true;
+        TvSelections.Items[IdKml].Enabled := false;
+        TvSelections.Items[IdHtml].Enabled := false;
+      end;
+    1:begin
+        TvSelections.Items[IdKml].Enabled := true;
+        TvSelections.Items[IdHtml].Enabled := true;
+        TvSelections.Items[IdCompleteRoute].Enabled := false;
+      end;
+  end;
+end;
+
 procedure TFrmSendTo.UpdateDesign;
 begin
   // Show/hide
@@ -99,9 +116,6 @@ begin
   case PCTDestination.ActivePageIndex of
     0:begin
         SendToDest := TSendToDest.stDevice;
-        TvSelections.Items[IdCompleteRoute].Enabled := true;
-        TvSelections.Items[IdKml].Enabled := false;
-        TvSelections.Items[IdHtml].Enabled := false;
 
         LblDestinations.Caption :=
           Format('Device:%s %s%s',      [#9, GetRegistry(Reg_CurrentDevice, ''), #10#10]) +
@@ -111,9 +125,6 @@ begin
       end;
     1:begin
         SendToDest := TSendToDest.stWindows;
-        TvSelections.Items[IdKml].Enabled := true;
-        TvSelections.Items[IdHtml].Enabled := true;
-        TvSelections.Items[IdCompleteRoute].Enabled := false;
 
         LblDestinations.Caption :=
           Format('Sub folder(s) of: %s%s',  [GetRegistry(Reg_PrefFileSysFolder_Key, ''), #10#10]) +
@@ -139,6 +150,7 @@ end;
 
 procedure TFrmSendTo.SetPrefs;
 begin
+  EnableItems;
   TProcessOptions.SetPrefs(TvSelections);
 end;
 

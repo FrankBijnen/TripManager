@@ -9,7 +9,7 @@ uses
   Vcl.StdCtrls, Vcl.Buttons, Vcl.Menus;
 
 type
-  TTagsToShow = (WptRte, RteTrk);
+  TTagsToShow = (WptRte, RteTrk, Rte, Trk);
 
   TFrmSelectGPX = class(TForm)
     LvTracks: TListView;
@@ -32,10 +32,11 @@ type
   private
     { Private declarations }
     FTagsToShow: TTagsToShow;
+    FCheckMask: string;
   public
     { Public declarations }
     AllTracks: TStringList;
-    procedure LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckAll: boolean);
+    procedure LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckMask: string);
     function TrackSelectedColor(const TrackName: string): string;
   end;
 
@@ -45,19 +46,21 @@ implementation
 
 {$R *.dfm}
 
-uses UnitStringUtils;
+uses
+  System.Masks,
+  UnitStringUtils;
 
 const
   TypeColumn = 1;
   ColorColumn = 1;
 
-procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckAll: boolean);
+procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckMask: string);
 var
   Indx: integer;
   Name, Color, Points, FromRoute: string;
   LVItem: TListItem;
 begin
-
+  FCheckMask := CheckMask;
   FTagsToShow := TagsToShow;
   case FTagsToShow of
     TTagsToShow.WptRte:
@@ -81,7 +84,7 @@ begin
     Name := NextField(FromRoute, Chr(9));
     LVItem := LvTracks.Items.Add;
     LVItem.Caption := Name;
-    LVItem.Checked := CheckAll;
+    LVItem.Checked := MatchesMask(Name, CheckMask);
     LVItem.SubItems.Add(FromRoute);
     if (DisplayColor = '') then
       LVItem.SubItems.Add(Color)
@@ -114,7 +117,7 @@ var
   AnItem: TlistItem;
 begin
   if (CmbOverruleColor.ItemIndex = 0) then
-    LoadTracks('', FTagsToShow, FTagsToShow = TTagsToShow.RteTrk)
+    LoadTracks('', FTagsToShow, FCheckMask)
   else
   begin
     for AnItem in LvTracks.Items do

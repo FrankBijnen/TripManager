@@ -1206,9 +1206,13 @@ object FrmTripManager: TFrmTripManager
     object N8: TMenuItem
       Caption = '-'
     end
-    object Compare1: TMenuItem
-      Caption = 'Compare'
-      OnClick = Compare1Click
+    object CompareGpxRoute: TMenuItem
+      Caption = 'Compare with GPX route'
+      OnClick = CompareGpxRouteClick
+    end
+    object CompareGPXtrack: TMenuItem
+      Caption = 'Compare with GPX track'
+      OnClick = CompareGPXtrackClick
     end
   end
   object SaveTrip: TSaveDialog
