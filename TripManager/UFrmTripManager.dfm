@@ -451,7 +451,7 @@ object FrmTripManager: TFrmTripManager
     Top = 275
     Width = 639
     Height = 406
-    ActivePage = TsHex
+    ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
     object TsHex: TTabSheet
@@ -641,11 +641,12 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 13
+          Height = 24
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True

@@ -1156,6 +1156,7 @@ procedure TFrmTripManager.CompareGpxRouteClick(Sender: TObject);
 var
   GPXFileObj: TGPXFile;
   CrWait, CrNormal: HCURSOR;
+  OsmTrack: TStringList;
 begin
   if (ATripList = nil) then
     exit;
@@ -1169,6 +1170,8 @@ begin
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+  DeleteTempFiles(GetOSMTemp, GetTracksTmp);
+  OsmTrack := TStringList.Create;
   GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
   try
     GPXFileObj.AnalyzeGpx;
@@ -1177,14 +1180,23 @@ begin
                                      TTagsToShow.Rte, ATripList.GetValue('mTripName'))) then
     begin
       SetCursor(CrWait);
-      GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items);
+      GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+      OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
+                                              [App_Prefix,
+                                              FileSysTrip,
+                                              ExtractFileName(ShellListView1.SelectedFolder.PathName),
+                                              GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
       FrmShowLog.Show;
     end;
   finally
+    OsmTrack.Free;
     GPXFileObj.Free;
     SetCursor(CrNormal);
+    TvTrip.Invalidate;
     VlTripInfo.Invalidate;
+    if (CreateOSMMapHtml) then
+      EdgeBrowser1.Navigate(GetHtmlTmp);
   end;
 end;
 
@@ -1192,6 +1204,7 @@ procedure TFrmTripManager.CompareGPXtrackClick(Sender: TObject);
 var
   GPXFileObj: TGPXFile;
   CrWait, CrNormal: HCURSOR;
+  OsmTrack: TStringList;
 begin
   if (ATripList = nil) then
     exit;
@@ -1205,6 +1218,7 @@ begin
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+  OsmTrack := TStringList.Create;
   GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
   try
     GPXFileObj.AnalyzeGpx;
@@ -1213,14 +1227,23 @@ begin
                                      TTagsToShow.Trk, ATripList.GetValue('mTripName'))) then
     begin
       SetCursor(CrWait);
-      GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items);
+      GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+      OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
+                                              [App_Prefix,
+                                              FileSysTrip,
+                                              ExtractFileName(ShellListView1.SelectedFolder.PathName),
+                                              GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
       FrmShowLog.Show;
     end;
   finally
+    OsmTrack.Free;
     GPXFileObj.Free;
     SetCursor(CrNormal);
+    TvTrip.Invalidate;
     VlTripInfo.Invalidate;
+    if (CreateOSMMapHtml) then
+      EdgeBrowser1.Navigate(GetHtmlTmp);
   end;
 end;
 

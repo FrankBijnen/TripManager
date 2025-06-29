@@ -177,8 +177,8 @@ type
                           var BestScanTrkSeg: TXmlVSNode; var BestScanTrkPt: TXmlVSNode): double;
 
     procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
-    procedure CompareGpxRoute(const ATripList: TTripList; const Messages: TStrings);
-    procedure CompareGpxTrack(const ATripList: TTripList; const Messages: TStrings);
+    procedure CompareGpxRoute(const ATripList: TTripList; const Messages, OutTrackList: TStrings);
+    procedure CompareGpxTrack(const ATripList: TTripList; const Messages, OutTrackList: TStrings);
 {$ENDIF}
     procedure AnalyzeGpx;
     property WayPointList: TXmlVSNodeList read FWayPointList;
@@ -1437,7 +1437,7 @@ const
   LatLonFormat = '%1.5f';
   DistOk: double = 0.1; // In Km. ==> 100 Meter
 
-procedure TGPXfile.CompareGpxRoute(const ATripList: TTripList; const Messages: TStrings);
+procedure TGPXfile.CompareGpxRoute(const ATripList: TTripList; const Messages, OutTrackList: TStrings);
 var
   RtePtCount, UdbDirCount: integer;
   AllRoutes: TmAllRoutes;
@@ -1453,8 +1453,18 @@ var
   CheckSegmentOK: boolean;
   CheckRouteOK: boolean;
   StartSegmentLine: integer;
+  TrackId: integer;
 begin
   Messages.Clear;
+
+// To load Route on map
+  TrackId := 0;
+  for RouteSelected in FTrackList do
+  begin
+    if (FrmSelectGPX.TrackSelectedColor(RouteSelected.Name) = '') then
+      continue;
+    Track2OSMTrackPoints(RouteSelected, TrackId, TStringList(OutTrackList));
+  end;
 
   AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
   if (AllRoutes = nil) then
@@ -1679,7 +1689,7 @@ begin
   end;
 end;
 
-procedure TGPXfile.CompareGpxTrack(const ATripList: TTripList; const Messages: TStrings);
+procedure TGPXfile.CompareGpxTrack(const ATripList: TTripList; const Messages, OutTrackList: TStrings);
 var
   AllRoutes: TmAllRoutes;
   AnUdbHandle: TmUdbDataHndl;
@@ -1694,10 +1704,20 @@ var
   CheckSegmentOK: boolean;
   CheckRouteOK: boolean;
   StartSegmentLine, AnUdbDirCnt, ToUdbDirCnt: integer;
-
+  TrackId: integer;
 begin
-// Some checks
   Messages.Clear;
+
+// Show track to compare with on map
+  TrackId := 0;
+  for TrackSelected in FTrackList do
+  begin
+    if (FrmSelectGPX.TrackSelectedColor(TrackSelected.Name) = '') then
+      continue;
+    Track2OSMTrackPoints(TrackSelected, TrackId, TStringList(OutTrackList));
+  end;
+
+// Some checks
   AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
   if (AllRoutes = nil) then
   begin
@@ -2251,9 +2271,6 @@ begin
     TrackId := 0;
     for Track in FTrackList do
     begin
-      if (FrmSelectGPX.TrackSelectedColor(Track.Name) = '') then
-        continue;
-
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       FOutStringList.AddStrings(TrackPointList);
     end;
