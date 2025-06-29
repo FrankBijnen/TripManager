@@ -1128,8 +1128,8 @@ object FrmTripManager: TFrmTripManager
     Enabled = False
     Interval = 100
     OnTimer = MapTimerTimer
-    Left = 303
-    Top = 66
+    Left = 207
+    Top = 202
   end
   object OpenTrip: TOpenDialog
     DefaultExt = 'trip'
@@ -1166,7 +1166,7 @@ object FrmTripManager: TFrmTripManager
           end>
         ActionBar = ActionMainMenuBar
       end>
-    Left = 385
+    Left = 313
     Top = 65
     StyleName = 'Platform Default'
     object Action1: TAction
@@ -1208,12 +1208,14 @@ object FrmTripManager: TFrmTripManager
       Caption = '-'
     end
     object CompareGpxRoute: TMenuItem
+      Tag = 20
       Caption = 'Compare with GPX route'
-      OnClick = CompareGpxRouteClick
+      OnClick = CompareWithGpx
     end
     object CompareGPXtrack: TMenuItem
+      Tag = 30
       Caption = 'Compare with GPX track'
-      OnClick = CompareGPXtrackClick
+      OnClick = CompareWithGpx
     end
     object N10: TMenuItem
       Caption = '-'

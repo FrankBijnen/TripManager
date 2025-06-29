@@ -9,7 +9,7 @@ uses
   Vcl.StdCtrls, Vcl.Buttons, Vcl.Menus;
 
 type
-  TTagsToShow = (WptRte, RteTrk, Rte, Trk);
+  TTagsToShow = (WptRte = 1, RteTrk = 10, Rte = 20, Trk = 30);
 
   TFrmSelectGPX = class(TForm)
     LvTracks: TListView;

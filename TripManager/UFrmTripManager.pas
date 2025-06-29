@@ -259,11 +259,10 @@ type
     procedure CmbModelChange(Sender: TObject);
     procedure BtnSendToClick(Sender: TObject);
     procedure VlTripInfoBeforeDrawCell(Sender: TObject; ACol, ARow: LongInt; Rect: TRect; State: TGridDrawState);
-    procedure CompareGpxRouteClick(Sender: TObject);
+    procedure CompareWithGpx(Sender: TObject);
     procedure PopupTripInfoPopup(Sender: TObject);
     procedure DeleteDirsClick(Sender: TObject);
     procedure NewDirectoryClick(Sender: TObject);
-    procedure CompareGPXtrackClick(Sender: TObject);
     procedure NextDiffClick(Sender: TObject);
     procedure PrevDiffClick(Sender: TObject);
     procedure TvTripKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1152,15 +1151,18 @@ begin
   ATripList.SaveAsGPX(SaveTrip.FileName);
 end;
 
-procedure TFrmTripManager.CompareGpxRouteClick(Sender: TObject);
+procedure TFrmTripManager.CompareWithGpx(Sender: TObject);
 var
   GPXFileObj: TGPXFile;
   CrWait, CrNormal: HCURSOR;
   OsmTrack: TStringList;
+  GpxSelected: boolean;
+  TagsToShow: TTagsToShow;
 begin
   if (ATripList = nil) then
     exit;
 
+  TagsToShow := TTagsToShow(TMenuItem(Sender).Tag);  //Rte = 20, Track = 30
   OpenTrip.DefaultExt := 'gpx';
   OpenTrip.Filter := '*.gpx|*.gpx';
   OpenTrip.InitialDir := ShellTreeView1.Path;
@@ -1175,59 +1177,18 @@ begin
   GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
   try
     GPXFileObj.AnalyzeGpx;
-    if (GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
-                                    'Select Route',
-                                     TTagsToShow.Rte, ATripList.GetValue('mTripName'))) then
+    GpxSelected := GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
+                                    'Select 1 Route or Track',
+                                     TagsToShow, ATripList.GetValue('mTripName'));
+    if (GpXSelected) then
     begin
       SetCursor(CrWait);
-      GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
-      OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
-                                              [App_Prefix,
-                                              FileSysTrip,
-                                              ExtractFileName(ShellListView1.SelectedFolder.PathName),
-                                              GetTracksExt]));
-      Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
-      FrmShowLog.Show;
-    end;
-  finally
-    OsmTrack.Free;
-    GPXFileObj.Free;
-    SetCursor(CrNormal);
-    TvTrip.Invalidate;
-    VlTripInfo.Invalidate;
-    if (CreateOSMMapHtml) then
-      EdgeBrowser1.Navigate(GetHtmlTmp);
-  end;
-end;
-
-procedure TFrmTripManager.CompareGPXtrackClick(Sender: TObject);
-var
-  GPXFileObj: TGPXFile;
-  CrWait, CrNormal: HCURSOR;
-  OsmTrack: TStringList;
-begin
-  if (ATripList = nil) then
-    exit;
-
-  OpenTrip.DefaultExt := 'gpx';
-  OpenTrip.Filter := '*.gpx|*.gpx';
-  OpenTrip.InitialDir := ShellTreeView1.Path;
-  OpenTrip.FileName := '';
-  if not OpenTrip.Execute then
-    exit;
-
-  CrWait := LoadCursor(0,IDC_WAIT);
-  CrNormal := SetCursor(CrWait);
-  OsmTrack := TStringList.Create;
-  GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
-  try
-    GPXFileObj.AnalyzeGpx;
-    if (GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
-                                    'Select Track',
-                                     TTagsToShow.Trk, ATripList.GetValue('mTripName'))) then
-    begin
-      SetCursor(CrWait);
-      GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+      case (TagsToShow) of
+        TTagsToShow.Rte:
+          GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+        TTagsToShow.Trk:
+          GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+      end;
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
                                               FileSysTrip,
