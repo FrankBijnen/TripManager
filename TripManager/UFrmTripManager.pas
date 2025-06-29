@@ -176,6 +176,9 @@ type
     DeleteDirs: TMenuItem;
     NewDirectory: TMenuItem;
     CompareGPXtrack: TMenuItem;
+    NextDiff: TMenuItem;
+    N10: TMenuItem;
+    PrevDiff: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -261,6 +264,9 @@ type
     procedure DeleteDirsClick(Sender: TObject);
     procedure NewDirectoryClick(Sender: TObject);
     procedure CompareGPXtrackClick(Sender: TObject);
+    procedure NextDiffClick(Sender: TObject);
+    procedure PrevDiffClick(Sender: TObject);
+    procedure TvTripKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
     PrefDevice: string;
@@ -1285,6 +1291,10 @@ begin
 
   CompareGpxRoute.Enabled := SaveGPX1.Enabled;
   CompareGpxTrack.Enabled := SaveGPX1.Enabled;
+
+  PrevDiff.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
+  NextDiff.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
+
 end;
 
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);
@@ -1481,6 +1491,50 @@ begin
   begin
     HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
     EditTrip(true);
+  end;
+end;
+
+procedure TFrmTripManager.NextDiffClick(Sender: TObject);
+var
+  ANode: TTreeNode;
+begin
+  if (TvTrip.Selected <> nil) then
+    ANode := TvTrip.Selected.GetNext
+  else
+    ANode := TvTrip.Items[0].GetNext;
+  while (ANode <> nil) do
+  begin
+    if (ANode.Data <> nil) and
+       (TObject(ANode.Data) is TUdbDir) and
+       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsCoordsNotFound,
+                                       TUdbDirStatus.udsRoutePointNotFound]) then
+    begin
+      TvTrip.Selected := ANode;
+      break;
+    end;
+    ANode := ANode.GetNext;
+  end;
+end;
+
+procedure TFrmTripManager.PrevDiffClick(Sender: TObject);
+var
+  ANode: TTreeNode;
+begin
+  if (TvTrip.Selected <> nil) then
+    ANode := TvTrip.Selected.GetPrev
+  else
+    ANode := TvTrip.Items[TvTrip.Items.Count -1].GetPrev;
+  while (ANode <> nil) do
+  begin
+    if (ANode.Data <> nil) and
+       (TObject(ANode.Data) is TUdbDir) and
+       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsCoordsNotFound,
+                                       TUdbDirStatus.udsRoutePointNotFound]) then
+    begin
+      TvTrip.Selected := ANode;
+      break;
+    end;
+    ANode := ANode.GetPrev;
   end;
 end;
 
@@ -2636,10 +2690,29 @@ begin
        (TUdbDir(Node.Data).IsTurn)  then
       Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
     case (TUdbDir(Node.Data).Status) of
-      TUdbDirStatus.udsRoadNotFound:
-        Sender.Canvas.Brush.Color := clWebYellow;
-      TUdbDirStatus.udsCoordsNotFound:
+      TUdbDirStatus.udsRoutePointNotFound:
         Sender.Canvas.Brush.Color := clWebOrange;
+      TUdbDirStatus.udsCoordsNotFound:
+        Sender.Canvas.Brush.Color := clWebYellow;
+    end;
+  end;
+end;
+
+procedure TFrmTripManager.TvTripKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (ssAlt in Shift) then
+  begin
+    case Key of
+      VK_DOWN:
+        begin
+          Key := 0;
+          NextDiffClick(NextDiff);
+        end;
+      VK_UP:
+        begin
+          Key := 0;
+          PrevDiffClick(PrevDiff);
+        end;
     end;
   end;
 end;
@@ -2663,10 +2736,10 @@ begin
   if (ACol = 0) then
   begin
     case (TUdbDir(AGridSelItem.BaseItem).Status) of
-      TUdbDirStatus.udsRoadNotFound:
-        VlTripInfo.Canvas.Brush.Color := clWebYellow;
-      TUdbDirStatus.udsCoordsNotFound:
+      TUdbDirStatus.udsRoutePointNotFound:
         VlTripInfo.Canvas.Brush.Color := clWebOrange;
+      TUdbDirStatus.udsCoordsNotFound:
+        VlTripInfo.Canvas.Brush.Color := clWebYellow;
     end;
   end;
 end;

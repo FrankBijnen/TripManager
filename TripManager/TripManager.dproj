@@ -133,13 +133,13 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>235</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.235;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>242</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.242;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <Icon_MainIcon>Icon\TripManager.ico</Icon_MainIcon>
-        <VerInfo_Build>235</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.235;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Build>242</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.5.0.242;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.5;Comments=Use at your own risk</VerInfo_Keys>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

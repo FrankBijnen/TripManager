@@ -47,7 +47,9 @@ type
   end;
 
 implementation
-  uses UnitStringUtils;
+
+uses
+  UnitStringUtils;
 
 procedure GetIdsFromDevice(var IDeviceName: string;
                            var OVendId: string;
@@ -122,7 +124,7 @@ begin
   Dbi.dbcc_size := Size;
   Dbi.dbcc_devicetype := USB_INTERFACE;
   Dbi.dbcc_reserved := 0;
-  Dbi.dbcc_classguid  := ClassGuid;
+  Dbi.dbcc_classguid := ClassGuid;
   Dbi.dbcc_name := #0;
 
   FDevNotifyHandle := RegisterDeviceNotification(FHandle, @Dbi, DEVICE_NOTIFY_WINDOW_HANDLE);

@@ -641,12 +641,11 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -748,6 +747,7 @@ object FrmTripManager: TFrmTripManager
         ToolTips = False
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
+        OnKeyDown = TvTripKeyDown
       end
       object PnlVlTripInfo: TPanel
         Left = 246
@@ -1213,6 +1213,19 @@ object FrmTripManager: TFrmTripManager
     object CompareGPXtrack: TMenuItem
       Caption = 'Compare with GPX track'
       OnClick = CompareGPXtrackClick
+    end
+    object N10: TMenuItem
+      Caption = '-'
+    end
+    object NextDiff: TMenuItem
+      Caption = 'Next Difference'
+      ShortCut = 16452
+      OnClick = NextDiffClick
+    end
+    object PrevDiff: TMenuItem
+      Caption = 'Previous difference'
+      ShortCut = 16469
+      OnClick = PrevDiffClick
     end
   end
   object SaveTrip: TSaveDialog
