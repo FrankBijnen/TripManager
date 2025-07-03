@@ -3,7 +3,7 @@ object FrmAdvSettings: TFrmAdvSettings
   Top = 0
   BorderStyle = bsSizeToolWin
   Caption = 'Advanced settings'
-  ClientHeight = 574
+  ClientHeight = 658
   ClientWidth = 587
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -17,13 +17,13 @@ object FrmAdvSettings: TFrmAdvSettings
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 543
+    Top = 627
     Width = 587
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 526
+    ExplicitTop = 543
     DesignSize = (
       587
       31)
@@ -54,18 +54,18 @@ object FrmAdvSettings: TFrmAdvSettings
     Left = 0
     Top = 0
     Width = 587
-    Height = 543
+    Height = 627
     ActivePage = TabGeneral
     Align = alClient
     TabOrder = 1
-    ExplicitHeight = 526
+    ExplicitHeight = 543
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
         Left = 0
         Top = 0
         Width = 579
-        Height = 513
+        Height = 597
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -75,7 +75,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
-        ExplicitHeight = 496
+        ExplicitHeight = 513
         RowHeights = (
           24
           24
@@ -136,7 +136,7 @@ object FrmAdvSettings: TFrmAdvSettings
       Caption = 'GeoCode settings'
       object Splitter1: TSplitter
         Left = 0
-        Top = 193
+        Top = 294
         Width = 579
         Height = 3
         Cursor = crVSplit
@@ -146,11 +146,12 @@ object FrmAdvSettings: TFrmAdvSettings
       end
       object PnlAddressFormat: TPanel
         Left = 0
-        Top = 196
+        Top = 297
         Width = 579
         Height = 300
         Align = alBottom
         TabOrder = 0
+        ExplicitTop = 213
         object MemoAddressFormat: TMemo
           Left = 1
           Top = 36
@@ -207,7 +208,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Left = 0
         Top = 33
         Width = 579
-        Height = 177
+        Height = 261
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230

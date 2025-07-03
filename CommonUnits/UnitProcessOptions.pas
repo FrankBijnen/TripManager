@@ -111,6 +111,7 @@ type
 
     ProcessDistance: boolean;                 // True, Compute distance. Added in KML, and name of shaping points
     DistanceUnit: TDistanceUnit;              // duKm, Kilometers.
+    CompareDistanceOK: integer;               // 500, Meters.
 
     ProcessCategory: set of TProcessCategory; // [pcSymbol, pcGPX], Add Categories to WayPoints
     ProcessAddrWayPt: boolean;                // False
@@ -222,6 +223,8 @@ begin
 
   ProcessDistance := true;
   DistanceUnit := duKm;
+
+  CompareDistanceOK := 500;
 
   DefTrackColor := 'Blue';
   TrackColor := '';

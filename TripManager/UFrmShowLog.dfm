@@ -41,5 +41,7 @@ object FrmShowLog: TFrmShowLog
     Align = alClient
     ItemHeight = 15
     TabOrder = 1
+    OnClick = LbLogClick
+    ExplicitTop = -3
   end
 end

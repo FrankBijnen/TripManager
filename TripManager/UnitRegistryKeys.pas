@@ -35,7 +35,8 @@ const
   Reg_ShapingName             = 'ShapingName';
   Reg_DistanceUnit            = 'DistanceUnit';
   Reg_ShapeAddress            = 'ShapeAddress';
-
+  Reg_CompareDistOK_Key       = 'CompareDistOK';
+  Reg_CompareDistOK_Val       = 500;
 
   Reg_PrefFileSysFolder_Key   = 'PrefFileSysFolder';
   Reg_PrefFileSysFolder_Val   = 'rfDesktop';

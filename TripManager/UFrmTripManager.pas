@@ -175,10 +175,10 @@ type
     N9: TMenuItem;
     DeleteDirs: TMenuItem;
     NewDirectory: TMenuItem;
-    CompareGPXtrack: TMenuItem;
     NextDiff: TMenuItem;
     N10: TMenuItem;
     PrevDiff: TMenuItem;
+    CompareGpxTrack: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -360,6 +360,7 @@ type
     procedure ReadSettings;
     procedure ClearTripInfo;
     procedure EditTrip(NewFile: boolean);
+    procedure SyncDiff(Sender: TObject);
   protected
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
@@ -1186,7 +1187,7 @@ begin
       case (TagsToShow) of
         TTagsToShow.Rte:
           GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
-        TTagsToShow.Trk:
+        TTagsToShow.RteTrk:
           GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
       end;
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
@@ -1195,6 +1196,7 @@ begin
                                               ExtractFileName(ShellListView1.SelectedFolder.PathName),
                                               GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
+      FrmShowLog.FSyncTreeview := SyncDiff;
       FrmShowLog.Show;
     end;
   finally
@@ -1490,7 +1492,8 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsCoordsNotFound,
+       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNotFound,
+                                       TUdbDirStatus.udsCoordsNotFound,
                                        TUdbDirStatus.udsRoutePointNotFound]) then
     begin
       TvTrip.Selected := ANode;
@@ -1512,13 +1515,37 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsCoordsNotFound,
+       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNotFound,
+                                       TUdbDirStatus.udsCoordsNotFound,
                                        TUdbDirStatus.udsRoutePointNotFound]) then
     begin
       TvTrip.Selected := ANode;
       break;
     end;
     ANode := ANode.GetPrev;
+  end;
+end;
+
+procedure TFrmTripManager.SyncDiff(Sender: TObject);
+var
+  ANode: TTreeNode;
+begin
+  TvTrip.Selected := TvTrip.Items[0];
+  if (Assigned(Sender)) and
+     (Sender is TUdbDir) then
+  begin
+    ANode := TvTrip.Items[0];
+    while (ANode <> nil) do
+    begin
+      if (ANode.Data <> nil) and
+         (TObject(ANode.Data) is TUdbDir) and
+         (ANode.Data = Sender) then
+      begin
+        TvTrip.Selected := ANode;
+        break;
+      end;
+      ANode := ANode.GetNext;
+    end;
   end;
 end;
 
@@ -2676,6 +2703,8 @@ begin
     case (TUdbDir(Node.Data).Status) of
       TUdbDirStatus.udsRoutePointNotFound:
         Sender.Canvas.Brush.Color := clWebOrange;
+      TUdbDirStatus.udsRoadNotFound:
+        Sender.Canvas.Brush.Color := clWebAqua;
       TUdbDirStatus.udsCoordsNotFound:
         Sender.Canvas.Brush.Color := clWebYellow;
     end;
@@ -2722,6 +2751,8 @@ begin
     case (TUdbDir(AGridSelItem.BaseItem).Status) of
       TUdbDirStatus.udsRoutePointNotFound:
         VlTripInfo.Canvas.Brush.Color := clWebOrange;
+      TUdbDirStatus.udsRoadNotFound:
+        VlTripInfo.Canvas.Brush.Color := clWebAqua;
       TUdbDirStatus.udsCoordsNotFound:
         VlTripInfo.Canvas.Brush.Color := clWebYellow;
     end;
@@ -3756,6 +3787,7 @@ begin
     GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Symbols\' +
                        GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
+    CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
 
     ProcessCategory := [];
   end;

@@ -1207,14 +1207,14 @@ object FrmTripManager: TFrmTripManager
     object N8: TMenuItem
       Caption = '-'
     end
-    object CompareGpxRoute: TMenuItem
-      Tag = 20
-      Caption = 'Compare with GPX route'
+    object CompareGpxTrack: TMenuItem
+      Tag = 10
+      Caption = 'Compare as track with GPX'
       OnClick = CompareWithGpx
     end
-    object CompareGPXtrack: TMenuItem
-      Tag = 30
-      Caption = 'Compare with GPX track'
+    object CompareGpxRoute: TMenuItem
+      Tag = 20
+      Caption = 'Compare as route with GPX (BC Calculated)'
       OnClick = CompareWithGpx
     end
     object N10: TMenuItem

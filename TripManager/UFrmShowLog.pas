@@ -12,10 +12,12 @@ type
     BtnClose: TBitBtn;
     LbLog: TListBox;
     procedure BtnCloseClick(Sender: TObject);
+    procedure LbLogClick(Sender: TObject);
   private
     { Private declarations }
   public
     { Public declarations }
+    FSyncTreeview: TnotifyEvent;
   end;
 
 var
@@ -28,6 +30,12 @@ implementation
 procedure TFrmShowLog.BtnCloseClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TFrmShowLog.LbLogClick(Sender: TObject);
+begin
+  if Assigned(FSyncTreeview) then
+    FSyncTreeview(LbLog.Items.Objects[LbLog.ItemIndex]);
 end;
 
 end.

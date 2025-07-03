@@ -30,7 +30,7 @@ type
     FWayPointList: TXmlVSNodeList;          // All Original way point
     FWayPointFromRouteList: TXmlVSNodeList; // Used in CreateWaypoints and CreatePoi. Has Categories. Only private
     FRouteViaPointList: TXmlVSNodeList;     // Used in CreateOSM(Points), CreateKml, CreatePoly. Exposed public
-    FTrackList: TXmlVSNodeList;             // All tracks. Can be created fro calculated routes
+    FTrackList: TXmlVSNodeList;             // All tracks. Can be created from calculated routes
     FWayPointsProcessedList: TStringList;   // To prevent duplicate Way points
 
     CurrentTrack: TXmlVSNode;
@@ -73,7 +73,8 @@ type
     function GetSpeedFromName(WptName: string): integer;
     function GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
     function GPXCategory(Category: string): TGPXCategory;
-    function GetRouteTrackNode(RouteTrack, RouteName: string): TXmlVSNode;
+    function GetRouteNode(RouteName: string): TXmlVSNode;
+    function GetTrackOrRouteNode(RouteName: string): TXmlVSNode;
 
     procedure FreeGlobals;
     procedure CreateGlobals;
@@ -174,10 +175,10 @@ type
 {$IFDEF TRIPOBJECTS}
     function PrepareTripForCompare(const AllRoutes: TmAllRoutes;
                                  const Messages, OutTrackList: TStrings;
-                                 var UdbDirCount: integer): TXmlVSNode;
-    function ScanForTrkPt(ScanFromTrkSeg, ScanFromTrkPt, ScanToTrkSeg, ScanToTrkPt: TXmlVSNode;
+                                 var UdbHandleCount, UdbDirCount: integer): TXmlVSNode;
+    function ScanForTrkPt(ScanFromTrkPt, ScanToTrkPt: TXmlVSNode;
                           FromCoords: TCoord;
-                          var BestScanTrkSeg: TXmlVSNode; var BestScanTrkPt: TXmlVSNode): double;
+                          var BestScanTrkPt: TXmlVSNode): double;
 
     procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
     procedure CompareGpxRoute(const ATripList: TTripList; const Messages, OutTrackList: TStrings);
@@ -1347,7 +1348,8 @@ begin
   ProcessGPX;
 end;
 
-function TGPXfile.GetRouteTrackNode(RouteTrack, RouteName: string): TXmlVSNode;
+//Gets the (BC) <rte> from the XMLDocument
+function TGPXfile.GetRouteNode(RouteName: string): TXmlVSNode;
 var
   GpxNode: TXmlVSNode;
   RouteTrackNode: TXmlVSNode;
@@ -1358,10 +1360,25 @@ begin
     if (GpxNode.Name = 'gpx') then
     begin
       for RouteTrackNode in GpxNode.ChildNodes do
-        if (RouteTrackNode.Name = RouteTrack) and
+        if (RouteTrackNode.Name = 'rte') and
            (FindSubNodeValue(RouteTrackNode, 'name') = RouteName) then
            exit(RouteTrackNode);
     end;
+  end;
+end;
+
+//Gets the track <trk> node from the processed track. Can be converted from <gpxxx:rpt>
+function TGPXfile.GetTrackOrRouteNode(RouteName: string): TXmlVSNode;
+var
+  Track: TXmlVSNode;
+begin
+  result := nil;
+  for Track in FTrackList do
+  begin
+    if (FrmSelectGPX.TrackSelectedColor(RouteName, FindSubNodeValue(Track, 'desc')) = '') then
+      continue;
+
+    exit(Track);
   end;
 end;
 
@@ -1438,17 +1455,15 @@ end;
 {$IFDEF TRIPOBJECTS}
 const
   LatLonFormat = '%1.5f';
-  DistOk: double = 0.1; // In Km. ==> 100 Meter
 
 function TGPXfile.PrepareTripForCompare(const AllRoutes: TmAllRoutes;
                                       const Messages, OutTrackList: TStrings;
-                                      var UdbDirCount: integer): TXmlVSNode;
+                                      var UdbHandleCount, UdbDirCount: integer): TXmlVSNode;
 var
   TrackId: integer;
   TrackRouteSelected: TXmlVSNode;
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir: TUdbDir;
-  AnItem: TListItem;
 begin
   result := nil;
 
@@ -1460,6 +1475,7 @@ begin
   end;
 
   UdbDirCount := 0;
+  UdbHandleCount := 0;
   for AnUdbHandle in AllRoutes.Items do
   begin
     for AnUdbDir in AnUdbHandle.Items do
@@ -1468,6 +1484,7 @@ begin
       if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
         Inc(UdbDirCount);
     end;
+    Inc(UdbHandleCount);
   end;
 
   if (UdbDirCount = 0) then
@@ -1476,32 +1493,21 @@ begin
     exit;
   end;
 
-// Show track to compare with on map
+// Show track to compare with on map, and return name
   TrackId := 0;
   for TrackRouteSelected in FTrackList do
   begin
-    if (FrmSelectGPX.TrackSelectedColor(TrackRouteSelected.Name) = '') then
+    if (FrmSelectGPX.TrackSelectedColor(TrackRouteSelected.Name, FindSubNodeValue(TrackRouteSelected, 'desc')) = '') then
       continue;
     Track2OSMTrackPoints(TrackRouteSelected, TrackId, TStringList(OutTrackList));
+    exit(TrackRouteSelected);
   end;
 
-// Return first node
-  for AnItem in FrmSelectGPX.LvTracks.Items do
-  begin
-    if not (AnItem.Checked) then
-      continue;
-
-    for result in RouteViaPointList do
-    begin
-      if (result.NodeName = AnItem.Caption) then
-        break;
-    end;
-  end;
 end;
 
 procedure TGPXfile.CompareGpxRoute(const ATripList: TTripList; const Messages, OutTrackList: TStrings);
 var
-  RtePtCount, UdbDirCount: integer;
+  RtePtCount, UdbHandleCount, UdbDirCount: integer;
   AllRoutes: TmAllRoutes;
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir: TUdbDir;
@@ -1514,11 +1520,13 @@ var
   CheckSegmentOK: boolean;
   CheckRouteOK: boolean;
   StartSegmentLine: integer;
+  SubClassList: TStringList;
+  DistOk: double;
 begin
   Messages.Clear;
 
   AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
-  RouteSelected := PrepareTripForCompare(AllRoutes, Messages, OutTrackList, UdbDirCount);
+  RouteSelected := PrepareTripForCompare(AllRoutes, Messages, OutTrackList, UdbHandleCount, UdbDirCount);
   if (RouteSelected = nil) then
   begin
     Messages.Add('No Route selected.');
@@ -1526,7 +1534,7 @@ begin
   end;
 
   Messages.Add(Format('Checking: %s', [RouteSelected.NodeName]));
-  RouteSelected := GetRouteTrackNode('rte', RouteSelected.NodeName);
+  RouteSelected := GetRouteNode(RouteSelected.NodeName);
   if (RouteSelected = nil) then // Should not happen
     exit;
 
@@ -1546,172 +1554,198 @@ begin
     ScanRtePt := ScanRtePt.NextSibling;
   end;
 
-  if (UdbDirCount <> RtePtCount) then
+  DistOk := ProcessOptions.CompareDistanceOK / 1000;
+
+  if (UdbDirCount - (UdbHandleCount -1) <> RtePtCount) then
   begin
     Messages.Add('Number of route points does not match in trip and gpx route.' + #13#10 +
                  'Try Compare track.');
+    UdbHandleCount := 1;
+    for AnUdbHandle in AllRoutes.Items do
+    begin
+      UdbDirCount := 1;
+      for AnUdbDir in AnUdbHandle.Items do
+      begin
+        if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
+        begin
+          Messages.AddObject(Format('UdbHandle: %d Route point: %d %s', [UdbHandleCount, UdbDirCount, AnUdbDir.DisplayName]), AnUdbDir);
+          Inc(UdbDirCount);
+        end;
+      end;
+      Inc(UdbHandleCount);
+    end;
     exit;
   end;
 
-  CheckSegmentOK := true;
-  CheckRouteOK := true;
-  StartSegmentLine := -1;
-  for AnUdbHandle in AllRoutes.Items do
-  begin
-    GpxxRptNode := nil;
-    for AnUdbDir in AnUdbHandle.Items do
+  SubClassList := TStringList.Create;
+  SubClassList.Sorted := true;
+  SubClassList.Duplicates := TDuplicates.dupIgnore;
+  try
+    CheckSegmentOK := true;
+    CheckRouteOK := true;
+    StartSegmentLine := -1;
+    for AnUdbHandle in AllRoutes.Items do
     begin
-      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) or
-         (AnUdbDir.UdbDirValue.SubClass.PointType = 33) then // Dont check UdbDir's just before or after a route point
-        continue;
-
-      CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
-                      IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8);
-      CoordTrip.Lat := AnUdbDir.Lat;
-      CoordTrip.Lon := AnUdbDir.Lon;
-      CTripLat := Format(LatLonFormat, [CoordTrip.Lat], FormatSettings);
-      CTripLon := Format(LatLonFormat, [CoordTrip.Lon], FormatSettings);
-
-      if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
+      GpxxRptNode := nil;
+      for AnUdbDir in AnUdbHandle.Items do
       begin
-        if (StartSegmentLine > -1) and
-           (CheckSegmentOK = false) then
-          Messages[StartSegmentLine] := Messages[StartSegmentLine] + ' NOT OK';
-        CheckSegmentOK := true;
+        if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
+          continue;
 
-        Messages.Add('');
-        StartSegmentLine := Messages.Add(Format('Checking Segment: %s', [AnUdbDir.DisplayName]));
-        CoordGpx := CoordFromAttribute(NextRtePt.AttributeList);
-        BestLat := Format(LatLonFormat, [CoordGpx.Lat], FormatSettings);
-        BestLon := Format(LatLonFormat, [CoordGpx.Lon], FormatSettings);
+        CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
+                        IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8);
+        CoordTrip.Lat := AnUdbDir.Lat;
+        CoordTrip.Lon := AnUdbDir.Lon;
+        CTripLat := Format(LatLonFormat, [CoordTrip.Lat], FormatSettings);
+        CTripLon := Format(LatLonFormat, [CoordTrip.Lon], FormatSettings);
 
-        if (CoordDistance(CoordTrip, CoordGpx) > DistOk) or
-           (AnUdbDir.DisplayName <> FindSubNodeValue(NextRtePt, 'name')) then
+        if (AnUdbDir.UdbDirValue.SubClass.PointType = 3) then
+        begin
+          if (StartSegmentLine > -1) and
+             (CheckSegmentOK = false) then
+            Messages[StartSegmentLine] := Messages[StartSegmentLine] + ' NOT OK';
+          CheckSegmentOK := true;
+
+          Messages.Add('');
+          StartSegmentLine := Messages.AddObject(Format('Checking Segment: %s', [AnUdbDir.DisplayName]), AnUdbDir);
+          CoordGpx := CoordFromAttribute(NextRtePt.AttributeList);
+          BestLat := Format(LatLonFormat, [CoordGpx.Lat], FormatSettings);
+          BestLon := Format(LatLonFormat, [CoordGpx.Lon], FormatSettings);
+
+          if (CoordDistance(CoordTrip, CoordGpx) > DistOk) or
+             (AnUdbDir.DisplayName <> FindSubNodeValue(NextRtePt, 'name')) then
+          begin
+            CheckSegmentOK := false;
+            CheckRouteOK := false;
+            Messages.AddObject(Format('Route point:%s check failed. Lat:%s Lon:%s Potential match Lat:%s Lon:%s.',
+                                     [AnUdbDir.DisplayName,
+                                      CTripLat, CTripLon,
+                                      BestLat, BestLon]), AnUdbDir);
+            AnUdbDir.Status := TUdbDirStatus.udsRoutePointNotFound;
+          end;
+
+          // Init GpxxRptNode
+          GpxxRptNode := nil;
+          RoutePointExtensionNode := nil;
+          ExtensionsNode := NextRtePt.Find('extensions');
+          if (ExtensionsNode <> nil) then
+            RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
+          if (RoutePointExtensionNode <> nil) then
+            GpxxRptNode := RoutePointExtensionNode.Find('gpxx:rpt');
+
+          ScanRtePt := GpxxRptNode;
+          while (ScanRtePt <> nil) do
+          begin
+            if (ScanRtePt.Name = 'gpxx:rpt') then
+              SubClassList.Add(Copy(FindSubNodeValue(ScanRtePt,'gpxx:Subclass'), 5, 16));
+            ScanRtePt := ScanRtePt.NextSibling;
+          end;
+
+          // Point to next segment
+          if (AnUdbDir <> AnUdbHandle.Items[AnUdbHandle.Items.Count -1]) then
+            NextRtePt := NextRtePt.NextSibling;
+          continue;
+      	end;
+
+        if (GpxxRptNode = nil) then
+        begin
+          Messages.Add('No <gpxx:rpt> in GPX file. Non Basecamp origin?');
+          CheckSegmentOK := false;
+          CheckRouteOK := false;
+          break;
+        end;
+
+        MinDist := MaxDouble;
+        ScanRtePt := GpxxRptNode;
+        BestRpt := nil;
+        while (ScanRtePt <> nil) do
+        begin
+          if (ScanRtePt.Name = 'gpxx:rpt') then
+          begin
+            CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
+
+            ThisDist := CoordDistance(CoordTrip, CoordGpx);
+            if (ThisDist < MinDist) then
+            begin
+              MinDist := ThisDist;
+              BestRpt := ScanRtePt;
+              BestLat := Format(LatLonFormat, [CoordGpx.Lat], FormatSettings);
+              BestLon := Format(LatLonFormat, [CoordGpx.Lon], FormatSettings);
+            end;
+          end;
+          ScanRtePt := ScanRtePt.NextSibling;
+        end;
+
+        // A valid trip file will never get here. That always ends with a type=3 Udbdir
+        if (BestRpt = nil) then
+        begin
+          Messages.AddObject(Format('No matching RtePt found for:%s MapSeg + Road:%s, Lat:%s, Lon:%s',
+                                    [AnUdbDir.DisplayName,
+                                     CTMapSegRoad,
+                                     CTripLat, CTripLon]), AnUdbDir);
+          AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
+          continue;
+        end;
+
+        // Point to next GpxcRptnode
+        GpxxRptNode := BestRpt;
+        if (SubClassList.IndexOf(CTMapSegRoad) < 0) then
         begin
           CheckSegmentOK := false;
           CheckRouteOK := false;
-          Messages.Add(Format('Route point:%s check failed. Lat:%s Lon:%s Potential match Lat:%s Lon:%s.',
-                              [AnUdbDir.DisplayName,
-                               CTripLat, CTripLon,
-                               BestLat, BestLon]));
-          AnUdbDir.Status := TUdbDirStatus.udsRoutePointNotFound;
-        end;
-
-        // Init GpxxRptNode
-        GpxxRptNode := nil;
-        RoutePointExtensionNode := nil;
-        ExtensionsNode := NextRtePt.Find('extensions');
-        if (ExtensionsNode <> nil) then
-          RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
-        if (RoutePointExtensionNode <> nil) then
-          GpxxRptNode := RoutePointExtensionNode.Find('gpxx:rpt');
-
-        // Point to next segment
-        NextRtePt := NextRtePt.NextSibling;
-        continue;
-      end;
-
-      if (GpxxRptNode = nil) then
-      begin
-        Messages.Add('No <gpxx:rpt> in GPX file. Non Basecamp origin?');
-        CheckSegmentOK := false;
-        CheckRouteOK := false;
-        break;
-      end;
-
-      MinDist := MaxDouble;
-      ScanRtePt := GpxxRptNode;
-      BestRpt := nil;
-      while (ScanRtePt <> nil) do
-      begin
-        if (ScanRtePt.Name = 'gpxx:rpt') then
+          Messages.AddObject(Format('Road:%s check failed. MapSeg + Road:%s, Best match: MapSeg + Road:%s Lat:%s, Lon:%s, Distance: %1.6f',
+                                    [AnUdbDir.DisplayName,
+                                     CTMapSegRoad, Copy(FindSubNodeValue(BestRpt, 'gpxx:Subclass'), 5, 16),
+                                     BestLat, BestLon, MinDist]), AnUdbDir);
+          AnUdbDir.Status := TUdbDirStatus.udsRoadNotFound;
+        end else if (MinDist > DistOk) then
         begin
-          CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
-
-          ThisDist := CoordDistance(CoordTrip, CoordGpx);
-          if (ThisDist < MinDist) then
-          begin
-            MinDist := ThisDist;
-            BestRpt := ScanRtePt;
-            BestLat := Format(LatLonFormat, [CoordGpx.Lat], FormatSettings);
-            BestLon := Format(LatLonFormat, [CoordGpx.Lon], FormatSettings);
-          end;
+          CheckSegmentOK := false;
+          CheckRouteOK := false;
+          Messages.AddObject(Format('Coords:%s check failed. Lat:%s, Lon:%s, Best match: Lat:%s, Lon:%s, Distance: %1.6f',
+                                    [AnUdbDir.DisplayName,
+                                     CTripLat, CTripLon,
+                                     BestLat, BestLon, MinDist]), AnUdbDir);
+          AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
         end;
-        ScanRtePt := ScanRtePt.NextSibling;
-      end;
-
-      // A valid trip file will never get here. That always ends with a type=3 Udbdir
-      if (BestRpt = nil) then
-      begin
-        Messages.Add(Format('No matching RtePt found for:%s MapSeg + Road:%s, Lat:%s, Lon:%s',
-                            [AnUdbDir.DisplayName,
-                             CTMapSegRoad,
-                             CTripLat, CTripLon]));
-        AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
-        continue;
-      end;
-
-      // Point to next GpxcRptnode
-      GpxxRptNode := BestRpt;
-
-      if (MinDist > DistOK) then
-      begin
-        CheckSegmentOK := false;
-        CheckRouteOK := false;
-        Messages.Add(Format('Coords:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s, Best match: Lat:%s, Lon:%s, Distance: %1.6f',
-                            [AnUdbDir.DisplayName,
-                             CTMapSegRoad,
-                             CTripLat, CTripLon,
-                             BestLat, BestLon, MinDist]));
-        AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
       end;
     end;
+    if (CheckRouteOK = false) then
+      Messages[0] := Messages[0] + ' NOT OK';
+  finally
+    SubClassList.Free;
   end;
-  if (CheckRouteOK = false) then
-    Messages[0] := Messages[0] + ' NOT OK';
 end;
 
 // Scan for a track point that best matches the coordinates of a route point.
-// ScanFromTrkSeg/Pt ScanToTrkSeg/Pt limit the range in the track.
-// Returns the BestScanTrkSeg/Pt and the Coordinate distance
-function TGPXfile.ScanForTrkPt(ScanFromTrkSeg, ScanFromTrkPt, ScanToTrkSeg, ScanToTrkPt: TXmlVSNode;
+// ScanFromTrkPt ScanToTrkPt limit the range in the track.
+// Returns the BestScanTrkPt and the Coordinate distance
+function TGPXfile.ScanForTrkPt(ScanFromTrkPt, ScanToTrkPt: TXmlVSNode;
                                FromCoords: TCoord;
-                               var BestScanTrkSeg: TXmlVSNode; var BestScanTrkPt: TXmlVSNode): double;
+                               var BestScanTrkPt: TXmlVSNode): double;
 var
-  ScanTrkSeg, ScanTrkPt: TXmlVSNode;
+  ScanTrkPt: TXmlVSNode;
   ScanCoords: TCoord;
   ScanDist: Double;
 begin
   result := MaxDouble;
-  BestScanTrkSeg := ScanToTrkSeg;
   BestScanTrkPt := ScanToTrkPt;
 
-  ScanTrkSeg := ScanFromTrkSeg;
   ScanTrkPt := ScanFromTrkPt;
-  while (ScanTrkSeg <> nil) do      // Usually only tracklogs have multiple <trkseg>
+  while (ScanTrkPt <> nil) do     // TrkPt loop
   begin
-    while (ScanTrkPt <> nil) do     // TrkPt loop
+    ScanCoords := CoordFromAttribute(ScanTrkPt.AttributeList);
+    ScanDist := CoordDistance(FromCoords, ScanCoords);
+    if (ScanDist < result) then
     begin
-      ScanCoords := CoordFromAttribute(ScanTrkPt.AttributeList);
-      ScanDist := CoordDistance(FromCoords, ScanCoords);
-      if (ScanDist < result) then
-      begin
-        result := ScanDist;
-        BestScanTrkSeg := ScanTrkSeg;
-        BestScanTrkPt := ScanTrkPt;
-      end;
-
-      if (ScanTrkSeg = ScanToTrkSeg) and
-         (ScanTrkPt = ScanToTrkPt) then
-        exit;
-
-      ScanTrkPt := ScanTrkPt.NextSibling;
+      result := ScanDist;
+      BestScanTrkPt := ScanTrkPt;
     end;
-    ScanTrkSeg := ScanTrkSeg.NextSibling;
-    if (ScanTrkSeg = nil) then // All TrkSeg processed
-      break;
 
-    ScanTrkPt := ScanTrkSeg.Find('trkpt');
+    if (ScanTrkPt = ScanToTrkPt) then
+      exit;
+
+    ScanTrkPt := ScanTrkPt.NextSibling;
   end;
 end;
 
@@ -1721,23 +1755,24 @@ var
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir, ToUdbDir: TUdbDir;
   TrackSelected: TXmlVSNode;
-  NextTrkSeg, NextTrkPt,  // Current <trkpt> Pointer
-  LastTrkSeg, LastTrkPt,  // Last <trkpt> in track
-  ToTrkSeg, ToTrkPt,      // Limit scan to <trkpt>
-  BestTrkSeg, BestTrkPt,  // Best matching <trkpt>
-  BestToTrkSeg, BestToTrkPt: TXmlVSNode;
+  NextTrkPt,  // Current <trkpt> Pointer
+  LastTrkPt,  // Last <trkpt> in track
+  ToTrkPt,    // Limit scan to <trkpt>
+  BestTrkPt,  // Best matching <trkpt>
+  BestToTrkPt: TXmlVSNode;
   ToCoordTrip, CoordTrip, CoordGpx: TCoord;
   CTMapSegRoad: string;
   ThisDist: double;
   BestLat, BestLon, GpxLat, GpxLon, TripLat, TripLon: string;
   CheckSegmentOK: boolean;
   CheckRouteOK: boolean;
-  UdbDirCount, StartSegmentLine, AnUdbDirCnt, ToUdbDirCnt: integer;
+  UdbHandleCount, UdbDirCount, StartSegmentLine, AnUdbDirCnt, ToUdbDirCnt: integer;
+  DistOk: double;
 begin
   Messages.Clear;
 
   AllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
-  TrackSelected := PrepareTripForCompare(AllRoutes, Messages, OutTrackList, UdbDirCount);
+  TrackSelected := PrepareTripForCompare(AllRoutes, Messages, OutTrackList, UdbHandleCount, UdbDirCount);
   if (TrackSelected = nil) then
   begin
     Messages.Add('No Track selected.');
@@ -1745,23 +1780,19 @@ begin
   end;
 
   Messages.Add(Format('Checking: %s', [TrackSelected.NodeName]));
-  TrackSelected := GetRouteTrackNode('trk', TrackSelected.NodeName);
+
+  TrackSelected := GetTrackOrRouteNode(TrackSelected.NodeName);
   if (TrackSelected = nil) then // Should not happen
     exit;
 
-  // Start pos for search
-  NextTrkSeg := TrackSelected.Find('trkseg');
-  if (NextTrkSeg = nil) then
-  begin
-    Messages.Add('No <trkseg> in GPX.');
-    exit;
-  end;
-  NextTrkPt := NextTrkSeg.Find('trkpt');
+  NextTrkPt := TrackSelected.Find('trkpt');
   if (NextTrkPt = nil) then
   begin
     Messages.Add('No <trkpt> in GPX.');
     exit;
   end;
+
+  DistOk := ProcessOptions.CompareDistanceOK / 1000;
 
   // Init Error status
   CheckSegmentOK := true;
@@ -1771,17 +1802,13 @@ begin
   for AnUdbHandle in AllRoutes.Items do
   begin
     // Search limits
-    LastTrkSeg := TrackSelected.LastChild;
-    LastTrkPt := LastTrkSeg.LastChild;
-    ToTrkSeg := LastTrkSeg;
+    LastTrkPt := TrackSelected.LastChild;
     ToTrkPt := LastTrkPt;
-    BestToTrkSeg := LastTrkSeg;
     BestToTrkPt := LastTrkPt;
     for AnUdbDirCnt := 0 to AnUdbHandle.Items.Count -1 do
     begin
       AnUdbDir := AnUdbHandle.Items[AnUdbDirCnt];
-      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) or
-         (AnUdbDir.UdbDirValue.SubClass.PointType = 33) then // Dont check UdbDir's just before or after a route point
+      if (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
         continue;
 
       CTMapSegRoad := IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8) +
@@ -1799,28 +1826,27 @@ begin
         CheckSegmentOK := true;
 
         Messages.Add('');
-        StartSegmentLine := Messages.Add(Format('Checking Segment: %s', [AnUdbDir.DisplayName]));
+        StartSegmentLine := Messages.AddObject(Format('Checking Segment: %s', [AnUdbDir.DisplayName]), AnUdbDir);
 
-        ThisDist := ScanForTrkPt(NextTrkSeg, NextTrkPt, ToTrkSeg, ToTrkPt, CoordTrip, BestToTrkSeg, BestToTrkpt);
+        ThisDist := ScanForTrkPt(NextTrkPt, ToTrkPt, CoordTrip, BestToTrkpt);
 
         // report route point error
-        if (ThisDist > DistOK) then
+        if (ThisDist > DistOk) then
         begin
           CheckSegmentOK := false;
           CheckRouteOK := false;
           CoordGpx := CoordFromAttribute(BestToTrkpt.AttributeList);
           BestLat := Format(LatLonFormat, [CoordGpx.Lat], FormatSettings);
           BestLon := Format(LatLonFormat, [CoordGpx.Lon], FormatSettings);
-          Messages.Add(Format('Route point:%s check failed. Lat:%s Lon:%s Potential match Lat:%s Lon:%s, Distance: %1.6f',
-                              [AnUdbDir.DisplayName,
-                               TripLat, TripLon,
-                               BestLat, BestLon, ThisDist]));
+          Messages.AddObject(Format('Route point:%s check failed. Lat:%s Lon:%s Potential match Lat:%s Lon:%s, Distance: %1.6f',
+                                    [AnUdbDir.DisplayName,
+                                     TripLat, TripLon,
+                                     BestLat, BestLon, ThisDist]), AnUdbDir);
           AnUdbDir.Status := TUdbDirStatus.udsRoutePointNotFound;
         end;
 
         // Scan for trkpt of next routepoint.
         // Use ToTrkSeg, ToTrkPt to limit the search in the track
-        ToTrkSeg := LastTrkSeg;
         ToTrkPt := LastTrkPt;
         for ToUdbDirCnt := AnUdbDirCnt +1 to AnUdbHandle.Items.Count -1 do
         begin
@@ -1830,9 +1856,8 @@ begin
 
           ToCoordTrip.Lat := ToUdbDir.Lat;
           ToCoordTrip.Lon := ToUdbDir.Lon;
-          if (ScanForTrkPt(NextTrkSeg, NextTrkPt, ToTrkSeg, ToTrkPt, ToCoordTrip, BestToTrkSeg, BestToTrkpt) < DistOk) then
+          if (ScanForTrkPt(NextTrkPt, ToTrkPt, ToCoordTrip, BestToTrkpt) < DistOk) then
           begin
-            ToTrkSeg := BestToTrkSeg;
             ToTrkPt := BestToTrkPt;
             break;
           end;
@@ -1842,28 +1867,25 @@ begin
       end;
 
       // Get minimum distance of this route point in track
-      ThisDist := ScanForTrkPt(NextTrkSeg, NextTrkPt, ToTrkSeg, ToTrkPt, CoordTrip, BestTrkSeg, BestTrkpt);
+      ThisDist := ScanForTrkPt(NextTrkPt, ToTrkPt, CoordTrip, BestTrkpt);
 
       // Report coords error.
-      if (ThisDist > DistOK) then
+      if (ThisDist > DistOk) then
       begin
         CoordGpx := CoordFromAttribute(BestTrkpt.AttributeList);
         GpxLat := Format(LatLonFormat, [CoordGpx.Lat], FormatSettings);
         GpxLon := Format(LatLonFormat, [CoordGpx.Lon], FormatSettings);
         CheckSegmentOK := false;
         CheckRouteOK := false;
-        Messages.Add(Format('Coords:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s, Best match: Lat:%s, Lon:%s, Distance: %1.6f',
-                            [AnUdbDir.DisplayName,
-                             CTMapSegRoad,
-                             TripLat, TripLon,
-                             BestLat, BestLon, ThisDist]));
+        Messages.AddObject(Format('Coords:%s check failed. MapSeg + Road:%s, Lat:%s, Lon:%s, Best match: Lat:%s, Lon:%s, Distance: %1.6f',
+                                  [AnUdbDir.DisplayName,
+                                   CTMapSegRoad,
+                                   TripLat, TripLon,
+                                   BestLat, BestLon, ThisDist]), AnUdbDir);
         AnUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
       end
       else
-      begin
-        NextTrkSeg := BestTrkSeg; // update track point for next start pos.
         NextTrkPt := BestTrkPt;
-      end;
 
     end;
   end;
@@ -1886,7 +1908,7 @@ var
   WptTrack: TXmlVSNode;
   Track : TXmlVSNode;
   TrackPoint: TXmlVSNode;
-  OutFile, TrackName, DisplayColor: string;
+  OutFile, DisplayColor: string;
   TracksProcessed: TStringList;
 
 begin
@@ -1904,8 +1926,7 @@ begin
         TracksProcessed.Add(Track.NodeValue);
       end;
 
-      Trackname := Track.Name;
-      DisplayColor := FrmSelectGPX.TrackSelectedColor(Trackname);
+      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
       if (DisplayColor = '') then
         continue;
 
@@ -2091,7 +2112,7 @@ begin
     begin
       for Track in FTrackList do
       begin
-        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name);
+        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
         if (DisplayColor = '') then
           continue;
 
@@ -2158,7 +2179,7 @@ procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
                                         var TrackId: integer;
                                         TrackStringList: TStringList);
 var
-  Trackname, Lon, Lat, DisplayColor, Color, LayerName, RoutePointName: string;
+  Lon, Lat, DisplayColor, Color, LayerName, RoutePointName: string;
   RouteWayPoint, WayPoint: TXmlVSNode;
   WayPointAttribute: TXmlVSAttribute;
   TrackPoint: TXmlVSNode;
@@ -2168,9 +2189,10 @@ var
   TrackPointAttribute: TXmlVSAttribute;
 begin
   TrackStringList.Clear;
-  Trackname := Track.Name;
   TrackPoints := 0;
-  DisplayColor := FrmSelectGpx.TrackSelectedColor(TrackName);
+  DisplayColor := FrmSelectGpx.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+  if (DisplayColor = '') then
+  	exit;
 
   for TrackPoint in Track.ChildNodes do
   begin
@@ -2210,7 +2232,7 @@ begin
         RoutePointName := EscapeDQuote(FindSubNodeValue(WayPoint, 'name'));
 
         LayerId := TrackId + 1;
-        LayerName := Format('Shape: %s', [EscapeDQuote(Trackname)]);
+        LayerName := Format('Shape: %s', [EscapeDQuote(Track.Name)]);
         Color := 'blue';
 
         RtePtExtensions := WayPoint.Find('extensions');
@@ -2218,7 +2240,7 @@ begin
            (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
         begin
           LayerId := TrackId;
-          LayerName := Format('Via: %s', [EscapeDQuote(Trackname)]);
+          LayerName := Format('Via: %s', [EscapeDQuote(Track.name)]);
           Color := 'red';
         end;
 
@@ -2233,7 +2255,7 @@ begin
       Inc(TrackId, 2);
     end;
   end;
-  TrackStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Trackname), OSMColor(DisplayColor)]));
+  TrackStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
 end;
 
 procedure TGPXFile.DoCreateHTML;
@@ -2247,7 +2269,7 @@ begin
   try
     for Track in FTrackList do
     begin
-      if (FrmSelectGPX.TrackSelectedColor(Track.Name) = '') then
+      if (FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc')) = '') then
         continue;
       TrackId := 0; // We get a new HTML file for every track/route
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);

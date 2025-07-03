@@ -2,7 +2,8 @@ unit MsgLoop;
 
 interface
 
-uses Windows, Messages;
+uses
+  Winapi.Windows, Winapi.Messages;
 
 procedure ProcessMessages;
 

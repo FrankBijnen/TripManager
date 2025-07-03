@@ -32,7 +32,7 @@ type
   TRoutePoint       = (rpVia              = 0,
                        rpShaping          = 1,
                        rpShapingXT2       = 2);
-  TUdbDirStatus     = (udsUnchecked, udsRoutePointNotFound, udsCoordsNotFound);
+  TUdbDirStatus     = (udsUnchecked, udsRoutePointNotFound, udsRoadNotFound, udsCoordsNotFound);
 
 { Elementary data types }
 const

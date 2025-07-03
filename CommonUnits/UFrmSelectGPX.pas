@@ -37,7 +37,7 @@ type
     { Public declarations }
     AllTracks: TStringList;
     procedure LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckMask: string);
-    function TrackSelectedColor(const TrackName: string): string;
+    function TrackSelectedColor(const TrackName, RteTrk: string): string;
   end;
 
 //var FrmSelectGPX: TFrmSelectGPX;
@@ -52,7 +52,8 @@ uses
 
 const
   TypeColumn = 1;
-  ColorColumn = 1;
+  TypeSubItem = 0;
+  ColorSubItem = 1;
 
 procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckMask: string);
 var
@@ -123,7 +124,7 @@ begin
     for AnItem in LvTracks.Items do
     begin
       if (AnItem.Checked) then
-        AnItem.SubItems[ColorColumn] := CmbOverruleColor.Text;
+        AnItem.SubItems[ColorSubItem] := CmbOverruleColor.Text;
     end;
   end;
 end;
@@ -144,15 +145,16 @@ begin
     LvTracks.Items[0].Selected := true;
 end;
 
-function TFrmSelectGPX.TrackSelectedColor(const TrackName: string): string;
+function TFrmSelectGPX.TrackSelectedColor(const TrackName, RteTrk: string): string;
 var LVItem: TListItem;
 begin
   result := '';
   for LVItem in LvTracks.Items do
   begin
-    if (LVItem.Caption = TrackName) and
+    if (SameText(LVItem.Caption, TrackName)) and
+       (SameText(LVItem.SubItems[TypeSubItem], RteTrk)) and
        (LVItem.Checked) then
-      exit(LVItem.SubItems[ColorColumn]);
+      exit(LVItem.SubItems[ColorSubItem]);
   end;
 end;
 

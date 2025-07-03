@@ -127,6 +127,9 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Compare-');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_CompareDistOK_Key,  IntToStr(Reg_CompareDistOK_Val), 'Compare distance OK (meters)');
+    AddGridLine(GridGeneralSettings, CurRow, '');
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Map display-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_GeoSearchTimeOut_Key,    Reg_GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
     AddGridLine(GridGeneralSettings, CurRow, Reg_RoutePointTimeOut_Key,   Reg_RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
