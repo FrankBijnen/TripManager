@@ -658,7 +658,7 @@ begin
 
     if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
                                     'Select Waypoints/Routes',
-                                     TTagsToShow.WptRte, CdsRoutePointsName.AsString)) then
+                                     TTagsToShow.WptRte, CdsRouteTripName.AsString)) then
     begin
       CdsRoutePoints.DisableControls;
       try

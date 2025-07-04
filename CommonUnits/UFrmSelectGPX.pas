@@ -58,6 +58,7 @@ const
 procedure TFrmSelectGPX.LoadTracks(DisplayColor: string; TagsToShow: TTagsToShow; CheckMask: string);
 var
   Indx: integer;
+  CanCheck: boolean;
   Name, Color, Points, FromRoute: string;
   LVItem: TListItem;
 begin
@@ -76,6 +77,7 @@ begin
       end;
   end;
 
+  CanCheck := true;
   LvTracks.Items.Clear;
   for Indx := 0 to AllTracks.Count - 1 do
   begin
@@ -85,7 +87,12 @@ begin
     Name := NextField(FromRoute, Chr(9));
     LVItem := LvTracks.Items.Add;
     LVItem.Caption := Name;
-    LVItem.Checked := MatchesMask(Name, CheckMask);
+    if (CanCheck) then
+    begin
+      LVItem.Checked := MatchesMask(Name, CheckMask);
+      if (LVItem.Checked) then
+        CanCheck := SameText(CheckMask, '*');
+    end;
     LVItem.SubItems.Add(FromRoute);
     if (DisplayColor = '') then
       LVItem.SubItems.Add(Color)
