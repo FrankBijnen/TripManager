@@ -2346,14 +2346,49 @@ var
   end;
 
   procedure AddUdbDir(AnUdbDir: TUdbDir; ZoomToPoint: boolean);
+  var
+    SelStart: integer;
   begin
-    VlTripInfo.Strings.AddPair(AnUdbDir.DisplayName, Format('MapSegment: %s RoadId: %s PointType: %d Lat: %1.6f Lon: %1.6f',
+    VlTripInfo.Strings.AddPair('*** Begin UdbDir', DupeString('-', DupeCount), TGridSelItem.Create(AnUdbDir));
+    SelStart := 0;
+    VlTripInfo.Strings.AddPair('MapSegment + RoadId', Format('%s %s',
                                  [IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8),
-                                  IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8),
-                                  AnUdbDir.UdbDirValue.SubClass.PointType,
-                                  AnUdbDir.Lat,
-                                  AnUdbDir.Lon]),
-                               TGridSelItem.Create(AnUdbDir));
+                                  IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8)]),
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
+                                                             SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
+                           SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment);
+    VlTripInfo.Strings.AddPair('PointType', Format('%d',
+                                 [AnUdbDir.UdbDirValue.SubClass.PointType]),
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType);
+    VlTripInfo.Strings.AddPair('Direction', Format('%d',
+                                 [AnUdbDir.UdbDirValue.SubClass.Direction]),
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction);
+    VlTripInfo.Strings.AddPair('Subclass Unknown1', '',
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1);
+    VlTripInfo.Strings.AddPair('Coordinates', Format('%s', [AnUdbDir.MapCoords]),
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.Lat) +
+                                                            SizeOf(AnUdbDir.UdbDirValue.Lon), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.Lat) +
+                           SizeOf(AnUdbDir.UdbDirValue.Lon);
+    VlTripInfo.Strings.AddPair('UdbDir Unknown1', '',
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.Unknown1), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.Unknown1);
+    VlTripInfo.Strings.AddPair('Address', AnUdbDir.DisplayName,
+                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.Name), SelStart));
+
+    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.Name) -1;
+    VlTripInfo.Strings.AddPair('*** End UdbDir', DupeString('-', DupeCount),
+                              TGridSelItem.Create(AnUdbDir, 1, SelStart));
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s Type:%d', [AnUdbDir.DisplayName,
