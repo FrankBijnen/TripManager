@@ -53,13 +53,16 @@ type
     SaveTrip: TSaveDialog;
     TBGPXExp_Imp: TToolButton;
     PopupGPX: TPopupMenu;
-    Import1: TMenuItem;
-    Export1: TMenuItem;
+    ImportGPX: TMenuItem;
     OpenTrip: TOpenDialog;
     N3: TMenuItem;
     Copy1: TMenuItem;
     Cut1: TMenuItem;
     Paste1: TMenuItem;
+    TBCSVExp_Imp: TToolButton;
+    PopupCSV: TPopupMenu;
+    ImportCSV: TMenuItem;
+    ExportCSV: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -76,12 +79,14 @@ type
     procedure TBMoveDownClick(Sender: TObject);
     procedure TbLookupAddressClick(Sender: TObject);
     procedure Selectall1Click(Sender: TObject);
-    procedure ExportGpx(Sender: TObject);
-    procedure Import1Click(Sender: TObject);
+    procedure ExportGpxClick(Sender: TObject);
+    procedure ImportGPXClick(Sender: TObject);
     procedure Copy1Click(Sender: TObject);
     procedure Cut1Click(Sender: TObject);
     procedure Paste1Click(Sender: TObject);
     procedure PnlRouteResize(Sender: TObject);
+    procedure ImportCSVClick(Sender: TObject);
+    procedure ExportCSVClick(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -188,18 +193,38 @@ begin
   CopyToClipBoard(true);
 end;
 
-procedure TFrmTripEditor.Import1Click(Sender: TObject);
+procedure TFrmTripEditor.ImportCSVClick(Sender: TObject);
+begin
+  OpenTrip.Filter := '*.csv|*.csv';
+  OpenTrip.InitialDir := CurPath;
+  if not OpenTrip.Execute then
+    exit;
+
+  DmRoutePoints.ImportFromCSV(OpenTrip.FileName);
+end;
+
+procedure TFrmTripEditor.ImportGPXClick(Sender: TObject);
 begin
   OpenTrip.Filter := '*.gpx|*.gpx';
   OpenTrip.InitialDir := CurPath;
-  OpenTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
   if not OpenTrip.Execute then
     exit;
 
   DmRoutePoints.ImportFromGPX(OpenTrip.FileName);
 end;
 
-procedure TFrmTripEditor.ExportGpx(Sender: TObject);
+procedure TFrmTripEditor.ExportCSVClick(Sender: TObject);
+begin
+  SaveTrip.Filter := '*.csv|*.csv';
+  SaveTrip.InitialDir := CurPath;
+  SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.csv');
+  if not SaveTrip.Execute then
+    exit;
+
+  DmRoutePoints.ExportToCSV(SaveTrip.FileName);
+end;
+
+procedure TFrmTripEditor.ExportGpxClick(Sender: TObject);
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := CurPath;
@@ -311,10 +336,11 @@ end;
 procedure TFrmTripEditor.Paste1Click(Sender: TObject);
 var
   PointsList: TStringList;
-  Index: integer;
+  PointID, Index: integer;
   ALine: string;
 begin
   PointsList := TStringList.Create;
+  PointID  := DmRoutePoints.CdsRoutePoints.RecordCount + 1;
   DmRoutePoints.CdsRoutePoints.DisableControls;
   try
     PointsList.Text := Clipboard.AsText;
@@ -327,6 +353,11 @@ begin
       DmRoutePoints.CdsRoutePointsLat.AsString := NextField(ALine, #9);
       DmRoutePoints.CdsRoutePointsLon.AsString := NextField(ALine, #9);
       DmRoutePoints.CdsRoutePointsAddress.AsString := NextField(ALine, #9);
+      // Allow for missing data
+      DmRoutePoints.SetDefaultName(PointID + Index);
+      if (DmRoutePoints.CdsRoutePointsViaPoint.IsNull) then
+         DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := true;
+
       DmRoutePoints.CdsRoutePoints.Post;
     end;
   finally

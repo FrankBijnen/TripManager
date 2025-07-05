@@ -2290,7 +2290,7 @@ var
       VlTripInfo.Strings.AddPair('Count', Format('%d', [LocationValue.Count]),
                                  TGridSelItem.Create(ALocation, SizeOf(LocationValue.Count), OffsetInRecord(LocationValue, LocationValue.Count) ));
 
-      VlTripInfo.Strings.AddPair('--- End location header', DupeString('-', DupeCount),
+      VlTripInfo.Strings.AddPair('*** End location header', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ALocation, 1, ALocation.SelEnd - ALocation.SelStart -1 ));
     end;
     for ANitem in ALocation.LocationItems do
@@ -2302,7 +2302,7 @@ var
       end;
     end;
     with ALocation do
-      VlTripInfo.Strings.AddPair('--- End location', DupeString('-', DupeCount),
+      VlTripInfo.Strings.AddPair('*** End location', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ALocation, 1,
                                                      SizeOf(LocationValue.Id) + SizeOf(LocationValue.Size) + LocationValue.Size -1) );
   end;
@@ -2341,7 +2341,7 @@ var
         continue;
       end;
     end;
-    VlTripInfo.Strings.AddPair('--- End locations', DupeString('-', DupeCount),
+    VlTripInfo.Strings.AddPair('*** End locations', DupeString('-', DupeCount),
                                TGridSelItem.Create(AmLocations, 1, AmLocations.SelEnd - AmLocations.SelStart -1));
   end;
 
@@ -2467,7 +2467,7 @@ var
       if (ANitem is TUdbDir) then
         AddUdbDir(TUdbDir(ANitem), false);
     end;
-    VlTripInfo.Strings.AddPair('--- End UdbHandle', DupeString('-', DupeCount),
+    VlTripInfo.Strings.AddPair('*** End UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle, 1, AnUdbhandle.SelEnd - AnUdbhandle.SelStart -1));
   end;
 
@@ -2506,7 +2506,7 @@ var
         continue;
       end;
     end;
-    VlTripInfo.Strings.AddPair('--- End AllRoutes', DupeString('-', DupeCount),
+    VlTripInfo.Strings.AddPair('*** End AllRoutes', DupeString('-', DupeCount),
                                TGridSelItem.Create(AmAllRoutes, 1, AmAllRoutes.SelEnd - AmAllRoutes.SelStart -1));
   end;
 
@@ -2527,7 +2527,7 @@ var
                                  TGridSelItem.Create(AHeader, SizeOf(HeaderLength), OffsetInRecord(HeaderValue, HeaderLength) ));
       VlTripInfo.Strings.AddPair('TotalItems',    Format('%d', [TotalItems]),
                                  TGridSelItem.Create(AHeader, SizeOf(TotalItems), OffsetInRecord(HeaderValue, TotalItems) ));
-      VlTripInfo.Strings.AddPair('--- End Trip header', DupeString('-', DupeCount),
+      VlTripInfo.Strings.AddPair('*** End Trip header', DupeString('-', DupeCount),
                                  TGridSelItem.Create(AHeader, 1, AHeader.SelStart + SizeOf(HeaderValue) -1 ));
     end;
   end;

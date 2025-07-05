@@ -50,7 +50,6 @@ type
     procedure DoRoutePointUpdated;
     function CheckEmptyField(Sender: TField): boolean;
     procedure SetAddressFromCoords(Sender: TObject; Coords: string);
-    procedure SetDefaultName(IdToAssign: integer);
     procedure OnSetAnalyzePrefs(Sender: TObject);
     procedure AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
   public
@@ -61,11 +60,14 @@ type
     procedure SaveTrip;
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
+    procedure SetDefaultName(IdToAssign: integer);
     function AddressFromCoords(const Lat, Lon: string): string;
     procedure LookUpAddress;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure ImportFromGPX(const GPXFile: string);
     procedure ExportToGPX(const GPXFile: string);
+    procedure ImportFromCSV(const CSVFile: string);
+    procedure ExportToCSV(const CSVFile: string);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
@@ -81,7 +83,7 @@ implementation
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
 uses
-  System.StrUtils, System.Variants, System.DateUtils,
+  System.StrUtils, System.Variants, System.DateUtils, System.Math,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
   UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxObjects, UFrmSelectGPX;
@@ -255,7 +257,7 @@ end;
 procedure TDmRoutePoints.CdsRoutePointsViaPointSetText(Sender: TField; const Text: string);
 begin
   Sender.clear;
-  if StartsText(Text, BooleanValues[Sender.Tag,0]) then
+  if StartsText(Text, BooleanValues[Sender.Tag, 0]) then
      Sender.Value := BooleanTrue
   else
      Sender.Value := BooleanFalse;
@@ -573,13 +575,23 @@ end;
 procedure TDmRoutePoints.LookUpAddress;
 var
   Place: TPlace;
+  Lat, Lon: string;
 begin
-  Place := GetPlaceOfCoords(CdsRoutePointsLat.AsString,
-                            CdsRoutePointsLon.AsString);
-  if (Place = nil) then
-    CdsRoutePointsAddress.AsString := AddressFromCoords(CdsRoutePointsLat.AsString, CdsRoutePointsLon.AsString)
+  if (ValidLatLon(CdsRoutePointsLat.AsString, CdsRoutePointsLon.AsString)) then
+  begin
+    Place := GetPlaceOfCoords(CdsRoutePointsLat.AsString,
+                              CdsRoutePointsLon.AsString);
+    if (Place = nil) then
+      CdsRoutePointsAddress.AsString := AddressFromCoords(CdsRoutePointsLat.AsString, CdsRoutePointsLon.AsString)
+    else
+      CdsRoutePointsAddress.AsString := Place.RoutePlace;
+  end
   else
-    CdsRoutePointsAddress.AsString := Place.RoutePlace;
+  begin
+    GetCoordsOfPlace(CdsRoutePointsAddress.AsString, Lat, Lon);
+    CdsRoutePointsLat.AsString := Lat;
+    CdsRoutePointsLon.AsString := Lon;
+  end;
 end;
 
 procedure TDmRoutePoints.CoordinatesApplied(Sender: TObject; Coords: string);
@@ -752,6 +764,134 @@ begin
   finally
     Xml.Free;
     DefProcessOptions.Free;
+    CdsRoutePoints.EnableControls;
+  end;
+end;
+
+procedure TDmRoutePoints.ImportFromCSV(const CSVFile: string);
+var
+  Reader: TStringList;
+  ALine, AField: string;
+  Lst: TStringList;
+  PointId, Column: integer;
+  Columns: array of TField;
+  Heading: boolean;
+  BoolValue: integer;
+begin
+  Heading := true;
+  SetLength(Columns, 0);
+
+  Reader := TStringList.Create;
+  Reader.LoadFromFile(CSVFile);
+  PointId := CdsRoutePoints.RecordCount +1;
+  CdsRoutePoints.DisableControls;
+  try
+    Lst := TStringList.Create;
+    try
+      Lst.QuoteChar := '"';
+      Lst.Delimiter := ';';
+      Lst.StrictDelimiter := true;
+      for ALine in Reader do
+      begin
+        Lst.DelimitedText := Aline;
+
+        if (Heading) then
+        begin
+          Heading := false;
+          SetLength(Columns, Lst.Count);
+          for Column := 0 to Lst.Count -1 do
+          begin
+            AField := Lst[Column];
+            if (ContainsText(AField, 'Route')) then
+              Columns[Column] := CdsRoutePointsName
+            else if (ContainsText(AField, 'Type')) then
+              Columns[Column] := CdsRoutePointsViaPoint
+            else if (ContainsText(AField, 'Lat')) then
+              Columns[Column] := CdsRoutePointsLat
+            else if (ContainsText(AField, 'Lon')) then
+              Columns[Column] := CdsRoutePointsLon
+            else if (ContainsText(AField, 'Address')) then
+              Columns[Column] := CdsRoutePointsAddress
+            else
+              Columns[Column] := nil;
+          end;
+          continue;
+        end;
+        CdsRoutePoints.Last;
+        CdsRoutePoints.Insert;
+        for Column := 0 to Min(Lst.Count -1, High(Columns)) do
+        begin
+          AField := Lst[Column];
+          if (Columns[Column] = nil) then
+            continue;
+          if (Columns[Column] is TBooleanField) then
+          begin
+            Columns[Column].AsBoolean := false;
+            for BoolValue := Low(BooleanValues) to High(BooleanValues) do
+            if (SameText(AField, BooleanValues[BoolValue, 0])) then
+            begin
+              Columns[Column].AsBoolean := true;
+              break;
+            end;
+            continue;
+          end;
+          Columns[Column].AsString := AField;
+        end;
+        if (CdsRoutePointsViaPoint.IsNull) then
+          CdsRoutePointsViaPoint.AsBoolean := true;
+        SetDefaultName(PointId);
+        Inc(PointId);
+        CdsRoutePoints.Post;
+      end;
+    finally
+      Lst.Free;
+      CdsRoutePoints.EnableControls;
+    end;
+ finally
+    Reader.Free;
+  end;
+end;
+
+procedure TDmRoutePoints.ExportToCSV(const CSVFile: string);
+var
+  Writer: TTextWriter;
+  Lst: TStringList;
+  ViaShape: string;
+begin
+  CdsRoutePoints.DisableControls;
+  Writer := TStreamWriter.Create(CSVFile, false, TEncoding.UTF8);
+  try
+    Lst := TStringList.Create;
+    try
+      Lst.QuoteChar := '"';
+      Lst.Delimiter := ';';
+      Lst.StrictDelimiter := true;
+
+      Lst.AddStrings(['Route point', 'Point type', 'Lat', 'Lon', 'Address']);
+      Writer.WriteLine(Lst.DelimitedText);
+
+      CdsRoutePoints.First;
+      while not CdsRoutePoints.Eof do
+      begin
+        if SameText(CdsRoutePointsViaPoint.AsString, BooleanTrue) then
+           ViaShape := BooleanValues[CdsRoutePoints.Tag, 0]
+        else
+           ViaShape := BooleanValues[CdsRoutePoints.Tag, 1];
+
+        Lst.Clear;
+        Lst.AddStrings([CdsRoutePointsName.AsString,
+                        ViaShape,
+                        CdsRoutePointsLat.AsString,
+                        CdsRoutePointsLon.AsString,
+                        CdsRoutePointsAddress.AsString]);
+        Writer.WriteLine(Lst.DelimitedText);
+        CdsRoutePoints.Next;
+      end;
+    finally
+      Lst.Free;
+    end;
+  finally
+    Writer.Free;
     CdsRoutePoints.EnableControls;
   end;
 end;

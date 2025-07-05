@@ -62,7 +62,8 @@ begin
       for Index := 0 to Strings.Count -1 do
       begin
         Lst.Clear;
-        Lst.AddStrings([#9 + Strings.KeyNames[Index], #9 + Strings.ValueFromIndex[Index]]);
+        Lst.AddStrings([Strings.KeyNames[Index],
+                        Strings.ValueFromIndex[Index]]);
         Writer.WriteLine(Lst.DelimitedText);
       end;
     finally
