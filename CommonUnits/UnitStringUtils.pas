@@ -169,9 +169,9 @@ var
   ADouble: Double;
 begin
   result := TryStrToFloat(Lat, ADouble, FloatFormatSettings);
-  result := result and (Abs(ADouble) <= 90);
+  result := result and (Abs(ADouble) <= 90) and (Abs(ADouble) > 0);
   result := result and TryStrToFloat(Lon, ADouble, FloatFormatSettings);
-  result := result and (Abs(ADouble) <= 180);
+  result := result and (Abs(ADouble) <= 180) and (Abs(ADouble) > 0);
 end;
 
 function AdjustUsingRound(const ADecimal: string; No_Decimals: integer): string;
