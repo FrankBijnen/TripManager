@@ -38,6 +38,7 @@ const
   CurrentTrip             = 'CurrentTrip';
   CurrentGPI              = 'CurrentGPI';
   FileSysTrip             = 'FileSys';
+  CompareTrip             = 'Compare';
 
   WM_DIRCHANGED           = WM_USER + 1;
   WM_ADDRLOOKUP           = WM_USER + 2;
@@ -417,6 +418,15 @@ begin
     Rc := FindNext(Fs);
   end;
   FindClose(Fs);
+end;
+
+procedure DeleteCompareFiles;
+begin
+  DeleteTempFiles(GetOSMTemp, Format('\%s_%s%s%s',
+                                     [App_Prefix,
+                                     CompareTrip,
+                                     '*',
+                                     GetTracksExt]));
 end;
 
 procedure TFrmTripManager.CheckSupportedModel(const ZumoModel: TZumoModel; const AllFuncs: array of TGPXFunc);
@@ -1173,14 +1183,13 @@ begin
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
-  DeleteTempFiles(GetOSMTemp, GetTracksTmp);
   OsmTrack := TStringList.Create;
   GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
   try
     GPXFileObj.AnalyzeGpx;
     GpxSelected := GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
-                                    'Select 1 Route or Track',
-                                     TagsToShow, ATripList.GetValue('mTripName'));
+                                               'Select 1 Route or Track',
+                                                TagsToShow, ATripList.GetValue('mTripName'));
     if (GpXSelected) then
     begin
       SetCursor(CrWait);
@@ -1190,9 +1199,10 @@ begin
         TTagsToShow.RteTrk:
           GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
       end;
+      DeleteCompareFiles;
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
-                                              FileSysTrip,
+                                              CompareTrip,
                                               ExtractFileName(ShellListView1.SelectedFolder.PathName),
                                               GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
@@ -2024,8 +2034,10 @@ var
 begin
   if not Assigned(CurrentTrip) then
     exit;
+
   OsmTrack := TStringList.Create;
   try
+    DeleteCompareFiles;
     CurrentTrip.CreateOSMPoints(OsmTrack, OSMColor(GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val)));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     if (CreateOSMMapHtml) then
@@ -2043,7 +2055,6 @@ var
 begin
   if not Assigned(CurrentGpi) then
     exit;
-
   OsmTrack := TStringList.Create;
   try
     Cnt := 0;
@@ -2051,8 +2062,9 @@ begin
     begin
       OsmTrack.Add(Format('AddPOI(%d, "%s", %s, %s, "./%s.png");',
                           [Cnt, EscapeDQuote(string(AGPXwayPoint.Name)), AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
-	  Inc(Cnt);	
+  	  Inc(Cnt);
     end;
+    DeleteCompareFiles;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     if (CreateOSMMapHtml) then
       EdgeBrowser1.Navigate(GetHtmlTmp);
