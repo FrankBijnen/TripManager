@@ -63,6 +63,8 @@ procedure TDBGrid.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Inte
 begin
   inherited;
 
+  if (Button <> TMouseButton.mbLeft) then
+    exit;
   if (ssCtrl in Shift) then
     exit;
 
