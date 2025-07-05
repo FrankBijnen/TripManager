@@ -337,7 +337,7 @@ procedure TFrmTripEditor.Paste1Click(Sender: TObject);
 var
   PointsList: TStringList;
   PointID, Index: integer;
-  ALine: string;
+  ViaShape, ALine: string;
 begin
   PointsList := TStringList.Create;
   PointID  := DmRoutePoints.CdsRoutePoints.RecordCount + 1;
@@ -349,12 +349,14 @@ begin
       ALine := PointsList[Index];
       DmRoutePoints.CdsRoutePoints.Insert;
       DmRoutePoints.CdsRoutePointsName.AsString := NextField(ALine, #9);
-      DmRoutePoints.CdsRoutePointsViaPoint.AsString := NextField(ALine, #9);
+      ViaShape := NextField(ALine, #9);
       DmRoutePoints.CdsRoutePointsLat.AsString := NextField(ALine, #9);
       DmRoutePoints.CdsRoutePointsLon.AsString := NextField(ALine, #9);
       DmRoutePoints.CdsRoutePointsAddress.AsString := NextField(ALine, #9);
+
       // Allow for missing data
       DmRoutePoints.SetDefaultName(PointID + Index);
+      DmRoutePoints.SetBoolValue(ViaShape, DmRoutePoints.CdsRoutePointsViaPoint);
       if (DmRoutePoints.CdsRoutePointsViaPoint.IsNull) then
          DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := true;
 

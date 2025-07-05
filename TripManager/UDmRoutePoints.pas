@@ -1,5 +1,5 @@
 unit UDmRoutePoints;
-
+{$WARN SYMBOL_PLATFORM OFF}
 interface
 
 uses
@@ -61,6 +61,9 @@ type
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
     procedure SetDefaultName(IdToAssign: integer);
+    procedure SetBoolValue(ABoolValue: string; ABoolField: TField);
+    function FromRegional(ANum: string): string;
+    function ToRegional(ANum: string): string;
     function AddressFromCoords(const Lat, Lon: string): string;
     procedure LookUpAddress;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
@@ -97,7 +100,8 @@ const
   RtePt = 'RtePt ';
 
 var
-  FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
+  RegionalFormatSettings: TFormatSettings;
+  FloatFormatSettings: TFormatSettings;
 
 function TDmRoutePoints.CheckEmptyField(Sender: TField): boolean;
 begin
@@ -108,6 +112,7 @@ end;
 
 procedure TDmRoutePoints.DataModuleCreate(Sender: TObject);
 begin
+  RegionalFormatSettings := TFormatSettings.Create(GetThreadLocale);
   FloatFormatSettings.ThousandSeparator := ',';
   FloatFormatSettings.DecimalSeparator := '.';
   with TmRoutePreference.Create(TRoutePreference.rmFasterTime) do
@@ -562,6 +567,29 @@ begin
     CdsRoutePointsName.AsString := Format(RtePt + '%d', [IdToAssign]);
 end;
 
+procedure TDmRoutePoints.SetBoolValue(ABoolValue: string; ABoolField: TField);
+var
+  BoolValue: integer;
+begin
+  ABoolField.AsBoolean := false;
+  for BoolValue := Low(BooleanValues) to High(BooleanValues) do
+  if (SameText(ABoolValue, BooleanValues[BoolValue, 0])) then
+  begin
+    ABoolField.AsBoolean := true;
+    break;
+  end;
+end;
+
+function TDmRoutePoints.FromRegional(ANum: string): string;
+begin
+  result := ReplaceAll(ANum, [RegionalFormatSettings.DecimalSeparator], [FloatFormatSettings.DecimalSeparator]);
+end;
+
+function TDmRoutePoints.ToRegional(ANum: string): string;
+begin
+  result := ReplaceAll(ANum, [FloatFormatSettings.DecimalSeparator], [RegionalFormatSettings.DecimalSeparator]);
+end;
+
 procedure TDmRoutePoints.SetAddressFromCoords(Sender: TObject; Coords: string);
 var
   Lat, Lon: string;
@@ -776,7 +804,6 @@ var
   PointId, Column: integer;
   Columns: array of TField;
   Heading: boolean;
-  BoolValue: integer;
 begin
   Heading := true;
   SetLength(Columns, 0);
@@ -826,13 +853,7 @@ begin
             continue;
           if (Columns[Column] is TBooleanField) then
           begin
-            Columns[Column].AsBoolean := false;
-            for BoolValue := Low(BooleanValues) to High(BooleanValues) do
-            if (SameText(AField, BooleanValues[BoolValue, 0])) then
-            begin
-              Columns[Column].AsBoolean := true;
-              break;
-            end;
+            SetBoolValue(AField, Columns[Column]);
             continue;
           end;
           Columns[Column].AsString := AField;
@@ -840,6 +861,8 @@ begin
         if (CdsRoutePointsViaPoint.IsNull) then
           CdsRoutePointsViaPoint.AsBoolean := true;
         SetDefaultName(PointId);
+        CdsRoutePointsLat.AsString := FromRegional(CdsRoutePointsLat.AsString);
+        CdsRoutePointsLon.AsString := FromRegional(CdsRoutePointsLon.AsString);
         Inc(PointId);
         CdsRoutePoints.Post;
       end;
@@ -881,8 +904,8 @@ begin
         Lst.Clear;
         Lst.AddStrings([CdsRoutePointsName.AsString,
                         ViaShape,
-                        CdsRoutePointsLat.AsString,
-                        CdsRoutePointsLon.AsString,
+                        ToRegional(CdsRoutePointsLat.AsString),
+                        ToRegional(CdsRoutePointsLon.AsString),
                         CdsRoutePointsAddress.AsString]);
         Writer.WriteLine(Lst.DelimitedText);
         CdsRoutePoints.Next;
