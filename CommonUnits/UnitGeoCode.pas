@@ -19,8 +19,7 @@ const
   Reg_GeoCodeApiKey       = 'GeoCodeApiKey';
   Reg_AddressFormat       = 'AddressFormat';
   Reg_ThrottleGeoCode     = 'ThrottleGeoCode';
-  Reg_EnableSendTo        = 'EnableSendTo';
-  Reg_EnableDirFuncs      = 'EnableDirFuncs';
+  Reg_SelectUniqPlace     = 'SelectUniqPlace';
 
 type
 
@@ -372,6 +371,15 @@ begin
   Lon := '';
   with FrmPlaces do
   begin
+
+    if (GetRegistry(Reg_SelectUniqPlace, false)) and
+       (Listview1.Items.Count = 1) then
+    begin
+      Lat := Listview1.Items[0].Caption;
+      Lon := Listview1.Items[0].Subitems[0];
+      exit(IDOK);
+    end;
+
     result := ShowModal;
     if (result <> IDOK) then
       exit;

@@ -13,6 +13,7 @@ type
     LbLog: TListBox;
     procedure BtnCloseClick(Sender: TObject);
     procedure LbLogClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
   public
@@ -30,6 +31,12 @@ implementation
 procedure TFrmShowLog.BtnCloseClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TFrmShowLog.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = Chr(VK_ESCAPE)) then
+    Close;
 end;
 
 procedure TFrmShowLog.LbLogClick(Sender: TObject);

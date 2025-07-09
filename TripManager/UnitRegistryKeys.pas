@@ -47,6 +47,8 @@ const
   Reg_PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
   Reg_PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
   Reg_PrefDevPoiFolder_Val    = 'Internal Storage\POI';
+  Reg_EnableSendTo            = 'EnableSendTo';
+  Reg_EnableDirFuncs          = 'EnableDirFuncs';
   Reg_WarnModel_Key           = 'WarnModel';
   Reg_TripColor_Key           = 'TripColor';
   Reg_TripColor_Val           = 'Magenta';

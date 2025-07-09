@@ -27,7 +27,6 @@ const
   Reg_FuncKml                 = 'FuncKml';
   Reg_FuncHtml                = 'FuncHtml';
 
-
 type
   TProcessOptions = class
     LookUpWindow: HWND;                       // 0, Window handle
@@ -139,8 +138,11 @@ type
     procedure DoPrefSaved;
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
     function DistanceStr: string;
+    function GetDistOKMeters: double;
+    property DistOKMeters: double read GetDistOKMeters;
     class procedure SetPrefs(TvSelections: TTreeview);
     class function StorePrefs(TvSelections: TTreeview): TGPXFuncArray;
+
   end;
 
 var
@@ -296,6 +298,11 @@ begin
     result := 'Mi'
   else
     result := 'Km';
+end;
+
+function TProcessOptions.GetDistOKMeters: double;
+begin
+  result := CompareDistanceOK / 1000;
 end;
 
 class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview);

@@ -23,7 +23,6 @@ object FrmAdvSettings: TFrmAdvSettings
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 543
     DesignSize = (
       587
       31)
@@ -58,7 +57,6 @@ object FrmAdvSettings: TFrmAdvSettings
     ActivePage = TabGeneral
     Align = alClient
     TabOrder = 1
-    ExplicitHeight = 543
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
@@ -75,7 +73,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
-        ExplicitHeight = 513
         RowHeights = (
           24
           24

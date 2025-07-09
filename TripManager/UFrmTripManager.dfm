@@ -823,6 +823,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -830,7 +831,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -1206,28 +1207,33 @@ object FrmTripManager: TFrmTripManager
     object N8: TMenuItem
       Caption = '-'
     end
-    object CompareGpxTrack: TMenuItem
-      Tag = 10
-      Caption = 'Compare as track with GPX'
-      OnClick = CompareWithGpx
-    end
-    object CompareGpxRoute: TMenuItem
-      Tag = 20
-      Caption = 'Compare as route with GPX (BC Calculated)'
-      OnClick = CompareWithGpx
-    end
-    object N10: TMenuItem
-      Caption = '-'
-    end
-    object NextDiff: TMenuItem
-      Caption = 'Next Difference'
-      ShortCut = 16452
-      OnClick = NextDiffClick
-    end
-    object PrevDiff: TMenuItem
-      Caption = 'Previous difference'
-      ShortCut = 16469
-      OnClick = PrevDiffClick
+    object CompareTriptoGPX1: TMenuItem
+      Caption = 'Compare Trip to GPX'
+      object MnuCompareGpxTrack: TMenuItem
+        Tag = 10
+        Caption = 'By Point Location (Track or Route)'
+        ShortCut = 49219
+        OnClick = CompareWithGpx
+      end
+      object MnuCompareGpxRoute: TMenuItem
+        Tag = 20
+        Caption = 'By Point Location and Road Id (BC Calculated Route)'
+        ShortCut = 49218
+        OnClick = CompareWithGpx
+      end
+      object N11: TMenuItem
+        Caption = '-'
+      end
+      object MnuNextDiff: TMenuItem
+        Caption = 'Next Difference'
+        ShortCut = 16452
+        OnClick = MnuNextDiffClick
+      end
+      object MnuPrevDiff: TMenuItem
+        Caption = 'Previous difference'
+        ShortCut = 16469
+        OnClick = MnuPrevDiffClick
+      end
     end
   end
   object SaveTrip: TSaveDialog

@@ -49,6 +49,7 @@ uses
   UnitStringUtils in '..\CommonUnits\UnitStringUtils.pas',
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
+  UnitGpxTripCompare in '..\CommonUnits\UnitGpxTripCompare.pas',
   UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitGpxDefs in '..\CommonUnits\UnitGpxDefs.pas',
   UnitProcessOptions in '..\CommonUnits\UnitProcessOptions.pas',

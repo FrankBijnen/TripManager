@@ -10,6 +10,8 @@ object FrmShowLog: TFrmShowLog
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  KeyPreview = True
+  OnKeyPress = FormKeyPress
   TextHeight = 15
   object PnlBot: TPanel
     Left = 0
@@ -27,7 +29,7 @@ object FrmShowLog: TFrmShowLog
       Width = 75
       Height = 25
       Anchors = [akRight, akBottom]
-      Kind = bkClose
+      Caption = '&Close'
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnCloseClick
@@ -39,9 +41,14 @@ object FrmShowLog: TFrmShowLog
     Width = 624
     Height = 408
     Align = alClient
-    ItemHeight = 15
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Consolas'
+    Font.Style = []
+    ItemHeight = 13
+    ParentFont = False
     TabOrder = 1
     OnClick = LbLogClick
-    ExplicitTop = -3
   end
 end

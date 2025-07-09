@@ -673,7 +673,8 @@ begin
   end
   else
   begin
-    DmRoutePoints.CdsRoutePointsAddress.AsString := FindSubNodeValue(ARoutePoint, 'cmt');
+    DmRoutePoints.CdsRoutePointsAddress.AsString := ReplaceAll(FindSubNodeValue(ARoutePoint, 'cmt'),
+                                                               [#13#10, #10], [', ',', ']);
     if (DmRoutePoints.CdsRoutePointsAddress.AsString = '') then
       DmRoutePoints.CdsRoutePointsAddress.AsString := DmRoutePoints.AddressFromCoords(Lat, Lon);
     if (ExtensionsNode <> nil) then
@@ -906,7 +907,7 @@ begin
                         ViaShape,
                         ToRegional(CdsRoutePointsLat.AsString),
                         ToRegional(CdsRoutePointsLon.AsString),
-                        CdsRoutePointsAddress.AsString]);
+                        ReplaceAll(CdsRoutePointsAddress.AsString, [#13#10, #10], [', ',', ']) ]);
         Writer.WriteLine(Lst.DelimitedText);
         CdsRoutePoints.Next;
       end;

@@ -8,9 +8,8 @@ uses
   Winapi.Windows;
 
 const
-  XT2Name     = 'zūmo XT2';
-  XTName      = 'zūmo XT';
-
+  XTName                  = 'zūmo XT';
+  XT2Name                 = 'zūmo XT2';
   XT2_VehicleProfileGuid  = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
   XT2_VehicleProfileHash  = '135656608';
   XT2_VehicleId           = '1';
@@ -575,6 +574,9 @@ type
     function SubLength: Cardinal; override;
     function GetName: string;
     function GetMapCoords: string;
+    function GetMapSegRoad: string;
+    function GetPointType: string;
+    function GetDirection: string;
   public
     function Lat: Double;
     function Lon: Double;
@@ -582,6 +584,9 @@ type
     property DisplayName: string read GetName;
     property UdbDirValue: TUdbDirValue read FValue;
     property MapCoords: string read GetMapCoords;
+    property MapSegRoad: string read GetMapSegRoad;
+    property PointType: string read GetPointType;
+    property Direction: string read GetDirection;
     property Status: TUdbDirStatus read FUdbDirStatus write FUdbDirStatus;
   end;
   TUdbDirList = Tlist<TUdbDir>;
@@ -2111,6 +2116,67 @@ function TUdbDir.GetMapCoords: string;
 begin
   result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
                   [Lat, Lon], FloatFormatSettings);
+end;
+
+function TUdbDir.GetMapSegRoad: string;
+begin
+  result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8) +  IntToHex(Swap32(UdbDirValue.SubClass.RoadId), 8);
+end;
+
+function TUdbDir.GetPointType: string;
+begin
+  case FValue.SubClass.PointType of
+    3:
+      result := 'Route point';
+    31:
+      result := 'Intermediate';
+    33:
+      result := 'Start/begin segment';
+    else
+     result := 'Unknown';
+  end;
+  result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.PointType, 2)]);
+end;
+
+function TUdbDir.GetDirection: string;
+begin
+  case FValue.SubClass.Direction of
+    0:
+      result := 'Continue';
+    2, 15, 18:
+      result := 'Right';
+    3:
+      result := 'Sharp Right';
+    4:
+      result := 'U-Turn';
+    5:
+      result := 'Sharp Left';
+    6, 16, 19:
+      result := 'Left';
+    8, 11, 13, 17, 20, 21:
+      result := 'Ahead';
+    10:
+      result := 'Turn Right';
+    12:
+      result := 'Ferry';
+    14:
+      result := 'Roundabout';
+    22:
+      result := 'Leave route point';
+    23:
+      result := 'Approach route point';
+    24:
+      result := 'Turn Left';
+    25:
+      result := 'Turn Right';
+    29, 34, 35, 36:
+      result := 'Route point';
+    79:
+      result := 'Exit Roundabout';
+    else
+      result := 'Unknown';
+  end;
+  result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.Direction, 2)]);
 end;
 
 function TUdbDir.IsTurn: boolean;

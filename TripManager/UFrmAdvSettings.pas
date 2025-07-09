@@ -201,6 +201,7 @@ begin
     AddGridLine(GridGeoCodeSettings, CurRow, Reg_GeoCodeUrl,       GeoSettings.GeoCodeUrl,    'Open URL in a browser for more info.');
     AddGridLine(GridGeoCodeSettings, CurRow, Reg_GeoCodeApiKey,    GeoSettings.GeoCodeApiKey, 'Enter your API_Key here and click Validate');
     AddGridLine(GridGeoCodeSettings, CurRow, Reg_ThrottleGeoCode,  IntToStr(GeoSettings.ThrottleGeoCode), 'Minimum time in ms between calls');
+    AddGridLine(GridGeoCodeSettings, CurRow, Reg_SelectUniqPlace,  'False',                   'Auto select unique places');
     GridGeoCodeSettings.RowCount := CurRow;
 
     AddGridHeader(GridGeoCodeSettings);

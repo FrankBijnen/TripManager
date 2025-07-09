@@ -172,14 +172,15 @@ type
     StatusTimer: TTimer;
     BtnSendTo: TButton;
     N8: TMenuItem;
-    CompareGpxRoute: TMenuItem;
+    MnuCompareGpxRoute: TMenuItem;
     N9: TMenuItem;
     DeleteDirs: TMenuItem;
     NewDirectory: TMenuItem;
-    NextDiff: TMenuItem;
-    N10: TMenuItem;
-    PrevDiff: TMenuItem;
-    CompareGpxTrack: TMenuItem;
+    MnuNextDiff: TMenuItem;
+    MnuPrevDiff: TMenuItem;
+    MnuCompareGpxTrack: TMenuItem;
+    CompareTriptoGPX1: TMenuItem;
+    N11: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -264,8 +265,8 @@ type
     procedure PopupTripInfoPopup(Sender: TObject);
     procedure DeleteDirsClick(Sender: TObject);
     procedure NewDirectoryClick(Sender: TObject);
-    procedure NextDiffClick(Sender: TObject);
-    procedure PrevDiffClick(Sender: TObject);
+    procedure MnuNextDiffClick(Sender: TObject);
+    procedure MnuPrevDiffClick(Sender: TObject);
     procedure TvTripKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
@@ -389,6 +390,7 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo,
   Winapi.ShellAPI, Vcl.Clipbrd,
   MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
+  UnitGpxTripCompare,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdditional, UFrmTransferOptions, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog;
@@ -1164,27 +1166,38 @@ end;
 
 procedure TFrmTripManager.CompareWithGpx(Sender: TObject);
 var
-  GPXFileObj: TGPXFile;
+  GPXFileObj: TGPXTripCompare;
   CrWait, CrNormal: HCURSOR;
   OsmTrack: TStringList;
   GpxSelected: boolean;
   TagsToShow: TTagsToShow;
+  AnItem: TListItem;
 begin
   if (ATripList = nil) then
     exit;
 
   TagsToShow := TTagsToShow(TMenuItem(Sender).Tag);  //Rte = 20, Track = 30
-  OpenTrip.DefaultExt := 'gpx';
-  OpenTrip.Filter := '*.gpx|*.gpx';
+  OpenTrip.DefaultExt := GpxExtension;
+  OpenTrip.Filter := GpxMask + '|' + GpxMask;
   OpenTrip.InitialDir := ShellTreeView1.Path;
-  OpenTrip.FileName := '';
+
+  // Select the fist GPX
+  for AnItem in ShellListView1.Items do
+  begin
+    if EndsText(GpxExtension, ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName)) then
+    begin
+      OpenTrip.FileName := ExtractFileName(ShellListView1.Folders[AnItem.Index].PathName);
+      break;
+    end;
+  end;
+
   if not OpenTrip.Execute then
     exit;
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   OsmTrack := TStringList.Create;
-  GPXFileObj := TGPXFile.Create(OpenTrip.FileName, nil, nil);
+  GPXFileObj := TGPXTripCompare.Create(OpenTrip.FileName, ATripList);
   try
     GPXFileObj.AnalyzeGpx;
     GpxSelected := GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
@@ -1195,9 +1208,9 @@ begin
       SetCursor(CrWait);
       case (TagsToShow) of
         TTagsToShow.Rte:
-          GPXFileObj.CompareGpxRoute(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+          GPXFileObj.CompareGpxRoute(FrmShowLog.LbLog.Items, OsmTrack);
         TTagsToShow.RteTrk:
-          GPXFileObj.CompareGpxTrack(ATripList, FrmShowLog.LbLog.Items, OsmTrack);
+          GPXFileObj.CompareGpxTrack(FrmShowLog.LbLog.Items, OsmTrack);
       end;
       DeleteCompareFiles;
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
@@ -1212,9 +1225,11 @@ begin
   finally
     OsmTrack.Free;
     GPXFileObj.Free;
-    SetCursor(CrNormal);
+
     TvTrip.Invalidate;
     VlTripInfo.Invalidate;
+
+    SetCursor(CrNormal);
     if (CreateOSMMapHtml) then
       EdgeBrowser1.Navigate(GetHtmlTmp);
   end;
@@ -1285,12 +1300,11 @@ begin
   SaveGPX1.Enabled := (ATripList <> nil) and
                       (ATripList.ItemList.Count > 0);
 
-  CompareGpxRoute.Enabled := SaveGPX1.Enabled;
-  CompareGpxTrack.Enabled := SaveGPX1.Enabled;
+  MnuCompareGpxRoute.Enabled := SaveGPX1.Enabled;
+  MnuCompareGpxTrack.Enabled := SaveGPX1.Enabled;
 
-  PrevDiff.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
-  NextDiff.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
-
+  MnuPrevDiff.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
+  MnuNextDiff.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
 end;
 
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);
@@ -1490,7 +1504,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.NextDiffClick(Sender: TObject);
+procedure TFrmTripManager.MnuNextDiffClick(Sender: TObject);
 var
   ANode: TTreeNode;
 begin
@@ -1513,7 +1527,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.PrevDiffClick(Sender: TObject);
+procedure TFrmTripManager.MnuPrevDiffClick(Sender: TObject);
 var
   ANode: TTreeNode;
 begin
@@ -2371,13 +2385,11 @@ var
 
     SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
                            SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment);
-    VlTripInfo.Strings.AddPair('PointType', Format('%d',
-                                 [AnUdbDir.UdbDirValue.SubClass.PointType]),
+    VlTripInfo.Strings.AddPair('PointType', AnUdbDir.PointType,
                               TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType), SelStart));
 
     SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType);
-    VlTripInfo.Strings.AddPair('Direction', Format('%d',
-                                 [AnUdbDir.UdbDirValue.SubClass.Direction]),
+    VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
                               TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction), SelStart));
 
     SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction);
@@ -2403,8 +2415,7 @@ var
                               TGridSelItem.Create(AnUdbDir, 1, SelStart));
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
-                 Format('%s Type:%d', [AnUdbDir.DisplayName,
-                                       AnUdbDir.UdbDirValue.SubClass.PointType]), '', RoutePointTimeOut);
+                 Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), '', RoutePointTimeOut);
   end;
 
 
@@ -2766,12 +2777,12 @@ begin
       VK_DOWN:
         begin
           Key := 0;
-          NextDiffClick(NextDiff);
+          MnuNextDiffClick(MnuNextDiff);
         end;
       VK_UP:
         begin
           Key := 0;
-          PrevDiffClick(PrevDiff);
+          MnuPrevDiffClick(MnuPrevDiff);
         end;
     end;
   end;
@@ -4181,6 +4192,5 @@ end;
 initialization
   FormatSettings.ThousandSeparator := ',';
   FormatSettings.DecimalSeparator := '.';
-
 
 end.
