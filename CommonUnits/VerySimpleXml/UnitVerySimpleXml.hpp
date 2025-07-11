@@ -45,6 +45,7 @@ typedef Xml::Verysimple::TXmlAttributeList TXmlVSAttributeList;
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::UnicodeString __fastcall XMLPrefix(TXmlVSNode* const AName);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall FindSubNodeValue(TXmlVSNode* ANode, System::UnicodeString SubName);
+extern DELPHI_PACKAGE TXmlVSNode* __fastcall InitGarminGpx(TXmlVSDocument* GarminGPX);
 }	/* namespace Unitverysimplexml */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITVERYSIMPLEXML)
 using namespace Unitverysimplexml;

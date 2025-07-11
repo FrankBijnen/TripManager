@@ -81,16 +81,17 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-#define GeoCodeUrl L"GeoCodeUrl"
-#define GeoCodeApiKey L"GeoCodeApiKey"
-#define AddressFormat L"AddressFormat"
-#define ThrottleGeoCode L"ThrottleGeoCode"
 #define DefState L"ISO3166-2-lvl4,state"
 #define DefCity L"village,town,city,municipality,hamlet"
 #define DefRoadHouse L"road+house_number"
 #define DefHouseRoad L"house_number+road"
 #define DefCountry L"country"
 #define DefPostalCode L"postcode"
+#define Reg_GeoCodeUrl L"GeoCodeUrl"
+#define Reg_GeoCodeApiKey L"GeoCodeApiKey"
+#define Reg_AddressFormat L"AddressFormat"
+#define Reg_ThrottleGeoCode L"ThrottleGeoCode"
+#define Reg_SelectUniqPlace L"SelectUniqPlace"
 static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
 extern DELPHI_PACKAGE GEOsettingsRec GeoSettings;
 extern DELPHI_PACKAGE TExecRestEvent ExecRestEvent;
@@ -98,7 +99,7 @@ extern DELPHI_PACKAGE System::UnicodeString GeoCodeCache;
 extern DELPHI_PACKAGE TPlace* __fastcall GetPlaceOfCoords(const System::UnicodeString Lat, const System::UnicodeString Lon, HWND hWnd = (HWND)(0x0), unsigned Msg = (unsigned)(0x0), bool UseCache = true);
 extern DELPHI_PACKAGE void __fastcall ClearCoordCache();
 extern DELPHI_PACKAGE void __fastcall GetCoordsOfPlace(const System::UnicodeString Place, System::UnicodeString &Lat, System::UnicodeString &Lon);
-extern DELPHI_PACKAGE void __fastcall ReadGeoCodeSettings(const System::UnicodeString Reg_Key);
+extern DELPHI_PACKAGE void __fastcall ReadGeoCodeSettings();
 }	/* namespace Unitgeocode */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITGEOCODE)
 using namespace Unitgeocode;

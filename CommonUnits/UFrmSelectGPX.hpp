@@ -38,7 +38,7 @@ namespace Ufrmselectgpx
 //-- forward type declarations -----------------------------------------------
 class DELPHICLASS TFrmSelectGPX;
 //-- type declarations -------------------------------------------------------
-enum DECLSPEC_DENUM TTagsToShow : unsigned char { WptRte, RteTrk };
+enum DECLSPEC_DENUM TTagsToShow : unsigned char { WptRte = 1, RteTrk = 10, Rte = 20, Trk = 30 };
 
 class PASCALIMPLEMENTATION TFrmSelectGPX : public Vcl::Forms::TForm
 {
@@ -65,11 +65,12 @@ __published:
 	
 private:
 	TTagsToShow FTagsToShow;
+	System::UnicodeString FCheckMask;
 	
 public:
 	System::Classes::TStringList* AllTracks;
-	void __fastcall LoadTracks(System::UnicodeString DisplayColor, TTagsToShow TagsToShow);
-	System::UnicodeString __fastcall TrackSelectedColor(const System::UnicodeString TrackName);
+	void __fastcall LoadTracks(System::UnicodeString DisplayColor, TTagsToShow TagsToShow, System::UnicodeString CheckMask);
+	System::UnicodeString __fastcall TrackSelectedColor(const System::UnicodeString TrackName, const System::UnicodeString RteTrk);
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmSelectGPX(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmSelectGPX(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }

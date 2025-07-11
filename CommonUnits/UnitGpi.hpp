@@ -111,7 +111,8 @@ class PASCALIMPLEMENTATION TGPXBitmap : public System::TObject
 public:
 	TGPXString Bitmap;
 	System::Word BitmapId;
-	__fastcall TGPXBitmap();
+	TGPXString GpiSymbolsDir;
+	__fastcall TGPXBitmap(TGPXString SymbolsDir);
 	__fastcall virtual ~TGPXBitmap();
 };
 
@@ -513,8 +514,10 @@ public:
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE TGPXString GpiName;
 extern DELPHI_PACKAGE System::Word GpiVersion;
-extern DELPHI_PACKAGE TGPXString GpiSymbolsDir;
 extern DELPHI_PACKAGE unsigned DefTransparentColor;
+#define DefGpiSymbolsDir L"Symbols\\24x24\\"
+#define Reg_GPISymbolSize L"GPISymbolsSize"
+#define Reg_GPIProximity L"GPIProximity"
 extern DELPHI_PACKAGE System::Word HasPhone;
 extern DELPHI_PACKAGE System::Word HasEmail;
 extern DELPHI_PACKAGE System::Word HasCity;

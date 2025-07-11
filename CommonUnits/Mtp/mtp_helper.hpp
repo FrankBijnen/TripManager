@@ -36,8 +36,9 @@ namespace Mtp_helper
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::WideString CLIENT_NAME;
 static _DELPHI_CONST System::Int8 CLIENT_MAJOR_VER = System::Int8(0x1);
-static _DELPHI_CONST System::Int8 CLIENT_MINOR_VER = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 CLIENT_MINOR_VER = System::Int8(0x1);
 static _DELPHI_CONST System::Int8 CLIENT_REVISION = System::Int8(0x0);
+extern DELPHI_PACKAGE GUID CLSID_WPD_NAMESPACE_EXTENSION;
 extern DELPHI_PACKAGE GUID CLASS_PortableDeviceValues;
 extern DELPHI_PACKAGE GUID CLASS_PortableDevicePropVariantCollection;
 extern DELPHI_PACKAGE GUID CLASS_PortableDeviceKeyCollection;
@@ -268,6 +269,8 @@ extern DELPHI_PACKAGE GUID WPD_CLIENT_REVISION_FMTID;
 static _DELPHI_CONST System::Int8 WPD_CLIENT_REVISION_PID = System::Int8(0x5);
 extern DELPHI_PACKAGE GUID WPD_CLIENT_DESIRED_ACCESS_FMTID;
 static _DELPHI_CONST System::Int8 WPD_CLIENT_DESIRED_ACCESS_PID = System::Int8(0x9);
+extern DELPHI_PACKAGE GUID WPD_CLIENT_EVENT_COOKIE_FMTID;
+static _DELPHI_CONST System::Int8 WPD_CLIENT_EVENT_COOKIE_PID = System::Int8(0xb);
 extern DELPHI_PACKAGE GUID WPD_DEVICE_FRIENDLY_NAME_FMTID;
 static _DELPHI_CONST System::Int8 WPD_DEVICE_FRIENDLY_NAME_PID = System::Int8(0xc);
 extern DELPHI_PACKAGE GUID WPD_RESOURCE_DEFAULT_FMTID;
@@ -297,7 +300,9 @@ static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_REGULAR_EXPRESSION_PID 
 extern DELPHI_PACKAGE GUID WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_FMTID;
 static _DELPHI_CONST System::Int8 WPD_PROPERTY_ATTRIBUTE_MAX_SIZE_PID = System::Int8(0xd);
 #define WPD_DEVICE_OBJECT_ID L"DEVICE"
-extern DELPHI_PACKAGE bool __fastcall RenameObject(Unitmtpdevice::IMTPDevice Device, System::WideString ObjectId, System::WideString NewName);
+static _DELPHI_CONST System::Int8 PORTABLE_DEVICE_DELETE_NO_RECURSION = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 PORTABLE_DEVICE_DELETE_WITH_RECURSION = System::Int8(0x1);
+extern DELPHI_PACKAGE bool __fastcall RenameObject(Unitmtpdevice::IMTPDevice PortableDev, System::WideString ObjectId, System::WideString NewName);
 extern DELPHI_PACKAGE bool __fastcall ConnectToDevice(System::WideString SDev, Unitmtpdevice::IMTPDevice &PortableDev, bool Readonly = true);
 extern DELPHI_PACKAGE System::Classes::TList* __fastcall GetDevices();
 extern DELPHI_PACKAGE Portabledeviceapilib_tlb::_di_IEnumPortableDeviceObjectIDs __fastcall FirstStorageIDs(Unitmtpdevice::IMTPDevice PortableDev, System::UnicodeString DeviceRoot = L"DEVICE");
@@ -306,7 +311,8 @@ extern DELPHI_PACKAGE System::WideChar * __fastcall ReadFilesFromDevice(Unitmtpd
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForFile(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SPath, System::WideString SFile, Vcl::Comctrls::TListItem* AListItem = (Vcl::Comctrls::TListItem*)(0x0));
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetIdForPath(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SPath, System::UnicodeString &FriendlyPath);
 extern DELPHI_PACKAGE bool __fastcall GetFileFromDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NFile);
-extern DELPHI_PACKAGE bool __fastcall DelFileFromDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile);
+extern DELPHI_PACKAGE bool __fastcall DelFromDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, const bool Recurse = false);
+extern DELPHI_PACKAGE bool __fastcall CreatePath(Unitmtpdevice::IMTPDevice PortableDev, System::WideString Parent, System::WideString DirName);
 extern DELPHI_PACKAGE System::WideString __fastcall TransferNewFileToDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, System::WideString NewName = System::WideString());
 extern DELPHI_PACKAGE bool __fastcall TransferExistingFileToDevice(Unitmtpdevice::IMTPDevice PortableDev, System::WideString SFile, System::WideString SSaveTo, Vcl::Comctrls::TListItem* AListItem);
 }	/* namespace Mtp_helper */

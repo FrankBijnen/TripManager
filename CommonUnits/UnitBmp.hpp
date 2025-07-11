@@ -89,7 +89,8 @@ public:
 	void *Pb;
 	_TBitMapReader__1 ColPat;
 	_TBitMapReader__2 ScanLines;
-	__fastcall TBitMapReader(System::UTF8String ABitMap);
+	__fastcall TBitMapReader();
+	void __fastcall Load(System::UTF8String ABitMap);
 	__fastcall virtual ~TBitMapReader();
 };
 

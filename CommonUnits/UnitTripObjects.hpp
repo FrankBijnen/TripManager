@@ -101,6 +101,8 @@ enum DECLSPEC_DENUM TTransportMode : unsigned char { tmAutoMotive = 1, tmMotorcy
 
 enum DECLSPEC_DENUM TRoutePoint : unsigned char { rpVia, rpShaping, rpShapingXT2 };
 
+enum DECLSPEC_DENUM TUdbDirStatus : unsigned char { udsUnchecked, udsRoutePointNotFound, udsRoadNotFound, udsCoordsNotFound };
+
 typedef System::StaticArray<System::Classes::TIdentMapEntry, 2> Unittripobjects__1;
 
 typedef System::StaticArray<System::Classes::TIdentMapEntry, 8> Unittripobjects__2;
@@ -325,7 +327,7 @@ private:
 	virtual void __fastcall SetMapCoords(System::UnicodeString ACoords);
 	
 public:
-	__fastcall TmScPosn(float ALat, float ALon);
+	__fastcall TmScPosn(double ALat, double ALon);
 	virtual void __fastcall InitFromStream(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType, System::Classes::TStream* AStream);
 	__fastcall virtual ~TmScPosn();
 };
@@ -1038,9 +1040,10 @@ class PASCALIMPLEMENTATION TUdbDir : public TBaseItem
 	
 private:
 	TUdbDirValue FValue;
+	TUdbDirStatus FUdbDirStatus;
 	
 protected:
-	__fastcall TUdbDir(System::WideString AName, float ALat, float ALon, System::Byte APointType, System::Byte ADirection);
+	__fastcall TUdbDir(System::WideString AName, double ALat, double ALon, System::Byte APointType, System::Byte ADirection);
 	
 private:
 	virtual void __fastcall WritePrefix(System::Classes::TMemoryStream* AStream);
@@ -1049,6 +1052,9 @@ private:
 	virtual unsigned __fastcall SubLength();
 	System::UnicodeString __fastcall GetName();
 	System::UnicodeString __fastcall GetMapCoords();
+	System::UnicodeString __fastcall GetMapSegRoad();
+	System::UnicodeString __fastcall GetPointType();
+	System::UnicodeString __fastcall GetDirection();
 	
 public:
 	double __fastcall Lat();
@@ -1057,6 +1063,10 @@ public:
 	__property System::UnicodeString DisplayName = {read=GetName};
 	__property TUdbDirValue UdbDirValue = {read=FValue};
 	__property System::UnicodeString MapCoords = {read=GetMapCoords};
+	__property System::UnicodeString MapSegRoad = {read=GetMapSegRoad};
+	__property System::UnicodeString PointType = {read=GetPointType};
+	__property System::UnicodeString Direction = {read=GetDirection};
+	__property TUdbDirStatus Status = {read=FUdbDirStatus, write=FUdbDirStatus, nodefault};
 public:
 	/* TPersistent.Destroy */ inline __fastcall virtual ~TUdbDir() { }
 	
@@ -1195,9 +1205,10 @@ public:
 	TLocation* __fastcall GetRoutePoint(int RoutePointId);
 	TOSMRoutePoint __fastcall OSMRoutePoint(int RoutePointId);
 	TmArrival* __fastcall GetArrival();
-	void __fastcall CreateOSMPoints(System::Classes::TStringList* const OutStringList, const System::UnicodeString DisplayColor = L"Magenta");
+	void __fastcall CreateOSMPoints(System::Classes::TStringList* const OutStringList, const System::UnicodeString HTMLColor);
 	void __fastcall ForceRecalc(const TZumoModel AModel = (TZumoModel)(0x2), int ViaPointCount = 0x0);
 	void __fastcall CreateTemplate(const TZumoModel AModel, System::UnicodeString TripName);
+	void __fastcall SaveAsGPX(const System::UnicodeString GPXFile);
 	__property THeader* Header = {read=FHeader};
 	__property TItemList* ItemList = {read=FItemList};
 	__property TZumoModel ZumoModel = {read=GetZumoModel, nodefault};
@@ -1206,8 +1217,8 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-#define XT2Name L"z\u016bmo XT2"
 #define XTName L"z\u016bmo XT"
+#define XT2Name L"z\u016bmo XT2"
 #define XT2_VehicleProfileGuid L"dbcac367-42c5-4d01-17aa-ecfe025f2d1c"
 #define XT2_VehicleProfileHash L"135656608"
 static _DELPHI_CONST System::WideChar XT2_VehicleId = (System::WideChar)(0x31);

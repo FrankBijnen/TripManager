@@ -2131,7 +2131,7 @@ begin
     31:
       result := 'Intermediate';
     33:
-      result := 'Start/begin segment';
+      result := 'Begin or end segment';
     else
      result := 'Unknown';
   end;

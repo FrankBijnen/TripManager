@@ -22,6 +22,8 @@
 #include <System.Math.hpp>
 #include <Xml.XMLIntf.hpp>
 #include <UnitVerySimpleXml.hpp>
+#include <UnitGpxDefs.hpp>
+#include <UnitProcessOptions.hpp>
 #include <kml_helper.hpp>
 #include <UFrmSelectGPX.hpp>
 #include <unitTripObjects.hpp>
@@ -35,93 +37,8 @@
 namespace Unitgpxobjects
 {
 //-- forward type declarations -----------------------------------------------
-struct TCoord;
-class DELPHICLASS TProcessOptions;
 class DELPHICLASS TGPXFile;
 //-- type declarations -------------------------------------------------------
-enum DECLSPEC_DENUM TDistanceUnit : unsigned char { duKm, duMi };
-
-enum DECLSPEC_DENUM TProcessCategory : unsigned char { pcSymbol, pcGPX };
-
-enum DECLSPEC_DENUM TProcessPointType : unsigned char { pptNone, pptWayPt, pptViaPt, pptShapePt };
-
-enum DECLSPEC_DENUM TShapingPointName : unsigned char { Unchanged, Route_Sequence, Route_Distance, Sequence_Route, Distance_Route };
-
-struct DECLSPEC_DRECORD TCoord
-{
-public:
-	double Lat;
-	double Lon;
-};
-
-
-enum DECLSPEC_DENUM TGPXFunc : unsigned char { PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML, CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints };
-
-typedef System::DynamicArray<TGPXFunc> TGPXFuncArray;
-
-class PASCALIMPLEMENTATION TProcessOptions : public System::TObject
-{
-	typedef System::TObject inherited;
-	
-public:
-	HWND LookUpWindow;
-	unsigned LookUpMessage;
-	bool ProcessSubClass;
-	bool ProcessFlags;
-	bool ProcessBegin;
-	bool ProcessAddrBegin;
-	System::UnicodeString BeginStr;
-	System::UnicodeString BeginSymbol;
-	bool ProcessEnd;
-	bool ProcessAddrEnd;
-	System::UnicodeString EndStr;
-	System::UnicodeString EndSymbol;
-	bool ProcessShape;
-	System::UnicodeString DefShapePtSymbol;
-	bool ProcessAddrShape;
-	TShapingPointName ShapingPointName;
-	System::UnicodeString DefShapingPointSymbol;
-	System::UnicodeString ShapingPointCategory;
-	bool ProcessVia;
-	bool ProcessAddrVia;
-	System::UnicodeString DefViaPointSymbol;
-	System::UnicodeString ViaPointCategory;
-	bool ProcessCreateRoutePoints;
-	bool ProcessTracks;
-	bool ProcessWayPtsFromRoute;
-	bool ProcessWayPtsInWayPts;
-	bool ProcessViaPtsInWayPts;
-	bool ProcessShapePtsInWayPts;
-	bool ProcessWayPtsInGpi;
-	bool ProcessViaPtsInGpi;
-	bool ProcessShapePtsInGpi;
-	System::UnicodeString DefaultProximityStr;
-	bool ProcessDistance;
-	TDistanceUnit DistanceUnit;
-	System::Set<TProcessCategory, TProcessCategory::pcSymbol, TProcessCategory::pcGPX> ProcessCategory;
-	bool ProcessAddrWayPt;
-	System::UnicodeString DefTrackColor;
-	System::UnicodeString TrackColor;
-	System::UnicodeString DefWaypointSymbol;
-	System::UnicodeString CatSymbol;
-	System::UnicodeString CatGPX;
-	System::UnicodeString CatRoute;
-	Unittripobjects::TZumoModel ZumoModel;
-	System::UnicodeString ExploreUuid;
-	System::UnicodeString VehicleProfileGuid;
-	System::UnicodeString VehicleProfileHash;
-	System::UnicodeString VehicleId;
-	System::Classes::TNotifyEvent FOnSetFuncPrefs;
-	System::Classes::TNotifyEvent FOnSavePrefs;
-	__fastcall TProcessOptions(System::Classes::TNotifyEvent OnSetFuncPrefs, System::Classes::TNotifyEvent OnSavePrefs);
-	__fastcall virtual ~TProcessOptions();
-	void __fastcall DoPrefSaved();
-	void __fastcall SetProcessCategory(bool ProcessWpt, System::UnicodeString WayPtCat);
-	__classmethod void __fastcall SetPrefs(Vcl::Comctrls::TTreeView* TvSelections, System::UnicodeString TripManagerReg_Key);
-	__classmethod TGPXFuncArray __fastcall StorePrefs(Vcl::Comctrls::TTreeView* TvSelections, System::UnicodeString TripManagerReg_Key);
-};
-
-
 class PASCALIMPLEMENTATION TGPXFile : public System::TObject
 {
 	typedef System::TObject inherited;
@@ -137,11 +54,10 @@ private:
 	Unitverysimplexml::TXmlVSNode* CurrentWayPointFromRoute;
 	System::UnicodeString CurrentRouteTrackName;
 	int ShapingPointCnt;
-	TCoord CurrentCoord;
+	Unitgpxdefs::TCoord CurrentCoord;
 	double TotalDistance;
 	double CurrentDistance;
-	System::UnicodeString DistanceStr;
-	TCoord PrevCoord;
+	Unitgpxdefs::TCoord PrevCoord;
 	Unitverysimplexml::TXmlVSDocument* FXmlDocument;
 	System::UnicodeString FOutDir;
 	System::Classes::TNotifyEvent FOnFunctionPrefs;
@@ -151,13 +67,8 @@ private:
 	System::UnicodeString FGPXFile;
 	unsigned FSeqNo;
 	Unittripobjects::TTripList* FTripList;
-	TProcessOptions* FProcessOptions;
-	TCoord __fastcall CoordFromAttribute(Unitverysimplexml::TXmlVSAttributeList* Atributes);
-	double __fastcall DegreesToRadians(double Degrees);
-	double __fastcall CoordDistance(const TCoord &Coord1, const TCoord &Coord2);
+	Unitprocessoptions::TProcessOptions* FProcessOptions;
 	System::UnicodeString __fastcall DistanceFormat(double Distance);
-	System::UnicodeString __fastcall Coord2Float(System::LongInt ACoord);
-	System::LongInt __fastcall Float2Coord(double ACoord);
 	System::UnicodeString __fastcall DebugCoords(Unitverysimplexml::TXmlVSAttributeList* Coords);
 	System::UnicodeString __fastcall GetTrackColor(Unitverysimplexml::TXmlVSNode* ANExtension);
 	bool __fastcall WayPointNotProcessed(Unitverysimplexml::TXmlVSNode* WayPoint);
@@ -183,9 +94,9 @@ private:
 	void __fastcall ReplaceAutoName(Unitverysimplexml::TXmlVSNode* const ExtensionsNode, const System::UnicodeString AutoName);
 	void __fastcall ReplaceCategory(Unitverysimplexml::TXmlVSNode* const ExtensionsNode, const System::UnicodeString NS, const System::UnicodeString Category);
 	void __fastcall ReplaceAddrWayPt(Unitverysimplexml::TXmlVSNode* ExtensionsNode, const System::UnicodeString NS);
-	void __fastcall AddWptPoint(Unitverysimplexml::TXmlVSNode* const ChildNode, Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString WayPointName, const TProcessPointType ProcessPointType, const System::UnicodeString Symbol = System::UnicodeString(), const System::UnicodeString Description = System::UnicodeString());
+	void __fastcall AddWptPoint(Unitverysimplexml::TXmlVSNode* const ChildNode, Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString WayPointName, const Unitgpxdefs::TProcessPointType ProcessPointType, const System::UnicodeString Symbol = System::UnicodeString(), const System::UnicodeString Description = System::UnicodeString());
 	void __fastcall AddWayPointFromRoute(Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString WayPointName, const bool ViaPt, const System::UnicodeString Symbol, const System::UnicodeString Category, const System::UnicodeString Route);
-	void __fastcall AddViaOrShapePoint(Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString ViaOrShapingPointName, const System::UnicodeString Symbol, const TProcessPointType ProcessPointType, const System::UnicodeString Category);
+	void __fastcall AddViaOrShapePoint(Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString ViaOrShapingPointName, const System::UnicodeString Symbol, const Unitgpxdefs::TProcessPointType ProcessPointType, const System::UnicodeString Category);
 	void __fastcall AddBeginPoint(Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString ViaPointName, const System::UnicodeString Symbol);
 	void __fastcall AddEndPoint(Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString ViaPointName, const System::UnicodeString Symbol);
 	void __fastcall AddViaPoint(Unitverysimplexml::TXmlVSNode* const RtePtNode, const System::UnicodeString ViaPointName, const System::UnicodeString Symbol);
@@ -199,17 +110,19 @@ private:
 	void __fastcall ProcessGPXNode(Unitverysimplexml::TXmlVSNode* GpxNode);
 	void __fastcall StripRtePt(Unitverysimplexml::TXmlVSNode* const RtePtNode);
 	void __fastcall StripRte(Unitverysimplexml::TXmlVSNode* const RteNode);
-	void __fastcall Track2OSMTrackPoints(Unitverysimplexml::TXmlVSNode* Track, int RouteId, int &FirstViaPointId, System::Classes::TStringList* TrackStringList);
 	int __fastcall CreateLocations(Unitverysimplexml::TXmlVSNodeList* RtePts);
 	void __fastcall CreateTrip_XT(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode, unsigned ParentTripID, Unitverysimplexml::TXmlVSNodeList* RtePts);
 	void __fastcall CreateTrip_XT2(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode, unsigned ParentTripID, Unitverysimplexml::TXmlVSNodeList* RtePts);
+	
+protected:
+	void __fastcall Track2OSMTrackPoints(Unitverysimplexml::TXmlVSNode* Track, int &TrackId, System::Classes::TStringList* TrackStringList);
 	
 public:
 	Ufrmselectgpx::TFrmSelectGPX* FrmSelectGpx;
 	__fastcall TGPXFile(const System::UnicodeString GPXFile, const System::Classes::TNotifyEvent FunctionPrefs, const System::Classes::TNotifyEvent SavePrefs)/* overload */;
 	__fastcall TGPXFile(const System::UnicodeString GPXFile, const System::UnicodeString OutDir, const System::Classes::TNotifyEvent FunctionPrefs, const System::Classes::TNotifyEvent SavePrefs, System::Classes::TStringList* const OutStringList, const unsigned SeqNo)/* overload */;
 	__fastcall virtual ~TGPXFile();
-	bool __fastcall ShowSelectTracks(const System::UnicodeString Caption, const System::UnicodeString SubCaption, Ufrmselectgpx::TTagsToShow TagsToShow);
+	bool __fastcall ShowSelectTracks(const System::UnicodeString Caption, const System::UnicodeString SubCaption, Ufrmselectgpx::TTagsToShow TagsToShow, System::UnicodeString CheckMask);
 	void __fastcall DoPostProcess();
 	void __fastcall DoCreateTracks();
 	void __fastcall DoCreateWayPoints();
@@ -225,31 +138,18 @@ public:
 	__property Unitverysimplexml::TXmlVSNodeList* WayPointList = {read=FWayPointList};
 	__property Unitverysimplexml::TXmlVSNodeList* RouteViaPointList = {read=FRouteViaPointList};
 	__property Unitverysimplexml::TXmlVSNodeList* TrackList = {read=FTrackList};
-	__property TProcessOptions* ProcessOptions = {read=FProcessOptions, write=FProcessOptions};
-	__classmethod void __fastcall PerformFunctions(const TGPXFunc *AllFuncs, const System::NativeInt AllFuncs_High, const System::UnicodeString GPXFile, const System::Classes::TNotifyEvent FunctionPrefs, const System::Classes::TNotifyEvent SavePrefs, const System::UnicodeString ForceOutDir = System::UnicodeString(), System::Classes::TStringList* const OutStringList = (System::Classes::TStringList*)(0x0), const unsigned SeqNo = (unsigned)(0x0));
+	__property Unitverysimplexml::TXmlVSDocument* XmlDocument = {read=FXmlDocument};
+	__property Unitprocessoptions::TProcessOptions* ProcessOptions = {read=FProcessOptions, write=FProcessOptions};
+	__classmethod System::UnicodeString __fastcall Coord2Float(System::LongInt ACoord);
+	__classmethod System::LongInt __fastcall Float2Coord(double ACoord);
+	__classmethod double __fastcall DegreesToRadians(double Degrees);
+	__classmethod Unitgpxdefs::TCoord __fastcall CoordFromAttribute(Unitverysimplexml::TXmlVSAttributeList* Attributes);
+	__classmethod double __fastcall CoordDistance(const Unitgpxdefs::TCoord &Coord1, const Unitgpxdefs::TCoord &Coord2, Unitgpxdefs::TDistanceUnit DistanceUnit);
+	__classmethod void __fastcall PerformFunctions(const Unitgpxdefs::TGPXFunc *AllFuncs, const System::NativeInt AllFuncs_High, const System::UnicodeString GPXFile, const System::Classes::TNotifyEvent FunctionPrefs, const System::Classes::TNotifyEvent SavePrefs, const System::UnicodeString ForceOutDir = System::UnicodeString(), System::Classes::TStringList* const OutStringList = (System::Classes::TStringList*)(0x0), const unsigned SeqNo = (unsigned)(0x0));
 };
 
 
 //-- var, const, procedure ---------------------------------------------------
-extern DELPHI_PACKAGE System::Classes::TNotifyEvent OnSetFixedPrefs;
-extern DELPHI_PACKAGE System::UnicodeString ProcessCategoryPick;
-static _DELPHI_CONST System::Int8 IdTrip = System::Int8(0x0);
-static _DELPHI_CONST System::Int8 IdTrack = System::Int8(0x1);
-static _DELPHI_CONST System::Int8 IdCompleteRoute = System::Int8(0x2);
-static _DELPHI_CONST System::Int8 IdStrippedRoute = System::Int8(0x3);
-static _DELPHI_CONST System::Int8 IdWayPoint = System::Int8(0x4);
-static _DELPHI_CONST System::Int8 IdWayPointWpt = System::Int8(0x5);
-static _DELPHI_CONST System::Int8 IdWayPointVia = System::Int8(0x6);
-static _DELPHI_CONST System::Int8 IdWayPointShp = System::Int8(0x7);
-static _DELPHI_CONST System::Int8 IdGpi = System::Int8(0x8);
-static _DELPHI_CONST System::Int8 IdGpiWayPt = System::Int8(0x9);
-static _DELPHI_CONST System::Int8 IdGpiViaPt = System::Int8(0xa);
-static _DELPHI_CONST System::Int8 IdGpiShpPt = System::Int8(0xb);
-static _DELPHI_CONST System::Int8 IdKml = System::Int8(0xc);
-static _DELPHI_CONST System::Int8 IdHtml = System::Int8(0xd);
-#define TripFilesFor L"Trip files (No import required, but will recalculate. Sele"\
-	L"cted model: %s)"
-extern DELPHI_PACKAGE Unitverysimplexml::TXmlVSNode* __fastcall InitGarminGpx(Unitverysimplexml::TXmlVSDocument* GarminGPX);
 }	/* namespace Unitgpxobjects */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITGPXOBJECTS)
 using namespace Unitgpxobjects;
