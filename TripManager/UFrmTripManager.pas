@@ -3036,6 +3036,14 @@ begin
     Inc(SelCount);
   end;
 
+  if (SelCount = 0) then
+  begin
+    MessageDlg(Format('No %s are selected to delete from %s.', [ObjectName[AllowRecurse],
+                                                                CurrentDevice.FriendlyName]),
+                 TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
+    exit;
+  end;
+
   // Extension check only for file
   if (AllowRecurse = false) then
   begin
