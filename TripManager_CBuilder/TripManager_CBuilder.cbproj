@@ -174,9 +174,6 @@
         <DelphiCompile Include="..\CommonUnits\kml\ogckml23.pas">
             <BuildOrder>20</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\CommonUnits\LVSort\ListViewSort.pas">
-            <BuildOrder>21</BuildOrder>
-        </DelphiCompile>
         <DelphiCompile Include="..\CommonUnits\MsgLoop.pas">
             <BuildOrder>32</BuildOrder>
         </DelphiCompile>
@@ -223,17 +220,14 @@
         <DelphiCompile Include="..\CommonUnits\UnitGpxObjects.pas">
             <BuildOrder>36</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\CommonUnits\UnitListViewSort.pas">
+            <BuildOrder>37</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\CommonUnits\UnitStringUtils.pas">
             <BuildOrder>37</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\CommonUnits\UnitTripObjects.pas">
             <BuildOrder>38</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellConsts.pas">
-            <BuildOrder>26</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\CommonUnits\Vcl.ShellControls\Vcl.Shell.ShellCtrls.pas">
-            <BuildOrder>27</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas">
             <BuildOrder>28</BuildOrder>
