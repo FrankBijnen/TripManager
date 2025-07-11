@@ -31,8 +31,8 @@ type
     Panel1: TPanel;
     BtnValidate: TButton;
     BtnClearCoordCache: TButton;
-    TabTransferDevice: TTabSheet;
-    GridTransferDevice: TStringGrid;
+    TabDevice: TTabSheet;
+    GridDevice: TStringGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -116,15 +116,6 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
     AddGridLine(GridGeneralSettings, CurRow, Reg_EnableSendTo,        'True',  'Enable Send to');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
-    AddGridLine(GridGeneralSettings, CurRow, '');
-
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Preferred device and folders-');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDev_Key,             XTName,                     'Default device to use');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Compare-');
@@ -145,31 +136,44 @@ begin
     GridGeneralSettings.EndUpdate;
   end;
 
-  GridTransferDevice.RowCount := GridTransferDevice.FixedRows +1;
-  GridTransferDevice.BeginUpdate;
+  GridDevice.RowCount := GridDevice.FixedRows +1;
+  GridDevice.BeginUpdate;
   try
 
     CurRow := 1;
 
-    AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Way point files (*.gpx)-');
-    AddGridLine(GridTransferDevice, CurRow, Reg_FuncWayPointWpt,   'True',  'Add original Way points');
-    AddGridLine(GridTransferDevice, CurRow, Reg_FuncWayPointVia,   'False', 'Add Via points from route');
-    AddGridLine(GridTransferDevice, CurRow, Reg_FuncWayPointShape, 'False', 'Add Shaping points from route');
-    AddGridLine(GridTransferDevice, CurRow, '');
+    AddGridLine(GridDevice, CurRow, '', '', '-Device-');
+    AddGridLine(GridDevice, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
+    AddGridLine(GridDevice, CurRow, Reg_TripNameInList,      'False', 'Show TripName in file list');
+    AddGridLine(GridDevice, CurRow, '');
 
-    AddGridLine(GridTransferDevice, CurRow, '', '', '-Creating Poi files (*.gpi)-');
-    AddGridLine(GridTransferDevice, CurRow, Reg_FuncGpiWayPt,      'True',  'Add original Way points');
-    AddGridLine(GridTransferDevice, CurRow, Reg_FuncGpiViaPt,      'False', 'Add Via points from route');
-    AddGridLine(GridTransferDevice, CurRow, Reg_FuncGpiShpPt,      'False', 'Add Shaping points from route');
-    AddGridLine(GridTransferDevice, CurRow, Reg_GPISymbolSize,     '80x80', 'Size of symbols (24x24 48x48 or 80x80)');
-    AddGridLine(GridTransferDevice, CurRow, Reg_GPIProximity,      '500',   'Default proximity for alerts in meters');
+    AddGridLine(GridDevice, CurRow, '', '', '-Preferred device and folders-');
+    AddGridLine(GridDevice, CurRow, Reg_PrefDev_Key,             XTName,                     'Default device to use');
+    AddGridLine(GridDevice, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
+    AddGridLine(GridDevice, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
+    AddGridLine(GridDevice, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');
+    AddGridLine(GridDevice, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
+    AddGridLine(GridDevice, CurRow, '');
 
-    GridTransferDevice.RowCount := CurRow;
+    AddGridLine(GridDevice, CurRow, '', '', '-Creating Way point files (*.gpx)-');
+    AddGridLine(GridDevice, CurRow, Reg_FuncWayPointWpt,   'True',  'Add original Way points');
+    AddGridLine(GridDevice, CurRow, Reg_FuncWayPointVia,   'False', 'Add Via points from route');
+    AddGridLine(GridDevice, CurRow, Reg_FuncWayPointShape, 'False', 'Add Shaping points from route');
+    AddGridLine(GridDevice, CurRow, '');
 
-    AddGridHeader(GridTransferDevice);
+    AddGridLine(GridDevice, CurRow, '', '', '-Creating Poi files (*.gpi)-');
+    AddGridLine(GridDevice, CurRow, Reg_FuncGpiWayPt,      'True',  'Add original Way points');
+    AddGridLine(GridDevice, CurRow, Reg_FuncGpiViaPt,      'False', 'Add Via points from route');
+    AddGridLine(GridDevice, CurRow, Reg_FuncGpiShpPt,      'False', 'Add Shaping points from route');
+    AddGridLine(GridDevice, CurRow, Reg_GPISymbolSize,     '80x80', 'Size of symbols (24x24 48x48 or 80x80)');
+    AddGridLine(GridDevice, CurRow, Reg_GPIProximity,      '500',   'Default proximity for alerts in meters');
+
+    GridDevice.RowCount := CurRow;
+
+    AddGridHeader(GridDevice);
 
   finally
-    GridTransferDevice.EndUpdate;
+    GridDevice.EndUpdate;
   end;
 
 
@@ -264,7 +268,7 @@ end;
 procedure TFrmAdvSettings.SaveSettings;
 begin
   SaveGrid(GridGeneralSettings);
-  SaveGrid(GridTransferDevice);
+  SaveGrid(GridDevice);
   SaveGrid(GridXT2Settings);
   SaveGrid(GridGeoCodeSettings);
 

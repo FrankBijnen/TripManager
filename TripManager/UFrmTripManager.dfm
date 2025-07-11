@@ -178,20 +178,21 @@ object FrmTripManager: TFrmTripManager
           end
           item
             Caption = 'Date'
-            Width = 100
+            Width = 85
           end
           item
             Caption = 'Time'
-            Width = 100
+            Width = 85
           end
           item
             Caption = 'Ext'
+            Width = 45
           end
           item
             Alignment = taRightJustify
             Caption = 'Size'
             Tag = 1
-            Width = 100
+            Width = 90
           end>
         DoubleBuffered = True
         HideSelection = False

@@ -959,7 +959,7 @@ begin
   if (AListItem = nil) then
   begin
     AMTP_Data := TMTP_Data.Create(IsDirectory(Prop_Val), ObjSize, ObjId , ObjDate);
-    AMTP_Data.CreateListItem(AListItems, ObjName, [DateOriginal, TimeOriginal, ExtractFileExt(ObjName), SenSize(ObjSize)]);
+    AMTP_Data.CreateListItem(AListItems, ObjName, [DateOriginal, TimeOriginal, ExtractFileExt(ObjName), SenSize(ObjSize), '']);
   end
   else
   begin
@@ -1023,7 +1023,7 @@ begin
 
         // Add .. entry (up)
         AMTP_Data := TMTP_Data.Create(true, 0, ParentId, 0);
-        AMTP_Data.CreateListItem(Lst, '..', ['', '', '', '']);
+        AMTP_Data.CreateListItem(Lst, '..', ['', '', '', '', '']);
 
         ObjectIds.Reset;
 

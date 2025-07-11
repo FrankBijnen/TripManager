@@ -54,7 +54,7 @@ object FrmAdvSettings: TFrmAdvSettings
     Top = 0
     Width = 587
     Height = 627
-    ActivePage = TabGeneral
+    ActivePage = TabDevice
     Align = alClient
     TabOrder = 1
     object TabGeneral: TTabSheet
@@ -81,13 +81,13 @@ object FrmAdvSettings: TFrmAdvSettings
           24)
       end
     end
-    object TabTransferDevice: TTabSheet
-      Caption = 'Transfer to Device'
-      object GridTransferDevice: TStringGrid
+    object TabDevice: TTabSheet
+      Caption = 'Device settings'
+      object GridDevice: TStringGrid
         Left = 0
         Top = 0
         Width = 579
-        Height = 496
+        Height = 597
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -111,7 +111,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Left = 0
         Top = 0
         Width = 579
-        Height = 496
+        Height = 597
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -148,7 +148,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Height = 300
         Align = alBottom
         TabOrder = 0
-        ExplicitTop = 213
         object MemoAddressFormat: TMemo
           Left = 1
           Top = 36
@@ -215,7 +214,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 1
         StyleElements = []
-        ExplicitHeight = 160
         RowHeights = (
           24
           24

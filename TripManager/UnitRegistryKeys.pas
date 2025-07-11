@@ -43,6 +43,8 @@ const
   Reg_PrefDev_Key             = 'PrefDevice';
   Reg_PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
   Reg_PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
+  Reg_TripNameInList          = 'TripNameInList';
+
   Reg_PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
   Reg_PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
   Reg_PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';

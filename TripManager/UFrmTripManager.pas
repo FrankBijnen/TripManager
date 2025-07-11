@@ -43,6 +43,9 @@ const
   WM_DIRCHANGED           = WM_USER + 1;
   WM_ADDRLOOKUP           = WM_USER + 2;
 
+  TripNameCol             = 5;
+  TripNameColWidth        = 250;
+
 type
   TMapReq = record
     Coords: string;
@@ -513,6 +516,8 @@ begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   if FrmAdvSettings.ShowModal = mrOk then
     ReadSettings;
+
+  BgDeviceClick(BgDevice);
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
@@ -527,12 +532,21 @@ begin
   LstFiles.Tag := 1;
   try
     LstFiles.Checkboxes := (BgDevice.ItemIndex = 0);
+    if (LstFiles.Columns.Count > TripNameCol) then
+    begin
+      if (BgDevice.ItemIndex = 0) then
+        LstFiles.Columns[TripNameCol].Width := TripNameColWidth
+      else
+        LstFiles.Columns[TripNameCol].Width := 0;
+    end;
   finally
     LstFiles.Tag := 0;
   end;
-  CheckDevice;
-  SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
-  ListFiles;
+  if CheckDevice(false) then
+  begin
+    SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
+    ListFiles;
+  end;
 end;
 
 procedure TFrmTripManager.BtnApplyCoordsClick(Sender: TObject);
@@ -1644,8 +1658,7 @@ begin
   BgDevice.ItemIndex := 0; // Default to trips
   GetDeviceList;
   SelectDevice(PrefDevice);
-  if (CheckDevice(false)) then
-    ListFiles;
+  BgDeviceClick(BgDevice);
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -2786,6 +2799,22 @@ begin
         end;
     end;
   end;
+  if (ssCtrl in Shift) and
+     (ssAlt in Shift) then
+  begin
+    case Chr(Key) of
+      'C':
+        begin
+          Key := 0;
+          CompareWithGpx(MnuCompareGpxTrack);
+        end;
+      'B':
+        begin
+          Key := 0;
+          CompareWithGpx(MnuCompareGpxRoute);
+        end;
+    end;
+  end;
 end;
 
 procedure TFrmTripManager.ValueListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -3740,6 +3769,9 @@ begin
     // Set Check mark
     SetCheckMark(AListItem, not TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean);
 
+    // Show trip name
+    if (LstFiles.Columns.Count > TripNameCol) then
+      AListItem.SubItems[TripNameCol -1] := TBaseDataItem(TmpTripList.GetItem('mTripName')).AsString;
   finally
     TmpTripList.Free;
   end;
@@ -3953,6 +3985,11 @@ begin
   else
     WindowState := TWindowState.wsNormal;
   ReadColumnSettings;
+
+  while (LstFiles.Columns.Count > TripNameCol) do
+    LstFiles.Columns.Delete(LstFiles.Columns.Count -1);
+  if (GetRegistry(Reg_TripNameInList, false)) then
+    LstFiles.Columns.Add.Caption := 'TripName';
 
   if (CreateOSMMapHtml(GetRegistry(Reg_SavedMapPosition_Key, Reg_DefaultCoordinates))) then
     EdgeBrowser1.Navigate(GetHtmlTmp);
