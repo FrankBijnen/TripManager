@@ -4,7 +4,7 @@ object FrmAdvSettings: TFrmAdvSettings
   BorderStyle = bsSizeToolWin
   Caption = 'Advanced settings'
   ClientHeight = 658
-  ClientWidth = 587
+  ClientWidth = 621
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,16 +18,16 @@ object FrmAdvSettings: TFrmAdvSettings
   object PnlBottom: TPanel
     Left = 0
     Top = 627
-    Width = 587
+    Width = 621
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
     DesignSize = (
-      587
+      621
       31)
     object BtnOK: TButton
-      Left = 423
+      Left = 457
       Top = 3
       Width = 75
       Height = 25
@@ -38,7 +38,7 @@ object FrmAdvSettings: TFrmAdvSettings
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 510
+      Left = 544
       Top = 3
       Width = 75
       Height = 25
@@ -52,25 +52,27 @@ object FrmAdvSettings: TFrmAdvSettings
   object PctMain: TPageControl
     Left = 0
     Top = 0
-    Width = 587
+    Width = 621
     Height = 627
-    ActivePage = TabDevice
+    ActivePage = TabXT2
     Align = alClient
+    TabHeight = 25
     TabOrder = 1
+    OnResize = PctMainResize
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
         Left = 0
         Top = 0
-        Width = 579
-        Height = 597
+        Width = 613
+        Height = 592
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
         DrawingStyle = gdsGradient
         FixedCols = 2
         GradientEndColor = clMoneyGreen
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
         RowHeights = (
@@ -83,18 +85,18 @@ object FrmAdvSettings: TFrmAdvSettings
     end
     object TabDevice: TTabSheet
       Caption = 'Device settings'
-      object GridDevice: TStringGrid
+      object GridDeviceSettings: TStringGrid
         Left = 0
         Top = 0
-        Width = 579
-        Height = 597
+        Width = 613
+        Height = 592
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
         DrawingStyle = gdsGradient
         FixedCols = 2
         GradientEndColor = clMoneyGreen
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
         RowHeights = (
@@ -109,16 +111,22 @@ object FrmAdvSettings: TFrmAdvSettings
       Caption = 'XT2 settings'
       object GridXT2Settings: TStringGrid
         Left = 0
-        Top = 0
-        Width = 579
-        Height = 597
+        Top = 33
+        Width = 613
+        Height = 559
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
         DrawingStyle = gdsGradient
         FixedCols = 2
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
         GradientEndColor = clMoneyGreen
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        ParentFont = False
         TabOrder = 0
         StyleElements = []
         RowHeights = (
@@ -128,13 +136,30 @@ object FrmAdvSettings: TFrmAdvSettings
           23
           24)
       end
+      object PnlXT2Funcs: TPanel
+        Left = 0
+        Top = 0
+        Width = 613
+        Height = 33
+        Align = alTop
+        TabOrder = 1
+        object BtnCurrent: TButton
+          Left = 2
+          Top = 2
+          Width = 137
+          Height = 25
+          Caption = 'Values from loaded trip'
+          TabOrder = 0
+          OnClick = BtnCurrentClick
+        end
+      end
     end
     object TabGeoCode: TTabSheet
       Caption = 'GeoCode settings'
       object Splitter1: TSplitter
         Left = 0
-        Top = 294
-        Width = 579
+        Top = 289
+        Width = 613
         Height = 3
         Cursor = crVSplit
         Align = alBottom
@@ -143,15 +168,15 @@ object FrmAdvSettings: TFrmAdvSettings
       end
       object PnlAddressFormat: TPanel
         Left = 0
-        Top = 297
-        Width = 579
+        Top = 292
+        Width = 613
         Height = 300
         Align = alBottom
         TabOrder = 0
         object MemoAddressFormat: TMemo
           Left = 1
           Top = 36
-          Width = 577
+          Width = 611
           Height = 93
           Align = alTop
           Lines.Strings = (
@@ -163,7 +188,7 @@ object FrmAdvSettings: TFrmAdvSettings
         object PnlResult: TPanel
           Left = 1
           Top = 129
-          Width = 577
+          Width = 611
           Height = 35
           Align = alTop
           Caption = 'Result'
@@ -172,7 +197,7 @@ object FrmAdvSettings: TFrmAdvSettings
         object MemoResult: TMemo
           Left = 1
           Top = 164
-          Width = 577
+          Width = 611
           Height = 135
           Align = alClient
           Lines.Strings = (
@@ -184,7 +209,7 @@ object FrmAdvSettings: TFrmAdvSettings
         object PnlAddressFormatTop: TPanel
           Left = 1
           Top = 1
-          Width = 577
+          Width = 611
           Height = 35
           Align = alTop
           Caption = 'Address format'
@@ -203,15 +228,15 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridGeoCodeSettings: TStringGrid
         Left = 0
         Top = 33
-        Width = 579
-        Height = 261
+        Width = 613
+        Height = 256
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
         DrawingStyle = gdsGradient
         FixedCols = 2
         GradientEndColor = clMoneyGreen
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 1
         StyleElements = []
         RowHeights = (
@@ -221,10 +246,10 @@ object FrmAdvSettings: TFrmAdvSettings
           24
           24)
       end
-      object Panel1: TPanel
+      object PnlGeoCodeFuncs: TPanel
         Left = 0
         Top = 0
-        Width = 579
+        Width = 613
         Height = 33
         Align = alTop
         TabOrder = 2

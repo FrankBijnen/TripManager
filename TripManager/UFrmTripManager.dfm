@@ -196,6 +196,7 @@ object FrmTripManager: TFrmTripManager
           end>
         DoubleBuffered = True
         HideSelection = False
+        Items.ItemData = {050000000000000000}
         LargeImages = ImageList
         MultiSelect = True
         ReadOnly = True

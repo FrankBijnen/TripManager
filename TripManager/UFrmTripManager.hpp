@@ -51,15 +51,19 @@
 #include <Vcl.PlatformDefaultStyleActnCtrls.hpp>
 #include <Monitor.hpp>
 #include <BCHexEditor.hpp>
-#include <UnitMtpDevice.hpp>
 #include <mtp_helper.hpp>
 #include <TripManager_ShellTree.hpp>
 #include <TripManager_ShellList.hpp>
 #include <TripManager_ValEdit.hpp>
-#include <ListViewSort.hpp>
+#include <UnitListViewSort.hpp>
+#include <UnitMtpDevice.hpp>
 #include <unitTripObjects.hpp>
+#include <UnitGpxDefs.hpp>
+#include <UnitGPXObjects.hpp>
 #include <UnitGpi.hpp>
+#include <UnitUSBEvent.hpp>
 #include <System.UITypes.hpp>
+#include <System.Types.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -151,7 +155,7 @@ __published:
 	Vcl::Menus::TMenuItem* N3;
 	Vcl::Menus::TMenuItem* Setselectedtripstosaved1;
 	Vcl::Menus::TMenuItem* Setselectedtripstoimported1;
-	Vcl::Menus::TMenuItem* Delete1;
+	Vcl::Menus::TMenuItem* DeleteFiles;
 	Vcl::Menus::TMenuItem* N2;
 	Vcl::Menus::TMenuItem* Rename1;
 	Vcl::Extctrls::TTimer* TripGpiTimer;
@@ -207,6 +211,18 @@ __published:
 	Vcl::Stdctrls::TCheckBox* ChkZoomToPoint;
 	Vcl::Comctrls::TStatusBar* SbPostProcess;
 	Vcl::Stdctrls::TLabel* LblBounds;
+	Vcl::Extctrls::TTimer* StatusTimer;
+	Vcl::Stdctrls::TButton* BtnSendTo;
+	Vcl::Menus::TMenuItem* N8;
+	Vcl::Menus::TMenuItem* MnuCompareGpxRoute;
+	Vcl::Menus::TMenuItem* N9;
+	Vcl::Menus::TMenuItem* DeleteDirs;
+	Vcl::Menus::TMenuItem* NewDirectory;
+	Vcl::Menus::TMenuItem* MnuNextDiff;
+	Vcl::Menus::TMenuItem* MnuPrevDiff;
+	Vcl::Menus::TMenuItem* MnuCompareGpxTrack;
+	Vcl::Menus::TMenuItem* CompareTriptoGPX1;
+	Vcl::Menus::TMenuItem* N11;
 	void __fastcall FormCreate(System::TObject* Sender);
 	void __fastcall FormDestroy(System::TObject* Sender);
 	void __fastcall BtnRefreshClick(System::TObject* Sender);
@@ -241,7 +257,7 @@ __published:
 	void __fastcall SetSelectedTrips(System::TObject* Sender);
 	void __fastcall BtnSetDeviceDefaultClick(System::TObject* Sender);
 	void __fastcall TripGpiTimerTimer(System::TObject* Sender);
-	void __fastcall Delete1Click(System::TObject* Sender);
+	void __fastcall DeleteFilesClick(System::TObject* Sender);
 	void __fastcall RenameFile(System::TObject* Sender);
 	void __fastcall Setdeparturedatetimeofselected1Click(System::TObject* Sender);
 	void __fastcall Renameselectedtripfilestotripname1Click(System::TObject* Sender);
@@ -282,6 +298,17 @@ __published:
 	void __fastcall PopupTripEditPopup(System::TObject* Sender);
 	void __fastcall PCTTripInfoResize(System::TObject* Sender);
 	void __fastcall ShellListView1KeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
+	void __fastcall StatusTimerTimer(System::TObject* Sender);
+	void __fastcall CmbModelChange(System::TObject* Sender);
+	void __fastcall BtnSendToClick(System::TObject* Sender);
+	void __fastcall VlTripInfoBeforeDrawCell(System::TObject* Sender, System::LongInt ACol, System::LongInt ARow, const Winapi::Windows::TRect &Rect, Vcl::Grids::TGridDrawState State);
+	void __fastcall CompareWithGpx(System::TObject* Sender);
+	void __fastcall PopupTripInfoPopup(System::TObject* Sender);
+	void __fastcall DeleteDirsClick(System::TObject* Sender);
+	void __fastcall NewDirectoryClick(System::TObject* Sender);
+	void __fastcall MnuNextDiffClick(System::TObject* Sender);
+	void __fastcall MnuPrevDiffClick(System::TObject* Sender);
+	void __fastcall TvTripKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	
 private:
 	System::UnicodeString PrefDevice;
@@ -292,7 +319,7 @@ private:
 	System::WideString FSavedFolderId;
 	System::WideString FCurrentPath;
 	System::Classes::TList* DeviceList;
-	Listviewsort::TSortSpecification FSortSpecification;
+	Unitlistviewsort::TSortSpecification FSortSpecification;
 	Bchexeditor::TBCHexEditor* HexEdit;
 	Unittripobjects::TTripList* ATripList;
 	Unitgpi::TPOIList* APOIList;
@@ -306,7 +333,10 @@ private:
 	double EdgeZoom;
 	System::UnicodeString RoutePointTimeOut;
 	System::UnicodeString GeoSearchTimeOut;
+	Unitusbevent::TUSBEvent* USBEvent;
 	void __fastcall DirectoryEvent(System::TObject* Sender, Monitor::TDirectoryMonitorAction Action, const System::WideString FileName);
+	void __fastcall USBChangeEvent(const bool Inserted, const System::UnicodeString DeviceName, const System::UnicodeString VendorId, const System::UnicodeString ProductId);
+	void __fastcall ConnectedDeviceChanged(const System::UnicodeString Device, const System::UnicodeString Status);
 	MESSAGE void __fastcall FileSysDrop(Winapi::Messages::TWMDropFiles &Msg);
 	Unittripobjects::TmScPosn* __fastcall SelectedScPosn();
 	Unittripobjects::TLocation* __fastcall SelectedLocation();
@@ -323,9 +353,10 @@ private:
 	void __fastcall SaveTripGpiFile();
 	void __fastcall LoadTripFile(const System::UnicodeString FileName, const bool FromDevice);
 	void __fastcall LoadGpiFile(const System::UnicodeString FileName, const bool FromDevice);
-	void __fastcall FreeCustomData(const void * ACustomData);
+	void __fastcall FreeDeviceData(const void * ACustomData);
 	void __fastcall FreeDevices();
 	void __fastcall GuessModel(const System::UnicodeString FriendlyName);
+	int __fastcall DeviceIdInList(const System::UnicodeString DeviceName);
 	void __fastcall SelectDevice(const int Indx)/* overload */;
 	void __fastcall SelectDevice(const System::UnicodeString Device)/* overload */;
 	TDirType __fastcall GetItemType(Vcl::Comctrls::TListView* const AListview);
@@ -339,6 +370,7 @@ private:
 	System::UnicodeString __fastcall CopyFileToTmp(Vcl::Comctrls::TListItem* const AListItem);
 	void __fastcall CopyFileFromTmp(const System::UnicodeString LocalFile, Vcl::Comctrls::TListItem* const AListItem);
 	void __fastcall ListFiles(const TListFilesDir ListFilesDir = (TListFilesDir)(0x0));
+	void __fastcall DeleteObjects(const bool AllowRecurse);
 	void __fastcall ReloadFileList();
 	void __fastcall SetCheckMark(Vcl::Comctrls::TListItem* const AListItem, const bool NewValue);
 	void __fastcall CheckFile(Vcl::Comctrls::TListItem* const AListItem);
@@ -346,19 +378,21 @@ private:
 	void __fastcall GroupTrips(bool Group);
 	void __fastcall SetRouteParm(TRouteParm ARouteParm, System::Byte Value);
 	void __fastcall CheckTrips();
+	void __fastcall CheckSupportedModel(const Unittripobjects::TZumoModel ZumoModel, const Unitgpxdefs::TGPXFunc *AllFuncs, const System::NativeInt AllFuncs_High);
 	void __fastcall ShowWarnRecalc();
 	void __fastcall ShowWarnOverWrite(const System::UnicodeString AFile);
 	void __fastcall ReadDefaultFolders();
 	void __fastcall ReadColumnSettings();
 	void __fastcall WriteColumnSettings();
 	void __fastcall OnSetFixedPrefs(System::TObject* Sender);
-	void __fastcall OnSetTransferPrefs(System::TObject* Sender);
+	void __fastcall OnSetDevicePrefs(System::TObject* Sender);
 	void __fastcall OnSetPostProcessPrefs(System::TObject* Sender);
-	void __fastcall OnSetAdditionalPrefs(System::TObject* Sender);
+	void __fastcall OnSetWindowsFolderPrefs(System::TObject* Sender);
 	void __fastcall OnSavePrefs(System::TObject* Sender);
 	void __fastcall ReadSettings();
 	void __fastcall ClearTripInfo();
 	void __fastcall EditTrip(bool NewFile);
+	void __fastcall SyncDiff(System::TObject* Sender);
 	
 protected:
 	virtual void __fastcall CreateWnd();
@@ -368,7 +402,6 @@ protected:
 	
 public:
 	_TFrmTripManager__1 DeviceFolder;
-	void __fastcall CheckSupportedModel();
 	void __fastcall ReloadTripOnMap(System::TObject* Sender);
 	void __fastcall RoutePointsShowing(System::TObject* Sender, bool Showing);
 	void __fastcall RoutePointUpdated(System::TObject* Sender);
@@ -401,13 +434,14 @@ public:
 #define UnlExtension L"unl"
 #define HtmlExtension L"html"
 #define KmlExtension L"kml"
-#define DefaultCoordinates L"48.854918, 2.346558"
-#define SavedMapPosition_Key L"SavedMapPosition"
 #define CurrentTrip L"CurrentTrip"
 #define CurrentGPI L"CurrentGPI"
 #define FileSysTrip L"FileSys"
+#define CompareTrip L"Compare"
 static _DELPHI_CONST System::Word WM_DIRCHANGED = System::Word(0x401);
 static _DELPHI_CONST System::Word WM_ADDRLOOKUP = System::Word(0x402);
+static _DELPHI_CONST System::Int8 TripNameCol = System::Int8(0x5);
+static _DELPHI_CONST System::Byte TripNameColWidth = System::Byte(0xfa);
 extern DELPHI_PACKAGE TFrmTripManager* FrmTripManager;
 }	/* namespace Ufrmtripmanager */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UFRMTRIPMANAGER)

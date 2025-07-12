@@ -2054,7 +2054,7 @@ begin
 
     PrepStream(TmpStream, [$0000]);
     FTriplist.Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
-    FTriplist.Add(TmAvoidancesChangedTimeAtSave.Create(Now));
+    FTriplist.Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
     TmpStream.Position := 0;
     FTriplist.Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
     FTripList.Add(TmIsDisplayable.Create);
@@ -2064,21 +2064,14 @@ begin
     FTripList.Add(TmOptimized.Create);
     FTripList.Add(TmTotalTripTime.Create);
     FTripList.Add(TmTripName.Create(TripName));
-    if (ProcessOptions.VehicleProfileGuid <> '') then
-      FTripList.Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid))
-    else
-    begin
-      CheckHRGuid(CreateGUID(Uid));
-      FTripList.Add(TStringItem.Create('mVehicleProfileGuid',
-                                       ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])))
-    end;
+    FTripList.Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
     FTripList.Add(TmParentTripId.Create(ParentTripId));
     FTripList.Add(TmIsRoundTrip.Create);
-    FTripList.Add(TStringItem.Create('mVehicleProfileName', 'z' + #0361 + 'mo Motorcycle'));
+    FTripList.Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
     FTripList.Add(TmAvoidancesChanged.Create);
     FTripList.Add(TmParentTripName.Create(FBaseFile));
-    FTripList.Add(TByteItem.Create('mVehicleProfileTruckType', 7));
-    FTripList.Add(TCardinalItem.Create('mVehicleProfileHash', StrToIntDef(ProcessOptions.VehicleProfileHash, 0)));
+    FTripList.Add(TByteItem.Create('mVehicleProfileTruckType', StrToInt(ProcessOptions.VehicleProfileTruckType)));
+    FTripList.Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
     FTriplist.Add(TmRoutePreferences.Create);
     FTripList.Add(TmImported.Create);
     FTripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
@@ -2093,7 +2086,7 @@ begin
     FTripList.Add(TmVersionNumber.Create(4, $10));
     FTriplist.Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     FTripList.Add(TmTotalTripDistance.Create);
-    FTripList.Add(TByteItem.Create('mVehicleId', StrToIntDef(ProcessOptions.VehicleId, 1)));
+    FTripList.Add(TByteItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
     FTriplist.Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     FTripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     FTriplist.Add(TmRoutePreferencesAdventurousPopularPaths.Create);

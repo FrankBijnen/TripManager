@@ -23,6 +23,7 @@
 #include <Data.DB.hpp>
 #include <Datasnap.DBClient.hpp>
 #include <unitTripObjects.hpp>
+#include <UnitVerySimpleXml.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -31,8 +32,6 @@ namespace Udmroutepoints
 //-- forward type declarations -----------------------------------------------
 class DELPHICLASS TDmRoutePoints;
 //-- type declarations -------------------------------------------------------
-typedef System::StaticArray<System::StaticArray<System::UnicodeString, 2>, 3> Udmroutepoints__1;
-
 typedef System::UnicodeString __fastcall (__closure *TOnGetMapCoords)();
 
 class PASCALIMPLEMENTATION TDmRoutePoints : public System::Classes::TDataModule
@@ -79,7 +78,8 @@ private:
 	void __fastcall DoRoutePointUpdated();
 	bool __fastcall CheckEmptyField(Data::Db::TField* Sender);
 	void __fastcall SetAddressFromCoords(System::TObject* Sender, System::UnicodeString Coords);
-	void __fastcall SetDefaultName(int IdToAssign);
+	void __fastcall OnSetAnalyzePrefs(System::TObject* Sender);
+	void __fastcall AddRoutePoint(Unitverysimplexml::TXmlVSNode* ARoutePoint, bool FromWpt);
 	
 public:
 	int __fastcall ShowFieldExists(System::UnicodeString AField, System::Uitypes::TMsgDlgButtons AButtons = (System::Uitypes::TMsgDlgButtons() << System::Uitypes::TMsgDlgBtn::mbOK ));
@@ -88,10 +88,17 @@ public:
 	void __fastcall SaveTrip();
 	void __fastcall MoveUp(Data::Db::TDataSet* Dataset);
 	void __fastcall MoveDown(Data::Db::TDataSet* Dataset);
+	void __fastcall SetDefaultName(int IdToAssign);
+	void __fastcall SetBoolValue(System::UnicodeString ABoolValue, Data::Db::TField* ABoolField);
+	System::UnicodeString __fastcall FromRegional(System::UnicodeString ANum);
+	System::UnicodeString __fastcall ToRegional(System::UnicodeString ANum);
 	System::UnicodeString __fastcall AddressFromCoords(const System::UnicodeString Lat, const System::UnicodeString Lon);
 	void __fastcall LookUpAddress();
 	void __fastcall CoordinatesApplied(System::TObject* Sender, System::UnicodeString Coords);
-	void __fastcall ExportToGPX(System::UnicodeString GPXFile);
+	void __fastcall ImportFromGPX(const System::UnicodeString GPXFile);
+	void __fastcall ExportToGPX(const System::UnicodeString GPXFile);
+	void __fastcall ImportFromCSV(const System::UnicodeString CSVFile);
+	void __fastcall ExportToCSV(const System::UnicodeString CSVFile);
 	__property System::Classes::TNotifyEvent OnRouteUpdated = {read=FOnRouteUpdated, write=FOnRouteUpdated};
 	__property System::Classes::TNotifyEvent OnRoutePointUpdated = {read=FOnRoutePointUpdated, write=FOnRoutePointUpdated};
 	__property TOnGetMapCoords OnGetMapCoords = {read=FOnGetMapCoords, write=FOnGetMapCoords};
@@ -106,10 +113,6 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define BooleanTrue L"True"
-#define BooleanFalse L"False"
-extern DELPHI_PACKAGE Udmroutepoints__1 BooleanValues;
-#define RtePt L"RtePt "
 extern DELPHI_PACKAGE TDmRoutePoints* DmRoutePoints;
 }	/* namespace Udmroutepoints */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UDMROUTEPOINTS)

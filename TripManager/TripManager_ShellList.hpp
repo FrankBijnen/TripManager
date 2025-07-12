@@ -28,7 +28,7 @@
 #include <Vcl.Shell.ShellConsts.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.Controls.hpp>
-#include <ListViewSort.hpp>
+#include <UnitListViewSort.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -44,7 +44,7 @@ class PASCALIMPLEMENTATION TShellListView : public Vcl::Shell::Shellctrls::TShel
 private:
 	bool FColumnSorted;
 	int FSortColumn;
-	Listviewsort::THeaderSortState FSortState;
+	Unitlistviewsort::THeaderSortState FSortState;
 	_di_IContextMenu2 ICM2;
 	Winapi::Windows::TPoint FDragStartPos;
 	bool FDragSource;
@@ -59,7 +59,7 @@ protected:
 	DYNAMIC void __fastcall MouseMove(System::Classes::TShiftState Shift, int X, int Y);
 	DYNAMIC void __fastcall MouseUp(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
 	HIDESBASE MESSAGE void __fastcall WMNotify(Winapi::Messages::TWMNotify &Msg);
-	void __fastcall InitSortSpec(int SortColumn, Listviewsort::THeaderSortState SortState);
+	void __fastcall InitSortSpec(int SortColumn, Unitlistviewsort::THeaderSortState SortState);
 	void __fastcall RestoreSortIndicator();
 	DYNAMIC void __fastcall DoContextPopup(const Winapi::Windows::TPoint &MousePos, bool &Handled);
 	virtual int __fastcall OwnerDataFind(Vcl::Comctrls::TItemFind Find, const System::UnicodeString FindString, const Winapi::Windows::TPoint &FindPosition, void * FindData, int StartIndex, Vcl::Comctrls::TSearchDirection Direction, bool Wrap);
@@ -83,7 +83,7 @@ public:
 	System::UnicodeString __fastcall PathForParsing(Vcl::Shell::Shellctrls::TShellFolder* AFolder);
 	__property bool ColumnSorted = {read=FColumnSorted, write=SetColumnSorted, nodefault};
 	__property int SortColumn = {read=FSortColumn, write=FSortColumn, nodefault};
-	__property Listviewsort::THeaderSortState SortState = {read=FSortState, write=FSortState, nodefault};
+	__property Unitlistviewsort::THeaderSortState SortState = {read=FSortState, write=FSortState, nodefault};
 	__property OnMouseWheel;
 	__property bool DragSource = {read=FDragSource, write=FDragSource, nodefault};
 public:

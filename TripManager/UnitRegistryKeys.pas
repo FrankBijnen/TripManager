@@ -7,10 +7,15 @@ const
   Reg_GPIProximity            = 'GPIProximity';
 
   Reg_TrackColor              = 'TrackColor';
-  Reg_ExploreUuid             = 'ExploreUuid';
-  Reg_VehicleProfileGuid      = 'VehicleProfileGuid';
-  Reg_VehicleProfileHash      = 'VehicleProfileHash';
-  Reg_VehicleId               = 'VehicleId';
+
+  //XT2
+  Reg_ExploreUuid                 = 'ExploreUuid';
+  Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
+  Reg_VehicleProfileHash          = 'VehicleProfileHash';
+  Reg_VehicleId                   = 'VehicleId';
+  Reg_VehicleProfileTruckType     = 'VehicleProfileTruckType';
+  Reg_AvoidancesChangedTimeAtSave = 'AvoidancesChangedTimeAtSave';
+  Reg_VehicleProfileName          = 'VehicleProfileName';
 
   Reg_ProcessBegin            = 'ProcessBegin';
   Reg_CurrentDevice           = 'CurrentDevice';

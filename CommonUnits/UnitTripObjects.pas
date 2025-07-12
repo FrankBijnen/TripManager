@@ -8,11 +8,14 @@ uses
   Winapi.Windows;
 
 const
-  XTName                  = 'zūmo XT';
-  XT2Name                 = 'zūmo XT2';
-  XT2_VehicleProfileGuid  = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
-  XT2_VehicleProfileHash  = '135656608';
-  XT2_VehicleId           = '1';
+  XT_Name                           = 'zūmo XT';
+  XT2_Name                          = 'zūmo XT2';
+  XT2_VehicleProfileGuid            = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
+  XT2_VehicleProfileHash            = '135656608';
+  XT2_VehicleId                     = '1';
+  XT2_VehicleProfileTruckType       = '7';
+  XT2_AvoidancesChangedTimeAtSave   = '';
+  XT2_VehicleProfileName            = 'z' + #0361 + 'mo Motorcycle';
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
@@ -323,7 +326,8 @@ type
 
   TmAvoidancesChangedTimeAtSave = class(TUnixDate)
   public
-    constructor Create(AValue: TDateTime = 0);
+    constructor Create(AValue: TDateTime = 0); overload;
+    constructor Create(AValue: cardinal); overload;
   end;
 
   TmOptimized = class(TBooleanItem)
@@ -698,7 +702,7 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo,
   Vcl.Dialogs,
-  UnitStringUtils, UnitVerySimpleXml;
+  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
 
 const
   Coord_Decimals = '%1.6f';
@@ -1486,6 +1490,11 @@ end;
 constructor TmAvoidancesChangedTimeAtSave.Create(AValue: TDateTime = 0);
 begin
   inherited Create('mAvoidancesChangedTimeAtSave', AValue);
+end;
+
+constructor TmAvoidancesChangedTimeAtSave.Create(AValue: cardinal);
+begin
+  inherited Create('mAvoidancesChangedTimeAtSave', TUnixDate.CardinalAsDateTime(AValue));
 end;
 
 constructor TmOptimized.Create(AValue: boolean = false);
@@ -2876,6 +2885,8 @@ begin
         Inc(ViaCount);
     end;
   end;
+  // At least a begin and end point needed. So at least 1 UdbHandle
+  ViaCount := Min(ViaCount, 2);
 
   TmpStream := TMemoryStream.Create;
   try
@@ -2887,10 +2898,9 @@ begin
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
-    // The RoutePreferences need to be resized?
+    // The RoutePreferences need to be resized? For XT2.
     if (CalcModel = TZumoModel.XT2) then
     begin
-      // For XT2
       SetLength(RoutePreferences, ViaCount -1);
       for Index := 0 to High(RoutePreferences) do
         RoutePreferences[Index] := Swap($0100);
@@ -2964,19 +2974,17 @@ procedure TTripList.CreateTemplate_XT2(const TripName: string);
 var
   TmpStream: TMemoryStream;
   Uid: TGuid;
+  GpxProcessOptions: TProcessOptions;
 begin
+  GpxProcessOptions := TProcessOptions.Create;
   TmpStream := TMemoryStream.Create;
   try
     AddHeader(THeader.Create);
-
     PrepStream(TmpStream, [$0000]);
     Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
-
-    Add(TmAvoidancesChangedTimeAtSave.Create(Now));
-
-    PrepStream(TmpStream, [$0000]);
+    Add(TmAvoidancesChangedTimeAtSave.Create(GpxProcessOptions.AvoidancesChangedTimeAtSave));
+    TmpStream.Position := 0;
     Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
-
     Add(TmIsDisplayable.Create);
     Add(TBooleanItem.Create('mIsDeviceRoute', true));
     Add(TmDayNumber.Create);
@@ -2984,22 +2992,25 @@ begin
     Add(TmOptimized.Create);
     Add(TmTotalTripTime.Create);
     Add(TmTripName.Create(TripName));
-    Add(TStringItem.Create('mVehicleProfileGuid', XT2_VehicleProfileGuid));
+    Add(TStringItem.Create('mVehicleProfileGuid', GpxProcessOptions.VehicleProfileGuid));
     Add(TmParentTripId.Create(0));
     Add(TmIsRoundTrip.Create);
-    Add(TStringItem.Create('mVehicleProfileName', 'z' + #0361 + 'mo Motorcycle'));
+    Add(TStringItem.Create('mVehicleProfileName', GpxProcessOptions.VehicleProfileName));
     Add(TmAvoidancesChanged.Create);
     Add(TmParentTripName.Create(TripName));
-    Add(TByteItem.Create('mVehicleProfileTruckType', 7));  // 7 or 0 ?
-    Add(TCardinalItem.Create('mVehicleProfileHash', StrToIntDef(XT2_VehicleProfileHash, 0)));
+    Add(TByteItem.Create('mVehicleProfileTruckType', StrToInt(GpxProcessOptions.VehicleProfileTruckType) ));
+    Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(GpxProcessOptions.VehicleProfileHash)));
     Add(TmRoutePreferences.Create);
     Add(TmImported.Create);
     Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
-
-    CheckHRGuid(CreateGUID(Uid));
-    Add(TStringItem.Create('mExploreUuid',
-                            ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
-
+    if (GpxProcessOptions.ExploreUuid <> '') then
+      Add(TStringItem.Create('mExploreUuid', GpxProcessOptions.ExploreUuid))
+    else
+    begin
+      CheckHRGuid(CreateGUID(Uid));
+      Add(TStringItem.Create('mExploreUuid',
+                              ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
+    end;
     Add(TmVersionNumber.Create(4, $10));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
@@ -3018,6 +3029,7 @@ begin
     ForceRecalc(TZumoModel.XT2, 2);
   finally
     TmpStream.Free;
+    GpxProcessOptions.Free;
   end;
 end;
 

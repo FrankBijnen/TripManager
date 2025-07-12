@@ -39,7 +39,7 @@ uses
 
 procedure TFrmAdditional.SetPrefs;
 begin
-  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
+  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XT_Name)]);
   TvSelections.Items[IdCompleteRoute].Enabled := false;
   TProcessOptions.SetPrefs(TvSelections);
 end;

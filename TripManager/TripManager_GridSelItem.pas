@@ -11,16 +11,16 @@ type
   TGridSelItem = class(TObject)
   private
     FBaseItem: TBaseItem;
-    FSelStart: integer;
-    FSelLength: integer;
+    FSelStart: IntPtr;
+    FSelLength: IntPtr;
   public
     constructor Create(ABaseItem: TBaseItem;
-                       ASelLength: integer = -1;
-                       ASelStart: integer = -1); overload;
-    constructor Create(ASelLength, ASelStart: integer); overload;
+                       ASelLength: IntPtr = -1;
+                       ASelStart: IntPtr = -1); overload;
+    constructor Create(ASelLength, ASelStart: IntPtr); overload;
     property BaseItem: TBaseItem read FBaseItem;
-    property SelStart: integer read FSelStart;
-    property SelLength: integer read FSelLength;
+    property SelStart: IntPtr read FSelStart;
+    property SelLength: IntPtr read FSelLength;
     class function GridSelItem(AValueListEditor: TValueListEditor; ARow: integer): TGridSelItem;
     class function BaseDataItem(AValueListEditor: TValueListEditor; ARow: integer): TBaseDataItem;
   end;
@@ -28,22 +28,22 @@ type
 implementation
 
 constructor TGridSelItem.Create(ABaseItem: TBaseItem;
-                                ASelLength: integer = -1;
-                                ASelStart: integer = -1);
+                                ASelLength: IntPtr = -1;
+                                ASelStart: IntPtr = -1);
 begin
   inherited Create;
   FBaseItem := ABaseItem;
 
-  FSelStart := integer(FBaseItem.SelStart);
+  FSelStart := IntPtr(FBaseItem.SelStart);
   if (ASelStart <> -1) then
     FSelStart := FSelStart + ASelStart;
 
   FSelLength := ASelLength;
   if (FSelLength = -1) then
-    FSelLength := integer(FBaseItem.SelEnd) - FSelStart;
+    FSelLength := IntPtr(FBaseItem.SelEnd) - FSelStart;
 end;
 
-constructor TGridSelItem.Create(ASelLength, ASelStart: integer);
+constructor TGridSelItem.Create(ASelLength, ASelStart: IntPtr);
 begin
   inherited Create;
   FBaseItem := nil;

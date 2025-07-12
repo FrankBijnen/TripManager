@@ -40,7 +40,7 @@ uses
 
 procedure TFrmTransferOptions.SetPrefs;
 begin
-  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XTName)]);
+  TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XT_Name)]);
   TvSelections.Items[IdKml].Enabled := false;
   TvSelections.Items[IdHtml].Enabled := false;
   TProcessOptions.SetPrefs(TvSelections);

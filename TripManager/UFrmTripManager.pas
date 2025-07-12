@@ -406,9 +406,9 @@ const
 var
   FormatSettings: TFormatSettings;
 
-function OffsetInRecord(const Base; const Field): integer;
+function OffsetInRecord(const Base; const Field): IntPtr;
 begin
-  result := integer(@Field) - integer(@Base);
+  result := IntPtr(@Field) - IntPtr(@Base);
 end;
 
 procedure DeleteTempFiles(const ATempPath, AMask: string);
@@ -467,9 +467,9 @@ end;
 procedure TFrmTripManager.GuessModel(const FriendlyName: string);
 begin
   CmbModel.ItemIndex := Ord(TZumoModel.Unknown);
-  if (ContainsText(FriendlyName, XT2Name)) then
+  if (ContainsText(FriendlyName, XT2_Name)) then
     CmbModel.ItemIndex := Ord(TZumoModel.XT2)
-  else if (ContainsText(FriendlyName, XTName)) then
+  else if (ContainsText(FriendlyName, XT_Name)) then
     CmbModel.ItemIndex := Ord(TZumoModel.XT);
   SetRegistry(Reg_CurrentDevice, FriendlyName);
   SetRegistry(Reg_ZumoModel, CmbModel.Text);
@@ -514,6 +514,7 @@ end;
 procedure TFrmTripManager.Action3Execute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
+  FrmAdvSettings.SampleTrip := ATripList;
   if FrmAdvSettings.ShowModal = mrOk then
     ReadSettings;
 
@@ -1288,7 +1289,7 @@ begin
     2: SetRegistry(Reg_PrefDevPoiFolder_Key, GetDevicePath(FCurrentPath));
   end;
 
-  PrefDevice := GetRegistry(Reg_PrefDev_Key, XTName);
+  PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
 end;
@@ -2269,7 +2270,7 @@ var
 
   procedure AddRoutePreferences(ARoutePreferences: TBaseRoutePreferences);
   var
-    SegmentNr: Cardinal;
+    SegmentNr: integer;
     Segments: TStringList;
     Offset: Cardinal;
   begin
@@ -2291,7 +2292,7 @@ var
 
       end;
     finally
-      Segments.Free
+      Segments.Free;
     end;
   end;
 
@@ -2358,18 +2359,25 @@ var
                                  TGridSelItem.Create(AmLocations,
                                                      SizeOf(biInitiator) +  SizeOf(LenName) +  LenName + SizeOf(LenValue) +
                                                      SizeOf(DataType) + SizeOf(LocationCount),
-                                                     GridSelStart ));
+                                                     GridSelStart));
+
       GridSelStart := GridSelStart + SizeOf(biInitiator) + SizeOf(LenName) + integer(LenName);
       VlTripInfo.Strings.AddPair('Size', Format('Size: %d', [LenValue]),
-                                 TGridSelItem.Create(AmLocations, SizeOf(LenValue), GridSelStart));
+                                 TGridSelItem.Create(AmLocations,
+                                                     SizeOf(LenValue),
+                                                     GridSelStart));
 
       GridSelStart := GridSelStart + SizeOf(LenValue);
       VlTripInfo.Strings.AddPair('DataType', Format('%d', [DataType]),
-                                 TGridSelItem.Create(AmLocations, SizeOf(DataType), GridSelStart));
+                                 TGridSelItem.Create(AmLocations,
+                                                     SizeOf(DataType),
+                                                     GridSelStart));
 
       GridSelStart := GridSelStart + SizeOf(DataType);
       VlTripInfo.Strings.AddPair('LocationCount', Format('%d', [LocationCount]),
-                                 TGridSelItem.Create(AmLocations, SizeOf(LocationCount), GridSelStart));
+                                 TGridSelItem.Create(AmLocations,
+                                                     SizeOf(LocationCount),
+                                                     GridSelStart));
     end;
 
     for ANitem in AmLocations.Locations do
@@ -2385,47 +2393,48 @@ var
   end;
 
   procedure AddUdbDir(AnUdbDir: TUdbDir; ZoomToPoint: boolean);
-  var
-    SelStart: integer;
   begin
     VlTripInfo.Strings.AddPair('*** Begin UdbDir', DupeString('-', DupeCount), TGridSelItem.Create(AnUdbDir));
-    SelStart := 0;
     VlTripInfo.Strings.AddPair('MapSegment + RoadId', Format('%s %s',
                                  [IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8),
                                   IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8)]),
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
-                                                             SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
+                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.RoadId),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.MapSegment)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
-                           SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment);
     VlTripInfo.Strings.AddPair('PointType', AnUdbDir.PointType,
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.PointType)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType);
     VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction);
     VlTripInfo.Strings.AddPair('Subclass Unknown1', '',
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown1)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1);
     VlTripInfo.Strings.AddPair('Coordinates', Format('%s', [AnUdbDir.MapCoords]),
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.Lat) +
-                                                            SizeOf(AnUdbDir.UdbDirValue.Lon), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.Lat) +
-                           SizeOf(AnUdbDir.UdbDirValue.Lon);
     VlTripInfo.Strings.AddPair('UdbDir Unknown1', '',
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.Unknown1), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.Unknown1),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown1)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.Unknown1);
     VlTripInfo.Strings.AddPair('Address', AnUdbDir.DisplayName,
-                              TGridSelItem.Create(AnUdbDir, SizeOf(AnUdbDir.UdbDirValue.Name), SelStart));
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.Name),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Name)));
 
-    SelStart := SelStart + SizeOf(AnUdbDir.UdbDirValue.Name) -1;
     VlTripInfo.Strings.AddPair('*** End UdbDir', DupeString('-', DupeCount),
-                              TGridSelItem.Create(AnUdbDir, 1, SelStart));
+                              TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) -1));
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), '', RoutePointTimeOut);
@@ -2439,64 +2448,81 @@ var
   begin
     GridSelStart := - SizeOf(AnUdbhandle.PrefValue);
     VlTripInfo.Strings.AddPair('*** Begin UdbPrefix', DupeString('-', DupeCount),
-                               TGridSelItem.Create(AnUdbhandle, SizeOf(AnUdbhandle.PrefValue), GridSelStart));
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(AnUdbhandle.PrefValue),
+                                                   GridSelStart));
 
     VlTripInfo.Strings.AddPair('Unknown', Format('0x%s', [IntToHex(AnUdbhandle.PrefValue.Unknown1)]),
-                               TGridSelItem.Create(AnUdbhandle, SizeOf(AnUdbhandle.PrefValue.Unknown1), GridSelStart));
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(AnUdbhandle.PrefValue.Unknown1),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.PrefValue.Unknown1);
     VlTripInfo.Strings.AddPair('PrefixSize', Format('%d', [AnUdbhandle.PrefValue.PrefixSize]),
-                               TGridSelItem.Create(AnUdbhandle, SizeOf(AnUdbhandle.PrefValue.PrefixSize), GridSelStart));
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(AnUdbhandle.PrefValue.PrefixSize),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.PrefValue.PrefixSize);
     VlTripInfo.Strings.AddPair('DataType', Format('%d', [AnUdbhandle.PrefValue.DataType]),
-                               TGridSelItem.Create(AnUdbhandle, SizeOf(AnUdbhandle.PrefValue.DataType), GridSelStart));
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(AnUdbhandle.PrefValue.DataType),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.PrefValue.DataType);
     VlTripInfo.Strings.AddPair('HandleId', Format('%d', [AnUdbhandle.PrefValue.PrefId]),
-                               TGridSelItem.Create(AnUdbhandle, SizeOf(AnUdbhandle.PrefValue.PrefId), GridSelStart));
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(AnUdbhandle.PrefValue.PrefId),
+                                                   GridSelStart));
 
     GridSelStart := 0;
     VlTripInfo.Strings.AddPair('*** Begin UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.LenName) + AnUdbhandle.LenName +
-                                                    SizeOf(AnUdbhandle.LenValue) + SizeOf(AnUdbhandle.DataType), GridSelStart));
+                                                   SizeOf(AnUdbhandle.LenName) + AnUdbhandle.LenName +
+                                                   SizeOf(AnUdbhandle.LenValue) + SizeOf(AnUdbhandle.DataType),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(biInitiator) + SizeOf(AnUdbhandle.LenName) + integer(AnUdbhandle.LenName);
-
     VlTripInfo.Strings.AddPair('Size', Format('%d', [AnUdbhandle.LenValue]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.LenValue), GridSelStart));
-    GridSelStart := GridSelStart + SizeOf(AnUdbhandle.LenValue);
+                                                    SizeOf(AnUdbhandle.LenValue),
+                                                    GridSelStart));
 
+    GridSelStart := GridSelStart + SizeOf(AnUdbhandle.LenValue);
     VlTripInfo.Strings.AddPair('DataType', Format('%d', [AnUdbhandle.DataType]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.DataType), GridSelStart));
+                                                   SizeOf(AnUdbhandle.DataType),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.DataType);
     VlTripInfo.Strings.AddPair('UdbHandleSize', Format('%d', [AnUdbhandle.UdbHandleValue.UdbHandleSize]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.UdbHandleValue.UdbHandleSize), GridSelStart));
+                                                   SizeOf(AnUdbhandle.UdbHandleValue.UdbHandleSize),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.UdbHandleValue.UdbHandleSize);
     VlTripInfo.Strings.AddPair('Calculation status', Format('0x%s (0x0538FEFF=XT 0x05d8FEFF=XT2)', [IntToHex(AnUdbhandle.UdbHandleValue.CalcStatus, 8)]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.UdbHandleValue.CalcStatus), GridSelStart));
+                                                   SizeOf(AnUdbhandle.UdbHandleValue.CalcStatus),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.UdbHandleValue.CalcStatus);
     VlTripInfo.Strings.AddPair('Unknown2', '150 bytes',
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.UdbHandleValue.Unknown2), GridSelStart));
+                                                   SizeOf(AnUdbhandle.UdbHandleValue.Unknown2),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.UdbHandleValue.Unknown2);
     VlTripInfo.Strings.AddPair('UdbDir count', Format('%d', [AnUdbhandle.UdbHandleValue.UDbDirCount]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    SizeOf(AnUdbhandle.UdbHandleValue.UDbDirCount), GridSelStart));
+                                                   SizeOf(AnUdbhandle.UdbHandleValue.UDbDirCount),
+                                                   GridSelStart));
 
     GridSelStart := GridSelStart + SizeOf(AnUdbhandle.UdbHandleValue.UDbDirCount);
     VlTripInfo.Strings.AddPair('Unknown3', Format('%d bytes', [Length(AnUdbhandle.UdbHandleValue.Unknown3)]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3), GridSelStart));
+                                                   Length(AnUdbhandle.UdbHandleValue.Unknown3),
+                                                   GridSelStart));
 
     for ANitem in AnUdbhandle.Items do
     begin
@@ -2543,7 +2569,9 @@ var
       end;
     end;
     VlTripInfo.Strings.AddPair('*** End AllRoutes', DupeString('-', DupeCount),
-                               TGridSelItem.Create(AmAllRoutes, 1, AmAllRoutes.SelEnd - AmAllRoutes.SelStart -1));
+                               TGridSelItem.Create(AmAllRoutes,
+                                                   1,
+                                                   AmAllRoutes.SelEnd - AmAllRoutes.SelStart -1));
   end;
 
   procedure AddHeader(AHeader: Theader);
@@ -2558,13 +2586,21 @@ var
       VlTripInfo.Strings.AddPair('ID', string(ID),
                                  TGridSelItem.Create(AHeader, SizeOf(ID)));
       VlTripInfo.Strings.AddPair('SubLength',     Format('%d', [SubLength]),
-                                 TGridSelItem.Create(AHeader, SizeOf(SubLength), OffsetInRecord(HeaderValue, SubLength) ));
+                                 TGridSelItem.Create(AHeader,
+                                                     SizeOf(SubLength),
+                                                     OffsetInRecord(HeaderValue, SubLength) ));
       VlTripInfo.Strings.AddPair('HeaderLength',  Format('%d', [HeaderLength]),
-                                 TGridSelItem.Create(AHeader, SizeOf(HeaderLength), OffsetInRecord(HeaderValue, HeaderLength) ));
+                                 TGridSelItem.Create(AHeader,
+                                                     SizeOf(HeaderLength),
+                                                     OffsetInRecord(HeaderValue, HeaderLength) ));
       VlTripInfo.Strings.AddPair('TotalItems',    Format('%d', [TotalItems]),
-                                 TGridSelItem.Create(AHeader, SizeOf(TotalItems), OffsetInRecord(HeaderValue, TotalItems) ));
+                                 TGridSelItem.Create(AHeader,
+                                                     SizeOf(TotalItems),
+                                                     OffsetInRecord(HeaderValue, TotalItems) ));
       VlTripInfo.Strings.AddPair('*** End Trip header', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(AHeader, 1, AHeader.SelStart + SizeOf(HeaderValue) -1 ));
+                                 TGridSelItem.Create(AHeader,
+                                                     1,
+                                                     AHeader.SelStart + SizeOf(HeaderValue) -1 ));
     end;
   end;
 
@@ -3881,7 +3917,12 @@ begin
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);
     VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, XT2_VehicleProfileHash);
     VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId);
+    VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, XT2_VehicleProfileTruckType);
+    VehicleProfileName := GetRegistry(Reg_VehicleProfileName, XT2_VehicleProfileName);
+    AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
+                                                                      TUnixDate.DateTimeAsCardinal(IncYear(Now, -1)));
 
+    // GPI defaults
     GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Symbols\' +
                        GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
@@ -3973,7 +4014,7 @@ procedure TFrmTripManager.ReadSettings;
 begin
   UnitProcessOptions.OnSetFixedPrefs := OnSetFixedPrefs;
 
-  PrefDevice := GetRegistry(Reg_PrefDev_Key, XTName);
+  PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
   WarnModel := GetRegistry(Reg_WarnModel_Key, True);

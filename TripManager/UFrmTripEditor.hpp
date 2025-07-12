@@ -16,20 +16,16 @@
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
+#include <System.Classes.hpp>
 #include <Winapi.Windows.hpp>
 #include <Winapi.Messages.hpp>
+#include <Vcl.Forms.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Buttons.hpp>
-#include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.ExtCtrls.hpp>
-#include <Vcl.Forms.hpp>
 #include <Vcl.ComCtrls.hpp>
-#include <Data.DB.hpp>
 #include <Vcl.DBCtrls.hpp>
-#include <Vcl.Grids.hpp>
-#include <Vcl.DBGrids.hpp>
-#include <unitTripObjects.hpp>
 #include <Vcl.Mask.hpp>
 #include <Vcl.Menus.hpp>
 #include <Vcl.ToolWin.hpp>
@@ -39,38 +35,19 @@
 #include <Vcl.ImgList.hpp>
 #include <Vcl.VirtualImageList.hpp>
 #include <Vcl.Dialogs.hpp>
+#include <Vcl.Grids.hpp>
+#include <Vcl.DBGrids.hpp>
+#include <Data.DB.hpp>
+#include <unitTripObjects.hpp>
+#include <TripManager_DBGrid.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
 namespace Ufrmtripeditor
 {
 //-- forward type declarations -----------------------------------------------
-class DELPHICLASS TDBGrid;
 class DELPHICLASS TFrmTripEditor;
 //-- type declarations -------------------------------------------------------
-class PASCALIMPLEMENTATION TDBGrid : public Vcl::Dbgrids::TDBGrid
-{
-	typedef Vcl::Dbgrids::TDBGrid inherited;
-	
-private:
-	int FirstSel;
-	void __fastcall SelectRange();
-	
-protected:
-	DYNAMIC void __fastcall MouseDown(System::Uitypes::TMouseButton Button, System::Classes::TShiftState Shift, int X, int Y);
-	
-public:
-	__fastcall virtual TDBGrid(System::Classes::TComponent* AOwner);
-	__property InplaceEditor;
-public:
-	/* TCustomDBGrid.Destroy */ inline __fastcall virtual ~TDBGrid() { }
-	
-public:
-	/* TWinControl.CreateParented */ inline __fastcall TDBGrid(HWND ParentWindow) : Vcl::Dbgrids::TDBGrid(ParentWindow) { }
-	
-};
-
-
 typedef System::Classes::TNotifyEvent TTripFileUpdate;
 
 typedef void __fastcall (__closure *TRoutePointsShowing)(System::TObject* Sender, bool Showing);
@@ -83,7 +60,7 @@ __published:
 	Vcl::Extctrls::TPanel* PnlBottom;
 	Vcl::Buttons::TBitBtn* BtnOk;
 	Vcl::Buttons::TBitBtn* BtnCancel;
-	TDBGrid* DBGRoutePoints;
+	Tripmanager_dbgrid::TDBGrid* DBGRoutePoints;
 	Vcl::Extctrls::TPanel* PnlRoute;
 	Vcl::Dbctrls::TDBEdit* DbTripName;
 	Vcl::Dbctrls::TDBComboBox* DBCRoutePreference;
@@ -116,13 +93,16 @@ __published:
 	Vcl::Dialogs::TSaveDialog* SaveTrip;
 	Vcl::Comctrls::TToolButton* TBGPXExp_Imp;
 	Vcl::Menus::TPopupMenu* PopupGPX;
-	Vcl::Menus::TMenuItem* Import1;
-	Vcl::Menus::TMenuItem* Export1;
+	Vcl::Menus::TMenuItem* ImportGPX;
 	Vcl::Dialogs::TOpenDialog* OpenTrip;
 	Vcl::Menus::TMenuItem* N3;
 	Vcl::Menus::TMenuItem* Copy1;
 	Vcl::Menus::TMenuItem* Cut1;
 	Vcl::Menus::TMenuItem* Paste1;
+	Vcl::Comctrls::TToolButton* TBCSVExp_Imp;
+	Vcl::Menus::TPopupMenu* PopupCSV;
+	Vcl::Menus::TMenuItem* ImportCSV;
+	Vcl::Menus::TMenuItem* ExportCSV;
 	void __fastcall BtnOkClick(System::TObject* Sender);
 	void __fastcall BtnCancelClick(System::TObject* Sender);
 	void __fastcall FormShow(System::TObject* Sender);
@@ -139,19 +119,20 @@ __published:
 	void __fastcall TBMoveDownClick(System::TObject* Sender);
 	void __fastcall TbLookupAddressClick(System::TObject* Sender);
 	void __fastcall Selectall1Click(System::TObject* Sender);
-	void __fastcall ExportGpx(System::TObject* Sender);
-	void __fastcall Import1Click(System::TObject* Sender);
+	void __fastcall ExportGpxClick(System::TObject* Sender);
+	void __fastcall ImportGPXClick(System::TObject* Sender);
 	void __fastcall Copy1Click(System::TObject* Sender);
 	void __fastcall Cut1Click(System::TObject* Sender);
 	void __fastcall Paste1Click(System::TObject* Sender);
 	void __fastcall PnlRouteResize(System::TObject* Sender);
+	void __fastcall ImportCSVClick(System::TObject* Sender);
+	void __fastcall ExportCSVClick(System::TObject* Sender);
 	
 private:
 	TTripFileUpdate FTripFileUpdating;
 	TTripFileUpdate FTripFileCanceled;
 	TTripFileUpdate FTripFileUpdated;
 	TRoutePointsShowing FRoutePointsShowing;
-	void __fastcall OnSetAnalyzePrefs(System::TObject* Sender);
 	void __fastcall CopyToClipBoard(bool Cut);
 	
 public:

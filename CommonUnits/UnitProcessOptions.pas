@@ -128,6 +128,9 @@ type
     VehicleProfileGuid: string;               // Defaults for XT2
     VehicleProfileHash: string;               // Defaults for XT2
     VehicleId: string;                        // Defaults for XT2
+    VehicleProfileTruckType: string;          // Defaults for XT2
+    VehicleProfileName: string;               // Defaults for XT2
+    AvoidancesChangedTimeAtSave: cardinal;    // Defaults for XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -242,9 +245,12 @@ begin
 {$IFDEF TRIPOBJECTS}
   ZumoModel := TZumoModel.XT;
   ExploreUuid := '';
-  VehicleProfileGuid := '';
-  VehicleProfileHash := '';
-  VehicleId := '';
+  VehicleProfileGuid := XT2_VehicleProfileGuid;
+  VehicleProfileHash := XT2_VehicleProfileHash;
+  VehicleId := XT2_VehicleId;
+  VehicleProfileTruckType := XT2_VehicleProfileTruckType;
+  VehicleProfileName := XT2_VehicleProfileName;
+  AvoidancesChangedTimeAtSave := 0;
 {$ENDIF}
 
   if (Assigned(OnSetFixedPrefs)) then

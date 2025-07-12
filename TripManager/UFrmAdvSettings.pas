@@ -5,8 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls,
-  Vcl.Menus,
-  UnitGeoCode;
+  Vcl.Menus;
 
 type
   TFrmAdvSettings = class(TForm)
@@ -28,11 +27,13 @@ type
     GridXT2Settings: TStringGrid;
     PopupBuilder: TPopupMenu;
     GridGeoCodeSettings: TStringGrid;
-    Panel1: TPanel;
+    PnlGeoCodeFuncs: TPanel;
     BtnValidate: TButton;
     BtnClearCoordCache: TButton;
     TabDevice: TTabSheet;
-    GridDevice: TStringGrid;
+    GridDeviceSettings: TStringGrid;
+    PnlXT2Funcs: TPanel;
+    BtnCurrent: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -45,16 +46,24 @@ type
     procedure AddTag(Sender: TObject);
     procedure BtnValidateClick(Sender: TObject);
     procedure BtnClearCoordCacheClick(Sender: TObject);
+    procedure BtnCurrentClick(Sender: TObject);
+    procedure PctMainResize(Sender: TObject);
   private
     { Private declarations }
-    SamplePlace: TPlace;
+    SamplePlace: TObject;
+    function GetSampleItem(const KeyName: ShortString): string;
     procedure LookupSamplePlace(UseCache: boolean);
     procedure ValidateApiKey;
+    procedure LoadSettings_General;
+    procedure LoadSettings_Device;
+    procedure LoadSettings_XT2;
+    procedure LoadSettings_GeoCode;
     procedure LoadSettings;
     procedure SaveGrid(AGrid: TStringGrid);
     procedure SaveSettings;
   public
     { Public declarations }
+    SampleTrip: TObject;
     SampleLat: string;
     SampleLon: string;
   end;
@@ -65,8 +74,8 @@ var
 implementation
 
 uses
-  System.UITypes,
-  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects;
+  System.UITypes, System.StrUtils, System.Math,
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects, UnitGeoCode;
 
 {$R *.dfm}
 
@@ -85,28 +94,37 @@ begin
   MemoAddressFormat.Lines.Add('municipality,city,town,village,hamlet');
 end;
 
-procedure TFrmAdvSettings.LoadSettings;
+procedure AddGridHeader(const AGrid: TStringGrid);
+begin
+  AGrid.FixedRows := 1;
+  AGrid.Cells[0, 0] := 'Registry Key';
+  AGrid.Cells[1, 0] := 'Description';
+  AGrid.Cells[2, 0] := 'Value';
+//  AGrid.ColWidths[0] := 120;  // Less room for the Key
+end;
+
+procedure AddGridLine(const AGrid: TStringGrid; var ARow: integer; const AKey: string;
+                      DefaultValue: string = ''; ADesc: string = '');
+var
+  ACardinal: Cardinal;
+begin
+  AGrid.Cells[0, ARow] := AKey;
+  AGrid.Cells[1, ARow] := ADesc;
+  AGrid.Cells[2, ARow] := GetRegistry(AKey, DefaultValue);
+
+  if (Startstext('0x', AGrid.Cells[2, ARow])) and
+     (AGrid.Cells[1, ARow] = '') then
+  begin
+    ACardinal := StrToIntDef('$' + Copy(AGrid.Cells[2, ARow], 3), 0);
+    AGrid.Cells[1, ARow] := TUnixDate.CardinalAsDateTimeString(ACardinal);
+  end;
+
+  ARow := ARow + 1;
+end;
+
+procedure TFrmAdvSettings.LoadSettings_General;
 var
   CurRow: integer;
-
-  procedure AddGridHeader(const AGrid: TStringGrid);
-  begin
-    AGrid.FixedRows := 1;
-    AGrid.Cells[0, 0] := 'Registry Key';
-    AGrid.Cells[1, 0] := 'Description';
-    AGrid.Cells[2, 0] := 'Value';
-    AGrid.ColWidths[0] := 120;  // Less room for the Key
-  end;
-
-  procedure AddGridLine(const AGrid: TStringGrid; var ARow: integer; const AKey: string;
-                        DefaultValue: string = ''; ADesc: string = '');
-  begin
-    AGrid.Cells[0, ARow] := AKey;
-    AGrid.Cells[1, ARow] := ADesc;
-    AGrid.Cells[2, ARow] := GetRegistry(AKey, DefaultValue);
-    ARow := ARow + 1;
-  end;
-
 begin
   GridGeneralSettings.RowCount := GridGeneralSettings.FixedRows +1;
   GridGeneralSettings.BeginUpdate;
@@ -135,58 +153,70 @@ begin
   finally
     GridGeneralSettings.EndUpdate;
   end;
+end;
 
-  GridDevice.RowCount := GridDevice.FixedRows +1;
-  GridDevice.BeginUpdate;
+procedure TFrmAdvSettings.LoadSettings_Device;
+var
+  CurRow: integer;
+begin
+  GridDeviceSettings.RowCount := GridDeviceSettings.FixedRows +1;
+  GridDeviceSettings.BeginUpdate;
   try
 
     CurRow := 1;
 
-    AddGridLine(GridDevice, CurRow, '', '', '-Device-');
-    AddGridLine(GridDevice, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
-    AddGridLine(GridDevice, CurRow, Reg_TripNameInList,      'False', 'Show TripName in file list');
-    AddGridLine(GridDevice, CurRow, '');
+    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Device-');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_TripNameInList,      'False', 'Show TripName in file list');
+    AddGridLine(GridDeviceSettings, CurRow, '');
 
-    AddGridLine(GridDevice, CurRow, '', '', '-Preferred device and folders-');
-    AddGridLine(GridDevice, CurRow, Reg_PrefDev_Key,             XTName,                     'Default device to use');
-    AddGridLine(GridDevice, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
-    AddGridLine(GridDevice, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
-    AddGridLine(GridDevice, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');
-    AddGridLine(GridDevice, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
-    AddGridLine(GridDevice, CurRow, '');
+    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Preferred device and folders-');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDev_Key,             XT_Name,                    'Default device to use');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
+    AddGridLine(GridDeviceSettings, CurRow, '');
 
-    AddGridLine(GridDevice, CurRow, '', '', '-Creating Way point files (*.gpx)-');
-    AddGridLine(GridDevice, CurRow, Reg_FuncWayPointWpt,   'True',  'Add original Way points');
-    AddGridLine(GridDevice, CurRow, Reg_FuncWayPointVia,   'False', 'Add Via points from route');
-    AddGridLine(GridDevice, CurRow, Reg_FuncWayPointShape, 'False', 'Add Shaping points from route');
-    AddGridLine(GridDevice, CurRow, '');
+    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Creating Way point files (*.gpx)-');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncWayPointWpt,   'True',  'Add original Way points');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncWayPointVia,   'False', 'Add Via points from route');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncWayPointShape, 'False', 'Add Shaping points from route');
+    AddGridLine(GridDeviceSettings, CurRow, '');
 
-    AddGridLine(GridDevice, CurRow, '', '', '-Creating Poi files (*.gpi)-');
-    AddGridLine(GridDevice, CurRow, Reg_FuncGpiWayPt,      'True',  'Add original Way points');
-    AddGridLine(GridDevice, CurRow, Reg_FuncGpiViaPt,      'False', 'Add Via points from route');
-    AddGridLine(GridDevice, CurRow, Reg_FuncGpiShpPt,      'False', 'Add Shaping points from route');
-    AddGridLine(GridDevice, CurRow, Reg_GPISymbolSize,     '80x80', 'Size of symbols (24x24 48x48 or 80x80)');
-    AddGridLine(GridDevice, CurRow, Reg_GPIProximity,      '500',   'Default proximity for alerts in meters');
+    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Creating Poi files (*.gpi)-');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncGpiWayPt,      'True',  'Add original Way points');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncGpiViaPt,      'False', 'Add Via points from route');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncGpiShpPt,      'False', 'Add Shaping points from route');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_GPISymbolSize,     '80x80', 'Size of symbols (24x24 48x48 or 80x80)');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_GPIProximity,      '500',   'Default proximity for alerts in meters');
 
-    GridDevice.RowCount := CurRow;
+    GridDeviceSettings.RowCount := CurRow;
 
-    AddGridHeader(GridDevice);
+    AddGridHeader(GridDeviceSettings);
 
   finally
-    GridDevice.EndUpdate;
+    GridDeviceSettings.EndUpdate;
   end;
+end;
 
-
+procedure TFrmAdvSettings.LoadSettings_XT2;
+var
+  CurRow: integer;
+begin
   GridXT2Settings.RowCount := GridXT2Settings.FixedRows +1;
   GridXT2Settings.BeginUpdate;
   try
 
     CurRow := 1;
     AddGridLine(GridXT2Settings, CurRow, '', '', '-Defaults for creating XT2 trips-');
-    AddGridLine(GridXT2Settings, CurRow, 'ExploreUuid',           '', 'Leave blank to generate unique GUID''s');
-    AddGridLine(GridXT2Settings, CurRow, 'VehicleProfileGuid',    XT2_VehicleProfileGuid);
-    AddGridLine(GridXT2Settings, CurRow, 'VehicleProfileHash',    XT2_VehicleProfileHash);
-    AddGridLine(GridXT2Settings, CurRow, 'VehicleId',             XT2_VehicleId);
+    AddGridLine(GridXT2Settings, CurRow, Reg_ExploreUuid,                 '', 'Leave blank to generate unique GUID''s');
+    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileGuid,          XT2_VehicleProfileGuid);
+    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileHash,          XT2_VehicleProfileHash);
+    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleId,                   XT2_VehicleId);
+    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileTruckType,     XT2_VehicleProfileTruckType);
+    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileName,          XT2_VehicleProfileName);
+    AddGridLine(GridXT2Settings, CurRow, Reg_AvoidancesChangedTimeAtSave, XT2_AvoidancesChangedTimeAtSave);
     GridXT2Settings.RowCount := CurRow;
 
     AddGridHeader(GridXT2Settings);
@@ -194,7 +224,12 @@ begin
   finally
     GridXT2Settings.EndUpdate;
   end;
+end;
 
+procedure TFrmAdvSettings.LoadSettings_GeoCode;
+var
+  CurRow: integer;
+begin
   GridGeoCodeSettings.RowCount := GridGeoCodeSettings.FixedRows +1;
   ReadGeoCodeSettings;
   GridGeoCodeSettings.BeginUpdate;
@@ -213,6 +248,32 @@ begin
     GridGeoCodeSettings.EndUpdate;
   end;
   MemoAddressFormat.Lines.Text := ReplaceAll(GeoSettings.AddressFormat, ['|'], [#13#10], [rfReplaceAll]);
+end;
+
+procedure TFrmAdvSettings.LoadSettings;
+begin
+  LoadSettings_General;
+  LoadSettings_Device;
+  LoadSettings_XT2;
+  LoadSettings_GeoCode;
+end;
+
+function TFrmAdvSettings.GetSampleItem(const KeyName: ShortString): string;
+var
+  ABase: TBaseItem;
+begin
+  result := '';
+  if (SampleTrip <> nil) and
+     (SampleTrip is TTripList) then
+  begin
+    ABase := TTripList(SampleTrip).GetItem('m' + KeyName);
+    if (ABase = nil) then
+      exit;
+    if (ABase is TUnixDate) then
+      result := '0x' + IntTohex(TUnixDate(ABase).AsUnixDateTime, 8)
+    else if (ABase is TBaseDataItem) then
+      result := TBaseDataItem(ABase).AsString;
+  end;
 end;
 
 procedure TFrmAdvSettings.LookupSamplePlace(UseCache: boolean);
@@ -245,12 +306,45 @@ begin
   LookupSamplePlace(true);
   GeoSettings.AddressFormat := ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]);
   if (SamplePlace <> nil) then
-    MemoResult.lines.Text := SamplePlace.DisplayPlace;
+    MemoResult.lines.Text := TPlace(SamplePlace).DisplayPlace;
 end;
 
 procedure TFrmAdvSettings.NrRoadPlaceState1Click(Sender: TObject);
 begin
     MemoAddressFormat.Lines.Text := DefHouseRoad + #10 + DefCity + #10 + DefState;
+end;
+
+procedure TFrmAdvSettings.PctMainResize(Sender: TObject);
+var
+  SpaceLeft: integer;
+  Margin: integer;
+
+  procedure AlignGrid(AGrid: TStringGrid);
+  var
+    Index: integer;
+    CurCol: integer;
+    LastCol: integer;
+    SpaceNeeded: integer;
+  begin
+    LastCol := SpaceLeft;
+    for CurCol := 0 to AGrid.ColCount -2 do
+    begin
+      SpaceNeeded := 0;
+      for Index := 0 to AGrid.RowCount do
+        SpaceNeeded := Max(SpaceNeeded, AGrid.Canvas.TextWidth(AGrid.Cells[CurCol, Index]) + Margin);
+      AGrid.ColWidths[CurCol] := SpaceNeeded;
+      Dec(LastCol, SpaceNeeded);
+    end;
+    AGrid.ColWidths[AGrid.ColCount -1] := LastCol;
+  end;
+
+begin
+  Margin := ScaleValue(10);
+  SpaceLeft := TPageControl(Sender).ClientWidth - GetSystemMetrics(SM_CXVSCROLL);
+  AlignGrid(GridGeneralSettings);
+  AlignGrid(GridDeviceSettings);
+  AlignGrid(GridXT2Settings);
+  AlignGrid(GridGeoCodeSettings);
 end;
 
 procedure TFrmAdvSettings.SaveGrid(AGrid: TStringGrid);
@@ -268,7 +362,7 @@ end;
 procedure TFrmAdvSettings.SaveSettings;
 begin
   SaveGrid(GridGeneralSettings);
-  SaveGrid(GridDevice);
+  SaveGrid(GridDeviceSettings);
   SaveGrid(GridXT2Settings);
   SaveGrid(GridGeoCodeSettings);
 
@@ -296,6 +390,18 @@ end;
 procedure TFrmAdvSettings.BtnValidateClick(Sender: TObject);
 begin
   ValidateApiKey;
+end;
+
+procedure TFrmAdvSettings.BtnCurrentClick(Sender: TObject);
+begin
+  SetRegistry(Reg_VehicleProfileGuid,           GetSampleItem(Reg_VehicleProfileGuid));
+  SetRegistry(Reg_VehicleProfileHash,           GetSampleItem(Reg_VehicleProfileHash));
+  SetRegistry(Reg_VehicleId,                    GetSampleItem(Reg_VehicleId));
+  SetRegistry(Reg_VehicleProfileTruckType,      GetSampleItem(Reg_VehicleProfileTruckType));
+  SetRegistry(Reg_VehicleProfileName,           GetSampleItem(Reg_VehicleProfileName));
+  SetRegistry(Reg_AvoidancesChangedTimeAtSave,  GetSampleItem(Reg_AvoidancesChangedTimeAtSave));
+
+  LoadSettings_XT2;
 end;
 
 procedure TFrmAdvSettings.Clear1Click(Sender: TObject);

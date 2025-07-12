@@ -40,8 +40,6 @@ namespace Ufrmadvsettings
 //-- forward type declarations -----------------------------------------------
 class DELPHICLASS TFrmAdvSettings;
 //-- type declarations -------------------------------------------------------
-typedef System::StaticArray<System::UnicodeString, 2> Ufrmadvsettings__1;
-
 class PASCALIMPLEMENTATION TFrmAdvSettings : public Vcl::Forms::TForm
 {
 	typedef Vcl::Forms::TForm inherited;
@@ -68,8 +66,8 @@ __published:
 	Vcl::Extctrls::TPanel* Panel1;
 	Vcl::Stdctrls::TButton* BtnValidate;
 	Vcl::Stdctrls::TButton* BtnClearCoordCache;
-	Vcl::Comctrls::TTabSheet* TabTransferDevice;
-	Vcl::Grids::TStringGrid* GridTransferDevice;
+	Vcl::Comctrls::TTabSheet* TabDevice;
+	Vcl::Grids::TStringGrid* GridDevice;
 	void __fastcall FormClose(System::TObject* Sender, System::Uitypes::TCloseAction &Action);
 	void __fastcall FormShow(System::TObject* Sender);
 	void __fastcall MemoAddressFormatChange(System::TObject* Sender);
@@ -107,27 +105,6 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define TripManagerReg_Key L"Software\\TDBware\\TripManager"
-#define PrefFileSysFolder_Key L"PrefFileSysFolder"
-#define PrefFileSysFolder_Val L"rfDesktop"
-#define PrefDev_Key L"PrefDevice"
-#define PrefDevTripsFolder_Key L"PrefDeviceTripsFolder"
-#define PrefDevTripsFolder_Val L"Internal Storage\\.System\\Trips"
-#define PrefDevGpxFolder_Key L"PrefDeviceGpxFolder"
-#define PrefDevGpxFolder_Val L"Internal Storage\\GPX"
-#define PrefDevPoiFolder_Key L"PrefDevicePoiFolder"
-#define PrefDevPoiFolder_Val L"Internal Storage\\POI"
-#define WarnModel_Key L"WarnModel"
-#define TripColor_Key L"TripColor"
-#define Maximized_Key L"Maximized"
-#define WidthColumns_Key L"WidthColumns"
-#define SortColumn_Key L"SortColumn"
-#define SortAscending_Key L"SortAscending"
-#define RoutePointTimeOut_Key L"RoutePointTimeOut"
-#define RoutePointTimeOut_Val L"5000"
-#define GeoSearchTimeOut_Key L"GeoSearchTimeOut"
-#define GeoSearchTimeOut_Val L"8000"
-extern DELPHI_PACKAGE Ufrmadvsettings__1 BooleanValues;
 extern DELPHI_PACKAGE TFrmAdvSettings* FrmAdvSettings;
 }	/* namespace Ufrmadvsettings */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UFRMADVSETTINGS)

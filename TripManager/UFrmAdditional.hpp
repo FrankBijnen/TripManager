@@ -31,7 +31,7 @@
 #include <Vcl.ComCtrls.hpp>
 #include <System.ImageList.hpp>
 #include <Vcl.ImgList.hpp>
-#include <UnitGPXObjects.hpp>
+#include <UnitGpxDefs.hpp>
 #include <System.UITypes.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -60,7 +60,7 @@ private:
 	void __fastcall StorePrefs();
 	
 public:
-	Unitgpxobjects::TGPXFuncArray Funcs;
+	Unitgpxdefs::TGPXFuncArray Funcs;
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmAdditional(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmAdditional(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }

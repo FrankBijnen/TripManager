@@ -17,6 +17,7 @@
 #include <System.hpp>
 #include <SysInit.hpp>
 #include <System.Classes.hpp>
+#include <System.Types.hpp>
 #include <Vcl.Grids.hpp>
 #include <Vcl.ValEdit.hpp>
 #include <Vcl.Controls.hpp>
@@ -34,12 +35,16 @@ class PASCALIMPLEMENTATION TValueListEditor : public Vcl::Valedit::TValueListEdi
 	
 private:
 	System::Classes::TNotifyEvent FOnSelectionMoved;
+	Vcl::Grids::TDrawCellEvent FOnBeforeDrawCell;
 	
 protected:
 	virtual void __fastcall SelectionMoved(const Vcl::Grids::TGridRect &OldSel);
+	virtual void __fastcall DrawCell(System::LongInt ACol, System::LongInt ARow, const System::Types::TRect &ARect, Vcl::Grids::TGridDrawState AState);
 	
 public:
+	void __fastcall SaveAsCSV(const System::UnicodeString CSVFile);
 	__property System::Classes::TNotifyEvent OnSelectionMoved = {read=FOnSelectionMoved, write=FOnSelectionMoved};
+	__property Vcl::Grids::TDrawCellEvent OnBeforeDrawCell = {read=FOnBeforeDrawCell, write=FOnBeforeDrawCell};
 public:
 	/* TValueListEditor.Create */ inline __fastcall virtual TValueListEditor(System::Classes::TComponent* AOwner) : Vcl::Valedit::TValueListEditor(AOwner) { }
 	/* TValueListEditor.Destroy */ inline __fastcall virtual ~TValueListEditor() { }
