@@ -123,14 +123,15 @@ type
     CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
 
     {$IFDEF TRIPOBJECTS}
-    ZumoModel: TZumoModel;                    // XT1
-    ExploreUuid: string;                      // Defaults for XT2
-    VehicleProfileGuid: string;               // Defaults for XT2
-    VehicleProfileHash: string;               // Defaults for XT2
-    VehicleId: string;                        // Defaults for XT2
-    VehicleProfileTruckType: string;          // Defaults for XT2
-    VehicleProfileName: string;               // Defaults for XT2
-    AvoidancesChangedTimeAtSave: cardinal;    // Defaults for XT2
+    ZumoModel: TZumoModel;                    // XT1 and XT2
+    ScPosn_Unknown1: Cardinal;                // XT1 and XT2
+    ExploreUuid: string;                      // XT2
+    VehicleProfileGuid: string;               // XT2
+    VehicleProfileHash: string;               // XT2
+    VehicleId: string;                        // XT2
+    VehicleProfileTruckType: string;          // XT2
+    VehicleProfileName: string;               // XT2
+    AvoidancesChangedTimeAtSave: Cardinal;    // XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -244,6 +245,7 @@ begin
 
 {$IFDEF TRIPOBJECTS}
   ZumoModel := TZumoModel.XT;
+  ScPosn_Unknown1 := 0;
   ExploreUuid := '';
   VehicleProfileGuid := XT2_VehicleProfileGuid;
   VehicleProfileHash := XT2_VehicleProfileHash;

@@ -3909,8 +3909,9 @@ begin
     LookUpWindow := FrmTripManager.Handle;
     LookUpMessage := UFrmTripManager.WM_ADDRLOOKUP;
 
-    // Model to use
+    // XT1 and XT2 Defaults
     ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), GetRegistry(Reg_ZumoModel, '')));
+    ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
 
     // XT2 Defaults
     ExploreUuid := GetRegistry(Reg_ExploreUuid, ExploreUuid);

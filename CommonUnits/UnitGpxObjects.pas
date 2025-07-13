@@ -1997,8 +1997,7 @@ begin
         Locations.Add(TmArrival.Create(DepartureDate))
       else
         Locations.Add(TmArrival.Create);
-
-      Locations.Add(TmScPosn.Create(Coords.Lat, Coords.Lon));
+      Locations.Add(TmScPosn.Create(Coords.Lat, Coords.Lon, ProcessOptions.ScPosn_Unknown1));
       Locations.Add(TmAddress.Create(RtePtCmt));
       Locations.Add(TmisTravelapseDestination.Create);
       Locations.Add(TmShapingRadius.Create);

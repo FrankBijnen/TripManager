@@ -372,7 +372,8 @@ var
   Locations: TmLocations;
   TmpStream: TMemoryStream;
   ZumoModel: TZumoModel;
-  ANItem: TBaseItem;                                                                          
+  ANItem: TBaseItem;
+  ProcessOptions: TProcessOptions;                                                                         
 begin
   if (CdsRoute.State in [dsEdit, dsInsert]) then
     CdsRoute.Post;
@@ -383,7 +384,7 @@ begin
   SaveRecNo := CdsRoutePoints.RecNo;
   CdsRoutePoints.DisableControls;
   TmpStream := TMemoryStream.Create;
-
+  ProcessOptions := TProcessOptions.Create;
   try
     Locations := TmLocations(FTripList.GetItem('mLocations'));
     if not (Assigned(Locations)) then
@@ -413,7 +414,8 @@ begin
       Locations.Add(TmDuration.Create);
       Locations.Add(TmArrival.Create); // Departure will be set later
       Locations.Add(TmScPosn.Create(StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
-                                    StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings)));
+                                    StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
+                                    ProcessOptions.ScPosn_Unknown1));
       Locations.Add(TmAddress.Create(CdsRoutePointsAddress.AsString));
       Locations.Add(TmisTravelapseDestination.Create);
       Locations.Add(TmShapingRadius.Create);
@@ -442,6 +444,7 @@ begin
     end;
   finally
     TmpStream.Free;
+    ProcessOptions.Free;
     CdsRoutePoints.RecNo := SaveRecNo;
     CdsRoutePoints.EnableControls;
   end;

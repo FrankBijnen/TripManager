@@ -13,7 +13,7 @@ type
     BtnCancel: TButton;
     PnlBottom: TPanel;
     PctMain: TPageControl;
-    TabXT2: TTabSheet;
+    TabZumo: TTabSheet;
     TabGeoCode: TTabSheet;
     MemoAddressFormat: TMemo;
     PnlResult: TPanel;
@@ -24,7 +24,7 @@ type
     BtnBuilder: TButton;
     TabGeneral: TTabSheet;
     GridGeneralSettings: TStringGrid;
-    GridXT2Settings: TStringGrid;
+    GridZumoSettings: TStringGrid;
     PopupBuilder: TPopupMenu;
     GridGeoCodeSettings: TStringGrid;
     PnlGeoCodeFuncs: TPanel;
@@ -32,7 +32,7 @@ type
     BtnClearCoordCache: TButton;
     TabDevice: TTabSheet;
     GridDeviceSettings: TStringGrid;
-    PnlXT2Funcs: TPanel;
+    PnlZumoFuncs: TPanel;
     BtnCurrent: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
@@ -51,7 +51,9 @@ type
   private
     { Private declarations }
     SamplePlace: TObject;
+    function GetSampleDataItem(const ABase: TObject): string;
     function GetSampleItem(const KeyName: ShortString): string;
+    function GetSampleLocationItem(const ClassName: string): string;
     procedure LookupSamplePlace(UseCache: boolean);
     procedure ValidateApiKey;
     procedure LoadSettings_General;
@@ -100,7 +102,6 @@ begin
   AGrid.Cells[0, 0] := 'Registry Key';
   AGrid.Cells[1, 0] := 'Description';
   AGrid.Cells[2, 0] := 'Value';
-//  AGrid.ColWidths[0] := 120;  // Less room for the Key
 end;
 
 procedure AddGridLine(const AGrid: TStringGrid; var ARow: integer; const AKey: string;
@@ -113,10 +114,10 @@ begin
   AGrid.Cells[2, ARow] := GetRegistry(AKey, DefaultValue);
 
   if (Startstext('0x', AGrid.Cells[2, ARow])) and
-     (AGrid.Cells[1, ARow] = '') then
+     (Startstext('Date: ', AGrid.Cells[1, ARow])) then
   begin
     ACardinal := StrToIntDef('$' + Copy(AGrid.Cells[2, ARow], 3), 0);
-    AGrid.Cells[1, ARow] := TUnixDate.CardinalAsDateTimeString(ACardinal);
+    AGrid.Cells[1, ARow] := 'Date: ' + TUnixDate.CardinalAsDateTimeString(ACardinal);
   end;
 
   ARow := ARow + 1;
@@ -204,25 +205,28 @@ procedure TFrmAdvSettings.LoadSettings_XT2;
 var
   CurRow: integer;
 begin
-  GridXT2Settings.RowCount := GridXT2Settings.FixedRows +1;
-  GridXT2Settings.BeginUpdate;
+  GridZumoSettings.RowCount := GridZumoSettings.FixedRows +1;
+  GridZumoSettings.BeginUpdate;
   try
 
     CurRow := 1;
-    AddGridLine(GridXT2Settings, CurRow, '', '', '-Defaults for creating XT2 trips-');
-    AddGridLine(GridXT2Settings, CurRow, Reg_ExploreUuid,                 '', 'Leave blank to generate unique GUID''s');
-    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileGuid,          XT2_VehicleProfileGuid);
-    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileHash,          XT2_VehicleProfileHash);
-    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleId,                   XT2_VehicleId);
-    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileTruckType,     XT2_VehicleProfileTruckType);
-    AddGridLine(GridXT2Settings, CurRow, Reg_VehicleProfileName,          XT2_VehicleProfileName);
-    AddGridLine(GridXT2Settings, CurRow, Reg_AvoidancesChangedTimeAtSave, XT2_AvoidancesChangedTimeAtSave);
-    GridXT2Settings.RowCount := CurRow;
+    AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating trips-');
+    AddGridLine(GridZumoSettings, CurRow, Reg_ScPosn_Unknown1,             '0', '');
+    AddGridLine(GridZumoSettings, CurRow, '');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT2 trips-');
+    AddGridLine(GridZumoSettings, CurRow, Reg_ExploreUuid,                 '', 'Leave blank to generate unique GUID''s');
+    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileGuid,          XT2_VehicleProfileGuid);
+    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileHash,          XT2_VehicleProfileHash);
+    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleId,                   XT2_VehicleId);
+    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileTruckType,     XT2_VehicleProfileTruckType);
+    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileName,          XT2_VehicleProfileName);
+    AddGridLine(GridZumoSettings, CurRow, Reg_AvoidancesChangedTimeAtSave, XT2_AvoidancesChangedTimeAtSave, 'Date: ');
+    GridZumoSettings.RowCount := CurRow;
 
-    AddGridHeader(GridXT2Settings);
+    AddGridHeader(GridZumoSettings);
 
   finally
-    GridXT2Settings.EndUpdate;
+    GridZumoSettings.EndUpdate;
   end;
 end;
 
@@ -258,21 +262,54 @@ begin
   LoadSettings_GeoCode;
 end;
 
+function TFrmAdvSettings.GetSampleDataItem(const ABase: TObject): string;
+begin
+  result := '';
+
+  if (ABase is TUnixDate) then
+    result := '0x' + IntTohex(TUnixDate(ABase).AsUnixDateTime, 8)
+  else if (ABase is TmScPosn) then
+    result := '0x' + IntTohex(TmScPosn(ABase).Unknown1, 8)
+  else if (ABase is TBaseDataItem) then
+    result := TBaseDataItem(ABase).AsString;
+end;
+
+
 function TFrmAdvSettings.GetSampleItem(const KeyName: ShortString): string;
 var
   ABase: TBaseItem;
 begin
   result := '';
+
   if (SampleTrip <> nil) and
      (SampleTrip is TTripList) then
   begin
     ABase := TTripList(SampleTrip).GetItem('m' + KeyName);
-    if (ABase = nil) then
-      exit;
-    if (ABase is TUnixDate) then
-      result := '0x' + IntTohex(TUnixDate(ABase).AsUnixDateTime, 8)
-    else if (ABase is TBaseDataItem) then
-      result := TBaseDataItem(ABase).AsString;
+    if (ABase <> nil) then
+      result := GetSampleDataItem(ABase);
+  end;
+end;
+
+function TFrmAdvSettings.GetSampleLocationItem(const ClassName: string): string;
+var
+  Alocation: Tlocation;
+  ANItem: TBaseItem;
+begin
+  result := '';
+
+  if (SampleTrip <> nil) and
+     (SampleTrip is TTripList) then
+  begin
+    Alocation := TTripList(SampleTrip).GetRoutePoint(0);
+    if (Alocation <> nil) then
+    begin
+      for ANItem in Alocation.LocationItems do
+      begin
+        if (ANItem is TBaseDataItem) and
+           (ANItem.ClassName = ClassName) then
+          exit(GetSampleDataItem(ANItem));
+      end;
+    end;
   end;
 end;
 
@@ -311,7 +348,7 @@ end;
 
 procedure TFrmAdvSettings.NrRoadPlaceState1Click(Sender: TObject);
 begin
-    MemoAddressFormat.Lines.Text := DefHouseRoad + #10 + DefCity + #10 + DefState;
+  MemoAddressFormat.Lines.Text := DefHouseRoad + #10 + DefCity + #10 + DefState;
 end;
 
 procedure TFrmAdvSettings.PctMainResize(Sender: TObject);
@@ -343,7 +380,7 @@ begin
   SpaceLeft := TPageControl(Sender).ClientWidth - GetSystemMetrics(SM_CXVSCROLL);
   AlignGrid(GridGeneralSettings);
   AlignGrid(GridDeviceSettings);
-  AlignGrid(GridXT2Settings);
+  AlignGrid(GridZumoSettings);
   AlignGrid(GridGeoCodeSettings);
 end;
 
@@ -363,7 +400,7 @@ procedure TFrmAdvSettings.SaveSettings;
 begin
   SaveGrid(GridGeneralSettings);
   SaveGrid(GridDeviceSettings);
-  SaveGrid(GridXT2Settings);
+  SaveGrid(GridZumoSettings);
   SaveGrid(GridGeoCodeSettings);
 
   SetRegistry(Reg_AddressFormat, ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
@@ -394,6 +431,7 @@ end;
 
 procedure TFrmAdvSettings.BtnCurrentClick(Sender: TObject);
 begin
+  SetRegistry(Reg_ScPosn_Unknown1,              GetSampleLocationItem(TmScPosn.ClassName));
   SetRegistry(Reg_VehicleProfileGuid,           GetSampleItem(Reg_VehicleProfileGuid));
   SetRegistry(Reg_VehicleProfileHash,           GetSampleItem(Reg_VehicleProfileHash));
   SetRegistry(Reg_VehicleId,                    GetSampleItem(Reg_VehicleId));
@@ -433,4 +471,3 @@ begin
 end;
 
 end.
-

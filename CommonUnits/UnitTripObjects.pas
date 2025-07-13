@@ -228,9 +228,10 @@ type
     function GetMapCoords: string; override;
     procedure SetMapCoords(ACoords: string); override;
   public
-    constructor Create(ALat, ALon: double); reintroduce;
+    constructor Create(ALat, ALon: double; AUnknown1: Cardinal); reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
+    property Unknown1: Cardinal read FValue.Unknown1;
   end;
 
   // Type 14
@@ -1242,11 +1243,11 @@ begin
 end;
 
 {*** ScPosn ***}
-constructor TmScPosn.Create(ALat, ALon: double);
+constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal);
 begin
   inherited Create('mScPosn', Sizeof(FValue), dtPosn);
   FValue.ScnSize := Swap32(SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon));
-  FValue.Unknown1 := 0;
+  FValue.Unknown1 := AUnknown1;
   FValue.Lat := (CoordAsInt(ALat));
   FValue.Lon := (CoordAsInt(ALon));
 end;

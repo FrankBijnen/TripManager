@@ -54,7 +54,7 @@ object FrmAdvSettings: TFrmAdvSettings
     Top = 0
     Width = 621
     Height = 627
-    ActivePage = TabXT2
+    ActivePage = TabZumo
     Align = alClient
     TabHeight = 25
     TabOrder = 1
@@ -107,9 +107,9 @@ object FrmAdvSettings: TFrmAdvSettings
           24)
       end
     end
-    object TabXT2: TTabSheet
-      Caption = 'XT2 settings'
-      object GridXT2Settings: TStringGrid
+    object TabZumo: TTabSheet
+      Caption = 'Z'#369'mo settings'
+      object GridZumoSettings: TStringGrid
         Left = 0
         Top = 33
         Width = 613
@@ -136,7 +136,7 @@ object FrmAdvSettings: TFrmAdvSettings
           23
           24)
       end
-      object PnlXT2Funcs: TPanel
+      object PnlZumoFuncs: TPanel
         Left = 0
         Top = 0
         Width = 613

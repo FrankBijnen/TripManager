@@ -5,9 +5,11 @@ interface
 const
   Reg_GPISymbolSize           = 'GPISymbolsSize';
   Reg_GPIProximity            = 'GPIProximity';
+  Reg_TrackColor              = 'TrackColor';     // User preferred track color
 
-  Reg_TrackColor              = 'TrackColor';
-
+  // XT1 and XT2
+  Reg_ZumoModel               = 'ZumoModel';
+  Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   //XT2
   Reg_ExploreUuid                 = 'ExploreUuid';
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
@@ -19,7 +21,6 @@ const
 
   Reg_ProcessBegin            = 'ProcessBegin';
   Reg_CurrentDevice           = 'CurrentDevice';
-  Reg_ZumoModel               = 'ZumoModel';
   Reg_BeginSymbol             = 'BeginSymbol';
   Reg_BeginStr                = 'BeginStr';
   Reg_BeginAddress            = 'BeginAddress';
