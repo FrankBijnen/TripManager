@@ -15,7 +15,7 @@ const
   XT2_VehicleId                     = '1';
   XT2_VehicleProfileTruckType       = '7';
   XT2_AvoidancesChangedTimeAtSave   = '';
-  XT2_VehicleProfileName            = 'z' + #0361 + 'mo Motorcycle';
+  XT2_VehicleProfileName            = 'z' + #0363 + 'mo Motorcycle';
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);

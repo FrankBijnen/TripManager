@@ -60,18 +60,20 @@ uses
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
 
-const LenFileSize = 11;
-      B  = ' B';
-      Kb = ' Kb';
-      Mb = ' Mb';
-      HtmlTempFileName  = '.html';
-      TrackFileExt    = '.track';
-      OSMDir            = 'OSM\';
-      RoutesDir         = 'Routes\';
+const
+  LenFileSize = 11;
+  B  = ' B';
+  Kb = ' Kb';
+  Mb = ' Mb';
+  HtmlTempFileName  = '.html';
+  TrackFileExt    = '.track';
+  OSMDir            = 'OSM\';
+  RoutesDir         = 'Routes\';
 
 function SenSize(const S: int64): string;
-var H: string;
-    I: int64;
+var
+  H: string;
+  I: int64;
 begin
   H := Spc(LenFileSize);
   if S < (1000000) then
@@ -80,12 +82,13 @@ begin
     result := H + FormatFloat('#,##0', S / 1024) + Kb
   else
     result := H + FormatFloat('#,##0', S / (1024 * 1024)) + Mb;
-  I := length(result);
-  result := copy(result, I - LenFileSize + 1, LenFileSize);
+  I := Length(result);
+  result := Copy(result, I - LenFileSize + 1, LenFileSize);
 end;
 
 function Intd(const N: Integer; const D: Integer): string;
-var L: integer;
+var
+  L: integer;
 begin
   result := IntToStr(N);
   L := D - Length(result);
@@ -226,7 +229,7 @@ var I: integer;
     FMsg: string;
 begin
   Fmsg := Format('%s %s %s', ['MTP_Helper', Paramstr(0), IntToStr(GetCurrentThreadId)]);
-  for I := 0 to high(Msg) do
+  for I := 0 to High(Msg) do
     FMsg := Format('%s,%s', [FMsg, VarToStr(Msg[I])]);
   OutputDebugString(PChar(FMsg));
 end;
@@ -239,7 +242,8 @@ begin
 end;
 
 function TempFilename(const Prefix: string): string;
-var AName, ADir: array [0 .. MAX_PATH] of char;
+var
+  AName, ADir: array [0 .. MAX_PATH] of char;
 begin
   GetTempPath(MAX_PATH, ADir);
   GetTempFilename(ADir, PChar(Prefix), 0, AName);
@@ -316,8 +320,10 @@ begin
 end;
 
 function EscapeFileName(InFile: string): string;
-const InvalidChars = ['<', '>', ':', '"', '/', '\', '|', '?', '*'];
-var Indx: integer;
+const
+  InvalidChars = ['<', '>', ':', '"', '/', '\', '|', '?', '*'];
+var
+  Indx: integer;
 begin
   result := InFile;
 
@@ -397,7 +403,7 @@ function VerInfo(IncludeCompany: boolean = false): string;
 var
   S: string;
   Buf, Value: PChar;
-   N, Len: DWORD;
+  N, Len: DWORD;
 
   function QueryItem(Item: string): string;
   begin
@@ -440,7 +446,7 @@ begin
     end;
   end
   else
-    result := ('No FileVersionInfo found');
+    result := 'No FileVersionInfo found';
 end;
 
 initialization
