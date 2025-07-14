@@ -444,7 +444,8 @@ begin
         GpxxRptNode := BestRpt;
 
         // Error?
-        if (SubClassList.IndexOf(CTMapSegRoad) < 0) then
+        if (FUdbDir.UdbDirValue.SubClass.PointType <> $21) and
+           (SubClassList.IndexOf(CTMapSegRoad) < 0) then
           FUdbDir.Status := TUdbDirStatus.udsRoadNotFound
         else if (MinDist > FDistOKMeters) then
           FUdbDir.Status := TUdbDirStatus.udsCoordsNotFound
