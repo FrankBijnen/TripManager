@@ -120,6 +120,9 @@ type
     function GetValue: string; virtual;
     procedure SetValue(NewValue: string); virtual;
     function GetLenValue: Cardinal; virtual;
+    function GetOffSetLenValue: integer;
+    function GetOffSetDataType: integer;
+    function GetOffSetValue: integer;
     function GetMapCoords: string; virtual;
     procedure SetMapCoords(ACoords: string); virtual;
   public
@@ -132,6 +135,9 @@ type
     property Name: ShortString read FName;
     property LenValue: Cardinal read GetLenValue;
     property DataType: byte read FDataType;
+    property OffsetLenValue: integer read GetOffSetLenValue;
+    property OffsetDataType: integer read GetOffSetDataType;
+    property OffsetValue: integer read GetOffSetValue;
     property MapCoords: string read GetMapCoords write SetMapCoords;
   end;
 
@@ -1017,6 +1023,21 @@ end;
 function TBaseDataItem.GetLenValue: Cardinal;
 begin
   result := FLenValue + SizeOf(FInitiator);
+end;
+
+function TBaseDataItem.GetOffSetLenValue: integer;
+begin
+  result := SizeOf(biInitiator) + SizeOf(LenName) + LenName;
+end;
+
+function TBaseDataItem.GetOffSetDataType: integer;
+begin
+  result := GetOffSetLenValue + SizeOf(LenName);
+end;
+
+function TBaseDataItem.GetOffSetValue: integer;
+begin
+  result := GetOffSetDataType + SizeOf(DataType);
 end;
 
 function TBaseDataItem.GetMapCoords: string;

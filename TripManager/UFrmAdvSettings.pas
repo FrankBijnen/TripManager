@@ -168,7 +168,7 @@ begin
 
     AddGridLine(GridDeviceSettings, CurRow, '', '', '-Device-');
     AddGridLine(GridDeviceSettings, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_TripNameInList,      'False', 'Show TripName in file list');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_TripNameInList,      'True',  'Show TripName in file list');
     AddGridLine(GridDeviceSettings, CurRow, '');
 
     AddGridLine(GridDeviceSettings, CurRow, '', '', '-Preferred device and folders-');
