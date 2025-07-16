@@ -420,7 +420,8 @@ begin
         BestRpt := nil;
         while (ScanRtePt <> nil) do
         begin
-          if (ScanRtePt.Name = 'gpxx:rpt') then
+          if (ScanRtePt.Name = 'gpxx:rpt') and
+             (FindSubNodeValue(ScanRtePt, 'gpxx:Subclass') <> '') then
           begin
             CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
             ThisDist := CoordDistance(CoordTrip, CoordGpx, TDistanceUnit.duKm);
@@ -444,7 +445,7 @@ begin
         GpxxRptNode := BestRpt;
 
         // Error?
-        if (FUdbDir.UdbDirValue.SubClass.PointType <> $21) and
+        if (FUdbDir.UdbDirValue.SubClass.PointType <> $21) and // Dont care for RoadId for Start/begin segment.
            (SubClassList.IndexOf(CTMapSegRoad) < 0) then
           FUdbDir.Status := TUdbDirStatus.udsRoadNotFound
         else if (MinDist > FDistOKMeters) then
