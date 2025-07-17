@@ -270,7 +270,7 @@ type
     procedure NewDirectoryClick(Sender: TObject);
     procedure MnuNextDiffClick(Sender: TObject);
     procedure MnuPrevDiffClick(Sender: TObject);
-    procedure TvTripKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
     PrefDevice: string;
@@ -1188,7 +1188,8 @@ var
   TagsToShow: TTagsToShow;
   AnItem: TListItem;
 begin
-  if (ATripList = nil) then
+  if (ATripList = nil) or
+    (ATripList.GetItem('mAllRoutes') = nil) then
     exit;
 
   TagsToShow := TTagsToShow(TMenuItem(Sender).Tag);  //Rte = 20, Track = 30
@@ -1211,8 +1212,10 @@ begin
 
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+
   OsmTrack := TStringList.Create;
-  GPXFileObj := TGPXTripCompare.Create(OpenTrip.FileName, ATripList);
+
+  GPXFileObj := TGPXTripCompare.Create(OpenTrip.FileName, ATripList, FrmShowLog.GpxRptList);
   try
     GPXFileObj.AnalyzeGpx;
     GpxSelected := GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
@@ -1221,6 +1224,7 @@ begin
     if (GpXSelected) then
     begin
       SetCursor(CrWait);
+      FrmShowLog.ClearLog;
       case (TagsToShow) of
         TTagsToShow.Rte:
           GPXFileObj.CompareGpxRoute(FrmShowLog.LbLog.Items, OsmTrack);
@@ -1523,6 +1527,8 @@ procedure TFrmTripManager.MnuNextDiffClick(Sender: TObject);
 var
   ANode: TTreeNode;
 begin
+  if (TvTrip.Items.Count = 0) then
+    exit;
   if (TvTrip.Selected <> nil) then
     ANode := TvTrip.Selected.GetNext
   else
@@ -1531,9 +1537,10 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNotFound,
-                                       TUdbDirStatus.udsCoordsNotFound,
-                                       TUdbDirStatus.udsRoutePointNotFound]) then
+       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNOK,
+                                       TUdbDirStatus.UdsRoadOKCoordsNOK,
+                                       TUdbDirStatus.udsCoordsNOK,
+                                       TUdbDirStatus.udsRoutePointNOK]) then
     begin
       TvTrip.Selected := ANode;
       break;
@@ -1546,6 +1553,8 @@ procedure TFrmTripManager.MnuPrevDiffClick(Sender: TObject);
 var
   ANode: TTreeNode;
 begin
+  if (TvTrip.Items.Count = 0) then
+    exit;
   if (TvTrip.Selected <> nil) then
     ANode := TvTrip.Selected.GetPrev
   else
@@ -1554,9 +1563,10 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNotFound,
-                                       TUdbDirStatus.udsCoordsNotFound,
-                                       TUdbDirStatus.udsRoutePointNotFound]) then
+       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNOK,
+                                       TUdbDirStatus.UdsRoadOKCoordsNOK,
+                                       TUdbDirStatus.udsCoordsNOK,
+                                       TUdbDirStatus.udsRoutePointNOK]) then
     begin
       TvTrip.Selected := ANode;
       break;
@@ -1568,11 +1578,22 @@ end;
 procedure TFrmTripManager.SyncDiff(Sender: TObject);
 var
   ANode: TTreeNode;
+  CoordGpx: TCoord;
+  BestLat, BestLon: string;
 begin
-  TvTrip.Selected := TvTrip.Items[0];
+  if (Assigned(Sender)) and
+     (Sender is TXmlVSNode) then
+  begin
+    CoordGpx := TGPXfile.CoordFromAttribute(TXmlVSNode(Sender).AttributeList);
+    CoordGpx.FormatLatLon(BestLat, BestLon);
+    MapRequest(BestLat + ', ' + BestLon, TXmlVSNode(Sender).NodeValue, '', RoutePointTimeOut);
+    exit;
+  end;
+
   if (Assigned(Sender)) and
      (Sender is TUdbDir) then
   begin
+    TvTrip.Selected := TvTrip.Items[0];
     ANode := TvTrip.Items[0];
     while (ANode <> nil) do
     begin
@@ -1585,6 +1606,7 @@ begin
       end;
       ANode := ANode.GetNext;
     end;
+    exit;
   end;
 end;
 
@@ -1674,6 +1696,41 @@ begin
   ATripList.Free;
   APOIList.Free;
   FreeDevices;
+end;
+
+procedure TFrmTripManager.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (ssAlt in Shift) then
+  begin
+    case Key of
+      VK_DOWN:
+        begin
+          Key := 0;
+          MnuNextDiffClick(MnuNextDiff);
+        end;
+      VK_UP:
+        begin
+          Key := 0;
+          MnuPrevDiffClick(MnuPrevDiff);
+        end;
+    end;
+  end;
+  if (ssCtrl in Shift) and
+     (ssAlt in Shift) then
+  begin
+    case Chr(Key) of
+      'C':
+        begin
+          Key := 0;
+          CompareWithGpx(MnuCompareGpxTrack);
+        end;
+      'B':
+        begin
+          Key := 0;
+          CompareWithGpx(MnuCompareGpxRoute);
+        end;
+    end;
+  end;
 end;
 
 procedure TFrmTripManager.FormShow(Sender: TObject);
@@ -2781,47 +2838,14 @@ begin
        (TUdbDir(Node.Data).IsTurn)  then
       Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
     case (TUdbDir(Node.Data).Status) of
-      TUdbDirStatus.udsRoutePointNotFound:
-        Sender.Canvas.Brush.Color := clWebOrange;
-      TUdbDirStatus.udsRoadNotFound:
+      TUdbDirStatus.udsRoutePointNOK:
         Sender.Canvas.Brush.Color := clWebAqua;
-      TUdbDirStatus.udsCoordsNotFound:
+      TUdbDirStatus.udsRoadNOK:
+        Sender.Canvas.Brush.Color := clWebRed;
+      TUdbDirStatus.UdsRoadOKCoordsNOK:
+        Sender.Canvas.Brush.Color := clWebOrange;
+      TUdbDirStatus.udsCoordsNOK:
         Sender.Canvas.Brush.Color := clWebYellow;
-    end;
-  end;
-end;
-
-procedure TFrmTripManager.TvTripKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (ssAlt in Shift) then
-  begin
-    case Key of
-      VK_DOWN:
-        begin
-          Key := 0;
-          MnuNextDiffClick(MnuNextDiff);
-        end;
-      VK_UP:
-        begin
-          Key := 0;
-          MnuPrevDiffClick(MnuPrevDiff);
-        end;
-    end;
-  end;
-  if (ssCtrl in Shift) and
-     (ssAlt in Shift) then
-  begin
-    case Chr(Key) of
-      'C':
-        begin
-          Key := 0;
-          CompareWithGpx(MnuCompareGpxTrack);
-        end;
-      'B':
-        begin
-          Key := 0;
-          CompareWithGpx(MnuCompareGpxRoute);
-        end;
     end;
   end;
 end;
@@ -2845,11 +2869,13 @@ begin
   if (ACol = 0) then
   begin
     case (TUdbDir(AGridSelItem.BaseItem).Status) of
-      TUdbDirStatus.udsRoutePointNotFound:
-        VlTripInfo.Canvas.Brush.Color := clWebOrange;
-      TUdbDirStatus.udsRoadNotFound:
+      TUdbDirStatus.udsRoutePointNOK:
         VlTripInfo.Canvas.Brush.Color := clWebAqua;
-      TUdbDirStatus.udsCoordsNotFound:
+      TUdbDirStatus.udsRoadNOK:
+        VlTripInfo.Canvas.Brush.Color := clWebRed;
+      TUdbDirStatus.UdsRoadOKCoordsNOK:
+        VlTripInfo.Canvas.Brush.Color := clWebOrange;
+      TUdbDirStatus.udsCoordsNOK:
         VlTripInfo.Canvas.Brush.Color := clWebYellow;
     end;
   end;

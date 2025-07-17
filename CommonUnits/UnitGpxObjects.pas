@@ -73,9 +73,6 @@ type
     procedure CreateGlobals;
     procedure ClearGlobals;
 
-    procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
-    procedure CloneSubNodes(FromNodes, ToNodes: TXmlVsNodeList);
-    procedure CloneNode(FromNode, ToNode: TXmlVsNode);
     procedure ProcessGPX;
 
     procedure ComputeDistance(RptNode: TXmlVSNode);
@@ -142,6 +139,9 @@ type
                              ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 {$ENDIF}
   protected
+    procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
+    procedure CloneSubNodes(FromNodes, ToNodes: TXmlVsNodeList);
+    procedure CloneNode(FromNode, ToNode: TXmlVsNode);
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);

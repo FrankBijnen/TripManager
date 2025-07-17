@@ -18,13 +18,33 @@ type
     FRtePt: TXmlVSNode;
     FCheckSegmentOK: boolean;
     FCheckRouteOK: boolean;
+    FGpxRptList: Tlist;
+    FSubClassList: TStringList;
+    function MapSegRoadExclBit(const ASubClass: string): string;
     function DisplayMapSegRoad(const MapSegRoad: string): string;
+    function AddGpxRptPt(const FromNode: TXmlVSNode;
+                         const ANodeValue: string): TXmlVSNode;
     function GetRouteNode(const RouteName: string): TXmlVSNode;
+    function GetExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+    procedure BuildSubClasses(const ARtePt: TXmlVSNode);
+    function ScanSubClass(const AMapSegRoad: string;
+                          const ACoordTrip: TCoord;
+                          var GpxSubClass: string;
+                          var MinDist: double): TXmlVSNode;
+    function ScanGpxxRptNode(const GpxxRptNode: TXmlVSNode;
+                             const ACoordTrip: TCoord;
+                             var GpxSubClass: string;
+                             var MinDist: double): TXmlVSNode;
+    function GetBestGpxRpt(const BestRpt: TXmlVSNode;
+                           const BestSubClass: string;
+                           const BestDist: double): TXmlVSNode;
+
     function GetRtePtFromRoute(const Messages: TStrings;
                                const RouteSelected: TXmlVSNode): TXmlVSNode;
     function PrepareTripForCompare(const Messages, OutTrackList: TStrings;
                                    var UdbHandleCount: integer;
                                    var UdbDirCount: integer): TXmlVSNode;
+    function GetBestTrkRpt(const BestTrk: TXmlVSNode; const BestDist: double): TXmlVSNode;
     function ScanForTrkPt(const FromCoords: TCoord;
                           const ScanFromTrkPt: TXmlVSNode;
                           const ScanToTrkPt: TXmlVSNode;
@@ -32,20 +52,23 @@ type
     // (BC) Route Checks
     procedure NoMatchRoutePoints(const Messages: TStrings);
     procedure NoMatchRoutePoint(const Messages: TStrings;
-                                CoordTrip, CoordGpx: TCoord; ThisDist: double);
+                                CoordTrip: TCoord;
+                                BestRpt: TXmlVSNode;
+                                ThisDist: double);
     procedure NoMatchRoutePointEnd(const Messages: TStrings; CoordTrip: TCoord);
     procedure NoGpxxRpt(const Messages: TStrings);
     procedure NoMatchUdbDirSubClass(const Messages: TStrings;
-                                    CoordTrip: TCoord;
-                                    BestRpt: TXmlVSNode;
-                                    BestDist: double);
+                                    const CoordTrip: TCoord;
+                                    const BestRpt: TXmlVSNode;
+                                    const BestSubClass: string;
+                                    const BestDist: double);
     // Track Checks
     procedure NoMatchRoutePointTrk(const Messages: TStrings;
                                    CoordTrip: TCoord; BestToTrkpt: TXmlVSNode; ThisDist: double);
     procedure NoMatchUdbDirTrk(const Messages: TStrings;
                                CoordTrip: TCoord; BestTrkpt: TXmlVSNode; BestDist: Double);
   public
-    constructor Create(const AGPXFile: string; ATripList: TTripList);
+    constructor Create(const AGPXFile: string; ATripList: TTripList; AGpxRptList: Tlist);
     destructor Destroy; override;
     procedure CompareGpxRoute(const Messages, OutTrackList: TStrings);
     procedure CompareGpxTrack(const Messages, OutTrackList: TStrings);
@@ -60,23 +83,55 @@ uses
 var
   FormatSettings: TFormatSettings;
 
-constructor TGPXTripCompare.Create(const AGPXFile: string; ATripList: TTripList);
+procedure BreakPoint;
+{$IFDEF DEBUG}
+asm int 3
+  {$ELSE}
+begin
+{$ENDIF}
+end;
+
+constructor TGPXTripCompare.Create(const AGPXFile: string; ATripList: TTripList; AGpxRptList: Tlist);
 begin
   inherited Create(AGPXFile, nil, nil); // Default processOptions are OK
 
   FDistOKMeters := ProcessOptions.GetDistOKMeters;
   FAllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
+  FGpxRptList := AGpxRptList;
+  FSubClassList := TStringList.Create;
 end;
 
 destructor TGPXTripCompare.Destroy;
 begin
+  FSubClassList.Free;
   inherited Destroy;
+end;
+
+function TGPXTripCompare.MapSegRoadExclBit(const ASubClass: string): string;
+var
+  RoadIdHex: Cardinal;
+begin
+  RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and $ffff7fbf;
+  result := Copy(ASubClass, 5, 8) + IntToHex(RoadIdHex, 8);
 end;
 
 function TGPXTripCompare.DisplayMapSegRoad(const MapSegRoad: string): string;
 begin
   result := MapSegRoad;
   Insert(' ' ,result, 9);
+end;
+
+// Adds an XML node containing lat/lan values and a nodevalue to the objects of Messages.
+// The reason is that the 'FromNode' will be freed after the compare,
+// but is needed to reposition the map from the ShowLog Form.
+// These objects will be freed  in TFrmShowLog.ClearGpxRptList.
+function TGPXTripCompare.AddGpxRptPt(const FromNode: TXmlVSNode;
+                                     const ANodeValue: string): TXmlVSNode;
+begin
+  result := TXmlVSNode.Create;
+  FGpxRptList.Add(result);
+  CloneNode(FromNode, result);
+  result.NodeValue := ANodeValue;
 end;
 
 //Gets the (BC) <rte> from the XMLDocument
@@ -156,6 +211,7 @@ var
   LocAnUdbDir: TUdbDir;
   LocUdbHandleCount, LocUdbDirCount: integer;
   LocScanRtePt: TXmlVSNode;
+  MsgScanRtePt: TXmlVSNode;
 begin
   Messages.Add('Number of route points does not match in trip and gpx route.' + #13#10 +
                'Try "By Point Location (Track or Route)"');
@@ -174,12 +230,13 @@ begin
                                   [LocUdbHandleCount, LocUdbDirCount, LocAnUdbDir.DisplayName]), LocAnUdbDir);
         if (LocScanRtePt <> nil) then
         begin
+          MsgScanRtePt := AddGpxRptPt(LocScanRtePt, FindSubNodeValue(LocScanRtePt, 'name'));
           Messages.AddObject(Format('  .gpx file: %s',
-                                    [FindSubNodeValue(LocScanRtePt, 'name') ]), LocAnUdbDir);
+                                    [MsgScanRtePt.NodeValue]), MsgScanRtePt);
           LocScanRtePt := LocScanRtePt.NextSibling;
         end
         else
-          Messages.AddObject(Format('  .gpx file: %s', ['Not found']), LocAnUdbDir);
+          Messages.Add(Format('  .gpx file: %s', ['Not found']));
         Inc(LocUdbDirCount);
       end;
     end;
@@ -188,30 +245,37 @@ begin
 
   while (LocScanRtePt <> nil) do
   begin
+    MsgScanRtePt := AddGpxRptPt(LocScanRtePt, FindSubNodeValue(LocScanRtePt, 'name'));
+
     Messages.Add('');
-    Messages.Add(Format('  .trip file: %s', ['Not found']));
-    Messages.Add(Format('   .gpx file: %s', [FindSubNodeValue(LocScanRtePt, 'name') ]));
+    Messages.Add      (Format('  .trip file: %s', ['Not found']));
+    Messages.AddObject(Format('   .gpx file: %s', [MsgScanRtePt.NodeValue]), MsgScanRtePt);
     LocScanRtePt := LocScanRtePt.NextSibling;
   end;
 end;
 
 procedure TGPXTripCompare.NoMatchRoutePoint(const Messages: TStrings;
-                                            CoordTrip, CoordGpx: TCoord; ThisDist: double);
+                                            CoordTrip: TCoord;
+                                            BestRpt: TXmlVSNode;
+                                            ThisDist: double);
 var
   BestLat, BestLon: string;
   CTripLat, CTripLon: string;
+  CoordGpx: TCoord;
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
-  FUdbDir.Status := TUdbDirStatus.udsRoutePointNotFound;
+  FUdbDir.Status := TUdbDirStatus.udsRoutePointNOK;
 
   CoordTrip.FormatLatLon(CTripLat, CTripLon);
+  CoordGpx := CoordFromAttribute(BestRpt.AttributeList);
   CoordGpx.FormatLatLon(BestLat, BestLon);
 
   Messages.Add('');
-  Messages.AddObject(Format('  Route point: %s check failed.', [FUdbDir.DisplayName]), FUdbDir);
-  Messages.AddObject(Format('     .trip file: Lat:%s Lon:%s', [CTripLat, CTripLon]), FUdbDir);
-  Messages.AddObject(Format('     .gpx file: Lat:%s Lon:%s. Distance: %1.0f Mtr', [BestLat, BestLon, ThisDist * 1000]), FUdbDir);
+  Messages.AddObject(Format('  Route point NOT OK', []), FUdbDir);
+  Messages.AddObject(Format('    .trip file: Lat: %s Lon: %s, Name: %s', [CTripLat, CTripLon, FUdbDir.DisplayName]), FUdbDir);
+  Messages.AddObject(Format('     .gpx file: Lat: %s Lon: %s, Name: %s, Distance: %1.0f Mtr',
+                            [BestLat, BestLon, FindSubNodeValue(FRtePt, 'name'), ThisDist * 1000]), FUdbDir);
 end;
 
 procedure TGPXTripCompare.NoMatchRoutePointEnd(const Messages: TStrings; CoordTrip: TCoord);
@@ -220,7 +284,7 @@ var
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
-  FUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
+  FUdbDir.Status := TUdbDirStatus.udsCoordsNOK;
 
   CoordTrip.FormatLatLon(CTripLat, CTripLon);
 
@@ -239,40 +303,53 @@ begin
   Messages.Add('No <gpxx:rpt> in GPX file. Non BaseCamp origin?');
 end;
 
+function TGPXTripCompare.GetBestGpxRpt(const BestRpt: TXmlVSNode;
+                                       const BestSubClass: string;
+                                       const BestDist: double): TXmlVSNode;
+var
+  CoordGpx: TCoord;
+  BestLat, BestLon: string;
+
+begin
+  CoordGpx := CoordFromAttribute(BestRpt.AttributeList);
+  CoordGpx.FormatLatLon(BestLat, BestLon);
+  result := AddGpxRptPt(BestRpt, Format('      .gpx file: MapSeg + Road: %s, Lat: %s, Lon: %s, Distance: %1.0f Mtr',
+                                        [DisplayMapSegRoad(BestSubClass),
+                                         BestLat, BestLon, BestDist * 1000]));
+end;
+
 procedure TGPXTripCompare.NoMatchUdbDirSubClass(const Messages: TStrings;
-                                                CoordTrip: TCoord;
-                                                BestRpt: TXmlVSNode;
-                                                BestDist: double);
+                                                const CoordTrip: TCoord;
+                                                const BestRpt: TXmlVSNode;
+                                                const BestSubClass: string;
+                                                const BestDist: double);
 var
   CheckFail: string;
   CTripLat, CTripLon: string;
-  CoordGpx: TCoord;
-  BestLat, BestLon: string;
+  MsgGpxRpt: TXmlVSNode;
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
 
   case FUdbDir.Status of
-    TUdbDirStatus.udsRoadNotFound:
-      CheckFail := 'Road';
-    TUdbDirStatus.udsCoordsNotFound:
-      CheckFail := 'Coordinates';
+    TUdbDirStatus.udsRoadNOK:
+      CheckFail := 'Road NOT OK';
+    TUdbDirStatus.UdsRoadOKCoordsNOK:
+      CheckFail := 'Road OK, Coordinates NOT OK';
+    TUdbDirStatus.udsCoordsNOK:
+      CheckFail := 'Coordinates NOT OK';
     else
       CheckFail := 'General';
   end;
 
   CoordTrip.FormatLatLon(CTripLat, CTripLon);
-
-  CoordGpx := CoordFromAttribute(BestRpt.AttributeList);
-  CoordGpx.FormatLatLon(BestLat, BestLon);
+  MsgGpxRpt := GetBestGpxRpt(BestRpt, BestSubClass, BestDist);
 
   Messages.Add('');
-  Messages.AddObject(Format('  %s: %s check failed', [CheckFail, FUdbDir.DisplayName]), FUdbDir);
+  Messages.AddObject(Format('  %s: %s', [CheckFail, FUdbDir.DisplayName]), FUdbDir);
   Messages.AddObject(Format('     .trip file: MapSeg + Road: %s, Lat: %s, Lon: %s',
                             [DisplayMapSegRoad(FUdbDir.MapSegRoad), CTripLat, CTripLon]), FUdbDir);
-  Messages.AddObject(Format('      .gpx file: MapSeg + Road: %s, Lat: %s, Lon: %s, Distance: %1.0f Mtr',
-                            [DisplayMapSegRoad(Copy(FindSubNodeValue(BestRpt,'gpxx:Subclass'), 5, 16)),
-                             BestLat, BestLon, BestDist * 1000]), FUdbDir);
+  Messages.AddObject(MsgGpxRpt.NodeValue, MsgGpxRpt);
 end;
 
 // RouteSelected only is the track created from the <gpxx:rpt> of the <rte>
@@ -295,19 +372,125 @@ begin
   end;
 end;
 
+function TGPXTripCompare.GetExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+var
+  ExtensionsNode, RoutePointExtensionNode: TXmlVSNode;
+begin
+  result := nil;
+  RoutePointExtensionNode := nil;
+  ExtensionsNode := ARtePt.Find('extensions');
+  if (ExtensionsNode <> nil) then
+    RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
+  if (RoutePointExtensionNode <> nil) then
+    result := RoutePointExtensionNode.Find('gpxx:rpt');
+end;
+
+// Add Subclasses to list of this <rtept>
+procedure TGPXTripCompare.BuildSubClasses(const ARtePt: TXmlVSNode);
+var
+  ScanGpxxRptNode: TXmlVSNode;
+  CMapSegRoad: string;
+begin
+  FSubClassList.Clear;
+  ScanGpxxRptNode := GetExtensionsNode(ARtePt);
+  while (ScanGpxxRptNode <> nil) do
+  begin
+    CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
+    if (CMapSegRoad <> '') then
+      FSubClassList.AddObject(MapSegRoadExclBit(CMapSegRoad), ScanGpxxRptNode);
+    ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+  end;
+end;
+
+// Scan for best matching Subclass
+function TGPXTripCompare.ScanSubClass(const AMapSegRoad: string;
+                                      const ACoordTrip: TCoord;
+                                      var GpxSubClass: string;
+                                      var MinDist: double): TXmlVSNode;
+var
+  SubClassIdx: integer;
+  ScanRtePt: TXmlVSNode;
+  CoordGpx: TCoord;
+  ThisDist: double;
+  LastSubClass: string;
+begin
+  result := nil;
+  GpxSubClass := '';
+  MinDist := MaxDouble;
+
+  for SubClassIdx := 0 to FSubClassList.Count -1 do
+  begin
+    if (FSubClassList[SubClassIdx] = AMapSegRoad) then
+    begin
+      ScanRtePt := TXmlVSNode(FSubClassList.Objects[SubClassIdx]);
+      while (ScanRtePt <> nil) do
+      begin
+        if (ScanRtePt.Find('gpxx:Subclass') <> nil) then
+          LastSubClass := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
+        CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
+        ThisDist := CoordDistance(ACoordTrip, CoordGpx, TDistanceUnit.duKm);
+        if (ThisDist < MinDist) then
+        begin
+          GpxSubClass := LastSubClass;
+          MinDist := ThisDist;
+          result := ScanRtePt;
+        end;
+        ScanRtePt := ScanRtePt.NextSibling;
+
+        // Only scan until next subclass
+        if (ScanRtePt = nil) or
+           ((ScanRtePt.Name = 'gpxx:rpt') and
+            (FindSubNodeValue(ScanRtePt, 'gpxx:Subclass') <> '')) then
+          break;
+      end;
+    end;
+  end;
+end;
+
+// Scan for best matching <gpxx:rpt>
+function TGPXTripCompare.ScanGpxxRptNode(const GpxxRptNode: TXmlVSNode;
+                                         const ACoordTrip: TCoord;
+                                         var GpxSubClass: string;
+                                         var MinDist: double): TXmlVSNode;
+var
+  ScanRtePt: TXmlVSNode;
+  CoordGpx: TCoord;
+  ThisDist: double;
+  LastSubClass: string;
+begin
+  result := nil;
+  GpxSubClass := '';
+  MinDist := MaxDouble;
+
+  ScanRtePt := GpxxRptNode;
+  while (ScanRtePt <> nil) do
+  begin
+    if (ScanRtePt.Find('gpxx:Subclass') <> nil) then
+      LastSubClass := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
+    CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
+    ThisDist := CoordDistance(ACoordTrip, CoordGpx, TDistanceUnit.duKm);
+    if (ThisDist < MinDist) then
+    begin
+      GpxSubClass := LastSubClass;
+      MinDist := ThisDist;
+      result := ScanRtePt;
+    end;
+
+    ScanRtePt := ScanRtePt.NextSibling;
+  end;
+end;
+
 procedure TGPXTripCompare.CompareGpxRoute(const Messages, OutTrackList: TStrings);
 var
   RtePtCount, UdbHandleCount, AnUdbHandleCnt, UdbDirCount, AnUdbDirCnt, LastUdbDirCnt: integer;
   RouteSelected, ScanRtePt, BestRpt: TXmlVSNode;
-  ExtensionsNode, RoutePointExtensionNode, GpxxRptNode: TXmlVSNode;
+  GpxxRptNode: TXmlVSNode;
   CoordTrip, CoordGpx: TCoord;
-  CTMapSegRoad: string;
+  CTMapSegRoad, BestSubClass: string;
   ThisDist, MinDist: double;
   StartSegmentLine: integer;
-  SubClassList: TStringList;
+  SubClassOK: boolean;
 begin
-  Messages.Clear;
-
   RouteSelected := PrepareTripForCompare(Messages, OutTrackList, UdbHandleCount, UdbDirCount);
   if (RouteSelected = nil) then
   begin
@@ -324,25 +507,23 @@ begin
     exit;
   end;
 
-  RtePtCount := 0;
-  ScanRtePt := FRtePt;
-  while (ScanRtePt <> nil) do
-  begin
-    if (ScanRtePt.Name = 'rtept') then
-      Inc(RtePtCount);
-    ScanRtePt := ScanRtePt.NextSibling;
-  end;
-
-  if (UdbDirCount - (UdbHandleCount -1) <> RtePtCount) then
-  begin
-    NoMatchRoutePoints(Messages);
-    exit;
-  end;
-
-  SubClassList := TStringList.Create;
-  SubClassList.Sorted := true;
-  SubClassList.Duplicates := TDuplicates.dupIgnore;
+  // Count <rtept> in GPX
   try
+    RtePtCount := 0;
+    ScanRtePt := FRtePt;
+    while (ScanRtePt <> nil) do
+    begin
+      if (ScanRtePt.Name = 'rtept') then
+        Inc(RtePtCount);
+      ScanRtePt := ScanRtePt.NextSibling;
+    end;
+
+    if (UdbDirCount - (UdbHandleCount -1) <> RtePtCount) then
+    begin
+      NoMatchRoutePoints(Messages);
+      exit;
+    end;
+
     FCheckSegmentOK := true;
     FCheckRouteOK := true;
     StartSegmentLine := -1;
@@ -360,7 +541,8 @@ begin
       for AnUdbDirCnt := 0 to LastUdbDirCnt do
       begin
         FUdbDir := FUdbHandle.Items[AnUdbDirCnt];
-        CTMapSegRoad := FUdbDir.MapSegRoad;
+
+        CTMapSegRoad := FUdbDir.MapSegRoadExclBit;
         CoordTrip.Lat := FUdbDir.Lat;
         CoordTrip.Lon := FUdbDir.Lon;
 
@@ -382,26 +564,13 @@ begin
 
           if (ThisDist > FDistOKMeters) or
              (FUdbDir.DisplayName <> FindSubNodeValue(FRtePt, 'name')) then
-            NoMatchRoutePoint(Messages, CoordTrip, CoordGpx, ThisDist);
+            NoMatchRoutePoint(Messages, CoordTrip, FRtePt, ThisDist);
 
           // Init GpxxRptNode
-          GpxxRptNode := nil;
-          RoutePointExtensionNode := nil;
-          ExtensionsNode := FRtePt.Find('extensions');
-          if (ExtensionsNode <> nil) then
-            RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
-          if (RoutePointExtensionNode <> nil) then
-            GpxxRptNode := RoutePointExtensionNode.Find('gpxx:rpt');
+          GpxxRptNode := GetExtensionsNode(FRtePt);
 
-          // Build list of SubClasses
-          SubClassList.Clear;
-          ScanRtePt := GpxxRptNode;
-          while (ScanRtePt <> nil) do
-          begin
-            if (ScanRtePt.Name = 'gpxx:rpt') then
-              SubClassList.Add(Copy(FindSubNodeValue(ScanRtePt,'gpxx:Subclass'), 5, 16));
-            ScanRtePt := ScanRtePt.NextSibling;
-          end;
+          // Build known subclasses for this <rtept>
+          BuildSubClasses(FRtePt);
 
           // Point to next segment
           if (FUdbDir <> FUdbHandle.Items[FUdbHandle.Items.Count -1]) then
@@ -415,26 +584,15 @@ begin
           break;
         end;
 
-        MinDist := MaxDouble;
-        ScanRtePt := GpxxRptNode;
-        BestRpt := nil;
-        while (ScanRtePt <> nil) do
-        begin
-          if (ScanRtePt.Name = 'gpxx:rpt') and
-             (FindSubNodeValue(ScanRtePt, 'gpxx:Subclass') <> '') then
-          begin
-            CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
-            ThisDist := CoordDistance(CoordTrip, CoordGpx, TDistanceUnit.duKm);
-            if (ThisDist < MinDist) then
-            begin
-              MinDist := ThisDist;
-              BestRpt := ScanRtePt;
-            end;
-          end;
-          ScanRtePt := ScanRtePt.NextSibling;
-        end;
+        // Scan for best matching Subclass
+        BestRpt := ScanSubClass(CTMapSegRoad, CoordTrip, BestSubClass, MinDist);
+        SubClassOK := (BestRpt <> nil);
 
-        // A valid trip file will never get here. That always ends with a type=3 Udbdir
+        // Scan for best matching <gpxx:rpt>
+        if not (SubClassOK) then
+          BestRpt := ScanGpxxRptNode(GpxxRptNode, CoordTrip, BestSubClass, MinDist);
+
+        // A valid trip file/gpx File will never get here.
         if (BestRpt = nil) then
         begin
           NoMatchRoutePointEnd(Messages, CoordTrip);
@@ -444,16 +602,29 @@ begin
         // Point to next GpxxRptNode
         GpxxRptNode := BestRpt;
 
-        // Error?
-        if (FUdbDir.UdbDirValue.SubClass.PointType <> $21) and // Dont care for RoadId for Start/begin segment.
-           (SubClassList.IndexOf(CTMapSegRoad) < 0) then
-          FUdbDir.Status := TUdbDirStatus.udsRoadNotFound
-        else if (MinDist > FDistOKMeters) then
-          FUdbDir.Status := TUdbDirStatus.udsCoordsNotFound
-        else
+        // Any errors?
+        if (SubClassOK) and
+           (MinDist > FDistOKMeters) then
+        begin
+          FUdbDir.Status := UdsRoadOKCoordsNOK;
+          NoMatchUdbDirSubClass(Messages, CoordTrip, BestRpt, BestSubClass, MinDist);
           continue;
+        end;
 
-        NoMatchUdbDirSubClass(Messages, CoordTrip, BestRpt, MinDist);
+        if not (SubClassOK) then
+        begin
+          FUdbDir.Status := TUdbDirStatus.udsRoadNOK;
+          NoMatchUdbDirSubClass(Messages, CoordTrip, BestRpt, BestSubClass, MinDist);
+          continue;
+        end;
+
+        if (MinDist > FDistOKMeters) then
+        begin
+          FUdbDir.Status := TUdbDirStatus.udsCoordsNOK;
+          NoMatchUdbDirSubClass(Messages, CoordTrip, BestRpt, BestSubClass, MinDist);
+          continue;
+        end;
+
       end;
     end;
 
@@ -461,7 +632,7 @@ begin
       Messages[0] := Messages[0] + ' NOT OK';
 
   finally
-    SubClassList.Free;
+// Reserved future use
   end;
 end;
 
@@ -498,52 +669,57 @@ begin
   end;
 end;
 
-procedure TGPXTripCompare.NoMatchRoutePointTrk(const Messages: TStrings;
-                                               CoordTrip: TCoord; BestToTrkpt: TXmlVSNode; ThisDist: double);
+function TGPXTripCompare.GetBestTrkRpt(const BestTrk: TXmlVSNode; const BestDist: double): TXmlVSNode;
 var
   CoordGpx: TCoord;
   BestLat, BestLon: string;
+begin
+  CoordGpx := CoordFromAttribute(BestTrk.AttributeList);
+  CoordGpx.FormatLatLon(BestLat, BestLon);
+  result := AddGpxRptPt(BestTrk, Format('     .gpx file: Lat: %s, Lon: %s, Distance: %1.0f Mtr',
+                                        [BestLat, BestLon, BestDist * 1000]));
+end;
+
+procedure TGPXTripCompare.NoMatchRoutePointTrk(const Messages: TStrings;
+                                               CoordTrip: TCoord; BestToTrkpt: TXmlVSNode; ThisDist: double);
+var
   TripLat, TripLon: string;
+  MsgTrkPt: TXmlVSNode;
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
-  FUdbDir.Status := TUdbDirStatus.udsRoutePointNotFound;
+  FUdbDir.Status := TUdbDirStatus.udsRoutePointNOK;
 
-  CoordGpx := CoordFromAttribute(BestToTrkpt.AttributeList);
-  CoordGpx.FormatLatLon(BestLat, BestLon);
   CoordTrip.FormatLatLon(TripLat, TripLon);
+  MsgTrkPt := GetBestTrkRpt(BestToTrkpt, ThisDist);
 
   Messages.Add('');
-  Messages.AddObject(Format('  Route point: %s check failed.',
+  Messages.AddObject(Format('  Route point NOT OK: %s',
                             [FUdbDir.DisplayName]), FUdbDir);
   Messages.AddObject(Format('    .trip file: Lat: %s Lon: %s',
                             [TripLat, TripLon]), FUdbDir);
-  Messages.AddObject(Format('     .gpx file: Lat: %s Lon: %s, Distance: %1.0f Mtr',
-                            [BestLat, BestLon, ThisDist * 1000]), FUdbDir);
+  Messages.AddObject(MsgTrkPt.NodeValue, MsgTrkPt);
 end;
 
 procedure TGPXTripCompare.NoMatchUdbDirTrk(const Messages: TStrings;
                                            CoordTrip: TCoord; BestTrkpt: TXmlVSNode; BestDist: Double);
 var
-  CoordGpx: TCoord;
-  BestLat, BestLon: string;
   TripLat, TripLon: string;
+  MsgTrkPt: TXmlVSNode;
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
-  FUdbDir.Status := TUdbDirStatus.udsCoordsNotFound;
+  FUdbDir.Status := TUdbDirStatus.udsCoordsNOK;
 
   CoordTrip.FormatLatLon(TripLat, TripLon);
-  CoordGpx := CoordFromAttribute(BestTrkpt.AttributeList);
-  CoordGpx.FormatLatLon(BestLat, BestLon);
+  MsgTrkPt := GetBestTrkRpt(BestTrkpt, BestDist);
 
   Messages.Add('');
-  Messages.AddObject(Format('  Coordinates: %s check failed.',
+  Messages.AddObject(Format('  Coordinates NOT OK: %s',
                             [FUdbDir.DisplayName]), FUdbDir);
-  Messages.AddObject(Format('    .trip file: Lat: %s, Lon: %s MapSeg + Road: %s, ',
+  Messages.AddObject(Format('    .trip file: Lat: %s, Lon: %s, MapSeg + Road: %s, ',
                             [TripLat, TripLon, DisplayMapSegRoad(FUdbDir.MapSegRoad)]), FUdbDir);
-  Messages.AddObject(Format('     .gpx file: Lat: %s, Lon: %s, Distance: %1.0f Mtr',
-                            [BestLat, BestLon, BestDist * 1000]), FUdbDir);
+  Messages.AddObject(MsgTrkPt.NodeValue, MsgTrkPt);
 end;
 
 procedure TGPXTripCompare.CompareGpxTrack(const Messages, OutTrackList: TStrings);
@@ -565,8 +741,6 @@ var
   UdbHandleCount, UdbDirCount, StartSegmentLine,
   AnUdbHandleCnt, ToUdbHandleCnt, AnUdbDirCnt, FromUdbDirCnt, ToUdbDirCnt, LastUdbDirCnt: integer;
 begin
-  Messages.Clear;
-
   TrackSelected := PrepareTripForCompare(Messages, OutTrackList, UdbHandleCount, UdbDirCount);
   if (TrackSelected = nil) then
   begin

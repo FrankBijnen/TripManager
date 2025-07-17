@@ -11,6 +11,8 @@ object FrmShowLog: TFrmShowLog
   Font.Name = 'Segoe UI'
   Font.Style = []
   KeyPreview = True
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   TextHeight = 15
   object PnlBot: TPanel

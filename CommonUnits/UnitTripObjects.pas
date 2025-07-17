@@ -34,7 +34,7 @@ type
   TRoutePoint       = (rpVia              = 0,
                        rpShaping          = 1,
                        rpShapingXT2       = 2);
-  TUdbDirStatus     = (udsUnchecked, udsRoutePointNotFound, udsRoadNotFound, udsCoordsNotFound);
+  TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
 
 { Elementary data types }
 const
@@ -586,6 +586,7 @@ type
     function GetName: string;
     function GetMapCoords: string;
     function GetMapSegRoad: string;
+    function GetMapSegRoadExclBit: string;
     function GetPointType: string;
     function GetDirection: string;
   public
@@ -596,6 +597,7 @@ type
     property UdbDirValue: TUdbDirValue read FValue;
     property MapCoords: string read GetMapCoords;
     property MapSegRoad: string read GetMapSegRoad;
+    property MapSegRoadExclBit: string read GetMapSegRoadExclBit;
     property PointType: string read GetPointType;
     property Direction: string read GetDirection;
     property Status: TUdbDirStatus read FUdbDirStatus write FUdbDirStatus;
@@ -2152,12 +2154,15 @@ end;
 function TUdbDir.GetMapSegRoad: string;
 begin
   result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8);
+  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId), 8);
+end;
+
+function TUdbDir.GetMapSegRoadExclBit: string;
+begin
+  result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8);
   // Reset bit for Start/begin segment. Is better, but not 100%, see CompareGpxRoute
   // It it still not confirmed that the RoadId is 32 bits.
-  if (UdbDirValue.SubClass.PointType = $21) then
-    result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7fff, 8)
-  else
-    result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId), 8);
+  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7fbf, 8);
 end;
 
 function TUdbDir.GetPointType: string;
