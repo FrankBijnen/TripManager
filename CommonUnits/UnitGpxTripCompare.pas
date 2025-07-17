@@ -27,6 +27,8 @@ type
     function GetRouteNode(const RouteName: string): TXmlVSNode;
     function GetExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
     procedure BuildSubClasses(const ARtePt: TXmlVSNode);
+    function GetPrevSubClass(const GpxxRptNode: TXmlVSNode): string;
+
     function ScanSubClass(const AMapSegRoad: string;
                           const ACoordTrip: TCoord;
                           var GpxSubClass: string;
@@ -111,7 +113,7 @@ function TGPXTripCompare.MapSegRoadExclBit(const ASubClass: string): string;
 var
   RoadIdHex: Cardinal;
 begin
-  RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and $ffff7fbf;
+  RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and $ffff7fbf; // $11ff7fbf; ?
   result := Copy(ASubClass, 5, 8) + IntToHex(RoadIdHex, 8);
 end;
 
@@ -402,6 +404,22 @@ begin
   end;
 end;
 
+// Get the SubClass of a GpxxRptNode. If not avail scan back
+function TGPXTripCompare.GetPrevSubClass(const GpxxRptNode: TXmlVSNode): string;
+var
+  ScanRtePt: TXmlVSNode;
+begin
+  result := '';
+  ScanRtePt := GpxxRptNode;
+  while (ScanRtePt <> nil) and
+        (ScanRtePt.Find('gpxx:Subclass') = nil) do
+    ScanRtePt := ScanRtePt.PreviousSibling;
+
+  if (ScanRtePt <> nil) and
+     (ScanRtePt.Find('gpxx:Subclass') <> nil) then
+    result := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
+end;
+
 // Scan for best matching Subclass
 function TGPXTripCompare.ScanSubClass(const AMapSegRoad: string;
                                       const ACoordTrip: TCoord;
@@ -412,7 +430,6 @@ var
   ScanRtePt: TXmlVSNode;
   CoordGpx: TCoord;
   ThisDist: double;
-  LastSubClass: string;
 begin
   result := nil;
   GpxSubClass := '';
@@ -425,13 +442,11 @@ begin
       ScanRtePt := TXmlVSNode(FSubClassList.Objects[SubClassIdx]);
       while (ScanRtePt <> nil) do
       begin
-        if (ScanRtePt.Find('gpxx:Subclass') <> nil) then
-          LastSubClass := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
         CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
         ThisDist := CoordDistance(ACoordTrip, CoordGpx, TDistanceUnit.duKm);
         if (ThisDist < MinDist) then
         begin
-          GpxSubClass := LastSubClass;
+          GpxSubClass := GetPrevSubClass(ScanRtePt);
           MinDist := ThisDist;
           result := ScanRtePt;
         end;
@@ -456,7 +471,6 @@ var
   ScanRtePt: TXmlVSNode;
   CoordGpx: TCoord;
   ThisDist: double;
-  LastSubClass: string;
 begin
   result := nil;
   GpxSubClass := '';
@@ -465,13 +479,11 @@ begin
   ScanRtePt := GpxxRptNode;
   while (ScanRtePt <> nil) do
   begin
-    if (ScanRtePt.Find('gpxx:Subclass') <> nil) then
-      LastSubClass := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
     CoordGpx := CoordFromAttribute(ScanRtePt.AttributeList);
     ThisDist := CoordDistance(ACoordTrip, CoordGpx, TDistanceUnit.duKm);
     if (ThisDist < MinDist) then
     begin
-      GpxSubClass := LastSubClass;
+      GpxSubClass := GetPrevSubClass(ScanRtePt);
       MinDist := ThisDist;
       result := ScanRtePt;
     end;

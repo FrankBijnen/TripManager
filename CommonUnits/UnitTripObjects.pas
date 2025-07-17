@@ -2160,9 +2160,9 @@ end;
 function TUdbDir.GetMapSegRoadExclBit: string;
 begin
   result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8);
-  // Reset bit for Start/begin segment. Is better, but not 100%, see CompareGpxRoute
+  // Reset bits. Is better, but not 100%, see CompareGpxRoute
   // It it still not confirmed that the RoadId is 32 bits.
-  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7fbf, 8);
+  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7fbf, 8); // $11ff7fbf; ?
 end;
 
 function TUdbDir.GetPointType: string;
