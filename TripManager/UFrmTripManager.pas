@@ -3913,7 +3913,6 @@ begin
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
 
     // XT2 Defaults
-    ExploreUuid := GetRegistry(Reg_ExploreUuid, ExploreUuid);
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);
     VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, XT2_VehicleProfileHash);
     VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId);

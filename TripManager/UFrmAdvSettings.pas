@@ -214,7 +214,6 @@ begin
     AddGridLine(GridZumoSettings, CurRow, Reg_ScPosn_Unknown1,             '0', '');
     AddGridLine(GridZumoSettings, CurRow, '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT2 trips-');
-    AddGridLine(GridZumoSettings, CurRow, Reg_ExploreUuid,                 '', 'Leave blank to generate unique GUID''s');
     AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileGuid,          XT2_VehicleProfileGuid);
     AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileHash,          XT2_VehicleProfileHash);
     AddGridLine(GridZumoSettings, CurRow, Reg_VehicleId,                   XT2_VehicleId);

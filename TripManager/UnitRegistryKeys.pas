@@ -11,7 +11,6 @@ const
   Reg_ZumoModel               = 'ZumoModel';
   Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   //XT2
-  Reg_ExploreUuid                 = 'ExploreUuid';
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
   Reg_VehicleProfileHash          = 'VehicleProfileHash';
   Reg_VehicleId                   = 'VehicleId';

@@ -125,7 +125,7 @@ type
     {$IFDEF TRIPOBJECTS}
     ZumoModel: TZumoModel;                    // XT1 and XT2
     ScPosn_Unknown1: Cardinal;                // XT1 and XT2
-    ExploreUuid: string;                      // XT2
+    ExploreUuid: string;                      // XT2 Not user Configurable anymore. Always generate a new Uuid
     VehicleProfileGuid: string;               // XT2
     VehicleProfileHash: string;               // XT2
     VehicleId: string;                        // XT2

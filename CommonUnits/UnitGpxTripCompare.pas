@@ -532,10 +532,7 @@ begin
 
     // Need an exact match, to compare by segment
     if (UdbDirCount - (UdbHandleCount -1) <> RtePtCount) then
-    begin
       NoMatchRoutePoints(Messages);
-      exit;
-    end;
 
     FCheckSegmentOK := true;
     FCheckRouteOK := true;
@@ -591,7 +588,12 @@ begin
           // Point to next segment
           if (FUdbDir <> FUdbHandle.Items[FUdbHandle.Items.Count -1]) then
             FRtePt := FRtePt.NextSibling;
-          continue;
+
+          // More UdbDirs than <RtePt> ?
+          if (FRtePt = nil) then
+            break
+          else
+            continue;
       	end;
 
         if (GpxxRptNode = nil) then
