@@ -1665,7 +1665,6 @@ begin
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
   ReadSettings;
 
-  EdgeBrowser1.UserDataFolder := CreatedTempPath;
   ATripList := TTripList.Create;
   APOIList := TPOIList.Create;
 
@@ -4039,6 +4038,7 @@ begin
   if (GetRegistry(Reg_TripNameInList, true)) then
     LstFiles.Columns.Add.Caption := 'TripName';
 
+  EdgeBrowser1.UserDataFolder := CreatedTempPath;
   if (CreateOSMMapHtml(GetRegistry(Reg_SavedMapPosition_Key, Reg_DefaultCoordinates))) then
     EdgeBrowser1.Navigate(GetHtmlTmp);
 
