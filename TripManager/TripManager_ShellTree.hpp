@@ -18,6 +18,7 @@
 #include <SysInit.hpp>
 #include <System.Classes.hpp>
 #include <System.Types.hpp>
+#include <Winapi.ShlObj.hpp>
 #include <Vcl.Shell.ShellCtrls.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.Controls.hpp>
@@ -34,6 +35,8 @@ class PASCALIMPLEMENTATION TShellTreeView : public Vcl::Shell::Shellctrls::TShel
 	typedef Vcl::Shell::Shellctrls::TShellTreeView inherited;
 	
 protected:
+	virtual void __fastcall InitNode(Vcl::Comctrls::TTreeNode* NewNode, Winapi::Shlobj::PItemIDList ID, Vcl::Comctrls::TTreeNode* ParentNode);
+	virtual bool __fastcall CustomDrawItem(Vcl::Comctrls::TTreeNode* Node, Vcl::Comctrls::TCustomDrawState State, Vcl::Comctrls::TCustomDrawStage Stage, bool &PaintImages);
 	DYNAMIC void __fastcall DoContextPopup(const System::Types::TPoint &MousePos, bool &Handled);
 public:
 	/* TCustomShellTreeView.Create */ inline __fastcall virtual TShellTreeView(System::Classes::TComponent* AOwner) : Vcl::Shell::Shellctrls::TShellTreeView(AOwner) { }
@@ -46,6 +49,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
+static _DELPHI_CONST System::Int8 sfsNeedsCheck = System::Int8(-2);
 }	/* namespace Tripmanager_shelltree */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_TRIPMANAGER_SHELLTREE)
 using namespace Tripmanager_shelltree;

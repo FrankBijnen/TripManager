@@ -33,15 +33,15 @@ class PASCALIMPLEMENTATION TGridSelItem : public System::TObject
 	
 private:
 	Unittripobjects::TBaseItem* FBaseItem;
-	int FSelStart;
-	int FSelLength;
+	System::IntPtr FSelStart;
+	System::IntPtr FSelLength;
 	
 public:
-	__fastcall TGridSelItem(Unittripobjects::TBaseItem* ABaseItem, int ASelLength, int ASelStart)/* overload */;
-	__fastcall TGridSelItem(int ASelLength, int ASelStart)/* overload */;
+	__fastcall TGridSelItem(Unittripobjects::TBaseItem* ABaseItem, System::IntPtr ASelLength, System::IntPtr ASelStart)/* overload */;
+	__fastcall TGridSelItem(System::IntPtr ASelLength, System::IntPtr ASelStart)/* overload */;
 	__property Unittripobjects::TBaseItem* BaseItem = {read=FBaseItem};
-	__property int SelStart = {read=FSelStart, nodefault};
-	__property int SelLength = {read=FSelLength, nodefault};
+	__property System::IntPtr SelStart = {read=FSelStart, nodefault};
+	__property System::IntPtr SelLength = {read=FSelLength, nodefault};
 	__classmethod TGridSelItem* __fastcall GridSelItem(Vcl::Valedit::TValueListEditor* AValueListEditor, int ARow);
 	__classmethod Unittripobjects::TBaseDataItem* __fastcall BaseDataItem(Vcl::Valedit::TValueListEditor* AValueListEditor, int ARow);
 public:

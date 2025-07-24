@@ -308,7 +308,7 @@ __published:
 	void __fastcall NewDirectoryClick(System::TObject* Sender);
 	void __fastcall MnuNextDiffClick(System::TObject* Sender);
 	void __fastcall MnuPrevDiffClick(System::TObject* Sender);
-	void __fastcall TvTripKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
+	void __fastcall FormKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	
 private:
 	System::UnicodeString PrefDevice;

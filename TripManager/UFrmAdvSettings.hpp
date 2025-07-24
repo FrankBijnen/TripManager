@@ -30,7 +30,6 @@
 #include <Vcl.Grids.hpp>
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.Menus.hpp>
-#include <UnitGeoCode.hpp>
 #include <System.UITypes.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -49,7 +48,7 @@ __published:
 	Vcl::Stdctrls::TButton* BtnCancel;
 	Vcl::Extctrls::TPanel* PnlBottom;
 	Vcl::Comctrls::TPageControl* PctMain;
-	Vcl::Comctrls::TTabSheet* TabXT2;
+	Vcl::Comctrls::TTabSheet* TabZumo;
 	Vcl::Comctrls::TTabSheet* TabGeoCode;
 	Vcl::Stdctrls::TMemo* MemoAddressFormat;
 	Vcl::Extctrls::TPanel* PnlResult;
@@ -60,14 +59,16 @@ __published:
 	Vcl::Stdctrls::TButton* BtnBuilder;
 	Vcl::Comctrls::TTabSheet* TabGeneral;
 	Vcl::Grids::TStringGrid* GridGeneralSettings;
-	Vcl::Grids::TStringGrid* GridXT2Settings;
+	Vcl::Grids::TStringGrid* GridZumoSettings;
 	Vcl::Menus::TPopupMenu* PopupBuilder;
 	Vcl::Grids::TStringGrid* GridGeoCodeSettings;
-	Vcl::Extctrls::TPanel* Panel1;
+	Vcl::Extctrls::TPanel* PnlGeoCodeFuncs;
 	Vcl::Stdctrls::TButton* BtnValidate;
 	Vcl::Stdctrls::TButton* BtnClearCoordCache;
 	Vcl::Comctrls::TTabSheet* TabDevice;
-	Vcl::Grids::TStringGrid* GridDevice;
+	Vcl::Grids::TStringGrid* GridDeviceSettings;
+	Vcl::Extctrls::TPanel* PnlZumoFuncs;
+	Vcl::Stdctrls::TButton* BtnCurrent;
 	void __fastcall FormClose(System::TObject* Sender, System::Uitypes::TCloseAction &Action);
 	void __fastcall FormShow(System::TObject* Sender);
 	void __fastcall MemoAddressFormatChange(System::TObject* Sender);
@@ -80,16 +81,26 @@ __published:
 	void __fastcall AddTag(System::TObject* Sender);
 	void __fastcall BtnValidateClick(System::TObject* Sender);
 	void __fastcall BtnClearCoordCacheClick(System::TObject* Sender);
+	void __fastcall BtnCurrentClick(System::TObject* Sender);
+	void __fastcall PctMainResize(System::TObject* Sender);
 	
 private:
-	Unitgeocode::TPlace* SamplePlace;
+	System::TObject* SamplePlace;
+	System::UnicodeString __fastcall GetSampleDataItem(System::TObject* const ABase);
+	System::UnicodeString __fastcall GetSampleItem(const System::ShortString &KeyName);
+	System::UnicodeString __fastcall GetSampleLocationItem(const System::UnicodeString ClassName);
 	void __fastcall LookupSamplePlace(bool UseCache);
 	void __fastcall ValidateApiKey();
+	void __fastcall LoadSettings_General();
+	void __fastcall LoadSettings_Device();
+	void __fastcall LoadSettings_XT2();
+	void __fastcall LoadSettings_GeoCode();
 	void __fastcall LoadSettings();
 	void __fastcall SaveGrid(Vcl::Grids::TStringGrid* AGrid);
 	void __fastcall SaveSettings();
 	
 public:
+	System::TObject* SampleTrip;
 	System::UnicodeString SampleLat;
 	System::UnicodeString SampleLon;
 public:

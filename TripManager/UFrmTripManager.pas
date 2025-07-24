@@ -1235,7 +1235,7 @@ begin
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
                                               CompareTrip,
-                                              ExtractFileName(ShellListView1.SelectedFolder.PathName),
+                                              ExtractFileName(OpenTrip.FileName),
                                               GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
       FrmShowLog.FSyncTreeview := SyncDiff;

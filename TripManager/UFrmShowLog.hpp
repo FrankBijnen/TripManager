@@ -47,9 +47,16 @@ __published:
 	void __fastcall BtnCloseClick(System::TObject* Sender);
 	void __fastcall LbLogClick(System::TObject* Sender);
 	void __fastcall FormKeyPress(System::TObject* Sender, System::WideChar &Key);
+	void __fastcall FormDestroy(System::TObject* Sender);
+	void __fastcall FormCreate(System::TObject* Sender);
+	
+private:
+	void __fastcall ClearGpxRptList();
 	
 public:
 	System::Classes::TNotifyEvent FSyncTreeview;
+	System::Classes::TList* GpxRptList;
+	void __fastcall ClearLog();
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmShowLog(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmShowLog(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }
