@@ -2919,7 +2919,7 @@ begin
     end;
   end;
   // At least a begin and end point needed. So at least 1 UdbHandle
-  ViaCount := Min(ViaCount, 2);
+  ViaCount := Max(ViaCount, 2);
 
   TmpStream := TMemoryStream.Create;
   try

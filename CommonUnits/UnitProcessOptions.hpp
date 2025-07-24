@@ -81,10 +81,14 @@ public:
 	System::UnicodeString CatGPX;
 	System::UnicodeString CatRoute;
 	Unittripobjects::TZumoModel ZumoModel;
+	unsigned ScPosn_Unknown1;
 	System::UnicodeString ExploreUuid;
 	System::UnicodeString VehicleProfileGuid;
 	System::UnicodeString VehicleProfileHash;
 	System::UnicodeString VehicleId;
+	System::UnicodeString VehicleProfileTruckType;
+	System::UnicodeString VehicleProfileName;
+	unsigned AvoidancesChangedTimeAtSave;
 	System::Classes::TNotifyEvent FOnSetFuncPrefs;
 	System::Classes::TNotifyEvent FOnSavePrefs;
 	__fastcall TProcessOptions(System::Classes::TNotifyEvent OnSetFuncPrefs, System::Classes::TNotifyEvent OnSavePrefs);

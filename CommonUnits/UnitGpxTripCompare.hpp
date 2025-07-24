@@ -43,21 +43,32 @@ private:
 	Unitverysimplexml::TXmlVSNode* FRtePt;
 	bool FCheckSegmentOK;
 	bool FCheckRouteOK;
+	System::Classes::TList* FGpxRptList;
+	System::Classes::TStringList* FSubClassList;
+	System::UnicodeString __fastcall MapSegRoadExclBit(const System::UnicodeString ASubClass);
 	System::UnicodeString __fastcall DisplayMapSegRoad(const System::UnicodeString MapSegRoad);
+	Unitverysimplexml::TXmlVSNode* __fastcall AddGpxRptPt(Unitverysimplexml::TXmlVSNode* const FromNode, const System::UnicodeString ANodeValue);
 	Unitverysimplexml::TXmlVSNode* __fastcall GetRouteNode(const System::UnicodeString RouteName);
+	Unitverysimplexml::TXmlVSNode* __fastcall GetExtensionsNode(Unitverysimplexml::TXmlVSNode* const ARtePt);
+	void __fastcall BuildSubClasses(Unitverysimplexml::TXmlVSNode* const ARtePt);
+	System::UnicodeString __fastcall GetPrevSubClass(Unitverysimplexml::TXmlVSNode* const GpxxRptNode);
+	Unitverysimplexml::TXmlVSNode* __fastcall ScanSubClass(const System::UnicodeString AMapSegRoad, const Unitgpxdefs::TCoord &ACoordTrip, System::UnicodeString &GpxSubClass, double &MinDist);
+	Unitverysimplexml::TXmlVSNode* __fastcall ScanGpxxRptNode(Unitverysimplexml::TXmlVSNode* const GpxxRptNode, const Unitgpxdefs::TCoord &ACoordTrip, System::UnicodeString &GpxSubClass, double &MinDist);
+	Unitverysimplexml::TXmlVSNode* __fastcall GetBestGpxRpt(Unitverysimplexml::TXmlVSNode* const BestRpt, const System::UnicodeString BestSubClass, const double BestDist);
 	Unitverysimplexml::TXmlVSNode* __fastcall GetRtePtFromRoute(System::Classes::TStrings* const Messages, Unitverysimplexml::TXmlVSNode* const RouteSelected);
 	Unitverysimplexml::TXmlVSNode* __fastcall PrepareTripForCompare(System::Classes::TStrings* const Messages, System::Classes::TStrings* const OutTrackList, int &UdbHandleCount, int &UdbDirCount);
+	Unitverysimplexml::TXmlVSNode* __fastcall GetBestTrkRpt(Unitverysimplexml::TXmlVSNode* const BestTrk, const double BestDist);
 	double __fastcall ScanForTrkPt(const Unitgpxdefs::TCoord &FromCoords, Unitverysimplexml::TXmlVSNode* const ScanFromTrkPt, Unitverysimplexml::TXmlVSNode* const ScanToTrkPt, Unitverysimplexml::TXmlVSNode* &BestScanTrkPt);
 	void __fastcall NoMatchRoutePoints(System::Classes::TStrings* const Messages);
-	void __fastcall NoMatchRoutePoint(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip, const Unitgpxdefs::TCoord &CoordGpx, double ThisDist);
+	void __fastcall NoMatchRoutePoint(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip, Unitverysimplexml::TXmlVSNode* BestRpt, double ThisDist);
 	void __fastcall NoMatchRoutePointEnd(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip);
 	void __fastcall NoGpxxRpt(System::Classes::TStrings* const Messages);
-	void __fastcall NoMatchUdbDirSubClass(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip, Unitverysimplexml::TXmlVSNode* BestRpt, double BestDist);
+	void __fastcall NoMatchUdbDirSubClass(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip, Unitverysimplexml::TXmlVSNode* const BestRpt, const System::UnicodeString BestSubClass, const double BestDist);
 	void __fastcall NoMatchRoutePointTrk(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip, Unitverysimplexml::TXmlVSNode* BestToTrkpt, double ThisDist);
 	void __fastcall NoMatchUdbDirTrk(System::Classes::TStrings* const Messages, const Unitgpxdefs::TCoord &CoordTrip, Unitverysimplexml::TXmlVSNode* BestTrkpt, double BestDist);
 	
 public:
-	__fastcall TGPXTripCompare(const System::UnicodeString AGPXFile, Unittripobjects::TTripList* ATripList);
+	__fastcall TGPXTripCompare(const System::UnicodeString AGPXFile, Unittripobjects::TTripList* ATripList, System::Classes::TList* AGpxRptList);
 	__fastcall virtual ~TGPXTripCompare();
 	void __fastcall CompareGpxRoute(System::Classes::TStrings* const Messages, System::Classes::TStrings* const OutTrackList);
 	void __fastcall CompareGpxTrack(System::Classes::TStrings* const Messages, System::Classes::TStrings* const OutTrackList);

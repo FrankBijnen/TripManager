@@ -101,7 +101,7 @@ enum DECLSPEC_DENUM TTransportMode : unsigned char { tmAutoMotive = 1, tmMotorcy
 
 enum DECLSPEC_DENUM TRoutePoint : unsigned char { rpVia, rpShaping, rpShapingXT2 };
 
-enum DECLSPEC_DENUM TUdbDirStatus : unsigned char { udsUnchecked, udsRoutePointNotFound, udsRoadNotFound, udsCoordsNotFound };
+enum DECLSPEC_DENUM TUdbDirStatus : unsigned char { udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK };
 
 typedef System::StaticArray<System::Classes::TIdentMapEntry, 2> Unittripobjects__1;
 
@@ -171,6 +171,9 @@ private:
 	virtual System::UnicodeString __fastcall GetValue();
 	virtual void __fastcall SetValue(System::UnicodeString NewValue);
 	virtual unsigned __fastcall GetLenValue();
+	int __fastcall GetOffSetLenValue();
+	int __fastcall GetOffSetDataType();
+	int __fastcall GetOffSetValue();
 	virtual System::UnicodeString __fastcall GetMapCoords();
 	virtual void __fastcall SetMapCoords(System::UnicodeString ACoords);
 	
@@ -184,6 +187,9 @@ public:
 	__property System::ShortString Name = {read=FName};
 	__property unsigned LenValue = {read=GetLenValue, nodefault};
 	__property System::Byte DataType = {read=FDataType, nodefault};
+	__property int OffsetLenValue = {read=GetOffSetLenValue, nodefault};
+	__property int OffsetDataType = {read=GetOffSetDataType, nodefault};
+	__property int OffsetValue = {read=GetOffSetValue, nodefault};
 	__property System::UnicodeString MapCoords = {read=GetMapCoords, write=SetMapCoords};
 };
 
@@ -327,9 +333,10 @@ private:
 	virtual void __fastcall SetMapCoords(System::UnicodeString ACoords);
 	
 public:
-	__fastcall TmScPosn(double ALat, double ALon);
+	__fastcall TmScPosn(double ALat, double ALon, unsigned AUnknown1);
 	virtual void __fastcall InitFromStream(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType, System::Classes::TStream* AStream);
 	__fastcall virtual ~TmScPosn();
+	__property unsigned Unknown1 = {read=FValue.Unknown1, nodefault};
 };
 
 #pragma pack(pop)
@@ -534,7 +541,8 @@ class PASCALIMPLEMENTATION TmAvoidancesChangedTimeAtSave : public TUnixDate
 	typedef TUnixDate inherited;
 	
 public:
-	__fastcall TmAvoidancesChangedTimeAtSave(System::TDateTime AValue);
+	__fastcall TmAvoidancesChangedTimeAtSave(System::TDateTime AValue)/* overload */;
+	__fastcall TmAvoidancesChangedTimeAtSave(unsigned AValue)/* overload */;
 public:
 	/* TCardinalItem.Destroy */ inline __fastcall virtual ~TmAvoidancesChangedTimeAtSave() { }
 	
@@ -1053,6 +1061,7 @@ private:
 	System::UnicodeString __fastcall GetName();
 	System::UnicodeString __fastcall GetMapCoords();
 	System::UnicodeString __fastcall GetMapSegRoad();
+	System::UnicodeString __fastcall GetMapSegRoadExclBit();
 	System::UnicodeString __fastcall GetPointType();
 	System::UnicodeString __fastcall GetDirection();
 	
@@ -1064,6 +1073,7 @@ public:
 	__property TUdbDirValue UdbDirValue = {read=FValue};
 	__property System::UnicodeString MapCoords = {read=GetMapCoords};
 	__property System::UnicodeString MapSegRoad = {read=GetMapSegRoad};
+	__property System::UnicodeString MapSegRoadExclBit = {read=GetMapSegRoadExclBit};
 	__property System::UnicodeString PointType = {read=GetPointType};
 	__property System::UnicodeString Direction = {read=GetDirection};
 	__property TUdbDirStatus Status = {read=FUdbDirStatus, write=FUdbDirStatus, nodefault};
@@ -1217,11 +1227,14 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-#define XTName L"z\u016bmo XT"
-#define XT2Name L"z\u016bmo XT2"
+#define XT_Name L"z\u016bmo XT"
+#define XT2_Name L"z\u016bmo XT2"
 #define XT2_VehicleProfileGuid L"dbcac367-42c5-4d01-17aa-ecfe025f2d1c"
 #define XT2_VehicleProfileHash L"135656608"
 static _DELPHI_CONST System::WideChar XT2_VehicleId = (System::WideChar)(0x31);
+static _DELPHI_CONST System::WideChar XT2_VehicleProfileTruckType = (System::WideChar)(0x37);
+#define XT2_AvoidancesChangedTimeAtSave L""
+#define XT2_VehicleProfileName L"z\u016bmo Motorcycle"
 static _DELPHI_CONST System::Int8 dtByte = System::Int8(0x1);
 static _DELPHI_CONST System::Int8 dtCardinal = System::Int8(0x3);
 static _DELPHI_CONST System::Int8 dtSingle = System::Int8(0x4);

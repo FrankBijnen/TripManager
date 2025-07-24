@@ -79,9 +79,6 @@ private:
 	void __fastcall FreeGlobals();
 	void __fastcall CreateGlobals();
 	void __fastcall ClearGlobals();
-	void __fastcall CloneAttributes(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
-	void __fastcall CloneSubNodes(Unitverysimplexml::TXmlVSNodeList* FromNodes, Unitverysimplexml::TXmlVSNodeList* ToNodes);
-	void __fastcall CloneNode(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
 	void __fastcall ProcessGPX();
 	void __fastcall ComputeDistance(Unitverysimplexml::TXmlVSNode* RptNode);
 	void __fastcall ClearSubClass(Unitverysimplexml::TXmlVSNode* ANode);
@@ -115,6 +112,9 @@ private:
 	void __fastcall CreateTrip_XT2(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode, unsigned ParentTripID, Unitverysimplexml::TXmlVSNodeList* RtePts);
 	
 protected:
+	void __fastcall CloneAttributes(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
+	void __fastcall CloneSubNodes(Unitverysimplexml::TXmlVSNodeList* FromNodes, Unitverysimplexml::TXmlVSNodeList* ToNodes);
+	void __fastcall CloneNode(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
 	void __fastcall Track2OSMTrackPoints(Unitverysimplexml::TXmlVSNode* Track, int &TrackId, System::Classes::TStringList* TrackStringList);
 	
 public:
