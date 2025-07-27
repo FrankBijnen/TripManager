@@ -5,9 +5,7 @@ Due to the Copyright statement I can't distribute that source, but the Community
 
 - Modify the Vcl.Shell.ShellCtrls.pas file.
 
-1) In the 'public' declarations of TShellTreeView, add
-
-property OnCustomDrawItem;
+1) In the 'protected' declarations of TCustomShellTreeView add 'virtual' to 'initnode'.
 
 2) In the 'private' declarations of TCustomShellListView, comment 'procedure EnumColumns'.
 
@@ -20,6 +18,7 @@ property OnCustomDrawItem;
 4) In the 'public' declarations of TCustomShellListView, add:
 
     property FoldersList: TList read FFolders;
+
 
 - Open the ShellControls.groupproj in Delphi (Or CBuilder), Compile and Install the 32 Bits version. The 64 Bits also works, but is not needed.
 

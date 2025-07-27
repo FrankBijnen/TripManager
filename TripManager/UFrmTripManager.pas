@@ -1660,6 +1660,7 @@ begin
   VlTripInfo.OnSelectionMoved := VlTripInfoSelectionMoved;
   VlTripInfo.OnBeforeDrawCell := VlTripInfoBeforeDrawCell;
 
+  ShellTreeView1.OnCustomDrawItem := ShellTreeView1CustomDrawItem;
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
