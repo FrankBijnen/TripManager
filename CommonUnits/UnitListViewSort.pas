@@ -24,14 +24,14 @@ procedure ListViewCompare(Item1, Item2: TListItem;
                           Data: Integer; var Compare: Integer);
 procedure InitSortSpec(Column: TListColumn;
                        Ascending: Boolean;
-                       var FSortSpecification:TSortSpecification);
+                       var FSortSpecification: TSortSpecification);
 procedure DoListViewSort(AListView: TlistView;
                          Column: TListColumn;
                          Ascending: Boolean;
-                         var FSortSpecification:TSortSpecification);
+                         var FSortSpecification: TSortSpecification);
 procedure ListViewColumnClick(AListView: TlistView;
                               Column: TListColumn;
-                              var FSortSpecification:TSortSpecification);
+                              var FSortSpecification: TSortSpecification);
 
 implementation
 
@@ -98,8 +98,8 @@ begin
   Index := FSortSpecification.Column.Index;
   if FSortSpecification.UseObject then
   begin
-    Compare:=CompareValue(TBASE_Data(Item1.Data).SortValue,
-                          TBASE_Data(Item2.Data).SortValue);
+    Compare := CompareValue(TBASE_Data(Item1.Data).SortValue,
+                            TBASE_Data(Item2.Data).SortValue);
   end
   else
   begin
@@ -111,11 +111,11 @@ begin
     else
     begin
       s1 := '';
-      if (Item1.SubItems.Count > Index-1) then
-        s1 := Item1.SubItems[Index-1];
+      if (Item1.SubItems.Count > Index -1) then
+        s1 := Item1.SubItems[Index -1];
       s2 := '';
-      if (Item2.SubItems.Count > Index-1) then
-        s2 := Item2.SubItems[Index-1];
+      if (Item2.SubItems.Count > Index -1) then
+        s2 := Item2.SubItems[Index -1];
     end;
     Compare := FSortSpecification.CompareItems(s1, s2);
   end;
@@ -125,7 +125,7 @@ end;
 
 procedure InitSortSpec(Column: TListColumn;
                        Ascending: Boolean;
-                       var FSortSpecification:TSortSpecification);
+                       var FSortSpecification: TSortSpecification);
 begin
   FSortSpecification.Column := Column;
   FSortSpecification.Ascending := Ascending;
@@ -136,7 +136,7 @@ end;
 procedure DoListViewSort(AListView: TlistView;
                          Column: TListColumn;
                          Ascending: Boolean;
-                         var FSortSpecification:TSortSpecification);
+                         var FSortSpecification: TSortSpecification);
 begin
   InitSortSpec(Column, Ascending, FSortSpecification);
   AListView.AlphaSort;
@@ -144,7 +144,7 @@ end;
 
 procedure ListViewColumnClick(AListView: TlistView;
                               Column: TListColumn;
-                              var FSortSpecification:TSortSpecification);
+                              var FSortSpecification: TSortSpecification);
 var
   I: Integer;
   Ascending: Boolean;
@@ -154,7 +154,7 @@ begin
   DoListViewSort(AListView, Column, Ascending, FSortSpecification);
   for I := 0 to AListView.Columns.Count-1 do
   begin
-    if AListView.Column[I]=Column then
+    if (AListView.Column[I] = Column) then
       if Ascending then
         State := hssAscending
       else

@@ -3434,12 +3434,15 @@ begin
     DeviceFolder[BgDevice.ItemIndex] := GetDevicePath(FCurrentPath);
     EdDeviceFolder.Text := CurrentDevice.FriendlyName + '\' + DeviceFolder[BgDevice.ItemIndex];
 
-    DoListViewSort(LstFiles, LstFiles.Columns[0], true, FSortSpecification);
-
+    // Trips need to be checked, and tripname filled
     case BgDevice.ItemIndex of
       0: CheckTrips;
 // Future use
     end;
+
+    // Now sort
+    DoListViewSort(LstFiles, FSortSpecification.Column, FSortSpecification.Ascending, FSortSpecification);
+
   finally
     SetCursor(CrNormal);
   end;
