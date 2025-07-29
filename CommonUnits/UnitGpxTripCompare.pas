@@ -25,7 +25,9 @@ type
     function AddGpxRptPt(const FromNode: TXmlVSNode;
                          const ANodeValue: string): TXmlVSNode;
     function GetRouteNode(const RouteName: string): TXmlVSNode;
-    function GetExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+    function GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
+    function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+    function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
     procedure BuildSubClasses(const ARtePt: TXmlVSNode);
     function GetPrevSubClass(const GpxxRptNode: TXmlVSNode): string;
 
@@ -374,34 +376,121 @@ begin
   end;
 end;
 
-function TGPXTripCompare.GetExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function TGPXTripCompare.GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
 var
   ExtensionsNode, RoutePointExtensionNode: TXmlVSNode;
 begin
-  result := nil;
-  RoutePointExtensionNode := nil;
   ExtensionsNode := ARtePt.Find('extensions');
-  if (ExtensionsNode <> nil) then
-    RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
-  if (RoutePointExtensionNode <> nil) then
-    result := RoutePointExtensionNode.Find('gpxx:rpt');
+  if (ExtensionsNode = nil) then
+    exit(nil);
+
+  RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
+  if (RoutePointExtensionNode = nil) then
+    exit(nil);
+
+  if (LastChild) then
+    exit(RoutePointExtensionNode.LastChild);  // Should be a 'gpxx:rpt'. Need to check?
+
+  result := RoutePointExtensionNode.Find('gpxx:rpt')
+end;
+
+function TGPXTripCompare.GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetExtensionsNode(ARtePt, false);
+end;
+
+function TGPXTripCompare.GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetExtensionsNode(ARtePt, true);
 end;
 
 // Add Subclasses to list of this <rtept>
 procedure TGPXTripCompare.BuildSubClasses(const ARtePt: TXmlVSNode);
-var
-  ScanGpxxRptNode: TXmlVSNode;
-  CMapSegRoad: string;
+
+  procedure AddSubClass(const GpxxRptNode: TXmlVSNode);
+  var
+    CMapSegRoad: string;
+  begin
+    CMapSegRoad := FindSubNodeValue(GpxxRptNode, 'gpxx:Subclass');
+    if (CMapSegRoad <> '') then
+      FSubClassList.AddObject(MapSegRoadExclBit(CMapSegRoad), GpxxRptNode);
+  end;
+
+  //Add subclasses from previous segment with Distance < DistOK from this Rtept
+  procedure AddPreviousSegment;
+  var
+    ScanGpxxRptNode: TXmlVSNode;
+    RtePtCoord, GpxxRptCoord: TCoord;
+    PrevRtePt: TXmlVSNode;
+    ThisDist: double;
+  begin
+    PrevRtePt := ARtePt.PreviousSibling;
+    if (PrevRtePt = nil) then
+      exit;
+
+    RtePtCoord := CoordFromAttribute(ARtePt.AttributeList);
+    ScanGpxxRptNode := GetLastExtensionsNode(PrevRtePt);
+    while (ScanGpxxRptNode <> nil) do
+    begin
+      GpxxRptCoord := CoordFromAttribute(ScanGpxxRptNode.AttributeList);
+      ThisDist := CoordDistance(RtePtCoord, GpxxRptCoord, TDistanceUnit.duKm);
+      if (ThisDist > FDistOKMeters) then
+        break;
+      AddSubClass(ScanGpxxRptNode);
+
+      ScanGpxxRptNode := ScanGpxxRptNode.PreviousSibling;
+    end;
+  end;
+
+  // Add subclasses from this segment
+  procedure AddCurrentSegment;
+  var
+    ScanGpxxRptNode: TXmlVSNode;
+  begin
+    ScanGpxxRptNode := GetFirstExtensionsNode(ARtePt);
+    while (ScanGpxxRptNode <> nil) do
+    begin
+      AddSubClass(ScanGpxxRptNode);
+
+      ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+    end;
+  end;
+
+  //Add subclasses from next segment with Distance < DistOK from next Rtept
+  procedure AddNextSegment;
+  var
+    ScanGpxxRptNode: TXmlVSNode;
+    RtePtCoord, GpxxRptCoord: TCoord;
+    NextRtePt: TXmlVSNode;
+    ThisDist: double;
+  begin
+    NextRtePt := ARtePt.NextSibling;
+    if (NextRtePt = nil) then
+      exit;
+
+    RtePtCoord := CoordFromAttribute(NextRtePt.AttributeList);
+    ScanGpxxRptNode := GetFirstExtensionsNode(NextRtePt);
+    while (ScanGpxxRptNode <> nil) do
+    begin
+      GpxxRptCoord := CoordFromAttribute(ScanGpxxRptNode.AttributeList);
+      ThisDist := CoordDistance(RtePtCoord, GpxxRptCoord, TDistanceUnit.duKm);
+      if (ThisDist > FDistOKMeters) then
+        break;
+
+      AddSubClass(ScanGpxxRptNode);
+
+      ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+    end;
+  end;
+
 begin
   FSubClassList.Clear;
-  ScanGpxxRptNode := GetExtensionsNode(ARtePt);
-  while (ScanGpxxRptNode <> nil) do
-  begin
-    CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
-    if (CMapSegRoad <> '') then
-      FSubClassList.AddObject(MapSegRoadExclBit(CMapSegRoad), ScanGpxxRptNode);
-    ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
-  end;
+
+  AddPreviousSegment;
+
+  AddCurrentSegment;
+
+  AddNextSegment;
 end;
 
 // Get the SubClass of a GpxxRptNode. If not avail scan back
@@ -580,7 +669,7 @@ begin
             NoMatchRoutePoint(Messages, CoordTrip, FRtePt, ThisDist);
 
           // Init GpxxRptNode
-          GpxxRptNode := GetExtensionsNode(FRtePt);
+          GpxxRptNode := GetFirstExtensionsNode(FRtePt);
 
           // Build known subclasses for this <rtept>
           BuildSubClasses(FRtePt);
