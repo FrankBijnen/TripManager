@@ -200,6 +200,7 @@ object FrmTripManager: TFrmTripManager
         HideSelection = False
         LargeImages = ImageList
         MultiSelect = True
+        StyleElements = [seFont, seBorder]
         ReadOnly = True
         RowSelect = True
         ParentDoubleBuffered = False
@@ -748,6 +749,7 @@ object FrmTripManager: TFrmTripManager
         ReadOnly = True
         TabOrder = 0
         ToolTips = False
+        StyleElements = [seFont, seBorder]
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
       end
@@ -767,6 +769,7 @@ object FrmTripManager: TFrmTripManager
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goThumbTracking]
           PopupMenu = PopupTripInfo
           TabOrder = 0
+          StyleElements = [seFont, seBorder]
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
           OnStringsChange = VlTripInfoStringsChange

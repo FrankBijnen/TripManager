@@ -3593,7 +3593,6 @@ var
   ANItem: TBaseItem;
   CurrentNode: TTreeNode;
   RootNode: TTreeNode;
-  OldRoot: TTreeNode;
   TripName: string;
   ParentTripName: string;
 
@@ -3690,7 +3689,8 @@ begin
     PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
     if (TripName <> ParentTripName) then
       PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
-    OldRoot := TvTrip.Items.GetFirstNode;
+
+    TvTrip.Items.Clear;
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
     TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
 
@@ -3709,11 +3709,8 @@ begin
       end;
     end;
 
-    if (OldRoot <> nil) then
-      TvTrip.Items.Delete(OldRoot);
     RootNode.Selected := true;
     RootNode.Expand(false);
-
   finally
     AStream.Free;
 
