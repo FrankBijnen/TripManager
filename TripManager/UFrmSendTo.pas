@@ -62,7 +62,7 @@ var
 implementation
 
 uses
-  UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils;
+  UnitRegistry, UnitRegistryKeys, UnitStringUtils;
 
 {$R *.dfm}
 
@@ -151,12 +151,12 @@ end;
 procedure TFrmSendTo.SetPrefs;
 begin
   EnableItems;
-  TProcessOptions.SetPrefs(TvSelections);
+  TSetProcessOptions.SetPrefs(TvSelections);
 end;
 
 procedure TFrmSendTo.StorePrefs;
 begin
-  Funcs := TProcessOptions.StorePrefs(TvSelections);
+  Funcs := TSetProcessOptions.StorePrefs(TvSelections);
 end;
 
 procedure TFrmSendTo.TvSelectionsCheckStateChanging(Sender: TCustomTreeView; Node: TTreeNode; NewCheckState,

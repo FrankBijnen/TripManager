@@ -33,7 +33,7 @@ var
 implementation
 
 uses
-  UnitRegistry, UnitRegistryKeys, UnitTripObjects, UnitProcessOptions;
+  UnitRegistry, UnitRegistryKeys, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -41,12 +41,12 @@ procedure TFrmAdditional.SetPrefs;
 begin
   TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XT_Name)]);
   TvSelections.Items[IdCompleteRoute].Enabled := false;
-  TProcessOptions.SetPrefs(TvSelections);
+  TSetProcessOptions.SetPrefs(TvSelections);
 end;
 
 procedure TFrmAdditional.StorePrefs;
 begin
-  Funcs := TProcessOptions.StorePrefs(TvSelections);
+  Funcs := TSetProcessOptions.StorePrefs(TvSelections);
 end;
 
 procedure TFrmAdditional.TvSelectionsCheckStateChanging(Sender: TCustomTreeView; Node: TTreeNode; NewCheckState,

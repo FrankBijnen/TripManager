@@ -188,14 +188,16 @@ type
                                      const ForceOutDir: string = '';
                                      const OutStringList: TStringList = nil;
                                      const SeqNo: cardinal = 0);
+    class function CmdLinePostProcess(SetPrefsEvent: TNotifyEvent): boolean;
+
 
 end;
 
 implementation
 
 uses
-  System.TypInfo, System.DateUtils, System.StrUtils,
-  UnitStringUtils, UnitOSMMap;
+  System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils,
+  UnitStringUtils, UnitOSMMap, UnitRegistry, UnitRegistryKeys;
 
 // Not configurable
 const
@@ -1409,7 +1411,9 @@ begin
   FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow, CheckMask);
   FrmSelectGPX.Caption := Caption;
   FrmSelectGPX.PnlTop.Caption := SubCaption;
-  result := (FrmSelectGPX.ShowModal = ID_OK);
+  result := ProcessOptions.HasConsole;
+  if not result then
+    result := (FrmSelectGPX.ShowModal = ID_OK);
 
   if (result) then
   begin
@@ -2298,10 +2302,114 @@ begin
   end;
 end;
 
+class function TGPXFile.CmdLinePostProcess(SetPrefsEvent: TNotifyEvent): boolean;
+var
+  Fs: TSearchRec;
+  Rc, Cnt: integer;
+  HasConsole: boolean;
+  GPXDir: string;
+  GPXMask: string;
+  AGPX: string;
+  Funcs: TGPXFuncArray;
+  AFunc: TGPXFunc;
+
+  procedure ShowUsage;
+  begin
+    if HasConsole then
+    begin
+      Writeln;
+      Writeln;
+      Writeln('Usage: ', paramstr(0) + ' /Options GPX files Mask');
+      Writeln;
+      Writeln('Options:');
+      Writeln(#9, '/PP or /PostProcess = Postprocess');
+      Writeln(#9, '/Trips              = Create .trip Zumo Trips');
+      Writeln(#9, '/Routes             = Create GPX Stripped Routes');
+      Writeln(#9, '/Tracks             = Create GPX Tracks');
+      Writeln(#9, '/Wpts or /WayPoints = Create GPX WayPoints');
+      Writeln(#9, '/Kml                = Create KML Google Earth');
+      Writeln(#9, '/Html               = Create HTML');
+      Writeln(#9, '/Poly               = Create POLY');
+      Writeln;
+      Writeln('Example: ', paramstr(0), ' /PP /Tracks /Trips *.gpx');
+      Writeln;
+    end;
+  end;
+
+begin
+  Cnt := 0;
+  result := false;
+  SetLength(Funcs, 0);
+  HasConsole := AttachConsole(ATTACH_PARENT_PROCESS);
+  try
+    if FindCmdLineSwitch('?', true) then
+    begin
+      ShowUsage;
+      exit(true);
+    end;
+    if FindCmdLineSwitch('PP', true) or
+       FindCmdLineSwitch('PostProcess', true) then
+      Funcs := Funcs + [TGPXFunc.PostProcess];
+    if FindCmdLineSwitch('TRACKS', true) then
+      Funcs := Funcs + [TGPXFunc.CreateTracks];
+    if FindCmdLineSwitch('WPTS', true) or
+       FindCmdLineSwitch('WAYPOINTS', true) then
+      Funcs := Funcs + [TGPXFunc.CreateWayPoints];
+    if FindCmdLineSwitch('POI', true) or
+       FindCmdLineSwitch('GPI', true) then
+      Funcs := Funcs + [TGPXFunc.CreatePOI];
+    if FindCmdLineSwitch('KML', true) then
+      Funcs := Funcs + [TGPXFunc.CreateKML];
+    if FindCmdLineSwitch('HTML', true) then
+      Funcs := Funcs + [TGPXFunc.CreateHTML];
+    if FindCmdLineSwitch('POLY', true) then
+      Funcs := Funcs + [TGPXFunc.CreatePoly];
+    if FindCmdLineSwitch('ROUTES', true) then
+      Funcs := Funcs + [TGPXFunc.CreateRoutes];
+    if FindCmdLineSwitch('TRIPS', true) then
+      Funcs := Funcs + [TGPXFunc.CreateTrips];
+
+    if (Length(Funcs) > 0) and
+       (ParamCount > 1) then
+    begin
+      result := true;
+      GPXMask := ParamStr(ParamCount);
+      GPXDir := ExtractFilePath(TPath.GetFullPath(GPXMask));
+      if (HasConsole) then
+      begin
+        Writeln;
+        Writeln;
+        Writeln('Processing started for: ', GPXMask);
+        Writeln('Selected model: ', GetRegistry(Reg_ZumoModel, XT_Name));
+        Write('Selected functions:');
+        for AFunc in Funcs do
+        begin
+          Write(' ', GetEnumName(TypeInfo(TGPXFunc), Ord(AFunc)));
+        end;
+        Writeln;
+      end;
+      Rc := System.SysUtils.FindFirst(GPXmask, faAnyFile - faDirectory, Fs);
+      while (Rc = 0) do
+      begin
+        Inc(Cnt);
+        AGPX := TPath.Combine(GPXDir, Fs.Name);
+        if (HasConsole) then
+          Writeln('Processing: ', AGPX);
+        TGPXFile.PerformFunctions(Funcs, AGPX, SetPrefsEvent, nil);
+        Rc := System.SysUtils.FindNext(Fs);
+      end;
+      System.SysUtils.FindClose(Fs);
+      if (HasConsole) then
+        Writeln('Processing ended. ', Cnt, ' Files processed');
+    end;
+  finally
+    FreeConsole;
+  end;
+end;
+
 initialization
 begin
   FormatSettings := GetLocaleSetting;
-  OnSetFixedPrefs := nil;
 end;
 
 end.

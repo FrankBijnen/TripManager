@@ -65,6 +65,13 @@ begin
 {$ENDIF}
   Application.Title := 'TripManager';
 
+  // Commandline process requested (/pp gpxmask)
+  if (TGPXFile.CmdLinePostProcess(SetProcessOptions.SetCmdLinePrefs)) then
+  begin
+    Application.Terminate; // Call finalizations
+    halt(0);               // Exit 0
+  end;
+
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   CreateTempPath('TRIP');

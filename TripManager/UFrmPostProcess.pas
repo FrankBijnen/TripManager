@@ -67,7 +67,7 @@ var
 implementation
 
 uses
-  System.TypInfo, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitGpxDefs, UnitProcessOptions, UFrmAdvSettings;
+  System.TypInfo, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitGpxDefs, UnitProcessOptions;
 
 {$R *.dfm}
 

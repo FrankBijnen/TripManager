@@ -5,13 +5,9 @@ interface
 uses
   System.Classes,
   Winapi.Windows,
-  Vcl.ComCtrls,
   UnitGpxDefs, UnitTripObjects, UnitGpi;
 
 const
-//TODO Deprecated
-  TripFilesFor    = 'Trip files (No import required, but will recalculate. Selected model: %s)';
-
   Reg_FuncTrip                = 'FuncTrip';
   Reg_FuncTrack               = 'FuncTrack';
   Reg_FuncStrippedRoute       = 'FuncStrippedRoute';
@@ -29,6 +25,7 @@ const
 
 type
   TProcessOptions = class
+    HasConsole: boolean;                      // False, CmdLine process
     LookUpWindow: HWND;                       // 0, Window handle
                                               // Used to send progress messages when looking up addresses
     LookUpMessage: UINT;                      // 0, Message Id
@@ -144,35 +141,13 @@ type
     function DistanceStr: string;
     function GetDistOKMeters: double;
     property DistOKMeters: double read GetDistOKMeters;
-    class procedure SetPrefs(TvSelections: TTreeview);
-    class function StorePrefs(TvSelections: TTreeview): TGPXFuncArray;
-
   end;
-
-var
-  OnSetFixedPrefs: TNotifyEvent;
-
-const
-  IdTrip          = 0;
-  IdTrack         = 1;
-  IdCompleteRoute = 2; // Only Transfer
-  IdStrippedRoute = 3;
-  IdWayPoint      = 4;
-    IdWayPointWpt = 5;
-    IdWayPointVia = 6;
-    IdWayPointShp = 7;
-  IdGpi           = 8;
-    IdGpiWayPt    = 9;
-    IdGpiViaPt    = 10;
-    IdGpiShpPt    = 11;
-  IdKml           = 12; // Only Additional
-  IdHtml          = 13; // Only Additional
 
 implementation
 
 uses
   System.SysUtils,
-  UnitRegistry,
+  UnitRegistry, UnitRegistryKeys,
   UnitStringUtils;
 
 constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
@@ -240,6 +215,7 @@ begin
   CatGPX := 'GPX:';
   CatRoute := 'Route:';
 
+  HasConsole := false;
   LookUpWindow := 0;
   LookUpMessage := 0;
 
@@ -255,8 +231,8 @@ begin
   AvoidancesChangedTimeAtSave := 0;
 {$ENDIF}
 
-  if (Assigned(OnSetFixedPrefs)) then
-    OnSetFixedPrefs(Self);
+  if (Assigned(SetProcessOptions)) then
+    SetProcessOptions.SetFixedPrefs(Self);
 
   if (Assigned(FOnSetFuncPrefs)) then
     FOnSetFuncPrefs(Self);
@@ -311,111 +287,6 @@ end;
 function TProcessOptions.GetDistOKMeters: double;
 begin
   result := CompareDistanceOK / 1000;
-end;
-
-class procedure TProcessOptions.SetPrefs(TvSelections: TTreeview);
-var
-  SavedStateChanging: TTVCheckStateChangingEvent;
-begin
-  // Cant uncheck when node is not enabled
-  SavedStateChanging := TvSelections.OnCheckStateChanging;
-  TvSelections.OnCheckStateChanging := nil;
-  try
-    TvSelections.Items[IdTrip].Checked := GetRegistry(Reg_FuncTrip, true);
-
-    TvSelections.Items[IdTrack].Checked := GetRegistry(Reg_FuncTrack, true);
-
-    TvSelections.Items[IdStrippedRoute].Checked := GetRegistry(Reg_FuncStrippedRoute, true);
-    TvSelections.Items[IdCompleteRoute].Checked := TvSelections.Items[IdCompleteRoute].Enabled and
-                                                     GetRegistry(Reg_FuncCompleteRoute, false);
-    TvSelections.Items[IdWayPoint].Checked := GetRegistry(Reg_FuncWayPoint, false);
-      TvSelections.Items[IdWayPointWpt].Checked := GetRegistry(Reg_FuncWayPointWpt, true);
-      TvSelections.Items[IdWayPointVia].Checked := GetRegistry(Reg_FuncWayPointVia, false);
-      TvSelections.Items[IdWayPointShp].Checked := GetRegistry(Reg_FuncWayPointShape, false);
-
-    TvSelections.Items[IdGpi].Checked := GetRegistry(Reg_FuncGpi, true);
-      TvSelections.Items[IdGpiWayPt].Checked := GetRegistry(Reg_FuncGpiWayPt, true);
-      TvSelections.Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
-      TvSelections.Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
-
-    TvSelections.Items[IdKml].Checked := TvSelections.Items[IdKml].Enabled and
-                                           GetRegistry(Reg_FuncKml, true);
-    TvSelections.Items[IdHtml].Checked := TvSelections.Items[IdHtml].Enabled and
-                                            GetRegistry(Reg_FuncHtml, true);
-  finally
-    TvSelections.OnCheckStateChanging := SavedStateChanging;
-    TvSelections.FullExpand;
-  end;
-end;
-
-class function TProcessOptions.StorePrefs(TvSelections: TTreeview): TGPXFuncArray;
-begin
-  if (TvSelections.Items[IdStrippedRoute].Checked) and
-     (TvSelections.Items[IdCompleteRoute].Checked) then
-    raise Exception.Create('Only one route option can be selected!');
-
-  SetLength(result, 0);
-
-  SetRegistry(Reg_FuncTrip, TvSelections.Items[IdTrip].Checked);
-  if (TvSelections.Items[IdTrip].Checked) then
-    result := result + [TGPXFunc.CreateTrips];
-
-  SetRegistry(Reg_FuncTrack, TvSelections.Items[IdTrack].Checked);
-  if (TvSelections.Items[IdTrack].Checked) then
-    result := result + [TGPXFunc.CreateTracks];
-
-  SetRegistry(Reg_FuncStrippedRoute, TvSelections.Items[IdStrippedRoute].Checked);
-  if (TvSelections.Items[IdStrippedRoute].Checked) then
-    result := result + [TGPXFunc.CreateRoutes];
-
-  if (TvSelections.Items[IdCompleteRoute].Enabled) then
-    SetRegistry(Reg_FuncCompleteRoute, TvSelections.Items[IdCompleteRoute].Checked);
-
-  SetRegistry(Reg_FuncWayPoint, TvSelections.Items[IdWayPoint].Checked);
-  if (TvSelections.Items[IdWayPoint].Checked) then
-  begin
-    result := result + [TGPXFunc.CreateWayPoints];
-    if (TvSelections.Items[IdWayPointWpt].Checked = false) and
-       (TvSelections.Items[IdWayPointWpt].Checked = false) and
-       (TvSelections.Items[IdWayPointWpt].Checked = false) then
-      raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
-       [#10, TvSelections.Items[IdWayPointWpt].Text,
-        #10, TvSelections.Items[IdWayPointVia].Text,
-        #10, TvSelections.Items[IdWayPointVia].Text]));
-  end;
-    SetRegistry(Reg_FuncWayPointWpt, TvSelections.Items[IdWayPointWpt].Checked);
-    SetRegistry(Reg_FuncWayPointVia, TvSelections.Items[IdWayPointVia].Checked);
-    SetRegistry(Reg_FuncWayPointShape, TvSelections.Items[IdWayPointVia].Checked);
-
-  SetRegistry(Reg_FuncGpi, TvSelections.Items[IdGpi].Checked);
-  if (TvSelections.Items[IdGpi].Checked) then
-  begin
-    result := result + [TGPXFunc.CreatePOI];
-    if (TvSelections.Items[IdGpiWayPt].Checked = false) and
-       (TvSelections.Items[IdGpiViaPt].Checked = false) and
-       (TvSelections.Items[IdGpiShpPt].Checked = false) then
-      raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
-       [#10, TvSelections.Items[IdGpiWayPt].Text,
-        #10, TvSelections.Items[IdGpiViaPt].Text,
-        #10, TvSelections.Items[IdGpiShpPt].Text]));
-  end;
-    SetRegistry(Reg_FuncGpiWayPt, TvSelections.Items[IdGpiWayPt].Checked);
-    SetRegistry(Reg_FuncGpiViaPt, TvSelections.Items[IdGpiViaPt].Checked);
-    SetRegistry(Reg_FuncGpiShpPt, TvSelections.Items[IdGpiShpPt].Checked);
-
-  if (TvSelections.Items[IdKml].Enabled) then
-  begin
-    SetRegistry(Reg_FuncKml, TvSelections.Items[IdKml].Checked);
-    if (TvSelections.Items[IdKml].Checked) then
-      result := result + [TGPXFunc.CreateKML];
-  end;
-
-  if (TvSelections.Items[IdHtml].Enabled) then
-  begin
-    SetRegistry(Reg_FuncHtml, TvSelections.Items[IdHtml].Checked);
-    if (TvSelections.Items[IdHtml].Checked) then
-      result := result + [TGPXFunc.CreateHTML];
-  end;
 end;
 
 end.

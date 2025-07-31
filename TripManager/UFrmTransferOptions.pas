@@ -34,7 +34,7 @@ var
 implementation
 
 uses
-  UnitProcessOptions, UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitTripObjects, UFrmAdvSettings, UFrmTripManager;
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitTripObjects, UFrmAdvSettings, UFrmTripManager;
 
 {$R *.dfm}
 
@@ -43,7 +43,7 @@ begin
   TvSelections.Items[IdTrip].Text := Format(TripFilesFor, [GetRegistry(Reg_ZumoModel, XT_Name)]);
   TvSelections.Items[IdKml].Enabled := false;
   TvSelections.Items[IdHtml].Enabled := false;
-  TProcessOptions.SetPrefs(TvSelections);
+  TSetProcessOptions.SetPrefs(TvSelections);
 
   MemoDestinations.Text :=
     'Files will be transferred to:' + #13 + #10 + #13 + #10 +
@@ -54,7 +54,7 @@ end;
 
 procedure TFrmTransferOptions.StorePrefs;
 begin
-  Funcs := TProcessOptions.StorePrefs(TvSelections);
+  Funcs := TSetProcessOptions.StorePrefs(TvSelections);
 end;
 
 procedure TFrmTransferOptions.TvSelectionsCheckStateChanging(Sender: TCustomTreeView; Node: TTreeNode; NewCheckState,

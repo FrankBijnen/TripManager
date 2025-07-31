@@ -356,12 +356,7 @@ type
     procedure ReadDefaultFolders;
     procedure ReadColumnSettings;
     procedure WriteColumnSettings;
-    procedure OnSetFixedPrefs(Sender: TObject);
-    procedure OnSetDevicePrefs(Sender: TObject);
     procedure OnSetPostProcessPrefs(Sender: TObject);
-    procedure OnSetWindowsFolderPrefs(Sender: TObject);
-    procedure OnSavePrefs(Sender: TObject);
-
     procedure ReadSettings;
     procedure ClearTripInfo;
     procedure EditTrip(NewFile: boolean);
@@ -784,7 +779,7 @@ begin
             // Clean up 'Routes' Temp directory.
             DeleteTempFiles(GetRoutesTmp, '*.*');
             TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
-                                      OnSetDevicePrefs, OnSavePrefs,
+                                      SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
                                       GetRoutesTmp, nil, AnItem.Index);
 
             // Need to copy the complete route?
@@ -839,7 +834,7 @@ begin
         TSendToDest.stWindows:
           begin
             TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
-                                      OnSetWindowsFolderPrefs, OnSavePrefs,
+                                      SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
                                       '', nil, AnItem.Index);
           end;
       end;
@@ -902,7 +897,7 @@ begin
 
       DeleteTempFiles(GetRoutesTmp, '*.*');
       TGPXFile.PerformFunctions(FrmTransferOptions.Funcs, GPXFile,
-                                OnSetDevicePrefs, OnSavePrefs,
+                                SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
                                 GetRoutesTmp, nil, AnItem.Index);
 
       if (GetRegistry(Reg_FuncCompleteRoute, false)) then
@@ -1354,7 +1349,7 @@ begin
           SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
           ProcessMessages;
           TGPXFile.PerformFunctions([PostProcess], ShellListView1.Folders[AnItem.Index].PathName,
-                                    OnSetPostProcessPrefs, OnSavePrefs);
+                                    OnSetPostProcessPrefs, SetProcessOptions.SavePrefs);
         end;
       end;
     finally
@@ -2095,7 +2090,7 @@ begin
     else
     begin
       TGPXFile.PerformFunctions([CreateOSMPoints], ShellListView1.SelectedFolder.PathName,
-                                nil, OnSavePrefs,
+                                nil, SetProcessOptions.SavePrefs,
                                 '', OsmTrack);
 
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
@@ -3569,7 +3564,7 @@ begin
       Ext := ExtractFileExt(ShellListView1.Folders[AnItem.Index].PathName);
       if (ContainsText(Ext, GpxExtension)) then
         TGPXFile.PerformFunctions(FrmAdditional.Funcs, ShellListView1.Folders[AnItem.Index].PathName,
-                                  OnSetWindowsFolderPrefs, OnSavePrefs,
+                                  SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
                                   '', nil, AnItem.Index);
     end;
 
@@ -3893,126 +3888,20 @@ begin
   SetRegistry(Reg_WidthColumns_Key, ColWidths);
 end;
 
-procedure TFrmTripManager.OnSetFixedPrefs(Sender: TObject);
+procedure TFrmTripManager.OnSetPostProcessPrefs(Sender: TObject);
 begin
+  SetProcessOptions.SetPostProcessPrefs(Sender);
+
   with Sender as TProcessOptions do
   begin
-    ProcessBegin := false;
-    ProcessEnd := false;
-    ProcessVia := false;
-    ProcessShape := false;
-
-    TrackColor := GetRegistry(Reg_TrackColor, '');
-
     // Lookup Messages
     LookUpWindow := FrmTripManager.Handle;
     LookUpMessage := UFrmTripManager.WM_ADDRLOOKUP;
-
-    // XT1 and XT2 Defaults
-    ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), GetRegistry(Reg_ZumoModel, '')));
-    ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
-
-    // XT2 Defaults
-    VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);
-    VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, XT2_VehicleProfileHash);
-    VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId);
-    VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, XT2_VehicleProfileTruckType);
-    VehicleProfileName := GetRegistry(Reg_VehicleProfileName, XT2_VehicleProfileName);
-    AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
-                                                                      TUnixDate.DateTimeAsCardinal(IncYear(Now, -1)));
-
-    // GPI defaults
-    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Symbols\' +
-                       GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
-    DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
-    CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
-
-    ProcessCategory := [];
-  end;
-end;
-
-procedure TFrmTripManager.OnSetDevicePrefs(Sender: TObject);
-begin
-// For creating Waypoints from routes, transferred as Waypoint<name>.gpx, or <name>.gpx
-  with Sender as TProcessOptions do
-  begin
-    ProcessWayPtsInWayPts := GetRegistry(Reg_FuncWayPointWpt, true);
-    ProcessViaPtsInWayPts := GetRegistry(Reg_FuncWayPointVia, false);
-    ProcessShapePtsInWayPts := GetRegistry(Reg_FuncWayPointShape, false);
-
-    ProcessWayPtsInGpi := GetRegistry(Reg_FuncGpiWayPt, true);
-    ProcessViaPtsInGpi := GetRegistry(Reg_FuncGpiViaPt, false);
-    ProcessShapePtsInGpi := GetRegistry(Reg_FuncGpiShpPt, false);
-  end;
-end;
-
-procedure TFrmTripManager.OnSetPostProcessPrefs(Sender: TObject);
-var
-  WayPtList: TStringList;
-begin
-  WayPtList := TStringList.Create;
-  try
-    WayPtList.Text := ProcessCategoryPick;
-    with Sender as TProcessOptions do
-    begin
-      ProcessBegin := GetRegistry(Reg_ProcessBegin, false);
-      BeginSymbol := GetRegistry(Reg_BeginSymbol, BeginSymbol);
-      BeginStr := GetRegistry(Reg_BeginStr, BeginStr);
-      ProcessAddrBegin := GetRegistry(Reg_BeginAddress, false);
-
-      ProcessEnd := GetRegistry(Reg_ProcessEnd, false);
-      EndSymbol := GetRegistry(Reg_EndSymbol, EndSymbol);
-      EndStr := GetRegistry(Reg_EndStr, EndStr);
-      ProcessAddrEnd := GetRegistry(Reg_EndAddress, false);
-
-      ProcessWpt := GetRegistry(Reg_ProcessWpt, false);
-      SetProcessCategory(ProcessWpt,
-                         GetRegistry(Reg_ProcessCategory, WayPtList[WayPtList.Count -1]));
-
-      ProcessWayPtsInWayPts := GetRegistry(Reg_FuncWayPointWpt, true);
-      ProcessViaPtsInWayPts := GetRegistry(Reg_FuncWayPointVia, false);
-      ProcessShapePtsInWayPts := GetRegistry(Reg_FuncWayPointShape, false);
-      ProcessAddrWayPt := GetRegistry(Reg_WayPtAddress, false);
-
-      ProcessVia := GetRegistry(Reg_ProcessVia, false);
-      ProcessAddrVia := GetRegistry(Reg_ViaAddress, false);
-
-      ProcessShape := GetRegistry(Reg_ProcessShape, false);
-      ShapingPointName := TShapingPointName(GetRegistry(Reg_ShapingName, Ord(ShapingPointName), TypeInfo(TShapingPointName)));
-      DistanceUnit := TDistanceUnit(GetRegistry(Reg_DistanceUnit, Ord(DistanceUnit), TypeInfo(TDistanceUnit)));
-      ProcessAddrShape := GetRegistry(Reg_ShapeAddress, false);
-    end;
-  finally
-    WayPtList.Free;
-  end;
-end;
-
-procedure TFrmTripManager.OnSetWindowsFolderPrefs(Sender: TObject);
-begin
-  with Sender as TProcessOptions do
-  begin
-    ProcessWayPtsInWayPts := GetRegistry(Reg_FuncWayPointWpt, true);
-    ProcessViaPtsInWayPts := GetRegistry(Reg_FuncWayPointVia, false);
-    ProcessShapePtsInWayPts := GetRegistry(Reg_FuncWayPointShape, false);
-
-    ProcessWayPtsInGpi := GetRegistry(Reg_FuncGpiWayPt, true);
-    ProcessViaPtsInGpi := GetRegistry(Reg_FuncGpiViaPt, false);
-    ProcessShapePtsInGpi := GetRegistry(Reg_FuncGpiShpPt, false);
-  end;
-end;
-
-procedure TFrmTripManager.OnSavePrefs(Sender: TObject);
-begin
-  with Sender as TProcessOptions do
-  begin
-    SetRegistry(Reg_TrackColor, TrackColor);
   end;
 end;
 
 procedure TFrmTripManager.ReadSettings;
 begin
-  UnitProcessOptions.OnSetFixedPrefs := OnSetFixedPrefs;
-
   PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
@@ -4136,7 +4025,7 @@ begin
       SbPostProcess.Panels[0].Text := AGpx;
       ProcessMessages;
       TGPXFile.PerformFunctions([PostProcess], AGpx,
-                                OnSetPostProcessPrefs, OnSavePrefs);
+                                OnSetPostProcessPrefs, SetProcessOptions.SavePrefs);
     end;
   finally
     DirectoryMonitor.Active := ChkWatch.Checked;
