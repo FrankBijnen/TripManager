@@ -6,11 +6,14 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
   Vcl.Edge;
 
-function CreateOSMMapHtml(Home: string; UseOl2Local: boolean = true): boolean; overload;
-function CreateOSMMapHtml: boolean; overload;
+function CreateOSMMapHtml(Home: string = ''; UseOl2Local: boolean = true): boolean; overload;
 function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; overload;
 function OSMColor(GPXColor: string): string;
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
+
+type TMapLayer = record
+  ClassName: string;
+  Description: string;      end;
 
 const
   Coord_Decimals    = 6;
@@ -18,8 +21,16 @@ const
   OSMCtrlClick      = 'Ctrl Click';
   OSMGetBounds      = 'GetBounds';
   OSMGetRoutePoint  = 'GetRoutePoint';
-  InitialZoom_Point = '15';
-  InitialZoom       = '12';
+  BaseLayer         = 'BaseLayer';
+  OSMMapLayer: TMapLayer
+                    =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
+  XYZMapLayers:  array[0..3] of TMapLayer
+                    = ( (ClassName: 'XYZ.ESRISatellite';   Description: 'ESRI Satellite'),
+                        (ClassName: 'XYZ.ESRIWorldStreet'; Description: 'ESRI WorldStreet'),
+                        (ClassName: 'XYZ.OpenTopoMap';     Description: 'Open Topo Map'),
+                        (ClassName: 'XYZ.TOPPlusOpen';     Description: 'TOP Plus Open')
+                      );
+  Reg_BaseLayer_Key = 'BaseLayer';
 
 type
   TOSMHelper = class(TObject)
@@ -27,7 +38,6 @@ type
     HasData: boolean;
     OsmFormatSettings: TFormatSettings;
     Html: TStringList;
-    FInitialZoom: string;
     FPathName: string;
     FHome: string;
     FTrackPoints: TStringList;
@@ -35,7 +45,7 @@ type
     procedure WriteTrackPoints;
     procedure WriteFooter;
   public
-    constructor Create(const APathName, AHome, AInitialZoom: string); overload;
+    constructor Create(const APathName, AHome: string); overload;
     constructor Create(const APathName: string; ATrackPoints: TStringList); overload;
     destructor Destroy; override;
   end;
@@ -46,19 +56,18 @@ uses
   System.Variants, System.JSON, System.NetEncoding, System.Math, System.DateUtils, System.IOUtils,
   Winapi.Windows, Vcl.Dialogs,
   REST.Types, REST.Client, REST.Utils,
-  UnitStringUtils;
+  UnitStringUtils, UnitRegistry;
 
 var
   Ol2Installed: boolean;
 
-constructor TOSMHelper.Create(const APathName, AHome, AInitialZoom: string);
+constructor TOSMHelper.Create(const APathName, AHome: string);
 begin
   inherited Create;
   OsmFormatSettings.DecimalSeparator := '.'; // The decimal separator is a . PERIOD!
   OsmFormatSettings.NegCurrFormat := 11;
   FPathName := APathName;
   FHome := AHome;
-  FInitialZoom := AInitialZoom;
   Html := TStringList.Create;
   HasData := false;
   FTrackPoints := nil;
@@ -66,7 +75,7 @@ end;
 
 constructor TOSMHelper.Create(const APathName: string; ATrackPoints: TStringList);
 begin
-  Create(APathName, '', InitialZoom_Point);
+  Create(APathName, '');
   FTrackPoints := ATrackPoints;
 end;
 
@@ -79,6 +88,8 @@ begin
 end;
 
 procedure TOSMHelper.WriteHeader(const UseOl2Local: boolean);
+var
+  AMapLayer: TMapLayer;
 begin
   HasData := false;
   Html.Clear;
@@ -89,7 +100,7 @@ begin
   if (UseOl2Local) then
   begin
     Html.Add('<script type="text/javascript" src="OpenLayers.js"></script>');
-    Html.Add('<script type="text/javascript" src="OpenStreetMap.js"></script>');
+    Html.Add('<script type="text/javascript" src="BaseLayers.js"></script>');
   end
   else
   begin
@@ -98,6 +109,7 @@ begin
   end;
   Html.Add('<script type="text/javascript">');
   Html.Add('var map;');
+  Html.Add('var BaseLayers;');
   Html.Add('var RoutePointsLayer;');
   Html.Add('var POILayer;');
   Html.Add('var allpoints;');       // Needed for CreateExtent
@@ -143,18 +155,27 @@ begin
   Html.Add('     cacheRead = new OpenLayers.Control.CacheRead();');
   Html.Add('     map.addControl(cacheRead);');
 
-  // OSM map
-  Html.Add('     map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));');
+  // Add Mapnik layer
+  Html.Add('     var BaseLayers = new Array();');
+  Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
+           [OSMMapLayer.ClassName, OSMMapLayer.Description]));
 
-  // Satellite images
-  Html.Add('     map.addLayer(new OpenLayers.Layer.XYZ(');
-  Html.Add('         "ESRI Satellite", ');
-  Html.Add('         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}",');
-  Html.Add('         { sphericalMercator: true,');
-  Html.Add('           attribution: "&copy; <a href=''https://www.esri.com/en-us/home''>Powered by Esri</a>&nbsp;' +
-                                    'Sources: Esri, DigitalGlobe, GeoEye, i-cubed, USDA FSA, USGS, AEX, Getmapping,' +
-                                    'Aerogrid, IGN, IGP, swisstopo, and the GIS User Community"');
-  Html.Add('         } ))');
+  if (UseOl2Local) then
+  begin
+    // Add all Base layers
+    for AMapLayer in XYZMapLayers do
+      Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
+               [AMapLayer.ClassName, AMapLayer.Description]));
+
+    // Select Base layer
+    Html.Add(Format('     map.setBaseLayer(map.getLayersBy("name", "%s")[0]);',
+                    [GetRegistry(Reg_BaseLayer_Key, OSMMapLayer.Description)]));
+
+    // base layer changed event
+    Html.Add('     map.events.register("changebaselayer", map, function(event) {');
+    Html.Add('       SendMessage("' + BaseLayer + '", event.layer.name, "");');
+    Html.Add('     });');
+  end;
 
   Html.Add('     po = map.getProjectionObject();');
   Html.Add('     op = new OpenLayers.Projection("EPSG:4326");');
@@ -181,7 +202,7 @@ begin
   Html.Add('     poipoints = new Array();');
   Html.Add('');
   Html.Add('     AddTrackPoints();');
-  Html.Add('     CreateExtent(' + FInitialZoom + ');');
+  Html.Add('     CreateExtent(map.getNumZoomLevels() * 0.66);');
   Html.Add('  }');
 
   Html.Add('  function SendMessage(msg, parm1, parm2){');
@@ -202,39 +223,31 @@ begin
   Html.Add('     SendMessage(Func, bounds.toBBOX(' + IntToStr(Place_Decimals) + ', true), lonlat.lat + ", " + lonlat.lon);');
   Html.Add('  }');
 
-  Html.Add('  function CreateExtent(ZoomLevel){');
+  Html.Add('  function CreateExtent(MaxZoomLevel){');
   Html.Add('     allpoints = allpoints.concat(trackpoints);');
   Html.Add('     allpoints = allpoints.concat(routepoints);');
   Html.Add('     allpoints = allpoints.concat(poipoints);');
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(allpoints);');
   Html.Add('     allpoints = new Array();'); // Remove from memory
-
   Html.Add('     var bounds = new OpenLayers.Bounds();');
   Html.Add('     line_string.calculateBounds();');
   Html.Add('     bounds.extend(line_string.bounds);');
   Html.Add('     map.zoomToExtent(bounds);');
-  Html.Add('     if (map.getZoom() > ZoomLevel){');
-  Html.Add('       map.zoomTo(ZoomLevel);');
+  Html.Add('     if (map.getZoom() > MaxZoomLevel){');
+  Html.Add('       map.zoomTo(MaxZoomLevel);');
   Html.Add('     }');
   Html.Add('  }');
 
   // OpenLayers uses LonLat, not LatLon. Confusing maybe,
   Html.Add('  function PopupAtPoint(Href, PointLat, PointLon, ZoomToPoint, PopupTimeOut){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     if (ZoomToPoint) {');
-  Html.Add('       var line_string = new OpenLayers.Geometry.LineString(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
-  Html.Add('       line_string.calculateBounds();');
-  Html.Add('       var bounds = new OpenLayers.Bounds();');
-  Html.Add('       bounds.extend(line_string.bounds);');
-  Html.Add('       map.zoomToExtent(bounds);');
-  Html.Add('       map.zoomTo(ZoomToPoint);');
-  Html.Add('     }');
   Html.Add('     if (Href) {');
   Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
   Html.Add('       map.addPopup(popup, true);');
   Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
   Html.Add('       timeoutId = setTimeout(RemovePopup, PopupTimeOut);');
   Html.Add('     };');
+  Html.Add('     if (ZoomToPoint) { map.moveTo(lonlat, map.getNumZoomLevels() -2, null) };');
   Html.Add('  }');
 
   Html.Add('  function RemovePopup(){');
@@ -354,7 +367,7 @@ function InstallOpenLayers2: boolean;
 const
   Ol2Files: array[0..14,0..1] of string  = (
     ('OL2_OpenLayers',      'OpenLayers.js'),
-    ('OL2_OpenStreetMap',   'OpenStreetMap.js'),
+    ('OL2_BaseLayers',      'BaseLayers.js'),
     ('OL2_img_cpr',         'img\cloud-popup-relative.png'),
     ('OL2_img_em',          'img\east-mini.png'),
     ('OL2_img_lsmax',       'img\layer-switcher-maximize.png'),
@@ -393,7 +406,7 @@ begin
   end;
 end;
 
-function CreateOSMMapHtml(Home: string; UseOl2Local: boolean = true): boolean;
+function CreateOSMMapHtml(Home: string = ''; UseOl2Local: boolean = true): boolean;
 var
   OsmHelper: TOSMHelper;
 begin
@@ -405,7 +418,7 @@ begin
       UseOl2Local := false;
   end;
 
-  OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home, InitialZoom);
+  OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home);
   try
     OsmHelper.WriteHeader(UseOl2Local);
     OsmHelper.WriteFooter;
@@ -413,11 +426,6 @@ begin
   finally
     OsmHelper.Free;
   end;
-end;
-
-function CreateOSMMapHtml: boolean; overload;
-begin
-  result := CreateOSMMapHtml('', true);
 end;
 
 function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; overload;

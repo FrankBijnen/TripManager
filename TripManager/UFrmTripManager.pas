@@ -316,8 +316,8 @@ type
     procedure LoadHex(const FileName: string);
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
-    procedure MapRequest(const Coords, Desc, Zoom, TimeOut: string);
-
+    procedure MapRequest(const Coords, Desc, TimeOut: string;
+                         const ZoomLevel: string = '');
     procedure SaveTripGpiFile;
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
@@ -728,7 +728,7 @@ begin
   begin
     Place := GetPlaceOfCoords(Lat, Lon);
     Clipboard.AsText := Place.DisplayPlace;
-    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), InitialZoom_Point, GeoSearchTimeOut);
+    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), GeoSearchTimeOut, 'true'); // Always zoom
   end;
 end;
 
@@ -1018,7 +1018,7 @@ procedure TFrmTripManager.RoutePointUpdated(Sender: TObject);
 begin
   MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
              DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
-             '', RoutePointTimeOut);
+             RoutePointTimeOut);
 end;
 
 function TFrmTripManager.GetMapCoords: string;
@@ -1465,17 +1465,24 @@ begin
     exit;
   end;
 
+  if (Msg = BaseLayer) then
+  begin
+    if (Parm1 <> '') then
+      SetRegistry(Reg_BaseLayer_Key, Parm1);
+    exit;
+  end;
+
   AdjustLatLon(Parm1, Parm2, Coord_Decimals);
   EditMapCoords.Text := Parm1 + ', ' + Parm2;
   if (Msg = OSMCtrlClick) then
   begin
     Place := GetPlaceOfCoords(Parm1, Parm2);
     if (PLace = nil) then
-      MapRequest(EditMapCoords.Text, OSMCtrlClick, InitialZoom_Point, GeoSearchTimeOut)
+      MapRequest(EditMapCoords.Text, OSMCtrlClick, GeoSearchTimeOut)
     else
     begin
       Clipboard.AsText := Place.DisplayPlace;
-      MapRequest(EditMapCoords.Text, Place.HtmlPlace, InitialZoom_Point, GeoSearchTimeOut);
+      MapRequest(EditMapCoords.Text, Place.HtmlPlace, GeoSearchTimeOut);
     end;
     exit;
   end;
@@ -1581,7 +1588,7 @@ begin
   begin
     CoordGpx := TGPXfile.CoordFromAttribute(TXmlVSNode(Sender).AttributeList);
     CoordGpx.FormatLatLon(BestLat, BestLon);
-    MapRequest(BestLat + ', ' + BestLon, TXmlVSNode(Sender).NodeValue, '', RoutePointTimeOut);
+    MapRequest(BestLat + ', ' + BestLon, TXmlVSNode(Sender).NodeValue, RoutePointTimeOut);
     exit;
   end;
 
@@ -1614,7 +1621,7 @@ procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; S
 begin
   if (Key = VK_Return) and
      (EditMapCoords.Text <> '') then
-    MapRequest(EditMapCoords.Text, EditMapCoords.Text, '', RoutePointTimeOut);
+    MapRequest(EditMapCoords.Text, EditMapCoords.Text, RoutePointTimeOut);
 end;
 
 procedure TFrmTripManager.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -2362,7 +2369,7 @@ var
         GpsCoords := TmScPosn(ANitem).MapCoords;
     end;
     if (ZoomToPoint) then
-      MapRequest(GpsCoords, LocationName, '', RoutePointTimeOut);
+      MapRequest(GpsCoords, LocationName, RoutePointTimeOut);
 
     with ALocation do
     begin
@@ -2483,7 +2490,7 @@ var
                               TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) -1));
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
-                 Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), '', RoutePointTimeOut);
+                 Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), RoutePointTimeOut);
   end;
 
 
@@ -2731,7 +2738,7 @@ var
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-                 Format('%s', [AGPXWayPoint.Name]), '', RoutePointTimeOut);
+                 Format('%s', [AGPXWayPoint.Name]), RoutePointTimeOut);
 
   end;
 
@@ -3518,14 +3525,15 @@ begin
   TripGpiTimer.Enabled := true;
 end;
 
-procedure TFrmTripManager.MapRequest(const Coords, Desc, Zoom, TimeOut: string);
+procedure TFrmTripManager.MapRequest(const Coords, Desc, TimeOut: string;
+                                     const ZoomLevel: string = '');
 begin
   FMapReq.Coords := Coords;
   FMapReq.Desc := Desc;
-  FMapReq.Zoom := Zoom;
+  FMapReq.Zoom := ZoomLevel;
   if (FMapReq.Zoom = '') and
      (ChkZoomToPoint.Checked) then
-    FMapReq.Zoom := InitialZoom_Point;
+    FMapReq.Zoom := 'true';
   FMapReq.TimeOut := TimeOut;
   MapTimer.Enabled := false;
   MapTimer.Enabled := true;
