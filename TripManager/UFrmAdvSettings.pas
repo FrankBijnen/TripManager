@@ -141,6 +141,8 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, Reg_CompareDistOK_Key,  IntToStr(Reg_CompareDistOK_Val), 'Compare distance OK (meters)');
     AddGridLine(GridGeneralSettings, CurRow, '');
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Map display-');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_MapTilerApi_Key,         '',   'Api-Key for enabling Map Tiler. https://www.maptiler.com');
+
     AddGridLine(GridGeneralSettings, CurRow, Reg_GeoSearchTimeOut_Key,    Reg_GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
     AddGridLine(GridGeneralSettings, CurRow, Reg_RoutePointTimeOut_Key,   Reg_RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
     AddGridLine(GridGeneralSettings, CurRow, Reg_TripColor_Key,           Reg_TripColor_Val,          'Trip file color on Map. Choose from:');

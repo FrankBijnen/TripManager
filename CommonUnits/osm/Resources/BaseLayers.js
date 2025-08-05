@@ -24,50 +24,12 @@ OpenLayers.Layer.OSM.Mapnik = OpenLayers.Class(OpenLayers.Layer.OSM, {
     CLASS_NAME: "OpenLayers.Layer.OSM.Mapnik"
 });
 
-OpenLayers.Layer.XYZ.ESRISatellite = OpenLayers.Class(OpenLayers.Layer.XYZ, {
-    initialize: function(name, options) {
-        var url = [
-            "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}"
-        ];
-        options = OpenLayers.Util.extend({
-            numZoomLevels: 20,
-            maxZoom: 20,
-            sphericalMercator: true,
-            attribution: "&copy; <a href='https://www.esri.com/en-us/home'>Powered by Esri</a>&nbsp;Source: Esri, DigitalGlobe, GeoEye, i-cubed, USDA FSA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community",
-            buffer: 1,
-            transitionEffect: "resize"
-        }, options);
-        var newArguments = [name, url, options];
-        OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
-    },
-
-    CLASS_NAME: "OpenLayers.Layer.XYZ.ESRISatellite"
-});
-
-OpenLayers.Layer.XYZ.ESRIWorldStreet = OpenLayers.Class(OpenLayers.Layer.XYZ, {
-    initialize: function(name, options) {
-        var url = [
-            "https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${z}/${y}/${x}"
-        ];
-        options = OpenLayers.Util.extend({
-            numZoomLevels: 20,
-            maxZoom: 20,
-            sphericalMercator: true,
-            attribution: "&copy; <a href='https://www.esri.com/en-us/home'>Powered by Esri</a>&nbsp;Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012",
-            buffer: 1,
-            transitionEffect: "resize"
-        }, options);
-        var newArguments = [name, url, options];
-        OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
-    },
-
-    CLASS_NAME: "OpenLayers.Layer.XYZ.ESRIWorldStreet"
-});
-
 OpenLayers.Layer.XYZ.OpenTopoMap = OpenLayers.Class(OpenLayers.Layer.XYZ, {
     initialize: function(name, options) {
         var url = [
-            "https://tile.opentopomap.org/${z}/${x}/${y}.png"
+            "https://a.tile.opentopomap.org/${z}/${x}/${y}.png",
+            "https://b.tile.opentopomap.org/${z}/${x}/${y}.png",
+            "https://c.tile.opentopomap.org/${z}/${x}/${y}.png"
         ];
         options = OpenLayers.Util.extend({
             numZoomLevels: 18,
@@ -104,46 +66,47 @@ OpenLayers.Layer.XYZ.TOPPlusOpen = OpenLayers.Class(OpenLayers.Layer.XYZ, {
     CLASS_NAME: "OpenLayers.Layer.XYZ.TOPPlusOpen"
 });
 
-OpenLayers.Layer.XYZ.CartoDB = OpenLayers.Class(OpenLayers.Layer.XYZ, {
-    initialize: function(name, options) {
+var tileQueue = [];
+var maxConcurrentTiles = 2;
+var loadingCount = 0;
+
+function processQueue() {
+    if (tileQueue.length > 0 && loadingCount < maxConcurrentTiles) {
+        var nextTile = tileQueue.shift();
+        loadingCount++;
+        nextTile.imgDiv.onload = nextTile.imgDiv.onerror = function() {
+            loadingCount--;
+            processQueue();
+        };
+        nextTile.imgDiv.src = nextTile.url;
+    }
+}
+
+OpenLayers.Layer.ThrottledXYZ = OpenLayers.Class(OpenLayers.Layer.XYZ, {
+    loadTile: function(tile, tileUrl) {
+        tile.url = tileUrl;
+        tileQueue.push(tile);
+        processQueue();
+    },
+    CLASS_NAME: "OpenLayers.Layer.ThrottledXYZ"
+});
+
+OpenLayers.Layer.XYZ.MapTiler = OpenLayers.Class(OpenLayers.Layer.ThrottledXYZ, {
+    initialize: function(name, resource, style, key, options) {
         var url = [
-            "https://${s}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}${r}.png"
+           "https://api.maptiler.com/" + resource + "/" + style + "/${z}/${x}/${y}.jpg?key=" + key
         ];
         options = OpenLayers.Util.extend({
             numZoomLevels: 20,
             maxZoom: 20,
             sphericalMercator: true,
-            attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>",
-            subdomains: "abcd",
-            buffer: 1,
-            transitionEffect: "resize"
+            attribution: "<a href='https://www.maptiler.com/copyright/' target='_blank'>&copy; MapTiler</a><a href='https://www.openstreetmap.org/copyright' target='_blank'>&copy;&nbsp;OpenStreetMap contributors</a>",
+            buffer: 0,
+            transitionEffect: null
         }, options);
         var newArguments = [name, url, options];
         OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
     },
 
-    CLASS_NAME: "OpenLayers.Layer.XYZ.CartoDB"
+    CLASS_NAME: "OpenLayers.Layer.XYZ.MapTiler"
 });
-
-OpenLayers.Layer.XYZ.CyclOSM = OpenLayers.Class(OpenLayers.Layer.XYZ, {
-    initialize: function(name, options) {
-        var url = [
-            "https://a.tile-cyclosm.openstreetmap.fr/cyclosm/${z}/${x}/${y}.png",
-            "https://b.tile-cyclosm.openstreetmap.fr/cyclosm/${z}/${x}/${y}.png",
-            "https://c.tile-cyclosm.openstreetmap.fr/cyclosm/${z}/${x}/${y}.png"
-        ];
-        options = OpenLayers.Util.extend({
-            numZoomLevels: 19,
-            maxZoom: 19,
-            sphericalMercator: true,
-            attribution: "<a href='https://github.com/cyclosm/cyclosm-cartocss-style/releases' title='CyclOSM - Open Bicycle render'>CyclOSM</a> | Map data: &copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-            buffer: 1,
-            transitionEffect: "resize"
-        }, options);
-        var newArguments = [name, url, options];
-        OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
-    },
-
-    CLASS_NAME: "OpenLayers.Layer.XYZ.CyclOSM"
-});
-

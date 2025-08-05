@@ -13,7 +13,14 @@ procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string)
 
 type TMapLayer = record
   ClassName: string;
-  Description: string;      end;
+  Description: string;
+end;
+
+type TMapTilerLayer = record
+  Resource: string;
+  Style: string;
+  Description: string;
+end;
 
 const
   Coord_Decimals    = 6;
@@ -24,13 +31,25 @@ const
   BaseLayer         = 'BaseLayer';
   OSMMapLayer: TMapLayer
                     =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
-  XYZMapLayers:  array[0..3] of TMapLayer
-                    = ( (ClassName: 'XYZ.ESRISatellite';   Description: 'ESRI Satellite'),
-                        (ClassName: 'XYZ.ESRIWorldStreet'; Description: 'ESRI WorldStreet'),
-                        (ClassName: 'XYZ.OpenTopoMap';     Description: 'Open Topo Map'),
+
+  XYZMapLayers:  array[0..1] of TMapLayer
+                    = ( (ClassName: 'XYZ.OpenTopoMap';     Description: 'Open Topo Map'),
                         (ClassName: 'XYZ.TOPPlusOpen';     Description: 'TOP Plus Open')
                       );
+
+  MapTilerLayers:  array[0..3] of TMapTilerLayer
+                    = ( (Resource: 'tiles'; Style: 'satellite-v2';  Description: 'Map Tiler Satellite'),
+                        (Resource: 'maps';  Style: 'streets-v2';    Description: 'Map Tiler Streets'),
+                        (Resource: 'maps';  Style: 'topo-v2';       Description: 'Map Tiler Topo'),
+                        (Resource: 'maps';  Style: 'bright-v2';     Description: 'Map Tiler Bright')
+                      );
+
+  MapTilerTiles:  array[0..0] of TMapTilerLayer
+                    = ( (Style: 'satellite-v2';            Description: 'Map Tiler Satellite')
+                      );
+
   Reg_BaseLayer_Key = 'BaseLayer';
+  Reg_MapTilerApi_Key = 'MapTilerApiKey';
 
 type
   TOSMHelper = class(TObject)
@@ -90,11 +109,13 @@ end;
 procedure TOSMHelper.WriteHeader(const UseOl2Local: boolean);
 var
   AMapLayer: TMapLayer;
+  AMapTilerLayer: TMapTilerLayer;
+  MapTilerKey: string;
 begin
   HasData := false;
   Html.Clear;
 
-  Html.Add('<Html>');
+  Html.Add('<html>');
   Html.Add('<head>');
   Html.Add('<title></title>');
   if (UseOl2Local) then
@@ -162,7 +183,14 @@ begin
 
   if (UseOl2Local) then
   begin
-    // Add all Base layers
+    // Add Map Tiler layers
+    MapTilerKey := GetRegistry(Reg_MapTilerApi_Key, '');
+    if (MapTilerKey <> '') then
+      for AMapTilerLayer in MapTilerLayers do
+        Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.XYZ.MapTiler("%s", "%s", "%s", "%s")) -1]);',
+                 [AMapTilerLayer.Description, AMapTilerLayer.Resource, AMapTilerLayer.Style, MapTilerKey]));
+
+    // Add 'Open' Base layers
     for AMapLayer in XYZMapLayers do
       Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
                [AMapLayer.ClassName, AMapLayer.Description]));
@@ -355,8 +383,8 @@ begin
 
   Html.Add('</script>');
   Html.Add('</head>');
-  Html.Add('<body onload="initialize()" >');
-  Html.Add('  <div id="map_canvas" style="width: 100%; height: 100%"></div>');
+  Html.Add('<body onload="initialize()">');
+  Html.Add('<div id="map_canvas" style="width: 100%; height: 100%"></div>');
   Html.Add('</body>');
   Html.Add('</html>');
 
