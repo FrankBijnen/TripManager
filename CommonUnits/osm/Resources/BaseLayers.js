@@ -66,32 +66,8 @@ OpenLayers.Layer.XYZ.TOPPlusOpen = OpenLayers.Class(OpenLayers.Layer.XYZ, {
     CLASS_NAME: "OpenLayers.Layer.XYZ.TOPPlusOpen"
 });
 
-var tileQueue = [];
-var maxConcurrentTiles = 2;
-var loadingCount = 0;
 
-function processQueue() {
-    if (tileQueue.length > 0 && loadingCount < maxConcurrentTiles) {
-        var nextTile = tileQueue.shift();
-        loadingCount++;
-        nextTile.imgDiv.onload = nextTile.imgDiv.onerror = function() {
-            loadingCount--;
-            processQueue();
-        };
-        nextTile.imgDiv.src = nextTile.url;
-    }
-}
-
-OpenLayers.Layer.ThrottledXYZ = OpenLayers.Class(OpenLayers.Layer.XYZ, {
-    loadTile: function(tile, tileUrl) {
-        tile.url = tileUrl;
-        tileQueue.push(tile);
-        processQueue();
-    },
-    CLASS_NAME: "OpenLayers.Layer.ThrottledXYZ"
-});
-
-OpenLayers.Layer.XYZ.MapTiler = OpenLayers.Class(OpenLayers.Layer.ThrottledXYZ, {
+OpenLayers.Layer.XYZ.MapTiler = OpenLayers.Class(OpenLayers.Layer.XYZ, {
     initialize: function(name, resource, style, key, options) {
         var url = [
            "https://api.maptiler.com/" + resource + "/" + style + "/${z}/${x}/${y}.jpg?key=" + key
@@ -102,11 +78,30 @@ OpenLayers.Layer.XYZ.MapTiler = OpenLayers.Class(OpenLayers.Layer.ThrottledXYZ, 
             sphericalMercator: true,
             attribution: "<a href='https://www.maptiler.com/copyright/' target='_blank'>&copy; MapTiler</a><a href='https://www.openstreetmap.org/copyright' target='_blank'>&copy;&nbsp;OpenStreetMap contributors</a>",
             buffer: 0,
-            transitionEffect: null
+            transitionEffect: "resize"
+        }, options);
+        var newArguments = [name, url, options];
+        OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
+    },
+    CLASS_NAME: "OpenLayers.Layer.XYZ.MapTiler"
+});
+
+OpenLayers.Layer.XYZ.ESRISatellite = OpenLayers.Class(OpenLayers.Layer.XYZ, {
+    initialize: function(name, options) {
+        var url = [
+            "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}"
+        ];
+        options = OpenLayers.Util.extend({
+            numZoomLevels: 20,
+            maxZoom: 20,
+            sphericalMercator: true,
+            attribution: "&copy; <a href='https://www.esri.com/en-us/home'>Powered by Esri</a>&nbsp;Source: Esri, DigitalGlobe, GeoEye, i-cubed, USDA FSA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community",
+            buffer: 0,
+            transitionEffect: "resize"
         }, options);
         var newArguments = [name, url, options];
         OpenLayers.Layer.OSM.prototype.initialize.apply(this, newArguments);
     },
 
-    CLASS_NAME: "OpenLayers.Layer.XYZ.MapTiler"
+    CLASS_NAME: "OpenLayers.Layer.XYZ.ESRISatellite"
 });

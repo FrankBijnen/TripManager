@@ -32,10 +32,6 @@ const
   OSMMapLayer: TMapLayer
                     =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
 
-  XYZMapLayers:  array[0..1] of TMapLayer
-                    = ( (ClassName: 'XYZ.OpenTopoMap';     Description: 'Open Topo Map'),
-                        (ClassName: 'XYZ.TOPPlusOpen';     Description: 'TOP Plus Open')
-                      );
 
   MapTilerLayers:  array[0..3] of TMapTilerLayer
                     = ( (Resource: 'tiles'; Style: 'satellite-v2';  Description: 'Map Tiler Satellite'),
@@ -44,12 +40,17 @@ const
                         (Resource: 'maps';  Style: 'bright-v2';     Description: 'Map Tiler Bright')
                       );
 
-  MapTilerTiles:  array[0..0] of TMapTilerLayer
-                    = ( (Style: 'satellite-v2';            Description: 'Map Tiler Satellite')
+  XYZMapLayers:  array[0..1] of TMapLayer
+                    = ( (ClassName: 'XYZ.OpenTopoMap';     Description: 'Open Topo Map'),
+                        (ClassName: 'XYZ.TOPPlusOpen';     Description: 'TOP Plus Open')
+                      );
+  ESRIMapLayers: array[0..0] of TMapLayer
+                    = ( (ClassName: 'XYZ.ESRISatellite';   Description: 'ESRI Satellite')
                       );
 
   Reg_BaseLayer_Key = 'BaseLayer';
   Reg_MapTilerApi_Key = 'MapTilerApiKey';
+  Reg_EnableESRI = 'EnableESRI';
 
 type
   TOSMHelper = class(TObject)
@@ -190,6 +191,12 @@ begin
         Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.XYZ.MapTiler("%s", "%s", "%s", "%s")) -1]);',
                  [AMapTilerLayer.Description, AMapTilerLayer.Resource, AMapTilerLayer.Style, MapTilerKey]));
 
+    // Add Undocumented ESRI Base layers
+    if (GetRegistry(Reg_EnableESRI, '') <> '') then
+      for AMapLayer in ESRIMapLayers do
+      Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
+               [AMapLayer.ClassName, AMapLayer.Description]));
+
     // Add 'Open' Base layers
     for AMapLayer in XYZMapLayers do
       Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
@@ -275,7 +282,7 @@ begin
   Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
   Html.Add('       timeoutId = setTimeout(RemovePopup, PopupTimeOut);');
   Html.Add('     };');
-  Html.Add('     if (ZoomToPoint) { map.moveTo(lonlat, map.getNumZoomLevels() -2, null) };');
+  Html.Add('     if (ZoomToPoint) { map.moveTo(lonlat, map.getNumZoomLevels() -4, null) };');
   Html.Add('  }');
 
   Html.Add('  function RemovePopup(){');
