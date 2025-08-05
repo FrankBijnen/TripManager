@@ -2020,7 +2020,10 @@ var
 begin
   FTripList.AddHeader(THeader.Create);
   FTripList.Add(TmPreserveTrackToRoute.Create);
-  FTripList.Add(TmParentTripId.Create(ParentTripId));
+  if (ProcessOptions.AllowGrouping) then
+    FTripList.Add(TmParentTripId.Create(ParentTripId))
+  else
+    FTripList.Add(TmParentTripId.Create);
   FTripList.Add(TmDayNumber.Create);
   FTripList.Add(TmTripDate.Create);
   FTripList.Add(TmIsDisplayable.Create);
@@ -2068,7 +2071,7 @@ begin
     FTripList.Add(TmTotalTripTime.Create);
     FTripList.Add(TmTripName.Create(TripName));
     FTripList.Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
-    FTripList.Add(TmParentTripId.Create(ParentTripId));
+    FTripList.Add(TmParentTripId.Create); // No use for the XT2
     FTripList.Add(TmIsRoundTrip.Create);
     FTripList.Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
     FTripList.Add(TmAvoidancesChanged.Create);

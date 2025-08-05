@@ -129,6 +129,7 @@ type
     VehicleProfileTruckType: string;          // XT2
     VehicleProfileName: string;               // XT2
     AvoidancesChangedTimeAtSave: Cardinal;    // XT2
+    AllowGrouping: boolean;                   // XT1. (Not used anymore for XT2)
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -229,6 +230,7 @@ begin
   VehicleProfileTruckType := XT2_VehicleProfileTruckType;
   VehicleProfileName := XT2_VehicleProfileName;
   AvoidancesChangedTimeAtSave := 0;
+  AllowGrouping := true;
 {$ENDIF}
 
   if (Assigned(SetProcessOptions)) then

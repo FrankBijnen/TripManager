@@ -271,6 +271,7 @@ type
     procedure MnuNextDiffClick(Sender: TObject);
     procedure MnuPrevDiffClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure LstFilesCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
   private
     { Private declarations }
     PrefDevice: string;
@@ -3481,6 +3482,18 @@ begin
   ListViewCompare(Item1, Item2, FSortSpecification, Data, Compare);
 end;
 
+procedure TFrmTripManager.LstFilesCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
+  var DefaultDraw: Boolean);
+begin
+  if (Item.Data <> nil) and
+     (TObject(Item.Data) is TMTP_Data) then
+  with TMTP_Data(Item.Data) do
+  begin
+    if (IsNotCalcTrip) then
+       Sender.Canvas.Brush.Color := clWebYellow;
+  end;
+end;
+
 procedure TFrmTripManager.LstFilesDblClick(Sender: TObject);
 begin              case GetItemType(LstFiles) of
     TDirType.Up:
@@ -3797,6 +3810,8 @@ end;
 procedure TFrmTripManager.CheckFile(const AListItem: TListItem);
 var TmpTripList: TTripList;
     LocalFile: string;
+    mAllRoutes: TmAllRoutes;
+    mUdbDataHndl: TmUdbDataHndl;
 begin
   if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
     exit;
@@ -3813,8 +3828,21 @@ begin
     TmpTripList.LoadFromFile(LocalFile);
 
     // Set Check mark
-    SetCheckMark(AListItem, not TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean);
-
+    if (AListItem.Data <> nil) and
+       (TObject(AListItem.Data) is TMTP_Data) then
+    with TMTP_Data(AListItem.Data) do
+    begin
+      IsNotSavedTrip := TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean;
+      SetCheckMark(AListItem, not IsNotSavedTrip);
+      IsNotCalcTrip :=  false;
+      mAllRoutes := TmAllRoutes(TmpTripList.GetItem('mAllRoutes'));
+      if (mAllRoutes <> nil) and
+         (mAllRoutes.Items.Count > 0) then
+      begin
+        mUdbDataHndl := mAllRoutes.Items[0];
+        IsNotCalcTrip := mUdbDataHndl.UdbHandleValue.CalcStatus = 0;
+      end;
+    end;
     // Show trip name
     if (LstFiles.Columns.Count > TripNameCol) then
       AListItem.SubItems[TripNameCol -1] := TBaseDataItem(TmpTripList.GetItem('mTripName')).AsString;

@@ -14,6 +14,8 @@ type
     SortValue: int64;
     ObjectId: string;
     Created: TDateTime;
+    IsNotSavedTrip: boolean;
+    IsNotCalcTrip: boolean;
   public
     constructor Create(const AIsFolder: boolean;
                        const ASortValue: int64;

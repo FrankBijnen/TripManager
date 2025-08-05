@@ -209,6 +209,7 @@ object FrmTripManager: TFrmTripManager
         ViewStyle = vsReport
         OnColumnClick = LstFilesColumnClick
         OnCompare = LstFilesCompare
+        OnCustomDrawItem = LstFilesCustomDrawItem
         OnDblClick = LstFilesDblClick
         OnDeletion = LstFilesDeletion
         OnKeyUp = LstFilesKeyUp
