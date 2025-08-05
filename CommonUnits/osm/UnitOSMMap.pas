@@ -276,13 +276,13 @@ begin
   // OpenLayers uses LonLat, not LatLon. Confusing maybe,
   Html.Add('  function PopupAtPoint(Href, PointLat, PointLon, ZoomToPoint, PopupTimeOut){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
+  Html.Add('     if (ZoomToPoint) { map.moveTo(lonlat, map.getNumZoomLevels() -4, null) };');
   Html.Add('     if (Href) {');
   Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
   Html.Add('       map.addPopup(popup, true);');
   Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
   Html.Add('       timeoutId = setTimeout(RemovePopup, PopupTimeOut);');
   Html.Add('     };');
-  Html.Add('     if (ZoomToPoint) { map.moveTo(lonlat, map.getNumZoomLevels() -4, null) };');
   Html.Add('  }');
 
   Html.Add('  function RemovePopup(){');
