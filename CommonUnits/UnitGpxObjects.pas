@@ -1714,12 +1714,10 @@ var
   WayPointAttribute: TXmlVSAttribute;
   TrackPoint: TXmlVSNode;
   RtePtExtensions: TXmlVSNode;
-  TrackPoints: integer;
   LayerId: integer;
   TrackPointAttribute: TXmlVSAttribute;
 begin
   TrackStringList.Clear;
-  TrackPoints := 0;
   DisplayColor := FrmSelectGpx.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
   if (DisplayColor = '') then
   	exit;
@@ -1737,8 +1735,8 @@ begin
       if (TrackPointAttribute.Name = 'lat') then
         Lat := TrackPointAttribute.Value;
     end;
-    TrackStringList.Add(Format('AddTrkPoint(%d,%s,%s);', [TrackPoints, Lat, Lon]));
-    Inc(TrackPoints);
+    AdjustLatLon(Lat, Lon, Coord_Decimals);
+    TrackStringList.Add(Format('     AddTrkPoint(%s,%s);', [ Lat, Lon]));
   end;
 
   if (ProcessOptions.ProcessCreateRoutePoints) then
@@ -1774,7 +1772,7 @@ begin
           Color := 'red';
         end;
 
-        TrackStringList.Add(Format('AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
+        TrackStringList.Add(Format('     AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
                                    [LayerId,
                                     LayerName,
                                     RoutePointName,
@@ -1785,7 +1783,7 @@ begin
       Inc(TrackId, 2);
     end;
   end;
-  TrackStringList.Add(Format('CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
+  TrackStringList.Add(Format('     CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
 end;
 
 procedure TGPXFile.DoCreateHTML;

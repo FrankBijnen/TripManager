@@ -677,7 +677,9 @@ type
     FItemList: TItemList;
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
+    function FirstUdbDataHndle: TmUdbDataHndl;
     function GetZumoModel: TZumoModel;
+    function GetIsCalculatedModel: TZumoModel;
     procedure CreateTemplate_XT(const TripName: string);
     procedure CreateTemplate_XT2(const TripName: string);
   public
@@ -704,6 +706,7 @@ type
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
     property ZumoModel: TZumoModel read GetZumoModel;
+    property CalculatedModel: TZumoModel read GetIsCalculatedModel;
   end;
 
 implementation
@@ -2777,7 +2780,6 @@ end;
 procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
 var
   Coords, Color, LayerName, RoutePointName: string;
-  TrackPoints: integer;
   LayerId: integer;
   TripName: TmTripName;
   AllRoutes: TmAllRoutes;
@@ -2786,27 +2788,23 @@ var
   Locations: TmLocations;
   Location: TBaseItem;
   ANItem: TBaseItem;
-  IsCalculated: boolean;
+  IsNotCalcTrip: boolean;
 begin
   OutStringList.Clear;
   TripName := TmTripName(GetItem('mTripName'));
   if (not Assigned(TripName)) then
     exit;
 
-  TrackPoints := 0;
+  IsNotCalcTrip := (CalculatedModel = TZumoModel.Unknown);
   AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
   if (Assigned(AllRoutes)) then
   begin
     for UdbDataHndl in AllRoutes.Items do
     begin
       for UdbDir in UdbDataHndl.Items do
-      begin
-        OutStringList.Add(Format('AddTrkPoint(%d,%.7g,%.7g);', [TrackPoints, UdbDir.Lat, UdbDir.Lon], FloatFormatSettings ) );
-        Inc(TrackPoints);
-      end;
+        OutStringList.Add(Format('    AddTrkPoint(%.6g,%.6g);', [UdbDir.Lat, UdbDir.Lon], FloatFormatSettings ) );
     end;
   end;
-  IsCalculated := (TrackPoints > 0);
 
   Locations := TmLocations(GetItem('mLocations'));
   if (Assigned(Locations)) then
@@ -2839,13 +2837,10 @@ begin
             Coords := TmScPosn(ANItem).GetMapCoords;
         end;
 
-        if (IsCalculated = false) then
-        begin
-          OutStringList.Add(Format('AddTrkPoint(%d,%s);', [TrackPoints, Coords], FloatFormatSettings ) );
-          Inc(TrackPoints);
-        end;
+        if (IsNotCalcTrip) then
+          OutStringList.Add(Format('    AddTrkPoint(%s);', [Coords], FloatFormatSettings ) );
 
-        OutStringList.Add(Format('AddRoutePoint(%d, "%s", "%s", %s, "%s");',
+        OutStringList.Add(Format('     AddRoutePoint(%d, "%s", "%s", %s, "%s");',
                                  [LayerId,
                                   LayerName,
                                   RoutePointName,
@@ -2853,7 +2848,7 @@ begin
                                   Color]));
       end;
     end;
-    OutStringList.Add(Format('CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), HTMLColor]));
+    OutStringList.Add(Format('    CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), HTMLColor]));
 
   end;
 end;
@@ -2950,27 +2945,58 @@ begin
   end;
 end;
 
-function TTripList.GetZumoModel: TZumoModel;
+function TTripList.FirstUdbDataHndle: TmUdbDataHndl;
 var
   AllRoutes: TmAllRoutes;
+begin
+  // Try to get allroutes
+  AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
+  if not Assigned(AllRoutes) or
+     not Assigned(AllRoutes.Items) or
+     (AllRoutes.Items.Count = 0) then
+    exit(nil);
+
+  result := AllRoutes.Items[0];
+end;
+
+// By checking the Size. This function reports the model even if not calculated.
+function TTripList.GetZumoModel: TZumoModel;
+var
   AnUdbHandle: TmUdbDataHndl;
   AModel: TZumoModel;
 begin
   // Default XT
   result := TZumoModel.XT;
 
-  // Try to get allroutes
-  AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
-  if not Assigned(AllRoutes) or
-     not Assigned(AllRoutes.Items) or
-     (AllRoutes.Items.Count = 0) then
+  // Try to get first TmUdbDataHndl
+  AnUdbHandle := FirstUdbDataHndle;
+  if not Assigned(AnUdbHandle) then
     exit;
 
   // Is the size of the first Unknown3 known to be from an XT or XT2?
-  AnUdbHandle := AllRoutes.Items[0];
   for AModel := Low(TZumoModel) to High(TZumoModel) do  // Future use
   begin
     if (Length(AnUdbHandle.FValue.Unknown3) = Unknown3Size[AModel]) then
+      exit(AModel);
+  end;
+end;
+
+// Get the model where the trip is calculated for. By checking for the magic number
+function TTripList.GetIsCalculatedModel: TZumoModel;
+var
+  AnUdbHandle: TmUdbDataHndl;
+  AModel: TZumoModel;
+begin
+  result := TZumoModel.Unknown;
+  AnUdbHandle := FirstUdbDataHndle;
+
+  if not Assigned(AnUdbHandle) or
+     (AnUdbHandle.FValue.CalcStatus = 0) then
+    exit;
+
+  for AModel := Low(TZumoModel) to High(TZumoModel) do  // Future use
+  begin
+    if ((AnUdbHandle.FValue.CalcStatus) = CalculationMagic[AModel]) then
       exit(AModel);
   end;
 end;

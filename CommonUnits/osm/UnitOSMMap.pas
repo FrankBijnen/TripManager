@@ -327,9 +327,9 @@ begin
   Html.Add('     poipoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  };');
 
-  Html.Add('  function AddTrkPoint(Id, PointLat, PointLon){');
+  Html.Add('  function AddTrkPoint(PointLat, PointLon){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     trackpoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
+  Html.Add('     trackpoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
   Html.Add('  }');
 
   Html.Add('  function CreateTrack(linename, color){');
@@ -355,7 +355,7 @@ begin
   Html.Add('  function AddTrackPoints(){');
   if (FHome <> '') then
   begin
-    Html.Add('  AddTrkPoint(1, ' + FHome + ');');
+    Html.Add('  AddTrkPoint(' + FHome + ');');
     HasData := true;
   end;
   if (FTrackPoints <> nil) then

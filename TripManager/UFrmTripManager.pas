@@ -3489,8 +3489,8 @@ begin
      (TObject(Item.Data) is TMTP_Data) then
   with TMTP_Data(Item.Data) do
   begin
-    if (IsNotCalcTrip) then
-       Sender.Canvas.Brush.Color := clWebYellow;
+    if (TZumoModel(CalculatedModel) = TZumoModel.Unknown) then
+       Sender.Canvas.Brush.Color := clWebOrange;
   end;
 end;
 
@@ -3810,8 +3810,6 @@ end;
 procedure TFrmTripManager.CheckFile(const AListItem: TListItem);
 var TmpTripList: TTripList;
     LocalFile: string;
-    mAllRoutes: TmAllRoutes;
-    mUdbDataHndl: TmUdbDataHndl;
 begin
   if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
     exit;
@@ -3827,22 +3825,16 @@ begin
     // Check mImported by loading tmp file
     TmpTripList.LoadFromFile(LocalFile);
 
-    // Set Check mark
+    // Set Check mark and calculated status
     if (AListItem.Data <> nil) and
        (TObject(AListItem.Data) is TMTP_Data) then
     with TMTP_Data(AListItem.Data) do
     begin
       IsNotSavedTrip := TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean;
       SetCheckMark(AListItem, not IsNotSavedTrip);
-      IsNotCalcTrip :=  false;
-      mAllRoutes := TmAllRoutes(TmpTripList.GetItem('mAllRoutes'));
-      if (mAllRoutes <> nil) and
-         (mAllRoutes.Items.Count > 0) then
-      begin
-        mUdbDataHndl := mAllRoutes.Items[0];
-        IsNotCalcTrip := mUdbDataHndl.UdbHandleValue.CalcStatus = 0;
-      end;
+      CalculatedModel := Ord(TmpTripList.CalculatedModel);
     end;
+
     // Show trip name
     if (LstFiles.Columns.Count > TripNameCol) then
       AListItem.SubItems[TripNameCol -1] := TBaseDataItem(TmpTripList.GetItem('mTripName')).AsString;
