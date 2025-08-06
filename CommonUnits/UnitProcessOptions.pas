@@ -5,7 +5,11 @@ interface
 uses
   System.Classes,
   Winapi.Windows,
-  UnitGpxDefs, UnitTripObjects, UnitGpi;
+  UnitGpxDefs,
+{$IFDEF TRIPOBJECTS}
+  UnitTripObjects,
+{$ENDIF}
+  UnitGpi;
 
 const
   Reg_FuncTrip                = 'FuncTrip';
@@ -148,7 +152,10 @@ implementation
 
 uses
   System.SysUtils,
-  UnitRegistry, UnitRegistryKeys,
+  UnitRegistry,
+{$IFDEF REGISTRYKEYS}
+  UnitRegistryKeys,
+{$ENDIF}
   UnitStringUtils;
 
 constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
@@ -233,8 +240,10 @@ begin
   AllowGrouping := true;
 {$ENDIF}
 
+{$IFDEF REGISTRYKEYS}
   if (Assigned(SetProcessOptions)) then
     SetProcessOptions.SetFixedPrefs(Self);
+{$ENDIF}
 
   if (Assigned(FOnSetFuncPrefs)) then
     FOnSetFuncPrefs(Self);

@@ -2139,19 +2139,14 @@ procedure TFrmTripManager.LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
 var
   OsmTrack: TStringList;
   AGPXwayPoint: TGPXWayPoint;
-  Cnt: integer;
 begin
   if not Assigned(CurrentGpi) then
     exit;
   OsmTrack := TStringList.Create;
   try
-    Cnt := 0;
     for AGPXwayPoint in CurrentGpi do
-    begin
-      OsmTrack.Add(Format('AddPOI(%d, "%s", %s, %s, "./%s.png");',
-                          [Cnt, EscapeDQuote(string(AGPXwayPoint.Name)), AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
-  	  Inc(Cnt);
-    end;
+      OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%s.png");',
+                          [EscapeDQuote(string(AGPXwayPoint.Name)), AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
     DeleteCompareFiles;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     if (CreateOSMMapHtml) then

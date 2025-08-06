@@ -305,15 +305,15 @@ begin
   Html.Add('     routepoints[IdLayer] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  }');
 
-  Html.Add('  function AddPOI(Id, PoiName, PointLat, PointLon, ImageFile){');
+  Html.Add('  function AddPOI(PoiName, PointLat, PointLon, ImageFile){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     POILayer[Id] = new OpenLayers.Layer.Vector(PoiName, {');
+  Html.Add('     var Id = POILayer.push(new OpenLayers.Layer.Vector(PoiName, {');
   Html.Add('         styleMap: new OpenLayers.StyleMap({');
   Html.Add('             externalGraphic: ImageFile,');
   Html.Add('             graphicWidth: 20, graphicHeight: 20, graphicXOffset: -10, graphicYOffset: -10,');
   Html.Add('             title: PoiName');
   Html.Add('         })');
-  Html.Add('     });');
+  Html.Add('     })) -1;');
   Html.Add('     POILayer[Id].displayInLayerSwitcher = false;');
 
   Html.Add('');

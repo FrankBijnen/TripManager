@@ -15,7 +15,7 @@ type
     ObjectId: string;
     Created: TDateTime;
     IsNotSavedTrip: boolean;
-    IsNotCalcTrip: boolean;
+    CalculatedModel: integer; // Is TZumoModel
   public
     constructor Create(const AIsFolder: boolean;
                        const ASortValue: int64;

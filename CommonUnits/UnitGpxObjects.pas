@@ -197,7 +197,11 @@ implementation
 
 uses
   System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils,
-  UnitStringUtils, UnitOSMMap, UnitRegistry, UnitRegistryKeys;
+  UnitStringUtils, UnitOSMMap,
+{$IFDEF REGISTRYKEYS}
+  UnitRegistryKeys,
+{$ENDIF}
+  UnitRegistry;
 
 // Not configurable
 const
@@ -2381,7 +2385,11 @@ begin
         Writeln;
         Writeln;
         Writeln('Processing started for: ', GPXMask);
+{$IFDEF TRIPOBJECTS}
+{$IFDEF REGISTRYKEYS}
         Writeln('Selected model: ', GetRegistry(Reg_ZumoModel, XT_Name));
+{$ENDIF}
+{$ENDIF}
         Write('Selected functions:');
         for AFunc in Funcs do
         begin
