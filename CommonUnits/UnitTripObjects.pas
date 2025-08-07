@@ -524,7 +524,9 @@ type
     constructor Create(ADataType: byte = dtLctnPref); reintroduce;
     destructor Destroy; override;
     procedure Add(ANitem: TBaseItem);
+    function LocationTmAttr: TmAttr;
     function LocationTmName: TmName;
+    function LocationTmAddress: TmAddress;
     function LocationTmScPosn: TmScPosn;
     property LocationValue: TLocationValue read Value;
     property LocationItems: TItemList read FItems;
@@ -545,6 +547,7 @@ type
     procedure Clear;
     procedure AddLocatIon(ALocation: TLocation);
     function Add(ANItem: TBaseItem): TBaseItem;
+    procedure GetRoutePoints(ViaPoint: integer; RoutePointList: TList<TLocation>);
     property Locations: TItemList read FItemList;
     property LocationCount: Cardinal read FItemCount;
   end;
@@ -558,8 +561,15 @@ type
     MapSegment:       Cardinal;
     RoadId:           Cardinal;
     PointType:        byte;
-    Direction:        byte;
-    Unknown1:         array[0..5] of byte;
+    case integer of
+    0: (Direction:        byte;
+        Unknown1:         array[0..5] of byte);
+    1: (ComprLatLon:      array[0..6] of byte);
+    2: (B4Lat:            byte;
+        B4Lon:            byte;
+        Reserved:         byte;
+        B2_3Lat:          word;
+        B2_3Lon:          word);
   end;
   TUdbDirValue = packed record
     SubClass:         TSubClass;
@@ -576,9 +586,8 @@ type
     constructor Create(AName: WideString;
                        ALat: double = 0;
                        ALon: double = 0;
-                       APointType: byte = $03;
-                       ADirection: byte = $24); reintroduce;
-
+                       APointType: byte = $03); reintroduce; overload;
+    constructor Create(ALocation: TLocation); reintroduce; overload;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure WriteTerminator(AStream: TMemoryStream); override;
@@ -589,6 +598,8 @@ type
     function GetMapSegRoadExclBit: string;
     function GetPointType: string;
     function GetDirection: string;
+    procedure FillCompressedLatLon;
+    function GetComprLatLon: string;
   public
     function Lat: Double;
     function Lon: Double;
@@ -600,6 +611,7 @@ type
     property MapSegRoadExclBit: string read GetMapSegRoadExclBit;
     property PointType: string read GetPointType;
     property Direction: string read GetDirection;
+    property ComprLatLon: string read GetComprLatLon;
     property Status: TUdbDirStatus read FUdbDirStatus write FUdbDirStatus;
   end;
   TUdbDirList = Tlist<TUdbDir>;
@@ -1924,6 +1936,18 @@ begin
   FItems.Add(ANitem);
 end;
 
+function TLocation.LocationTmAttr: TmAttr;
+var
+  AnItem: TBaseItem;
+begin
+  result := nil;
+  for AnItem in FItems do
+  begin
+    if (AnItem is TmAttr) then
+      exit(TmAttr(AnItem));
+  end;
+end;
+
 function TLocation.LocationTmName: TmName;
 var
   AnItem: TBaseItem;
@@ -1933,6 +1957,18 @@ begin
   begin
     if (AnItem is TmName) then
       exit(TmName(AnItem));
+  end;
+end;
+
+function TLocation.LocationTmAddress: TmAddress;
+var
+  AnItem: TBaseItem;
+begin
+  result := nil;
+  for AnItem in FItems do
+  begin
+    if (AnItem is TmAddress) then
+      exit(TmAddress(AnItem));
   end;
 end;
 
@@ -2047,6 +2083,32 @@ begin
   result := ANItem;
 end;
 
+// Gets all routepoints (Including shaping) from a via point to the next. (That go in one udbhandle)
+procedure TmLocations.GetRoutePoints(ViaPoint: integer; RoutePointList: TList<TLocation>);
+var
+  ALocation: TBaseItem;
+  AmAttr: TmAttr;
+  ViaCnt: integer;
+begin
+  RoutePointList.Clear;
+  ViaCnt := 0;
+  for ALocation in FItemList do
+  begin
+    if (ALocation is TLocation) then
+    begin
+      AmAttr := TLocation(ALocation).LocationTmAttr;
+      if (AmAttr = nil) then
+        continue;
+      if (AmAttr.AsRoutePoint = TRoutePoint.rpVia) then
+        Inc(ViaCnt);
+      if (ViaCnt >= ViaPoint) then
+        RoutePointList.Add(Tlocation(ALocation));
+      if (ViaCnt > ViaPoint) then
+        exit;
+    end;
+  end;
+end;
+
 procedure TmLocations.Calculate(AStream: TMemoryStream);
 var
   ANitem: TBaseItem;
@@ -2094,8 +2156,7 @@ end;
 constructor TUdbDir.Create(AName: WideString;
                            ALat: double = 0;
                            ALon: double = 0;
-                           APointType: byte = $03;
-                           ADirection: byte = $24);
+                           APointType: byte = $03);
 begin
   inherited Create;
   FillChar(FValue, SizeOf(FValue), 0);
@@ -2103,8 +2164,30 @@ begin
   FValue.Lat := Swap32(CoordAsInt(ALat));
   FValue.Lon := Swap32(CoordAsInt(ALon));
   FValue.SubClass.PointType := APointType;
-  FValue.SubClass.Direction := ADirection;
   FUdbDirStatus := TUdbDirStatus.udsUnchecked;
+end;
+
+constructor TUdbDir.Create(ALocation: TLocation);
+var
+  AmScPosn: TmScPosn;
+begin
+  if not Assigned(ALocation) then
+  begin
+    Create('');
+    exit;
+  end;
+
+  Create(ALocation.LocationTmName.AsString);
+
+  AmScPosn := ALocation.LocationTmScPosn;
+  FValue.Lat := Swap32(AmScPosn.FValue.Lat);
+  FValue.Lon := Swap32(AmScPosn.FValue.Lon);
+  FValue.SubClass.MapSegment := Swap32($00000180);
+  FValue.SubClass.RoadId := Swap32($00f0ffff);
+  FillCompressedLatLon;
+  FValue.Unknown1[0] := Swap32($51590469);
+  FValue.Unknown1[1] := Swap32($ffff0000);
+  FValue.Unknown1[2] := Swap32($00008001);
 end;
 
 procedure TUdbDir.WritePrefix(AStream: TMemoryStream);
@@ -2222,6 +2305,26 @@ begin
       result := 'Unknown';
   end;
   result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.Direction, 2)]);
+end;
+
+procedure TUdbDir.FillCompressedLatLon;
+begin
+  FValue.SubClass.ComprLatLon[0] := T4Bytes(FValue.Lat)[3];
+  FValue.SubClass.ComprLatLon[1] := T4Bytes(FValue.Lon)[3];
+  FValue.SubClass.ComprLatLon[2] := 0;
+  FValue.SubClass.ComprLatLon[3] := T4Bytes(FValue.Lat)[1];
+  FValue.SubClass.ComprLatLon[4] := T4Bytes(FValue.Lon)[1];
+  FValue.SubClass.ComprLatLon[5] := T4Bytes(FValue.Lat)[2];
+  FValue.SubClass.ComprLatLon[6] := T4Bytes(FValue.Lon)[2];
+end;
+
+function TUdbDir.GetComprLatLon: string;
+begin
+  result := '0x' + IntToHex(FValue.SubClass.B4Lat, 2) + ' ' +
+            '0x' + IntToHex(FValue.SubClass.B4Lon, 2) + ' ' +
+            '0x' + IntToHex(FValue.SubClass.Reserved, 2) + ' ' +
+            '0x' + IntToHex(Swap(FValue.SubClass.B2_3Lat), 4) + ' ' +
+            '0x' + IntToHex(Swap(FValue.SubClass.B2_3Lon), 4);
 end;
 
 function TUdbDir.IsTurn: boolean;
@@ -2859,6 +2962,9 @@ var
   AllRoutes: TBaseItem;
   Index: integer;
   ViaCount: integer;
+  RoutePointList: TList<TLocation>;
+
+  ALocation: TLocation;
   Locations: TBaseItem;
   RoutePreferences: array of WORD;
   TmpStream: TMemoryStream;
@@ -2898,11 +3004,13 @@ begin
     TmAllRoutes(AllRoutes).Items.Clear;
   end;
 
+  // Need locations
+  Locations := GetItem('mLocations');
+
   // Count Via points
   ViaCount := ViaPointCount;
   if (ViaCount = 0) then  // Count from already assigned Locations
   begin
-    Locations := GetItem('mLocations');
     if not Assigned(Locations) then
       exit;
 
@@ -2913,9 +3021,11 @@ begin
         Inc(ViaCount);
     end;
   end;
+
   // At least a begin and end point needed. So at least 1 UdbHandle
   ViaCount := Max(ViaCount, 2);
 
+  RoutePointList := TList<TLocation>.Create;
   TmpStream := TMemoryStream.Create;
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
@@ -2923,6 +3033,16 @@ begin
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
+
+      // Add udb's for all Via and Shaping found in Locations.
+      // Will be discarded when recalculated on the Zumo.
+      if (Assigned(Locations)) then
+      begin
+        TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
+        for ALocation in RoutePointList do
+          AnUdbHandle.Add(TUdbDir.Create(ALocation));
+      end;
+
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
@@ -2942,6 +3062,7 @@ begin
     end;
   finally
     TmpStream.Free;
+    RoutePointList.Free;
   end;
 end;
 

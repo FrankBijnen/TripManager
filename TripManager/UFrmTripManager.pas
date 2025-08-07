@@ -271,7 +271,6 @@ type
     procedure MnuNextDiffClick(Sender: TObject);
     procedure MnuPrevDiffClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure LstFilesCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
   private
     { Private declarations }
     PrefDevice: string;
@@ -2456,17 +2455,23 @@ var
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.PointType)));
+    if (AnUdbDir.UdbDirValue.SubClass.PointType = $03) then
+      VlTripInfo.Strings.AddPair('Compressed LatLon', AnUdbDir.ComprLatLon,
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.ComprLatLon),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.ComprLatLon)))
+    else
+    begin
+      VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
 
-    VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
-                              TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
-
-    VlTripInfo.Strings.AddPair('Subclass Unknown1', '',
-                              TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown1)));
-
+      VlTripInfo.Strings.AddPair('Subclass Unknown1', '',
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown1)));
+    end;
     VlTripInfo.Strings.AddPair('Coordinates', Format('%s', [AnUdbDir.MapCoords]),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
@@ -3477,18 +3482,6 @@ begin
   ListViewCompare(Item1, Item2, FSortSpecification, Data, Compare);
 end;
 
-procedure TFrmTripManager.LstFilesCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
-  var DefaultDraw: Boolean);
-begin
-  if (Item.Data <> nil) and
-     (TObject(Item.Data) is TMTP_Data) then
-  with TMTP_Data(Item.Data) do
-  begin
-    if (TZumoModel(CalculatedModel) = TZumoModel.Unknown) then
-       Sender.Canvas.Brush.Color := clWebOrange;
-  end;
-end;
-
 procedure TFrmTripManager.LstFilesDblClick(Sender: TObject);
 begin              case GetItemType(LstFiles) of
     TDirType.Up:
@@ -3828,6 +3821,8 @@ begin
       IsNotSavedTrip := TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean;
       SetCheckMark(AListItem, not IsNotSavedTrip);
       CalculatedModel := Ord(TmpTripList.CalculatedModel);
+      if (TmpTripList.CalculatedModel = TZumoModel.Unknown) then
+        AListItem.ImageIndex := 2;
     end;
 
     // Show trip name
