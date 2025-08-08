@@ -506,21 +506,23 @@ begin
   GpxFile := TGPXFile.Create(CreatedTempPath + NFile, '', nil, nil, FixMessages);
   try
     GpxFile.AnalyzeGpx;
-    if (FixMessages.Text <> '') then
+    if (FixMessages.Text = '') then
     begin
-      Rc := MessageDlg(FixMessages.Text + #10 + 'Continue with Fix?',
-                       TMsgDlgType.mtWarning, [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo], 0);
-      if (Rc = ID_YES) then
-      begin
-        GpxFile.FixCurrentGPX;
-        if not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectId) then
-          raise exception.Create('Deleting file failed');
-        if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + NFile, FolderId) = '') then
-          raise exception.Create('Writing file failed');
-      end;
-    end
-    else
       MessageDlg('No problems found', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], 0);
+      exit;
+    end;
+
+    Rc := MessageDlg(FixMessages.Text + #10 + 'Continue with Fix?',
+                     TMsgDlgType.mtWarning, [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo], 0);
+    if (Rc = ID_YES) then
+    begin
+      GpxFile.FixCurrentGPX;
+      if not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectId) then
+        raise exception.Create(Format('Deleting file %s failed', [NFile]));
+
+      if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + NFile, FolderId) = '') then
+        raise exception.Create(Format('Writing file %s failed', [NFile]));
+    end;
   finally
     GpxFile.Free;
     FixMessages.Free;
