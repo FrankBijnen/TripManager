@@ -184,6 +184,8 @@ type
     MnuCompareGpxTrack: TMenuItem;
     CompareTriptoGPX1: TMenuItem;
     N11: TMenuItem;
+    N10: TMenuItem;
+    CheckandFixcurrentgpx1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -271,6 +273,7 @@ type
     procedure MnuNextDiffClick(Sender: TObject);
     procedure MnuPrevDiffClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure CheckandFixcurrentgpx1Click(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -474,6 +477,56 @@ end;
 procedure TFrmTripManager.CloseDevice;
 begin
   CurrentDevice := nil;
+end;
+
+procedure TFrmTripManager.CheckandFixcurrentgpx1Click(Sender: TObject);
+var
+  CurrentObjectId, FolderId: widestring;
+  NFile, FriendlyPath: string;
+  GpxFile: TGPXFile;
+  FixMessages: TStringList;
+  Rc: integer;
+begin
+  CheckDevice;
+
+  FolderId := GetIdForPath(CurrentDevice.PortableDev, DeviceFolder[1], FriendlyPath);
+  if (FolderId = '') then
+    raise exception.Create(DeviceFolder[1] + ' not found');
+
+  // Get Id of File
+  NFile := 'current.gpx';
+  CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, FolderId, NFile);
+  if (CurrentObjectId = '') then
+    raise exception.Create(NFile + ' not found');
+
+  if not GetFileFromDevice(CurrentDevice.PortableDev, CurrentObjectId, CreatedTempPath, NFile) then
+    raise Exception.Create(Format('Copy %s from %s failed', [NFile, CurrentDevice.Device]));
+
+  FixMessages := TStringList.Create;
+  GpxFile := TGPXFile.Create(CreatedTempPath + NFile, '', nil, nil, FixMessages);
+  try
+    GpxFile.AnalyzeGpx;
+    if (FixMessages.Text <> '') then
+    begin
+      Rc := MessageDlg(FixMessages.Text + #10 + 'Continue with Fix?',
+                       TMsgDlgType.mtWarning, [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo], 0);
+      if (Rc = ID_YES) then
+      begin
+        GpxFile.FixCurrentGPX;
+        if not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectId) then
+          raise exception.Create('Deleting file failed');
+        if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + NFile, FolderId) = '') then
+          raise exception.Create('Writing file failed');
+      end;
+    end
+    else
+      MessageDlg('No problems found', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], 0);
+  finally
+    GpxFile.Free;
+    FixMessages.Free;
+    DeleteFile(CreatedTempPath + NFile);
+  end;
+
 end;
 
 function TFrmTripManager.CheckDevice(RaiseException: boolean = true): boolean;

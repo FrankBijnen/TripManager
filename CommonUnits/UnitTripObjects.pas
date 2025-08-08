@@ -651,7 +651,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure WriteTerminator(AStream: TMemoryStream); override;
   public
-    constructor Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT); reintroduce;
+    constructor Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT; ForceRecalc: boolean = true); reintroduce;
     destructor Destroy; override;
     procedure Add(AnUdbDir: TUdbDir);
     property HandleId: Cardinal read FUdbHandleId;
@@ -2268,6 +2268,9 @@ end;
 
 function TUdbDir.GetDirection: string;
 begin
+  if (FValue.SubClass.PointType = 3) then
+    exit(PointType);
+
   case FValue.SubClass.Direction of
     0:
       result := 'Continue';
@@ -2355,13 +2358,16 @@ begin
   SetLength(Self.Unknown3, ASize);
 end;
 
-constructor TmUdbDataHndl.Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT);
+constructor TmUdbDataHndl.Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT; ForceRecalc: boolean = true);
 begin
   inherited Create('mUdbDataHndl', SizeOf(FValue), dtUdbHandle); // Will get Length later, Via Calculate
   FUdbHandleId := AHandleId; // Only value seen = 1
   FillChar(FValue, SizeOf(FValue), 0);
+
 // Leaving it to Zeroes, to force recalculation
-//  FValue.CalcStatus := CalculationMagic[AModel];
+  if not (ForceRecalc) then
+    FValue.CalcStatus := CalculationMagic[AModel];
+
   FValue.AllocUnknown3(AModel);
   FSubLength := 0;
   FUdbDirList := TUdbDirList.Create;
@@ -2891,19 +2897,20 @@ var
   Locations: TmLocations;
   Location: TBaseItem;
   ANItem: TBaseItem;
-  IsNotCalcTrip: boolean;
+  HasUdbs: boolean;
 begin
   OutStringList.Clear;
   TripName := TmTripName(GetItem('mTripName'));
   if (not Assigned(TripName)) then
     exit;
 
-  IsNotCalcTrip := (CalculatedModel = TZumoModel.Unknown);
+  HasUdbs := false;
   AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
   if (Assigned(AllRoutes)) then
   begin
     for UdbDataHndl in AllRoutes.Items do
     begin
+      HasUdbs := HasUdbs or (UdbDataHndl.Items.Count > 0);
       for UdbDir in UdbDataHndl.Items do
         OutStringList.Add(Format('    AddTrkPoint(%.6g,%.6g);', [UdbDir.Lat, UdbDir.Lon], FloatFormatSettings ) );
     end;
@@ -2940,7 +2947,7 @@ begin
             Coords := TmScPosn(ANItem).GetMapCoords;
         end;
 
-        if (IsNotCalcTrip) then
+        if not (HasUdbs) then
           OutStringList.Add(Format('    AddTrkPoint(%s);', [Coords], FloatFormatSettings ) );
 
         OutStringList.Add(Format('     AddRoutePoint(%d, "%s", "%s", %s, "%s");',

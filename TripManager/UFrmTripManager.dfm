@@ -1025,6 +1025,15 @@ object FrmTripManager: TFrmTripManager
       Caption = '-'
       GroupIndex = 1
     end
+    object CheckandFixcurrentgpx1: TMenuItem
+      Caption = 'Check and Fix current.gpx'
+      GroupIndex = 1
+      OnClick = CheckandFixcurrentgpx1Click
+    end
+    object N10: TMenuItem
+      Caption = '-'
+      GroupIndex = 1
+    end
     object TripFunctions1: TMenuItem
       Break = mbBarBreak
       Caption = 'Trip Functions'

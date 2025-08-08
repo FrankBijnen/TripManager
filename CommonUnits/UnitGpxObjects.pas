@@ -169,6 +169,7 @@ type
 {$IFDEF TRIPOBJECTS}
     procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
 {$ENDIF}
+    procedure FixCurrentGPX;
     procedure AnalyzeGpx;
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
@@ -1178,7 +1179,7 @@ end;
 
 procedure TGPXfile.ProcessGPXNode(GpxNode: TXmlVSNode);
 var
-  MainNode: TXmlVSNode;
+  MainNode, RtePtNode: TXmlVSNode;
 begin
   for MainNode in GpxNode.ChildNodes do
   begin
@@ -1186,10 +1187,33 @@ begin
     if (MainNode.Name = 'wpt') then
       ProcessWpt(MainNode)
     else if (MainNode.Name = 'rte') then
-      ProcessRte(MainNode)
+    begin
+      if (FOutStringList <> nil) then
+      begin
+        RtePtNode := MainNode.Find('rtept');
+        if (RtePtNode = nil) then
+        begin
+          FOutStringList.Add(Format('Incomplete route detected %s', [FindSubNodeValue(MainNode, 'name')]));
+          FOutStringList.Add(Format('Only the first error is reported', []));
+        end;
+      end;
+      ProcessRte(MainNode);
+    end
     else if (MainNode.Name = 'trk') then
       ProcessTrk(MainNode);
   end;
+end;
+
+procedure TGPXfile.FixCurrentGPX;
+var
+  AllXml: string;
+begin
+  AllXml := TFile.ReadAllText(FGPXFile, TEncoding.UTF8);
+  AllXml := ReplaceAll(AllXml,
+    ['</extensions><rte>'],
+    ['</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><rte>'],
+    [rfReplaceAll]);
+  TFile.WriteAllText(FGPXFile, AllXml);
 end;
 
 procedure TGPXfile.ProcessGPX;
