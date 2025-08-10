@@ -1210,8 +1210,9 @@ var
 begin
   AllXml := TFile.ReadAllText(FGPXFile, TEncoding.UTF8);
   AllXml := ReplaceAll(AllXml,
-    ['</extensions><rte>'],
-    ['</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><rte>'],
+    ['</extensions><rte>', '</extensions><gpx>'],
+    ['</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><rte>',
+     '</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><gpx>'],
     [rfReplaceAll]);
   TFile.WriteAllText(FGPXFile, AllXml);
 end;
@@ -1477,16 +1478,16 @@ begin
 
     for Track in FTrackList do
     begin
+      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+      if (DisplayColor = '') then
+        continue;
+
       if (UniqueTracks) then
       begin
         if (TracksProcessed.IndexOf(Track.NodeValue) > -1) then
           continue;
         TracksProcessed.Add(Track.NodeValue);
       end;
-
-      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
-      if (DisplayColor = '') then
-        continue;
 
       WptTrack := TracksRoot.AddChild('trk');
       WptTrack.AddChild('name').NodeValue := Track.NodeValue;

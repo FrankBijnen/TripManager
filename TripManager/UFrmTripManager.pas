@@ -494,7 +494,7 @@ begin
     raise exception.Create(DeviceFolder[1] + ' not found');
 
   // Get Id of File
-  NFile := 'current.gpx';
+  NFile := 'Current.gpx';
   CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, FolderId, NFile);
   if (CurrentObjectId = '') then
     raise exception.Create(NFile + ' not found');
@@ -522,6 +522,8 @@ begin
 
       if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + NFile, FolderId) = '') then
         raise exception.Create(Format('Writing file %s failed', [NFile]));
+
+      MessageDlg('Fix complete. Restart BaseCamp!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], 0);
     end;
   finally
     GpxFile.Free;
@@ -3731,6 +3733,15 @@ begin
 
     DeviceFile := FromDevice;
     HexEditFile := FileName;
+
+    if (DeviceFile) and
+       (ATripList.CalculatedModel = TZumoModel.Unknown) then
+    begin
+      SbPostProcess.Panels[0].Text := 'Not calculated trip. Marked with !';
+      SbPostProcess.Panels[1].Text := 'BaseCamp may have problems reading current.gpx';
+      StatusTimer.Enabled := false;
+      StatusTimer.Enabled := true;
+    end;
 
     LoadHex(FileName);
     LoadTripOnMap(ATripList, CurrentTrip);
