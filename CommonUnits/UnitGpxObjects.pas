@@ -39,16 +39,17 @@ type
     CurrentRouteTrackName: string;
     ShapingPointCnt: integer;               // Counter of all <trp:ShapingPoint>. Seqnr of name
 
-    CurrentCoord: TCoord;
+    CurrentCoord: TCoords;
     TotalDistance: double;
     CurrentDistance: double;
-    PrevCoord: TCoord;
+    PrevCoord: TCoords;
 
     FXmlDocument: TXmlVSDocument;
     FOutDir: string;
     FOnFunctionPrefs: TNotifyEvent;
     FOnSavePrefs: TNotifyEvent;
     FOutStringList: TStringList;
+    FSubClassList: TStringList;
     FBaseFile: string;
     FGPXFile: string;
 {$IFDEF TRIPOBJECTS}
@@ -139,6 +140,14 @@ type
                              ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 {$ENDIF}
   protected
+    function GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
+    function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+    function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+    function MapSegRoadExclBit(const ASubClass: string): string;
+    procedure BuildSubClasses(const ARtePt: TXmlVSNode;
+                              const DistOKMeters: double;
+                              const SCType: TSubClassType = [scCompare]);
+
     procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
     procedure CloneSubNodes(FromNodes, ToNodes: TXmlVsNodeList);
     procedure CloneNode(FromNode, ToNode: TXmlVsNode);
@@ -171,6 +180,7 @@ type
 {$ENDIF}
     procedure FixCurrentGPX;
     procedure AnalyzeGpx;
+    property SubClassList: TStringList read FSubClassList;
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
     property TrackList: TXmlVSNodeList read FTrackList;
@@ -181,8 +191,7 @@ type
     class function Coord2Float(ACoord: LongInt): string;
     class function Float2Coord(ACoord: Double): LongInt;
     class function DegreesToRadians(Degrees: double): double;
-    class function CoordFromAttribute(Attributes: TXmlVSAttributeList): TCoord;
-    class function CoordDistance(Coord1, Coord2: TCoord; DistanceUnit: TDistanceUnit): double;
+    class function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
     class procedure PerformFunctions(const AllFuncs: array of TGPXFunc;
                                      const GPXFile:string;
                                      const FunctionPrefs, SavePrefs: TNotifyEvent;
@@ -219,18 +228,12 @@ const
 var
   FormatSettings: TFormatSettings;
 
-class function TGPXfile.CoordFromAttribute(Attributes: TXmlVSAttributeList): TCoord;
-begin
-  result.Lat := StrToFloat(Attributes.Find('lat').Value, FormatSettings);
-  result.Lon := StrToFloat(Attributes.Find('lon').Value, FormatSettings);
-end;
-
 class function TGPXfile.DegreesToRadians(Degrees: double): double;
 begin
   result := Degrees * PI / 180;
 end;
 
-class function TGPXfile.CoordDistance(Coord1, Coord2: TCoord; DistanceUnit: TDistanceUnit): double;
+class function TGPXfile.CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
 var
   DLat, DLon, Lat1, Lat2, A, C: double;
 begin
@@ -291,9 +294,9 @@ end;
 
 function TGPXfile.DebugCoords(Coords: TXmlVSAttributeList): string;
 var LastSub, Hex, LatLon: string;
-    Coord: TCoord;
+    Coord: TCoords;
 begin
-  Coord := CoordFromAttribute(Coords);
+  Coord.FromAttributes(Coords);
   Hex := IntToHex(Float2Coord(Coord.Lat), 8);
   LatLon := Hex + ' = ' + Coord2Float(Float2Coord(Coord.Lat));
   LastSub := Copy(Hex, 5, 2) + Copy(Hex, 3, 2);
@@ -314,6 +317,7 @@ begin
   FreeAndNil(FWayPointList);
   FreeAndNil(FTrackList);
   FreeAndNil(FWayPointsProcessedList);
+  FSubClassList.Free;
   FreeAndNil(FXmlDocument);
 end;
 
@@ -325,6 +329,7 @@ begin
   FWayPointList := TXmlVSNodeList.Create;
   FTrackList := TXmlVSNodeList.Create;
   FWayPointsProcessedList := TStringList.Create;
+  FSubClassList := TStringList.Create;
   FXmlDocument := TXmlVSDocument.Create;
   FrmSelectGpx := TFrmSelectGPX.Create(nil);
 end;
@@ -337,6 +342,183 @@ begin
   FWayPointList.Clear;
   FTrackList.Clear;
   FWayPointsProcessedList.Clear;
+end;
+
+function TGPXfile.GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
+var
+  ExtensionsNode, RoutePointExtensionNode: TXmlVSNode;
+begin
+  ExtensionsNode := ARtePt.Find('extensions');
+  if (ExtensionsNode = nil) then
+    exit(nil);
+
+  RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
+  if (RoutePointExtensionNode = nil) then
+    exit(nil);
+
+  if (LastChild) then
+    exit(RoutePointExtensionNode.LastChild);  // Should be a 'gpxx:rpt'. Need to check?
+
+  result := RoutePointExtensionNode.Find('gpxx:rpt')
+end;
+
+function TGPXfile.GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetExtensionsNode(ARtePt, false);
+end;
+
+function TGPXfile.GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetExtensionsNode(ARtePt, true);
+end;
+
+function TGPXfile.MapSegRoadExclBit(const ASubClass: string): string;
+var
+  RoadIdHex: Cardinal;
+begin
+  RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and $ffff7fbf; // $11ff7fbf; ?
+  result := Copy(ASubClass, 5, 8) + IntToHex(RoadIdHex, 8);
+end;
+
+procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
+                                   const DistOKMeters: double;
+                                   const SCType: TSubClassType = [scCompare]);
+
+  procedure AddSubClass(const GpxxRptNode: TXmlVSNode; const CurType: TSubClassType = [scCompare]);
+  var
+    CMapSegRoad: string;
+    KeepBegin: boolean;
+    KeepEnd: boolean;
+  begin
+    CMapSegRoad := FindSubNodeValue(GpxxRptNode, 'gpxx:Subclass');
+    if (CMapSegRoad <> '') then
+    begin
+      if (scCompare in SCType) then
+        CMapSegRoad := MapSegRoadExclBit(CMapSegRoad)
+      else
+      begin
+        CMapSegRoad := Copy(CMapSegRoad, 5);
+//        if (Copy(CMapSegRoad, 17, 4) = '2116') or
+//           (Copy(CMapSegRoad, 17, 4) = '2117') then
+//        begin
+//          CMapSegRoad := Copy(CMapSegRoad, 1, 16) + '21140000000000000000';
+//        end;
+
+        if (Copy(CMapSegRoad, 17, 4) = '2116') then
+        begin
+          KeepBegin := ((scFirst in SCType) and
+                        (scFirst in CurType));
+          if not KeepBegin then
+            exit;
+        end;
+        if (Copy(CMapSegRoad, 17, 4) = '2117') then
+        begin
+          KeepEnd :=  ((ScLast in SCType) and
+                       (ScLast in CurType));
+          if not KeepEnd then
+            exit;
+//          begin
+//            CMapSegRoad[17] := '1';
+//            CMapSegRoad[18] := 'F';
+//            CMapSegRoad[19] := '0';
+//            CMapSegRoad[20] := '0';
+//          end;
+        end;
+      end;
+      FSubClassList.AddObject(CMapSegRoad, GpxxRptNode);
+    end;
+  end;
+
+  //Add subclasses from previous segment with Distance < DistOK from this Rtept
+  procedure AddPreviousSegment;
+  var
+    ScanGpxxRptNode: TXmlVSNode;
+    RtePtCoord, GpxxRptCoord: TCoords;
+    PrevRtePt: TXmlVSNode;
+    ThisDist: double;
+  begin
+    PrevRtePt := ARtePt.PreviousSibling;
+    if (PrevRtePt = nil) then
+      exit;
+
+    RtePtCoord.FromAttributes(ARtePt.AttributeList);
+    ScanGpxxRptNode := GetLastExtensionsNode(PrevRtePt);
+    while (ScanGpxxRptNode <> nil) do
+    begin
+      GpxxRptCoord.FromAttributes(ScanGpxxRptNode.AttributeList);
+      ThisDist := CoordDistance(RtePtCoord, GpxxRptCoord, TDistanceUnit.duKm);
+      if (ThisDist > DistOKMeters) then
+        break;
+      AddSubClass(ScanGpxxRptNode);
+
+      ScanGpxxRptNode := ScanGpxxRptNode.PreviousSibling;
+    end;
+  end;
+
+  // Add subclasses from this segment
+  procedure AddCurrentSegment;
+  var
+    ScanGpxxRptNode: TXmlVSNode;
+    SegmentCnt: integer;
+    CurType: TSubClassType;
+  begin
+    ScanGpxxRptNode := GetFirstExtensionsNode(ARtePt);
+    SegmentCnt := 0;
+    while (ScanGpxxRptNode <> nil) do
+    begin
+      CurType := [];
+      if (SegmentCnt = 0) then
+        Include(CurType, scFirst);
+      if (ScanGpxxRptNode.NextSibling = nil) then
+        Include(CurType, ScLast);
+      Inc(SegmentCnt);
+
+      AddSubClass(ScanGpxxRptNode, CurType);
+
+      ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+    end;
+  end;
+
+  //Add subclasses from next segment with Distance < DistOK from next Rtept
+  procedure AddNextSegment;
+  var
+    ScanGpxxRptNode: TXmlVSNode;
+    RtePtCoord, GpxxRptCoord: TCoords;
+    NextRtePt: TXmlVSNode;
+    ThisDist: double;
+  begin
+    NextRtePt := ARtePt.NextSibling;
+    if (NextRtePt = nil) then
+      exit;
+
+    RtePtCoord.FromAttributes(NextRtePt.AttributeList);
+    ScanGpxxRptNode := GetFirstExtensionsNode(NextRtePt);
+    while (ScanGpxxRptNode <> nil) do
+    begin
+      GpxxRptCoord.FromAttributes(ScanGpxxRptNode.AttributeList);
+      ThisDist := CoordDistance(RtePtCoord, GpxxRptCoord, TDistanceUnit.duKm);
+      if (ThisDist > DistOKMeters) then
+        break;
+
+      AddSubClass(ScanGpxxRptNode);
+
+      ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+    end;
+  end;
+
+begin
+  if (scCompare in SCType) then
+  begin
+    FSubClassList.Clear;
+
+    AddPreviousSegment;
+
+    AddCurrentSegment;
+
+    AddNextSegment;
+  end
+  else
+    AddCurrentSegment;
 end;
 
 procedure TGPXfile.CloneAttributes(FromNode, ToNode: TXmlVsNode);
@@ -431,7 +613,7 @@ end;
 
 procedure TGPXfile.ComputeDistance(RptNode: TXmlVSNode);
 begin
-  CurrentCoord := CoordFromAttribute(RptNode.AttributeList);
+  CurrentCoord.FromAttributes(RptNode.AttributeList);
   CurrentDistance := CoordDistance(PrevCoord, CurrentCoord, ProcessOptions.DistanceUnit);
   TotalDistance := TotalDistance + CurrentDistance;
   PrevCoord := CurrentCoord;
@@ -456,7 +638,7 @@ end;
 procedure TGPXfile.UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName:TGPXString);
 var
   RptNode, DebugNode: TXmlVSNode;
-  ViaPtCoord, NextCoord: TCoord;
+  ViaPtCoord, NextCoord: TCoords;
   Distance: Double;
 begin
   if (RtePtNode = nil) or
@@ -469,8 +651,8 @@ begin
 
 // We could compare Lat and Lon values, but instead we compute the distance.
 // Slower, but nicer.
-  ViaPtCoord := CoordFromAttribute(RptNode.AttributeList);
-  NextCoord := CoordFromAttribute(RtePtNode.AttributeList);
+  ViaPtCoord.FromAttributes(RptNode.AttributeList);
+  NextCoord.FromAttributes(RtePtNode.AttributeList);
   Distance := CoordDistance(ViaPtCoord, NextCoord, ProcessOptions.DistanceUnit);
 
   if (Abs(Distance) > UnglitchTreshold) then
@@ -826,7 +1008,7 @@ begin
      (Cnt = 1) then
   begin
     TotalDistance := 0;
-    PrevCoord := CoordFromAttribute(RtePtNode.AttributeList);
+    PrevCoord.FromAttributes(RtePtNode.AttributeList);
   end;
 
   if (Cnt = 1) then
@@ -1131,7 +1313,7 @@ begin
             if (ProcessOptions.ProcessDistance) then
             begin
               TotalDistance := 0;
-              PrevCoord := CoordFromAttribute(TrkPtNode.AttributeList);
+              PrevCoord.FromAttributes(TrkPtNode.AttributeList);
             end;
           end;
           LastTrkPtNode := TrkPtNode;
@@ -1201,6 +1383,8 @@ begin
     end
     else if (MainNode.Name = 'trk') then
       ProcessTrk(MainNode);
+    if (Assigned(CurrentTrack)) then
+      CurrentTrack.AddChild('TotalDistance').NodeValue := Format('%1.0f', [TotalDistance * 1000], FormatSettings);
   end;
 end;
 
@@ -1210,9 +1394,9 @@ var
 begin
   AllXml := TFile.ReadAllText(FGPXFile, TEncoding.UTF8);
   AllXml := ReplaceAll(AllXml,
-    ['</extensions><rte>', '</extensions><gpx>'],
+    ['</extensions><rte>', '</extensions></gpx>'],
     ['</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><rte>',
-     '</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><gpx>'],
+     '</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte></gpx>'],
     [rfReplaceAll]);
   TFile.WriteAllText(FGPXFile, AllXml);
 end;
@@ -1863,7 +2047,7 @@ var
   RouteWayPoints, WayPoint: TXmlVSNode;
   OutFile: string;
   F: TextFile;
-  Coords: TCoord;
+  Coords: TCoords;
 begin
   for RouteWayPoints in FRouteViaPointList do
   begin
@@ -1877,7 +2061,7 @@ begin
 
     for WayPoint in RouteWayPoints.ChildNodes do
     begin
-      Coords := CoordFromAttribute(WayPoint.AttributeList);
+      Coords.FromAttributes(WayPoint.AttributeList);
       Writeln(F, ' ',
               FormatFloat('0.00000;-0.00000;0.00', Coords.Lon, FormatSettings),
               ' ',
@@ -1972,22 +2156,31 @@ var
   RtePtNode: TXmlVSNode;
   TmpStream : TMemoryStream;
   RtePtName: string;
-  Coords: TCoord;
+  Coords: TCoords;
   RtePtExtensions: TXmlVSNode;
   RtePtViaPoint: TXmlVSNode;
   RtePtCmt: string;
   DepartureDateString: string;
   DepartureDate: TDateTime;
+  PointCnt: integer;
 begin
   result := 0;
+  PointCnt := 0;
   TmpStream := TMemoryStream.Create;
   try
     Locations := TmLocations.Create;
     for RtePtNode in RtePts do
     begin
+      Inc(PointCnt);
+      if (ProcessOptions.PreserveTrackToRoute) then
+      begin
+        if (PointCnt <> 1) and
+           (PointCnt <> RtePts.Count) then
+          Continue;
+      end;
       // Get Data from RtePt
       RtePtName := FindSubNodeValue(RtePtNode, 'name');
-      Coords := CoordFromAttribute(RtePtNode.AttributeList);
+      Coords.FromAttributes(RtePtNode.AttributeList);
 
       RtePtExtensions := RtePtNode.Find('extensions');
       if (RtePtExtensions = nil) then
@@ -2044,9 +2237,55 @@ procedure TGPXFile.CreateTrip_XT(const TripName, CalculationMode, TransportMode:
                                  ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 var
   ViaPointCount: integer;
+  ARtePt, ATrack: TXmlVSNode;
+  FirstRtePt, LastRtePt: TXmlVSNode;
+  TotalDistance: double;
+  CanPreserve: boolean;
+  ScType: TSubClassType;
 begin
+  TotalDistance := 0;
+  CanPreserve := (ProcessOptions.PreserveTrackToRoute);
+  if (CanPreserve) then
+  begin
+    // Create AllRoutes from BC calculation
+    SubClassList.Clear;
+
+    // From to segment
+    FirstRtePt := RtePts.First;
+    LastRtePt := RtePts.Last;
+    if (LastRtePt <> nil) then
+      LastRtePt := LastRtePt.PreviousSibling;
+
+    // Build SubClass list.
+    for ARtePt in RtePts do
+    begin
+      ScType := [];
+      if (ARtePt = FirstRtePt) then
+        Include(ScType, scFirst);
+      if (ARtePt = LastRtePt) then
+        Include(ScType, ScLast);
+
+      BuildSubClasses(ARtePt, 0, ScType);
+    end;
+    CanPreserve := (SubClassList.Count > 1);
+
+    // Get total distance of track
+    if (CanPreserve) then
+    begin
+      for ATrack in TrackList do
+      begin
+        if (SameText(FindSubNodeValue(ATrack, 'desc'), 'rte')) and
+           (SameText(ATrack.NodeName, TripName)) then
+        begin
+          TotalDistance := StrToFloatDef(FindSubNodeValue(ATrack, 'TotalDistance'), 0);
+          break;
+        end;
+      end;
+    end;
+  end;
+
   FTripList.AddHeader(THeader.Create);
-  FTripList.Add(TmPreserveTrackToRoute.Create);
+  FTripList.Add(TmPreserveTrackToRoute.Create(CanPreserve));
   if (ProcessOptions.AllowGrouping) then
     FTripList.Add(TmParentTripId.Create(ParentTripId))
   else
@@ -2058,11 +2297,11 @@ begin
   FTripList.Add(TmIsRoundTrip.Create);
   FTripList.Add(TmParentTripName.Create(FBaseFile));
   FTripList.Add(TmOptimized.Create);
-  FTripList.Add(TmTotalTripTime.Create);
+  FTripList.Add(TmTotalTripTime.Create(Round(TotalDistance * 0.06)));
   FTripList.Add(TmImported.Create);
   FTripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
   FTripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-  FTripList.Add(TmTotalTripDistance.Create);
+  FTripList.Add(TmTotalTripDistance.Create(TotalDistance));
   FTripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
   ViaPointCount := CreateLocations(RtePts);
   FTripList.Add(TmPartOfSplitRoute.Create);
@@ -2070,8 +2309,12 @@ begin
   FTripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
   FTripList.Add(TmTripName.Create(TripName));
 
-  // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
-  FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
+  if (CanPreserve) then
+    // Create AllRoutes from BC calculation
+    FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
+  else
+    // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
+    FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
 end;
 
 procedure TGPXFile.CreateTrip_XT2(const TripName, CalculationMode, TransportMode: string;

@@ -1637,13 +1637,13 @@ end;
 procedure TFrmTripManager.SyncDiff(Sender: TObject);
 var
   ANode: TTreeNode;
-  CoordGpx: TCoord;
+  CoordGpx: TCoords;
   BestLat, BestLon: string;
 begin
   if (Assigned(Sender)) and
      (Sender is TXmlVSNode) then
   begin
-    CoordGpx := TGPXfile.CoordFromAttribute(TXmlVSNode(Sender).AttributeList);
+    CoordGpx.FromAttributes(TXmlVSNode(Sender).AttributeList);
     CoordGpx.FormatLatLon(BestLat, BestLon);
     MapRequest(BestLat + ', ' + BestLon, TXmlVSNode(Sender).NodeValue, RoutePointTimeOut);
     exit;
@@ -2081,6 +2081,9 @@ end;
 
 procedure TFrmTripManager.ShellListView1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+  if ShellListView1.IsEditing then
+    exit;
+
   case Key of
     VK_HOME,
     VK_END,
@@ -2524,7 +2527,11 @@ var
                                                     SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
                                                     OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
 
-      VlTripInfo.Strings.AddPair('Subclass Unknown1', '',
+      VlTripInfo.Strings.AddPair('Subclass Unknown1', Format('%s %s %s',
+                                                         [IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Time), 4),
+                                                          IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Unknown2[0]), 4),
+                                                          IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Unknown2[1]), 4)]
+                                                        ),
                                 TGridSelItem.Create(AnUdbDir,
                                                     SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1),
                                                     OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown1)));
@@ -2534,7 +2541,12 @@ var
                                                   SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
-    VlTripInfo.Strings.AddPair('UdbDir Unknown1', '',
+    VlTripInfo.Strings.AddPair('UdbDir Unknown1', Format('%s %s %s %s',
+                                                         [IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[0]), 8),
+                                                          IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[1]), 8),
+                                                          IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[2]), 8),
+                                                          IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[3]), 8)]
+                                                        ),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Unknown1),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown1)));

@@ -561,6 +561,7 @@ type
     MapSegment:       Cardinal;
     RoadId:           Cardinal;
     PointType:        byte;
+    procedure Init(const GPXSubClass: string);
     case integer of
     0: (Direction:        byte;
         Unknown1:         array[0..5] of byte);
@@ -570,6 +571,9 @@ type
         Reserved:         byte;
         B2_3Lat:          word;
         B2_3Lon:          word);
+    3: (Direction2:       byte;
+        Time:             word;
+        Unknown2:         array[0..1] of word);
   end;
   TUdbDirValue = packed record
     SubClass:         TSubClass;
@@ -588,6 +592,7 @@ type
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
     constructor Create(ALocation: TLocation); reintroduce; overload;
+    constructor Create(GPXSubClass: string; Lat, Lon: double); reintroduce; overload;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure WriteTerminator(AStream: TMemoryStream); override;
@@ -712,7 +717,10 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
+    procedure SetRoutePrefs_XT2(ViaCount: integer);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
+    procedure TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil);
+
     procedure CreateTemplate(const AModel: TZumoModel; TripName: string);
     procedure SaveAsGPX(const GPXFile: string);
     property Header: THeader read FHeader;
@@ -726,7 +734,7 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo,
   Vcl.Dialogs,
-  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
+  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions, UnitGpxDefs;
 
 const
   Coord_Decimals = '%1.6f';
@@ -2147,6 +2155,17 @@ begin
 end;
 
 {*** UdbDir ***}
+procedure TSubClass.Init(const GPXSubClass: string);
+var
+  Indx: integer;
+begin
+  MapSegment  := Swap32(StrToUInt('$' + Copy(GPXSubClass, 1, 8)));
+  RoadId      := Swap32(StrToUInt('$' + Copy(GPXSubClass, 9, 8)));
+  PointType   := StrToUInt('$' + Copy(GPXSubClass, 17, 2));
+  for Indx := 0 to 6 do
+    ComprLatLon[Indx] := StrToUInt('$' + Copy(GPXSubClass, 19 + (Indx * 2), 2));
+end;
+
 procedure TUdbDirValue.SwapCardinals;
 begin
   Lat := Swap32(Lat);
@@ -2188,6 +2207,28 @@ begin
   FValue.Unknown1[0] := Swap32($51590469);
   FValue.Unknown1[1] := Swap32($ffff0000);
   FValue.Unknown1[2] := Swap32($00008001);
+end;
+
+constructor TUdbDir.Create(GPXSubClass: string; Lat, Lon:Double);
+
+begin
+  Create('Point');
+
+  FValue.Lat := Swap32(CoordAsInt(Lat));
+  FValue.Lon := Swap32(CoordAsInt(Lon));
+  FValue.SubClass.Init(GPXSubClass);
+//  FillChar(FValue.SubClass, SizeOf(FValue.SubClass), 0);
+//  FValue.SubClass.RoadId := $FFFFFFFF;
+
+  FValue.Unknown1[0] := Swap32($51590469);
+
+//  if (FValue.SubClass.PointType = $1f) then
+//    FValue.Unknown1[1] := Swap(FValue.SubClass.Time);
+//  FValue.Unknown1[2] := Swap32($00000000);
+
+  if (FValue.SubClass.PointType = $1f) then
+    FValue.Unknown1[1] := Swap32($00000000);
+  FValue.Unknown1[2] := Swap32($00000000);
 end;
 
 procedure TUdbDir.WritePrefix(AStream: TMemoryStream);
@@ -2312,13 +2353,13 @@ end;
 
 procedure TUdbDir.FillCompressedLatLon;
 begin
-  FValue.SubClass.ComprLatLon[0] := T4Bytes(FValue.Lat)[3];
-  FValue.SubClass.ComprLatLon[1] := T4Bytes(FValue.Lon)[3];
+  FValue.SubClass.ComprLatLon[0] := T4Bytes(FValue.Lat)[0];
+  FValue.SubClass.ComprLatLon[1] := T4Bytes(FValue.Lon)[0];
   FValue.SubClass.ComprLatLon[2] := 0;
-  FValue.SubClass.ComprLatLon[3] := T4Bytes(FValue.Lat)[1];
-  FValue.SubClass.ComprLatLon[4] := T4Bytes(FValue.Lon)[1];
-  FValue.SubClass.ComprLatLon[5] := T4Bytes(FValue.Lat)[2];
-  FValue.SubClass.ComprLatLon[6] := T4Bytes(FValue.Lon)[2];
+  FValue.SubClass.ComprLatLon[3] := T4Bytes(FValue.Lat)[2];
+  FValue.SubClass.ComprLatLon[4] := T4Bytes(FValue.Lat)[1];
+  FValue.SubClass.ComprLatLon[5] := T4Bytes(FValue.Lon)[2];
+  FValue.SubClass.ComprLatLon[6] := T4Bytes(FValue.Lon)[1];
 end;
 
 function TUdbDir.GetComprLatLon: string;
@@ -2963,21 +3004,11 @@ begin
   end;
 end;
 
-procedure TTripList.ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
+procedure TTripList.SetRoutePrefs_XT2(ViaCount: integer);
 var
-  CalcModel: TZumoModel;
-  AllRoutes: TBaseItem;
   Index: integer;
-  ViaCount: integer;
-  RoutePointList: TList<TLocation>;
-
-  ALocation: TLocation;
-  Locations: TBaseItem;
   RoutePreferences: array of WORD;
   TmpStream: TMemoryStream;
-
-  Location: TBaseItem;
-  AnUdbHandle: TmUdbDataHndl;
 
   procedure SetRoutePref(AKey: ShortString);
   var
@@ -2990,6 +3021,39 @@ var
       RoutePreference.InitFromStream(AKey, TmpStream.Size, $80, TmpStream);
     end;
   end;
+
+begin
+  TmpStream := TMemoryStream.Create;
+  try
+    // The RoutePreferences need to be resized? For XT2.
+    SetLength(RoutePreferences, ViaCount -1);
+    for Index := 0 to High(RoutePreferences) do
+      RoutePreferences[Index] := Swap($0100);
+    PrepStream(TmpStream, ViaCount -1, RoutePreferences);
+
+    SetRoutePref('mRoutePreferences');
+    SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves');
+    SetRoutePref('mRoutePreferencesAdventurousScenicRoads');
+    SetRoutePref('mRoutePreferencesAdventurousPopularPaths');
+    SetRoutePref('mRoutePreferencesAdventurousMode');
+  finally
+    TmpStream.Free;
+  end;
+end;
+
+procedure TTripList.ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
+var
+  CalcModel: TZumoModel;
+  AllRoutes: TBaseItem;
+  Index: integer;
+  ViaCount: integer;
+  RoutePointList: TList<TLocation>;
+
+  ALocation: TLocation;
+  Locations: TBaseItem;
+
+  Location: TBaseItem;
+  AnUdbHandle: TmUdbDataHndl;
 
 begin
   // If the model is not supplied, try to get it from the data
@@ -3033,7 +3097,6 @@ begin
   ViaCount := Max(ViaCount, 2);
 
   RoutePointList := TList<TLocation>.Create;
-  TmpStream := TMemoryStream.Create;
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
     // The XT(2) recalculates all.
@@ -3053,22 +3116,75 @@ begin
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
-    // The RoutePreferences need to be resized? For XT2.
+    // The RoutePreferences need to be recreated for the XT2
     if (CalcModel = TZumoModel.XT2) then
-    begin
-      SetLength(RoutePreferences, ViaCount -1);
-      for Index := 0 to High(RoutePreferences) do
-        RoutePreferences[Index] := Swap($0100);
-      PrepStream(TmpStream, ViaCount -1, RoutePreferences);
-
-      SetRoutePref('mRoutePreferences');
-      SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves');
-      SetRoutePref('mRoutePreferencesAdventurousScenicRoads');
-      SetRoutePref('mRoutePreferencesAdventurousPopularPaths');
-      SetRoutePref('mRoutePreferencesAdventurousMode');
-    end;
+      SetRoutePrefs_XT2(ViaCount);
   finally
-    TmpStream.Free;
+
+    RoutePointList.Free;
+  end;
+end;
+
+procedure TTripList.TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil);
+var
+  CalcModel: TZumoModel;
+  Locations: TBaseItem;
+  RoutePointList: TList<TLocation>;
+  ALocation: TLocation;
+  AllRoutes: TBaseItem;
+  Index: integer;
+  AnUdbHandle: TmUdbDataHndl;
+  GpxRptNode: TXmlVSNode;
+  Coords: TCoords;
+begin
+  // If the model is not supplied, try to get it from the data
+  CalcModel := AModel;
+  if (CalcModel = TZumoModel.Unknown) then
+    CalcModel := GetZumoModel;
+
+  AllRoutes := GetItem('mAllRoutes');
+  if not Assigned(AllRoutes) then
+  begin
+    AllRoutes := TmAllRoutes.Create;
+    Add(AllRoutes);
+  end
+  else
+  begin
+    // Clear all UdbHandles from AllRoutes
+    for AnUdbHandle in TmAllRoutes(AllRoutes).Items do
+      FreeAndNil(AnUdbHandle);
+    TmAllRoutes(AllRoutes).Items.Clear;
+  end;
+  // Need locations
+  Locations := GetItem('mLocations');
+
+  AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, false);
+  RoutePointList := TList<TLocation>.Create;
+  try
+    // Add begin
+    TmLocations(Locations).GetRoutePoints(1, RoutePointList);
+    ALocation := RoutePointList[0];
+    AnUdbHandle.Add(TUdbDir.Create(ALocation));
+
+    // Add intermediates
+    for Index := 0 to SubClasses.Count -1 do
+    begin
+      GpxRptNode := TXmlVSNode(SubClasses.Objects[Index]);
+      Coords.FromAttributes(GpxRptNode.AttributeList);
+      AnUdbHandle.Add(TUdbDir.Create(SubClasses[Index], Coords.Lat, Coords.Lon));
+    end;
+
+    // Add End
+    TmLocations(Locations).GetRoutePoints(2, RoutePointList);
+    ALocation := RoutePointList[0];
+    AnUdbHandle.Add(TUdbDir.Create(ALocation));
+
+    TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
+
+    // The RoutePreferences need to be recreated for the XT2
+    if (CalcModel = TZumoModel.XT2) then
+      SetRoutePrefs_XT2(2); // Begin and End
+  finally
     RoutePointList.Free;
   end;
 end;
