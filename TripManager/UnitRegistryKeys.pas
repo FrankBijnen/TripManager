@@ -14,6 +14,8 @@ const
   Reg_ZumoModel               = 'ZumoModel';
   Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   Reg_AllowGrouping           = 'AllowGrouping';
+  Reg_AddSubClasses           = 'AddSubClasses';
+
   //XT2
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
   Reg_VehicleProfileHash          = 'VehicleProfileHash';
@@ -133,6 +135,7 @@ begin
     ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), GetRegistry(Reg_ZumoModel, '')));
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
+    AddSubClasses := GetRegistry(Reg_AddSubClasses, true);
 
     // XT2 Defaults
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);

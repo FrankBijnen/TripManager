@@ -591,7 +591,7 @@ type
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(ALocation: TLocation); reintroduce; overload;
+    constructor Create(ALocation: TLocation; LocType: byte); reintroduce; overload;
     constructor Create(GPXSubClass: string; Lat, Lon: double); reintroduce; overload;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
@@ -696,7 +696,9 @@ type
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
     function GetZumoModel: TZumoModel;
+    function GetCalcModel(AModel: TZumoModel): TZumoModel;
     function GetIsCalculatedModel: TZumoModel;
+    function InitAllRoutes: TBaseItem;
     procedure CreateTemplate_XT(const TripName: string);
     procedure CreateTemplate_XT2(const TripName: string);
   public
@@ -720,6 +722,7 @@ type
     procedure SetRoutePrefs_XT2(ViaCount: integer);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
     procedure TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil);
+    procedure SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil);
 
     procedure CreateTemplate(const AModel: TZumoModel; TripName: string);
     procedure SaveAsGPX(const GPXFile: string);
@@ -2186,7 +2189,7 @@ begin
   FUdbDirStatus := TUdbDirStatus.udsUnchecked;
 end;
 
-constructor TUdbDir.Create(ALocation: TLocation);
+constructor TUdbDir.Create(ALocation: TLocation; LocType: byte);
 var
   AmScPosn: TmScPosn;
 begin
@@ -2202,6 +2205,9 @@ begin
   FValue.Lat := Swap32(AmScPosn.FValue.Lat);
   FValue.Lon := Swap32(AmScPosn.FValue.Lon);
   FValue.SubClass.MapSegment := Swap32($00000180);
+//TODO: The lefmost byte keeps swapping 00, 01, 02.
+//      Investigate. For now stick with 00. Gets recalculated
+//  FValue.SubClass.RoadId := Swap32($00f0ffff + (LocType shl 24));
   FValue.SubClass.RoadId := Swap32($00f0ffff);
   FillCompressedLatLon;
   FValue.Unknown1[0] := Swap32($51590469);
@@ -2217,18 +2223,17 @@ begin
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
   FValue.SubClass.Init(GPXSubClass);
-//  FillChar(FValue.SubClass, SizeOf(FValue.SubClass), 0);
-//  FValue.SubClass.RoadId := $FFFFFFFF;
 
   FValue.Unknown1[0] := Swap32($51590469);
 
+//TODO: Figure out how time works
 //  if (FValue.SubClass.PointType = $1f) then
 //    FValue.Unknown1[1] := Swap(FValue.SubClass.Time);
 //  FValue.Unknown1[2] := Swap32($00000000);
 
   if (FValue.SubClass.PointType = $1f) then
-    FValue.Unknown1[1] := Swap32($00000000);
-  FValue.Unknown1[2] := Swap32($00000000);
+    FValue.Unknown1[1] := $00000000;
+  FValue.Unknown1[2] := $00000000;
 end;
 
 procedure TUdbDir.WritePrefix(AStream: TMemoryStream);
@@ -3048,32 +3053,16 @@ var
   Index: integer;
   ViaCount: integer;
   RoutePointList: TList<TLocation>;
-
   ALocation: TLocation;
   Locations: TBaseItem;
-
   Location: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
-
 begin
   // If the model is not supplied, try to get it from the data
-  CalcModel := AModel;
-  if (CalcModel = TZumoModel.Unknown) then
-    CalcModel := GetZumoModel;
+  CalcModel := GetCalcModel(AModel);
 
-  AllRoutes := GetItem('mAllRoutes');
-  if not Assigned(AllRoutes) then
-  begin
-    AllRoutes := TmAllRoutes.Create;
-    Add(AllRoutes);
-  end
-  else
-  begin
-    // Clear all UdbHandles from AllRoutes
-    for AnUdbHandle in TmAllRoutes(AllRoutes).Items do
-      FreeAndNil(AnUdbHandle);
-    TmAllRoutes(AllRoutes).Items.Clear;
-  end;
+  // All Routes
+  AllRoutes := InitAllRoutes;
 
   // Need locations
   Locations := GetItem('mLocations');
@@ -3110,7 +3099,7 @@ begin
       begin
         TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
         for ALocation in RoutePointList do
-          AnUdbHandle.Add(TUdbDir.Create(ALocation));
+          AnUdbHandle.Add(TUdbDir.Create(ALocation, 0));
       end;
 
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
@@ -3138,23 +3127,11 @@ var
   Coords: TCoords;
 begin
   // If the model is not supplied, try to get it from the data
-  CalcModel := AModel;
-  if (CalcModel = TZumoModel.Unknown) then
-    CalcModel := GetZumoModel;
+  CalcModel := GetCalcModel(AModel);
 
-  AllRoutes := GetItem('mAllRoutes');
-  if not Assigned(AllRoutes) then
-  begin
-    AllRoutes := TmAllRoutes.Create;
-    Add(AllRoutes);
-  end
-  else
-  begin
-    // Clear all UdbHandles from AllRoutes
-    for AnUdbHandle in TmAllRoutes(AllRoutes).Items do
-      FreeAndNil(AnUdbHandle);
-    TmAllRoutes(AllRoutes).Items.Clear;
-  end;
+  // All Routes
+  AllRoutes := InitAllRoutes;
+
   // Need locations
   Locations := GetItem('mLocations');
 
@@ -3164,7 +3141,7 @@ begin
     // Add begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation));
+    AnUdbHandle.Add(TUdbDir.Create(ALocation, 0));
 
     // Add intermediates
     for Index := 0 to SubClasses.Count -1 do
@@ -3177,7 +3154,7 @@ begin
     // Add End
     TmLocations(Locations).GetRoutePoints(2, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation));
+    AnUdbHandle.Add(TUdbDir.Create(ALocation, 1));
 
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 
@@ -3185,6 +3162,119 @@ begin
     if (CalcModel = TZumoModel.XT2) then
       SetRoutePrefs_XT2(2); // Begin and End
   finally
+    RoutePointList.Free;
+  end;
+end;
+
+procedure TTripList.SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil);
+var
+  CalcModel: TZumoModel;
+  AllRoutes: TBaseItem;
+  Index: integer;
+  ViaCount, RoutePtCount: integer;
+  RoutePointList: TList<TLocation>;
+  ALocation: TLocation;
+  Locations: TBaseItem;
+  Location: TBaseItem;
+  AnUdbHandle: TmUdbDataHndl;
+  FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
+  CMapSegRoad: string;
+  Coords: TCoords;
+begin
+  // If the model is not supplied, try to get it from the data
+  CalcModel := GetCalcModel(AModel);
+
+  // All Routes
+  AllRoutes := InitAllRoutes;
+
+  // Need locations
+  Locations := GetItem('mLocations');
+
+ // Count from already assigned Locations
+  ViaCount := 0;
+  if not Assigned(Locations) then
+    exit;
+
+  for Location in TmLocations(Locations).Locations do
+  begin
+    if (Location is TmAttr) and
+       (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
+      Inc(ViaCount);
+  end;
+
+  // At least a begin and end point needed. So at least 1 UdbHandle
+  if (ViaCount < 2) then
+    exit;
+
+  FirstRtePt := TXmlVSNodeList(RtePts).FirstChild;
+  RoutePointList := TList<TLocation>.Create;
+  try
+    for Index := 1 to ViaCount -1 do
+    begin
+      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, false);
+      ScanRtePt := FirstRtePt;
+
+      // Add udb's for all Via and Shaping found in Locations.
+      // Add Subclasses from <gpxx:rpt>. Will be named 'point'
+      TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
+      for RoutePtCount := 0 to RoutePointList.Count -2 do
+      begin
+        ALocation := RoutePointList[RoutePtCount];
+        AnUdbHandle.Add(TUdbDir.Create(ALocation, 1));
+
+        while (ScanRtePt <> nil) do
+        begin
+          if (SameText(ALocation.LocationTmName.AsString, FindSubNodeValue(ScanRtePt, 'name'))) then
+            break;
+          ScanRtePt := ScanRtePt.NextSibling;
+        end;
+
+        if (ScanRtePt = nil) then // Cant be
+          continue;
+        FirstRtePt := ScanRtePt; // restart search here
+
+        ScanGpxxRptNode := GetFirstExtensionsNode(ScanRtePt);
+        while (ScanGpxxRptNode <> nil) do
+        begin
+          CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
+          if (CMapSegRoad <> '') then
+          begin
+            CMapSegRoad := Copy(CMapSegRoad, 5);
+            if (Copy(CMapSegRoad, 17, 4) = '2114') then
+            begin
+              CMapSegRoad[17] := '1';
+              CMapSegRoad[18] := 'F';
+            end;
+            if (Copy(CMapSegRoad, 17, 4) = '2117') then
+            begin
+              CMapSegRoad[29] := '0';
+              CMapSegRoad[30] := '0';
+              CMapSegRoad[31] := '0';
+              CMapSegRoad[32] := '0';
+            end;
+            Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
+            AnUdbHandle.Add(TUdbDir.Create(CMapSegRoad, Coords.Lat, Coords.Lon));
+          end;
+          ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+        end;
+      end;
+
+      // Add end route point
+      ALocation := RoutePointList[RoutePointList.Count -1];
+      if (Index < ViaCount -1) then
+        AnUdbHandle.Add(TUdbDir.Create(ALocation, 1))
+      else
+        AnUdbHandle.Add(TUdbDir.Create(ALocation, 2));
+
+      // Add to Allroutes
+      TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
+    end;
+
+    // The RoutePreferences need to be recreated for the XT2
+    if (CalcModel = TZumoModel.XT2) then
+      SetRoutePrefs_XT2(ViaCount);
+  finally
+
     RoutePointList.Free;
   end;
 end;
@@ -3225,6 +3315,13 @@ begin
   end;
 end;
 
+function TTripList.GetCalcModel(AModel: TZumoModel): TZumoModel;
+begin
+  result := AModel;
+  if (result = TZumoModel.Unknown) then
+    result := GetZumoModel;
+end;
+
 // Get the model where the trip is calculated for. By checking for the magic number
 function TTripList.GetIsCalculatedModel: TZumoModel;
 var
@@ -3242,6 +3339,25 @@ begin
   begin
     if ((AnUdbHandle.FValue.CalcStatus) = CalculationMagic[AModel]) then
       exit(AModel);
+  end;
+end;
+
+function TTripList.InitAllRoutes: TBaseItem;
+var
+  AnUdbHandle:  TmUdbDataHndl;
+begin
+  result := GetItem('mAllRoutes');
+  if not Assigned(result) then
+  begin
+    result := TmAllRoutes.Create;
+    Add(result);
+  end
+  else
+  begin
+    // Clear all UdbHandles from AllRoutes
+    for AnUdbHandle in TmAllRoutes(result).Items do
+      FreeAndNil(AnUdbHandle);
+    TmAllRoutes(result).Items.Clear;
   end;
 end;
 

@@ -132,6 +132,8 @@ type
     procedure StripRtePt(const RtePtNode: TXmlVSNode);
     procedure StripRte(const RteNode: TXmlVSNode);
 {$IFDEF TRIPOBJECTS}
+    function GetTotalDistance(const ATripName: string): double;
+    function BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
     function CreateLocations(RtePts: TXmlVSNodeList): integer;
     procedure CreateTrip_XT(const TripName, CalculationMode, TransportMode: string;
                             ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
@@ -140,9 +142,6 @@ type
                              ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 {$ENDIF}
   protected
-    function GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
-    function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
-    function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
     function MapSegRoadExclBit(const ASubClass: string): string;
     procedure BuildSubClasses(const ARtePt: TXmlVSNode;
                               const DistOKMeters: double;
@@ -344,34 +343,6 @@ begin
   FWayPointsProcessedList.Clear;
 end;
 
-function TGPXfile.GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
-var
-  ExtensionsNode, RoutePointExtensionNode: TXmlVSNode;
-begin
-  ExtensionsNode := ARtePt.Find('extensions');
-  if (ExtensionsNode = nil) then
-    exit(nil);
-
-  RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
-  if (RoutePointExtensionNode = nil) then
-    exit(nil);
-
-  if (LastChild) then
-    exit(RoutePointExtensionNode.LastChild);  // Should be a 'gpxx:rpt'. Need to check?
-
-  result := RoutePointExtensionNode.Find('gpxx:rpt')
-end;
-
-function TGPXfile.GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
-begin
-  result := GetExtensionsNode(ARtePt, false);
-end;
-
-function TGPXfile.GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
-begin
-  result := GetExtensionsNode(ARtePt, true);
-end;
-
 function TGPXfile.MapSegRoadExclBit(const ASubClass: string): string;
 var
   RoadIdHex: Cardinal;
@@ -397,13 +368,8 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
         CMapSegRoad := MapSegRoadExclBit(CMapSegRoad)
       else
       begin
-        CMapSegRoad := Copy(CMapSegRoad, 5);
-//        if (Copy(CMapSegRoad, 17, 4) = '2116') or
-//           (Copy(CMapSegRoad, 17, 4) = '2117') then
-//        begin
-//          CMapSegRoad := Copy(CMapSegRoad, 1, 16) + '21140000000000000000';
-//        end;
 
+        CMapSegRoad := Copy(CMapSegRoad, 5);
         if (Copy(CMapSegRoad, 17, 4) = '2116') then
         begin
           KeepBegin := ((scFirst in SCType) and
@@ -411,19 +377,15 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
           if not KeepBegin then
             exit;
         end;
+
         if (Copy(CMapSegRoad, 17, 4) = '2117') then
         begin
           KeepEnd :=  ((ScLast in SCType) and
                        (ScLast in CurType));
           if not KeepEnd then
             exit;
-//          begin
-//            CMapSegRoad[17] := '1';
-//            CMapSegRoad[18] := 'F';
-//            CMapSegRoad[19] := '0';
-//            CMapSegRoad[20] := '0';
-//          end;
         end;
+
       end;
       FSubClassList.AddObject(CMapSegRoad, GpxxRptNode);
     end;
@@ -2150,6 +2112,57 @@ begin
 end;
 
 {$IFDEF TRIPOBJECTS}
+function TGPXFile.GetTotalDistance(const ATripName: string): double;
+var
+  ATrack: TXmlVSNode;
+begin
+  result := 0;
+  if (ProcessOptions.PreserveTrackToRoute) or
+     (ProcessOptions.AddSubClasses) then
+  begin
+    for ATrack in TrackList do
+    begin
+      if (SameText(FindSubNodeValue(ATrack, 'desc'), 'rte')) and
+         (SameText(ATrack.NodeName, ATripName)) then
+      begin
+        result := StrToFloatDef(FindSubNodeValue(ATrack, 'TotalDistance'), 0);
+        break;
+      end;
+    end;
+  end;
+end;
+
+function TGPXFile.BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
+var
+  ARtePt: TXmlVSNode;
+  FirstRtePt, LastRtePt: TXmlVSNode;
+  ScType: TSubClassType;
+begin
+  SubClassList.Clear;
+
+  // From to segment
+  FirstRtePt := RtePts.First;
+  LastRtePt := RtePts.Last;
+  if (LastRtePt <> nil) then
+    LastRtePt := LastRtePt.PreviousSibling;
+
+  // Build SubClass list.
+  for ARtePt in RtePts do
+  begin
+    ScType := [];
+    if (ProcessOptions.PreserveTrackToRoute) then
+    begin
+      if (ARtePt = FirstRtePt) then
+        Include(ScType, scFirst);
+      if (ARtePt = LastRtePt) then
+        Include(ScType, ScLast);
+    end;
+    BuildSubClasses(ARtePt, 0, ScType);
+  end;
+
+  result := (SubClassList.Count > 2); // Need more than a start and end
+end;
+
 function TGPXFile.CreateLocations(RtePts: TXmlVSNodeList): integer;
 var
   Locations: TmLocations;
@@ -2237,55 +2250,17 @@ procedure TGPXFile.CreateTrip_XT(const TripName, CalculationMode, TransportMode:
                                  ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 var
   ViaPointCount: integer;
-  ARtePt, ATrack: TXmlVSNode;
-  FirstRtePt, LastRtePt: TXmlVSNode;
   TotalDistance: double;
-  CanPreserve: boolean;
-  ScType: TSubClassType;
+  HasSubClasses: boolean;
 begin
-  TotalDistance := 0;
-  CanPreserve := (ProcessOptions.PreserveTrackToRoute);
-  if (CanPreserve) then
-  begin
-    // Create AllRoutes from BC calculation
-    SubClassList.Clear;
-
-    // From to segment
-    FirstRtePt := RtePts.First;
-    LastRtePt := RtePts.Last;
-    if (LastRtePt <> nil) then
-      LastRtePt := LastRtePt.PreviousSibling;
-
-    // Build SubClass list.
-    for ARtePt in RtePts do
-    begin
-      ScType := [];
-      if (ARtePt = FirstRtePt) then
-        Include(ScType, scFirst);
-      if (ARtePt = LastRtePt) then
-        Include(ScType, ScLast);
-
-      BuildSubClasses(ARtePt, 0, ScType);
-    end;
-    CanPreserve := (SubClassList.Count > 1);
-
-    // Get total distance of track
-    if (CanPreserve) then
-    begin
-      for ATrack in TrackList do
-      begin
-        if (SameText(FindSubNodeValue(ATrack, 'desc'), 'rte')) and
-           (SameText(ATrack.NodeName, TripName)) then
-        begin
-          TotalDistance := StrToFloatDef(FindSubNodeValue(ATrack, 'TotalDistance'), 0);
-          break;
-        end;
-      end;
-    end;
-  end;
+  TotalDistance := GetTotalDistance(TripName);
+  HasSubClasses := false;
+  if (ProcessOptions.PreserveTrackToRoute) or
+     (ProcessOptions.AddSubClasses) then
+    HasSubClasses := BuildSubClassesList(RtePts);
 
   FTripList.AddHeader(THeader.Create);
-  FTripList.Add(TmPreserveTrackToRoute.Create(CanPreserve));
+  FTripList.Add(TmPreserveTrackToRoute.Create(ProcessOptions.PreserveTrackToRoute and HasSubClasses));
   if (ProcessOptions.AllowGrouping) then
     FTripList.Add(TmParentTripId.Create(ParentTripId))
   else
@@ -2297,7 +2272,7 @@ begin
   FTripList.Add(TmIsRoundTrip.Create);
   FTripList.Add(TmParentTripName.Create(FBaseFile));
   FTripList.Add(TmOptimized.Create);
-  FTripList.Add(TmTotalTripTime.Create(Round(TotalDistance * 0.06)));
+  FTripList.Add(TmTotalTripTime.Create(Round(TotalDistance * 0.1))); // Just a guess.
   FTripList.Add(TmImported.Create);
   FTripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
   FTripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
@@ -2309,9 +2284,12 @@ begin
   FTripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
   FTripList.Add(TmTripName.Create(TripName));
 
-  if (CanPreserve) then
-    // Create AllRoutes from BC calculation
+  if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
+    // Create Trip from BC calculation
     FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
+  else if (ProcessOptions.AddSubClasses and HasSubClasses and (ViaPointCount >= 2)) then
+    // Create AllRoutes from BC calculation
+    FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
   else
     // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
     FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
@@ -2323,9 +2301,18 @@ var
   TmpStream: TMemoryStream;
   Uid: TGuid;
   ViaPointCount: integer;
+  TotalDistance: double;
+  HasSubClasses: boolean;
 begin
   TmpStream := TMemoryStream.Create;
   try
+    TotalDistance := GetTotalDistance(TripName);
+    //TODO. Need info on how to modify trip
+    HasSubClasses := false;
+    if (ProcessOptions.PreserveTrackToRoute) or
+       (ProcessOptions.AddSubClasses) then
+      HasSubClasses := BuildSubClassesList(RtePts);
+
     FTripList.AddHeader(THeader.Create);
 
     PrepStream(TmpStream, [$0000]);
@@ -2338,7 +2325,7 @@ begin
     FTripList.Add(TmDayNumber.Create);
     FTripList.Add(TmTripDate.Create);
     FTripList.Add(TmOptimized.Create);
-    FTripList.Add(TmTotalTripTime.Create);
+    FTripList.Add(TmTotalTripTime.Create(Round(TotalDistance * 0.1))); // Just a guess.
     FTripList.Add(TmTripName.Create(TripName));
     FTripList.Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
     FTripList.Add(TmParentTripId.Create); // No use for the XT2
@@ -2361,7 +2348,7 @@ begin
     end;
     FTripList.Add(TmVersionNumber.Create(4, $10));
     FTriplist.Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
-    FTripList.Add(TmTotalTripDistance.Create);
+    FTripList.Add(TmTotalTripDistance.Create(TotalDistance));
     FTripList.Add(TByteItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
     FTriplist.Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     FTripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
@@ -2372,8 +2359,16 @@ begin
     FTriplist.Add(TmRoutePreferencesAdventurousMode.Create);
     FTripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     ViaPointCount := CreateLocations(RtePts);
-    // Create dummy AllRoutes, and complete RoutePreferences
-    FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
+
+    if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
+      // Create Trip from BC calculation
+      FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
+    else if (ProcessOptions.AddSubClasses and HasSubClasses and (ViaPointCount >= 2)) then
+      // Create AllRoutes from BC calculation
+      FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
+    else
+      // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
+      FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
   finally
     TmpStream.Free;
   end;

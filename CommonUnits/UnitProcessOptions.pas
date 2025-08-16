@@ -135,6 +135,7 @@ type
     AvoidancesChangedTimeAtSave: Cardinal;    // XT2
     AllowGrouping: boolean;                   // XT1. (Not used anymore for XT2)
     PreserveTrackToRoute: boolean;            // XT1 and XT2
+    AddSubClasses: boolean;                   // XT1 and XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -239,7 +240,8 @@ begin
   VehicleProfileName := XT2_VehicleProfileName;
   AvoidancesChangedTimeAtSave := 0;
   AllowGrouping := true;
-  PreserveTrackToRoute := true;
+  PreserveTrackToRoute := false;
+  AddSubClasses := false;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}

@@ -214,6 +214,7 @@ begin
     CurRow := 1;
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating trips-');
     AddGridLine(GridZumoSettings, CurRow, Reg_ScPosn_Unknown1,             '0', '');
+    AddGridLine(GridZumoSettings, CurRow, Reg_AddSubClasses,               'True', 'Add <subclass> from GPX');
     AddGridLine(GridZumoSettings, CurRow, '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow, Reg_AllowGrouping,               'True', 'Group trips from the same GPX');

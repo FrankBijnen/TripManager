@@ -1,6 +1,8 @@
 unit UnitGpxDefs;
 
 interface
+uses
+  UnitVerySimpleXml;
 
 const
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
@@ -22,12 +24,15 @@ type
   TGPXFuncArray = Array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
 
+function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+
 implementation
 
 uses
   System.SysUtils,
-  UnitVerySimpleXml,
   UnitStringUtils;
+
 var
   FormatSettings: TFormatSettings;
 
@@ -44,6 +49,34 @@ begin
     Lat := StrToFloat(Find('lat').Value, FormatSettings);
     Lon := StrToFloat(Find('lon').Value, FormatSettings);
   end;
+end;
+
+function GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
+var
+  ExtensionsNode, RoutePointExtensionNode: TXmlVSNode;
+begin
+  ExtensionsNode := ARtePt.Find('extensions');
+  if (ExtensionsNode = nil) then
+    exit(nil);
+
+  RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
+  if (RoutePointExtensionNode = nil) then
+    exit(nil);
+
+  if (LastChild) then
+    exit(RoutePointExtensionNode.LastChild);  // Should be a 'gpxx:rpt'. Need to check?
+
+  result := RoutePointExtensionNode.Find('gpxx:rpt')
+end;
+
+function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetExtensionsNode(ARtePt, false);
+end;
+
+function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetExtensionsNode(ARtePt, true);
 end;
 
 initialization
