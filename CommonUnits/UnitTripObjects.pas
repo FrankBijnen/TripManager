@@ -1,6 +1,7 @@
 ﻿unit unitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
+{.$DEFINE ENABLE_TREAD}
 interface
 
 uses
@@ -19,7 +20,11 @@ const
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
+{$IFDEF ENABLE_TREAD}
+  TZumoModel        = (XT, XT2, Tread, Unknown);
+{$ELSE}
   TZumoModel        = (XT, XT2, Unknown);
+{$ENDIF}
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmDirect           = $04,
@@ -219,12 +224,30 @@ type
   end;
 
   // Type 08 (ScPosn)
+{$IFDEF ENABLE_TREAD}
+  TPosnValue = packed record
+    case ScnSize:            Cardinal of
+    $0c000000:  // is swap32(12)
+      (
+        Unknown1:                Cardinal;
+        Lat:                     integer;
+        Lon:                     integer;
+      );
+    $10000000: // is swap32(16)
+      (
+        Unknown1_16: array[0..1] of Cardinal;
+        Lat_16:                     integer;
+        Lon_16:                     integer;
+      );
+{$ELSE}
   TPosnValue = packed record
     ScnSize:          Cardinal;
     Unknown1:         Cardinal;
     Lat:              integer;
     Lon:              integer;
-  end;
+{$ENDIF}
+
+ end;
   TmScPosn = class(TBaseDataItem)
   private
     FValue:            TPosnValue;
@@ -629,8 +652,13 @@ type
     procedure SwapCardinals;
   end;
 
+{$IFDEF ENABLE_TREAD}
+const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
+      CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
+{$ELSE}
 const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1288);      // Default unknown to XT size
       CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $00000000);
+{$ENDIF}
 
 type
   TUdbHandleValue = packed record
@@ -775,11 +803,32 @@ function CoordsAsPosn(const LatLon: string): TPosnValue;
 var
   Lat, Lon: string;
 begin
+{$IFDEF ENABLE_TREAD}
+  case Swap32(result.ScnSize) of
+    16:
+      begin
+        FillChar(result, SizeOf(result), 0);
+        result.ScnSize := Swap32(SizeOf(result.Unknown1_16) + Sizeof(result.Lat_16) + SizeOf(result.Lon_16));
+        ParseLatLon(LatLon, Lat, Lon);
+        result.Lat_16 := CoordAsInt(UnitStringUtils.CoordAsDec(Lat));
+        result.Lon_16 := CoordAsInt(UnitStringUtils.CoordAsDec(Lon));
+      end;
+    else
+    begin
+      FillChar(result, SizeOf(result), 0);
+      result.ScnSize := Swap32(SizeOf(result.Unknown1) + Sizeof(result.Lat) + SizeOf(result.Lon));
+      ParseLatLon(LatLon, Lat, Lon);
+      result.Lat := CoordAsInt(UnitStringUtils.CoordAsDec(Lat));
+      result.Lon := CoordAsInt(UnitStringUtils.CoordAsDec(Lon));
+    end;
+  end;
+{$ELSE}
   FillChar(result, SizeOf(result), 0);
   result.ScnSize := Swap32(SizeOf(result.Unknown1) + Sizeof(result.Lat) + SizeOf(result.Lon));
   ParseLatLon(LatLon, Lat, Lon);
   result.Lat := CoordAsInt(UnitStringUtils.CoordAsDec(Lat));
   result.Lon := CoordAsInt(UnitStringUtils.CoordAsDec(Lon));
+{$ENDIF}
 end;
 
 // For some reason the degree character ° is stored on the Zumo as 0xe0b0 and not just 0xb0
@@ -1294,20 +1343,62 @@ end;
 {*** ScPosn ***}
 constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal);
 begin
+{$IFDEF ENABLE_TREAD}
+  case AUnknown1 of
+    $05C79A00:
+      begin
+        inherited Create('mScPosn', SizeOf(FValue), dtPosn);
+        FValue.ScnSize := Swap32(SizeOf(FValue.Unknown1_16) + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16));
+        FValue.Unknown1_16[0] := AUnknown1;
+        FValue.Unknown1_16[1] := $00000000;
+        FValue.Lat_16 := (CoordAsInt(ALat));
+        FValue.Lon_16 := (CoordAsInt(ALon));
+      end
+    else
+    begin
+      inherited Create('mScPosn',
+                        SizeOf(FValue.ScnSize) + SizeOf(FValue.Unknown1) +
+                        Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
+                        dtPosn);
+      FValue.ScnSize      := Swap32(SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon));
+      FValue.Unknown1     := AUnknown1;
+      FValue.Lat          := (CoordAsInt(ALat));
+      FValue.Lon          := (CoordAsInt(ALon));
+    end;
+  end;
+{$ELSE}
   inherited Create('mScPosn', Sizeof(FValue), dtPosn);
   FValue.ScnSize := Swap32(SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon));
   FValue.Unknown1 := AUnknown1;
   FValue.Lat := (CoordAsInt(ALat));
   FValue.Lon := (CoordAsInt(ALon));
+{$ENDIF}
 end;
 
 procedure TmScPosn.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
   AStream.Read(FValue.ScnSize, SizeOf(FValue.ScnSize));
+{$IFDEF ENABLE_TREAD}
+  case Swap32(FValue.ScnSize) of
+    16:
+      begin
+        AStream.Read(FValue.Unknown1_16, SizeOf(FValue.Unknown1_16));
+        AStream.Read(FValue.Lat_16, SizeOf(FValue.Lat_16));
+        AStream.Read(FValue.Lon_16, SizeOf(FValue.Lon_16));
+      end;
+    else
+      begin
+        AStream.Read(FValue.Unknown1, SizeOf(FValue.Unknown1));
+        AStream.Read(FValue.Lat, SizeOf(FValue.Lat));
+        AStream.Read(FValue.Lon, SizeOf(FValue.Lon));
+      end;
+  end;
+{$ELSE}
   AStream.Read(FValue.Unknown1, SizeOf(FValue.Unknown1));
   AStream.Read(FValue.Lat, SizeOf(FValue.Lat));
   AStream.Read(FValue.Lon, SizeOf(FValue.Lon));
+{$ENDIF}
 end;
 
 destructor TmScPosn.Destroy;
@@ -1318,7 +1409,21 @@ end;
 procedure TmScPosn.WriteValue(AStream: TMemoryStream);
 begin
   inherited WriteValue(AStream);
+{$IFDEF ENABLE_TREAD}
+  case Swap32(FValue.ScnSize) of
+  12:
+    begin
+      AStream.Write(FValue.ScnSize, SizeOf(FValue.ScnSize));
+      AStream.Write(FValue.Unknown1, SizeOf(FValue.Unknown1));
+      AStream.Write(FValue.Lat, SizeOf(FValue.Lat));
+      AStream.Write(FValue.Lon, SizeOf(FValue.Lon));
+    end;
+  else
+    AStream.Write(FValue, SizeOf(FValue));
+  end;
+{$ELSE}
   AStream.Write(FValue, SizeOf(FValue));
+{$ENDIF}
 end;
 
 function TmScPosn.GetEditMode: TEditMode;
@@ -1328,16 +1433,51 @@ end;
 
 function TmScPosn.GetValue: string;
 begin
+{$IFDEF ENABLE_TREAD}
+  case Swap32(FValue.ScnSize) of
+    16:
+      begin
+        result := Format(Format('Unknown1: 0x%%s, Unknown2: 0x%%s, Lat: %s, Lon: %s', [Coord_Decimals, Coord_Decimals]),
+                        [IntToHex(FValue.Unknown1_16[0], 8),
+                         IntToHex(FValue.Unknown1_16[1], 8),
+                         CoordAsDec(FValue.Lat_16),
+                         CoordAsDec(FValue.Lon_16)], FloatFormatSettings);
+      end;
+    else
+      begin
+        result := Format(Format('Unknown: 0x%%s, Lat: %s, Lon: %s', [Coord_Decimals, Coord_Decimals]),
+                        [IntToHex(FValue.Unknown1, 8),
+                         CoordAsDec(FValue.Lat),
+                         CoordAsDec(FValue.Lon)], FloatFormatSettings);
+      end;
+  end;
+{$ELSE}
   result := Format(Format('Unknown: 0x%%s, Lat: %s, Lon: %s', [Coord_Decimals, Coord_Decimals]),
                   [IntToHex(FValue.Unknown1, 8),
                    CoordAsDec(FValue.Lat),
                    CoordAsDec(FValue.Lon)], FloatFormatSettings);
+{$ENDIF}
 end;
 
 function TmScPosn.GetMapCoords: string;
 begin
+{$IFDEF ENABLE_TREAD}
+  case Swap32(FValue.ScnSize) of
+    16:
+      begin
+        result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
+                         [CoordAsDec(FValue.Lat_16), CoordAsDec(FValue.Lon_16)], FloatFormatSettings);
+      end;
+    else
+      begin
+        result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
+                         [CoordAsDec(FValue.Lat), CoordAsDec(FValue.Lon)], FloatFormatSettings);
+      end;
+  end;
+{$ELSE}
   result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
                    [CoordAsDec(FValue.Lat), CoordAsDec(FValue.Lon)], FloatFormatSettings);
+{$ENDIF}
 end;
 
 procedure TmScPosn.SetMapCoords(ACoords: string);
@@ -2202,12 +2342,29 @@ begin
   Create(ALocation.LocationTmName.AsString);
 
   AmScPosn := ALocation.LocationTmScPosn;
+{$IFDEF ENABLE_TREAD}
+  case Swap32(AmScPosn.FValue.ScnSize) of
+    16:
+      begin
+        FValue.Lat := Swap32(AmScPosn.FValue.Lat_16);
+        FValue.Lon := Swap32(AmScPosn.FValue.Lon_16);
+      end
+    else
+    begin
+      FValue.Lat := Swap32(AmScPosn.FValue.Lat);
+      FValue.Lon := Swap32(AmScPosn.FValue.Lon);
+    end;
+  end;
+{$ELSE}
   FValue.Lat := Swap32(AmScPosn.FValue.Lat);
   FValue.Lon := Swap32(AmScPosn.FValue.Lon);
+{$ENDIF}
   FValue.SubClass.MapSegment := Swap32($00000180);
+
 //TODO: The lefmost byte keeps swapping 00, 01, 02.
 //      Investigate. For now stick with 00. Gets recalculated
 //  FValue.SubClass.RoadId := Swap32($00f0ffff + (LocType shl 24));
+
   FValue.SubClass.RoadId := Swap32($00f0ffff);
   FillCompressedLatLon;
   FValue.Unknown1[0] := Swap32($51590469);
@@ -3452,6 +3609,7 @@ begin
   end;
 end;
 
+//TODO Tread
 procedure TTripList.CreateTemplate(const AModel: TZumoModel; TripName: string);
 begin
   Clear;

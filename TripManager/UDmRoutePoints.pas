@@ -398,6 +398,7 @@ begin
       // Create Location
       Locations.AddLocatIon(TLocation.Create);
 
+      //TODO Tread
       if (ZumoModel = TZumoModel.XT2) then
       begin
         PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);

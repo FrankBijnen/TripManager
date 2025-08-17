@@ -2163,6 +2163,7 @@ begin
   result := (SubClassList.Count > 2); // Need more than a start and end
 end;
 
+//TODO Tread
 function TGPXFile.CreateLocations(RtePts: TXmlVSNodeList): integer;
 var
   Locations: TmLocations;
@@ -2295,6 +2296,7 @@ begin
     FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
 end;
 
+//TODO Tread. Create copy
 procedure TGPXFile.CreateTrip_XT2(const TripName, CalculationMode, TransportMode: string;
                                   ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 var
