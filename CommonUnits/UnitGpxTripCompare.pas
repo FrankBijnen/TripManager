@@ -628,17 +628,19 @@ begin
   ScanTrkPt := ScanFromTrkPt;
   while (ScanTrkPt <> nil) do     // TrkPt loop
   begin
-    ScanCoords.FromAttributes(ScanTrkPt.AttributeList);
-    ScanDist := CoordDistance(FromCoords, ScanCoords, TDistanceUnit.duKm);
-    if (ScanDist < result) then
+    if (ScanTrkPt.Name = 'trkpt') then
     begin
-      result := ScanDist;
-      BestScanTrkPt := ScanTrkPt;
+      ScanCoords.FromAttributes(ScanTrkPt.AttributeList);
+      ScanDist := CoordDistance(FromCoords, ScanCoords, TDistanceUnit.duKm);
+      if (ScanDist < result) then
+      begin
+        result := ScanDist;
+        BestScanTrkPt := ScanTrkPt;
+      end;
+
+      if (ScanTrkPt = ScanToTrkPt) then
+        exit;
     end;
-
-    if (ScanTrkPt = ScanToTrkPt) then
-      exit;
-
     ScanTrkPt := ScanTrkPt.NextSibling;
   end;
 end;

@@ -348,7 +348,7 @@ var
   RoadIdHex: Cardinal;
 begin
   RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and $ffff7fbf; // $11ff7fbf; ?
-  result := Copy(ASubClass, 5, 8) + IntToHex(RoadIdHex, 8);
+  result := UpperCase(Copy(ASubClass, 5, 8) + IntToHex(RoadIdHex, 8));
 end;
 
 procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;

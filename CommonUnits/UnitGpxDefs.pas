@@ -44,10 +44,16 @@ end;
 
 procedure TCoords.FromAttributes(Attributes: TObject);
 begin
-  with TXmlVSAttributeList(Attributes) do
-  begin
-    Lat := StrToFloat(Find('lat').Value, FormatSettings);
-    Lon := StrToFloat(Find('lon').Value, FormatSettings);
+  try
+    if Assigned(Attributes) and
+       (TXmlVSAttributeList(Attributes).Count > 0) then
+    with TXmlVSAttributeList(Attributes) do
+    begin
+      Lat := StrToFloat(Find('lat').Value, FormatSettings);
+      Lon := StrToFloat(Find('lon').Value, FormatSettings);
+    end;
+  except
+    FillChar(Self, SizeOf(Self), 0);
   end;
 end;
 
