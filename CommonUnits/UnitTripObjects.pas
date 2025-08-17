@@ -1,7 +1,8 @@
 ﻿unit unitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
-{.$DEFINE ENABLE_TREAD}
+{$DEFINE ENABLE_TREAD}
+{.$DEFINE NO_CALC_REQUIRED}
 interface
 
 uses
@@ -17,6 +18,8 @@ const
   XT2_VehicleProfileTruckType       = '7';
   XT2_AvoidancesChangedTimeAtSave   = '';
   XT2_VehicleProfileName            = 'z' + #0363 + 'mo Motorcycle';
+//TODO TREAD
+  TREAD_VehicleProfileGuid          = 'c21c922c-553f-4783-85f8-c0a13f52d960';
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
@@ -3368,7 +3371,11 @@ begin
   try
     for Index := 1 to ViaCount -1 do
     begin
+{$IFDEF NO_CALC_REQUIRED}
       AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, false);
+{$ELSE}
+      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
+{$ENDIF}
       ScanRtePt := FirstRtePt;
 
       // Add udb's for all Via and Shaping found in Locations.
@@ -3546,6 +3553,45 @@ begin
   ForceRecalc(TZumoModel.XT, 2);
 end;
 
+//TODO Tread. Create copy
+(*
+THeader
+mGreatRidesInfoMap
+TmAvoidancesChangedTimeAtSave
+mTrackToRouteInfoMap
+TmIsDisplayable
+mExploreUuid  <== Xt2 diff
+TmOptimized
+TmDayNumber
+TmParentTripName
+mShowLastStopAsShapingPoint
+TmTotalTripDistance
+TmTotalTripTime
+mVehicleProfileTruckType
+TmAvoidancesChanged
+mVehicleProfileName
+mVehicleProfileHash
+TmParentTripId
+mVehicleId
+TmTripDate
+TmImported
+mRoutePreferencesAdventurousHillsAndCurves
+TmIsRoundTrip
+TmRoutePreference
+TmTransportationMode
+TmFileName
+CreateLocations <=
+TmPartOfSplitRoute
+mRoutePreferencesAdventurousPopularPaths
+TmAllRoutes
+TmRoutePreferences
+mIsDeviceRoute
+mRoutePreferencesAdventurousScenicRoads
+mVehicleProfileGuid  TREAD = 'c21c922c-553f-4783-85f8-c0a13f52d960'
+TmTripName
+mRoutePreferencesAdventurousMode
+TmVersionNumber (4, $10));
+*)
 procedure TTripList.CreateTemplate_XT2(const TripName: string);
 var
   TmpStream: TMemoryStream;

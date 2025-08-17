@@ -2164,6 +2164,17 @@ begin
 end;
 
 //TODO Tread
+(*
+TmisTravelapseDestination
+TmShapingRadius
+mShapingCenter
+TmDuration
+TmArrival
+TmScPosn
+TmAttr
+TmAddress
+TmName
+*)
 function TGPXFile.CreateLocations(RtePts: TXmlVSNodeList): integer;
 var
   Locations: TmLocations;
@@ -2297,6 +2308,44 @@ begin
 end;
 
 //TODO Tread. Create copy
+(*
+THeader
+mGreatRidesInfoMap
+TmAvoidancesChangedTimeAtSave
+mTrackToRouteInfoMap
+TmIsDisplayable
+mExploreUuid  <== Xt2 diff
+TmOptimized
+TmDayNumber
+TmParentTripName
+mShowLastStopAsShapingPoint
+TmTotalTripDistance
+TmTotalTripTime
+mVehicleProfileTruckType
+TmAvoidancesChanged
+mVehicleProfileName
+mVehicleProfileHash
+TmParentTripId
+mVehicleId
+TmTripDate
+TmImported
+mRoutePreferencesAdventurousHillsAndCurves
+TmIsRoundTrip
+TmRoutePreference
+TmTransportationMode
+TmFileName
+CreateLocations <=
+TmPartOfSplitRoute
+mRoutePreferencesAdventurousPopularPaths
+TmAllRoutes
+TmRoutePreferences
+mIsDeviceRoute
+mRoutePreferencesAdventurousScenicRoads
+mVehicleProfileGuid  TREAD = 'c21c922c-553f-4783-85f8-c0a13f52d960'
+TmTripName
+mRoutePreferencesAdventurousMode
+TmVersionNumber (4, $10));
+*)
 procedure TGPXFile.CreateTrip_XT2(const TripName, CalculationMode, TransportMode: string;
                                   ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
 var
@@ -2418,6 +2467,7 @@ begin
       end;
     end;
 
+    //TODO TREAD
     case ProcessOptions.ZumoModel of
       TZumoModel.XT:
         CreateTrip_XT(TripName, CalculationMode, TransportMode, ParentTripID, RtePts);

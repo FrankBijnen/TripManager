@@ -445,6 +445,7 @@ begin
     case GPXFunc of
       TGPXFunc.CreateTrips:
       begin
+        //TODO TREAD
         case ZumoModel of
           TZumoModel.XT,
           TZumoModel.XT2:;  // Fall thru
@@ -464,6 +465,7 @@ end;
 
 procedure TFrmTripManager.GuessModel(const FriendlyName: string);
 begin
+//TODO TREAD (add to combobox)
   CmbModel.ItemIndex := Ord(TZumoModel.Unknown);
   if (ContainsText(FriendlyName, XT2_Name)) then
     CmbModel.ItemIndex := Ord(TZumoModel.XT2)
