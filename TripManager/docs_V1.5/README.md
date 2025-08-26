@@ -36,6 +36,7 @@ Throughout the docs here the terms Way point, Via point and Shaping point are us
      <li><a href="WalkThroughs/11%20Using%20GeoCode.pdf">Using GeoCode (*New in V1.4*)</a></li>
      <li><a href="WalkThroughs/12%20Using%20Trip%20Editor.pdf">Using Trip Editor (*New in V1.4*)</a></li>
      <li><a href="WalkThroughs/13%20Import%20from,%20export%20to%20CSV%20or%20Excel.pdf">Import from, export to CSV or Excel (*New in V1.5*)</a></li>
+     <li><a href="WalkThroughs/14%20Fixing%20invalid%20current.gpx.pdf">Fixing invalid current.gpx (*New in V1.5*)</a></li>
 </ol><br>
 
 <h4>Technical info on the data formats.</h4>
