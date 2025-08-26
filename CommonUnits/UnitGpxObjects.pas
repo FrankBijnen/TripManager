@@ -184,13 +184,7 @@ type
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
     property TrackList: TXmlVSNodeList read FTrackList;
     property XmlDocument: TXmlVSDocument read FXmlDocument;
-
     property ProcessOptions: TProcessOptions read FProcessOptions write FProcessOptions;
-
-    class function Coord2Float(ACoord: LongInt): string;
-    class function Float2Coord(ACoord: Double): LongInt;
-    class function DegreesToRadians(Degrees: double): double;
-    class function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
     class procedure PerformFunctions(const AllFuncs: array of TGPXFunc;
                                      const GPXFile:string;
                                      const FunctionPrefs, SavePrefs: TNotifyEvent;
@@ -198,8 +192,6 @@ type
                                      const OutStringList: TStringList = nil;
                                      const SeqNo: cardinal = 0);
     class function CmdLinePostProcess(SetPrefsEvent: TNotifyEvent): boolean;
-
-
 end;
 
 implementation
@@ -214,9 +206,6 @@ uses
 
 // Not configurable
 const
-  EarthRadiusKm: Double = 6371.009;
-  EarthRadiusMi: Double = 3958.761;
-
   DebugComments: string = 'False';
   UniqueTracks: boolean = true;
   DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
@@ -226,59 +215,6 @@ const
 
 var
   FormatSettings: TFormatSettings;
-
-class function TGPXfile.DegreesToRadians(Degrees: double): double;
-begin
-  result := Degrees * PI / 180;
-end;
-
-class function TGPXfile.CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
-var
-  DLat, DLon, Lat1, Lat2, A, C: double;
-begin
-  DLat := DegreesToRadians(Coord2.Lat - Coord1.Lat);
-  DLon := DegreesToRadians(Coord2.Lon - Coord1.lon);
-
-  Lat1 := DegreesToRadians(Coord1.Lat);
-  Lat2 := DegreesToRadians(Coord2.Lat);
-
-  A := sin(DLat/2) * sin(DLat/2) +
-       sin(DLon/2) * sin(DLon/2) * cos(Lat1) * cos(Lat2);
-  C := 2 * ArcTan2(sqrt(A), sqrt(1-A));
-
-  if (DistanceUnit = TDistanceUnit.duMi) then
-    result := EarthRadiusMi * C
-  else
-    result := EarthRadiusKm * C;
-end;
-
-class function TGPXfile.Coord2Float(ACoord: LongInt): string;
-var
-  HCoord: Double;
-begin
-  result := IntToStr(ACoord);
-  HCoord := ACoord;
-  try
-    HCoord := HCoord * 360;
-    Result := result + ' * 360 = ' + FormatFloat('0', HCoord);
-    HCoord := HCoord / 4294967296; {2^32}
-    Result := result + ' / 2^32 = ' + FormatFloat('0.000000000000000', HCoord);
-  except
-    result := '';
-  end;
-end;
-
-class function TGPXfile.Float2Coord(ACoord: Double): LongInt;
-var
-  HCoord: Double;
-begin
-  try
-    HCoord := ACoord * 4294967296 {2^32} / 360;
-    result := round(HCoord);
-  except
-    result := 0;
-  end;
-end;
 
 function TGPXfile.DistanceFormat(Distance: double): string;
 begin
@@ -365,12 +301,10 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
     if (CMapSegRoad <> '') then
     begin
       if (scCompare in SCType) then
-        CMapSegRoad := MapSegRoadExclBit(CMapSegRoad)
+        CMapSegRoad := MapSegRoadExclBit(CMapSegRoad) // For compare only mapsegment and roadid
       else
       begin
-
-        CMapSegRoad := Copy(CMapSegRoad, 5);
-        if (Copy(CMapSegRoad, 17, 4) = '2116') then
+        if (Copy(CMapSegRoad, 22, 4) = '2116') then   // Complete subclass
         begin
           KeepBegin := ((scFirst in SCType) and
                         (scFirst in CurType));
@@ -378,7 +312,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
             exit;
         end;
 
-        if (Copy(CMapSegRoad, 17, 4) = '2117') then
+        if (Copy(CMapSegRoad, 22, 4) = '2117') then
         begin
           KeepEnd :=  ((ScLast in SCType) and
                        (ScLast in CurType));
@@ -2264,6 +2198,7 @@ var
   ViaPointCount: integer;
   TotalDistance: double;
   HasSubClasses: boolean;
+  TotalTripTime: TmTotalTripTime;
 begin
   TotalDistance := GetTotalDistance(TripName);
   HasSubClasses := false;
@@ -2284,7 +2219,8 @@ begin
   FTripList.Add(TmIsRoundTrip.Create);
   FTripList.Add(TmParentTripName.Create(FBaseFile));
   FTripList.Add(TmOptimized.Create);
-  FTripList.Add(TmTotalTripTime.Create(Round(TotalDistance * 0.1))); // Just a guess.
+  TotalTripTime := TmTotalTripTime.Create;
+  FTripList.Add(TotalTripTime);
   FTripList.Add(TmImported.Create);
   FTripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
   FTripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
@@ -2298,10 +2234,10 @@ begin
 
   if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
     // Create Trip from BC calculation
-    FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
+    TotalTripTime.AsCardinal := FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
   else if (ProcessOptions.AddSubClasses and HasSubClasses and (ViaPointCount >= 2)) then
     // Create AllRoutes from BC calculation
-    FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
+    TotalTripTime.AsCardinal := FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
   else
     // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
     FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
@@ -2354,11 +2290,12 @@ var
   ViaPointCount: integer;
   TotalDistance: double;
   HasSubClasses: boolean;
+  TotalTripTime: TmTotalTripTime;
 begin
   TmpStream := TMemoryStream.Create;
   try
     TotalDistance := GetTotalDistance(TripName);
-    //TODO. Need info on how to modify trip
+    //TODO. Update according to info JFHeath
     HasSubClasses := false;
     if (ProcessOptions.PreserveTrackToRoute) or
        (ProcessOptions.AddSubClasses) then
@@ -2376,7 +2313,8 @@ begin
     FTripList.Add(TmDayNumber.Create);
     FTripList.Add(TmTripDate.Create);
     FTripList.Add(TmOptimized.Create);
-    FTripList.Add(TmTotalTripTime.Create(Round(TotalDistance * 0.1))); // Just a guess.
+    TotalTripTime := TmTotalTripTime.Create;
+    FTripList.Add(TotalTripTime);
     FTripList.Add(TmTripName.Create(TripName));
     FTripList.Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
     FTripList.Add(TmParentTripId.Create); // No use for the XT2
@@ -2413,10 +2351,10 @@ begin
 
     if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
       // Create Trip from BC calculation
-      FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
+      TotalTripTime.AsCardinal := FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
     else if (ProcessOptions.AddSubClasses and HasSubClasses and (ViaPointCount >= 2)) then
       // Create AllRoutes from BC calculation
-      FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
+      TotalTripTime.AsCardinal := FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
     else
       // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
       FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);

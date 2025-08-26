@@ -2543,15 +2543,25 @@ var
                                                   SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
-    VlTripInfo.Strings.AddPair('UdbDir Unknown1', Format('%s %s %s %s',
-                                                         [IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[0]), 8),
-                                                          IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[1]), 8),
-                                                          IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[2]), 8),
-                                                          IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1[3]), 8)]
+    VlTripInfo.Strings.AddPair('UdbDir Unknown1', Format('%s',
+                                                         [IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1), 8)]
                                                         ),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Unknown1),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown1)));
+    VlTripInfo.Strings.AddPair('Time', Format('%d sec.', [AnUdbDir.UdbDirValue.Time]),
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.Time),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Time)));
+    VlTripInfo.Strings.AddPair('Border', Format('%d', [AnUdbDir.UdbDirValue.Border]),
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.Border),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Border)));
+    VlTripInfo.Strings.AddPair('UdbDir Unknown2', Format('%d bytes', [SizeOf(AnUdbDir.UdbDirValue.Unknown2)]
+                                                        ),
+                              TGridSelItem.Create(AnUdbDir,
+                                                  SizeOf(AnUdbDir.UdbDirValue.Unknown2),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown2)));
 
     VlTripInfo.Strings.AddPair('Address', AnUdbDir.DisplayName,
                               TGridSelItem.Create(AnUdbDir,

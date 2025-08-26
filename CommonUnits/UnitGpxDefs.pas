@@ -1,10 +1,13 @@
 unit UnitGpxDefs;
 
 interface
+
 uses
   UnitVerySimpleXml;
 
 const
+  EarthRadiusKm: Double = 6371.009;
+  EarthRadiusMi: Double = 3958.761;
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
   LatLonFormat = '%1.5f';
 
@@ -24,13 +27,16 @@ type
   TGPXFuncArray = Array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
 
+function Coord2Float(ACoord: LongInt): string;
+function Float2Coord(ACoord: Double): LongInt;
+function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
 function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 
 implementation
 
 uses
-  System.SysUtils,
+  System.SysUtils, System.Math,
   UnitStringUtils;
 
 var
@@ -55,6 +61,59 @@ begin
   except
     FillChar(Self, SizeOf(Self), 0);
   end;
+end;
+
+function Coord2Float(ACoord: LongInt): string;
+var
+  HCoord: Double;
+begin
+  result := IntToStr(ACoord);
+  HCoord := ACoord;
+  try
+    HCoord := HCoord * 360;
+    Result := result + ' * 360 = ' + FormatFloat('0', HCoord);
+    HCoord := HCoord / 4294967296; {2^32}
+    Result := result + ' / 2^32 = ' + FormatFloat('0.000000000000000', HCoord);
+  except
+    result := '';
+  end;
+end;
+
+function Float2Coord(ACoord: Double): LongInt;
+var
+  HCoord: Double;
+begin
+  try
+    HCoord := ACoord * 4294967296 {2^32} / 360;
+    result := round(HCoord);
+  except
+    result := 0;
+  end;
+end;
+
+function DegreesToRadians(Degrees: double): double;
+begin
+  result := Degrees * PI / 180;
+end;
+
+function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
+var
+  DLat, DLon, Lat1, Lat2, A, C: double;
+begin
+  DLat := DegreesToRadians(Coord2.Lat - Coord1.Lat);
+  DLon := DegreesToRadians(Coord2.Lon - Coord1.lon);
+
+  Lat1 := DegreesToRadians(Coord1.Lat);
+  Lat2 := DegreesToRadians(Coord2.Lat);
+
+  A := sin(DLat/2) * sin(DLat/2) +
+       sin(DLon/2) * sin(DLon/2) * cos(Lat1) * cos(Lat2);
+  C := 2 * ArcTan2(sqrt(A), sqrt(1-A));
+
+  if (DistanceUnit = TDistanceUnit.duMi) then
+    result := EarthRadiusMi * C
+  else
+    result := EarthRadiusKm * C;
 end;
 
 function GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;

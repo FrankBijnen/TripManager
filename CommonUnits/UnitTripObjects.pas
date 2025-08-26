@@ -1,7 +1,7 @@
 ﻿unit unitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
-{$DEFINE ENABLE_TREAD}
+{.$DEFINE ENABLE_TREAD}
 {.$DEFINE NO_CALC_REQUIRED}
 interface
 
@@ -605,7 +605,10 @@ type
     SubClass:         TSubClass;
     Lat:              integer;
     Lon:              integer;
-    Unknown1:         array[0..5] of Cardinal;
+    Unknown1:         Cardinal;
+    Time:             byte;
+    Border:           byte;
+    Unknown2:         array[0..8] of word;
     Name:             array[0..120] of UCS4Char;
     procedure SwapCardinals;
   end;
@@ -618,7 +621,7 @@ type
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
     constructor Create(ALocation: TLocation; LocType: byte); reintroduce; overload;
-    constructor Create(GPXSubClass: string; Lat, Lon: double); reintroduce; overload;
+    constructor Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure WriteTerminator(AStream: TMemoryStream); override;
@@ -658,9 +661,11 @@ type
 {$IFDEF ENABLE_TREAD}
 const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
       CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
+      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $90, $90);
 {$ELSE}
 const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1288);      // Default unknown to XT size
       CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $00000000);
+      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $90);
 {$ENDIF}
 
 type
@@ -752,9 +757,8 @@ type
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
     procedure SetRoutePrefs_XT2(ViaCount: integer);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
-    procedure TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil);
-    procedure SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil);
-
+    function TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil): cardinal;
+    function SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil): cardinal;
     procedure CreateTemplate(const AModel: TZumoModel; TripName: string);
     procedure SaveAsGPX(const GPXFile: string);
     property Header: THeader read FHeader;
@@ -881,6 +885,27 @@ begin
   Move(AnUCS4Array[0], AUCS4String[0], Length * SizeOf(UCS4Char));
   result := UCS4StringToUnicodeString(AUCS4String);
   SetLength(result, StrLen(PChar(result)));  // Drop trailing zeroes
+end;
+
+procedure GenShapeBitmap(const NumShapes: integer; OBuf: PByte);
+var
+  Index: integer;
+  OrByte: byte;
+begin
+  OrByte := 2;
+  OBuf^ := 0;
+  for Index := 1 to NumShapes do
+  begin
+    OBuf^ := OBuf^ or OrByte;
+
+    if (OrByte <> 128) then
+      OrByte := OrByte shl 1
+    else
+    begin
+      OrByte := 1;
+      Inc(OBuf);
+    end;
+  end;
 end;
 
 function ReadKeyVAlues(AStream: TStream;
@@ -2332,6 +2357,7 @@ begin
   FUdbDirStatus := TUdbDirStatus.udsUnchecked;
 end;
 
+// UdbDir Create for <rtept>
 constructor TUdbDir.Create(ALocation: TLocation; LocType: byte);
 var
   AmScPosn: TmScPosn;
@@ -2365,18 +2391,19 @@ begin
   FValue.SubClass.MapSegment := Swap32($00000180);
 
 //TODO: The lefmost byte keeps swapping 00, 01, 02.
-//      Investigate. For now stick with 00. Gets recalculated
+//      Investigate. For now stick with 00. Doesn't harm it seems.
 //  FValue.SubClass.RoadId := Swap32($00f0ffff + (LocType shl 24));
 
   FValue.SubClass.RoadId := Swap32($00f0ffff);
   FillCompressedLatLon;
-  FValue.Unknown1[0] := Swap32($51590469);
-  FValue.Unknown1[1] := Swap32($ffff0000);
-  FValue.Unknown1[2] := Swap32($00008001);
+  FValue.Unknown1     := Swap32($51590469);
+  FValue.Time         := $ff;
+  FValue.Border       := $ff;
+  FValue.Unknown2[2]  := Swap($8001);
 end;
 
-constructor TUdbDir.Create(GPXSubClass: string; Lat, Lon:Double);
-
+// UdbDir Create for <gpxx:rpt>
+constructor TUdbDir.Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist:Double);
 begin
   Create('Point');
 
@@ -2384,16 +2411,23 @@ begin
   FValue.Lon := Swap32(CoordAsInt(Lon));
   FValue.SubClass.Init(GPXSubClass);
 
-  FValue.Unknown1[0] := Swap32($51590469);
-
-//TODO: Figure out how time works
-//  if (FValue.SubClass.PointType = $1f) then
-//    FValue.Unknown1[1] := Swap(FValue.SubClass.Time);
-//  FValue.Unknown1[2] := Swap32($00000000);
+  FValue.Unknown1 := Swap32($51590469);
 
   if (FValue.SubClass.PointType = $1f) then
-    FValue.Unknown1[1] := $00000000;
-  FValue.Unknown1[2] := $00000000;
+  begin
+    if (RoadClass = '0100') then
+      FValue.Time       := Round(3600 * dist / 93)  // was 108
+    else if (RoadClass = '0200') then
+      FValue.Time       := Round(3600 * dist / 72)  // was 93
+    else if (RoadClass = '0300') then
+      FValue.Time       := Round(3600 * dist / 56)  // Was 72
+    else if (RoadClass = '0400') then
+      FValue.Time       := Round(3600 * dist / 40) // Was 56
+//    else if (SameText(RoadClass, '0C00')) then  // Round About
+//      FValue.Time       := Round(3600 * dist / 15)
+    else
+      FValue.Time       := Round(3600 * dist / 15)
+  end;
 end;
 
 procedure TUdbDir.WritePrefix(AStream: TMemoryStream);
@@ -3274,7 +3308,7 @@ begin
   end;
 end;
 
-procedure TTripList.TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil);
+function TTripList.TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil): cardinal;
 var
   CalcModel: TZumoModel;
   Locations: TBaseItem;
@@ -3283,9 +3317,12 @@ var
   AllRoutes: TBaseItem;
   Index: integer;
   AnUdbHandle: TmUdbDataHndl;
+  AnUdbDir: TUdbDir;
   GpxRptNode: TXmlVSNode;
-  Coords: TCoords;
+  PrevCoords, Coords: TCoords;
+  CurDist: double;
 begin
+  result := 0;
   // If the model is not supplied, try to get it from the data
   CalcModel := GetCalcModel(AModel);
 
@@ -3302,13 +3339,22 @@ begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(ALocation, 0));
-
+    CurDist := 0;
     // Add intermediates
     for Index := 0 to SubClasses.Count -1 do
     begin
       GpxRptNode := TXmlVSNode(SubClasses.Objects[Index]);
+
       Coords.FromAttributes(GpxRptNode.AttributeList);
-      AnUdbHandle.Add(TUdbDir.Create(SubClasses[Index], Coords.Lat, Coords.Lon));
+      if (Index > 0) then
+        CurDist := CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
+      PrevCoords := Coords;
+
+      AnUdbDir := TUdbDir.Create(Copy(SubClasses[Index], 5),
+                                 Copy(SubClasses[Index], 1, 4),
+                                 Coords.Lat, Coords.Lon, CurDist);
+      AnUdbHandle.Add(AnUdbDir);
+      result := result + AnUdbDir.FValue.Time;
     end;
 
     // Add End
@@ -3326,7 +3372,7 @@ begin
   end;
 end;
 
-procedure TTripList.SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil);
+function TTripList.SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil): cardinal;
 var
   CalcModel: TZumoModel;
   AllRoutes: TBaseItem;
@@ -3337,10 +3383,13 @@ var
   Locations: TBaseItem;
   Location: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
+  AnUdbDir: TUdbDir;
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
-  CMapSegRoad: string;
-  Coords: TCoords;
+  CMapSegRoad, PrevRoadClass, RoadClass: string;
+  PrevCoords, Coords: TCoords;
+  CurDist: double;
 begin
+  result := 0;
   // If the model is not supplied, try to get it from the data
   CalcModel := GetCalcModel(AModel);
 
@@ -3381,6 +3430,7 @@ begin
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named 'point'
       TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
+      GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[ShapeBitmap[CalcModel]]);
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
@@ -3398,17 +3448,29 @@ begin
         FirstRtePt := ScanRtePt; // restart search here
 
         ScanGpxxRptNode := GetFirstExtensionsNode(ScanRtePt);
+        PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
+        CurDist := 0;
         while (ScanGpxxRptNode <> nil) do
         begin
+          Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
+          CurDist := CurDist + CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
+          PrevCoords := Coords;
           CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
           if (CMapSegRoad <> '') then
           begin
+            PrevRoadClass := RoadClass;
+            RoadClass := Copy(CMapSegRoad, 1, 4);
             CMapSegRoad := Copy(CMapSegRoad, 5);
-            if (Copy(CMapSegRoad, 17, 4) = '2114') then
-            begin
-              CMapSegRoad[17] := '1';
-              CMapSegRoad[18] := 'F';
-            end;
+
+// '2114' Occurs when switching to another mapsegment.
+// We could skip it, but doesn't seem to harm
+//            if (Copy(CMapSegRoad, 17, 4) = '2114') then
+//            begin
+//              ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+//              continue;
+//            end;
+
+//TODO: Why is this needed?
             if (Copy(CMapSegRoad, 17, 4) = '2117') then
             begin
               CMapSegRoad[29] := '0';
@@ -3416,8 +3478,13 @@ begin
               CMapSegRoad[31] := '0';
               CMapSegRoad[32] := '0';
             end;
+
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
-            AnUdbHandle.Add(TUdbDir.Create(CMapSegRoad, Coords.Lat, Coords.Lon));
+            AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
+            AnUdbHandle.Add(AnUdbDir);
+
+            result := result + AnUdbDir.FValue.Time;
+            CurDist := 0;
           end;
           ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
         end;
@@ -3438,7 +3505,6 @@ begin
     if (CalcModel = TZumoModel.XT2) then
       SetRoutePrefs_XT2(ViaCount);
   finally
-
     RoutePointList.Free;
   end;
 end;
