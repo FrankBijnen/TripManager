@@ -620,7 +620,7 @@ type
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(ALocation: TLocation; LocType: byte); reintroduce; overload;
+    constructor Create(ALocation: TLocation); reintroduce; overload;
     constructor Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
@@ -2358,7 +2358,7 @@ begin
 end;
 
 // UdbDir Create for <rtept>
-constructor TUdbDir.Create(ALocation: TLocation; LocType: byte);
+constructor TUdbDir.Create(ALocation: TLocation);
 var
   AmScPosn: TmScPosn;
 begin
@@ -2410,23 +2410,22 @@ begin
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
   FValue.SubClass.Init(GPXSubClass);
-
   FValue.Unknown1 := Swap32($51590469);
-
-  if (FValue.SubClass.PointType = $1f) then
-  begin
-    if (RoadClass = '0100') then
-      FValue.Time       := Round(3600 * dist / 93)  // was 108
-    else if (RoadClass = '0200') then
-      FValue.Time       := Round(3600 * dist / 72)  // was 93
-    else if (RoadClass = '0300') then
-      FValue.Time       := Round(3600 * dist / 56)  // Was 72
-    else if (RoadClass = '0400') then
-      FValue.Time       := Round(3600 * dist / 40) // Was 56
-//    else if (SameText(RoadClass, '0C00')) then  // Round About
-//      FValue.Time       := Round(3600 * dist / 15)
-    else
-      FValue.Time       := Round(3600 * dist / 15)
+  case (FValue.SubClass.PointType) of
+    $1f, $21:
+      begin
+        // Table taken from default Basecamp Motorcycle profile.
+        //TODO Make configurable
+        case (StrToIntDef('$' + RoadClass, 0)) of
+          1:  FValue.Time := Round(3600 * dist / 108);  // Interstate Highway
+          2:  FValue.Time := Round(3600 * dist / 93);   // Major Highway
+          3:  FValue.Time := Round(3600 * dist / 72);   // Other Highway
+          4:  FValue.Time := Round(3600 * dist / 56);   // Collector Road
+          12: FValue.Time := Round(3600 * dist / 15);   // Round about
+          else
+              FValue.Time := Round(3600 * dist / 40);   // Default for all others. EG Residential
+        end;
+      end;
   end;
 end;
 
@@ -3293,7 +3292,7 @@ begin
       begin
         TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
         for ALocation in RoutePointList do
-          AnUdbHandle.Add(TUdbDir.Create(ALocation, 0));
+          AnUdbHandle.Add(TUdbDir.Create(ALocation));
       end;
 
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
@@ -3338,7 +3337,7 @@ begin
     // Add begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation, 0));
+    AnUdbHandle.Add(TUdbDir.Create(ALocation));
     CurDist := 0;
     // Add intermediates
     for Index := 0 to SubClasses.Count -1 do
@@ -3351,7 +3350,7 @@ begin
       PrevCoords := Coords;
 
       AnUdbDir := TUdbDir.Create(Copy(SubClasses[Index], 5),
-                                 Copy(SubClasses[Index], 1, 4),
+                                 Copy(SubClasses[Index], 1, 2),
                                  Coords.Lat, Coords.Lon, CurDist);
       AnUdbHandle.Add(AnUdbDir);
       result := result + AnUdbDir.FValue.Time;
@@ -3360,7 +3359,7 @@ begin
     // Add End
     TmLocations(Locations).GetRoutePoints(2, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation, 1));
+    AnUdbHandle.Add(TUdbDir.Create(ALocation));
 
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 
@@ -3434,7 +3433,7 @@ begin
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
-        AnUdbHandle.Add(TUdbDir.Create(ALocation, 1));
+        AnUdbHandle.Add(TUdbDir.Create(ALocation));
 
         while (ScanRtePt <> nil) do
         begin
@@ -3459,7 +3458,7 @@ begin
           if (CMapSegRoad <> '') then
           begin
             PrevRoadClass := RoadClass;
-            RoadClass := Copy(CMapSegRoad, 1, 4);
+            RoadClass := Copy(CMapSegRoad, 1, 2);
             CMapSegRoad := Copy(CMapSegRoad, 5);
 
 // '2114' Occurs when switching to another mapsegment.
@@ -3470,14 +3469,14 @@ begin
 //              continue;
 //            end;
 
-//TODO: Why is this needed?
-            if (Copy(CMapSegRoad, 17, 4) = '2117') then
-            begin
-              CMapSegRoad[29] := '0';
-              CMapSegRoad[30] := '0';
-              CMapSegRoad[31] := '0';
-              CMapSegRoad[32] := '0';
-            end;
+//TODO: Is this needed?
+//            if (Copy(CMapSegRoad, 17, 4) = '2117') then
+//            begin
+//              CMapSegRoad[29] := '0';
+//              CMapSegRoad[30] := '0';
+//              CMapSegRoad[31] := '0';
+//              CMapSegRoad[32] := '0';
+//            end;
 
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
             AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
@@ -3492,10 +3491,7 @@ begin
 
       // Add end route point
       ALocation := RoutePointList[RoutePointList.Count -1];
-      if (Index < ViaCount -1) then
-        AnUdbHandle.Add(TUdbDir.Create(ALocation, 1))
-      else
-        AnUdbHandle.Add(TUdbDir.Create(ALocation, 2));
+      AnUdbHandle.Add(TUdbDir.Create(ALocation));
 
       // Add to Allroutes
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
