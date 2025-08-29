@@ -60,7 +60,6 @@ const
   Reg_PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
   Reg_PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
   Reg_PrefDevPoiFolder_Val    = 'Internal Storage\POI';
-  Reg_EnableSendTo            = 'EnableSendTo';
   Reg_EnableDirFuncs          = 'EnableDirFuncs';
   Reg_WarnModel_Key           = 'WarnModel';
   Reg_TripColor_Key           = 'TripColor';
@@ -81,7 +80,7 @@ const
 const
   IdTrip          = 0;
   IdTrack         = 1;
-  IdCompleteRoute = 2; // Only Transfer
+  IdCompleteRoute = 2; // Only Device
   IdStrippedRoute = 3;
   IdWayPoint      = 4;
     IdWayPointWpt = 5;
@@ -91,11 +90,8 @@ const
     IdGpiWayPt    = 9;
     IdGpiViaPt    = 10;
     IdGpiShpPt    = 11;
-  IdKml           = 12; // Only Additional
-  IdHtml          = 13; // Only Additional
-
-  //TODO Deprecated
-  TripFilesFor    = 'Trip files (No import required, but will recalculate. Selected model: %s)';
+  IdKml           = 12; // Only Windows
+  IdHtml          = 13; // Only Windows
 
 type
 
@@ -132,7 +128,7 @@ begin
     TrackColor := GetRegistry(Reg_TrackColor, '');
 
     // XT1 and XT2 Defaults
-    ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), GetRegistry(Reg_ZumoModel, '')));
+    ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), StringReplace(GetRegistry(Reg_ZumoModel, ''), ' ', '', [rfReplaceAll])));
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     AddSubClasses := GetRegistry(Reg_AddSubClasses, true);

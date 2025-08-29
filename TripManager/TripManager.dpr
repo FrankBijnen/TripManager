@@ -16,8 +16,6 @@ uses
   UFrmTripManager in 'UFrmTripManager.pas' {FrmTripManager},
   UFrmPostProcess in 'UFrmPostProcess.pas' {FrmPostProcess},
   UFrmDateDialog in 'UFrmDateDialog.pas' {FrmDateDialog},
-  UFrmTransferOptions in 'UFrmTransferOptions.pas' {FrmTransferOptions},
-  UFrmAdditional in 'UFrmAdditional.pas' {FrmAdditional},
   UFrmSendTo in 'UFrmSendTo.pas' {FrmSendTo},
   UFrmAdvSettings in 'UFrmAdvSettings.pas' {FrmAdvSettings},
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
@@ -81,14 +79,12 @@ begin
   Application.CreateForm(TFrmTripManager, FrmTripManager);
   Application.CreateForm(TFrmPostProcess, FrmPostProcess);
   Application.CreateForm(TFrmDateDialog, FrmDateDialog);
-  Application.CreateForm(TFrmAdditional, FrmAdditional);
   Application.CreateForm(TFrmSendTo, FrmSendTo);
   Application.CreateForm(TFrmAdvSettings, FrmAdvSettings);
   Application.CreateForm(TFrmNewTrip, FrmNewTrip);
   Application.CreateForm(TFrmTripEditor, FrmTripEditor);
   Application.CreateForm(TFGeoSearch, FGeoSearch);
   Application.CreateForm(TFrmPlaces, FrmPlaces);
-  Application.CreateForm(TFrmTransferOptions, FrmTransferOptions);
   Application.CreateForm(TFrmShowLog, FrmShowLog);
   Application.Run;
 end.

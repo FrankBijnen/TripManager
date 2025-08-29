@@ -163,6 +163,7 @@ object FrmTripManager: TFrmTripManager
           Items.Strings = (
             'XT'
             'XT2'
+            'Tread 2'
             'Unknown')
         end
       end
@@ -335,24 +336,13 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 1
           OnClick = BtnAddToMapClick
         end
-        object BtnTransferToDevice: TButton
-          AlignWithMargins = True
-          Left = 366
-          Top = 4
-          Width = 99
-          Height = 24
-          Align = alLeft
-          Caption = 'Transfer to device'
-          TabOrder = 2
-          OnClick = BtnTransferToDeviceClick
-        end
         object PnlTopFiller: TPanel
           Left = 1
           Top = 1
           Width = 65
           Height = 30
           Align = alLeft
-          TabOrder = 4
+          TabOrder = 3
           object ChkWatch: TCheckBox
             Left = 1
             Top = 1
@@ -377,25 +367,14 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnPostProcess: TButton
           AlignWithMargins = True
-          Left = 471
+          Left = 366
           Top = 4
           Width = 85
           Height = 24
           Align = alLeft
           Caption = 'Post process'
-          TabOrder = 3
+          TabOrder = 2
           OnClick = PostProcessClick
-        end
-        object BtnCreateAdditional: TButton
-          AlignWithMargins = True
-          Left = 562
-          Top = 4
-          Width = 85
-          Height = 24
-          Align = alLeft
-          Caption = 'Additional files'
-          TabOrder = 5
-          OnClick = CreateAdditionalClick
         end
         object BtnSendTo: TButton
           AlignWithMargins = True
@@ -405,7 +384,7 @@ object FrmTripManager: TFrmTripManager
           Height = 24
           Align = alLeft
           Caption = 'Send to'
-          TabOrder = 6
+          TabOrder = 4
           OnClick = BtnSendToClick
         end
       end
@@ -829,7 +808,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -837,7 +815,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

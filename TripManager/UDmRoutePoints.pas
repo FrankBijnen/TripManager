@@ -89,7 +89,7 @@ uses
   System.StrUtils, System.Variants, System.DateUtils, System.Math,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
-  UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxObjects, UFrmSelectGPX;
+  UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects, UFrmSelectGPX;
 
 {$R *.dfm}
 
@@ -371,9 +371,9 @@ var
   SaveRecNo: integer;
   Locations: TmLocations;
   TmpStream: TMemoryStream;
-  ZumoModel: TZumoModel;
   ANItem: TBaseItem;
-  ProcessOptions: TProcessOptions;                                                                         
+  ProcessOptions: TProcessOptions;
+  RoutePoint: TRoutePoint;                                                                   
 begin
   if (CdsRoute.State in [dsEdit, dsInsert]) then
     CdsRoute.Post;
@@ -385,54 +385,31 @@ begin
   CdsRoutePoints.DisableControls;
   TmpStream := TMemoryStream.Create;
   ProcessOptions := TProcessOptions.Create;
+  ProcessOptions.ZumoModel := FTripList.ZumoModel;
   try
     Locations := TmLocations(FTripList.GetItem('mLocations'));
     if not (Assigned(Locations)) then
       exit;
-    ZumoModel := FTripList.ZumoModel;
 
     Locations.Clear;
     CdsRoutePoints.First;
     while not CdsRoutePoints.Eof do
     begin
-      // Create Location
-      Locations.AddLocatIon(TLocation.Create);
-
-      //TODO Tread
-(*
-TmisTravelapseDestination
-TmShapingRadius
-mShapingCenter
-TmDuration
-TmArrival
-TmScPosn
-TmAttr
-TmAddress
-TmName
-*)
-      if (ZumoModel = TZumoModel.XT2) then
-      begin
-        PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-        Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
-      end;
-
       if (CdsRoutePointsViaPoint.AsBoolean) or
          (CdsRoutePoints.RecNo = 1) or
          (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
-        Locations.Add(TmAttr.Create(TRoutePoint.rpVia))
+        RoutePoint := TRoutePoint.rpVia
       else
-        Locations.Add(TmAttr.Create(TRoutePoint.rpShaping));
-      Locations.Add(TmIsDFSPoint.Create);
-      Locations.Add(TmDuration.Create);
-      Locations.Add(TmArrival.Create); // Departure will be set later
-      Locations.Add(TmScPosn.Create(StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
-                                    StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
-                                    ProcessOptions.ScPosn_Unknown1));
-      Locations.Add(TmAddress.Create(CdsRoutePointsAddress.AsString));
-      Locations.Add(TmisTravelapseDestination.Create);
-      Locations.Add(TmShapingRadius.Create);
-      Locations.Add(TmName.Create(CdsRoutePointsName.AsString));
+        RoutePoint := TRoutePoint.rpShaping;
 
+      FTripList.AddLocation(Locations,
+                            ProcessOptions,
+                            RoutePoint,
+                            StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
+                            StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
+                            0,
+                            CdsRoutePointsName.AsString,
+                            CdsRoutePointsAddress.AsString);
       CdsRoutePoints.Next;
     end;
 
@@ -648,7 +625,16 @@ end;
 
 procedure TDmRoutePoints.OnSetAnalyzePrefs(Sender: TObject);
 begin
-  TProcessOptions(Sender).ProcessTracks := false;
+  with TProcessOptions(Sender) do
+  begin
+    ProcessTracks := false;
+    ProcessDistance := false;
+    ProcessShape := false;
+    ProcessVia := false;
+    ProcessBegin := false;
+    ProcessEnd := false;
+    ShapingPointName := TShapingPointName.Unchanged;
+  end;
 end;
 
 procedure TDmRoutePoints.AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);

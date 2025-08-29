@@ -273,6 +273,7 @@ object FrmTripEditor: TFrmTripEditor
         Items.Strings = (
           'XT'
           'XT2'
+          'Tread 2'
           'Unknown')
       end
       object DbTripName: TDBEdit

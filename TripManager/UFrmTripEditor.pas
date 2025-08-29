@@ -309,7 +309,6 @@ begin
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
   DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
-//TODO TREAD (add to combobox)
   CmbModel.ItemIndex := Ord(CurTripList.ZumoModel);
 end;
 

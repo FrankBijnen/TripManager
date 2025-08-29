@@ -134,7 +134,6 @@ begin
     CurRow := 1;
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_EnableSendTo,        'True',  'Enable Send to');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Compare-');
