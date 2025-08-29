@@ -501,6 +501,33 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
 
+  TTrackPoints = packed record
+    Inititiator: AnsiChar;
+    KeyLen: cardinal;
+    KeyName: array[0..11] of AnsiChar;
+    ValueLen: cardinal;
+    DataType: byte;
+    TrkPntCnt: cardinal;
+  end;
+
+  TTrackHeader = packed record
+    TrkCnt: cardinal;
+    SubItems: byte;
+    Unknown1: array[0..1] of Cardinal;
+    SubLength: cardinal;
+    DataType: byte;
+    ItemCount: cardinal;
+
+    TrackPoints: TTrackPoints;
+  end;
+
+  TmTrackToRouteInfoMap = class(TRawDataItem)
+  public
+    FTrackHeader: TTrackHeader;
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+    procedure InitFromGpxxRpt(RtePts: TObject);
+  end;
+
 {*** Header ***}
   THeaderValue = packed record
     Id:               array[0..3] of AnsiChar;  // 'TRPL'
@@ -2020,6 +2047,126 @@ begin
   inherited Create('mRoutePreferencesAdventurousPopularPaths', 0 , $80);
 end;
 
+constructor TmTrackToRouteInfoMap.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create('mTrackToRouteInfoMap', 0 , $0c);
+end;
+
+procedure TmTrackToRouteInfoMap.InitFromGpxxRpt(RtePts: TObject);
+var
+  RtePtNode, GpxxRptNode: TXmlVSNode;
+  PrevCoords, Coords: TCoords;
+  TmpStream: TMemoryStream;
+  TrkPtCnt: integer;
+  TrkPtSize: cardinal;
+
+  procedure WritePrefix;
+  const
+    Size1: cardinal = $67000000;
+    Size2: cardinal = $29000000;
+    DataType: byte  = $0a;
+    Cnt: cardinal   = $02000000;
+  begin
+    TmpStream.Write(Size1, SizeOf(Size1));
+    TmpStream.Write(Size2, SizeOf(Size2));
+    TmpStream.Write(DataType, SizeOf(DataType));
+    TmpStream.Write(Cnt, SizeOf(Cnt));
+  end;
+
+  procedure WriteMLon(Lon: double);
+  const
+    Init:     byte      = $09;
+    KeyLen:   cardinal  = $04000000;
+    KeyName:  cardinal  = $6E6F4C6D;  // mlon
+    ValueLen: cardinal  = $05000000;
+    DataType: byte      = $03;
+ var
+    CoordInt: integer;
+  begin
+    TmpStream.Write(Init, SizeOf(Init));
+    TmpStream.Write(KeyLen, SizeOf(KeyLen));
+    TmpStream.Write(KeyName, SizeOf(KeyName));
+    TmpStream.Write(ValueLen, SizeOf(ValueLen));
+    TmpStream.Write(DataType, SizeOf(DataType));
+    CoordInt := Swap32(CoordAsInt(Lon));
+    TmpStream.Write(CoordInt, SizeOf(CoordInt));
+  end;
+
+  procedure WriteMLat(Lat: double);
+  const
+    Init:     byte      = $09;
+    KeyLen:   cardinal  = $04000000;
+    KeyName:  cardinal  = $74614C6D;  // mLat
+    ValueLen: cardinal  = $05000000;
+    DataType: byte      = $03;
+ var
+    CoordInt: integer;
+  begin
+    TmpStream.Write(Init, SizeOf(Init));
+    TmpStream.Write(KeyLen, SizeOf(KeyLen));
+    TmpStream.Write(KeyName, SizeOf(KeyName));
+    TmpStream.Write(ValueLen, SizeOf(ValueLen));
+    TmpStream.Write(DataType, SizeOf(DataType));
+    CoordInt := Swap32(CoordAsInt(lat));
+    TmpStream.Write(CoordInt, SizeOf(CoordInt));
+  end;
+
+begin
+  TmpStream := TMemoryStream.Create;
+  try
+    TrkPtCnt := 0;
+    RtePtNode := TXmlVSNodeList(RtePts).FirstChild;
+    while (RtePtNode <> nil) do
+    begin
+      GpxxRptNode := GetFirstExtensionsNode(RtePtNode);
+      FillChar(PrevCoords, SizeOf(PrevCoords), 0);
+      while (GpxxRptNode <> nil) do
+      begin
+        Coords.FromAttributes(GpxxRptNode.AttributeList);
+        if (Coords.Lon <> PrevCoords.Lon) and
+           (Coords.Lat <> PrevCoords.Lat) then
+        begin
+          Inc(TrkPtCnt);
+          WritePrefix;
+          WriteMlon(Coords.Lon);
+          WriteMlat(Coords.Lat);
+        end;
+        PrevCoords := Coords;
+        GpxxRptNode := GpxxRptNode.NextSibling;
+      end;
+      RtePtNode := RtePtNode.NextSibling;
+    end;
+    FillChar(FTrackHeader, SizeOf(FTrackHeader), 0);
+    FTrackHeader.TrackPoints.Inititiator  := #9;
+    FTrackHeader.TrackPoints.KeyLen       := Swap32(Length(FTrackHeader.TrackPoints.KeyName));
+    FTrackHeader.TrackPoints.KeyName      := 'mTrackPoints';
+    TrkPtSize := TmpStream.Size + SizeOf(FTrackHeader.TrackPoints.DataType) + SizeOf(FTrackHeader.TrackPoints.TrkPntCnt);
+    FTrackHeader.TrackPoints.ValueLen     := Swap32(TrkPtSize);
+    FTrackHeader.TrackPoints.DataType     := $80;
+    FTrackHeader.TrackPoints.TrkPntCnt    := Swap32(TrkPtCnt);
+
+    FTrackHeader.TrkCnt     := Swap32(1);
+    FTrackHeader.SubItems   := 3;
+    FTrackHeader.SubLength  := Swap32(TrkPtSize +
+                                      SizeOf(FTrackHeader.DataType) +
+                                      SizeOf(FTrackHeader.ItemCount) +
+                                      SizeOf(FTrackHeader.TrackPoints.Inititiator) +
+                                      SizeOf(FTrackHeader.TrackPoints.KeyLen) +
+                                      SizeOf(FTrackHeader.TrackPoints.KeyName) +
+                                      SizeOf(FTrackHeader.TrackPoints.ValueLen));
+    FTrackHeader.DataType   := $0a;
+    FTrackHeader.ItemCount  := Swap32(1);
+
+    SetLength(FBytes, SizeOf(FTrackHeader) + TmpStream.Size);
+    Move(FTrackHeader, FBytes[0], SizeOf(FTrackHeader));
+    TmpStream.Position := 0;
+    TmpStream.Read(Fbytes[SizeOf(FTrackHeader)], TmpStream.Size);
+    FLenValue := SizeOf(FTrackHeader) + TmpStream.Size;
+  finally
+    TmpStream.Free;
+  end;
+end;
+
 {*** Header ***}
 procedure THeaderValue.SwapCardinals;
 begin
@@ -2374,7 +2521,7 @@ end;
 // UdbDir Create for <gpxx:rpt>
 constructor TUdbDir.Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist:Double);
 begin
-  Create('Point');
+  Create(Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass,9,8)]));
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
@@ -3362,10 +3509,12 @@ begin
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
-    // The RoutePreferences need to be recreated for the XT2 and Tread 2
-    if (CalcModel = TZumoModel.XT2) or
-       (CalcModel = TZumoModel.Tread2) then
-      SetRoutePrefs_XT2_Tread2(ViaCount);
+    // Recreate RoutePreferences
+    case (CalcModel) of
+      TZumoModel.XT2,
+      TZumoModel.Tread2:
+        SetRoutePrefs_XT2_Tread2(ViaCount);
+    end;
   finally
 
     RoutePointList.Free;
@@ -3428,10 +3577,13 @@ begin
 
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 
-    // The RoutePreferences need to be recreated for the XT2 and Tread 2
-    if (CalcModel = TZumoModel.XT2) or
-       (CalcModel = TZumoModel.Tread2) then
-      SetRoutePrefs_XT2_Tread2(2); // Begin and End
+    // Recreate RoutePreferences
+    case (CalcModel) of
+      TZumoModel.XT2,
+      TZumoModel.Tread2:
+        SetRoutePrefs_XT2_Tread2(2);
+    end;
+
   finally
     RoutePointList.Free;
   end;
@@ -3521,7 +3673,12 @@ begin
           CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
           if (CMapSegRoad <> '') then
           begin
-            PrevRoadClass := RoadClass;
+            // First record
+            if (RoadClass <> '') then
+              PrevRoadClass := RoadClass
+            else
+              PrevRoadClass := Copy(CMapSegRoad, 1, 2);
+
             RoadClass := Copy(CMapSegRoad, 1, 2);
             CMapSegRoad := Copy(CMapSegRoad, 5);
 
@@ -3561,9 +3718,13 @@ begin
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
-    // The RoutePreferences need to be recreated for the XT2
-    if (CalcModel = TZumoModel.XT2) then
-      SetRoutePrefs_XT2_Tread2(ViaCount);
+    // Recreate RoutePreferences
+    case (CalcModel) of
+      TZumoModel.XT2,
+      TZumoModel.Tread2:
+        SetRoutePrefs_XT2_Tread2(ViaCount);
+    end;
+
   finally
     RoutePointList.Free;
     ProcessOptions.Free;
@@ -3694,7 +3855,7 @@ begin
     Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
     TmpStream.Position := 0;
-    Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
+    Add(TmTrackToRouteInfoMap.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
     Add(TmIsDisplayable.Create);
     Add(TBooleanItem.Create('mIsDeviceRoute', true));
     Add(TmDayNumber.Create);
@@ -3753,7 +3914,7 @@ begin
     Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
     TmpStream.Position := 0;
-    Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
+    Add(TmTrackToRouteInfoMap.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
     Add(TmIsDisplayable.Create);
 
     CheckHRGuid(CreateGUID(Uid));
@@ -3939,7 +4100,8 @@ begin
     TmRoutePreferencesAdventurousHillsAndCurves,
     TmRoutePreferencesAdventurousScenicRoads,
     TmRoutePreferencesAdventurousMode,
-    TmRoutePreferencesAdventurousPopularPaths
+    TmRoutePreferencesAdventurousPopularPaths,
+    TmTrackToRouteInfoMap
     ]);
 end;
 

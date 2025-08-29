@@ -16,6 +16,7 @@ const
   Reg_AllowGrouping           = 'AllowGrouping';
   Reg_AddSubClasses           = 'AddSubClasses';
   Reg_ForceRecalc             = 'ForceRecalc';
+  Reg_PreserveTrackToRoute    = 'PreserveTrackToRoute';
 
   //XT2
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
@@ -134,6 +135,7 @@ begin
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     AddSubClasses := GetRegistry(Reg_AddSubClasses, true);
     ForceRecalc := GetRegistry(Reg_ForceRecalc, true);
+    PreserveTrackToRoute := GetRegistry(Reg_PreserveTrackToRoute, false);
 
     // XT2 Defaults
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);
