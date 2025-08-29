@@ -134,12 +134,8 @@ type
 {$IFDEF TRIPOBJECTS}
     function GetTotalDistance(const ATripName: string): double;
     function BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
-    function CreateLocations(RtePts: TXmlVSNodeList): integer;
-    procedure CreateTrip_XT(const TripName, CalculationMode, TransportMode: string;
-                            ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
-
-    procedure CreateTrip_XT2(const TripName, CalculationMode, TransportMode: string;
-                             ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
+    function CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList): integer;
+    procedure UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 {$ENDIF}
   protected
     function MapSegRoadExclBit(const ASubClass: string): string;
@@ -2097,23 +2093,9 @@ begin
   result := (SubClassList.Count > 2); // Need more than a start and end
 end;
 
-//TODO Tread
-(*
-TmisTravelapseDestination
-TmShapingRadius
-mShapingCenter
-TmDuration
-TmArrival
-TmScPosn
-TmAttr
-TmAddress
-TmName
-*)
-function TGPXFile.CreateLocations(RtePts: TXmlVSNodeList): integer;
+function TGPXFile.CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList): integer;
 var
-  Locations: TmLocations;
   RtePtNode: TXmlVSNode;
-  TmpStream : TMemoryStream;
   RtePtName: string;
   Coords: TCoords;
   RtePtExtensions: TXmlVSNode;
@@ -2122,115 +2104,81 @@ var
   DepartureDateString: string;
   DepartureDate: TDateTime;
   PointCnt: integer;
+  RoutePoint: TRoutePoint;
 begin
   result := 0;
   PointCnt := 0;
-  TmpStream := TMemoryStream.Create;
-  try
-    Locations := TmLocations.Create;
-    for RtePtNode in RtePts do
+  for RtePtNode in RtePts do
+  begin
+    Inc(PointCnt);
+    if (ProcessOptions.PreserveTrackToRoute) then
     begin
-      Inc(PointCnt);
-      if (ProcessOptions.PreserveTrackToRoute) then
-      begin
-        if (PointCnt <> 1) and
-           (PointCnt <> RtePts.Count) then
-          Continue;
-      end;
-      // Get Data from RtePt
-      RtePtName := FindSubNodeValue(RtePtNode, 'name');
-      Coords.FromAttributes(RtePtNode.AttributeList);
-
-      RtePtExtensions := RtePtNode.Find('extensions');
-      if (RtePtExtensions = nil) then
-        continue;
-      RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
-
-      RtePtCmt := FindSubNodeValue(RtePtNode, 'cmt');
-      if (RtePtCmt = '') then
-        RtePtCmt := Format('%s, %s', [FormatFloat('##0.00000', Coords.Lat, FormatSettings),
-                                      FormatFloat('##0.00000', Coords.Lon, FormatSettings)]
-                          );
-      DepartureDateString := '';
-      if (RtePtViaPoint <> nil) then
-        DepartureDateString := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
-      // Have all we need.
-
-      // Create Location
-      Locations.AddLocatIon(TLocation.Create);
-
-      if (ProcessOptions.ZumoModel = TZumoModel.XT2) then
-      begin
-        PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-        Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
-      end;
-
-      if (RtePtViaPoint <> nil) then
-      begin
-        inc(result);
-        Locations.Add(TmAttr.Create(TRoutePoint.rpVia))
-      end
-      else
-        Locations.Add(TmAttr.Create(TRoutePoint.rpShaping));
-      Locations.Add(TmIsDFSPoint.Create);
-      Locations.Add(TmDuration.Create);
-
-      if (DepartureDateString <> '') and
-        TryISO8601ToDate(DepartureDateString, DepartureDate, false) then
-        Locations.Add(TmArrival.Create(DepartureDate))
-      else
-        Locations.Add(TmArrival.Create);
-      Locations.Add(TmScPosn.Create(Coords.Lat, Coords.Lon, ProcessOptions.ScPosn_Unknown1));
-      Locations.Add(TmAddress.Create(RtePtCmt));
-      Locations.Add(TmisTravelapseDestination.Create);
-      Locations.Add(TmShapingRadius.Create);
-      Locations.Add(TmName.Create(RtePtName));
+      if (PointCnt <> 1) and
+         (PointCnt <> RtePts.Count) then
+        Continue;
     end;
-    FTripList.Add(Locations);
-  finally
-    TmpStream.Free;
+    // Get Data from RtePt
+    RtePtName := FindSubNodeValue(RtePtNode, 'name');
+    // Coords
+    Coords.FromAttributes(RtePtNode.AttributeList);
+    // Via/Shape
+    RoutePoint := TRoutePoint.rpShaping;
+    RtePtExtensions := RtePtNode.Find('extensions');
+    if (RtePtExtensions = nil) then
+      continue;
+    RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
+    if (RtePtViaPoint <> nil) then
+    begin
+      RoutePoint := TRoutePoint.rpVia;
+      Inc(result);
+    end;
+    // Address
+    RtePtCmt := FindSubNodeValue(RtePtNode, 'cmt');
+    if (RtePtCmt = '') then
+      RtePtCmt := Format('%s, %s', [FormatFloat('##0.00000', Coords.Lat, FormatSettings),
+                                    FormatFloat('##0.00000', Coords.Lon, FormatSettings)]
+                        );
+    // Departure
+    DepartureDateString := '';
+    if (RtePtViaPoint <> nil) then
+      DepartureDateString := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
+    if (DepartureDateString <> '') and
+      TryISO8601ToDate(DepartureDateString, DepartureDate, false) then
+    else
+      DepartureDate := 0;
+
+    // Have all we need. Create location
+    FTripList.AddLocation(Locations,
+                          ProcessOptions,
+                          RoutePoint,
+                          Coords.Lat, Coords.Lon,
+                          DepartureDate, RtePtName, RtePtCmt);
   end;
 end;
 
-procedure TGPXFile.CreateTrip_XT(const TripName, CalculationMode, TransportMode: string;
-                                 ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
+procedure TGPXFile.UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 var
   ViaPointCount: integer;
-  TotalDistance: double;
   HasSubClasses: boolean;
   TotalTripTime: TmTotalTripTime;
+  Locations:     TmLocations;
 begin
-  TotalDistance := GetTotalDistance(TripName);
+  if (ProcessOptions.AllowGrouping) and
+     (ProcessOptions.ZumoModel = TZumoModel.XT) then
+    (FTripList.GetItem('mParentTripId') as TmParentTripId).AsCardinal := ParentTripId;
+  (FTripList.GetItem('mParentTripName') as TmParentTripName).AsString := FBaseFile;
+
+  Locations := FTripList.GetItem('mLocations') as TmLocations;
+  ViaPointCount := CreateLocations(Locations, RtePts);
+
+  (FTripList.GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := Swap32(GetTotalDistance(TripName));
+  TotalTripTime := FTripList.GetItem('mTotalTripTime') as TmTotalTripTime;
+
+  //TODO. Update according to info JFHeath
   HasSubClasses := false;
   if (ProcessOptions.PreserveTrackToRoute) or
      (ProcessOptions.AddSubClasses) then
     HasSubClasses := BuildSubClassesList(RtePts);
-
-  FTripList.AddHeader(THeader.Create);
-  FTripList.Add(TmPreserveTrackToRoute.Create(ProcessOptions.PreserveTrackToRoute and HasSubClasses));
-  if (ProcessOptions.AllowGrouping) then
-    FTripList.Add(TmParentTripId.Create(ParentTripId))
-  else
-    FTripList.Add(TmParentTripId.Create);
-  FTripList.Add(TmDayNumber.Create);
-  FTripList.Add(TmTripDate.Create);
-  FTripList.Add(TmIsDisplayable.Create);
-  FTripList.Add(TmAvoidancesChanged.Create);
-  FTripList.Add(TmIsRoundTrip.Create);
-  FTripList.Add(TmParentTripName.Create(FBaseFile));
-  FTripList.Add(TmOptimized.Create);
-  TotalTripTime := TmTotalTripTime.Create;
-  FTripList.Add(TotalTripTime);
-  FTripList.Add(TmImported.Create);
-  FTripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
-  FTripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-  FTripList.Add(TmTotalTripDistance.Create(TotalDistance));
-  FTripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
-  ViaPointCount := CreateLocations(RtePts);
-  FTripList.Add(TmPartOfSplitRoute.Create);
-  FTripList.Add(TmVersionNumber.Create);
-  FTripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
-  FTripList.Add(TmTripName.Create(TripName));
 
   if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
     // Create Trip from BC calculation
@@ -2241,126 +2189,6 @@ begin
   else
     // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
     FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
-end;
-
-//TODO Tread. Create copy
-(*
-THeader
-mGreatRidesInfoMap
-TmAvoidancesChangedTimeAtSave
-mTrackToRouteInfoMap
-TmIsDisplayable
-mExploreUuid  <== Xt2 diff
-TmOptimized
-TmDayNumber
-TmParentTripName
-mShowLastStopAsShapingPoint
-TmTotalTripDistance
-TmTotalTripTime
-mVehicleProfileTruckType
-TmAvoidancesChanged
-mVehicleProfileName
-mVehicleProfileHash
-TmParentTripId
-mVehicleId
-TmTripDate
-TmImported
-mRoutePreferencesAdventurousHillsAndCurves
-TmIsRoundTrip
-TmRoutePreference
-TmTransportationMode
-TmFileName
-CreateLocations <=
-TmPartOfSplitRoute
-mRoutePreferencesAdventurousPopularPaths
-TmAllRoutes
-TmRoutePreferences
-mIsDeviceRoute
-mRoutePreferencesAdventurousScenicRoads
-mVehicleProfileGuid  TREAD = 'c21c922c-553f-4783-85f8-c0a13f52d960'
-TmTripName
-mRoutePreferencesAdventurousMode
-TmVersionNumber (4, $10));
-*)
-procedure TGPXFile.CreateTrip_XT2(const TripName, CalculationMode, TransportMode: string;
-                                  ParentTripID: Cardinal; RtePts: TXmlVSNodeList);
-var
-  TmpStream: TMemoryStream;
-  Uid: TGuid;
-  ViaPointCount: integer;
-  TotalDistance: double;
-  HasSubClasses: boolean;
-  TotalTripTime: TmTotalTripTime;
-begin
-  TmpStream := TMemoryStream.Create;
-  try
-    TotalDistance := GetTotalDistance(TripName);
-    //TODO. Update according to info JFHeath
-    HasSubClasses := false;
-    if (ProcessOptions.PreserveTrackToRoute) or
-       (ProcessOptions.AddSubClasses) then
-      HasSubClasses := BuildSubClassesList(RtePts);
-
-    FTripList.AddHeader(THeader.Create);
-
-    PrepStream(TmpStream, [$0000]);
-    FTriplist.Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, $0c, TmpStream);
-    FTriplist.Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
-    TmpStream.Position := 0;
-    FTriplist.Add(TRawDataItem.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, $0c, TmpStream);
-    FTripList.Add(TmIsDisplayable.Create);
-    FTripList.Add(TBooleanItem.Create('mIsDeviceRoute', true));
-    FTripList.Add(TmDayNumber.Create);
-    FTripList.Add(TmTripDate.Create);
-    FTripList.Add(TmOptimized.Create);
-    TotalTripTime := TmTotalTripTime.Create;
-    FTripList.Add(TotalTripTime);
-    FTripList.Add(TmTripName.Create(TripName));
-    FTripList.Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
-    FTripList.Add(TmParentTripId.Create); // No use for the XT2
-    FTripList.Add(TmIsRoundTrip.Create);
-    FTripList.Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
-    FTripList.Add(TmAvoidancesChanged.Create);
-    FTripList.Add(TmParentTripName.Create(FBaseFile));
-    FTripList.Add(TByteItem.Create('mVehicleProfileTruckType', StrToInt(ProcessOptions.VehicleProfileTruckType)));
-    FTripList.Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
-    FTriplist.Add(TmRoutePreferences.Create);
-    FTripList.Add(TmImported.Create);
-    FTripList.Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
-    if (ProcessOptions.ExploreUuid <> '') then
-      FTripList.Add(TStringItem.Create('mExploreUuid', ProcessOptions.ExploreUuid))
-    else
-    begin
-      CheckHRGuid(CreateGUID(Uid));
-      FTripList.Add(TStringItem.Create('mExploreUuid',
-                                       ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])))
-    end;
-    FTripList.Add(TmVersionNumber.Create(4, $10));
-    FTriplist.Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
-    FTripList.Add(TmTotalTripDistance.Create(TotalDistance));
-    FTripList.Add(TByteItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
-    FTriplist.Add(TmRoutePreferencesAdventurousScenicRoads.Create);
-    FTripList.Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
-    FTriplist.Add(TmRoutePreferencesAdventurousPopularPaths.Create);
-    FTripList.Add(TmPartOfSplitRoute.Create);
-    FTripList.Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
-    FTripList.Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
-    FTriplist.Add(TmRoutePreferencesAdventurousMode.Create);
-    FTripList.Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-    ViaPointCount := CreateLocations(RtePts);
-
-    if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
-      // Create Trip from BC calculation
-      TotalTripTime.AsCardinal := FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList)
-    else if (ProcessOptions.AddSubClasses and HasSubClasses and (ViaPointCount >= 2)) then
-      // Create AllRoutes from BC calculation
-      TotalTripTime.AsCardinal := FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
-    else
-      // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
-      FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
-  finally
-    TmpStream.Free;
-  end;
 end;
 
 procedure TGPXFile.ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
@@ -2405,16 +2233,9 @@ begin
       end;
     end;
 
-    //TODO TREAD
-    case ProcessOptions.ZumoModel of
-      TZumoModel.XT:
-        CreateTrip_XT(TripName, CalculationMode, TransportMode, ParentTripID, RtePts);
-      TZumoModel.XT2:
-        CreateTrip_XT2(TripName, CalculationMode, TransportMode, ParentTripID, RtePts);
-      else
-        // Unknown model, default to XT
-        CreateTrip_XT(TripName, CalculationMode, TransportMode, ParentTripID, RtePts);
-    end;
+    FTripList.CreateTemplate(ProcessOptions.ZumoModel,
+                             TripName, CalculationMode, TransportMode);
+    UpdateTemplate(TripName, ParentTripId, RtePts);
 
     // Write to File
     FTripList.SaveToFile(OutFile);
