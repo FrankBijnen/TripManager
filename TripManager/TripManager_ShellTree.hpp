@@ -38,6 +38,9 @@ protected:
 	virtual void __fastcall InitNode(Vcl::Comctrls::TTreeNode* NewNode, Winapi::Shlobj::PItemIDList ID, Vcl::Comctrls::TTreeNode* ParentNode);
 	virtual bool __fastcall CustomDrawItem(Vcl::Comctrls::TTreeNode* Node, Vcl::Comctrls::TCustomDrawState State, Vcl::Comctrls::TCustomDrawStage Stage, bool &PaintImages);
 	DYNAMIC void __fastcall DoContextPopup(const System::Types::TPoint &MousePos, bool &Handled);
+	
+public:
+	__property OnCustomDrawItem;
 public:
 	/* TCustomShellTreeView.Create */ inline __fastcall virtual TShellTreeView(System::Classes::TComponent* AOwner) : Vcl::Shell::Shellctrls::TShellTreeView(AOwner) { }
 	/* TCustomShellTreeView.Destroy */ inline __fastcall virtual ~TShellTreeView() { }

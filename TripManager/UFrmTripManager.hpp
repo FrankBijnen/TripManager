@@ -177,7 +177,6 @@ __published:
 	Vcl::Menus::TMenuItem* Curvyroads1;
 	Vcl::Stdctrls::TButton* BtnFromDev;
 	Vcl::Stdctrls::TButton* BtnToDev;
-	Vcl::Stdctrls::TButton* BtnTransferToDevice;
 	Vcl::Extctrls::TPanel* PnlTopFiller;
 	Vcl::Stdctrls::TButton* BtnRefreshFileSys;
 	Vcl::Extctrls::TPanel* PnlBotFileSys;
@@ -203,7 +202,6 @@ __published:
 	Vcl::Buttons::TSpeedButton* BtnGeoSearch;
 	Vcl::Stdctrls::TButton* BtnTripEditor;
 	Vcl::Extctrls::TSplitter* SpltRoutePoint;
-	Vcl::Stdctrls::TButton* BtnCreateAdditional;
 	Vcl::Menus::TPopupMenu* PopupTripEdit;
 	Vcl::Menus::TMenuItem* MnuTripNewMTP;
 	Vcl::Menus::TMenuItem* MnuTripEdit;
@@ -223,6 +221,8 @@ __published:
 	Vcl::Menus::TMenuItem* MnuCompareGpxTrack;
 	Vcl::Menus::TMenuItem* CompareTriptoGPX1;
 	Vcl::Menus::TMenuItem* N11;
+	Vcl::Menus::TMenuItem* N10;
+	Vcl::Menus::TMenuItem* CheckandFixcurrentgpx1;
 	void __fastcall FormCreate(System::TObject* Sender);
 	void __fastcall FormDestroy(System::TObject* Sender);
 	void __fastcall BtnRefreshClick(System::TObject* Sender);
@@ -271,7 +271,6 @@ __published:
 	void __fastcall DeviceMenuPopup(System::TObject* Sender);
 	void __fastcall BtnFromDevClick(System::TObject* Sender);
 	void __fastcall BtnToDevClick(System::TObject* Sender);
-	void __fastcall CreateAdditionalClick(System::TObject* Sender);
 	void __fastcall BtnRefreshFileSysClick(System::TObject* Sender);
 	void __fastcall AdvPanel_MapTopResize(System::TObject* Sender);
 	void __fastcall ShellTreeView1CustomDrawItem(Vcl::Comctrls::TCustomTreeView* Sender, Vcl::Comctrls::TTreeNode* Node, Vcl::Comctrls::TCustomDrawState State, bool &DefaultDraw);
@@ -279,7 +278,6 @@ __published:
 	void __fastcall EdFileSysFolderKeyPress(System::TObject* Sender, System::WideChar &Key);
 	void __fastcall MapTimerTimer(System::TObject* Sender);
 	void __fastcall ShellListView1KeyUp(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
-	void __fastcall BtnTransferToDeviceClick(System::TObject* Sender);
 	void __fastcall ShellListView1ColumnClick(System::TObject* Sender, Vcl::Comctrls::TListColumn* Column);
 	void __fastcall LstFilesKeyUp(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall ChkWatchClick(System::TObject* Sender);
@@ -309,6 +307,7 @@ __published:
 	void __fastcall MnuNextDiffClick(System::TObject* Sender);
 	void __fastcall MnuPrevDiffClick(System::TObject* Sender);
 	void __fastcall FormKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
+	void __fastcall CheckandFixcurrentgpx1Click(System::TObject* Sender);
 	
 private:
 	System::UnicodeString PrefDevice;
@@ -349,7 +348,7 @@ private:
 	void __fastcall LoadHex(const System::UnicodeString FileName);
 	void __fastcall LoadTripOnMap(Unittripobjects::TTripList* CurrentTrip, System::UnicodeString Id);
 	void __fastcall LoadGpiOnMap(Unitgpi::TPOIList* CurrentGpi, System::UnicodeString Id);
-	void __fastcall MapRequest(const System::UnicodeString Coords, const System::UnicodeString Desc, const System::UnicodeString Zoom, const System::UnicodeString TimeOut);
+	void __fastcall MapRequest(const System::UnicodeString Coords, const System::UnicodeString Desc, const System::UnicodeString TimeOut, const System::UnicodeString ZoomLevel = System::UnicodeString());
 	void __fastcall SaveTripGpiFile();
 	void __fastcall LoadTripFile(const System::UnicodeString FileName, const bool FromDevice);
 	void __fastcall LoadGpiFile(const System::UnicodeString FileName, const bool FromDevice);
@@ -384,11 +383,7 @@ private:
 	void __fastcall ReadDefaultFolders();
 	void __fastcall ReadColumnSettings();
 	void __fastcall WriteColumnSettings();
-	void __fastcall OnSetFixedPrefs(System::TObject* Sender);
-	void __fastcall OnSetDevicePrefs(System::TObject* Sender);
 	void __fastcall OnSetPostProcessPrefs(System::TObject* Sender);
-	void __fastcall OnSetWindowsFolderPrefs(System::TObject* Sender);
-	void __fastcall OnSavePrefs(System::TObject* Sender);
 	void __fastcall ReadSettings();
 	void __fastcall ClearTripInfo();
 	void __fastcall EditTrip(bool NewFile);

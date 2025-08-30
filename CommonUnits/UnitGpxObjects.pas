@@ -2167,7 +2167,7 @@ begin
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
 
-  (FTripList.GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := Swap32(GetTotalDistance(TripName));
+  (FTripList.GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := GetTotalDistance(TripName);
   TotalTripTime := FTripList.GetItem('mTotalTripTime') as TmTotalTripTime;
 
   HasSubClasses := BuildSubClassesList(RtePts);

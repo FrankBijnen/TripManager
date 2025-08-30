@@ -16,19 +16,44 @@
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
+#include <UnitGpxDefs.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
 namespace Unitregistrykeys
 {
 //-- forward type declarations -----------------------------------------------
+class DELPHICLASS TSetProcessOptions;
 //-- type declarations -------------------------------------------------------
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TSetProcessOptions : public System::TObject
+{
+	typedef System::TObject inherited;
+	
+public:
+	void __fastcall SetFixedPrefs(System::TObject* Sender);
+	void __fastcall SetPostProcessPrefs(System::TObject* Sender);
+	void __fastcall SetSendToPrefs(System::TObject* Sender);
+	void __fastcall SetCmdLinePrefs(System::TObject* Sender);
+	void __fastcall SavePrefs(System::TObject* Sender);
+	__classmethod void __fastcall SetPrefs(System::TObject* TvSelections);
+	__classmethod Unitgpxdefs::TGPXFuncArray __fastcall StorePrefs(System::TObject* TvSelections);
+public:
+	/* TObject.Create */ inline __fastcall TSetProcessOptions() : System::TObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TSetProcessOptions() { }
+	
+};
+
+#pragma pack(pop)
+
 //-- var, const, procedure ---------------------------------------------------
 #define Reg_GPISymbolSize L"GPISymbolsSize"
 #define Reg_GPIProximity L"GPIProximity"
 #define Reg_TrackColor L"TrackColor"
 #define Reg_ZumoModel L"ZumoModel"
 #define Reg_ScPosn_Unknown1 L"ScPosn_Unknown1"
+#define Reg_AllowGrouping L"AllowGrouping"
+#define Reg_TripOption L"TripOption"
 #define Reg_VehicleProfileGuid L"VehicleProfileGuid"
 #define Reg_VehicleProfileHash L"VehicleProfileHash"
 #define Reg_VehicleId L"VehicleId"
@@ -65,7 +90,6 @@ static _DELPHI_CONST System::Word Reg_CompareDistOK_Val = System::Word(0x1f4);
 #define Reg_PrefDevGpxFolder_Val L"Internal Storage\\GPX"
 #define Reg_PrefDevPoiFolder_Key L"PrefDevicePoiFolder"
 #define Reg_PrefDevPoiFolder_Val L"Internal Storage\\POI"
-#define Reg_EnableSendTo L"EnableSendTo"
 #define Reg_EnableDirFuncs L"EnableDirFuncs"
 #define Reg_WarnModel_Key L"WarnModel"
 #define Reg_TripColor_Key L"TripColor"
@@ -81,6 +105,21 @@ static _DELPHI_CONST System::Word Reg_CompareDistOK_Val = System::Word(0x1f4);
 #define Reg_GeoSearchTimeOut_Val L"8000"
 #define Reg_SavedMapPosition_Key L"SavedMapPosition"
 #define Reg_DefaultCoordinates L"48.854918, 2.346558"
+static _DELPHI_CONST System::Int8 IdTrip = System::Int8(0x0);
+static _DELPHI_CONST System::Int8 IdTrack = System::Int8(0x1);
+static _DELPHI_CONST System::Int8 IdCompleteRoute = System::Int8(0x2);
+static _DELPHI_CONST System::Int8 IdStrippedRoute = System::Int8(0x3);
+static _DELPHI_CONST System::Int8 IdWayPoint = System::Int8(0x4);
+static _DELPHI_CONST System::Int8 IdWayPointWpt = System::Int8(0x5);
+static _DELPHI_CONST System::Int8 IdWayPointVia = System::Int8(0x6);
+static _DELPHI_CONST System::Int8 IdWayPointShp = System::Int8(0x7);
+static _DELPHI_CONST System::Int8 IdGpi = System::Int8(0x8);
+static _DELPHI_CONST System::Int8 IdGpiWayPt = System::Int8(0x9);
+static _DELPHI_CONST System::Int8 IdGpiViaPt = System::Int8(0xa);
+static _DELPHI_CONST System::Int8 IdGpiShpPt = System::Int8(0xb);
+static _DELPHI_CONST System::Int8 IdKml = System::Int8(0xc);
+static _DELPHI_CONST System::Int8 IdHtml = System::Int8(0xd);
+extern DELPHI_PACKAGE TSetProcessOptions* SetProcessOptions;
 }	/* namespace Unitregistrykeys */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITREGISTRYKEYS)
 using namespace Unitregistrykeys;

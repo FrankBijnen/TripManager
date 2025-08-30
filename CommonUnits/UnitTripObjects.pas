@@ -41,7 +41,7 @@ type
                        rpShapingXT2       = 2);
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
 
-  TTripOption       = (ttCalc, ttNoCal, ttTripTrack, ttTripTrackLoc);
+  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc);
 
 { Elementary data types }
 const
@@ -842,6 +842,14 @@ begin
   AStream.Write(Tmp, SizeOf(Tmp));
 end;
 
+procedure WriteSwap32(AStream: TMemoryStream; I: Single); overload;
+var
+  Tmp: Single;
+begin
+  Tmp := Swap32(I);
+  AStream.Write(Tmp, SizeOf(Tmp));
+end;
+
 function CoordAsDec(CoordInt: integer): double;
 begin
   result := SimpleRoundTo(CoordInt / 4294967296 * 360, -10);
@@ -1282,13 +1290,14 @@ end;
 constructor TSingleItem.Create(AName: ShortString; AValue: Single);
 begin
   inherited Create(AName, SizeOf(FValue), dtSingle);
-  FValue := Swap32(AValue);
+  FValue := AValue;
 end;
 
 procedure TSingleItem.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
   AStream.Read(FValue, SizeOf(FValue));
+  FValue := Swap32(FValue);
 end;
 
 destructor TSingleItem.Destroy;
@@ -1299,12 +1308,12 @@ end;
 procedure TSingleItem.WriteValue(AStream: TMemoryStream);
 begin
   inherited WriteValue(AStream);
-  AStream.Write(FValue, SizeOf(FValue));
+  WriteSwap32(AStream, FValue);
 end;
 
 function TSingleItem.GetValue: string;
 begin
-  result := Format('%f', [Swap32(FValue)]);
+  result := Format('%f', [FValue]);
 end;
 
 function TSingleItem.GetEditMode: TEditMode;
@@ -2086,7 +2095,7 @@ var
     KeyName:  cardinal  = $6E6F4C6D;  // mlon
     ValueLen: cardinal  = $05000000;
     DataType: byte      = $03;
- var
+  var
     CoordInt: integer;
   begin
     TmpStream.Write(Init, SizeOf(Init));
@@ -2105,7 +2114,7 @@ var
     KeyName:  cardinal  = $74614C6D;  // mLat
     ValueLen: cardinal  = $05000000;
     DataType: byte      = $03;
- var
+  var
     CoordInt: integer;
   begin
     TmpStream.Write(Init, SizeOf(Init));
@@ -3569,6 +3578,8 @@ begin
 
   // Need locations
   Locations := GetItem('mLocations');
+  if not Assigned(Locations) then
+    exit;
 
   AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, false);
   RoutePointList := TList<TLocation>.Create;
@@ -3644,12 +3655,11 @@ begin
 
   // Need locations
   Locations := GetItem('mLocations');
-
- // Count from already assigned Locations
-  ViaCount := 0;
   if not Assigned(Locations) then
     exit;
 
+ // Count from already assigned Locations
+  ViaCount := 0;
   for Location in TmLocations(Locations).Locations do
   begin
     if (Location is TmAttr) and
@@ -3671,7 +3681,7 @@ begin
       ScanRtePt := FirstRtePt;
 
       // Add udb's for all Via and Shaping found in Locations.
-      // Add Subclasses from <gpxx:rpt>. Will be named 'point'
+      // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
       TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
       GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[ShapeBitmap[CalcModel]]);
       for RoutePtCount := 0 to RoutePointList.Count -2 do

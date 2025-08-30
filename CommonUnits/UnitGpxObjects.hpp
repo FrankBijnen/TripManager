@@ -54,15 +54,16 @@ private:
 	Unitverysimplexml::TXmlVSNode* CurrentWayPointFromRoute;
 	System::UnicodeString CurrentRouteTrackName;
 	int ShapingPointCnt;
-	Unitgpxdefs::TCoord CurrentCoord;
+	Unitgpxdefs::TCoords CurrentCoord;
 	double TotalDistance;
 	double CurrentDistance;
-	Unitgpxdefs::TCoord PrevCoord;
+	Unitgpxdefs::TCoords PrevCoord;
 	Unitverysimplexml::TXmlVSDocument* FXmlDocument;
 	System::UnicodeString FOutDir;
 	System::Classes::TNotifyEvent FOnFunctionPrefs;
 	System::Classes::TNotifyEvent FOnSavePrefs;
 	System::Classes::TStringList* FOutStringList;
+	System::Classes::TStringList* FSubClassList;
 	System::UnicodeString FBaseFile;
 	System::UnicodeString FGPXFile;
 	unsigned FSeqNo;
@@ -107,11 +108,14 @@ private:
 	void __fastcall ProcessGPXNode(Unitverysimplexml::TXmlVSNode* GpxNode);
 	void __fastcall StripRtePt(Unitverysimplexml::TXmlVSNode* const RtePtNode);
 	void __fastcall StripRte(Unitverysimplexml::TXmlVSNode* const RteNode);
-	int __fastcall CreateLocations(Unitverysimplexml::TXmlVSNodeList* RtePts);
-	void __fastcall CreateTrip_XT(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode, unsigned ParentTripID, Unitverysimplexml::TXmlVSNodeList* RtePts);
-	void __fastcall CreateTrip_XT2(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode, unsigned ParentTripID, Unitverysimplexml::TXmlVSNodeList* RtePts);
+	double __fastcall GetTotalDistance(const System::UnicodeString ATripName);
+	bool __fastcall BuildSubClassesList(Unitverysimplexml::TXmlVSNodeList* const RtePts);
+	int __fastcall CreateLocations(Unittripobjects::TmLocations* Locations, Unitverysimplexml::TXmlVSNodeList* RtePts);
+	void __fastcall UpdateTemplate(const System::UnicodeString TripName, unsigned ParentTripId, Unitverysimplexml::TXmlVSNodeList* RtePts);
 	
 protected:
+	System::UnicodeString __fastcall MapSegRoadExclBit(const System::UnicodeString ASubClass);
+	void __fastcall BuildSubClasses(Unitverysimplexml::TXmlVSNode* const ARtePt, const double DistOKMeters, const Unitgpxdefs::TSubClassType SCType = (Unitgpxdefs::TSubClassType() << Unitgpxdefs::Unitgpxdefs__1::scCompare ));
 	void __fastcall CloneAttributes(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
 	void __fastcall CloneSubNodes(Unitverysimplexml::TXmlVSNodeList* FromNodes, Unitverysimplexml::TXmlVSNodeList* ToNodes);
 	void __fastcall CloneNode(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
@@ -134,18 +138,16 @@ public:
 	void __fastcall DoCreateRoutes();
 	void __fastcall DoCreateTrips();
 	void __fastcall ProcessTrip(Unitverysimplexml::TXmlVSNode* const RteNode, unsigned ParentTripId);
+	void __fastcall FixCurrentGPX();
 	void __fastcall AnalyzeGpx();
+	__property System::Classes::TStringList* SubClassList = {read=FSubClassList};
 	__property Unitverysimplexml::TXmlVSNodeList* WayPointList = {read=FWayPointList};
 	__property Unitverysimplexml::TXmlVSNodeList* RouteViaPointList = {read=FRouteViaPointList};
 	__property Unitverysimplexml::TXmlVSNodeList* TrackList = {read=FTrackList};
 	__property Unitverysimplexml::TXmlVSDocument* XmlDocument = {read=FXmlDocument};
 	__property Unitprocessoptions::TProcessOptions* ProcessOptions = {read=FProcessOptions, write=FProcessOptions};
-	__classmethod System::UnicodeString __fastcall Coord2Float(System::LongInt ACoord);
-	__classmethod System::LongInt __fastcall Float2Coord(double ACoord);
-	__classmethod double __fastcall DegreesToRadians(double Degrees);
-	__classmethod Unitgpxdefs::TCoord __fastcall CoordFromAttribute(Unitverysimplexml::TXmlVSAttributeList* Attributes);
-	__classmethod double __fastcall CoordDistance(const Unitgpxdefs::TCoord &Coord1, const Unitgpxdefs::TCoord &Coord2, Unitgpxdefs::TDistanceUnit DistanceUnit);
 	__classmethod void __fastcall PerformFunctions(const Unitgpxdefs::TGPXFunc *AllFuncs, const System::NativeInt AllFuncs_High, const System::UnicodeString GPXFile, const System::Classes::TNotifyEvent FunctionPrefs, const System::Classes::TNotifyEvent SavePrefs, const System::UnicodeString ForceOutDir = System::UnicodeString(), System::Classes::TStringList* const OutStringList = (System::Classes::TStringList*)(0x0), const unsigned SeqNo = (unsigned)(0x0));
+	__classmethod bool __fastcall CmdLinePostProcess(System::Classes::TNotifyEvent SetPrefsEvent);
 };
 
 

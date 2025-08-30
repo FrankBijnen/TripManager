@@ -76,6 +76,9 @@ class DELPHICLASS TmRoutePreferencesAdventurousHillsAndCurves;
 class DELPHICLASS TmRoutePreferencesAdventurousScenicRoads;
 class DELPHICLASS TmRoutePreferencesAdventurousMode;
 class DELPHICLASS TmRoutePreferencesAdventurousPopularPaths;
+struct TTrackPoints;
+struct TTrackHeader;
+class DELPHICLASS TmTrackToRouteInfoMap;
 struct THeaderValue;
 class DELPHICLASS THeader;
 struct TLocationValue;
@@ -93,7 +96,7 @@ class DELPHICLASS TTripList;
 //-- type declarations -------------------------------------------------------
 enum DECLSPEC_DENUM TEditMode : unsigned char { emNone, emEdit, emPickList, emButton };
 
-enum DECLSPEC_DENUM TZumoModel : unsigned char { XT, XT2, Unknown };
+enum DECLSPEC_DENUM TZumoModel : unsigned char { XT, XT2, Tread2, Unknown };
 
 enum DECLSPEC_DENUM TRoutePreference : unsigned char { rmFasterTime, rmShorterDistance, rmDirect = 4, rmCurvyRoads = 7, rmHills = 26, rmNoShape = 88, rmScenic = 190, rmPopular = 239 };
 
@@ -102,6 +105,8 @@ enum DECLSPEC_DENUM TTransportMode : unsigned char { tmAutoMotive = 1, tmMotorcy
 enum DECLSPEC_DENUM TRoutePoint : unsigned char { rpVia, rpShaping, rpShapingXT2 };
 
 enum DECLSPEC_DENUM TUdbDirStatus : unsigned char { udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK };
+
+enum DECLSPEC_DENUM TTripOption : unsigned char { ttCalc, ttNoCal, ttTripTrack, ttTripTrackLoc };
 
 typedef System::StaticArray<System::Classes::TIdentMapEntry, 2> Unittripobjects__1;
 
@@ -253,6 +258,7 @@ public:
 	__fastcall TSingleItem(System::ShortString &AName, float AValue);
 	__fastcall virtual ~TSingleItem();
 	virtual void __fastcall InitFromStream(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType, System::Classes::TStream* AStream);
+	__property float AsSingle = {read=FValue, write=FValue};
 };
 
 #pragma pack(pop)
@@ -310,11 +316,25 @@ public:
 #pragma pack(push,1)
 struct DECLSPEC_DRECORD TPosnValue
 {
+	
 public:
 	unsigned ScnSize;
-	unsigned Unknown1;
-	int Lat;
-	int Lon;
+	union
+	{
+		struct 
+		{
+			System::StaticArray<unsigned, 2> Unknown1_16;
+			int Lat_16;
+			int Lon_16;
+		};
+		struct 
+		{
+			unsigned Unknown1;
+			int Lat;
+			int Lon;
+		};
+		
+	};
 };
 #pragma pack(pop)
 
@@ -333,7 +353,7 @@ private:
 	virtual void __fastcall SetMapCoords(System::UnicodeString ACoords);
 	
 public:
-	__fastcall TmScPosn(double ALat, double ALon, unsigned AUnknown1);
+	__fastcall TmScPosn(double ALat, double ALon, unsigned AUnknown1, unsigned ASize);
 	virtual void __fastcall InitFromStream(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType, System::Classes::TStream* AStream);
 	__fastcall virtual ~TmScPosn();
 	__property unsigned Unknown1 = {read=FValue.Unknown1, nodefault};
@@ -921,6 +941,51 @@ public:
 #pragma pack(pop)
 
 #pragma pack(push,1)
+struct DECLSPEC_DRECORD TTrackPoints
+{
+public:
+	char Inititiator;
+	unsigned KeyLen;
+	System::StaticArray<char, 12> KeyName;
+	unsigned ValueLen;
+	System::Byte DataType;
+	unsigned TrkPntCnt;
+};
+#pragma pack(pop)
+
+
+#pragma pack(push,1)
+struct DECLSPEC_DRECORD TTrackHeader
+{
+public:
+	unsigned TrkCnt;
+	System::Byte SubItems;
+	System::StaticArray<unsigned, 2> Unknown1;
+	unsigned SubLength;
+	System::Byte DataType;
+	unsigned ItemCount;
+	TTrackPoints TrackPoints;
+};
+#pragma pack(pop)
+
+
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TmTrackToRouteInfoMap : public TRawDataItem
+{
+	typedef TRawDataItem inherited;
+	
+public:
+	TTrackHeader FTrackHeader;
+	__fastcall virtual TmTrackToRouteInfoMap(System::ShortString &AName, unsigned ALenValue, System::Byte ADataType);
+	void __fastcall InitFromGpxxRpt(System::TObject* RtePts);
+public:
+	/* TRawDataItem.Destroy */ inline __fastcall virtual ~TmTrackToRouteInfoMap() { }
+	
+};
+
+#pragma pack(pop)
+
+#pragma pack(push,1)
 struct DECLSPEC_DRECORD THeaderValue
 {
 public:
@@ -980,7 +1045,9 @@ public:
 	__fastcall TLocation(System::Byte ADataType);
 	__fastcall virtual ~TLocation();
 	void __fastcall Add(TBaseItem* ANitem);
+	TmAttr* __fastcall LocationTmAttr();
 	TmName* __fastcall LocationTmName();
+	TmAddress* __fastcall LocationTmAddress();
 	TmScPosn* __fastcall LocationTmScPosn();
 	__property TLocationValue LocationValue = {read=Value};
 	__property TItemList* LocationItems = {read=FItems};
@@ -1008,6 +1075,7 @@ public:
 	void __fastcall Clear();
 	void __fastcall AddLocatIon(TLocation* ALocation);
 	TBaseItem* __fastcall Add(TBaseItem* ANItem);
+	void __fastcall GetRoutePoints(int ViaPoint, System::Generics::Collections::TList__1<TLocation*>* RoutePointList);
 	__property TItemList* Locations = {read=FItemList};
 	__property unsigned LocationCount = {read=FItemCount, nodefault};
 };
@@ -1021,8 +1089,36 @@ public:
 	unsigned MapSegment;
 	unsigned RoadId;
 	System::Byte PointType;
-	System::Byte Direction;
-	System::StaticArray<System::Byte, 6> Unknown1;
+	void __fastcall Init(const System::UnicodeString GPXSubClass);
+	
+public:
+	union
+	{
+		struct 
+		{
+			System::Byte Direction2;
+			System::Word Time;
+			System::StaticArray<System::Word, 2> Unknown2;
+		};
+		struct 
+		{
+			System::Byte B4Lat;
+			System::Byte B4Lon;
+			System::Byte Reserved;
+			System::Word B2_3Lat;
+			System::Word B2_3Lon;
+		};
+		struct 
+		{
+			System::StaticArray<System::Byte, 7> ComprLatLon;
+		};
+		struct 
+		{
+			System::Byte Direction;
+			System::StaticArray<System::Byte, 6> Unknown1;
+		};
+		
+	};
 };
 #pragma pack(pop)
 
@@ -1034,7 +1130,10 @@ public:
 	TSubClass SubClass;
 	int Lat;
 	int Lon;
-	System::StaticArray<unsigned, 6> Unknown1;
+	unsigned Unknown1;
+	System::Byte Time;
+	System::Byte Border;
+	System::StaticArray<System::Word, 9> Unknown2;
 	System::StaticArray<unsigned, 121> Name;
 	void __fastcall SwapCardinals();
 };
@@ -1051,7 +1150,9 @@ private:
 	TUdbDirStatus FUdbDirStatus;
 	
 protected:
-	__fastcall TUdbDir(System::WideString AName, double ALat, double ALon, System::Byte APointType, System::Byte ADirection);
+	__fastcall TUdbDir(System::WideString AName, double ALat, double ALon, System::Byte APointType)/* overload */;
+	__fastcall TUdbDir(TLocation* ALocation)/* overload */;
+	__fastcall TUdbDir(System::UnicodeString GPXSubClass, System::UnicodeString RoadClass, double Lat, double Lon, double Dist)/* overload */;
 	
 private:
 	virtual void __fastcall WritePrefix(System::Classes::TMemoryStream* AStream);
@@ -1064,6 +1165,8 @@ private:
 	System::UnicodeString __fastcall GetMapSegRoadExclBit();
 	System::UnicodeString __fastcall GetPointType();
 	System::UnicodeString __fastcall GetDirection();
+	void __fastcall FillCompressedLatLon();
+	System::UnicodeString __fastcall GetComprLatLon();
 	
 public:
 	double __fastcall Lat();
@@ -1076,6 +1179,7 @@ public:
 	__property System::UnicodeString MapSegRoadExclBit = {read=GetMapSegRoadExclBit};
 	__property System::UnicodeString PointType = {read=GetPointType};
 	__property System::UnicodeString Direction = {read=GetDirection};
+	__property System::UnicodeString ComprLatLon = {read=GetComprLatLon};
 	__property TUdbDirStatus Status = {read=FUdbDirStatus, write=FUdbDirStatus, nodefault};
 public:
 	/* TPersistent.Destroy */ inline __fastcall virtual ~TUdbDir() { }
@@ -1137,7 +1241,7 @@ private:
 	virtual void __fastcall WriteTerminator(System::Classes::TMemoryStream* AStream);
 	
 public:
-	__fastcall TmUdbDataHndl(unsigned AHandleId, TZumoModel AModel);
+	__fastcall TmUdbDataHndl(unsigned AHandleId, TZumoModel AModel, bool ForceRecalc);
 	__fastcall virtual ~TmUdbDataHndl();
 	void __fastcall Add(TUdbDir* AnUdbDir);
 	__property unsigned HandleId = {read=FUdbHandleId, nodefault};
@@ -1194,9 +1298,18 @@ private:
 	TItemList* FItemList;
 	void __fastcall ResetCalculation();
 	void __fastcall Calculate(System::Classes::TMemoryStream* AStream);
+	TmUdbDataHndl* __fastcall FirstUdbDataHndle();
 	TZumoModel __fastcall GetZumoModel();
-	void __fastcall CreateTemplate_XT(const System::UnicodeString TripName);
-	void __fastcall CreateTemplate_XT2(const System::UnicodeString TripName);
+	TZumoModel __fastcall GetCalcModel(TZumoModel AModel);
+	TZumoModel __fastcall GetIsCalculatedModel();
+	TBaseItem* __fastcall InitAllRoutes();
+	void __fastcall SetPreserveTrackToRoute(System::TObject* const RtePts);
+	void __fastcall AddLocation_XT(TmLocations* Locations, System::TObject* ProcessOptions, TRoutePoint RoutePoint, double Lat, double Lon, System::TDateTime DepartureDate, System::UnicodeString Name, System::UnicodeString Address);
+	void __fastcall AddLocation_XT2(TmLocations* Locations, System::TObject* ProcessOptions, TRoutePoint RoutePoint, double Lat, double Lon, System::TDateTime DepartureDate, System::UnicodeString Name, System::UnicodeString Address);
+	void __fastcall AddLocation_Tread2(TmLocations* Locations, System::TObject* ProcessOptions, TRoutePoint RoutePoint, double Lat, double Lon, System::TDateTime DepartureDate, System::UnicodeString Name, System::UnicodeString Address);
+	void __fastcall CreateTemplate_XT(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode);
+	void __fastcall CreateTemplate_XT2(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode);
+	void __fastcall CreateTemplate_Tread2(const System::UnicodeString TripName, const System::UnicodeString CalculationMode, const System::UnicodeString TransportMode);
 	
 public:
 	__fastcall TTripList();
@@ -1216,12 +1329,17 @@ public:
 	TOSMRoutePoint __fastcall OSMRoutePoint(int RoutePointId);
 	TmArrival* __fastcall GetArrival();
 	void __fastcall CreateOSMPoints(System::Classes::TStringList* const OutStringList, const System::UnicodeString HTMLColor);
-	void __fastcall ForceRecalc(const TZumoModel AModel = (TZumoModel)(0x2), int ViaPointCount = 0x0);
-	void __fastcall CreateTemplate(const TZumoModel AModel, System::UnicodeString TripName);
+	void __fastcall SetRoutePrefs_XT2_Tread2(int ViaCount);
+	void __fastcall AddLocation(TmLocations* Locations, System::TObject* ProcessOptions, TRoutePoint RoutePoint, double Lat, double Lon, System::TDateTime DepartureDate, System::UnicodeString Name, System::UnicodeString Address);
+	void __fastcall ForceRecalc(const TZumoModel AModel = (TZumoModel)(0x3), int ViaPointCount = 0x0);
+	unsigned __fastcall TripTrack(const TZumoModel AModel = (TZumoModel)(0x3), System::TObject* RtePts = (System::TObject*)(0x0), System::Classes::TStringList* SubClasses = (System::Classes::TStringList*)(0x0));
+	unsigned __fastcall SaveCalculated(const TZumoModel AModel = (TZumoModel)(0x3), System::TObject* RtePts = (System::TObject*)(0x0));
+	void __fastcall CreateTemplate(const TZumoModel AModel, const System::UnicodeString TripName, const System::UnicodeString CalculationMode = System::UnicodeString(), const System::UnicodeString TransportMode = System::UnicodeString());
 	void __fastcall SaveAsGPX(const System::UnicodeString GPXFile);
 	__property THeader* Header = {read=FHeader};
 	__property TItemList* ItemList = {read=FItemList};
 	__property TZumoModel ZumoModel = {read=GetZumoModel, nodefault};
+	__property TZumoModel CalculatedModel = {read=GetIsCalculatedModel, nodefault};
 };
 
 #pragma pack(pop)
@@ -1235,6 +1353,11 @@ static _DELPHI_CONST System::WideChar XT2_VehicleId = (System::WideChar)(0x31);
 static _DELPHI_CONST System::WideChar XT2_VehicleProfileTruckType = (System::WideChar)(0x37);
 #define XT2_AvoidancesChangedTimeAtSave L""
 #define XT2_VehicleProfileName L"z\u016bmo Motorcycle"
+#define Tread2_Name L"Tread 2"
+#define Tread2_VehicleProfileName L"Tread Profile"
+#define Tread2_VehicleProfileGuid L"c21c922c-553f-4783-85f8-c0a13f52d960"
+#define Tread2_VehicleProfileHash L"61578528"
+static _DELPHI_CONST System::Int8 Tread2_TmScPosnSize = System::Int8(0x10);
 static _DELPHI_CONST System::Int8 dtByte = System::Int8(0x1);
 static _DELPHI_CONST System::Int8 dtCardinal = System::Int8(0x3);
 static _DELPHI_CONST System::Int8 dtSingle = System::Int8(0x4);
@@ -1253,8 +1376,9 @@ extern DELPHI_PACKAGE Unittripobjects__3 TransportModeMap;
 extern DELPHI_PACKAGE Unittripobjects__4 RoutePointMap;
 #define UdbDirTurn L"Turn"
 extern DELPHI_PACKAGE System::StaticArray<System::Byte, 4> TurnMagic;
-extern DELPHI_PACKAGE System::StaticArray<int, 3> Unknown3Size;
-extern DELPHI_PACKAGE System::StaticArray<unsigned, 3> CalculationMagic;
+extern DELPHI_PACKAGE System::StaticArray<int, 4> Unknown3Size;
+extern DELPHI_PACKAGE System::StaticArray<unsigned, 4> CalculationMagic;
+extern DELPHI_PACKAGE System::StaticArray<unsigned, 4> ShapeBitmap;
 }	/* namespace Unittripobjects */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITTRIPOBJECTS)
 using namespace Unittripobjects;
