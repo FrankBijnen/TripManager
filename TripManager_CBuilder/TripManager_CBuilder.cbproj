@@ -253,11 +253,6 @@
             <DesignClass>TDataModule</DesignClass>
             <BuildOrder>38</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\TripManager\UFrmAdditional.pas">
-            <Form>FrmAdditional</Form>
-            <FormType>dfm</FormType>
-            <BuildOrder>31</BuildOrder>
-        </DelphiCompile>
         <DelphiCompile Include="..\TripManager\UFrmAdvSettings.pas">
             <Form>FrmAdvSettings</Form>
             <FormType>dfm</FormType>
@@ -278,8 +273,8 @@
             <FormType>dfm</FormType>
             <BuildOrder>35</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\TripManager\UFrmTransferOptions.pas">
-            <Form>FrmTransferOptions</Form>
+        <DelphiCompile Include="..\TripManager\UFrmSendTo.pas">
+            <Form>FrmSendTo</Form>
             <FormType>dfm</FormType>
             <BuildOrder>36</BuildOrder>
         </DelphiCompile>
@@ -299,18 +294,6 @@
         <None Include="TripManager_CBuilderPCH2.h">
             <BuildOrder>8</BuildOrder>
         </None>
-        <FormResources Include="..\CommonUnits\UFrmGeoSearch.dfm"/>
-        <FormResources Include="..\CommonUnits\UFrmPlaces.dfm"/>
-        <FormResources Include="..\CommonUnits\UFrmSelectGPX.dfm"/>
-        <FormResources Include="..\TripManager\UFrmAdditional.dfm"/>
-        <FormResources Include="..\TripManager\UFrmAdvSettings.dfm"/>
-        <FormResources Include="..\TripManager\UFrmDateDialog.dfm"/>
-        <FormResources Include="..\TripManager\UFrmNewTrip.dfm"/>
-        <FormResources Include="..\TripManager\UFrmPostProcess.dfm"/>
-        <FormResources Include="..\TripManager\UFrmTransferOptions.dfm"/>
-        <FormResources Include="..\TripManager\UFrmTripEditor.dfm"/>
-        <FormResources Include="..\TripManager\UFrmTripManager.dfm"/>
-        <FormResources Include="..\TripManager\UDmRoutePoints.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
