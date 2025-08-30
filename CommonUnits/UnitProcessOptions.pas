@@ -126,7 +126,6 @@ type
     {$IFDEF TRIPOBJECTS}
     ZumoModel: TZumoModel;                    // XT1 and XT2
     ScPosn_Unknown1: Cardinal;                // XT1 and XT2
-//    ExploreUuid: string;                    // XT2 Not user Configurable anymore. Always generate a new Uuid
     VehicleProfileGuid: string;               // XT2
     VehicleProfileHash: string;               // XT2
     VehicleId: string;                        // XT2
@@ -134,9 +133,7 @@ type
     VehicleProfileName: string;               // XT2
     AvoidancesChangedTimeAtSave: Cardinal;    // XT2
     AllowGrouping: boolean;                   // XT1. (Not used anymore for XT2)
-    PreserveTrackToRoute: boolean;            // XT1 and XT2
-    AddSubClasses: boolean;                   // XT1 and XT2
-    ForceRecalc: boolean;                     // XT1 and XT2
+    TripOption: TTripOption;                  // XT1 and XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -240,9 +237,7 @@ begin
   VehicleProfileName := XT2_VehicleProfileName;
   AvoidancesChangedTimeAtSave := 0;
   AllowGrouping := true;
-  PreserveTrackToRoute := false;
-  AddSubClasses := false;
-  ForceRecalc := true;
+  TripOption := TTripOption.ttCalc;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}

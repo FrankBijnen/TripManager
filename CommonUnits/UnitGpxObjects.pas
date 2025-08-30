@@ -2047,17 +2047,13 @@ var
   ATrack: TXmlVSNode;
 begin
   result := 0;
-  if (ProcessOptions.PreserveTrackToRoute) or
-     (ProcessOptions.AddSubClasses) then
+  for ATrack in TrackList do
   begin
-    for ATrack in TrackList do
+    if (SameText(FindSubNodeValue(ATrack, 'desc'), 'rte')) and
+       (SameText(ATrack.NodeName, ATripName)) then
     begin
-      if (SameText(FindSubNodeValue(ATrack, 'desc'), 'rte')) and
-         (SameText(ATrack.NodeName, ATripName)) then
-      begin
-        result := StrToFloatDef(FindSubNodeValue(ATrack, 'TotalDistance'), 0);
-        break;
-      end;
+      result := StrToFloatDef(FindSubNodeValue(ATrack, 'TotalDistance'), 0);
+      break;
     end;
   end;
 end;
@@ -2080,7 +2076,7 @@ begin
   for ARtePt in RtePts do
   begin
     ScType := [];
-    if (ProcessOptions.PreserveTrackToRoute) then
+    if (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then // Need to drop intermediate route points
     begin
       if (ARtePt = FirstRtePt) then
         Include(ScType, scFirst);
@@ -2111,7 +2107,7 @@ begin
   for RtePtNode in RtePts do
   begin
     Inc(PointCnt);
-    if (ProcessOptions.PreserveTrackToRoute) then
+    if (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
     begin
       if (PointCnt <> 1) and
          (PointCnt <> RtePts.Count) then
@@ -2162,7 +2158,6 @@ var
   HasSubClasses: boolean;
   TotalTripTime: TmTotalTripTime;
   Locations:     TmLocations;
-  TrackToRouteInfoMap: TmTrackToRouteInfoMap;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.ZumoModel = TZumoModel.XT) then
@@ -2175,20 +2170,12 @@ begin
   (FTripList.GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := Swap32(GetTotalDistance(TripName));
   TotalTripTime := FTripList.GetItem('mTotalTripTime') as TmTotalTripTime;
 
-  HasSubClasses := false;
-  if (ProcessOptions.PreserveTrackToRoute) or
-     (ProcessOptions.AddSubClasses) then
-    HasSubClasses := BuildSubClassesList(RtePts);
+  HasSubClasses := BuildSubClassesList(RtePts);
 
-  if (ProcessOptions.PreserveTrackToRoute and HasSubClasses) then
-  begin
+  if ((ProcessOptions.TripOption in [TTripOption.ttTripTrack]) and HasSubClasses) then
     // Create TripTrack from BC calculation
-    TrackToRouteInfoMap := FTripList.GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
-    if Assigned(TrackToRouteInfoMap) then
-      TrackToRouteInfoMap.InitFromGpxxRpt(RtePts);
-    TotalTripTime.AsCardinal := FTripList.TripTrack(ProcessOptions.ZumoModel, SubClassList);
-  end
-  else if (ProcessOptions.AddSubClasses and HasSubClasses and (ViaPointCount >= 2)) then
+    TotalTripTime.AsCardinal := FTripList.TripTrack(ProcessOptions.ZumoModel, RtePts, SubClassList)
+  else if ((ViaPointCount >= 2)and HasSubClasses) then
     // Create AllRoutes from BC calculation
     TotalTripTime.AsCardinal := FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
   else

@@ -14,9 +14,7 @@ const
   Reg_ZumoModel               = 'ZumoModel';
   Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   Reg_AllowGrouping           = 'AllowGrouping';
-  Reg_AddSubClasses           = 'AddSubClasses';
-  Reg_ForceRecalc             = 'ForceRecalc';
-  Reg_PreserveTrackToRoute    = 'PreserveTrackToRoute';
+  Reg_TripOption              = 'TripOption';
 
   //XT2
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
@@ -133,9 +131,7 @@ begin
     ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), StringReplace(GetRegistry(Reg_ZumoModel, ''), ' ', '', [rfReplaceAll])));
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
-    AddSubClasses := GetRegistry(Reg_AddSubClasses, true);
-    ForceRecalc := GetRegistry(Reg_ForceRecalc, true);
-    PreserveTrackToRoute := GetRegistry(Reg_PreserveTrackToRoute, false);
+    TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
 
     // XT2 Defaults
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);

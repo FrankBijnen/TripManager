@@ -41,6 +41,8 @@ type
                        rpShapingXT2       = 2);
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
 
+  TTripOption       = (ttCalc, ttNoCal, ttTripTrack, ttTripTrackLoc);
+
 { Elementary data types }
 const
   dtByte          = 1;
@@ -745,6 +747,7 @@ type
     function GetCalcModel(AModel: TZumoModel): TZumoModel;
     function GetIsCalculatedModel: TZumoModel;
     function InitAllRoutes: TBaseItem;
+    procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure AddLocation_XT(Locations: TmLocations;
                              ProcessOptions: TObject;
                              RoutePoint: TRoutePoint;
@@ -793,8 +796,11 @@ type
                           DepartureDate: TDateTime;
                           Name, Address: string);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
-    function TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil): cardinal;
-    function SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil): cardinal;
+    function TripTrack(const AModel: TZumoModel = TZumoModel.Unknown;
+                       RtePts: TObject = nil;
+                       SubClasses: TStringList = nil): cardinal;
+    function SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown;
+                            RtePts: TObject = nil): cardinal;
     procedure CreateTemplate(const AModel: TZumoModel;
                              const TripName: string;
                              const CalculationMode: string = '';
@@ -3521,7 +3527,26 @@ begin
   end;
 end;
 
-function TTripList.TripTrack(const AModel: TZumoModel = TZumoModel.Unknown; SubClasses: TStringList = nil): cardinal;
+procedure TTripList.SetPreserveTrackToRoute(const RtePts: TObject);
+var
+  TrackToRouteInfoMap: TmTrackToRouteInfoMap;
+  PreserveTrackToRoute: TmPreserveTrackToRoute;
+begin
+  // Create TrackToRouteInfoMap for XT2 and Tread2
+  TrackToRouteInfoMap := GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
+  if Assigned(TrackToRouteInfoMap) and
+     Assigned(RtePts) then
+    TrackToRouteInfoMap.InitFromGpxxRpt(RtePts);
+
+  // For XT
+  PreserveTrackToRoute := GetItem('mPreserveTrackToRoute') as TmPreserveTrackToRoute;
+  if Assigned(PreserveTrackToRoute) then
+    PreserveTrackToRoute.AsBoolean := true;
+end;
+
+function TTripList.TripTrack(const AModel: TZumoModel = TZumoModel.Unknown;
+                             RtePts: Tobject = nil;
+                             SubClasses: TStringList = nil): cardinal;
 var
   CalcModel: TZumoModel;
   Locations: TBaseItem;
@@ -3553,6 +3578,7 @@ begin
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(ALocation));
     CurDist := 0;
+
     // Add intermediates
     for Index := 0 to SubClasses.Count -1 do
     begin
@@ -3576,6 +3602,8 @@ begin
     AnUdbHandle.Add(TUdbDir.Create(ALocation));
 
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
+
+    SetPreserveTrackToRoute(RtePts);
 
     // Recreate RoutePreferences
     case (CalcModel) of
@@ -3639,7 +3667,7 @@ begin
   try
     for Index := 1 to ViaCount -1 do
     begin
-      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, ProcessOptions.ForceRecalc);
+      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, ProcessOptions.TripOption = TTripOption.ttCalc);
       ScanRtePt := FirstRtePt;
 
       // Add udb's for all Via and Shaping found in Locations.
@@ -3717,6 +3745,9 @@ begin
       // Add to Allroutes
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
+
+    if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc]) then
+      SetPreserveTrackToRoute(RtePts);
 
     // Recreate RoutePreferences
     case (CalcModel) of

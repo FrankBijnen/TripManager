@@ -213,9 +213,11 @@ begin
     CurRow := 1;
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating trips-');
     AddGridLine(GridZumoSettings, CurRow, Reg_ScPosn_Unknown1,             '0', '');
-    AddGridLine(GridZumoSettings, CurRow, Reg_AddSubClasses,               'True', 'Add <subclass> from GPX');
-    AddGridLine(GridZumoSettings, CurRow, Reg_ForceRecalc,                 'True', 'Force recalculation');
-    AddGridLine(GridZumoSettings, CurRow, Reg_PreserveTrackToRoute,        'False', 'Create TripTrack');
+    AddGridLine(GridZumoSettings, CurRow, Reg_TripOption,                  '0', 'Trip create options');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '0=Force calculation');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '-Only for BaseCamp calculated routes-');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '1=No calculation, 2=TripTrack, 3=TripTrack with locations');
     AddGridLine(GridZumoSettings, CurRow, '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow, Reg_AllowGrouping,               'True', 'Group trips from the same GPX');
