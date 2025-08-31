@@ -72,7 +72,7 @@ const
                                                           (Value: Ord(rmNoShape);           Name: 'No Shape'),
                                                           (Value: Ord(rmScenic);            Name: 'Scenic'));
 
-  TransportModeMap : array[0..2] of TIdentMapEntry =    ( (Value: Ord(tmAutoMotive);        Name: 'AutoMotive'),
+  TransportModeMap : array[0..2] of TIdentMapEntry =    ( (Value: Ord(tmAutoMotive);        Name: 'Automotive'),
                                                           (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
                                                           (Value: Ord(tmOffRoad);           Name: 'OffRoad')
                                                         );
@@ -678,7 +678,7 @@ type
 
 const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
       CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
-      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $90, $90);
+      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $c0, $90);
 
 type
   TUdbHandleValue = packed record
@@ -3927,10 +3927,10 @@ begin
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmPartOfSplitRoute.Create);
-    Add(TmRoutePreference.Create(TRoutePreference.rmFasterTime));
+    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
     Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
     Add(TmRoutePreferencesAdventurousMode.Create);
-    Add(TmTransportationMode.Create(TTransportMode.tmMotorcycling));
+    Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmLocations.Create);
 
     // Create dummy AllRoutes, and complete RoutePreferences
@@ -3978,13 +3978,13 @@ begin
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmIsRoundTrip.Create);
     Add(TmRoutePreferences.Create);
-    Add(TmTransportationMode.Create(TTransportMode.tmMotorcycling));
+    Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
-    Add(TmRoutePreference.Create(TRoutePreference.rmFasterTime));
+    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
     Add(TBooleanItem.Create('mIsDeviceRoute', true));
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     Add(TStringItem.Create('mVehicleProfileGuid', Tread2_VehicleProfileGuid));
