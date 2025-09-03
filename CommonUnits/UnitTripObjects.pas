@@ -790,7 +790,9 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
+    procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
     procedure SetRoutePrefs_XT2_Tread2(ViaCount: integer);
+    procedure SetRoutePrefs_XT2_Tread2_TripTrack(ViaCount: integer);
 
     procedure AddLocation(Locations: TmLocations;
                           ProcessOptions: TObject;
@@ -3358,24 +3360,23 @@ begin
   end;
 end;
 
+procedure TTripList.SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
+var
+  RoutePreference: TRawDataItem;
+begin
+  RoutePreference := TRawDataItem(GetItem(AKey));
+  if (RoutePreference <> nil) then
+  begin
+    TmpStream.Position := 0;
+    RoutePreference.InitFromStream(AKey, TmpStream.Size, $80, TmpStream);
+  end;
+end;
+
 procedure TTripList.SetRoutePrefs_XT2_Tread2(ViaCount: integer);
 var
   Index: integer;
   RoutePreferences: array of WORD;
   TmpStream: TMemoryStream;
-
-  procedure SetRoutePref(AKey: ShortString);
-  var
-    RoutePreference: TRawDataItem;
-  begin
-    RoutePreference := TRawDataItem(GetItem(AKey));
-    if (RoutePreference <> nil) then
-    begin
-      TmpStream.Position := 0;
-      RoutePreference.InitFromStream(AKey, TmpStream.Size, $80, TmpStream);
-    end;
-  end;
-
 begin
   TmpStream := TMemoryStream.Create;
   try
@@ -3385,11 +3386,38 @@ begin
       RoutePreferences[Index] := Swap($0100);
     PrepStream(TmpStream, ViaCount -1, RoutePreferences);
 
-    SetRoutePref('mRoutePreferences');
-    SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves');
-    SetRoutePref('mRoutePreferencesAdventurousScenicRoads');
-    SetRoutePref('mRoutePreferencesAdventurousPopularPaths');
-    SetRoutePref('mRoutePreferencesAdventurousMode');
+    SetRoutePref('mRoutePreferences',TmpStream);
+    SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves', TmpStream);
+    SetRoutePref('mRoutePreferencesAdventurousScenicRoads', TmpStream);
+    SetRoutePref('mRoutePreferencesAdventurousPopularPaths', TmpStream);
+    SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
+  finally
+    TmpStream.Free;
+  end;
+end;
+
+procedure TTripList.SetRoutePrefs_XT2_Tread2_TripTrack(ViaCount: integer);
+var
+  Index: integer;
+  RoutePreferences: array of WORD;
+  TmpStream: TMemoryStream;
+begin
+  TmpStream := TMemoryStream.Create;
+  try
+    // The RoutePreferences need to be resized?
+    SetLength(RoutePreferences, ViaCount -1);
+    for Index := 0 to High(RoutePreferences) do
+      RoutePreferences[Index] := Swap($0109);
+    PrepStream(TmpStream, ViaCount -1, RoutePreferences);
+
+    SetRoutePref('mRoutePreferences',TmpStream);
+
+    // The RoutePreferences need to be resized?
+    SetLength(RoutePreferences, ViaCount -1);
+    for Index := 0 to High(RoutePreferences) do
+      RoutePreferences[Index] := Swap($0102);
+    PrepStream(TmpStream, ViaCount -1, RoutePreferences);
+    SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
   finally
     TmpStream.Free;
   end;
@@ -3566,6 +3594,8 @@ var
   TrackToRouteInfoMap: TmTrackToRouteInfoMap;
   PreserveTrackToRoute: TmPreserveTrackToRoute;
 begin
+  (GetItem('mDayNumber') as TmDayNumber).AsByte := 0;
+
   // Create TrackToRouteInfoMap for XT2 and Tread2
   TrackToRouteInfoMap := GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
   if Assigned(TrackToRouteInfoMap) and
@@ -3658,7 +3688,10 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        SetRoutePrefs_XT2_Tread2(2);
+        begin
+          SetRoutePrefs_XT2_Tread2(2);
+          SetRoutePrefs_XT2_Tread2_TripTrack(2);
+        end;
     end;
 
   finally
@@ -3816,7 +3849,11 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        SetRoutePrefs_XT2_Tread2(ViaCount);
+        begin
+          SetRoutePrefs_XT2_Tread2(ViaCount);
+          if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc]) then
+            SetRoutePrefs_XT2_Tread2_TripTrack(ViaCount);
+        end;
     end;
 
   finally
