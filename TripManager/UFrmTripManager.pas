@@ -2539,6 +2539,18 @@ var
                                TGridSelItem.Create(AnUdbhandle,
                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3),
                                                    AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) ));
+    VlTripInfo.Strings.AddPair('Unknown3 dist', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(Unknown3DistOffset)]),
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Cardinal),
+                                                   AnUdbhandle.OffsetValue +
+                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
+                                                     Unknown3DistOffset));
+    VlTripInfo.Strings.AddPair('Unknown3 Time', Format('%d (seconds)', [AnUdbhandle.UdbHandleValue.GetUnknown3(Unknown3TimeOffset)]),
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Cardinal),
+                                                   AnUdbhandle.OffsetValue +
+                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
+                                                     Unknown3TimeOffset));
 
     for ANitem in AnUdbhandle.Items do
     begin

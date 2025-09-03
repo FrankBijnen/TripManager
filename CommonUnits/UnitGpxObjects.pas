@@ -132,7 +132,6 @@ type
     procedure StripRtePt(const RtePtNode: TXmlVSNode);
     procedure StripRte(const RteNode: TXmlVSNode);
 {$IFDEF TRIPOBJECTS}
-    function GetTotalDistance(const ATripName: string): double;
     function BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
     function CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList): integer;
     procedure UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
@@ -1275,8 +1274,6 @@ begin
     end
     else if (MainNode.Name = 'trk') then
       ProcessTrk(MainNode);
-    if (Assigned(CurrentTrack)) then
-      CurrentTrack.AddChild('TotalDistance').NodeValue := Format('%1.0f', [TotalDistance * 1000], FormatSettings);
   end;
 end;
 
@@ -2042,22 +2039,6 @@ begin
 end;
 
 {$IFDEF TRIPOBJECTS}
-function TGPXFile.GetTotalDistance(const ATripName: string): double;
-var
-  ATrack: TXmlVSNode;
-begin
-  result := 0;
-  for ATrack in TrackList do
-  begin
-    if (SameText(FindSubNodeValue(ATrack, 'desc'), 'rte')) and
-       (SameText(ATrack.NodeName, ATripName)) then
-    begin
-      result := StrToFloatDef(FindSubNodeValue(ATrack, 'TotalDistance'), 0);
-      break;
-    end;
-  end;
-end;
-
 function TGPXFile.BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
 var
   ARtePt: TXmlVSNode;
@@ -2156,7 +2137,6 @@ procedure TGPXFile.UpdateTemplate(const TripName: string; ParentTripId: cardinal
 var
   ViaPointCount: integer;
   HasSubClasses: boolean;
-  TotalTripTime: TmTotalTripTime;
   Locations:     TmLocations;
 begin
   if (ProcessOptions.AllowGrouping) and
@@ -2167,17 +2147,14 @@ begin
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
 
-  (FTripList.GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := GetTotalDistance(TripName);
-  TotalTripTime := FTripList.GetItem('mTotalTripTime') as TmTotalTripTime;
-
   HasSubClasses := BuildSubClassesList(RtePts);
 
   if ((ProcessOptions.TripOption in [TTripOption.ttTripTrack]) and HasSubClasses) then
     // Create TripTrack from BC calculation
-    TotalTripTime.AsCardinal := FTripList.TripTrack(ProcessOptions.ZumoModel, RtePts, SubClassList)
+    FTripList.TripTrack(ProcessOptions.ZumoModel, RtePts, SubClassList)
   else if ((ViaPointCount >= 2)and HasSubClasses) then
     // Create AllRoutes from BC calculation
-    TotalTripTime.AsCardinal := FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
+    FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
   else
     // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
     FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);

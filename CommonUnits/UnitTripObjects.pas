@@ -679,6 +679,8 @@ type
 const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
       CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
       ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $c0, $90);
+      Unknown3DistOffset = $14;
+      Unknown3TimeOffset = $18;
 
 type
   TUdbHandleValue = packed record
@@ -690,7 +692,8 @@ type
     procedure SwapCardinals;
     procedure AllocUnknown3(AModel: TZumoModel = TZumoModel.XT); overload;
     procedure AllocUnknown3(ASize: cardinal); overload;
-
+    procedure UpdateUnknown3(const Offset: integer; const Value: cardinal);
+    function GetUnknown3(const Offset: integer): cardinal;
   end;
   TmUdbDataHndl = class(TBaseDataItem)
   private
@@ -796,11 +799,11 @@ type
                           DepartureDate: TDateTime;
                           Name, Address: string);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
-    function TripTrack(const AModel: TZumoModel = TZumoModel.Unknown;
-                       RtePts: TObject = nil;
-                       SubClasses: TStringList = nil): cardinal;
-    function SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown;
-                            RtePts: TObject = nil): cardinal;
+    procedure TripTrack(const AModel: TZumoModel;
+                        const RtePts: TObject;
+                        const SubClasses: TStringList);
+    procedure SaveCalculated(const AModel: TZumoModel;
+                            const RtePts: TObject);
     procedure CreateTemplate(const AModel: TZumoModel;
                              const TripName: string;
                              const CalculationMode: string = '';
@@ -1864,8 +1867,8 @@ end;
 
 function TmTotalTripDistance.GetValue: string;
 begin
-  result := Format('%f Km.', [Swap32(FValue) / 1000]);
-  result := result + Format(' (%f Meters)', [Swap32(FValue)]);
+  result := Format('%f Km.', [FValue / 1000]);
+  result := result + Format(' (%f Meters)', [FValue]);
 end;
 
 constructor TmFileName.Create(AValue: string);
@@ -2728,6 +2731,28 @@ begin
   SetLength(Self.Unknown3, ASize);
 end;
 
+procedure TudbHandleValue.UpdateUnknown3(const Offset: integer; const Value: cardinal);
+var
+  PUpdVal: ^cardinal;
+begin
+  if (Offset > Length(Self.Unknown3)) then
+    exit;
+
+  PUpdVal := @Unknown3[Offset];
+  PUpdVal^ := Value;
+end;
+
+function TudbHandleValue.GetUnknown3(const Offset: integer): cardinal;
+var
+  PUpdVal: ^cardinal;
+begin
+  if (Offset > Length(Self.Unknown3)) then
+    exit(0);
+
+  PUpdVal := @Unknown3[Offset];
+  result := PUpdVal^;
+end;
+
 constructor TmUdbDataHndl.Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT; ForceRecalc: boolean = true);
 begin
   inherited Create('mUdbDataHndl', SizeOf(FValue), dtUdbHandle); // Will get Length later, Via Calculate
@@ -3553,9 +3578,9 @@ begin
     PreserveTrackToRoute.AsBoolean := true;
 end;
 
-function TTripList.TripTrack(const AModel: TZumoModel = TZumoModel.Unknown;
-                             RtePts: Tobject = nil;
-                             SubClasses: TStringList = nil): cardinal;
+procedure TTripList.TripTrack(const AModel: TZumoModel;
+                              const RtePts: TObject;
+                              const SubClasses: TStringList);
 var
   CalcModel: TZumoModel;
   Locations: TBaseItem;
@@ -3567,9 +3592,11 @@ var
   AnUdbDir: TUdbDir;
   GpxRptNode: TXmlVSNode;
   PrevCoords, Coords: TCoords;
-  CurDist: double;
+  TotalTime: integer;
+  TotalDist, CurDist: double;
 begin
-  result := 0;
+  TotalTime := 0;
+  TotalDist := 0;
   // If the model is not supplied, try to get it from the data
   CalcModel := GetCalcModel(AModel);
 
@@ -3588,9 +3615,9 @@ begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(ALocation));
-    CurDist := 0;
 
     // Add intermediates
+    CurDist := 0;
     for Index := 0 to SubClasses.Count -1 do
     begin
       GpxRptNode := TXmlVSNode(SubClasses.Objects[Index]);
@@ -3604,7 +3631,8 @@ begin
                                  Copy(SubClasses[Index], 1, 2),
                                  Coords.Lat, Coords.Lon, CurDist);
       AnUdbHandle.Add(AnUdbDir);
-      result := result + AnUdbDir.FValue.Time;
+      TotalTime := TotalTime + AnUdbDir.FValue.Time;
+      TotalDist := TotalDist + (CurDist * 1000);
     end;
 
     // Add End
@@ -3612,8 +3640,18 @@ begin
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(ALocation));
 
+    // Update Time and Dist
+    AnUdbHandle.FValue.UpdateUnknown3(Unknown3TimeOffset, TotalTime);
+    AnUdbHandle.FValue.UpdateUnknown3(Unknown3DistOffset, Round(TotalDist));
+
+    // Add to AllRoutes
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 
+    // Update Dist and Time
+    (GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := TotalDist;
+    (GetItem('mTotalTripTime') as TmTotalTripTime).AsCardinal := TotalTime;
+
+    // Mark as TripTrack
     SetPreserveTrackToRoute(RtePts);
 
     // Recreate RoutePreferences
@@ -3628,7 +3666,8 @@ begin
   end;
 end;
 
-function TTripList.SaveCalculated(const AModel: TZumoModel = TZumoModel.Unknown; RtePts: TObject = nil): cardinal;
+procedure TTripList.SaveCalculated(const AModel: TZumoModel;
+                                   const RtePts: TObject);
 var
   CalcModel: TZumoModel;
   AllRoutes: TBaseItem;
@@ -3643,10 +3682,12 @@ var
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
   CMapSegRoad, PrevRoadClass, RoadClass: string;
   PrevCoords, Coords: TCoords;
-  CurDist: double;
+  TotalDist, UdbDist, CurDist: double;
+  TotalTime, UdbTime: cardinal;
   ProcessOptions: TProcessOptions;
 begin
-  result := 0;
+  TotalTime := 0;
+  TotalDist := 0;
   // If the model is not supplied, try to get it from the data
   CalcModel := GetCalcModel(AModel);
 
@@ -3678,6 +3719,8 @@ begin
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, ProcessOptions.TripOption = TTripOption.ttCalc);
+      UdbDist := 0;
+      UdbTime := 0;
       ScanRtePt := FirstRtePt;
 
       // Add udb's for all Via and Shaping found in Locations.
@@ -3741,7 +3784,8 @@ begin
             AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
             AnUdbHandle.Add(AnUdbDir);
 
-            result := result + AnUdbDir.FValue.Time;
+            UdbTime := UdbTime + AnUdbDir.FValue.Time;
+            UdbDist := UdbDist + (CurDist * 1000);
             CurDist := 0;
           end;
           ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
@@ -3752,12 +3796,21 @@ begin
       ALocation := RoutePointList[RoutePointList.Count -1];
       AnUdbHandle.Add(TUdbDir.Create(ALocation));
 
+      // update dist and time
+      TotalDist := TotalDist + UdbDist;
+      TotalTime := TotalTime + UdbTime;
+      AnUdbHandle.FValue.UpdateUnknown3(Unknown3TimeOffset, UdbTime);
+      AnUdbHandle.FValue.UpdateUnknown3(Unknown3DistOffset, Round(UdbDist));
+
       // Add to Allroutes
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
     if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc]) then
       SetPreserveTrackToRoute(RtePts);
+
+    (GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := TotalDist;
+    (GetItem('mTotalTripTime') as TmTotalTripTime).AsCardinal := TotalTime;
 
     // Recreate RoutePreferences
     case (CalcModel) of
