@@ -503,6 +503,25 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
 
+  TTrackPoint = packed record
+    Sizes1:       array[0..1] of cardinal;
+    Datatype1:    byte;
+    Count1:       cardinal;
+    InitLon:      byte;
+    KeylenLon:    cardinal;
+    KeyNameLon:   array[0..3] of ansichar;
+    ValueLenLon:  cardinal;
+    DatatypeLon:  byte;
+    LonAsInt:     cardinal;
+    InitLat:      byte;
+    KeylenLat:    cardinal;
+    KeyNameLat:   array[0..3] of ansichar;
+    ValueLenLat:  cardinal;
+    DatatypeLat:  byte;
+    LatAsInt:     cardinal;
+    function GetMapCoords: string;
+  end;
+
   TTrackPoints = packed record
     Inititiator: AnsiChar;
     KeyLen: cardinal;
@@ -519,15 +538,18 @@ type
     SubLength: cardinal;
     DataType: byte;
     ItemCount: cardinal;
-
     TrackPoints: TTrackPoints;
   end;
 
   TmTrackToRouteInfoMap = class(TRawDataItem)
+  private
+    function GetBytes: TBytes;
   public
     FTrackHeader: TTrackHeader;
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure InitFromGpxxRpt(RtePts: TObject);
+    property AsBytes: TBytes read GetBytes;
   end;
 
 {*** Header ***}
@@ -1812,7 +1834,6 @@ begin
                        Format(' (%d)', [RoutePreferenceMap[Index].Value]) +
 {$ENDIF}
                        #10;
-
 end;
 
 constructor TmTransportationMode.Create(AValue: TTransportMode = tmMotorcycling);
@@ -2067,9 +2088,28 @@ begin
   inherited Create('mRoutePreferencesAdventurousPopularPaths', 0 , $80);
 end;
 
+function TTrackPoint.GetMapCoords: string;
+begin
+  result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
+                   [CoordAsDec(Swap32(LatAsInt)), CoordAsDec(Swap32(LonAsInt))], FloatFormatSettings);
+end;
+
 constructor TmTrackToRouteInfoMap.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
   inherited Create('mTrackToRouteInfoMap', 0 , $0c);
+end;
+
+procedure TmTrackToRouteInfoMap.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
+begin
+  inherited InitFromStream(AName, ALenValue, ADataType, AStream);
+  FillChar(FTrackHeader, SizeOf(FTrackHeader), 0);
+  if (Length(FBytes) > SizeOf(FTrackHeader)) then
+    Move(FBytes[0], FTrackHeader, SizeOf(FTrackHeader));
+end;
+
+function TmTrackToRouteInfoMap.GetBytes: TBytes;
+begin
+  result := FBytes;
 end;
 
 procedure TmTrackToRouteInfoMap.InitFromGpxxRpt(RtePts: TObject);
@@ -2131,27 +2171,36 @@ var
     TmpStream.Write(CoordInt, SizeOf(CoordInt));
   end;
 
+  procedure WriteCoords;
+  begin
+    if (Coords.Lon <> PrevCoords.Lon) and
+       (Coords.Lat <> PrevCoords.Lat) then
+    begin
+      Inc(TrkPtCnt);
+      WritePrefix;
+      WriteMlon(Coords.Lon);
+      WriteMlat(Coords.Lat);
+    end;
+    PrevCoords := Coords;
+  end;
+
 begin
   TmpStream := TMemoryStream.Create;
   try
     TrkPtCnt := 0;
+    FillChar(PrevCoords, SizeOf(PrevCoords), 0);
     RtePtNode := TXmlVSNodeList(RtePts).FirstChild;
     while (RtePtNode <> nil) do
     begin
+      Coords.FromAttributes(RtePtNode.AttributeList);
+      WriteCoords;
+
       GpxxRptNode := GetFirstExtensionsNode(RtePtNode);
-      FillChar(PrevCoords, SizeOf(PrevCoords), 0);
       while (GpxxRptNode <> nil) do
       begin
         Coords.FromAttributes(GpxxRptNode.AttributeList);
-        if (Coords.Lon <> PrevCoords.Lon) and
-           (Coords.Lat <> PrevCoords.Lat) then
-        begin
-          Inc(TrkPtCnt);
-          WritePrefix;
-          WriteMlon(Coords.Lon);
-          WriteMlat(Coords.Lat);
-        end;
-        PrevCoords := Coords;
+        WriteCoords;
+
         GpxxRptNode := GpxxRptNode.NextSibling;
       end;
       RtePtNode := RtePtNode.NextSibling;

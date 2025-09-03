@@ -2279,6 +2279,46 @@ var
                                  TGridSelItem.Create(ABaseData));
   end;
 
+  procedure AddTrackToRouteInfoMap(ATrackToRouteInfoMap: TmTrackToRouteInfoMap);
+  var
+    Offset: integer;
+    ATrackPoint: TTrackPoint;
+    Index: integer;
+  begin
+      VlTripInfo.Strings.AddPair('*** mTrackToRouteInfoMap', DupeString('-', DupeCount),
+                               TGridSelItem.Create(ATrackToRouteInfoMap));
+
+      if (ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt > 0) then
+      begin
+        Offset := ATrackToRouteInfoMap.OffsetValue + OffsetInRecord(ATrackToRouteInfoMap.FTrackHeader,
+                                                                    ATrackToRouteInfoMap.FTrackHeader.TrackPoints.ValueLen);
+        VlTripInfo.Strings.AddPair('Track size', Format('%d', [Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.ValueLen)]),
+                                   TGridSelItem.Create(ATrackToRouteInfoMap,
+                                                       SizeOf(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.ValueLen), Offset));
+
+        Offset := ATrackToRouteInfoMap.OffsetValue + OffsetInRecord(ATrackToRouteInfoMap.FTrackHeader,
+                                                                    ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt);
+        VlTripInfo.Strings.AddPair('Track points', Format('%d', [Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt)]),
+                                   TGridSelItem.Create(ATrackToRouteInfoMap,
+                                                       SizeOf(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt), Offset));
+        Offset := SizeOf(ATrackToRouteInfoMap.FTrackHeader);
+        for Index := 0 to Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt) -1 do
+        begin
+          if (Offset + SizeOf(ATrackPoint) > Length(ATrackToRouteInfoMap.AsBytes)) then
+            break;
+
+          Move(ATrackToRouteInfoMap.AsBytes[Offset], ATrackPoint, SizeOf(ATrackPoint));
+          VlTripInfo.Strings.AddPair('trkpt', Format('%s', [ATrackPoint.GetMapCoords]),
+                                     TGridSelItem.Create(ATrackToRouteInfoMap,
+                                                         SizeOf(ATrackPoint), ATrackToRouteInfoMap.OffsetValue + Offset));
+          Inc(Offset, SizeOf(ATrackPoint));
+        end;
+      end;
+      VlTripInfo.Strings.AddPair('*** End mTrackToRouteInfoMap', DupeString('-', DupeCount),
+                                 TGridSelItem.Create(ATrackToRouteInfoMap, 1, ATrackToRouteInfoMap.SelEnd - ATrackToRouteInfoMap.SelStart -1 ));
+
+  end;
+
   procedure AddRoutePreferences(ARoutePreferences: TBaseRoutePreferences);
   var
     SegmentNr: integer;
@@ -2769,6 +2809,9 @@ begin
 
     else if (TObject(Node.Data) is TBaseRoutePreferences) then
       AddRoutePreferences(TBaseRoutePreferences(Node.Data))
+
+    else if (TObject(Node.Data) is TmTrackToRouteInfoMap) then
+      AddTrackToRouteInfoMap(TmTrackToRouteInfoMap(Node.Data))
 
     else if (TObject(Node.Data) is TBaseDataItem) then
       AddBaseData(TBaseDataItem(Node.Data))
@@ -3428,7 +3471,7 @@ begin
     // Trips need to be checked, and tripname filled
     case BgDevice.ItemIndex of
       0: CheckTrips;
-// Future use
+    // Future use
     end;
 
     // Now sort
