@@ -520,6 +520,7 @@ type
     DatatypeLat:  byte;
     LatAsInt:     cardinal;
     function GetMapCoords: string;
+    procedure Init;
   end;
 
   TTrackPoints = packed record
@@ -543,13 +544,12 @@ type
 
   TmTrackToRouteInfoMap = class(TRawDataItem)
   private
-    function GetBytes: TBytes;
   public
     FTrackHeader: TTrackHeader;
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure InitFromGpxxRpt(RtePts: TObject);
-    property AsBytes: TBytes read GetBytes;
+    function GetCoords(Color: string = ''): string;
   end;
 
 {*** Header ***}
@@ -2094,6 +2094,29 @@ begin
                    [CoordAsDec(Swap32(LatAsInt)), CoordAsDec(Swap32(LonAsInt))], FloatFormatSettings);
 end;
 
+procedure TTrackpoint.Init;
+begin
+  // Prefix
+  Sizes1[0]   := $67000000; // Cant figure this out
+  Sizes1[1]   := Swap32(SizeOf(Self) - SizeOf(Sizes1));
+  DataType1   := $0a;
+  Count1      := $02000000;
+  // Lon
+  InitLon     := $09;
+  KeylenLon   := $04000000;
+  KeyNameLon  := 'mLon';
+  ValueLenLon := $05000000;
+  DataTypeLon := $03;
+  LonAsInt    := $0;
+  // Lat
+  InitLat     := $09;
+  KeylenLat   := $04000000;
+  KeyNameLat  := 'mLat';
+  ValueLenLat := $05000000;
+  DataTypeLat := $03;
+  LatAsInt    := $0;
+end;
+
 constructor TmTrackToRouteInfoMap.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
   inherited Create('mTrackToRouteInfoMap', 0 , $0c);
@@ -2107,9 +2130,32 @@ begin
     Move(FBytes[0], FTrackHeader, SizeOf(FTrackHeader));
 end;
 
-function TmTrackToRouteInfoMap.GetBytes: TBytes;
+function TmTrackToRouteInfoMap.GetCoords(Color: string = ''): string;
+var
+  Offset: integer;
+  Index: integer;
+  ATrackPoint: TTrackPoint;
+  FmtString: string;
 begin
-  result := FBytes;
+  result := '';
+  if (Color <> '') then
+    FmtString := 'AddTrkPoint(%s)'
+  else
+    FmtString := '%s';
+  Offset := SizeOf(FTrackHeader);
+  for Index := 0 to Swap32(FTrackHeader.TrackPoints.TrkPntCnt) -1 do
+  begin
+    if (Offset + SizeOf(ATrackPoint) > Length(FBytes)) then
+      break;
+
+    Move(FBytes[Offset], ATrackPoint, SizeOf(ATrackPoint));
+    if (result <> '') then
+      result := result + #10;
+    result := result + Format(FmtString, [ATrackPoint.GetMapCoords]);
+    Inc(Offset, SizeOf(ATrackPoint));
+  end;
+  if (Color <> '') then
+    result := result + #10 + 'CreateTrack(''TrackPoints'', ''' + Color + ''');';
 end;
 
 procedure TmTrackToRouteInfoMap.InitFromGpxxRpt(RtePts: TObject);
@@ -2117,69 +2163,19 @@ var
   RtePtNode, GpxxRptNode: TXmlVSNode;
   PrevCoords, Coords: TCoords;
   TmpStream: TMemoryStream;
+  Trackpoint: TTrackpoint;
   TrkPtCnt: integer;
   TrkPtSize: cardinal;
 
-  procedure WritePrefix;
-  const
-    Size1: cardinal = $67000000;
-    Size2: cardinal = $29000000;
-    DataType: byte  = $0a;
-    Cnt: cardinal   = $02000000;
-  begin
-    TmpStream.Write(Size1, SizeOf(Size1));
-    TmpStream.Write(Size2, SizeOf(Size2));
-    TmpStream.Write(DataType, SizeOf(DataType));
-    TmpStream.Write(Cnt, SizeOf(Cnt));
-  end;
-
-  procedure WriteMLon(Lon: double);
-  const
-    Init:     byte      = $09;
-    KeyLen:   cardinal  = $04000000;
-    KeyName:  cardinal  = $6E6F4C6D;  // mlon
-    ValueLen: cardinal  = $05000000;
-    DataType: byte      = $03;
-  var
-    CoordInt: integer;
-  begin
-    TmpStream.Write(Init, SizeOf(Init));
-    TmpStream.Write(KeyLen, SizeOf(KeyLen));
-    TmpStream.Write(KeyName, SizeOf(KeyName));
-    TmpStream.Write(ValueLen, SizeOf(ValueLen));
-    TmpStream.Write(DataType, SizeOf(DataType));
-    CoordInt := Swap32(CoordAsInt(Lon));
-    TmpStream.Write(CoordInt, SizeOf(CoordInt));
-  end;
-
-  procedure WriteMLat(Lat: double);
-  const
-    Init:     byte      = $09;
-    KeyLen:   cardinal  = $04000000;
-    KeyName:  cardinal  = $74614C6D;  // mLat
-    ValueLen: cardinal  = $05000000;
-    DataType: byte      = $03;
-  var
-    CoordInt: integer;
-  begin
-    TmpStream.Write(Init, SizeOf(Init));
-    TmpStream.Write(KeyLen, SizeOf(KeyLen));
-    TmpStream.Write(KeyName, SizeOf(KeyName));
-    TmpStream.Write(ValueLen, SizeOf(ValueLen));
-    TmpStream.Write(DataType, SizeOf(DataType));
-    CoordInt := Swap32(CoordAsInt(lat));
-    TmpStream.Write(CoordInt, SizeOf(CoordInt));
-  end;
-
   procedure WriteCoords;
   begin
-    if (Coords.Lon <> PrevCoords.Lon) and
+    if (Coords.Lon <> PrevCoords.Lon) or
        (Coords.Lat <> PrevCoords.Lat) then
     begin
       Inc(TrkPtCnt);
-      WritePrefix;
-      WriteMlon(Coords.Lon);
-      WriteMlat(Coords.Lat);
+      Trackpoint.LonAsInt := Swap32(CoordAsInt(Coords.Lon));
+      Trackpoint.LatAsInt := Swap32(CoordAsInt(Coords.Lat));
+      TmpStream.Write(Trackpoint, SizeOf(Trackpoint));
     end;
     PrevCoords := Coords;
   end;
@@ -2188,6 +2184,7 @@ begin
   TmpStream := TMemoryStream.Create;
   try
     TrkPtCnt := 0;
+    Trackpoint.Init;
     FillChar(PrevCoords, SizeOf(PrevCoords), 0);
     RtePtNode := TXmlVSNodeList(RtePts).FirstChild;
     while (RtePtNode <> nil) do

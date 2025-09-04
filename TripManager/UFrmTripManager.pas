@@ -2075,19 +2075,30 @@ end;
 procedure TFrmTripManager.LoadTripOnMap(CurrentTrip: TTripList; Id: string);
 var
   OsmTrack: TStringList;
+  TrackToRouteInfoMap: TmTrackToRouteInfoMap;
+  ProcessOptions: TProcessOptions;
 begin
   if not Assigned(CurrentTrip) then
     exit;
 
+  ProcessOptions := TProcessOptions.Create;
   OsmTrack := TStringList.Create;
+
   try
     DeleteCompareFiles;
     CurrentTrip.CreateOSMPoints(OsmTrack, OSMColor(GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val)));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
+    TrackToRouteInfoMap := CurrentTrip.GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
+    if (Assigned(TrackToRouteInfoMap)) then
+    begin
+      OsmTrack.Text := TrackToRouteInfoMap.GetCoords(ProcessOptions.TrackColor);
+      OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s_track%s', [App_Prefix, Id, GetTracksExt]));
+    end;
     if (CreateOSMMapHtml) then
       EdgeBrowser1.Navigate(GetHtmlTmp);
   finally
     OsmTrack.Free;
+    ProcessOptions.Free;
   end;
 end;
 
@@ -2282,11 +2293,13 @@ var
   procedure AddTrackToRouteInfoMap(ATrackToRouteInfoMap: TmTrackToRouteInfoMap);
   var
     Offset: integer;
-    ATrackPoint: TTrackPoint;
-    Index: integer;
+    CoordsList: TStringList;
+    ACoord: string;
   begin
+    CoordsList := TStringList.Create;
+    try
       VlTripInfo.Strings.AddPair('*** mTrackToRouteInfoMap', DupeString('-', DupeCount),
-                               TGridSelItem.Create(ATrackToRouteInfoMap));
+                                 TGridSelItem.Create(ATrackToRouteInfoMap));
 
       if (ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt > 0) then
       begin
@@ -2301,22 +2314,24 @@ var
         VlTripInfo.Strings.AddPair('Track points', Format('%d', [Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt)]),
                                    TGridSelItem.Create(ATrackToRouteInfoMap,
                                                        SizeOf(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt), Offset));
-        Offset := SizeOf(ATrackToRouteInfoMap.FTrackHeader);
-        for Index := 0 to Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt) -1 do
-        begin
-          if (Offset + SizeOf(ATrackPoint) > Length(ATrackToRouteInfoMap.AsBytes)) then
-            break;
 
-          Move(ATrackToRouteInfoMap.AsBytes[Offset], ATrackPoint, SizeOf(ATrackPoint));
-          VlTripInfo.Strings.AddPair('trkpt', Format('%s', [ATrackPoint.GetMapCoords]),
+        CoordsList.Text := ATrackToRouteInfoMap.GetCoords;
+        Offset := SizeOf(ATrackToRouteInfoMap.FTrackHeader);
+        for ACoord in CoordsList do
+        begin
+          VlTripInfo.Strings.AddPair('trkpt', ACoord,
                                      TGridSelItem.Create(ATrackToRouteInfoMap,
-                                                         SizeOf(ATrackPoint), ATrackToRouteInfoMap.OffsetValue + Offset));
-          Inc(Offset, SizeOf(ATrackPoint));
+                                                         SizeOf(TTrackPoint), ATrackToRouteInfoMap.OffsetValue + Offset));
+          Inc(Offset, SizeOf(TTrackPoint));
         end;
       end;
       VlTripInfo.Strings.AddPair('*** End mTrackToRouteInfoMap', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ATrackToRouteInfoMap, 1, ATrackToRouteInfoMap.SelEnd - ATrackToRouteInfoMap.SelStart -1 ));
 
+
+    finally
+      CoordsList.Free;
+    end;
   end;
 
   procedure AddRoutePreferences(ARoutePreferences: TBaseRoutePreferences);
