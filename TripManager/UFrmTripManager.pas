@@ -2987,12 +2987,19 @@ end;
 procedure TFrmTripManager.VlTripInfoSelectionMoved(Sender: TObject);
 var
   AGridSel: TGridSelItem;
+  AVle: TValueListEditor;
 begin
-  AGridSel := TGridSelItem.GridSelItem(TValueListEditor(Sender), TValueListEditor(Sender).Row -1);
+  AVle := TValueListEditor(Sender);
+  AGridSel := TGridSelItem.GridSelItem(AVle, AVle.Row -1);
   if not Assigned(AGridSel) then
     exit;
 
   SyncHexEdit(AGridSel);
+
+  if (AGridSel.BaseItem is TmTrackToRouteInfoMap) and
+     (Sametext(AVle.Cells[0, AVle.Row], 'trkpt')) then
+    MapRequest(AVle.Cells[1, AVle.Row], Format('%s %s', [AVle.Cells[0, AVle.Row], AVle.Cells[1, AVle.Row]]),
+               RoutePointTimeOut);
 end;
 
 procedure TFrmTripManager.VlTripInfoStringsChange(Sender: TObject);
