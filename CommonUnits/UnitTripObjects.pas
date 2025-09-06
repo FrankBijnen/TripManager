@@ -2139,7 +2139,7 @@ var
 begin
   result := '';
   if (Color <> '') then
-    FmtString := 'AddTrkPoint(%s)'
+    FmtString := '    AddTrkPoint(%s);'
   else
     FmtString := '%s';
   Offset := SizeOf(FTrackHeader);
@@ -2155,7 +2155,7 @@ begin
     Inc(Offset, SizeOf(ATrackPoint));
   end;
   if (Color <> '') then
-    result := result + #10 + 'CreateTrack(''TrackPoints'', ''' + Color + ''');';
+    result := result + #10 + Format('    CreateTrack(''%s'', ''%s'');', [Name, Color]);
 end;
 
 procedure TmTrackToRouteInfoMap.InitFromGpxxRpt(RtePts: TObject);
@@ -3393,7 +3393,7 @@ begin
         if not (HasUdbs) then
           OutStringList.Add(Format('    AddTrkPoint(%s);', [Coords], FloatFormatSettings ) );
 
-        OutStringList.Add(Format('     AddRoutePoint(%d, "%s", "%s", %s, "%s");',
+        OutStringList.Add(Format('    AddRoutePoint(%d, "%s", "%s", %s, "%s");',
                                  [LayerId,
                                   LayerName,
                                   RoutePointName,
