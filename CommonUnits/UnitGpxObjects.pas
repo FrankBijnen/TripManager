@@ -170,7 +170,7 @@ type
     procedure DoCreateRoutes;
     procedure DoCreateTrips;
 {$IFDEF TRIPOBJECTS}
-    procedure ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
+    procedure ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
 {$ENDIF}
     procedure FixCurrentGPX;
     procedure AnalyzeGpx;
@@ -2160,7 +2160,7 @@ begin
     FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
 end;
 
-procedure TGPXFile.ProcessTrip(const RteNode: TXmlVSNode; ParentTripId: Cardinal);
+procedure TGPXFile.ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
 var
   RtePts: TXmlVSNodeList;
   TripName, OutFile: string;
@@ -2173,6 +2173,7 @@ begin
 
   FTripList := TTripList.Create;
   try
+    FTripList.RouteCnt := RouteCnt;
     TripName := FindSubNodeValue(RteNode, 'name');
     OutFile := FOutDir + EscapeFileName(TripName) + '.trip';
 
@@ -2220,6 +2221,7 @@ procedure TGPXFile.DoCreateTrips;
 var
   ParentTripId: Cardinal;
   RteNode, GpxNode: TXmlVSNode;
+  RouteCnt: integer;
 {$ENDIF}
 begin
 {$IFDEF TRIPOBJECTS}
@@ -2229,10 +2231,14 @@ begin
     exit;
 
   ParentTripId := TUnixDate.DateTimeAsCardinal(Now) + FSeqNo;
+  RouteCnt := 0;
   for RteNode in GpxNode.ChildNodes do
   begin
     if (RteNode.Name = 'rte') then // Only want <rte> nodes. No <trk> or <wpt>
-      ProcessTrip(RteNode, ParentTripId);
+    begin
+      ProcessTrip(RteNode, RouteCnt, ParentTripId);
+      Inc(RouteCnt);
+    end;
   end;
 {$ENDIF}
 end;

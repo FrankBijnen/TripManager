@@ -660,7 +660,7 @@ type
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(ALocation: TLocation); reintroduce; overload;
+    constructor Create(ALocation: TLocation; RouteCnt: cardinal); reintroduce; overload;
     constructor Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
@@ -765,6 +765,7 @@ type
   private
     FHeader: THeader;
     FItemList: TItemList;
+    FRouteCnt: cardinal;
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
@@ -838,6 +839,7 @@ type
     property ItemList: TItemList read FItemList;
     property ZumoModel: TZumoModel read GetZumoModel;
     property CalculatedModel: TZumoModel read GetIsCalculatedModel;
+    property RouteCnt: cardinal read FRouteCnt write FRouteCnt;
   end;
 
 implementation
@@ -2545,7 +2547,7 @@ begin
 end;
 
 // UdbDir Create for <rtept>
-constructor TUdbDir.Create(ALocation: TLocation);
+constructor TUdbDir.Create(ALocation: TLocation; RouteCnt: cardinal);
 var
   AmScPosn: TmScPosn;
 begin
@@ -2571,12 +2573,8 @@ begin
     end;
   end;
   FValue.SubClass.MapSegment := Swap32($00000180);
-
-//TODO: The lefmost byte keeps swapping 00, 01, 02.
-//      Investigate. For now stick with 00. Doesn't harm it seems.
-//  FValue.SubClass.RoadId := Swap32($00f0ffff + (LocType shl 24));
-
-  FValue.SubClass.RoadId := Swap32($00f0ffff);
+  // The leftmost byte appears to be the <rte> number in the GPX. First <rte> gets 00, Next gets 01 etc.
+  FValue.SubClass.RoadId := Swap32($00f0ffff + (RouteCnt shl 24));
   FillCompressedLatLon;
   FValue.Unknown1     := Swap32($51590469);
   FValue.Time         := $ff;
@@ -3041,6 +3039,7 @@ end;
 constructor TTripList.Create;
 begin
   inherited Create;
+  FRouteCnt := 0;
   FItemList := TItemList.Create;
 end;
 
@@ -3617,7 +3616,7 @@ begin
       begin
         TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
         for ALocation in RoutePointList do
-          AnUdbHandle.Add(TUdbDir.Create(ALocation));
+          AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
       end;
 
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
@@ -3690,7 +3689,7 @@ begin
     // Add begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation));
+    AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
 
     // Add intermediates
     CurDist := 0;
@@ -3714,7 +3713,7 @@ begin
     // Add End
     TmLocations(Locations).GetRoutePoints(2, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation));
+    AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
 
     // Update Time and Dist
     AnUdbHandle.FValue.UpdateUnknown3(Unknown3TimeOffset, TotalTime);
@@ -3809,7 +3808,7 @@ begin
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
-        AnUdbHandle.Add(TUdbDir.Create(ALocation));
+        AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
 
         while (ScanRtePt <> nil) do
         begin
@@ -3822,8 +3821,10 @@ begin
           continue;
         FirstRtePt := ScanRtePt; // restart search here
 
+        FillChar(PrevCoords, SizeOf(PrevCoords), 0);
         ScanGpxxRptNode := GetFirstExtensionsNode(ScanRtePt);
-        PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
+        if (ScanGpxxRptNode <> nil) then
+          PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
         CurDist := 0;
         while (ScanGpxxRptNode <> nil) do
         begin
@@ -3873,7 +3874,7 @@ begin
 
       // Add end route point
       ALocation := RoutePointList[RoutePointList.Count -1];
-      AnUdbHandle.Add(TUdbDir.Create(ALocation));
+      AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
 
       // update dist and time
       TotalDist := TotalDist + UdbDist;
