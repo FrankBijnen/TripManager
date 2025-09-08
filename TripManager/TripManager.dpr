@@ -6,7 +6,7 @@ program TripManager;
 
 uses
   {$IFDEF Debug_CallStack}
-  UnitStackTrace in 'UnitStackTrace.pas',
+  UnitStackTrace,
   {$ENDIF }
   MidasLib,
   Vcl.Forms,
@@ -21,13 +21,14 @@ uses
   UFrmTripEditor in 'UFrmTripEditor.pas' {FrmTripEditor},
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
   UFrmShowLog in 'UFrmShowLog.pas' {FrmShowLog},
+  UFrmEditRoutePref in 'UFrmEditRoutePref.pas' {FrmEditRoutePref},
   UnitRegistryKeys in 'UnitRegistryKeys.pas',
-  TripManager_MultiContext in 'TripManager_MultiContext.pas',
-  TripManager_ShellTree in 'TripManager_ShellTree.pas',
-  TripManager_ShellList in 'TripManager_ShellList.pas',
-  TripManager_ValEdit in 'TripManager_ValEdit.pas',
   TripManager_DBGrid in 'TripManager_DBGrid.pas',
   TripManager_GridSelItem in 'TripManager_GridSelItem.pas',
+  TripManager_MultiContext in 'TripManager_MultiContext.pas',
+  TripManager_ShellList in 'TripManager_ShellList.pas',
+  TripManager_ShellTree in 'TripManager_ShellTree.pas',
+  TripManager_ValEdit in 'TripManager_ValEdit.pas',
   UnitRegistry in '..\CommonUnits\UnitRegistry.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
@@ -48,13 +49,12 @@ uses
   UnitTripObjects in '..\CommonUnits\UnitTripObjects.pas',
   UnitGpxObjects in '..\CommonUnits\UnitGpxObjects.pas',
   UnitGpxTripCompare in '..\CommonUnits\UnitGpxTripCompare.pas',
-  UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitGpxDefs in '..\CommonUnits\UnitGpxDefs.pas',
   UnitProcessOptions in '..\CommonUnits\UnitProcessOptions.pas',
   UFrmSelectGPX in '..\CommonUnits\UFrmSelectGPX.pas' {FrmSelectGPX},
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
-  UfrmEditRoutePref in 'UfrmEditRoutePref.pas' {FrmEditRoutePref};
+  UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas';
 
 {$R *.res}
 

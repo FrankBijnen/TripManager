@@ -1,7 +1,7 @@
 unit UDmRoutePoints;
 {$WARN SYMBOL_PLATFORM OFF}
 interface
-//TODO Add routePrefs to CdsRoutePoints
+
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
   Data.DB, Datasnap.DBClient,
@@ -26,6 +26,7 @@ type
     CdsRouteRoutePreference: TStringField;
     CdsRouteTransportationMode: TStringField;
     CdsRouteDepartureDate: TDateTimeField;
+    CdsRoutePointsRoutePref: TWordField;
     procedure CdsRoutePointsAfterInsert(DataSet: TDataSet);
     procedure CdsRoutePointsAfterScroll(DataSet: TDataSet);
     procedure CdsRoutePointsBeforePost(DataSet: TDataSet);
@@ -174,6 +175,7 @@ end;
 procedure TDmRoutePoints.CdsRoutePointsAfterInsert(DataSet: TDataSet);
 begin
   CdsRoutePointsId.AsInteger := IdToInsert;
+  CdsRoutePointsRoutePref.AsInteger := Ord(TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString)) shl 8;
   if (DataSet.ControlsDisabled) then
     exit;
 
@@ -405,9 +407,8 @@ begin
       FTripList.AddLocation(Locations,
                             ProcessOptions,
                             RoutePoint,
-                            //TODO RoutePref. Add option to set it per location
-                            TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString),
-                            TAdvlevel.advNA,
+                            TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger)),
+                            TAdvlevel(Lo(CdsRoutePointsRoutePref.AsInteger)),
                             StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
                             StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
                             0,
@@ -514,30 +515,33 @@ begin
       begin
         CdsRoutePoints.Insert; // Id is autoassigned
 
-        for ANItem in TLocation(Location).LocationItems do
+        // TmAttr
+        CdsRoutePointsViaPoint.AsBoolean := false;
+        ANItem := TLocation(Location).LocationTmAttr;
+        if (Assigned(ANItem)) and
+           (Pos('Via', TmAttr(ANItem).AsString) = 1) then
+          CdsRoutePointsViaPoint.AsBoolean := true;
+        // TmName
+        ANItem := TLocation(Location).LocationTmName;
+        if (Assigned(ANItem)) then
+          CdsRoutePointsName.AsString := TmName(ANItem).AsString;
+
+        // TmAddress
+        ANItem := TLocation(Location).LocationTmAddress;
+        if (Assigned(ANItem)) then
+          CdsRoutePointsAddress.AsString := TmAddress(ANItem).AsString;
+
+        // TmscPosn
+        ANItem := TLocation(Location).LocationTmScPosn;
+        if (Assigned(ANItem)) then
         begin
-
-          if (ANItem is TmAttr) then
-          begin
-            CdsRoutePointsViaPoint.AsBoolean := false;
-            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
-              CdsRoutePointsViaPoint.AsBoolean := true;
-          end;
-
-          if (ANItem is TmName) then
-            CdsRoutePointsName.AsString := TmName(ANItem).AsString;
-
-          if (ANItem is TmAddress) then
-            CdsRoutePointsAddress.AsString := TmAddress(ANItem).AsString;
-
-          if (ANItem is TmScPosn) then
-          begin
-            LatLon := TmScPosn(ANItem).MapCoords;
-            CdsRoutePointsLat.AsString := Trim(NextField(LatLon, ','));
-            CdsRoutePointsLon.AsString := Trim(LatLon);
-          end;
-
+          LatLon := TmScPosn(ANItem).MapCoords;
+          CdsRoutePointsLat.AsString := Trim(NextField(LatLon, ','));
+          CdsRoutePointsLon.AsString := Trim(LatLon);
         end;
+
+        CdsRoutePointsRoutePref.AsInteger := (Ord(TLocation(Location).RoutePref) shl 8) + Ord(TLocation(Location).AdvLevel);
+
         CdsRoutePoints.Post;
       end;
     end;

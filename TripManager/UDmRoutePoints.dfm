@@ -52,6 +52,9 @@ object DmRoutePoints: TDmRoutePoints
       FieldName = 'Coords'
       Calculated = True
     end
+    object CdsRoutePointsRoutePref: TWordField
+      FieldName = 'RoutePref'
+    end
   end
   object CdsRoute: TClientDataSet
     Aggregates = <>

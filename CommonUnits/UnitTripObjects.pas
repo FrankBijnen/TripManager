@@ -3573,6 +3573,7 @@ var
   ViaPt, SegmentCount: integer;
   RoutePreferences: array of WORD;
   RoutePreferencesAdventurous: array of WORD;
+  RoutePreferencesAdventurousHillsAndCurves: array of WORD;
   TmpStream: TMemoryStream;
   RoutePointList: TList<TLocation>;
   Location: TLocation;
@@ -3586,18 +3587,26 @@ begin
   try
     SetLength(RoutePreferences, SegmentCount);
     SetLength(RoutePreferencesAdventurous, SegmentCount);
+    SetLength(RoutePreferencesAdventurousHillsAndCurves, SegmentCount);
 
     // Set RoutePrefs from location
-    for ViaPt := 0 to Locations.ViaPointCount -1  do
+    for ViaPt := 0 to SegmentCount -1 do
     begin
       Locations.GetRoutePoints(ViaPt +1, RoutePointList);
       Location := RoutePointList[0];
       RoutePreferences[ViaPt] := Swap($0100 + Ord(Location.RoutePref));
       case (Location.RoutePref) of
         TRoutePreference.rmCurvyRoads:
-          RoutePreferencesAdventurous[ViaPt] := Swap($0100 + Ord(Location.AdvLevel));
+        begin
+          //TODO Add default parm
+          RoutePreferencesAdventurous[ViaPt] := Swap($0100 + Max(Ord(Location.AdvLevel), Ord(TAdvlevel.advLevel1)));
+          RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap($0164);
+        end
         else
+        begin
           RoutePreferencesAdventurous[ViaPt] := Swap($0100);
+          RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap($0100);
+        end;
       end;
     end;
 
@@ -3608,11 +3617,14 @@ begin
     PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurous);
     SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
 
+    // RoutePrefs from Adventurous Hills and Curves
+    PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurousHillsAndCurves);
+    SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves', TmpStream);
+
     // All others
     for ViaPt := 0 to High(RoutePreferences) do
       RoutePreferences[ViaPt] := Swap($0100);
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
-    SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves', TmpStream);
     SetRoutePref('mRoutePreferencesAdventurousScenicRoads', TmpStream);
     SetRoutePref('mRoutePreferencesAdventurousPopularPaths', TmpStream);
   finally
@@ -3781,7 +3793,6 @@ begin
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
     end;
   finally
-
     RoutePointList.Free;
   end;
 end;

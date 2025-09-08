@@ -134,7 +134,6 @@
         <RcCompile Include="..\CommonUnits\osm\Resources\OpenLayers2.rc">
             <Form>OpenLayers2.res</Form>
         </RcCompile>
-        <DCCReference Include="UnitStackTrace.pas"/>
         <DCCReference Include="UDmRoutePoints.pas">
             <Form>DmRoutePoints</Form>
             <DesignClass>TDataModule</DesignClass>
@@ -163,13 +162,16 @@
         <DCCReference Include="UFrmShowLog.pas">
             <Form>FrmShowLog</Form>
         </DCCReference>
+        <DCCReference Include="UFrmEditRoutePref.pas">
+            <Form>FrmEditRoutePref</Form>
+        </DCCReference>
         <DCCReference Include="UnitRegistryKeys.pas"/>
-        <DCCReference Include="TripManager_MultiContext.pas"/>
-        <DCCReference Include="TripManager_ShellTree.pas"/>
-        <DCCReference Include="TripManager_ShellList.pas"/>
-        <DCCReference Include="TripManager_ValEdit.pas"/>
         <DCCReference Include="TripManager_DBGrid.pas"/>
         <DCCReference Include="TripManager_GridSelItem.pas"/>
+        <DCCReference Include="TripManager_MultiContext.pas"/>
+        <DCCReference Include="TripManager_ShellList.pas"/>
+        <DCCReference Include="TripManager_ShellTree.pas"/>
+        <DCCReference Include="TripManager_ValEdit.pas"/>
         <DCCReference Include="..\CommonUnits\UnitRegistry.pas"/>
         <DCCReference Include="..\CommonUnits\BCHex\BCHexEditor.pas"/>
         <DCCReference Include="..\CommonUnits\DirMon\Monitor.pas"/>
@@ -190,7 +192,6 @@
         <DCCReference Include="..\CommonUnits\UnitTripObjects.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxObjects.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxTripCompare.pas"/>
-        <DCCReference Include="..\CommonUnits\UnitUSBEvent.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxDefs.pas"/>
         <DCCReference Include="..\CommonUnits\UnitProcessOptions.pas"/>
         <DCCReference Include="..\CommonUnits\UFrmSelectGPX.pas">
@@ -202,9 +203,8 @@
         <DCCReference Include="..\CommonUnits\UFrmPlaces.pas">
             <Form>FrmPlaces</Form>
         </DCCReference>
-        <DCCReference Include="UfrmEditRoutePref.pas">
-            <Form>FrmEditRoutePref</Form>
-            <FormType>dfm</FormType>
+        <DCCReference Include="..\CommonUnits\UnitUSBEvent.pas">
+            <Form>$R *.res</Form>
         </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

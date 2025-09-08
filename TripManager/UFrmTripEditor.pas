@@ -94,6 +94,7 @@ type
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
     procedure CopyToClipBoard(Cut: boolean);
+    procedure SaveChanges;
   public
     { Public declarations }
     CurPath: string;
@@ -129,7 +130,7 @@ begin
   Close;
 end;
 
-procedure TFrmTripEditor.BtnOkClick(Sender: TObject);
+procedure TFrmTripEditor.SaveChanges;
 begin
   if (DmRoutePoints.CdsRoutePoints.RecordCount < 2) then
     raise Exception.Create('Need at least a begin and end point.');
@@ -142,6 +143,12 @@ begin
   DmRoutePoints.CdsRoute.Post;
 
   DmRoutePoints.SaveTrip;
+end;
+
+procedure TFrmTripEditor.BtnOkClick(Sender: TObject);
+begin
+  SaveChanges;
+
   if Assigned(FTripFileUpdated) then
     FTripFileUpdated(Self);
 

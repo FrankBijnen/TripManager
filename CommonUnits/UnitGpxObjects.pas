@@ -2125,8 +2125,7 @@ begin
           RoutePref := TmRoutePreference.RoutePreference(RtePtCalculationMode.NodeValue);
         if (RoutePref = TRoutePreference.rmCurvyRoads) then
         begin
-          //TODO Add default parm
-          AdvLevel := TAdvlevel.advLevel1;
+          AdvLevel := TAdvlevel.advNA;
           RtePtAdvLevel := RtePtViaPoint.Find('trp:AdventurousLevel');
           if (RtePtAdvLevel <> nil) then
             AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue);
