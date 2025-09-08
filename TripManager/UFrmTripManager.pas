@@ -390,7 +390,7 @@ uses
   UnitGpxTripCompare,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
-  UFrmSelectGPX, UFrmShowLog;
+  UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
 
 const
   DupeCount = 10;
@@ -2364,17 +2364,11 @@ var
   procedure AddLocation(ALocation: TLocation; ZoomToPoint: boolean);
   var
     ANitem: TBaseItem;
-    LocationName, GpsCoords: string;
+    LocationName, GpsCoords, RoutePreference, AdventurousLevel: string;
   begin
-    // Scan for Location Name and Coords
-    LocationName := '';
-    for ANitem in ALocation.LocationItems do
-    begin
-      if (ANitem is TmName) then
-        LocationName := TmName(ANitem).AsString;
-      if (ANitem is TmScPosn) then
-        GpsCoords := TmScPosn(ANitem).MapCoords;
-    end;
+    LocationName := ALocation.LocationTmName.AsString;
+    GpsCoords := ALocation.LocationTmScPosn.MapCoords;
+
     if (ZoomToPoint) then
       MapRequest(GpsCoords, LocationName, RoutePointTimeOut);
 
@@ -2400,7 +2394,16 @@ var
                                  TGridSelItem.Create(ALocation,
                                                      SizeOf(LocationValue.Count),
                                                      OffsetInRecord(LocationValue, LocationValue.Count) ));
+      if (IntToIdent(Ord(ALocation.RoutePref), RoutePreference, RoutePreferenceMap)) then
+      begin
+        AdventurousLevel := '';
+        if (ALocation.RoutePref = TRoutePreference.rmCurvyRoads) then
+           IntToIdent(Ord(ALocation.AdvLevel), AdventurousLevel, AdvLevelMap);
 
+        VlTripInfo.Strings.AddPair('RoutePref', Format('%s %s', [RoutePreference, AdventurousLevel]),
+                                   TGridSelItem.Create(ALocation));
+
+      end;
       VlTripInfo.Strings.AddPair('*** End location header', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ALocation, 1, ALocation.SelEnd - ALocation.SelStart -1 ));
     end;
@@ -2940,7 +2943,18 @@ begin
   if not Assigned(ABaseDataItem) then
     exit;
 
-  if (ABaseDataItem is TmScPosn) then
+  if (ABaseDataItem is TmRoutePreferences) or
+     (ABaseDataItem is TmRoutePreferencesAdventurousMode) then
+  begin
+    FrmEditRoutePref.CurTripList := ATripList;
+    if (FrmEditRoutePref.ShowModal = IDOK) and
+        (FrmEditRoutePref.VlModified) then
+    begin
+      BtnSaveTripValues.Enabled := true;
+      TvTripChange(TvTrip, TvTrip.Selected);
+    end;
+  end
+  else if (ABaseDataItem is TmScPosn) then
     ShowMessage('Position Map and click on ''Apply Coordinates''.' + #10 +
                 'Tip: Use Ctrl + Click on Map to get precise coordinates')
   else if (ABaseDataItem is TUnixDate) then

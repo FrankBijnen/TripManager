@@ -25,14 +25,22 @@ const
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
   TZumoModel        = (XT, XT2, Tread2, Unknown);
+  TDefPreference    = (defTBD             = $00);
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmDirect           = $04,
                        rmCurvyRoads       = $07,
+                       rmTripTrack        = $09,
                        rmHills            = $1a,
                        rmNoShape          = $58,
                        rmScenic           = $be,
-                       rmPopular          = $ef);
+                       rmPopular          = $ef,
+                       rmNA               = $ff);
+  TAdvlevel         = (advNA              = $00,
+                       advLevel1          = $01,
+                       advLevel2          = $02,
+                       advLevel3          = $03,
+                       advLevel4          = $04);
   TTransportMode    = (tmAutoMotive       = 1,
                        tmMotorcycling     = 9,
                        tmOffRoad          = 10);
@@ -63,14 +71,25 @@ const
                                                           (Value: Ord(True);                Name: 'True')
                                                         );
 
-  RoutePreferenceMap : array[0..7] of TIdentMapEntry =  ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
+  RoutePreferenceMap : array[0..10] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
                                                           (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),
                                                           (Value: Ord(rmDirect);            Name: 'Direct'),
+                                                          (Value: Ord(rmCurvyRoads);        Name: 'Adventurous'),
                                                           (Value: Ord(rmCurvyRoads);        Name: 'CurvyRoads'),
+                                                          (Value: Ord(rmTripTrack);         Name: 'TripTrack'),
                                                           (Value: Ord(rmHills);             Name: 'Hills'),
                                                           (Value: Ord(rmPopular);           Name: 'Popular'),
                                                           (Value: Ord(rmNoShape);           Name: 'No Shape'),
-                                                          (Value: Ord(rmScenic);            Name: 'Scenic'));
+                                                          (Value: Ord(rmScenic);            Name: 'Scenic'),
+                                                          (Value: Ord(rmNA);                Name: 'N/A')
+                                                        );
+
+  AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: 'N/A'),
+                                                          (Value: Ord(advLevel1);           Name: 'Faster'),
+                                                          (Value: Ord(advLevel2);           Name: 'FastAndAdventurous'),
+                                                          (Value: Ord(advLevel3);           Name: 'Adventurous'),
+                                                          (Value: Ord(advLevel4);           Name: 'ExtraAdventurous')
+                                                        );
 
   TransportModeMap : array[0..2] of TIdentMapEntry =    ( (Value: Ord(tmAutoMotive);        Name: 'Automotive'),
                                                           (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
@@ -382,6 +401,7 @@ type
   public
     constructor Create(AValue: TRoutePreference = rmFasterTime);
     class function RoutePreference(AValue: string): TRoutePreference;
+    class function AdvLevel(AValue: string): TAdvlevel;
   end;
 
   TmTransportationMode = class(TByteItem)
@@ -472,19 +492,22 @@ type
 {*** RoutePreferences ***}
   TBaseRoutePreferences = class(TRawDataItem)
   private
-    function StandardPrefs: boolean; virtual;
+    function GetIntToIdent(const Value: word): string; virtual;
     function GetCount: Cardinal;
   public
     function GetValue: string; override;
+    function GetRoutePrefByte(ViaPt: cardinal): byte;
     function GetRoutePrefs: string;
     property Count: Cardinal read GetCount;
   end;
 
   TmRoutePreferences = class(TBaseRoutePreferences)
   private
-    function StandardPrefs: boolean; override;
+    function GetIntToIdent(const Value: word): string; override;
+    function GetEditMode: TEditMode; override;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+    function GetRoutePref(ViaPt: cardinal): TRoutePreference;
   end;
   TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseRoutePreferences)
   public
@@ -495,8 +518,12 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
   TmRoutePreferencesAdventurousMode = class(TBaseRoutePreferences)
+  private
+    function GetIntToIdent(const Value: word): string; override;
+    function GetEditMode: TEditMode; override;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+    function GetRoutePref(ViaPt: cardinal): TAdvlevel;
   end;
   TmRoutePreferencesAdventurousPopularPaths = class(TBaseRoutePreferences)
   public
@@ -585,9 +612,12 @@ type
   private
     Value:            TLocationValue;
     FItems: TItemList;
+    FRoutePref: TRoutePreference; // Not used for XT
+    FAdvLevel: TAdvlevel;         // Not used for XT
     procedure WriteValue(AStream: TMemoryStream); override;
   public
-    constructor Create(ADataType: byte = dtLctnPref); reintroduce;
+    constructor Create(ARoutePref: TRoutePreference = TRoutePreference.rmNA;
+                       AAdvLevel: TAdvlevel = TAdvlevel.advNA); reintroduce;
     destructor Destroy; override;
     procedure Add(ANitem: TBaseItem);
     function LocationTmAttr: TmAttr;
@@ -596,6 +626,8 @@ type
     function LocationTmScPosn: TmScPosn;
     property LocationValue: TLocationValue read Value;
     property LocationItems: TItemList read FItems;
+    property RoutePref: TRoutePreference read FRoutePref write FRoutePref;
+    property AdvLevel: TAdvlevel read FAdvLevel write FAdvLevel;
   end;
 
   TmLocations = class(TBaseDataItem)
@@ -606,16 +638,18 @@ type
     procedure Calculate(AStream: TMemoryStream); override;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
+    function GetViaPointCount: integer;
   public
     constructor Create; reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure Clear;
-    procedure AddLocatIon(ALocation: TLocation);
+    procedure AddLocation(ALocation: TLocation);
     function Add(ANItem: TBaseItem): TBaseItem;
     procedure GetRoutePoints(ViaPoint: integer; RoutePointList: TList<TLocation>);
     property Locations: TItemList read FItemList;
     property LocationCount: Cardinal read FItemCount;
+    property ViaPointCount: integer read GetViaPointCount;
   end;
 
 {*** All routes ***}
@@ -783,18 +817,24 @@ type
     procedure AddLocation_XT2(Locations: TmLocations;
                              ProcessOptions: TObject;
                              RoutePoint: TRoutePoint;
+                             RoutePref: TRoutePreference;
+                             AdvLevel: TAdvlevel;
                              Lat, Lon: double;
                              DepartureDate: TDateTime;
                              Name, Address: string);
     procedure AddLocation_Tread2(Locations: TmLocations;
                              ProcessOptions: TObject;
                              RoutePoint: TRoutePoint;
+                             RoutePref: TRoutePreference;
+                             AdvLevel: TAdvlevel;
                              Lat, Lon: double;
                              DepartureDate: TDateTime;
                              Name, Address: string);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
+    procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
+    procedure UpdLocsFromRoutePrefs;
   public
     constructor Create;
     destructor Destroy; override;
@@ -813,16 +853,16 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
-    procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
-    procedure SetRoutePrefs_XT2_Tread2(ViaCount: integer);
-    procedure SetRoutePrefs_XT2_Tread2_TripTrack(ViaCount: integer);
 
     procedure AddLocation(Locations: TmLocations;
                           ProcessOptions: TObject;
                           RoutePoint: TRoutePoint;
+                          RoutePref: TRoutePreference;
+                          AdvLevel: TAdvlevel;
                           Lat, Lon: double;
                           DepartureDate: TDateTime;
                           Name, Address: string);
+    procedure SetRoutePrefs_XT2_Tread2(Locations: TmLocations);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
     procedure TripTrack(const AModel: TZumoModel;
                         const RtePts: TObject;
@@ -1806,6 +1846,16 @@ begin
     result := TRoutePreference(RoutePreference);
 end;
 
+class function TmRoutePreference.AdvLevel(AValue: string): TAdvlevel;
+var
+  AdvLevel: integer;
+begin
+  if not (IdentToInt(AValue, AdvLevel, AdvLevelMap)) then
+    result := TAdvlevel.advNA
+  else
+    result := TAdvlevel(AdvLevel);
+end;
+
 function TmRoutePreference.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, RoutePreferenceMap)) then
@@ -2010,9 +2060,9 @@ begin
 end;
 
 { TBaseRoutePreferences }
-function TBaseRoutePreferences.StandardPrefs: boolean;
+function TBaseRoutePreferences.GetIntToIdent(const Value: word): string;
 begin
-  result := false;
+  result := Format('TBD (0x%s)', [IntTohex(Value, 4)]);
 end;
 
 function TBaseRoutePreferences.GetCount: Cardinal;
@@ -2038,8 +2088,6 @@ var
   Stream: TBytesStream;
   SegmentNr: Cardinal;
   RoutePref: Word;
-  RoutePreferenceByte: byte;
-  RoutePreferenceString: string;
 begin
   result := '';
   Stream := TBytesStream.Create(FBytes);
@@ -2049,12 +2097,31 @@ begin
     begin
       Stream.Read(RoutePref, SizeOf(RoutePref));
       RoutePref := Swap(RoutePref);
-      RoutePreferenceByte := RoutePref;// and $0f;
-      if (not StandardPrefs) or
-         (not IntToIdent(RoutePreferenceByte, RoutePreferenceString, RoutePreferenceMap)) then
-        RoutePreferenceString := 'TBD';
-      result := result + Format('%s (0x%s)%s', [RoutePreferenceString, IntTohex(RoutePref, 4), #10]);
+      result := result + GetIntToIdent(RoutePref) + #10;
     end;
+  finally
+    Stream.Free;
+  end;
+end;
+
+function TBaseRoutePreferences.GetRoutePrefByte(ViaPt: cardinal): byte;
+var
+  Stream: TBytesStream;
+  RoutePref: Word;
+  RoutePrefLen: cardinal;
+begin
+  result := 0;
+
+  Stream := TBytesStream.Create(FBytes);
+  try
+    Stream.Read(RoutePrefLen, SizeOf(RoutePrefLen));
+    RoutePrefLen := Swap32(RoutePrefLen);
+    if (ViaPt > RoutePrefLen) then // End point for example
+      exit;
+
+    Stream.Seek((ViaPt -1) * SizeOf(RoutePref), TSeekOrigin.soCurrent);
+    Stream.Read(RoutePref, SizeOf(RoutePref));
+    result := Swap(RoutePref) and $ff;
   finally
     Stream.Free;
   end;
@@ -2065,9 +2132,22 @@ begin
   inherited Create('mRoutePreferences', 0 , $80);
 end;
 
-function TmRoutePreferences.StandardPrefs: boolean;
+function TmRoutePreferences.GetIntToIdent(const Value: word): string;
 begin
-  result := true;
+  if (IntToIdent(Value and $ff, result, RoutePreferenceMap)) then
+    result := result + Format(' (0x%s)', [IntTohex(Value, 4)])
+  else
+    result := inherited GetIntToIdent(Value);
+end;
+
+function TmRoutePreferences.GetEditMode: TEditMode;
+begin
+  result := TEditMode.emButton;
+end;
+
+function TmRoutePreferences.GetRoutePref(ViaPt: cardinal): TRoutePreference;
+begin
+  result := TRoutePreference(GetRoutePrefByte(ViaPt));
 end;
 
 constructor TmRoutePreferencesAdventurousHillsAndCurves.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
@@ -2085,10 +2165,30 @@ begin
   inherited Create('mRoutePreferencesAdventurousMode', 0 , $80);
 end;
 
+function TmRoutePreferencesAdventurousMode.GetIntToIdent(const Value: word): string;
+begin
+  if (IntToIdent(Value and $ff, result, AdvLevelMap)) then
+    result := result + Format(' (0x%s)', [IntTohex(Value, 4)])
+  else
+    result := inherited GetIntToIdent(Value);
+end;
+
+function TmRoutePreferencesAdventurousMode.GetEditMode: TEditMode;
+begin
+  result := TEditMode.emButton;
+end;
+
+function TmRoutePreferencesAdventurousMode.GetRoutePref(ViaPt: cardinal): TAdvlevel;
+begin
+  result := TAdvlevel(GetRoutePrefByte(ViaPt));
+end;
+
 constructor TmRoutePreferencesAdventurousPopularPaths.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
   inherited Create('mRoutePreferencesAdventurousPopularPaths', 0 , $80);
 end;
+
+(*** TripTrack ***)
 
 function TTrackPoint.GetMapCoords: string;
 begin
@@ -2282,13 +2382,16 @@ begin
   Size := Swap32(Size);
 end;
 
-constructor TLocation.Create(ADataType: byte = dtLctnPref);
+constructor TLocation.Create(ARoutePref: TRoutePreference = TRoutePreference.rmNA;
+                             AAdvLevel: TAdvlevel = TAdvlevel.advNA);
 begin
   inherited Create;
   Value.Id := 'LCTN';
-  Value.DataType := ADataType;
+  Value.DataType := dtLctnPref;
   Value.Size := SizeOf(Value) - SizeOf(Value.Id) - SizeOf(Value.Size);
   FItems := TItemList.Create;
+  FRoutePref := ARoutePref;
+  FAdvLevel := AAdvLevel;
 end;
 
 destructor TLocation.Destroy;
@@ -2399,7 +2502,7 @@ begin
     AStream.Read(ALocationValue, SizeOf(ALocationValue));
     ALocationValue.SwapCardinals;
 
-    AddLocatIon(TLocation.Create(ALocationValue.DataType));
+    AddLocation(TLocation.Create);
     for LocItems := 0 to ALocationValue.Count -1 do
     begin
       BytesRead := ReadKeyVAlues(AStream,
@@ -2437,7 +2540,7 @@ begin
   FItemCount := 0;
 end;
 
-procedure TmLocations.AddLocatIon(ALocation: TLocation);
+procedure TmLocations.AddLocation(ALocation: TLocation);
 begin
   FLocation := ALocation;
   FItemList.Add(ALocation);
@@ -2449,6 +2552,20 @@ begin
   FItemList.Add(ANItem);
   FLocation.Add(ANItem);
   result := ANItem;
+end;
+
+
+function TmLocations.GetViaPointCount: Integer;
+var
+  Location: TBaseItem;
+begin
+  result := 0;
+  for Location in Locations do
+  begin
+    if (Location is TmAttr) and
+       (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
+      Inc(result);
+  end;
 end;
 
 // Gets all routepoints (Including shaping) from a via point to the next. (That go in one udbhandle)
@@ -3130,6 +3247,39 @@ begin
 {$ENDIF}
 end;
 
+procedure TTripList.UpdLocsFromRoutePrefs;
+var
+  RoutePreferences: TmRoutePreferences;
+  RoutePreferencesAdventurousMode: TmRoutePreferencesAdventurousMode;
+  Locations: TmLocations;
+  ViaPt: integer;
+  RoutePointList: TList<TLocation>;
+  Location: TLocation;
+begin
+  RoutePreferences := GetItem('mRoutePreferences') as TmRoutePreferences;
+  if (RoutePreferences = nil) then
+    exit;
+  RoutePreferencesAdventurousMode := GetItem('mRoutePreferencesAdventurousMode') as TmRoutePreferencesAdventurousMode;
+  if (RoutePreferencesAdventurousMode = nil) then
+    exit;
+
+  Locations := GetItem('mLocations') as TmLocations;
+  if (Locations = nil) then
+    exit;
+  RoutePointList := TList<TLocation>.Create;
+  try
+    for ViaPt := 1 to Locations.ViaPointCount do
+    begin
+      Locations.GetRoutePoints(ViaPt, RoutePointList);
+      Location := RoutePointList[0];
+      Location.RoutePref := RoutePreferences.GetRoutePref(ViaPt);
+      Location.AdvLevel := RoutePreferencesAdventurousMode.GetRoutePref(ViaPt);
+    end;
+  finally
+    RoutePointList.Free;
+  end;
+end;
+
 procedure TTripList.SaveToStream(AStream: TMemoryStream);
 var
   ANitem: TBaseItem;
@@ -3194,6 +3344,7 @@ begin
     Add(ABaseItem);
 
   end;
+  UpdLocsFromRoutePrefs;
   result := true;
 end;
 
@@ -3417,54 +3568,56 @@ begin
   end;
 end;
 
-procedure TTripList.SetRoutePrefs_XT2_Tread2(ViaCount: integer);
+procedure TTripList.SetRoutePrefs_XT2_Tread2(Locations: TmLocations);
 var
-  Index: integer;
+  ViaPt, SegmentCount: integer;
   RoutePreferences: array of WORD;
+  RoutePreferencesAdventurous: array of WORD;
   TmpStream: TMemoryStream;
+  RoutePointList: TList<TLocation>;
+  Location: TLocation;
 begin
+  SegmentCount := Locations.ViaPointCount -1;
+  if (SegmentCount < 1) then
+    exit;
+
+  RoutePointList := TList<TLocation>.Create;
   TmpStream := TMemoryStream.Create;
   try
-    // The RoutePreferences need to be resized?
-    SetLength(RoutePreferences, ViaCount -1);
-    for Index := 0 to High(RoutePreferences) do
-      RoutePreferences[Index] := Swap($0100);
-    PrepStream(TmpStream, ViaCount -1, RoutePreferences);
+    SetLength(RoutePreferences, SegmentCount);
+    SetLength(RoutePreferencesAdventurous, SegmentCount);
 
+    // Set RoutePrefs from location
+    for ViaPt := 0 to Locations.ViaPointCount -1  do
+    begin
+      Locations.GetRoutePoints(ViaPt +1, RoutePointList);
+      Location := RoutePointList[0];
+      RoutePreferences[ViaPt] := Swap($0100 + Ord(Location.RoutePref));
+      case (Location.RoutePref) of
+        TRoutePreference.rmCurvyRoads:
+          RoutePreferencesAdventurous[ViaPt] := Swap($0100 + Ord(Location.AdvLevel));
+        else
+          RoutePreferencesAdventurous[ViaPt] := Swap($0100);
+      end;
+    end;
+
+    PrepStream(TmpStream, SegmentCount, RoutePreferences);
     SetRoutePref('mRoutePreferences',TmpStream);
+
+    // RoutePrefs from Adventurous
+    PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurous);
+    SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
+
+    // All others
+    for ViaPt := 0 to High(RoutePreferences) do
+      RoutePreferences[ViaPt] := Swap($0100);
+    PrepStream(TmpStream, SegmentCount, RoutePreferences);
     SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves', TmpStream);
     SetRoutePref('mRoutePreferencesAdventurousScenicRoads', TmpStream);
     SetRoutePref('mRoutePreferencesAdventurousPopularPaths', TmpStream);
-    SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
   finally
     TmpStream.Free;
-  end;
-end;
-
-procedure TTripList.SetRoutePrefs_XT2_Tread2_TripTrack(ViaCount: integer);
-var
-  Index: integer;
-  RoutePreferences: array of WORD;
-  TmpStream: TMemoryStream;
-begin
-  TmpStream := TMemoryStream.Create;
-  try
-    // The RoutePreferences need to be resized?
-    SetLength(RoutePreferences, ViaCount -1);
-    for Index := 0 to High(RoutePreferences) do
-      RoutePreferences[Index] := Swap($0109);
-    PrepStream(TmpStream, ViaCount -1, RoutePreferences);
-
-    SetRoutePref('mRoutePreferences',TmpStream);
-
-    // The RoutePreferences need to be resized?
-    SetLength(RoutePreferences, ViaCount -1);
-    for Index := 0 to High(RoutePreferences) do
-      RoutePreferences[Index] := Swap($0102);
-    PrepStream(TmpStream, ViaCount -1, RoutePreferences);
-    SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
-  finally
-    TmpStream.Free;
+    RoutePointList.Free;
   end;
 end;
 
@@ -3475,7 +3628,7 @@ procedure TTripList.AddLocation_XT(Locations: TmLocations;
                                    DepartureDate: TDateTime;
                                    Name, Address: string);
 begin
-  Locations.AddLocatIon(TLocation.Create);
+  Locations.AddLocation(TLocation.Create);
 
   Locations.Add(TmAttr.Create(RoutePoint));
   Locations.Add(TmIsDFSPoint.Create);
@@ -3491,6 +3644,8 @@ end;
 procedure TTripList.AddLocation_XT2(Locations: TmLocations;
                                     ProcessOptions: TObject;
                                     RoutePoint: TRoutePoint;
+                                    RoutePref: TRoutePreference;
+                                    AdvLevel: TAdvlevel;
                                     Lat, Lon: double;
                                     DepartureDate: TDateTime;
                                     Name, Address: string);
@@ -3499,7 +3654,7 @@ var
 begin
   TmpStream := TMemoryStream.Create;
   try
-    Locations.AddLocatIon(TLocation.Create);
+    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
 
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
@@ -3520,6 +3675,8 @@ end;
 procedure TTripList.AddLocation_Tread2(Locations: TmLocations;
                                        ProcessOptions: TObject;
                                        RoutePoint: TRoutePoint;
+                                       RoutePref: TRoutePreference;
+                                       AdvLevel: TAdvlevel;
                                        Lat, Lon: double;
                                        DepartureDate: TDateTime;
                                        Name, Address: string);
@@ -3528,7 +3685,7 @@ var
 begin
   TmpStream := TMemoryStream.Create;
   try
-    Locations.AddLocatIon(TLocation.Create);
+    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
 
     Locations.Add(TmisTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
@@ -3548,17 +3705,19 @@ end;
 procedure TTripList.AddLocation(Locations: TmLocations;
                                 ProcessOptions: Tobject;
                                 RoutePoint: TRoutePoint;
+                                RoutePref: TRoutePreference;
+                                AdvLevel: TAdvlevel;
                                 Lat, Lon: double;
                                 DepartureDate: TDateTime;
                                 Name, Address: string);
-
 begin
   case TProcessOptions(ProcessOptions).ZumoModel of
     TZumoModel.XT2:
-      AddLocation_XT2(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_XT2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TZumoModel.Tread2:
-      AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     else
+      // No RoutePref for XT
       AddLocation_XT(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
   end;
 end;
@@ -3572,7 +3731,6 @@ var
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
   Locations: TBaseItem;
-  Location: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
 begin
   // If the model is not supplied, try to get it from the data
@@ -3590,13 +3748,7 @@ begin
   begin
     if not Assigned(Locations) then
       exit;
-
-    for Location in TmLocations(Locations).Locations do
-    begin
-      if (Location is TmAttr) and
-         (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
-        Inc(ViaCount);
-    end;
+    ViaCount := TmLocations(Locations).ViaPointCount;
   end;
 
   // At least a begin and end point needed. So at least 1 UdbHandle
@@ -3626,7 +3778,7 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        SetRoutePrefs_XT2_Tread2(ViaCount);
+        SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
     end;
   finally
 
@@ -3733,10 +3885,7 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        begin
-          SetRoutePrefs_XT2_Tread2(2);
-          SetRoutePrefs_XT2_Tread2_TripTrack(2);
-        end;
+        SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
     end;
 
   finally
@@ -3754,7 +3903,6 @@ var
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
   Locations: TBaseItem;
-  Location: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir: TUdbDir;
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
@@ -3778,13 +3926,7 @@ begin
     exit;
 
  // Count from already assigned Locations
-  ViaCount := 0;
-  for Location in TmLocations(Locations).Locations do
-  begin
-    if (Location is TmAttr) and
-       (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
-      Inc(ViaCount);
-  end;
+  ViaCount := TmLocations(Locations).ViaPointCount;
 
   // At least a begin and end point needed. So at least 1 UdbHandle
   if (ViaCount < 2) then
@@ -3896,11 +4038,7 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        begin
-          SetRoutePrefs_XT2_Tread2(ViaCount);
-          if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc]) then
-            SetRoutePrefs_XT2_Tread2_TripTrack(ViaCount);
-        end;
+        SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
     end;
 
   finally
@@ -4181,36 +4319,34 @@ begin
       if (Location is TLocation) then
       begin
         RtePt := Rte.AddChild('rtept');
+        // Point Type
         ViaPointType := 'trp:ShapingPoint';
+        ANItem := TLocation(Location).LocationTmAttr;
+        if (Assigned(ANItem)) and
+           (Pos('Via', TmAttr(ANItem).AsString) = 1) then
+          ViaPointType := 'trp:ViaPoint';
+        // Point Name
         PointName := '';
+        ANItem := TLocation(Location).LocationTmName;
+        if (Assigned(ANItem)) then
+           PointName := TmName(ANItem).AsString;
+        // Lat Lon
         Lat := '';
         Lon := '';
-        Address := '';
-        for ANItem in TLocation(Location).LocationItems do
+        ANItem := TLocation(Location).LocationTmScPosn;
+        if (Assigned(ANItem)) then
         begin
-
-          if (ANItem is TmAttr) then
-          begin
-            if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
-              ViaPointType := 'trp:ViaPoint'
-            else
-              ViaPointType := 'trp:ShapingPoint';
-          end;
-
-          if (ANItem is TmName) then
-            PointName := TmName(ANItem).AsString;
-
-          if (ANItem is TmScPosn) then
-          begin
-            Lon := TmScPosn(ANItem).MapCoords;
-            Lat := Trim(NextField(Lon, ','));
-            Lon := Trim(Lon);
-          end;
-
-          if (ANItem is TmAddress) then
-            Address := TmAddress(ANItem).AsString;
-
+          Lon := TmScPosn(ANItem).MapCoords;
+          Lat := Trim(NextField(Lon, ','));
+          Lon := Trim(Lon);
         end;
+        // Address
+        Address := '';
+        ANItem := TLocation(Location).LocationTmAddress;
+        if (Assigned(ANItem)) then
+          Address := TmAddress(ANItem).AsString;
+
+        // Write to XML
         RtePt.Attributes['lat'] := Lat;
         RtePt.Attributes['lon'] := Lon;
         RtePt.AddChild('name').NodeValue := PointName;

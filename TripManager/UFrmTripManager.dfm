@@ -78,6 +78,7 @@ object FrmTripManager: TFrmTripManager
           Margins.Top = 4
           Margins.Right = 1
           Align = alClient
+          Constraints.MinWidth = 40
           TabOrder = 2
           Text = 'Select an MTP device'
           OnChange = CmbDevicesChange
@@ -157,6 +158,7 @@ object FrmTripManager: TFrmTripManager
           Margins.Top = 4
           Margins.Right = 1
           Align = alRight
+          Constraints.MinWidth = 40
           TabOrder = 3
           Text = 'Unknown'
           OnChange = CmbModelChange

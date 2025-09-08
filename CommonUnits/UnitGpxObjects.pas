@@ -2077,22 +2077,30 @@ var
   Coords: TCoords;
   RtePtExtensions: TXmlVSNode;
   RtePtViaPoint: TXmlVSNode;
+  RtePtCalculationMode: TXmlVSNode;
+  RtePtAdvLevel: TXmlVSNode;
   RtePtCmt: string;
   DepartureDateString: string;
   DepartureDate: TDateTime;
   PointCnt: integer;
   RoutePoint: TRoutePoint;
+  RoutePref: TRoutePreference;
+  AdvLevel: TAdvlevel;
 begin
   result := 0;
   PointCnt := 0;
+  RoutePref := TRoutePreference.rmFasterTime;  // If the GPX has no trp:CalculationMode at all
   for RtePtNode in RtePts do
   begin
     Inc(PointCnt);
+    AdvLevel := TAdvlevel.advNA;
     if (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
     begin
-      if (PointCnt <> 1) and
-         (PointCnt <> RtePts.Count) then
-        Continue;
+      if (PointCnt = 1) or
+         (PointCnt = RtePts.Count) then
+        RoutePref := TRoutePreference.rmTripTrack
+      else
+        continue;
     end;
     // Get Data from RtePt
     RtePtName := FindSubNodeValue(RtePtNode, 'name');
@@ -2106,9 +2114,26 @@ begin
     RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
     if (RtePtViaPoint <> nil) then
     begin
-      RoutePoint := TRoutePoint.rpVia;
       Inc(result);
+      RoutePoint := TRoutePoint.rpVia;
+
+      // RoutePref
+      if not (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
+      begin
+        RtePtCalculationMode := RtePtViaPoint.Find('trp:CalculationMode');
+        if (RtePtCalculationMode <> nil) then
+          RoutePref := TmRoutePreference.RoutePreference(RtePtCalculationMode.NodeValue);
+        if (RoutePref = TRoutePreference.rmCurvyRoads) then
+        begin
+          //TODO Add default parm
+          AdvLevel := TAdvlevel.advLevel1;
+          RtePtAdvLevel := RtePtViaPoint.Find('trp:AdventurousLevel');
+          if (RtePtAdvLevel <> nil) then
+            AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue);
+        end;
+      end;
     end;
+
     // Address
     RtePtCmt := FindSubNodeValue(RtePtNode, 'cmt');
     if (RtePtCmt = '') then
@@ -2128,6 +2153,8 @@ begin
     FTripList.AddLocation(Locations,
                           ProcessOptions,
                           RoutePoint,
+                          RoutePref,
+                          AdvLevel,
                           Coords.Lat, Coords.Lon,
                           DepartureDate, RtePtName, RtePtCmt);
   end;

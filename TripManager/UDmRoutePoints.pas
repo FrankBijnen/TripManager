@@ -1,7 +1,7 @@
 unit UDmRoutePoints;
 {$WARN SYMBOL_PLATFORM OFF}
 interface
-
+//TODO Add routePrefs to CdsRoutePoints
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
   Data.DB, Datasnap.DBClient,
@@ -373,7 +373,7 @@ var
   TmpStream: TMemoryStream;
   ANItem: TBaseItem;
   ProcessOptions: TProcessOptions;
-  RoutePoint: TRoutePoint;                                                                   
+  RoutePoint: TRoutePoint;
 begin
   if (CdsRoute.State in [dsEdit, dsInsert]) then
     CdsRoute.Post;
@@ -405,6 +405,9 @@ begin
       FTripList.AddLocation(Locations,
                             ProcessOptions,
                             RoutePoint,
+                            //TODO RoutePref. Add option to set it per location
+                            TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString),
+                            TAdvlevel.advNA,
                             StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
                             StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
                             0,

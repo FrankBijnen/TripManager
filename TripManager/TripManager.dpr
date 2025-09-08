@@ -53,7 +53,8 @@ uses
   UnitProcessOptions in '..\CommonUnits\UnitProcessOptions.pas',
   UFrmSelectGPX in '..\CommonUnits\UFrmSelectGPX.pas' {FrmSelectGPX},
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
-  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces};
+  UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
+  UfrmEditRoutePref in 'UfrmEditRoutePref.pas' {FrmEditRoutePref};
 
 {$R *.res}
 
@@ -86,5 +87,6 @@ begin
   Application.CreateForm(TFGeoSearch, FGeoSearch);
   Application.CreateForm(TFrmPlaces, FrmPlaces);
   Application.CreateForm(TFrmShowLog, FrmShowLog);
+  Application.CreateForm(TFrmEditRoutePref, FrmEditRoutePref);
   Application.Run;
 end.
