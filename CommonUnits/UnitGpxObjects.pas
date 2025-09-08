@@ -299,7 +299,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
         CMapSegRoad := MapSegRoadExclBit(CMapSegRoad) // For compare only mapsegment and roadid
       else
       begin
-        if (Copy(CMapSegRoad, 22, 4) = '2116') then   // Complete subclass
+        if (Copy(CMapSegRoad, 21, 4) = '2116') then   // Complete subclass
         begin
           KeepBegin := ((scFirst in SCType) and
                         (scFirst in CurType));
@@ -307,7 +307,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
             exit;
         end;
 
-        if (Copy(CMapSegRoad, 22, 4) = '2117') then
+        if (Copy(CMapSegRoad, 21, 4) = '2117') then
         begin
           KeepEnd :=  ((ScLast in SCType) and
                        (ScLast in CurType));
@@ -2096,10 +2096,8 @@ begin
     AdvLevel := TAdvlevel.advNA;
     if (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
     begin
-      if (PointCnt = 1) or
-         (PointCnt = RtePts.Count) then
-        RoutePref := TRoutePreference.rmTripTrack
-      else
+      if (PointCnt <> 1) and
+         (PointCnt <> RtePts.Count) then
         continue;
     end;
     // Get Data from RtePt
@@ -2118,7 +2116,12 @@ begin
       RoutePoint := TRoutePoint.rpVia;
 
       // RoutePref
-      if not (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
+      if (ProcessOptions.TripOption in [TTripOption.ttTripTrack, TTripOption.ttTripTrackLoc]) then
+      begin
+        RoutePref := TRoutePreference.rmTripTrack;
+        AdvLevel := TAdvlevel.advNA;
+      end
+      else
       begin
         RtePtCalculationMode := RtePtViaPoint.Find('trp:CalculationMode');
         if (RtePtCalculationMode <> nil) then
