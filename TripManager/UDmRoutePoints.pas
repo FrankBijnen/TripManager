@@ -709,6 +709,11 @@ begin
                                     'Select Waypoints/Routes',
                                      TTagsToShow.WptRte, CdsRouteTripName.AsString)) then
     begin
+      if (CdsRoute.State in [dsEdit, dsInsert]) then
+        CdsRoute.Post;
+      if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+        CdsRoutePoints.Post;
+
       CdsRoutePoints.DisableControls;
       try
         CdsRoutePoints.Last;
@@ -755,6 +760,11 @@ var
 begin
   XML := TXmlVSDocument.Create;
   DefProcessOptions := TProcessOptions.Create;
+  if (CdsRoute.State in [dsEdit, dsInsert]) then
+    CdsRoute.Post;
+  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+    CdsRoutePoints.Post;
+
   CdsRoutePoints.DisableControls;
   try
     XMLRoot := InitGarminGpx(XML);
@@ -819,6 +829,11 @@ begin
 
   Reader := TStringList.Create;
   Reader.LoadFromFile(CSVFile);
+  if (CdsRoute.State in [dsEdit, dsInsert]) then
+    CdsRoute.Post;
+  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+    CdsRoutePoints.Post;
+
   PointId := CdsRoutePoints.RecordCount +1;
   CdsRoutePoints.DisableControls;
   try
@@ -890,6 +905,11 @@ var
   Lst: TStringList;
   ViaShape: string;
 begin
+  if (CdsRoute.State in [dsEdit, dsInsert]) then
+    CdsRoute.Post;
+  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+    CdsRoutePoints.Post;
+
   CdsRoutePoints.DisableControls;
   Writer := TStreamWriter.Create(CSVFile, false, TEncoding.UTF8);
   try

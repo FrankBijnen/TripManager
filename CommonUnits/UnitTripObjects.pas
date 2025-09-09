@@ -25,7 +25,6 @@ const
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
   TZumoModel        = (XT, XT2, Tread2, Unknown);
-  TDefPreference    = (defTBD             = $00);
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmDirect           = $04,
@@ -40,7 +39,8 @@ type
                        advLevel1          = $01,
                        advLevel2          = $02,
                        advLevel3          = $03,
-                       advLevel4          = $04);
+                       advLevel4          = $04,
+                       advEnd             = $ff);
   TTransportMode    = (tmAutoMotive       = 1,
                        tmMotorcycling     = 9,
                        tmOffRoad          = 10);
@@ -70,7 +70,9 @@ const
   BooleanMap : array[0..1] of TIdentMapEntry =          ( (Value: Ord(False);               Name: 'False'),
                                                           (Value: Ord(True);                Name: 'True')
                                                         );
-
+  MinRoutePreferenceUserConfig = 0; // Only these are available to the user.
+  MaxRoutePreferenceUserConfig = 3;
+  RoutePreferenceAdventurous = 3;
   RoutePreferenceMap : array[0..10] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
                                                           (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),
                                                           (Value: Ord(rmDirect);            Name: 'Direct'),
@@ -84,6 +86,8 @@ const
                                                           (Value: Ord(rmNA);                Name: 'N/A')
                                                         );
 
+  MinAdvLevelUserConfig = 1; // Only theses are available to the user.
+  MaxAdvLevelUserConfig = 4;
   AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: 'N/A'),
                                                           (Value: Ord(advLevel1);           Name: 'Faster'),
                                                           (Value: Ord(advLevel2);           Name: 'FastAndAdventurous'),
@@ -1880,7 +1884,7 @@ var
   Index: integer;
 begin
   result := '';
-  for Index := 0 to High(RoutePreferenceMap) do
+  for Index := MinRoutePreferenceUserConfig to MaxRoutePreferenceUserConfig do
     result := result + RoutePreferenceMap[index].Name +
 {$IFDEF DEBUG_ENUMS}
                        Format(' (%d)', [RoutePreferenceMap[Index].Value]) +
@@ -2104,20 +2108,20 @@ begin
   end;
 end;
 
+{$HINTS OFF}
 function TBaseRoutePreferences.GetRoutePrefByte(ViaPt: cardinal): byte;
 var
   Stream: TBytesStream;
   RoutePref: Word;
   RoutePrefLen: cardinal;
 begin
-  result := 0;
-
+  result := Ord(TRoutePreference.rmFasterTime); // Compiler warns. Never used. But for clarity kept.
   Stream := TBytesStream.Create(FBytes);
   try
     Stream.Read(RoutePrefLen, SizeOf(RoutePrefLen));
     RoutePrefLen := Swap32(RoutePrefLen);
     if (ViaPt > RoutePrefLen) then // End point for example
-      exit;
+      exit(Ord(TRoutePreference.rmNA));
 
     Stream.Seek((ViaPt -1) * SizeOf(RoutePref), TSeekOrigin.soCurrent);
     Stream.Read(RoutePref, SizeOf(RoutePref));
@@ -2126,6 +2130,7 @@ begin
     Stream.Free;
   end;
 end;
+{$HINTS ON}
 
 constructor TmRoutePreferences.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
