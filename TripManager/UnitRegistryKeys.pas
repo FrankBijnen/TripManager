@@ -15,6 +15,7 @@ const
   Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   Reg_AllowGrouping           = 'AllowGrouping';
   Reg_TripOption              = 'TripOption';
+  Reg_DefAdvLevel             = 'DefAdvLevel';
 
   //XT2
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
@@ -132,6 +133,7 @@ begin
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
+    DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel1)));
 
     // XT2 Defaults
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);

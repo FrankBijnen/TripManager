@@ -229,6 +229,7 @@ begin
     AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileTruckType,     XT2_VehicleProfileTruckType);
     AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileName,          XT2_VehicleProfileName);
     AddGridLine(GridZumoSettings, CurRow, Reg_AvoidancesChangedTimeAtSave, XT2_AvoidancesChangedTimeAtSave, 'Date: ');
+    AddGridLine(GridZumoSettings, CurRow, Reg_DefAdvLevel,                 IntToStr(Ord(TAdvlevel.advLevel1)), 'Default Adventurous Level (1-4)');
     GridZumoSettings.RowCount := CurRow;
 
     AddGridHeader(GridZumoSettings);

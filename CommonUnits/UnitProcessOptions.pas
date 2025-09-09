@@ -134,6 +134,7 @@ type
     AvoidancesChangedTimeAtSave: Cardinal;    // XT2
     AllowGrouping: boolean;                   // XT1. (Not used anymore for XT2)
     TripOption: TTripOption;                  // XT1 and XT2
+    DefAdvLevel: TAdvlevel;                   // XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -238,6 +239,7 @@ begin
   AvoidancesChangedTimeAtSave := 0;
   AllowGrouping := true;
   TripOption := TTripOption.ttCalc;
+  DefAdvLevel := TAdvlevel.advLevel1;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}

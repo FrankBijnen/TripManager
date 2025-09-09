@@ -70,6 +70,8 @@ const
   BooleanMap : array[0..1] of TIdentMapEntry =          ( (Value: Ord(False);               Name: 'False'),
                                                           (Value: Ord(True);                Name: 'True')
                                                         );
+  DefRoutePref: word = $0100;
+  DefRoutePrefHillsAndCurves: word = $0164;
   MinRoutePreferenceUserConfig = 0; // Only these are available to the user.
   MaxRoutePreferenceUserConfig = 3;
   RoutePreferenceAdventurous = 3;
@@ -866,7 +868,7 @@ type
                           Lat, Lon: double;
                           DepartureDate: TDateTime;
                           Name, Address: string);
-    procedure SetRoutePrefs_XT2_Tread2(Locations: TmLocations);
+    procedure SetRoutePrefs_XT2_Tread2(Locations: TmLocations; ProcessOptions: TObject);
     procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
     procedure TripTrack(const AModel: TZumoModel;
                         const RtePts: TObject;
@@ -3573,7 +3575,7 @@ begin
   end;
 end;
 
-procedure TTripList.SetRoutePrefs_XT2_Tread2(Locations: TmLocations);
+procedure TTripList.SetRoutePrefs_XT2_Tread2(Locations: TmLocations; ProcessOptions: TObject);
 var
   ViaPt, SegmentCount: integer;
   RoutePreferences: array of WORD;
@@ -3599,18 +3601,20 @@ begin
     begin
       Locations.GetRoutePoints(ViaPt +1, RoutePointList);
       Location := RoutePointList[0];
-      RoutePreferences[ViaPt] := Swap($0100 + Ord(Location.RoutePref));
+      RoutePreferences[ViaPt] := Swap(DefRoutePref + Ord(Location.RoutePref));
       case (Location.RoutePref) of
         TRoutePreference.rmCurvyRoads:
         begin
-          //TODO Add default parm
-          RoutePreferencesAdventurous[ViaPt] := Swap($0100 + Max(Ord(Location.AdvLevel), Ord(TAdvlevel.advLevel1)));
-          RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap($0164);
+          if (Location.AdvLevel = TAdvlevel.advNA) then
+            Location.AdvLevel := TProcessOptions(ProcessOptions).DefAdvLevel;
+
+          RoutePreferencesAdventurous[ViaPt] := Swap(DefRoutePref + Ord(Location.AdvLevel));
+          RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap(DefRoutePrefHillsAndCurves);
         end
         else
         begin
-          RoutePreferencesAdventurous[ViaPt] := Swap($0100);
-          RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap($0100);
+          RoutePreferencesAdventurous[ViaPt] := Swap(DefRoutePref);
+          RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap(DefRoutePref);
         end;
       end;
     end;
@@ -3628,7 +3632,7 @@ begin
 
     // All others
     for ViaPt := 0 to High(RoutePreferences) do
-      RoutePreferences[ViaPt] := Swap($0100);
+      RoutePreferences[ViaPt] := Swap(DefRoutePref);
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
     SetRoutePref('mRoutePreferencesAdventurousScenicRoads', TmpStream);
     SetRoutePref('mRoutePreferencesAdventurousPopularPaths', TmpStream);
@@ -3749,6 +3753,7 @@ var
   ALocation: TLocation;
   Locations: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
+  ProcessOptions: TProcessOptions;
 begin
   // If the model is not supplied, try to get it from the data
   CalcModel := GetCalcModel(AModel);
@@ -3771,6 +3776,7 @@ begin
   // At least a begin and end point needed. So at least 1 UdbHandle
   ViaCount := Max(ViaCount, 2);
 
+  ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
@@ -3795,10 +3801,11 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
+        SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
   finally
     RoutePointList.Free;
+    ProcessOptions.Free;
   end;
 end;
 
@@ -3837,6 +3844,7 @@ var
   PrevCoords, Coords: TCoords;
   TotalTime: integer;
   TotalDist, CurDist: double;
+  ProcessOptions: TProcessOptions;
 begin
   TotalTime := 0;
   TotalDist := 0;
@@ -3852,6 +3860,7 @@ begin
     exit;
 
   AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, false);
+  ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
     // Add begin
@@ -3901,11 +3910,12 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
+        SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
 
   finally
     RoutePointList.Free;
+    ProcessOptions.Free;
   end;
 end;
 
@@ -4054,7 +4064,7 @@ begin
     case (CalcModel) of
       TZumoModel.XT2,
       TZumoModel.Tread2:
-        SetRoutePrefs_XT2_Tread2(TmLocations(Locations));
+        SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
 
   finally

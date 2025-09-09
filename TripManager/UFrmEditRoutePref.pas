@@ -34,7 +34,8 @@ var
 implementation
 
 uses
-  System.Generics.Collections;
+  System.Generics.Collections,
+  UnitProcessOptions;
 
 {$R *.dfm}
 
@@ -46,14 +47,16 @@ var
   ViaPt: integer;
   ARoutePref: string;
   LookUp: integer;
+  ProcessOptions: TProcessOptions;
 begin
   if (ModalResult <> IDOK) then
     exit;
 
+  ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
     Locations := CurTripList.GetItem('mLocations') as TmLocations;
-    for ViaPt := 1 to Locations.ViaPointCount do
+    for ViaPt := 1 to Locations.ViaPointCount -1 do
     begin
       Locations.GetRoutePoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
@@ -68,9 +71,10 @@ begin
         Location.AdvLevel := TAdvlevel(Lo(Word(PickList.Objects[LookUp])));
       end;
     end;
-    CurTripList.SetRoutePrefs_XT2_Tread2(Locations);
+    CurTripList.SetRoutePrefs_XT2_Tread2(Locations, ProcessOptions);
   finally
-    RoutePointList.free;
+    RoutePointList.Free;
+    ProcessOptions.Free;
   end;
 end;
 
