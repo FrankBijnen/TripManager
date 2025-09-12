@@ -217,7 +217,8 @@ begin
     AddGridLine(GridZumoSettings, CurRow, '', '', '0=Force calculation');
     AddGridLine(GridZumoSettings, CurRow, '', '', '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Only for BaseCamp calculated routes-');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '1=No calculation, 2=TripTrack, 3=TripTrack with locations');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '1=No calculation, 2=TripTrack, 3=TripTrack + Locations');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '4=TripTrack + Locations + RoutePrefs');
     AddGridLine(GridZumoSettings, CurRow, '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow, Reg_AllowGrouping,               'True', 'Group trips from the same GPX');

@@ -35,12 +35,11 @@ type
                        rmScenic           = $be,
                        rmPopular          = $ef,
                        rmNA               = $ff);
-  TAdvlevel         = (advNA              = $00,
-                       advLevel1          = $01,
-                       advLevel2          = $02,
-                       advLevel3          = $03,
-                       advLevel4          = $04,
-                       advEnd             = $ff);
+  TAdvlevel         = (advLevel1          = $00,
+                       advLevel2          = $01,
+                       advLevel3          = $02,
+                       advLevel4          = $03,
+                       advNA              = $ff);
   TTransportMode    = (tmAutoMotive       = 1,
                        tmMotorcycling     = 9,
                        tmOffRoad          = 10);
@@ -49,7 +48,7 @@ type
                        rpShapingXT2       = 2);
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
 
-  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc);
+  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
 
 { Elementary data types }
 const
@@ -71,6 +70,7 @@ const
                                                           (Value: Ord(True);                Name: 'True')
                                                         );
   DefRoutePref: word = $0100;
+  DefRoutePrefAdv: word = $0101;
   DefRoutePrefHillsAndCurves: word = $0164;
   MinRoutePreferenceUserConfig = 0; // Only these are available to the user.
   MaxRoutePreferenceUserConfig = 3;
@@ -503,7 +503,7 @@ type
   public
     function GetValue: string; override;
     function GetRoutePrefByte(ViaPt: cardinal): byte;
-    function GetRoutePrefs: string;
+    function GetRoutePrefs(RoutePreference: TObject = nil): string; virtual;
     property Count: Cardinal read GetCount;
   end;
 
@@ -2089,11 +2089,12 @@ begin
   result := Format('%d Segments', [GetCount]);
 end;
 
-function TBaseRoutePreferences.GetRoutePrefs: string;
+function TBaseRoutePreferences.GetRoutePrefs(RoutePreference: TObject = nil): string;
 var
   Stream: TBytesStream;
   SegmentNr: Cardinal;
   RoutePref: Word;
+  BaseRoutePrefByte: byte;
 begin
   result := '';
   Stream := TBytesStream.Create(FBytes);
@@ -2103,6 +2104,15 @@ begin
     begin
       Stream.Read(RoutePref, SizeOf(RoutePref));
       RoutePref := Swap(RoutePref);
+      if (RoutePreference <> nil) then
+      begin
+        BaseRoutePrefByte := TmRoutePreferences(RoutePreference).GetRoutePrefByte(SegmentNr);
+        if (TRoutePreference(BaseRoutePrefByte) <> TRoutePreference.rmCurvyRoads) then
+        begin
+          result := result + Format('%s (0x%s)', [AdvLevelMap[0].Name, IntTohex(RoutePref, 4)]) + #10;
+          continue;
+        end;
+      end;
       result := result + GetIntToIdent(RoutePref) + #10;
     end;
   finally
@@ -3280,7 +3290,10 @@ begin
       Locations.GetRoutePoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
       Location.RoutePref := RoutePreferences.GetRoutePref(ViaPt);
-      Location.AdvLevel := RoutePreferencesAdventurousMode.GetRoutePref(ViaPt);
+      if (Location.RoutePref = TRoutePreference.rmCurvyRoads) then
+        Location.AdvLevel := RoutePreferencesAdventurousMode.GetRoutePref(ViaPt)
+      else
+        Location.AdvLevel := TAdvlevel.advNA;
     end;
   finally
     RoutePointList.Free;
@@ -3613,7 +3626,7 @@ begin
         end
         else
         begin
-          RoutePreferencesAdventurous[ViaPt] := Swap(DefRoutePref);
+          RoutePreferencesAdventurous[ViaPt] := Swap(DefRoutePrefAdv);
           RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap(DefRoutePref);
         end;
       end;
@@ -4054,7 +4067,7 @@ begin
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
-    if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc]) then
+    if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc, TTripOption.ttTripTrackLocPrefs]) then
       SetPreserveTrackToRoute(RtePts);
 
     (GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := TotalDist;

@@ -68,7 +68,10 @@ begin
       if (LookUp > -1) then
       begin
         Location.RoutePref := TRoutePreference(Hi(Word(PickList.Objects[LookUp])));
-        Location.AdvLevel := TAdvlevel(Lo(Word(PickList.Objects[LookUp])));
+        if (Location.RoutePref = TRoutePreference.rmCurvyRoads) then
+          Location.AdvLevel := TAdvlevel(Lo(Word(PickList.Objects[LookUp])))
+        else
+          Location.AdvLevel := TAdvlevel.advNA;
       end;
     end;
     CurTripList.SetRoutePrefs_XT2_Tread2(Locations, ProcessOptions);
@@ -81,14 +84,19 @@ end;
 procedure TFrmEditRoutePref.FormCreate(Sender: TObject);
 var
   Index: integer;
+  W: word;
 begin
   PickList := TStringList.Create;
   for Index := MinRoutePreferenceUserConfig to RoutePreferenceAdventurous -1 do
-    PickList.AddObject(RoutePreferenceMap[Index].Name,
-                       TObject(RoutePreferenceMap[Index].Value shl 8) );
+  begin
+    W := (RoutePreferenceMap[Index].Value shl 8) + Ord(TAdvlevel.advNA);
+    PickList.AddObject(RoutePreferenceMap[Index].Name, TObject(W));
+  end;
   for Index := MinAdvLevelUserConfig to MaxAdvLevelUserConfig do
-    PickList.AddObject(RoutePreferenceMap[RoutePreferenceAdventurous].Name + ' ' + AdvLevelMap[Index].Name,
-                       TObject( (RoutePreferenceMap[RoutePreferenceAdventurous].Value shl 8) + AdvLevelMap[Index].Value) );
+  begin
+    W := (RoutePreferenceMap[RoutePreferenceAdventurous].Value shl 8) + AdvLevelMap[Index].Value;
+    PickList.AddObject(RoutePreferenceMap[RoutePreferenceAdventurous].Name + ' ' + AdvLevelMap[Index].Name, TObject(W));
+  end;
 end;
 
 procedure TFrmEditRoutePref.FormDestroy(Sender: TObject);

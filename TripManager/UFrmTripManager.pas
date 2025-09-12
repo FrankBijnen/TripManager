@@ -2344,7 +2344,10 @@ var
     try
       Offset := (ARoutePreferences.SelEnd - ARoutePreferences.SelStart - ARoutePreferences.LenValue) +
                 SizeOf(biInitiator);
-      Segments.Text := ARoutePreferences.GetRoutePrefs;
+      if (ARoutePreferences is TmRoutePreferencesAdventurousMode) then
+        Segments.Text := ARoutePreferences.GetRoutePrefs(ATripList.GetItem('mRoutePreferences'))
+      else
+        Segments.Text := ARoutePreferences.GetRoutePrefs;
       VlTripInfo.Strings.AddObject(Format('%s #Segments', [ARoutePreferences.Name]) +
                                      VlTripInfo.Strings.NameValueSeparator +
                                      Format('%d', [ARoutePreferences.Count]),

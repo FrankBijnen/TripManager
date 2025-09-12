@@ -1,5 +1,6 @@
 unit UnitGPXObjects;
 {$WARN SYMBOL_PLATFORM OFF}
+{.$DEFINE UniqueTrkPts}
 
 interface
 
@@ -33,6 +34,7 @@ type
     FTrackList: TXmlVSNodeList;             // All tracks. Can be created from calculated routes
     FWayPointsProcessedList: TStringList;   // To prevent duplicate Way points
 
+    PrevTrackCoords: TCoords;
     CurrentTrack: TXmlVSNode;
     CurrentViaPointRoute: TXmlVSNode;
     CurrentWayPointFromRoute: TXmlVSNode;
@@ -867,7 +869,19 @@ end;
 procedure TGPXFile.AddTrackPoint(const RptNode: TXmlVsNode);
 var
   TrackPoint: TXmlVsNode;
+{$IFDEF UniqueTrkPts}
+  CurCoords: TCoords;
+  CurDist: Double;
+{$ENDIF}
 begin
+{$IFDEF UniqueTrkPts}
+  CurCoords.FromAttributes(RptNode.AttributeList);
+  CurDist := CoordDistance(CurCoords, PrevTrackCoords, TDistanceUnit.duKm);
+  if (CurDist < 0.001) then
+    exit;
+  PrevTrackCoords := CurCoords;
+{$ENDIF}
+
   TrackPoint := CurrentTrack.AddChild('trkpt');
   CloneAttributes(RptNode, TrackPoint);
 end;
@@ -1118,6 +1132,7 @@ begin
 
   if (ProcessOptions.ProcessTracks) then
   begin
+    FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
     CurrentTrack.AddChild('desc').NodeValue := 'Rte';
@@ -1176,6 +1191,7 @@ begin
 
   if (ProcessOptions.ProcessTracks) then
   begin
+    FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
     CurrentTrack.AddChild('desc').NodeValue := 'Trk';
