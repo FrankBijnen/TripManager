@@ -27,8 +27,33 @@
 namespace Unitosmmap
 {
 //-- forward type declarations -----------------------------------------------
+struct TMapLayer;
+struct TMapTilerLayer;
 class DELPHICLASS TOSMHelper;
 //-- type declarations -------------------------------------------------------
+struct DECLSPEC_DRECORD TMapLayer
+{
+public:
+	System::UnicodeString ClassName;
+	System::UnicodeString Description;
+};
+
+
+struct DECLSPEC_DRECORD TMapTilerLayer
+{
+public:
+	System::UnicodeString Resource;
+	System::UnicodeString Style;
+	System::UnicodeString Description;
+};
+
+
+typedef System::StaticArray<TMapTilerLayer, 4> Unitosmmap__1;
+
+typedef System::StaticArray<TMapLayer, 2> Unitosmmap__2;
+
+typedef System::StaticArray<TMapLayer, 1> Unitosmmap__3;
+
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TOSMHelper : public System::TObject
 {
@@ -38,7 +63,6 @@ private:
 	bool HasData;
 	System::Sysutils::TFormatSettings OsmFormatSettings;
 	System::Classes::TStringList* Html;
-	System::UnicodeString FInitialZoom;
 	System::UnicodeString FPathName;
 	System::UnicodeString FHome;
 	System::Classes::TStringList* FTrackPoints;
@@ -47,7 +71,7 @@ private:
 	void __fastcall WriteFooter();
 	
 public:
-	__fastcall TOSMHelper(const System::UnicodeString APathName, const System::UnicodeString AHome, const System::UnicodeString AInitialZoom)/* overload */;
+	__fastcall TOSMHelper(const System::UnicodeString APathName, const System::UnicodeString AHome)/* overload */;
 	__fastcall TOSMHelper(const System::UnicodeString APathName, System::Classes::TStringList* ATrackPoints)/* overload */;
 	__fastcall virtual ~TOSMHelper();
 };
@@ -60,10 +84,15 @@ static _DELPHI_CONST System::Int8 Place_Decimals = System::Int8(0x4);
 #define OSMCtrlClick L"Ctrl Click"
 #define OSMGetBounds L"GetBounds"
 #define OSMGetRoutePoint L"GetRoutePoint"
-#define InitialZoom_Point L"15"
-#define InitialZoom L"12"
-extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml(System::UnicodeString Home, bool UseOl2Local = true)/* overload */;
-extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml()/* overload */;
+#define BaseLayer L"BaseLayer"
+extern DELPHI_PACKAGE TMapLayer OSMMapLayer;
+extern DELPHI_PACKAGE Unitosmmap__1 MapTilerLayers;
+extern DELPHI_PACKAGE Unitosmmap__2 XYZMapLayers;
+extern DELPHI_PACKAGE Unitosmmap__3 ESRIMapLayers;
+#define Reg_BaseLayer_Key L"BaseLayer"
+#define Reg_MapTilerApi_Key L"MapTilerApiKey"
+#define Reg_EnableESRI L"EnableESRI"
+extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml(System::UnicodeString Home = System::UnicodeString(), bool UseOl2Local = true)/* overload */;
 extern DELPHI_PACKAGE bool __fastcall CreateOSMMapHtml(System::UnicodeString HtmlName, System::Classes::TStringList* TrackPoints)/* overload */;
 extern DELPHI_PACKAGE System::UnicodeString __fastcall OSMColor(System::UnicodeString GPXColor);
 extern DELPHI_PACKAGE void __fastcall ParseJsonMessage(const System::UnicodeString Message, System::UnicodeString &Msg, System::UnicodeString &Parm1, System::UnicodeString &Parm2);

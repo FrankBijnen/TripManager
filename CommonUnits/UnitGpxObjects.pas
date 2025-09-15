@@ -1,6 +1,5 @@
 unit UnitGPXObjects;
 {$WARN SYMBOL_PLATFORM OFF}
-{.$DEFINE UniqueTrkPts}
 
 interface
 
@@ -869,18 +868,18 @@ end;
 procedure TGPXFile.AddTrackPoint(const RptNode: TXmlVsNode);
 var
   TrackPoint: TXmlVsNode;
-{$IFDEF UniqueTrkPts}
   CurCoords: TCoords;
   CurDist: Double;
-{$ENDIF}
 begin
-{$IFDEF UniqueTrkPts}
   CurCoords.FromAttributes(RptNode.AttributeList);
-  CurDist := CoordDistance(CurCoords, PrevTrackCoords, TDistanceUnit.duKm);
-  if (CurDist < 0.001) then
-    exit;
-  PrevTrackCoords := CurCoords;
-{$ENDIF}
+  if (ProcessOptions.MinDistTrackPoint > 0) then
+  begin
+    CurDist := CoordDistance(CurCoords, PrevTrackCoords, TDistanceUnit.duKm);
+    if (CurDist < (ProcessOptions.MinDistTrackPoint / 1000)) then
+      exit
+    else
+      PrevTrackCoords := CurCoords;
+  end;
 
   TrackPoint := CurrentTrack.AddChild('trkpt');
   CloneAttributes(RptNode, TrackPoint);

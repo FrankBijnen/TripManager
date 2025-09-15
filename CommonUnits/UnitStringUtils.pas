@@ -45,6 +45,7 @@ function GetRoutesTmp: string;
 function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
+function UserAgent: string;
 
 var
   CreatedTempPath: string;
@@ -399,54 +400,72 @@ begin
   end;
 end;
 
+function QueryItem(Buf: PByte; Item: string): PChar;
+var
+  Len: DWORD;
+begin
+  if not VerQueryValue(Buf, PChar('stringFileInfo\040904E4\' + Item), Pointer(result), Len) then
+     result := '';
+end;
+
 function VerInfo(IncludeCompany: boolean = false): string;
 var
   S: string;
-  Buf, Value: PChar;
-  N, Len: DWORD;
-
-  function QueryItem(Item: string): string;
-  begin
-    if VerQueryValue(Buf, PChar('stringFileInfo\040904E4\' + Item), Pointer(Value), Len) then
-       result := value
-    else
-       result:= '';
-  end;
-
+  Buf: PByte;
+  Len: DWORD;
 begin
   S := Application.ExeName;
-  N := GetFileVersionInfoSize(PChar(S), N);
-  if (N > 0) then
+  Len := GetFileVersionInfoSize(PChar(S), Len);
+  if (Len > 0) then
   begin
-    Buf := AllocMem(N);
+    Buf := AllocMem(Len);
     try
-      GetFileVersionInfo(PChar(S), 0, N, Buf);
+      GetFileVersionInfo(PChar(S), 0, Len, Buf);
       S := 'ProductName';
-      result := QueryItem(S);
+      result := QueryItem(Buf, S);
 {$IFDEF WIN64}
       result := S + ': ' + #9 + result + ' (Win64)' + #10;
 {$ELSE}
       result := S + ': ' + #9 + result + ' (Win32)' + #10;
 {$ENDIF}
       S := 'FileDescription';
-      result := result + S + ': ' + #9 + QueryItem(S) + #10;
+      result := result + S + ': ' + #9 + QueryItem(Buf, S) + #10;
       S := 'FileVersion';
-      result := result + S + ': ' + #9 + QueryItem(S) +#10;
+      result := result + S + ': ' + #9 + QueryItem(Buf, S) + #10;
       S := 'CompilerVersion';
       result := result + S + ': ' + #9 + FormatFloat('#0.0', CompilerVersion, FormatSettings) +#10;
       S := 'LegalCopyRight';
-      result := result + S + ': ' + #9 + QueryItem(S) +#10;
+      result := result + S + ': ' + #9 + QueryItem(Buf, S) +#10;
       if (IncludeCompany) then
       begin
         S := 'CompanyName';
-        result := result + S + ': ' + #9 + QueryItem(S) + #10;
+        result := result + S + ': ' + #9 + QueryItem(Buf, S) + #10;
       end;
     finally
-      FreeMem(Buf, N);
+      FreeMem(Buf, Len);
     end;
   end
   else
     result := 'No FileVersionInfo found';
+end;
+
+function UserAgent: string;
+var
+  Buf: PByte;
+  Len: DWORD;
+begin
+  result := '';
+  Len := GetFileVersionInfoSize(PChar(Application.ExeName), Len);
+  if (Len > 0) then
+  begin
+    Buf := AllocMem(Len);
+    try
+      GetFileVersionInfo(PChar(Application.ExeName), 0, Len, Buf);
+      result := QueryItem(Buf, 'ProductName') + '/' + QueryItem(Buf, 'ProductVersion') + ' (https://github.com/)';
+    finally
+      FreeMem(Buf, Len);
+    end;
+  end
 end;
 
 initialization

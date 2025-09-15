@@ -8,7 +8,8 @@ uses
 const
   Reg_GPISymbolSize           = 'GPISymbolsSize';
   Reg_GPIProximity            = 'GPIProximity';
-  Reg_TrackColor              = 'TrackColor';     // User preferred track color
+  Reg_TrackColor              = 'TrackColor';         // User preferred track color
+  Reg_MinDistTrackPoints_Key  = 'MinDistTrackPoints'; // Use to filter trackpoints
 
   // XT1 and XT2
   Reg_ZumoModel               = 'ZumoModel';
@@ -127,6 +128,7 @@ begin
     ProcessShape := false;
 
     TrackColor := GetRegistry(Reg_TrackColor, '');
+    MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
 
     // XT1 and XT2 Defaults
     ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), StringReplace(GetRegistry(Reg_ZumoModel, ''), ' ', '', [rfReplaceAll])));

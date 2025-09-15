@@ -1386,9 +1386,17 @@ begin
 end;
 
 procedure TFrmTripManager.EdgeBrowser1CreateWebViewCompleted(Sender: TCustomEdgeBrowser; AResult: HRESULT);
+var
+  Settings: ICoreWebView2Settings;
 begin
   if (AResult <> S_OK) then
+  begin
     ShowMessage('Could not load OSM Map');
+    exit;
+  end;
+
+  if Succeeded(EdgeBrowser1.DefaultInterface.Get_Settings(Settings)) then
+    ICoreWebView2Settings2(Settings).Set_UserAgent(PWideChar(UserAgent));
 end;
 
 procedure TFrmTripManager.EdgeBrowser1NavigationStarting(Sender: TCustomEdgeBrowser; Args: TNavigationStartingEventArgs);

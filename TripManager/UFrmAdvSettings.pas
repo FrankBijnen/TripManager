@@ -136,6 +136,10 @@ begin
     AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
     AddGridLine(GridGeneralSettings, CurRow, '');
 
+    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Tracks-');
+    AddGridLine(GridGeneralSettings, CurRow, Reg_MinDistTrackPoints_Key,  '0', 'Minimum distance between track points (meters)');
+    AddGridLine(GridGeneralSettings, CurRow, '');
+
     AddGridLine(GridGeneralSettings, CurRow, '', '', '-Compare-');
     AddGridLine(GridGeneralSettings, CurRow, Reg_CompareDistOK_Key,  IntToStr(Reg_CompareDistOK_Val), 'Compare distance OK (meters)');
     AddGridLine(GridGeneralSettings, CurRow, '');

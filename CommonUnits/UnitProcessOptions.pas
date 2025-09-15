@@ -88,6 +88,7 @@ type
                                               // Used in: CreateOSM(Points), CreateKml, CreatePoly. Exposed public
 
     ProcessTracks: boolean;                   // True, Retain tracks, Create tracks from ghost points in routes.
+      MinDistTrackPoint: integer;             // 0, Minimum distance between trackpoint. Use as a filter.
 
     ProcessWayPtsFromRoute: boolean;          // True, Allow adding routepoints to FWayPointFromRouteList for creating WayPoints
                                               // Used in: CreateWayPoints, CreatePOI
@@ -194,6 +195,7 @@ begin
   ProcessCreateRoutePoints := true;
 
   ProcessTracks := true;
+  MinDistTrackPoint := 0;
 
   ProcessWayPtsFromRoute := true; // Create points for GPI and route Points from route
   ProcessWayPtsInWayPts := true;

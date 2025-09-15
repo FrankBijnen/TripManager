@@ -40,6 +40,8 @@ public:
 	__int64 SortValue;
 	System::UnicodeString ObjectId;
 	System::TDateTime Created;
+	bool IsNotSavedTrip;
+	int CalculatedModel;
 	__fastcall TBASE_Data(const bool AIsFolder, const __int64 ASortValue, const System::UnicodeString AObjectId, const System::TDateTime ACreated);
 	void __fastcall UpdateListItem(Vcl::Comctrls::TListItem* const AListItem, const System::UnicodeString *ASubItems, const System::NativeInt ASubItems_High);
 	Vcl::Comctrls::TListItem* __fastcall CreateListItem(Vcl::Comctrls::TListItems* const Alist, const System::UnicodeString ACaption, const System::UnicodeString *ASubItems, const System::NativeInt ASubItems_High);
