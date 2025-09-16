@@ -3994,9 +3994,12 @@ begin
     LstFiles.Columns.Add.Caption := 'TripName';
 
   EdgeBrowser1.UserDataFolder := CreatedTempPath;
-  if (CreateOSMMapHtml(GetRegistry(Reg_SavedMapPosition_Key, Reg_DefaultCoordinates))) then
-    EdgeBrowser1.Navigate(GetHtmlTmp);
-
+  if not Assigned(ATripList) then
+  begin
+    DeleteTempFiles(GetOSMTemp, GetTracksMask);
+    if (CreateOSMMapHtml(GetRegistry(Reg_SavedMapPosition_Key, Reg_DefaultCoordinates))) then
+      EdgeBrowser1.Navigate(GetHtmlTmp);
+  end;
 end;
 
 // Drag and Drop methods
