@@ -54,6 +54,7 @@ type
     Funcs: TGPXFuncArray;
     SendToDest: TSendToDest;
     HasCurrentDevice: boolean;
+    TripsEnabled: boolean;
   end;
 
 var
@@ -67,7 +68,7 @@ uses
 {$R *.dfm}
 
 const
-  SelectionHelp: array[IdTrip..IdHtml] of string = (
+  SelectionHelp: array[IdTrip..IdFit] of string = (
     'Send .trip files. Immediately available in Trip planner. No import required, but will recalculate.',
     'Send tracks created from selected GPX file. Convert to trip, or show on map, on the device.',
     'Send complete unmodified GPX file. No recalculation forced.',
@@ -81,10 +82,13 @@ const
     'Sent .gpi file will contain Via points from selected GPX file.',
     'Sent .gpi file will contain Shaping points from selected GPX file.',
     'Send a KML file. To display in Google Earth, or other compatible application.',
-    'Send a HTML file. To display in a browser.');
+    'Send a HTML file. To display in a browser.',
+    'Send a Fit file. For Edge models');
 
 procedure TFrmSendTo.EnableItems;
 begin
+  TvSelections.Items[IdTrip].Enabled := TripsEnabled;
+
   case PCTDestination.ActivePageIndex of
     0:begin
         TvSelections.Items[IdCompleteRoute].Enabled := true;
@@ -205,6 +209,12 @@ begin
   GrpSelDestHeight := GrpSelDestination.Height;
   // Design Height
   FrmHeight := Height;
+
+  // Add room for Fit files
+  if (GetRegistry(Reg_EnableFitFuncs, false)) then
+    with TvSelections do
+      FrmHeight := FrmHeight + Items.Add(Items[Items.Count -1], 'Course files (.fit)').DisplayRect(false).Height;
+
   ShowHelp := false;
 end;
 

@@ -43,10 +43,16 @@ Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";  
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 Source: "..\Win32\TripManager.exe";       DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
+Source: "..\Win32\Trk2Fit.exe";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
+Source: "..\Win32\Fit2Gpx.exe";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 Source: "..\Win32\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
+Source: "..\Win32\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 
 Source: "..\Win64\TripManager.exe";       DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
+Source: "..\Win64\Trk2Fit.exe";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
+Source: "..\Win64\Fit2Gpx.exe";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
+Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 ; Images
 Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: recursesubdirs; Excludes: "*.png,*.jbf,*.db"
 

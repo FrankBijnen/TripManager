@@ -63,6 +63,7 @@ const
   Reg_PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
   Reg_PrefDevPoiFolder_Val    = 'Internal Storage\POI';
   Reg_EnableDirFuncs          = 'EnableDirFuncs';
+  Reg_EnableFitFuncs          = 'EnableFitFuncs';
   Reg_WarnModel_Key           = 'WarnModel';
   Reg_TripColor_Key           = 'TripColor';
   Reg_TripColor_Val           = 'Magenta';
@@ -94,7 +95,7 @@ const
     IdGpiShpPt    = 11;
   IdKml           = 12; // Only Windows
   IdHtml          = 13; // Only Windows
-
+  IdFit           = 14; // Test
 type
 
   TSetProcessOptions = class
@@ -237,7 +238,7 @@ begin
     SavedStateChanging := OnCheckStateChanging;
     OnCheckStateChanging := nil;
     try
-      Items[IdTrip].Checked := GetRegistry(Reg_FuncTrip, true);
+      Items[IdTrip].Checked := Items[IdTrip].Enabled and GetRegistry(Reg_FuncTrip, true);
 
       Items[IdTrack].Checked := GetRegistry(Reg_FuncTrack, true);
 
@@ -255,6 +256,9 @@ begin
 
       Items[IdKml].Checked := Items[IdKml].Enabled and GetRegistry(Reg_FuncKml, true);
       Items[IdHtml].Checked := Items[IdHtml].Enabled and GetRegistry(Reg_FuncHtml, true);
+
+      if (GetRegistry(Reg_EnableFitFuncs, false)) then
+        Items[IdFit].Checked := Items[IdFit].Enabled and GetRegistry(Reg_FuncFit, true);
     finally
       OnCheckStateChanging := SavedStateChanging;
       FullExpand;
@@ -272,9 +276,12 @@ begin
 
     SetLength(result, 0);
 
-    SetRegistry(Reg_FuncTrip, Items[IdTrip].Checked);
-    if (Items[IdTrip].Checked) then
-      result := result + [TGPXFunc.CreateTrips];
+    if (Items[IdTrip].Enabled) then
+    begin
+      SetRegistry(Reg_FuncTrip, Items[IdTrip].Checked);
+      if (Items[IdTrip].Checked) then
+        result := result + [TGPXFunc.CreateTrips];
+    end;
 
     SetRegistry(Reg_FuncTrack, Items[IdTrack].Checked);
     if (Items[IdTrack].Checked) then
@@ -331,6 +338,14 @@ begin
       SetRegistry(Reg_FuncHtml, Items[IdHtml].Checked);
       if (Items[IdHtml].Checked) then
         result := result + [TGPXFunc.CreateHTML];
+    end;
+
+    if (GetRegistry(Reg_EnableFitFuncs, false)) and
+       (Items[IdFit].Enabled) then
+    begin
+      SetRegistry(Reg_FuncFit, Items[IdFit].Checked);
+      if (Items[IdFit].Checked) then
+        result := result + [TGPXFunc.CreateFITPoints];
     end;
   end;
 end;

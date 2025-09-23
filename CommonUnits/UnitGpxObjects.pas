@@ -149,6 +149,9 @@ type
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);
+    procedure Track2FITTrackPoints(Track: TXmlVSNode;
+                                   var TrackId: integer;
+                                   TrackStringList: TStringList);
   public
     var FrmSelectGpx: TFrmSelectGPX;
     constructor Create(const GPXFile:string;
@@ -168,6 +171,7 @@ type
     procedure DoCreateHTML;
     procedure DoCreateOSMPoints;
     procedure DoCreatePOLY;
+    procedure DoCreateFITPoints;
     procedure DoCreateRoutes;
     procedure DoCreateTrips;
 {$IFDEF TRIPOBJECTS}
@@ -870,6 +874,7 @@ var
   TrackPoint: TXmlVsNode;
   CurCoords: TCoords;
   CurDist: Double;
+  SubNodeValue: string;
 begin
   CurCoords.FromAttributes(RptNode.AttributeList);
   if (ProcessOptions.MinDistTrackPoint > 0) then
@@ -883,6 +888,15 @@ begin
 
   TrackPoint := CurrentTrack.AddChild('trkpt');
   CloneAttributes(RptNode, TrackPoint);
+
+// For track
+  SubNodeValue := FindSubNodeValue(RptNode, 'ele');
+  if (SubNodeValue <> '') then
+    TrackPoint.AddChild('ele').NodeValue := SubNodeValue;
+  SubNodeValue := FindSubNodeValue(RptNode, 'time');
+  if (SubNodeValue <> '') then
+    TrackPoint.AddChild('time').NodeValue := SubNodeValue;
+
 end;
 
 procedure TGPXFile.ProcessRtePt(const RtePtNode: TXmlVsNode;
@@ -1903,6 +1917,73 @@ begin
   TrackStringList.Add(Format('     CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
 end;
 
+
+procedure TGPXFile.Track2FITTrackPoints(Track: TXmlVSNode;
+                                        var TrackId: integer;
+                                        TrackStringList: TStringList);
+var
+  TrackPoint: TXmlVSNode;
+  Coords: TCoords;
+  PrevCoords: TCoords;
+  UnixTime: cardinal;
+  WinDateTime: TDateTime;
+  GpxTime: string;
+  Ele: string;
+  CurrentDist: double;
+
+const
+  BikeSpeed = 694.5; // * 100 meter/sec
+
+  function CoordAsInt(CoordDec: double): integer;
+  begin
+    result := Round(SimpleRoundTo(CoordDec, -10) * 4294967296 / 360);
+  end;
+
+begin
+  UnixTime := 0;
+
+  TrackStringList.Add(Track.Name);
+  for TrackPoint in Track.ChildNodes do
+  begin
+    if (TrackPoint.Name = 'trkpt') then
+    begin
+      PrevCoords.FromAttributes(TrackPoint.AttributeList);
+
+      GpxTime := FindSubNodeValue(TrackPoint, 'time');
+      if (GpxTime <> '') and
+        TryISO8601ToDate(GpxTime, WinDateTime, false) then
+        UnixTime := TUnixDate.DateTimeAsCardinal(WinDateTime)
+      else
+        UnixTime := TUnixDate.DateTimeAsCardinal(Now);
+      break;
+    end;
+  end;
+  for TrackPoint in Track.ChildNodes do
+  begin
+    if (TrackPoint.Name <> 'trkpt') then
+      continue;
+
+    Coords.FromAttributes(TrackPoint.AttributeList);
+    CurrentDist := (CoordDistance(Coords, PrevCoords, TDistanceUnit.duKm) * 100000); // * 100m
+    PrevCoords := Coords;
+    if (CurrentDist = 0) then
+      continue;
+
+    // speed?
+    UnixTime := UnixTime + Round((CurrentDist / BikeSpeed));
+
+    Ele := FindSubNodeValue(TrackPoint, 'ele');
+    if (Ele = '') then
+      Ele := '0';
+    TrackStringList.Add(Format('%u,%u,%u,%1.0f,%s', [UnixTime,
+                                               CoordAsInt(Coords.Lat),
+                                               CoordAsInt(Coords.Lon),
+                                               CurrentDist,
+                                               Ele]));
+  end;
+  TrackStringList.Add(Chr(26)); // EOF for Stdin
+end;
+
 procedure TGPXFile.DoCreateHTML;
 var
   OutFile: string;
@@ -1974,6 +2055,27 @@ begin
     Writeln(F, 'END');
     Writeln(F, 'END');
     CloseFile(F);
+  end;
+end;
+
+procedure TGPXFile.DoCreateFITPoints;
+var
+  Track : TXmlVSNode;
+  TrackId: integer;
+  TrackPointList: TStringList;
+  ResOut, ResErr: string;
+  ResExit: DWord;
+begin
+  TrackPointList := TStringList.Create;
+  try
+    TrackId := 0;
+    for Track in FTrackList do
+    begin
+      Track2FITTrackPoints(Track, TrackId, TrackPointList);
+      Sto_RedirectedExecute('trk2fit.exe', FOutDir, ResOut, ResErr, ResExit, TrackPointList.Text);
+    end;
+  finally
+    TrackPointList.Free;
   end;
 end;
 
@@ -2313,7 +2415,8 @@ begin
         CreateHTML,
         CreatePOLY,
         CreateRoutes,
-        CreateTrips:
+        CreateTrips,
+        CreateFITPoints:
           begin
             if not Assigned(OutStringList) then
               ForceDirectories(GpxFileObj.FOutDir);
@@ -2352,6 +2455,12 @@ begin
             SubCaption := SubCaption + ', ';
           SubCaption := SubCaption + 'Map';
         end;
+        CreateFITPoints:
+        begin
+          if (SubCaption <> '') then
+            SubCaption := SubCaption + ', ';
+          SubCaption := SubCaption + 'Fit';
+        end;
       end;
     end;
     if (SubCaption <> '') then
@@ -2380,6 +2489,8 @@ begin
           GpxFileObj.DoCreateHTML;
         CreateOSMPoints:
           GpxFileObj.DoCreateOSMPoints;
+        CreateFITPoints:
+          GpxFileObj.DoCreateFITPoints;
         CreatePOLY:
           GpxFileObj.DoCreatePOLY;
         CreateTrips:

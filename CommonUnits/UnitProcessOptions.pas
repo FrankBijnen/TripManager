@@ -26,6 +26,7 @@ const
   Reg_FuncGpiShpPt            = 'FuncGpiShpPt';
   Reg_FuncKml                 = 'FuncKml';
   Reg_FuncHtml                = 'FuncHtml';
+  Reg_FuncFit                 = 'FuncFit';
 
 type
   TProcessOptions = class

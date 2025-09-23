@@ -34,6 +34,7 @@ const
 
   HtmlExtension           = 'html';
   KmlExtension            = 'kml';
+  FitExtension            = 'fit';
 
   CurrentTrip             = 'CurrentTrip';
   CurrentGPI              = 'CurrentGPI';
@@ -270,6 +271,7 @@ type
     procedure MnuPrevDiffClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure CheckandFixcurrentgpx1Click(Sender: TObject);
+    procedure BgDeviceItems0Click(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -468,6 +470,7 @@ begin
     CmbModel.ItemIndex := Ord(TZumoModel.XT2)
   else if (ContainsText(FriendlyName, XT_Name)) then
     CmbModel.ItemIndex := Ord(TZumoModel.XT);
+
   SetRegistry(Reg_CurrentDevice, FriendlyName);
   SetRegistry(Reg_ZumoModel, CmbModel.Text);
 end;
@@ -599,6 +602,12 @@ begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
     ListFiles;
   end;
+end;
+
+procedure TFrmTripManager.BgDeviceItems0Click(Sender: TObject);
+begin
+  if (CmbModel.ItemIndex = ORD(TZumoModel.Unknown)) then
+    abort;
 end;
 
 procedure TFrmTripManager.BtnApplyCoordsClick(Sender: TObject);
@@ -802,7 +811,7 @@ begin
   // Revert to default (startup) locations
   ReadDefaultFolders;
   FrmSendTo.HasCurrentDevice := CheckDevice(false);
-
+  FrmSendTo.TripsEnabled := (CmbModel.ItemIndex <> Ord(TZumoModel.Unknown));
   if (FrmSendTo.ShowModal <> ID_OK) then
     exit;
 
@@ -1648,7 +1657,10 @@ begin
     ShellTreeView1.Root := Reg_PrefFileSysFolder_Val;
   end;
 
-  BgDevice.ItemIndex := 0; // Default to trips
+  if (CmbModel.ItemIndex = Ord(TZumoModel.Unknown)) then
+    BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+  else
+    BgDevice.ItemIndex := 0; // Default to trips
   GetDeviceList;
   SelectDevice(PrefDevice);
   BgDeviceClick(BgDevice);
@@ -1797,6 +1809,9 @@ end;
 
 procedure TFrmTripManager.CmbModelChange(Sender: TObject);
 begin
+  if (CmbModel.ItemIndex = Ord(TZumoModel.Unknown)) and
+     (BgDevice.ItemIndex = 0) then
+     BgDevice.ItemIndex := 1;
   SetRegistry(Reg_ZumoModel, CmbModel.Text);
 end;
 
@@ -1911,7 +1926,8 @@ begin
             (ContainsText(Ext, TripExtension)) or
             (ContainsText(Ext, GPIExtension)) or
             (ContainsText(Ext, HtmlExtension)) or
-            (ContainsText(Ext, KmlExtension));
+            (ContainsText(Ext, KmlExtension)) or
+            (ContainsText(Ext, FitExtension));
 
 end;
 
