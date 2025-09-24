@@ -197,7 +197,8 @@ end;
 implementation
 
 uses
-  System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils,
+  System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils, System.UITypes,
+  Vcl.Dialogs,
   UnitStringUtils, UnitOSMMap,
 {$IFDEF REGISTRYKEYS}
   UnitRegistryKeys,
@@ -1542,7 +1543,7 @@ begin
   FrmSelectGPX.LoadTracks(ProcessOptions.TrackColor, TagsToShow, CheckMask);
   FrmSelectGPX.Caption := Caption;
   FrmSelectGPX.PnlTop.Caption := SubCaption;
-  result := ProcessOptions.HasConsole;
+  result := ProcessOptions.HasConsole or ProcessOptions.SkipTrackDialog;
   if not result then
     result := (FrmSelectGPX.ShowModal = ID_OK);
 
@@ -1697,58 +1698,62 @@ var
   ExtensionsNode: TXmlVSNode;
 begin
   OutFile := ChangeFileExt(FOutDir + FBaseFile, '.gpi');
-  S := TBufferedFileStream.Create(OutFile, fmCreate);
-  GPIFile := TGPI.Create(GPIVersion);
-  GPIFile.WriteHeader(S);
-  PoiGroup := GPIFile.CreatePOIGroup(TGPXString(ProcessOptions.CatGPX + FBaseFile));
+  try
+    S := TBufferedFileStream.Create(OutFile, fmCreate);
+    GPIFile := TGPI.Create(GPIVersion);
+    GPIFile.WriteHeader(S);
+    PoiGroup := GPIFile.CreatePOIGroup(TGPXString(ProcessOptions.CatGPX + FBaseFile));
 
-  if (ProcessOptions.ProcessWayPtsInGpi) then
-  begin
-    for WayPoint in FWayPointList do
+    if (ProcessOptions.ProcessWayPtsInGpi) then
     begin
-      if (WayPointNotProcessed(WayPoint)) then
-      begin
-        CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
-        BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-        PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
-      end;
-    end;
-  end;
-
-// Create Way points, from Via, or Shaping points in routes.
-// Create a file per route/track
-  if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
-     (ProcessOptions.ProcessWayPtsFromRoute) then
-  begin
-    for RouteWayPoints in FWayPointFromRouteList do
-    begin
-      CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
-
-      for WayPoint in RouteWayPoints.ChildNodes do
+      for WayPoint in FWayPointList do
       begin
         if (WayPointNotProcessed(WayPoint)) then
         begin
-          IsViaPt := false;
-          ExtensionsNode := WayPoint.find('extensions');
-          if (ExtensionsNode <> nil) then
-            IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
-
-          if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
-             ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
-          begin
-            BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-            PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
-          end;
+          CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
+          BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+          PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
         end;
       end;
-
     end;
+
+  // Create Way points, from Via, or Shaping points in routes.
+  // Create a file per route/track
+    if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
+       (ProcessOptions.ProcessWayPtsFromRoute) then
+    begin
+      for RouteWayPoints in FWayPointFromRouteList do
+      begin
+        CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
+
+        for WayPoint in RouteWayPoints.ChildNodes do
+        begin
+          if (WayPointNotProcessed(WayPoint)) then
+          begin
+            IsViaPt := false;
+            ExtensionsNode := WayPoint.find('extensions');
+            if (ExtensionsNode <> nil) then
+              IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+
+            if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
+               ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
+            begin
+              BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+              PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+            end;
+          end;
+        end;
+
+      end;
+    end;
+
+    POIGroup.Write(S);
+    GPIFile.WriteEnd(S);
+    S.Free;
+  except
+    on E:Exception do
+      MessageDlg(e.Message, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
   end;
-
-  POIGroup.Write(S);
-  GPIFile.WriteEnd(S);
-  S.Free;
-
 end;
 
 procedure TGPXFile.DoCreateKML;
@@ -1940,9 +1945,10 @@ const
   end;
 
 begin
+  TrackStringList.Clear;
   UnixTime := 0;
 
-  TrackStringList.Add(Track.Name);
+  TrackStringList.Add(EscapeFileName(Track.Name));
   for TrackPoint in Track.ChildNodes do
   begin
     if (TrackPoint.Name = 'trkpt') then
@@ -2073,6 +2079,8 @@ begin
     begin
       Track2FITTrackPoints(Track, TrackId, TrackPointList);
       Sto_RedirectedExecute('trk2fit.exe', FOutDir, ResOut, ResErr, ResExit, TrackPointList.Text);
+      if (ResExit <> 0) then
+        raise Exception.Create(Track.NodeValue + #10 + ResOut + #10 + ResErr);
     end;
   finally
     TrackPointList.Free;
@@ -2399,10 +2407,12 @@ var
   Func: TGPXFunc;
   GpxFileObj: TGPXFile;
   SubCaption: string;
+  CrWait, CrNormal: HCURSOR;
 begin
 
   GpxFileObj := TGPXFile.Create(GPXFile, ForceOutDir, FunctionPrefs, SavePrefs, OutStringList, SeqNo);
-
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
   try
 
     for Func in AllFuncs do
@@ -2425,6 +2435,7 @@ begin
       end;
     end;
 
+    SetCursor(CrWait);
     GpxFileObj.ProcessGPX;
 
     SubCaption := '';
@@ -2463,12 +2474,14 @@ begin
         end;
       end;
     end;
+
     if (SubCaption <> '') then
     begin
       if (not GpxFileObj.ShowSelectTracks(ExtractFileName(GPXFile),
                                           Format('Select Rte/Trk to add to %s', [SubCaption]),
                                           TTagsToShow.RteTrk, '*')) then
         exit;
+      SetCursor(CrWait);
     end;
 
     for Func in AllFuncs  do
@@ -2508,6 +2521,7 @@ begin
     end;
   finally
     GpxFileObj.Free;
+    SetCursor(CrNormal);
   end;
 end;
 

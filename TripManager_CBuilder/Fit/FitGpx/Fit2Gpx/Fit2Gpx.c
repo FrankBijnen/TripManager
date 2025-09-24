@@ -1,10 +1,13 @@
+// Based on the sample decode
+// This program reads a fit file, and writes a track gpx to stdout
+// Returns 0 on succes
+
 #define _CRT_SECURE_NO_WARNINGS
-#undef VERBOSE
+#undef VERBOSE // Print verbose. GPX will be invalid
 #include <time.h>
 #include "stdio.h"
 #include "string.h"
 #include <math.h>
-
 #include "fit_convert.h"
 
 int main(int argc, char* argv[])
@@ -14,9 +17,6 @@ int main(int argc, char* argv[])
    FIT_CONVERT_RETURN convert_return = FIT_CONVERT_CONTINUE;
    FIT_UINT32 buf_size;
    FIT_UINT32 mesg_index = 0;
-   #if defined(FIT_CONVERT_MULTI_THREAD)
-      FIT_CONVERT_STATE state;
-   #endif
 
    if (argc < 2)
    {
@@ -28,11 +28,7 @@ int main(int argc, char* argv[])
       printf("Testing file conversion using %s file...\n", argv[1]);
    #endif
 
-   #if defined(FIT_CONVERT_MULTI_THREAD)
-      FitConvert_Init(&state, FIT_TRUE);
-   #else
-      FitConvert_Init(FIT_TRUE);
-   #endif
+   FitConvert_Init(FIT_TRUE);
 
    if((file = fopen(argv[1], "rb")) == NULL)
    {
@@ -49,23 +45,14 @@ int main(int argc, char* argv[])
 
       do
       {
-         #if defined(FIT_CONVERT_MULTI_THREAD)
-            convert_return = FitConvert_Read(&state, buf, buf_size);
-         #else
-            convert_return = FitConvert_Read(buf, buf_size);
-         #endif
+         convert_return = FitConvert_Read(buf, buf_size);
 
          switch (convert_return)
          {
             case FIT_CONVERT_MESSAGE_AVAILABLE:
             {
-               #if defined(FIT_CONVERT_MULTI_THREAD)
-                  const FIT_UINT8 *mesg = FitConvert_GetMessageData(&state);
-                  FIT_UINT16 mesg_num = FitConvert_GetMessageNumber(&state);
-               #else
-                  const FIT_UINT8 *mesg = FitConvert_GetMessageData();
-                  FIT_UINT16 mesg_num = FitConvert_GetMessageNumber();
-               #endif
+               const FIT_UINT8 *mesg = FitConvert_GetMessageData();
+               FIT_UINT16 mesg_num = FitConvert_GetMessageNumber();
                #if defined(VERBOSE)
                   printf("Mesg %d (%d) - ", mesg_index++, mesg_num);
                #endif
@@ -112,11 +99,7 @@ int main(int argc, char* argv[])
                          {
                             FIT_ACTIVITY_MESG old_mesg;
                             old_mesg.num_sessions = 1;
-                            #if defined(FIT_CONVERT_MULTI_THREAD)
-                               FitConvert_RestoreFields(&state, &old_mesg);
-                            #else
-                               FitConvert_RestoreFields(&old_mesg);
-                            #endif
+                            FitConvert_RestoreFields(&old_mesg);
                             printf("Restored num_sessions=1 - Activity: timestamp=%u, type=%u, event=%u, event_type=%u, num_sessions=%u\n", activity->timestamp, activity->type, activity->event, activity->event_type, activity->num_sessions);
                          }
                      #endif

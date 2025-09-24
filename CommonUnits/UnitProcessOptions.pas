@@ -30,6 +30,8 @@ const
 
 type
   TProcessOptions = class
+    SkipTrackDialog: boolean;                 // False, For showing fit files.
+
     HasConsole: boolean;                      // False, CmdLine process
     LookUpWindow: HWND;                       // 0, Window handle
                                               // Used to send progress messages when looking up addresses
@@ -228,6 +230,7 @@ begin
   CatRoute := 'Route:';
 
   HasConsole := false;
+  SkipTrackDialog := false;
   LookUpWindow := 0;
   LookUpMessage := 0;
 

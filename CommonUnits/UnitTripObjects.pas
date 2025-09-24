@@ -851,6 +851,7 @@ type
     procedure SaveToFile(AFile: string);
     function LoadFromStream(AStream: TBufferedFileStream): boolean;
     function LoadFromFile(AFile: string): boolean;
+    procedure Recalculate;
     function GetValue(AKey: ShortString): string;
     function GetItem(AKey: ShortString): TBaseItem;
     procedure SetItem(AKey: ShortString; ABaseItem: TBaseItem);
@@ -891,7 +892,7 @@ type
 implementation
 
 uses
-  System.Math, System.DateUtils, System.StrUtils, System.TypInfo,
+  System.Math, System.DateUtils, System.StrUtils, System.TypInfo, System.UITypes,
   Vcl.Dialogs,
   UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions, UnitGpxDefs;
 
@@ -3248,7 +3249,7 @@ begin
   // Be sure to recalculate all items.
   ResetCalculation;
 
-  FSubLength := 6; //We need to add 6, but can figure out why.
+  FSubLength := 6; //We need to add 6, but can't figure out why.
   for ANItem in ItemList do
   begin
     if (ANItem is TBaseItem) then
@@ -3262,6 +3263,18 @@ begin
   Writeln('Total: ', FSubLength);
   Readln;
 {$ENDIF}
+end;
+
+procedure TTripList.Recalculate;
+var
+  AStream: TMemoryStream;
+begin
+  AStream := TMemoryStream.Create;
+  try
+    Calculate(AStream);
+  finally
+    AStream.Free;
+  end;
 end;
 
 procedure TTripList.UpdLocsFromRoutePrefs;
@@ -3319,8 +3332,12 @@ var
 begin
   AStream := TMemoryStream.Create;
   try
-    SaveToStream(AStream);
-    AStream.SaveToFile(AFile);
+    try
+      SaveToStream(AStream);
+      AStream.SaveToFile(AFile);
+    except on E:exception do
+      MessageDlg(e.Message, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
+    end;
   finally
     AStream.Free;
   end;
@@ -3365,6 +3382,7 @@ begin
 
   end;
   UpdLocsFromRoutePrefs;
+  Recalculate;
   result := true;
 end;
 
@@ -3372,7 +3390,7 @@ function TTripList.LoadFromFile(AFile: string): boolean;
 var
   AStream: TBufferedFileStream;
 begin
-  AStream := TBufferedFileStream.Create(AFile, fmOpenRead);
+  AStream := TBufferedFileStream.Create(AFile, fmOpenRead or fmShareDenyNone);
   try
     result := LoadFromStream(AStream);
     if not result then

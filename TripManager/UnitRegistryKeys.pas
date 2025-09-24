@@ -104,6 +104,7 @@ type
     procedure SetPostProcessPrefs(Sender: TObject);
     procedure SetSendToPrefs(Sender: TObject);
     procedure SetCmdLinePrefs(Sender: TObject);
+    procedure SetSkipTrackDlgPrefs(Sender: TObject);
     procedure SavePrefs(Sender: TObject);
     class procedure SetPrefs(TvSelections: TObject);
     class function StorePrefs(TvSelections: TObject): TGPXFuncArray;
@@ -220,6 +221,12 @@ begin
 
   with Sender as TProcessOptions do
     HasConsole := true;
+end;
+
+procedure TSetProcessOptions.SetSkipTrackDlgPrefs(Sender: TObject);
+begin
+  with Sender as TProcessOptions do
+    SkipTrackDialog := true;
 end;
 
 procedure TSetProcessOptions.SavePrefs(Sender: TObject);
