@@ -9,6 +9,9 @@
         <Projects Include="Fit2Gpx\Fit2Gpx.cbproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="FitInfo\FitInfo.cbproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,25 +38,40 @@
     <Target Name="Fit2Gpx:Make">
         <MSBuild Projects="Fit2Gpx\Fit2Gpx.cbproj" Targets="Make"/>
     </Target>
+    <Target Name="FitInfo">
+        <MSBuild Projects="FitInfo\FitInfo.cbproj"/>
+    </Target>
+    <Target Name="FitInfo:Clean">
+        <MSBuild Projects="FitInfo\FitInfo.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FitInfo:Make">
+        <MSBuild Projects="FitInfo\FitInfo.cbproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Trk2Fit;Fit2Gpx"/>
+        <CallTarget Targets="Trk2Fit;Fit2Gpx;FitInfo"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Trk2Fit:Clean;Fit2Gpx:Clean"/>
+        <CallTarget Targets="Trk2Fit:Clean;Fit2Gpx:Clean;FitInfo:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Trk2Fit:Make;Fit2Gpx:Make"/>
+        <CallTarget Targets="Trk2Fit:Make;Fit2Gpx:Make;FitInfo:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
     <ItemGroup Condition="'$(BuildGroup)'=='Release'">
+        <BuildGroupProject Include="Trk2Fit\Trk2Fit.cbproj">
+            <ProjectGuid>{CD867F78-A1FA-4F98-8D78-154F9F1D6315}</ProjectGuid>
+            <Configurations>Release</Configurations>
+            <Platforms>Win32;Win64</Platforms>
+            <Enabled>True</Enabled>
+        </BuildGroupProject>
         <BuildGroupProject Include="Fit2Gpx\Fit2Gpx.cbproj">
             <ProjectGuid>{7B44A9CC-AAFA-4051-B6C1-CD4051267181}</ProjectGuid>
             <Configurations>Release</Configurations>
             <Platforms>Win32;Win64</Platforms>
             <Enabled>True</Enabled>
         </BuildGroupProject>
-        <BuildGroupProject Include="Trk2Fit\Trk2Fit.cbproj">
-            <ProjectGuid>{CD867F78-A1FA-4F98-8D78-154F9F1D6315}</ProjectGuid>
+        <BuildGroupProject Include="FitInfo\FitInfo.cbproj">
+            <ProjectGuid>{8587976E-09FF-4747-9B44-7BD93E4561F4}</ProjectGuid>
             <Configurations>Release</Configurations>
             <Platforms>Win32;Win64</Platforms>
             <Enabled>True</Enabled>

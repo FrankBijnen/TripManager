@@ -24,7 +24,7 @@ const
   Tread2_TmScPosnSize               = 16;
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
-  TZumoModel        = (XT, XT2, Tread2, Unknown);
+  TZumoModel        = (XT, XT2, Tread2, Zumo, Edge, Unknown);
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmDirect           = $04,
@@ -738,9 +738,9 @@ type
     procedure SwapCardinals;
   end;
 
-const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
-      CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
-      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $c0, $90);
+const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288, 1288, 1288);      // Default unknown to XT size
+      CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000, $00000000, $00000000);
+      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $c0, $90, $90, $90);
       Unknown3DistOffset = $14;
       Unknown3TimeOffset = $18;
 

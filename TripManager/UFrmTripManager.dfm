@@ -167,6 +167,8 @@ object FrmTripManager: TFrmTripManager
             'XT'
             'XT2'
             'Tread 2'
+            'Zumo'
+            'Edge'
             'Unknown')
         end
       end

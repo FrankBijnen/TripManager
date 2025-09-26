@@ -364,7 +364,7 @@ function ConnectToDevice(SDev: WideString; var PortableDev: IMTPDevice; Readonly
 implementation
 
 uses
-  System.Math, System.DateUtils, UnitStringUtils;
+  System.Math, System.DateUtils, System.Masks, UnitStringUtils;
 
 // For documentation purposes only
 function DisplayFunctionalCategory(Cat_Id: WideString): String;
@@ -1140,7 +1140,7 @@ begin
             continue;
 
           ObJName := PropValToName(Prop_Val);
-          if SameText(FileId, ObjName) then
+          if MatchesMask(ObjName, FileId) then
           begin
             result := ObjId;
             exit;
@@ -1151,7 +1151,8 @@ begin
           Prop_Val.GetStringValue(Dev_Val, PersistentId);
           PersistentIdString := ReplaceAll(PersistentId, ['%3B%5C'], [':\']);
 
-          if (FileId = PersistentIdString) then
+//TODO Did check ever work?
+          if MatchesMask(PersistentIdString, FileId) then
           begin
             result := ObjId;
             exit;

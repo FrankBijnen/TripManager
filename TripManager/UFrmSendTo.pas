@@ -54,7 +54,6 @@ type
     Funcs: TGPXFuncArray;
     SendToDest: TSendToDest;
     HasCurrentDevice: boolean;
-    TripsEnabled: boolean;
   end;
 
 var
@@ -87,7 +86,16 @@ const
 
 procedure TFrmSendTo.EnableItems;
 begin
-  TvSelections.Items[IdTrip].Enabled := TripsEnabled;
+  TvSelections.Items[IdTrip].Enabled := GetRegistry(Reg_EnableTripFuncs, false);
+  TvSelections.Items[IdFit].Enabled := GetRegistry(Reg_EnableFitFuncs, false);
+  TvSelections.Items[IdWayPoint].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdWayPointWpt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdWayPointVia].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdWayPointShp].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpi].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpiWayPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpiViaPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpiShpPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
 
   case PCTDestination.ActivePageIndex of
     0:begin
@@ -122,10 +130,20 @@ begin
         SendToDest := TSendToDest.stDevice;
 
         LblDestinations.Caption :=
-          Format('Device:%s %s%s',      [#9, GetRegistry(Reg_CurrentDevice, ''), #10#10]) +
-          Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val), #10]) +
-          Format('.gpx files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevGpxFolder_Key, Reg_PrefDevGpxFolder_Val), #10]) +
-          Format('.gpi files:%s %s',    [#9, GetRegistry(Reg_PrefDevPoiFolder_Key, Reg_PrefDevPoiFolder_Val)]);
+          Format('Device:%s %s%s',      [#9, GetRegistry(Reg_CurrentDevice, ''), #10#10]);
+        if GetRegistry(Reg_EnableTripFuncs, false) then
+          LblDestinations.Caption := LblDestinations.Caption +
+            Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val), #10])
+        else if GetRegistry(Reg_EnableFitFuncs, false) then
+          LblDestinations.Caption := LblDestinations.Caption +
+            Format('.fit files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val), #10]);
+
+        LblDestinations.Caption := LblDestinations.Caption +
+          Format('.gpx files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevGpxFolder_Key, Reg_PrefDevGpxFolder_Val), #10]);
+
+        if (GetRegistry(Reg_EnableFitFuncs, false) = false) then
+          LblDestinations.Caption := LblDestinations.Caption +
+            Format('.gpi files:%s %s',    [#9, GetRegistry(Reg_PrefDevPoiFolder_Key, Reg_PrefDevPoiFolder_Val)]);
       end;
     1:begin
         SendToDest := TSendToDest.stWindows;
@@ -209,12 +227,7 @@ begin
   GrpSelDestHeight := GrpSelDestination.Height;
   // Design Height
   FrmHeight := Height;
-
-  // Add room for Fit files
-  if (GetRegistry(Reg_EnableFitFuncs, false)) then
-    with TvSelections do
-      FrmHeight := FrmHeight + Items.Add(Items[Items.Count -1], 'Course files (.fit)').DisplayRect(false).Height;
-
+  // Dont bother
   ShowHelp := false;
 end;
 

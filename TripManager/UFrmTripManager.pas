@@ -287,6 +287,7 @@ type
     HexEdit: TBCHexEditor;
     ATripList: TTripList;
     APOIList: TPOIList;
+    AFitInfo: TStringList;
 
     WarnRecalc: integer; // MrNone, MrYes, MrNo, mrIgnore
     WarnModel: boolean;
@@ -330,6 +331,12 @@ type
 
     procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
+    function CopyDeviceFile(const APath, AFile: string): boolean;
+
+    function ModelFromDescription(const ModelDescription: string): TZumoModel;
+    function ModelFromGarminDevice(const ModelDescription: string): TZumoModel;
+
+    function ReadGarminDevice(var ModelDescription: string): TZumoModel;
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
     procedure SelectDevice(const Indx: integer); overload;
@@ -466,17 +473,137 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.GuessModel(const FriendlyName: string);
+function TFrmTripManager.CopyDeviceFile(const APath, AFile: string): boolean;
+var
+  CurrentObjectId, FolderId: widestring;
+  FriendlyPath: string;
 begin
-  CmbModel.ItemIndex := Ord(TZumoModel.Unknown);
-  if (ContainsText(FriendlyName, Tread2_Name)) then
-    CmbModel.ItemIndex := Ord(TZumoModel.Tread2)
-  else if (ContainsText(FriendlyName, XT2_Name)) then
-    CmbModel.ItemIndex := Ord(TZumoModel.XT2)
-  else if (ContainsText(FriendlyName, XT_Name)) then
-    CmbModel.ItemIndex := Ord(TZumoModel.XT);
+  result := false;
+  if not CheckDevice(false) then
+    exit;
 
-  SetRegistry(Reg_CurrentDevice, FriendlyName);
+  FolderId := GetIdForPath(CurrentDevice.PortableDev, APath, FriendlyPath);
+  if (FolderId = '') then
+    exit;
+
+  // Get Id of File
+  CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, FolderId, AFile);
+  if (CurrentObjectId = '') then
+    exit;
+
+  ForceDirectories(GetDeviceTmp);
+  if not GetFileFromDevice(CurrentDevice.PortableDev, CurrentObjectId, GetDeviceTmp, AFile) then
+    exit;
+
+  result := true;
+end;
+
+function TFrmTripManager.ModelFromDescription(const ModelDescription: string): TZumoModel;
+begin
+  if (ContainsText(ModelDescription, Tread2_Name)) then
+    result := TZumoModel.Tread2
+  else if (ContainsText(ModelDescription, XT2_Name)) then
+    result := TZumoModel.XT2
+  else if (ContainsText(ModelDescription, XT_Name)) then
+    result := TZumoModel.XT
+  else if (ContainsText(ModelDescription, 'Edge')) then
+    result := TZumoModel.Edge
+  else if (ContainsText(ModelDescription, 'Garmin')) then
+    result := TZumoModel.Zumo
+  else
+    result := TZumoModel.Unknown;
+end;
+
+function TFrmTripManager.ModelFromGarminDevice(const ModelDescription: string): TZumoModel;
+begin
+  if (ContainsText(ModelDescription, 'Edge')) then
+    result := TZumoModel.Edge
+  else
+    result := TZumoModel.Zumo;
+end;
+
+function TFrmTripManager.ReadGarminDevice(var ModelDescription: string): TZumoModel;
+var
+  DevicePath, DBPath: string;
+  NFile: string;
+  XmlDoc: TXmlVSDocument;
+  DeviceNode, ModelNode: TXmlVSNode;
+begin
+  result := ModelFromDescription(ModelDescription);
+
+// Need a device to check better
+  if not CheckDevice(false) then
+    exit;
+
+// Location of GarminDevice.Xml and SQLite
+  DevicePath := '?:\Garmin';
+  DBPath := '';
+  case result of
+    TZumoModel.XT,
+    TZumoModel.XT2,
+    TZumoModel.Tread2:
+    begin
+      DevicePath := 'Internal Storage\Garmin';
+      DBPath := 'Internal Storage\.System\SQLite';
+    end
+  end;
+
+// Copy DB files
+  if (DBPath <> '') then
+  begin
+    if (CopyDeviceFile(DBPath, 'settings.db')) then
+       (CopyDeviceFile(DBPath, 'vehicle_profile.db'));
+  end;
+
+// Copy and read GarminDevice.xml
+  NFile := 'GarminDevice.xml';
+  if (CopyDeviceFile(DevicePath, NFile)) then
+  begin
+    XmlDoc := TXmlVSDocument.Create;
+    try
+      XmlDoc.LoadFromFile(GetDeviceTmp + NFile);
+      DeviceNode := XmlDoc.ChildNodes.Find('Device');
+      if (DeviceNode = nil) then
+        exit;
+      ModelNode := DeviceNode.Find('Model');
+      if (ModelNode = nil) then
+        exit;
+
+      // Update model from GarminDevice.xml
+      ModelDescription := FindSubNodeValue(ModelNode, 'Description');
+      result := ModelFromDescription(ModelDescription);
+      if (result = TZumoModel.Unknown) then
+        result := ModelFromGarminDevice(ModelDescription);
+    finally
+      XmlDoc.Free;
+    end;
+  end;
+end;
+
+procedure TFrmTripManager.GuessModel(const FriendlyName: string);
+var
+  ModelDisplayed: string;
+  ModelIndex: integer;
+begin
+  ModelDisplayed := FriendlyName;
+  ModelIndex := Ord(ReadGarminDevice(ModelDisplayed));
+
+  // Change description for 'old' Garmin units and Edge
+  case TZumoModel(ModelIndex) of
+    TZumoModel.Zumo,
+    TZumoModel.Edge:
+      if (ModelDisplayed <> CmbModel.Items[ModelIndex]) then
+        CmbModel.Items[ModelIndex] := ModelDisplayed;
+  end;
+
+  // Model changed?
+  if (ModelIndex <> CmbModel.ItemIndex) then
+  begin
+    CmbModel.ItemIndex := ModelIndex;
+    CmbModelChange(CmbModel);
+  end;
+
+  SetRegistry(Reg_CurrentDevice, ModelDisplayed);
   SetRegistry(Reg_ZumoModel, CmbModel.Text);
 end;
 
@@ -611,8 +738,8 @@ end;
 
 procedure TFrmTripManager.BgDeviceItems0Click(Sender: TObject);
 begin
-  if (CmbModel.ItemIndex = ORD(TZumoModel.Unknown)) then
-    abort;
+  if (CmbModel.ItemIndex in [Ord(TZumoModel.Zumo), Ord(TZumoModel.Unknown)]) then
+    Abort;
 end;
 
 procedure TFrmTripManager.BtnApplyCoordsClick(Sender: TObject);
@@ -816,7 +943,6 @@ begin
   // Revert to default (startup) locations
   ReadDefaultFolders;
   FrmSendTo.HasCurrentDevice := CheckDevice(false);
-  FrmSendTo.TripsEnabled := (CmbModel.ItemIndex <> Ord(TZumoModel.Unknown));
   if (FrmSendTo.ShowModal <> ID_OK) then
     exit;
 
@@ -863,7 +989,8 @@ begin
             while (Rc = 0) do
             begin
               TempFile := Fs.Name;
-              if (ContainsText(ExtractFileExt(Fs.Name), TripExtension)) then
+              if (ContainsText(ExtractFileExt(Fs.Name), TripExtension)) or
+                 (ContainsText(ExtractFileExt(Fs.Name), FitExtension)) then
                 SetCurrentPath(DeviceFolder[0])
               else if (ContainsText(ExtractFileExt(Fs.Name), GpxExtension)) then
                 SetCurrentPath(DeviceFolder[1])
@@ -1251,15 +1378,21 @@ begin
 end;
 
 procedure TFrmTripManager.BtnSetDeviceDefaultClick(Sender: TObject);
+var
+  CurrentDevicePath: string;
 begin
   CheckDevice;
+  // Make Drive letter a ?. Allow wildcard.
+  CurrentDevicePath := GetDevicePath(FCurrentPath);
+  if (Copy(CurrentDevicePath, 2, 2) = ':\') then
+    CurrentDevicePath[1] := '?';
 
   // Save Device settings
   SetRegistry(Reg_PrefDev_Key, CurrentDevice.FriendlyName);
   case (BgDevice.ItemIndex) of
-    0: SetRegistry(Reg_PrefDevTripsFolder_Key, GetDevicePath(FCurrentPath));
-    1: SetRegistry(Reg_PrefDevGpxFolder_Key, GetDevicePath(FCurrentPath));
-    2: SetRegistry(Reg_PrefDevPoiFolder_Key, GetDevicePath(FCurrentPath));
+    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath);
+    1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath);
+    2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath);
   end;
 
   PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
@@ -1652,6 +1785,7 @@ begin
 
   ATripList := TTripList.Create;
   APOIList := TPOIList.Create;
+  AFitInfo := TStringList.Create;
 
   try
     AFilePath := GetRegistry(Reg_PrefFileSysFolder_Key);
@@ -1662,10 +1796,6 @@ begin
     ShellTreeView1.Root := Reg_PrefFileSysFolder_Val;
   end;
 
-  if (CmbModel.ItemIndex = Ord(TZumoModel.Unknown)) then
-    BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
-  else
-    BgDevice.ItemIndex := 0; // Default to trips
   GetDeviceList;
   SelectDevice(PrefDevice);
   BgDeviceClick(BgDevice);
@@ -1682,6 +1812,7 @@ begin
   ClearTripInfo;
   ATripList.Free;
   APOIList.Free;
+  AFitInfo.Free;
   FreeDevices;
 end;
 
@@ -1814,9 +1945,32 @@ end;
 
 procedure TFrmTripManager.CmbModelChange(Sender: TObject);
 begin
-  if (CmbModel.ItemIndex = Ord(TZumoModel.Unknown)) and
-     (BgDevice.ItemIndex = 0) then
-     BgDevice.ItemIndex := 1;
+  BgDevice.ItemIndex := 0; // Default to trips
+  BgDevice.Items[0].Caption := 'Trips';
+  BgDevice.Items[1].Caption := 'Gpx';
+  BgDevice.Items[2].Caption := 'Poi (Gpi)';
+
+  case TZumoModel(CmbModel.ItemIndex) of
+    TZumoModel.Zumo:
+    begin
+      BgDevice.Items[0].Caption := 'Unused';
+      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+    end;
+    TZumoModel.Edge:
+    begin
+      BgDevice.Items[0].Caption := 'Courses';
+      BgDevice.Items[1].Caption := 'NewFiles';
+      BgDevice.Items[2].Caption := 'Activities';
+    end;
+    TZumoModel.Unknown:
+    begin
+      BgDevice.Items[0].Caption := 'Unused';
+      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+    end;
+  end;
+
+  SetRegistry(Reg_EnableTripFuncs, (TZumoModel(CmbModel.ItemIndex) in [TZumoModel.XT, TZumoModel.XT2, TZumoModel.Tread2]));
+  SetRegistry(Reg_EnableFitFuncs, (TZumoModel(CmbModel.ItemIndex) in [TZumoModel.Edge]));
   SetRegistry(Reg_ZumoModel, CmbModel.Text);
 end;
 
@@ -2330,11 +2484,14 @@ begin
     exit;
 
   if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) or
-     (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
+     (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) or
+     (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
   begin
     CopyFileToTmp(LstFiles.Selected);
     if (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
       LoadGpiFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
+    else if (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
+      LoadFitFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
     else
       LoadTripFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true);
   end;
@@ -2865,6 +3022,17 @@ var
     end;
   end;
 
+  procedure AddStringList(AStringList: TStringList);
+  var
+    ALine: string;
+  begin
+    VlTripInfo.Strings.AddPair('*** Begin FIT', DupeString('-', DupeCount));
+    for ALine in AStringList do
+    begin
+      VlTripInfo.Strings.Add(ALine)
+    end;
+  end;
+
 begin
   VlTripInfo.Strings.BeginUpdate;
   ClearTripInfo;
@@ -2904,7 +3072,11 @@ begin
     else if (TObject(Node.Data) is TPOIList) then
       AddPOIList(TPOIList(Node.Data))
     else if (TObject(Node.Data) is TGPXWayPoint) then
-      AddGPXWayPoint(TGPXWayPoint(Node.Data), true);
+      AddGPXWayPoint(TGPXWayPoint(Node.Data), true)
+// Fit Info
+//TODO Create own Object
+    else if (TObject(Node.Data) is TStringList) then
+      AddStringList(TStringList(Node.Data));
 
 // Prepare TripInfo
     for Index := 0 to VlTripInfo.Strings.Count -1 do
@@ -3748,27 +3920,18 @@ begin
 
   TsTripGpiInfo.Caption := 'Trip info';
 
-//  AStream := TBufferedFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
   ATripList.Clear;
+  if (Assigned(APOIList)) then
+    APOIList.Clear;
+  if (Assigned(AFitInfo)) then
+    AFitInfo.Clear;
 
   TvTrip.Items.BeginUpdate;
-
   VlTripInfo.Strings.BeginUpdate;
   ClearTripInfo;
 
   try
     if not ATripList.LoadFromFile(FileName) then
-//    if not ATripList.LoadFromStream(AStream) then
-//      raise Exception.Create('Not a valid trip file');
-//    ATripList.Recalculate;
-//    //Save, and discard, to stream to get the sizes
-//    MemStream := TMemoryStream.Create;
-//    try
-//      ATripList.SaveToStream(MemStream);
-//    finally
-//      MemStream.Free;
-//    end;
-//
     DeviceFile := FromDevice;
     HexEditFile := FileName;
 
@@ -3820,8 +3983,6 @@ begin
     RootNode.Selected := true;
     RootNode.Expand(false);
   finally
-//    AStream.Free;
-
     VlTripInfo.Strings.EndUpdate;
     TvTrip.Items.EndUpdate;
 
@@ -3839,10 +4000,11 @@ var
   AGPXWayPoint: TGPXWayPoint;
   RootNode: TTreeNode;
   GPIRec: TGPI;
-
 begin
   if (Assigned(ATripList)) then
     ATripList.Clear;
+  if (Assigned(AFitInfo)) then
+    AFitInfo.Clear;
 
   TsTripGpiInfo.Caption := 'POI(gpi) info';
   AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
@@ -3892,11 +4054,13 @@ procedure TFrmTripManager.LoadFitFile(const FileName: string; const FromDevice: 
 var
   RootNode: TTreeNode;
   ActGpxFile: string;
-  FormattedGpx, OError: string;
+  FitInfo, FormattedGpx, OError: string;
   Rc: DWORD;
 begin
   if (Assigned(ATripList)) then
     ATripList.Clear;
+  if (Assigned(APOIList)) then
+    APOIList.Clear;
 
   TsTripGpiInfo.Caption := 'Course(fit) info';
 
@@ -3910,6 +4074,12 @@ begin
   MnuTripEdit.Enabled := false;
 
   try
+    Sto_RedirectedExecute(Format('FitInfo.exe "%s"', [FileName]),
+                          GetRoutesTmp, FitInfo, OError, Rc);
+    if (Rc <> 0) then
+      raise Exception.Create(FitInfo + #10 + OError);
+    AFitInfo.Text := FitInfo;
+
     ActGpxFile := GetRoutesTmp + ChangeFileExt(ExtractFilename(FileName), '.' + GpxExtension);
     DeleteTempFiles(GetRoutesTmp, '*.*');
     Sto_RedirectedExecute(Format('Fit2Gpx.exe "%s"', [FileName]),
@@ -3918,7 +4088,7 @@ begin
       raise Exception.Create(FormattedGpx + #10 + OError);
     TFile.WriteAllText(ActGpxFile, FormattedGpx);
 
-    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), APOIList);
+    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), AFitInfo);
     TvTrip.ShowRoot := true;
 
     if (DeviceFile) then
@@ -3926,19 +4096,11 @@ begin
     else
       PnlTripGpiInfo.Color := clAqua;
     PnlTripGpiInfo.Caption := '';
-//    for AGPXWayPoint in APOIList do
-//    begin
-//      if (PnlTripGpiInfo.Caption = '') then
-//        PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
-//      TvTrip.Items.AddChildObject(RootNode, String(AGPXWayPoint.Name), AGPXWayPoint);
-//    end;
-
     RootNode.Expand(false);
   finally
     TvTrip.Items.EndUpdate;
     TvTrip.UnlockDrawing;
     VlTripInfo.Strings.EndUpdate;
-
   end;
   LoadHex(FileName);
   LoadFitOnMap(ActGpxFile, CurrentMapItem);

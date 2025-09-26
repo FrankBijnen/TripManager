@@ -42,6 +42,7 @@ function GetTracksMask: string;
 function GetTracksTmp: string;
 function GetOSMTemp: string;
 function GetRoutesTmp: string;
+function GetDeviceTmp: string;
 function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
@@ -79,6 +80,7 @@ const
   TrackFileExt    = '.track';
   OSMDir            = 'OSM\';
   RoutesDir         = 'Routes\';
+  DeviceDir         = 'Device\';
 
 function SenSize(const S: int64): string;
 var
@@ -314,6 +316,11 @@ end;
 function GetRoutesTmp: string;
 begin
   result := CreatedTempPath + RoutesDir;
+end;
+
+function GetDeviceTmp: string;
+begin
+  result := CreatedTempPath + DeviceDir;
 end;
 
 function EscapeDQuote(const HTML: string): string;

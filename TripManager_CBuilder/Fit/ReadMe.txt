@@ -4,4 +4,4 @@ https://developer.garmin.com/fit/download/
 
 Take the files from the C directory, not including the examples, and put them here. 
 
-Programs Fit2Gpx and Trk2Fit based on the sample Encode and Decode programs
+Programs Fit2Gpx, FitInfo and Trk2Fit based on the sample Encode and Decode programs

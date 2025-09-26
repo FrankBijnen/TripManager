@@ -64,6 +64,7 @@ const
   Reg_PrefDevPoiFolder_Val    = 'Internal Storage\POI';
   Reg_EnableDirFuncs          = 'EnableDirFuncs';
   Reg_EnableFitFuncs          = 'EnableFitFuncs';
+  Reg_EnableTripFuncs         = 'EnableTripFuncs';
   Reg_WarnModel_Key           = 'WarnModel';
   Reg_TripColor_Key           = 'TripColor';
   Reg_TripColor_Val           = 'Magenta';
@@ -247,19 +248,19 @@ begin
     try
       Items[IdTrip].Checked := Items[IdTrip].Enabled and GetRegistry(Reg_FuncTrip, true);
 
-      Items[IdTrack].Checked := GetRegistry(Reg_FuncTrack, true);
+      Items[IdTrack].Checked := Items[IdTrack].Enabled and GetRegistry(Reg_FuncTrack, true);
 
-      Items[IdStrippedRoute].Checked := GetRegistry(Reg_FuncStrippedRoute, true);
+      Items[IdStrippedRoute].Checked := Items[IdStrippedRoute].Enabled and GetRegistry(Reg_FuncStrippedRoute, true);
       Items[IdCompleteRoute].Checked := Items[IdCompleteRoute].Enabled and GetRegistry(Reg_FuncCompleteRoute, false);
-      Items[IdWayPoint].Checked := GetRegistry(Reg_FuncWayPoint, false);
-        Items[IdWayPointWpt].Checked := GetRegistry(Reg_FuncWayPointWpt, true);
-        Items[IdWayPointVia].Checked := GetRegistry(Reg_FuncWayPointVia, false);
-        Items[IdWayPointShp].Checked := GetRegistry(Reg_FuncWayPointShape, false);
+      Items[IdWayPoint].Checked := Items[IdWayPoint].Enabled and GetRegistry(Reg_FuncWayPoint, false);
+        Items[IdWayPointWpt].Checked := Items[IdWayPointWpt].Enabled and GetRegistry(Reg_FuncWayPointWpt, true);
+        Items[IdWayPointVia].Checked := Items[IdWayPointVia].Enabled and GetRegistry(Reg_FuncWayPointVia, false);
+        Items[IdWayPointShp].Checked := Items[IdWayPointShp].Enabled and GetRegistry(Reg_FuncWayPointShape, false);
 
-      Items[IdGpi].Checked := GetRegistry(Reg_FuncGpi, true);
-        Items[IdGpiWayPt].Checked := GetRegistry(Reg_FuncGpiWayPt, true);
-        Items[IdGpiViaPt].Checked := GetRegistry(Reg_FuncGpiViaPt, false);
-        Items[IdGpiShpPt].Checked := GetRegistry(Reg_FuncGpiShpPt, false);
+      Items[IdGpi].Checked := Items[IdGpi].Enabled and GetRegistry(Reg_FuncGpi, true);
+        Items[IdGpiWayPt].Checked := Items[IdGpiWayPt].Enabled and GetRegistry(Reg_FuncGpiWayPt, true);
+        Items[IdGpiViaPt].Checked := Items[IdGpiViaPt].Enabled and GetRegistry(Reg_FuncGpiViaPt, false);
+        Items[IdGpiShpPt].Checked := Items[IdGpiShpPt].Enabled and GetRegistry(Reg_FuncGpiShpPt, false);
 
       Items[IdKml].Checked := Items[IdKml].Enabled and GetRegistry(Reg_FuncKml, true);
       Items[IdHtml].Checked := Items[IdHtml].Enabled and GetRegistry(Reg_FuncHtml, true);
@@ -315,7 +316,7 @@ begin
     end;
       SetRegistry(Reg_FuncWayPointWpt, Items[IdWayPointWpt].Checked);
       SetRegistry(Reg_FuncWayPointVia, Items[IdWayPointVia].Checked);
-      SetRegistry(Reg_FuncWayPointShape, Items[IdWayPointVia].Checked);
+      SetRegistry(Reg_FuncWayPointShape, Items[IdWayPointShp].Checked);
 
     SetRegistry(Reg_FuncGpi, Items[IdGpi].Checked);
     if (Items[IdGpi].Checked) then

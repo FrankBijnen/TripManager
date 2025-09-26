@@ -45,12 +45,14 @@ Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";  
 Source: "..\Win32\TripManager.exe";       DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 Source: "..\Win32\Trk2Fit.exe";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 Source: "..\Win32\Fit2Gpx.exe";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
+Source: "..\Win32\FitInfo.exe";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 Source: "..\Win32\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 Source: "..\Win32\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin32;      Flags: ignoreversion
 
 Source: "..\Win64\TripManager.exe";       DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\Trk2Fit.exe";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\Fit2Gpx.exe";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
+Source: "..\Win64\FitInfo.exe";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 ; Images
