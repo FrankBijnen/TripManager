@@ -3929,6 +3929,8 @@ begin
 
   try
     if not ATripList.LoadFromFile(FileName) then
+      raise Exception.Create('Not a valid trip file');
+
     DeviceFile := FromDevice;
     HexEditFile := FileName;
 
