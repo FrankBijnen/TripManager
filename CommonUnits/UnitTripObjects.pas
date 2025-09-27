@@ -24,7 +24,7 @@ const
   Tread2_TmScPosnSize               = 16;
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
-  TZumoModel        = (XT, XT2, Tread2, Zumo, Edge, Unknown);
+  TTripModel        = (XT, XT2, Tread2, Unknown);
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmDirect           = $04,
@@ -47,7 +47,6 @@ type
                        rpShaping          = 1,
                        rpShapingXT2       = 2);
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
-
   TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
 
 { Elementary data types }
@@ -738,9 +737,9 @@ type
     procedure SwapCardinals;
   end;
 
-const Unknown3Size:     array[TZumoModel] of integer = (1288, 1448, 1348, 1288, 1288, 1288);      // Default unknown to XT size
-      CalculationMagic: array[TZumoModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000, $00000000, $00000000);
-      ShapeBitmap:      array[TZumoModel] of Cardinal = ($90, $c0, $c0, $90, $90, $90);
+const Unknown3Size:     array[TTripModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
+      CalculationMagic: array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
+      ShapeBitmap:      array[TTripModel] of Cardinal = ($90, $c0, $c0, $90);
       Unknown3DistOffset = $14;
       Unknown3TimeOffset = $18;
 
@@ -752,7 +751,7 @@ type
     UDbDirCount:      WORD;
     Unknown3:         array of byte;
     procedure SwapCardinals;
-    procedure AllocUnknown3(AModel: TZumoModel = TZumoModel.XT); overload;
+    procedure AllocUnknown3(AModel: TTripModel = TTripModel.XT); overload;
     procedure AllocUnknown3(ASize: cardinal); overload;
     procedure UpdateUnknown3(const Offset: integer; const Value: cardinal);
     function GetUnknown3(const Offset: integer): cardinal;
@@ -769,7 +768,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure WriteTerminator(AStream: TMemoryStream); override;
   public
-    constructor Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT; ForceRecalc: boolean = true); reintroduce;
+    constructor Create(AHandleId: Cardinal; AModel: TTripModel = TTripModel.XT; ForceRecalc: boolean = true); reintroduce;
     destructor Destroy; override;
     procedure Add(AnUdbDir: TUdbDir);
     property HandleId: Cardinal read FUdbHandleId;
@@ -809,9 +808,9 @@ type
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
-    function GetZumoModel: TZumoModel;
-    function GetCalcModel(AModel: TZumoModel): TZumoModel;
-    function GetIsCalculatedModel: TZumoModel;
+    function GetTripModel: TTripModel;
+    function GetCalcModel(AModel: TTripModel): TTripModel;
+    function GetIsCalculatedModel: TTripModel;
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure AddLocation_XT(Locations: TmLocations;
@@ -870,13 +869,13 @@ type
                           DepartureDate: TDateTime;
                           Name, Address: string);
     procedure SetRoutePrefs_XT2_Tread2(Locations: TmLocations; ProcessOptions: TObject);
-    procedure ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
-    procedure TripTrack(const AModel: TZumoModel;
+    procedure ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
+    procedure TripTrack(const AModel: TTripModel;
                         const RtePts: TObject;
                         const SubClasses: TStringList);
-    procedure SaveCalculated(const AModel: TZumoModel;
+    procedure SaveCalculated(const AModel: TTripModel;
                             const RtePts: TObject);
-    procedure CreateTemplate(const AModel: TZumoModel;
+    procedure CreateTemplate(const AModel: TTripModel;
                              const TripName: string;
                              const CalculationMode: string = '';
                              const TransportMode: string = '');
@@ -884,8 +883,8 @@ type
     procedure SaveAsGPX(const GPXFile: string);
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
-    property ZumoModel: TZumoModel read GetZumoModel;
-    property CalculatedModel: TZumoModel read GetIsCalculatedModel;
+    property TripModel: TTripModel read GetTripModel;
+    property CalculatedModel: TTripModel read GetIsCalculatedModel;
     property RouteCnt: cardinal read FRouteCnt write FRouteCnt;
   end;
 
@@ -2902,7 +2901,7 @@ begin
   UdbHandleSize := Swap32(UdbHandleSize);
 end;
 
-procedure TudbHandleValue.AllocUnknown3(AModel: TZumoModel = TZumoModel.XT);
+procedure TudbHandleValue.AllocUnknown3(AModel: TTripModel = TTripModel.XT);
 begin
   SetLength(Self.Unknown3, Unknown3Size[AModel]);
 end;
@@ -2934,7 +2933,7 @@ begin
   result := PUpdVal^;
 end;
 
-constructor TmUdbDataHndl.Create(AHandleId: Cardinal; AModel: TZumoModel = TZumoModel.XT; ForceRecalc: boolean = true);
+constructor TmUdbDataHndl.Create(AHandleId: Cardinal; AModel: TTripModel = TTripModel.XT; ForceRecalc: boolean = true);
 begin
   inherited Create('mUdbDataHndl', SizeOf(FValue), dtUdbHandle); // Will get Length later, Via Calculate
   FUdbHandleId := AHandleId; // Only value seen = 1
@@ -3061,7 +3060,7 @@ var
 
   UdbDirCnt: integer;
   AnUdbDir: TUdbDir;
-  AModel: TZumoModel;
+  AModel: TTripModel;
 
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
@@ -3092,11 +3091,11 @@ begin
     AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));
 
     AnUdbHandle.FValue.AllocUnknown3; // Default to XT
-    for AModel := Low(TZumoModel) to High(TZumoModel) do  // Future use
+    for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
     begin
       if (AnUdbHandle.FValue.CalcStatus = CalculationMagic[AModel]) then
       begin
-        if (AModel = TZumoModel.Unknown) then
+        if (AModel = TTripModel.Unknown) then
           AnUdbHandle.FValue.AllocUnknown3(AnUdbHandle.ComputeUnknown3Size)
         else
           AnUdbHandle.FValue.AllocUnknown3(AModel);
@@ -3763,10 +3762,10 @@ procedure TTripList.AddLocation(Locations: TmLocations;
                                 DepartureDate: TDateTime;
                                 Name, Address: string);
 begin
-  case TProcessOptions(ProcessOptions).ZumoModel of
-    TZumoModel.XT2:
+  case TProcessOptions(ProcessOptions).TripModel of
+    TTripModel.XT2:
       AddLocation_XT2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
-    TZumoModel.Tread2:
+    TTripModel.Tread2:
       AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     else
       // No RoutePref for XT
@@ -3774,9 +3773,9 @@ begin
   end;
 end;
 
-procedure TTripList.ForceRecalc(const AModel: TZumoModel = TZumoModel.Unknown; ViaPointCount: integer = 0);
+procedure TTripList.ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
 var
-  CalcModel: TZumoModel;
+  CalcModel: TTripModel;
   AllRoutes: TBaseItem;
   Index: integer;
   ViaCount: integer;
@@ -3830,8 +3829,8 @@ begin
 
     // Recreate RoutePreferences
     case (CalcModel) of
-      TZumoModel.XT2,
-      TZumoModel.Tread2:
+      TTripModel.XT2,
+      TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
   finally
@@ -3859,11 +3858,11 @@ begin
     PreserveTrackToRoute.AsBoolean := true;
 end;
 
-procedure TTripList.TripTrack(const AModel: TZumoModel;
+procedure TTripList.TripTrack(const AModel: TTripModel;
                               const RtePts: TObject;
                               const SubClasses: TStringList);
 var
-  CalcModel: TZumoModel;
+  CalcModel: TTripModel;
   Locations: TBaseItem;
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
@@ -3939,8 +3938,8 @@ begin
 
     // Recreate RoutePreferences
     case (CalcModel) of
-      TZumoModel.XT2,
-      TZumoModel.Tread2:
+      TTripModel.XT2,
+      TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
 
@@ -3950,10 +3949,10 @@ begin
   end;
 end;
 
-procedure TTripList.SaveCalculated(const AModel: TZumoModel;
+procedure TTripList.SaveCalculated(const AModel: TTripModel;
                                    const RtePts: TObject);
 var
-  CalcModel: TZumoModel;
+  CalcModel: TTripModel;
   AllRoutes: TBaseItem;
   Index: integer;
   ViaCount, RoutePtCount: integer;
@@ -4093,8 +4092,8 @@ begin
 
     // Recreate RoutePreferences
     case (CalcModel) of
-      TZumoModel.XT2,
-      TZumoModel.Tread2:
+      TTripModel.XT2,
+      TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
 
@@ -4118,14 +4117,14 @@ begin
   result := AllRoutes.Items[0];
 end;
 
-// By checking the Size. This function reports the model even if not calculated.
-function TTripList.GetZumoModel: TZumoModel;
+// Get the model by checking the size. This function reports the model even if not calculated.
+function TTripList.GetTripModel: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
-  AModel: TZumoModel;
+  AModel: TTripModel;
 begin
   // Default XT
-  result := TZumoModel.XT;
+  result := TTripModel.XT;
 
   // Try to get first TmUdbDataHndl
   AnUdbHandle := FirstUdbDataHndle;
@@ -4133,34 +4132,34 @@ begin
     exit;
 
   // Is the size of the first Unknown3 known to be from an XT or XT2?
-  for AModel := Low(TZumoModel) to High(TZumoModel) do  // Future use
+  for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
   begin
     if (Length(AnUdbHandle.FValue.Unknown3) = Unknown3Size[AModel]) then
       exit(AModel);
   end;
 end;
 
-function TTripList.GetCalcModel(AModel: TZumoModel): TZumoModel;
+function TTripList.GetCalcModel(AModel: TTripModel): TTripModel;
 begin
   result := AModel;
-  if (result = TZumoModel.Unknown) then
-    result := GetZumoModel;
+  if not (result in [TTripModel.XT, TTripModel.XT2, TTripModel.Tread2]) then
+    result := GetTripModel;
 end;
 
 // Get the model where the trip is calculated for. By checking for the magic number
-function TTripList.GetIsCalculatedModel: TZumoModel;
+function TTripList.GetIsCalculatedModel: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
-  AModel: TZumoModel;
+  AModel: TTripModel;
 begin
-  result := TZumoModel.Unknown;
+  result := TTripModel.Unknown;
   AnUdbHandle := FirstUdbDataHndle;
 
   if not Assigned(AnUdbHandle) or
      (AnUdbHandle.FValue.CalcStatus = 0) then
     exit;
 
-  for AModel := Low(TZumoModel) to High(TZumoModel) do  // Future use
+  for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
   begin
     if ((AnUdbHandle.FValue.CalcStatus) = CalculationMagic[AModel]) then
       exit(AModel);
@@ -4211,7 +4210,7 @@ begin
   Add(TmTripName.Create(TripName));
 
   // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
-  ForceRecalc(TZumoModel.XT, 2);
+  ForceRecalc(TTripModel.XT, 2);
 end;
 
 procedure TTripList.CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
@@ -4266,7 +4265,7 @@ begin
     Add(TmLocations.Create);
 
     // Create dummy AllRoutes, and complete RoutePreferences
-    ForceRecalc(TZumoModel.XT2, 2);
+    ForceRecalc(TTripModel.XT2, 2);
   finally
     TmpStream.Free;
     ProcessOptions.Free;
@@ -4325,14 +4324,14 @@ begin
     Add(TmVersionNumber.Create(4, $10));
 
     // Create dummy AllRoutes, and complete RoutePreferences
-    ForceRecalc(TZumoModel.Tread2, 2);
+    ForceRecalc(TTripModel.Tread2, 2);
   finally
     TmpStream.Free;
     ProcessOptions.Free;
   end;
 end;
 
-procedure TTripList.CreateTemplate(const AModel: TZumoModel;
+procedure TTripList.CreateTemplate(const AModel: TTripModel;
                                    const TripName: string;
                                    const CalculationMode: string = '';
                                    const TransportMode: string = '');
@@ -4340,9 +4339,9 @@ begin
   Clear;
 
   case AModel of
-    TZumoModel.XT2:
+    TTripModel.XT2:
       CreateTemplate_XT2(TripName, CalculationMode, TransportMode);
-    TZumoModel.Tread2:
+    TTripModel.Tread2:
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
     else
       CreateTemplate_XT(TripName, CalculationMode, TransportMode);

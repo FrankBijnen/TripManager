@@ -87,7 +87,6 @@ const
 procedure TFrmSendTo.EnableItems;
 begin
   TvSelections.Items[IdTrip].Enabled := GetRegistry(Reg_EnableTripFuncs, false);
-  TvSelections.Items[IdFit].Enabled := GetRegistry(Reg_EnableFitFuncs, false);
   TvSelections.Items[IdWayPoint].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdWayPointWpt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdWayPointVia].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
@@ -96,6 +95,7 @@ begin
   TvSelections.Items[IdGpiWayPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdGpiViaPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdGpiShpPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdFit].Enabled := GetRegistry(Reg_EnableFitFuncs, false);
 
   case PCTDestination.ActivePageIndex of
     0:begin
@@ -124,7 +124,7 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  LblModel.Caption := GetRegistry(Reg_ZumoModel, '');
+  LblModel.Caption := GetRegistry(Reg_GarminModel, ''); // LblModel is only visible for Trip models
   case PCTDestination.ActivePageIndex of
     0:begin
         SendToDest := TSendToDest.stDevice;

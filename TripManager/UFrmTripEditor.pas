@@ -102,7 +102,7 @@ type
     CurFile: string;
     CurNewFile: boolean;
     CurDevice: boolean;
-    CurModel: TZumoModel;
+    CurModel: TTripModel;
     property OnTripFileCanceled: TTripFileUpdate read FTripFileCanceled write FTripFileCanceled;
     property OnTripFileUpdating: TTripFileUpdate read FTripFileUpdating write FTripFileUpdating;
     property OnTripFileUpdated: TTripFileUpdate read FTripFileUpdated write FTripFileUpdated;
@@ -316,7 +316,7 @@ begin
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
   DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
-  CmbModel.ItemIndex := Ord(CurTripList.ZumoModel);
+  CmbModel.ItemIndex := Ord(CurTripList.TripModel);
 end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);

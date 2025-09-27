@@ -26,6 +26,8 @@ type
               CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints);
   TGPXFuncArray = Array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
+  // Note: The first elements should be the same as UnitTripList.TTripModel
+  TGarminModel  = (XT, XT2, Tread2, GarminEdge, GarminGeneric, Unknown);
 
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;

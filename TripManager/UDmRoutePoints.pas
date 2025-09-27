@@ -387,7 +387,7 @@ begin
   CdsRoutePoints.DisableControls;
   TmpStream := TMemoryStream.Create;
   ProcessOptions := TProcessOptions.Create;
-  ProcessOptions.ZumoModel := FTripList.ZumoModel;
+  ProcessOptions.TripModel := FTripList.TripModel;
   try
     Locations := TmLocations(FTripList.GetItem('mLocations'));
     if not (Assigned(Locations)) then

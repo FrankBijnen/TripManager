@@ -128,7 +128,7 @@ type
     CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
 
     {$IFDEF TRIPOBJECTS}
-    ZumoModel: TZumoModel;                    // XT1 and XT2
+    TripModel: TTripModel;                    // XT1 and XT2
     ScPosn_Unknown1: Cardinal;                // XT1 and XT2
     VehicleProfileGuid: string;               // XT2
     VehicleProfileHash: string;               // XT2
@@ -235,7 +235,7 @@ begin
   LookUpMessage := 0;
 
 {$IFDEF TRIPOBJECTS}
-  ZumoModel := TZumoModel.XT;
+  TripModel := TTripModel.XT;
   ScPosn_Unknown1 := 0;
   VehicleProfileGuid := XT2_VehicleProfileGuid;
   VehicleProfileHash := XT2_VehicleProfileHash;

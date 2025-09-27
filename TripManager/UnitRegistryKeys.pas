@@ -11,8 +11,11 @@ const
   Reg_TrackColor              = 'TrackColor';         // User preferred track color
   Reg_MinDistTrackPoints_Key  = 'MinDistTrackPoints'; // Use to filter trackpoints
 
+// All supported models
+// Todo Fix rename from ZumoModel to GarminModel in Installer
+  Reg_GarminModel             = 'GarminModel';
+
   // XT1 and XT2
-  Reg_ZumoModel               = 'ZumoModel';
   Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   Reg_AllowGrouping           = 'AllowGrouping';
   Reg_TripOption              = 'TripOption';
@@ -97,6 +100,7 @@ const
   IdKml           = 12; // Only Windows
   IdHtml          = 13; // Only Windows
   IdFit           = 14; // Test
+
 type
 
   TSetProcessOptions = class
@@ -122,6 +126,8 @@ uses
   UnitRegistry, UnitProcessOptions, UnitTripObjects;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
+var
+  RegModelValue: string;
 begin
   with Sender as TProcessOptions do
   begin
@@ -133,8 +139,11 @@ begin
     TrackColor := GetRegistry(Reg_TrackColor, '');
     MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
 
+    // GarminModel has entries not valid for Trips. UnitTripObjects should check, and correct.
+    RegModelValue := StringReplace(GetRegistry(Reg_GarminModel, ''), ' ', '', [rfReplaceAll]);
+    TripModel := TTripModel(GetEnumValue(TypeInfo(TTripModel), RegModelValue));
+
     // XT1 and XT2 Defaults
-    ZumoModel := TZumoModel(GetEnumValue(TypeInfo(TZumoModel), StringReplace(GetRegistry(Reg_ZumoModel, ''), ' ', '', [rfReplaceAll])));
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
@@ -265,8 +274,7 @@ begin
       Items[IdKml].Checked := Items[IdKml].Enabled and GetRegistry(Reg_FuncKml, true);
       Items[IdHtml].Checked := Items[IdHtml].Enabled and GetRegistry(Reg_FuncHtml, true);
 
-      if (GetRegistry(Reg_EnableFitFuncs, false)) then
-        Items[IdFit].Checked := Items[IdFit].Enabled and GetRegistry(Reg_FuncFit, true);
+      Items[IdFit].Checked := Items[IdFit].Enabled and GetRegistry(Reg_FuncFit, true);
     finally
       OnCheckStateChanging := SavedStateChanging;
       FullExpand;
@@ -348,8 +356,7 @@ begin
         result := result + [TGPXFunc.CreateHTML];
     end;
 
-    if (GetRegistry(Reg_EnableFitFuncs, false)) and
-       (Items[IdFit].Enabled) then
+    if (Items[IdFit].Enabled) then
     begin
       SetRegistry(Reg_FuncFit, Items[IdFit].Checked);
       if (Items[IdFit].Checked) then

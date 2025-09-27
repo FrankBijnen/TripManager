@@ -318,10 +318,7 @@ type
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
-
-    //TODO keep?
     procedure AddToMap(FileName: string);
-
     procedure MapRequest(const Coords, Desc, TimeOut: string;
                          const ZoomLevel: string = '');
     procedure SaveTripGpiFile;
@@ -333,10 +330,10 @@ type
     procedure FreeDevices;
     function CopyDeviceFile(const APath, AFile: string): boolean;
 
-    function ModelFromDescription(const ModelDescription: string): TZumoModel;
-    function ModelFromGarminDevice(const ModelDescription: string): TZumoModel;
+    function ModelFromDescription(const ModelDescription: string): TGarminModel;
+    function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
 
-    function ReadGarminDevice(var ModelDescription: string): TZumoModel;
+    function ReadGarminDevice(var ModelDescription: string): TGarminModel;
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
     procedure SelectDevice(const Indx: integer); overload;
@@ -362,7 +359,7 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
-    procedure CheckSupportedModel(const ZumoModel: TZumoModel; const AllFuncs: array of TGPXFunc);
+    procedure CheckSupportedModel(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
 
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
@@ -442,7 +439,7 @@ begin
                                      GetTracksExt]));
 end;
 
-procedure TFrmTripManager.CheckSupportedModel(const ZumoModel: TZumoModel; const AllFuncs: array of TGPXFunc);
+procedure TFrmTripManager.CheckSupportedModel(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
 var
   Rc: integer;
   GPXFunc: TGPXFunc;
@@ -455,10 +452,10 @@ begin
     case GPXFunc of
       TGPXFunc.CreateTrips:
       begin
-        case ZumoModel of
-          TZumoModel.XT,
-          TZumoModel.XT2,
-          TZumoModel.Tread2:;  // Fall thru
+        case GarminModel of
+          TGarminModel.XT,
+          TGarminModel.XT2,
+          TGarminModel.Tread2:;  // Fall thru
           else
             begin
               Rc := MessageDlg('Trip files created may not work for selected model.',
@@ -498,31 +495,31 @@ begin
   result := true;
 end;
 
-function TFrmTripManager.ModelFromDescription(const ModelDescription: string): TZumoModel;
+function TFrmTripManager.ModelFromDescription(const ModelDescription: string): TGarminModel;
 begin
   if (ContainsText(ModelDescription, Tread2_Name)) then
-    result := TZumoModel.Tread2
+    result := TGarminModel.Tread2
   else if (ContainsText(ModelDescription, XT2_Name)) then
-    result := TZumoModel.XT2
+    result := TGarminModel.XT2
   else if (ContainsText(ModelDescription, XT_Name)) then
-    result := TZumoModel.XT
-  else if (ContainsText(ModelDescription, 'Edge')) then
-    result := TZumoModel.Edge
+    result := TGarminModel.XT
   else if (ContainsText(ModelDescription, 'Garmin')) then
-    result := TZumoModel.Zumo
+    result := TGarminModel.GarminGeneric
+  else if (ContainsText(ModelDescription, 'Edge')) then
+    result := TGarminModel.GarminEdge
   else
-    result := TZumoModel.Unknown;
+    result := TGarminModel.Unknown;
 end;
 
-function TFrmTripManager.ModelFromGarminDevice(const ModelDescription: string): TZumoModel;
+function TFrmTripManager.ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
 begin
   if (ContainsText(ModelDescription, 'Edge')) then
-    result := TZumoModel.Edge
+    result := TGarminModel.GarminEdge
   else
-    result := TZumoModel.Zumo;
+    result := TGarminModel.GarminGeneric;
 end;
 
-function TFrmTripManager.ReadGarminDevice(var ModelDescription: string): TZumoModel;
+function TFrmTripManager.ReadGarminDevice(var ModelDescription: string): TGarminModel;
 var
   DevicePath, DBPath: string;
   NFile: string;
@@ -539,9 +536,9 @@ begin
   DevicePath := '?:\Garmin';
   DBPath := '';
   case result of
-    TZumoModel.XT,
-    TZumoModel.XT2,
-    TZumoModel.Tread2:
+    TGarminModel.XT,
+    TGarminModel.XT2,
+    TGarminModel.Tread2:
     begin
       DevicePath := 'Internal Storage\Garmin';
       DBPath := 'Internal Storage\.System\SQLite';
@@ -572,7 +569,7 @@ begin
       // Update model from GarminDevice.xml
       ModelDescription := FindSubNodeValue(ModelNode, 'Description');
       result := ModelFromDescription(ModelDescription);
-      if (result = TZumoModel.Unknown) then
+      if (result = TGarminModel.Unknown) then
         result := ModelFromGarminDevice(ModelDescription);
     finally
       XmlDoc.Free;
@@ -589,9 +586,9 @@ begin
   ModelIndex := Ord(ReadGarminDevice(ModelDisplayed));
 
   // Change description for 'old' Garmin units and Edge
-  case TZumoModel(ModelIndex) of
-    TZumoModel.Zumo,
-    TZumoModel.Edge:
+  case TGarminModel(ModelIndex) of
+    TGarminModel.GarminEdge,
+    TGarminModel.GarminGeneric:
       if (ModelDisplayed <> CmbModel.Items[ModelIndex]) then
         CmbModel.Items[ModelIndex] := ModelDisplayed;
   end;
@@ -604,7 +601,7 @@ begin
   end;
 
   SetRegistry(Reg_CurrentDevice, ModelDisplayed);
-  SetRegistry(Reg_ZumoModel, CmbModel.Text);
+  SetRegistry(Reg_GarminModel, CmbModel.Text);
 end;
 
 // No need to close manually.
@@ -738,7 +735,7 @@ end;
 
 procedure TFrmTripManager.BgDeviceItems0Click(Sender: TObject);
 begin
-  if (CmbModel.ItemIndex in [Ord(TZumoModel.Zumo), Ord(TZumoModel.Unknown)]) then
+  if (CmbModel.ItemIndex in [Ord(TGarminModel.GarminGeneric), Ord(TGarminModel.Unknown)]) then
     Abort;
 end;
 
@@ -957,7 +954,7 @@ begin
     if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
       BgDeviceClick(BgDevice);
 {$ENDIF}
-    CheckSupportedModel(TZumoModel(CmbModel.ItemIndex), FrmSendTo.Funcs);
+    CheckSupportedModel(TGarminModel(CmbModel.ItemIndex), FrmSendTo.Funcs);
 
     for AnItem in ShellListView1.Items do
     begin
@@ -1137,7 +1134,7 @@ begin
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
   if (NewFile) then
-    ATripList.CreateTemplate(TZumoModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
+    ATripList.CreateTemplate(TTripModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
 
 // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
@@ -1950,28 +1947,28 @@ begin
   BgDevice.Items[1].Caption := 'Gpx';
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
 
-  case TZumoModel(CmbModel.ItemIndex) of
-    TZumoModel.Zumo:
-    begin
-      BgDevice.Items[0].Caption := 'Unused';
-      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
-    end;
-    TZumoModel.Edge:
+  case TGarminModel(CmbModel.ItemIndex) of
+    TGarminModel.GarminEdge:
     begin
       BgDevice.Items[0].Caption := 'Courses';
       BgDevice.Items[1].Caption := 'NewFiles';
       BgDevice.Items[2].Caption := 'Activities';
     end;
-    TZumoModel.Unknown:
+    TGarminModel.GarminGeneric:
+    begin
+      BgDevice.Items[0].Caption := 'Unused';
+      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+    end;
+    TGarminModel.Unknown:
     begin
       BgDevice.Items[0].Caption := 'Unused';
       BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
     end;
   end;
 
-  SetRegistry(Reg_EnableTripFuncs, (TZumoModel(CmbModel.ItemIndex) in [TZumoModel.XT, TZumoModel.XT2, TZumoModel.Tread2]));
-  SetRegistry(Reg_EnableFitFuncs, (TZumoModel(CmbModel.ItemIndex) in [TZumoModel.Edge]));
-  SetRegistry(Reg_ZumoModel, CmbModel.Text);
+  SetRegistry(Reg_EnableTripFuncs, (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]));
+  SetRegistry(Reg_EnableFitFuncs, (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.GarminEdge]));
+  SetRegistry(Reg_GarminModel, CmbModel.Text);
 end;
 
 function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
@@ -3936,7 +3933,7 @@ begin
     HexEditFile := FileName;
 
     if (DeviceFile) and
-       (ATripList.CalculatedModel = TZumoModel.Unknown) then
+       (ATripList.CalculatedModel = TTripModel.Unknown) then
     begin
       SbPostProcess.Panels[0].Text := 'Not calculated trip. Marked with !';
       SbPostProcess.Panels[1].Text := 'BaseCamp may have problems reading current.gpx';
@@ -4146,7 +4143,7 @@ begin
       IsNotSavedTrip := TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean;
       SetCheckMark(AListItem, not IsNotSavedTrip);
       CalculatedModel := Ord(TmpTripList.CalculatedModel);
-      if (TmpTripList.CalculatedModel = TZumoModel.Unknown) then
+      if (TmpTripList.CalculatedModel = TTripModel.Unknown) then
         AListItem.ImageIndex := 2;
     end;
 

@@ -2294,7 +2294,7 @@ var
   Locations:     TmLocations;
 begin
   if (ProcessOptions.AllowGrouping) and
-     (ProcessOptions.ZumoModel = TZumoModel.XT) then
+     (ProcessOptions.TripModel = TTripModel.XT) then
     (FTripList.GetItem('mParentTripId') as TmParentTripId).AsCardinal := ParentTripId;
   (FTripList.GetItem('mParentTripName') as TmParentTripName).AsString := FBaseFile;
 
@@ -2305,13 +2305,13 @@ begin
 
   if ((ProcessOptions.TripOption in [TTripOption.ttTripTrack]) and HasSubClasses) then
     // Create TripTrack from BC calculation
-    FTripList.TripTrack(ProcessOptions.ZumoModel, RtePts, SubClassList)
+    FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList)
   else if ((ViaPointCount >= 2)and HasSubClasses) then
     // Create AllRoutes from BC calculation
-    FTripList.SaveCalculated(ProcessOptions.ZumoModel, RtePts)
+    FTripList.SaveCalculated(FTripList.TripModel, RtePts)
   else
-    // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
-    FTripList.ForceRecalc(ProcessOptions.ZumoModel, ViaPointCount);
+    // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+    FTripList.ForceRecalc(FTripList.TripModel, ViaPointCount);
 end;
 
 procedure TGPXFile.ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
@@ -2356,11 +2356,9 @@ begin
           break;
       end;
     end;
-
-    FTripList.CreateTemplate(ProcessOptions.ZumoModel,
+    FTripList.CreateTemplate(ProcessOptions.TripModel,
                              TripName, CalculationMode, TransportMode);
     UpdateTemplate(TripName, ParentTripId, RtePts);
-
     // Write to File
     FTripList.SaveToFile(OutFile);
   finally
@@ -2605,7 +2603,7 @@ begin
         Writeln('Processing started for: ', GPXMask);
 {$IFDEF TRIPOBJECTS}
 {$IFDEF REGISTRYKEYS}
-        Writeln('Selected model: ', GetRegistry(Reg_ZumoModel, XT_Name));
+        Writeln('Selected model: ', GetRegistry(Reg_GarminModel, XT_Name));
 {$ENDIF}
 {$ENDIF}
         Write('Selected functions:');

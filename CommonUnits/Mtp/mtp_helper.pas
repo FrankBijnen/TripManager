@@ -1151,7 +1151,6 @@ begin
           Prop_Val.GetStringValue(Dev_Val, PersistentId);
           PersistentIdString := ReplaceAll(PersistentId, ['%3B%5C'], [':\']);
 
-//TODO Did check ever work?
           if MatchesMask(PersistentIdString, FileId) then
           begin
             result := ObjId;
