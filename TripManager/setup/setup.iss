@@ -107,6 +107,7 @@ var
   RegKey: string;
   ErrorCode: integer;
   UninstallString: string;
+  ZumoModel: string;
 begin
   Result := true;
   RegKey := 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#MyAppId}') + '_is1';
@@ -117,5 +118,18 @@ begin
                      UninstallString, mbConfirmation, MB_YESNO) = IDYES;
     if (result) then
       ShellExec('', UninstallString, '/SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ErrorCode);
-  end;    
+  end; 
+  
+  // Clean old registry keys
+  RegKey := 'SOFTWARE\TDBware\' + ExpandConstant('{#MyAppName}');
+  if RegQueryStringValue(HKCU, RegKey, 'ZumoModel', ZumoModel) then
+  begin
+    if RegWriteStringValue(HKCU, RegKey, 'GarminModel', ZumoModel) then
+      RegDeleteValue(HKCU, RegKey, 'ZumoModel');
+  end;
+  RegDeleteValue(HKCU, RegKey, 'EnableSendTo');
+  RegDeleteValue(HKCU, RegKey, 'TripNameInList');
+  RegDeleteValue(HKCU, RegKey, 'ExploreUuid');
+  RegDeleteValue(HKCU, RegKey, 'ForceRecalc');     
+  RegDeleteValue(HKCU, RegKey, 'AddSubClasses');    
 end;

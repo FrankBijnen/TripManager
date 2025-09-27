@@ -4262,8 +4262,7 @@ begin
 
   while (LstFiles.Columns.Count > TripNameCol) do
     LstFiles.Columns.Delete(LstFiles.Columns.Count -1);
-  if (GetRegistry(Reg_TripNameInList, true)) then
-    LstFiles.Columns.Add.Caption := 'TripName';
+  LstFiles.Columns.Add.Caption := 'TripName';
 
   EdgeBrowser1.UserDataFolder := CreatedTempPath;
   if not Assigned(ATripList) then

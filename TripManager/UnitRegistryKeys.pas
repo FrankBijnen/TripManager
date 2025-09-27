@@ -11,8 +11,7 @@ const
   Reg_TrackColor              = 'TrackColor';         // User preferred track color
   Reg_MinDistTrackPoints_Key  = 'MinDistTrackPoints'; // Use to filter trackpoints
 
-// All supported models
-// Todo Fix rename from ZumoModel to GarminModel in Installer
+  // All supported models
   Reg_GarminModel             = 'GarminModel';
 
   // XT1 and XT2
@@ -59,7 +58,6 @@ const
   Reg_PrefDev_Key             = 'PrefDevice';
   Reg_PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
   Reg_PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
-  Reg_TripNameInList          = 'TripNameInList';
 
   Reg_PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
   Reg_PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
