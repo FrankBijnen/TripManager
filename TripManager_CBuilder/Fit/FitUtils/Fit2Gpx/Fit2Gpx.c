@@ -103,6 +103,10 @@ int main(int argc, char* argv[])
                      const double todegrees = (180 / pow(2, 31));
                      double lat = (record->position_lat) ? record->position_lat * todegrees : 0;
                      double lon = (record->position_long) ? record->position_long * todegrees : 0;
+                     // Check for valid coordinates
+                     if ((fabs(lat) > 90) || (fabs(lon) > 180)) {
+                        break;
+                     }
                      // timestamp
                      TimeStamp2Buf(record->timestamp, DateTimeBuf, sizeof(DateTimeBuf));
                      // Elevation

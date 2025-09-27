@@ -120,7 +120,7 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>(None)</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
-        <Debugger_RunParams>De_Bosberg_11_to_Peelstraat1_course.fit</Debugger_RunParams>
+        <Debugger_RunParams>&quot;G:\TDB_Tools\TripManager_CBuilder\Fit\FitUtils\Fit2Gpx\2025-09-20-09-17-20.fit&quot;</Debugger_RunParams>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>

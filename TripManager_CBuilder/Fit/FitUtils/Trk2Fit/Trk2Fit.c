@@ -43,8 +43,12 @@ void WriteRecord(FIT_DATE_TIME timestamp,
                  FIT_UINT32 dist,
                  FIT_UINT16 ele,
                  FIT_UINT8 local_mesg_number);
-void WriteLap(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT8 local_mesg_number);
-void WriteSession(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT8 local_mesg_number);
+void WriteLap(FIT_DATE_TIME timestamp,
+              FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT32 latstart, FIT_UINT32 lonstart, FIT_UINT32 latend, FIT_UINT32 lonend,
+              FIT_UINT8 local_mesg_number);
+void WriteSession(FIT_DATE_TIME timestamp,
+                  FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT32 latstart, FIT_UINT32 lonstart, FIT_UINT32 latend, FIT_UINT32 lonend,
+                  FIT_UINT8 local_mesg_number);
 void WriteActivity(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT8 local_mesg_number);
 
 static FIT_UINT16 data_crc;
@@ -60,6 +64,10 @@ int main(void)
     FIT_DATE_TIME timestamp;
     FIT_UINT32 lat1 = 0;
     FIT_UINT32 lon1 = 0;
+    FIT_UINT32 latstart = 0;
+    FIT_UINT32 lonstart = 0;
+    FIT_UINT32 latend = 0;
+    FIT_UINT32 lonend = 0;
     FIT_UINT32 dist1, totaldist = 0;
     FIT_UINT16 ele1 = 0;
     FIT_UINT8 mesg_number = 0;
@@ -89,7 +97,8 @@ int main(void)
     buf[strcspn(buf, "\n")] = 0;
     ParseBuf(buf, &timestamp, &lat1, &lon1, &dist1, &ele1);
     FIT_DATE_TIME start_time = timestamp;
-
+    latstart = lat1;
+    lonstart = lon1;
     WriteFileId(timestamp, mesg_number++);
 
 	WriteCourse(CourseName, mesg_number++);
@@ -106,12 +115,14 @@ int main(void)
 
     } while (fgets(buf, sizeof(buf), stdin) != NULL);
     mesg_number++;
+    latend = lat1;
+    lonend = lon1;
 
     WriteEvent(timestamp, FIT_EVENT_TYPE_STOP, mesg_number++);
 
-    WriteLap(timestamp, start_time, totaldist, mesg_number++);
+    WriteLap(timestamp, start_time, totaldist, latstart, lonstart, latend, lonend, mesg_number++);
 
-    WriteSession(timestamp, start_time, totaldist, mesg_number++);
+    WriteSession(timestamp, start_time, totaldist, latstart, lonstart, latend, lonend, mesg_number++);
 
     WriteActivity(timestamp, start_time, mesg_number++);
 
@@ -272,7 +283,9 @@ void WriteRecord(FIT_DATE_TIME timestamp,
 }
 
 // Write Lap message.
-void WriteLap(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT8 local_mesg_number)
+void WriteLap(FIT_DATE_TIME timestamp,
+              FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT32 latstart, FIT_UINT32 lonstart, FIT_UINT32 latend, FIT_UINT32 lonend,
+              FIT_UINT8 local_mesg_number)
 {
     FIT_LAP_MESG lap_mesg;
     Fit_InitMesg(fit_mesg_defs[FIT_MESG_LAP], &lap_mesg);
@@ -283,12 +296,18 @@ void WriteLap(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT32 totaldi
     lap_mesg.total_elapsed_time = (timestamp - start_time) * 1000;
     lap_mesg.total_timer_time = (timestamp - start_time) * 1000;
     lap_mesg.total_distance = totaldist;
+    lap_mesg.start_position_lat = latstart;
+    lap_mesg.start_position_long = lonstart;
+    lap_mesg.end_position_lat = latend;
+    lap_mesg.end_position_long = lonend;
     WriteMessageDefinition(local_mesg_number, fit_mesg_defs[FIT_MESG_LAP], FIT_LAP_MESG_DEF_SIZE, fp);
     WriteMessage(local_mesg_number, &lap_mesg, FIT_LAP_MESG_SIZE, fp);
 }
 
 // Write Session message.
-void WriteSession(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT8 local_mesg_number)
+void WriteSession(FIT_DATE_TIME timestamp,
+                  FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT32 latstart, FIT_UINT32 lonstart, FIT_UINT32 latend, FIT_UINT32 lonend,
+			      FIT_UINT8 local_mesg_number)
 {
     FIT_SESSION_MESG session_mesg;
     Fit_InitMesg(fit_mesg_defs[FIT_MESG_SESSION], &session_mesg);
@@ -299,6 +318,10 @@ void WriteSession(FIT_DATE_TIME timestamp, FIT_UINT32 start_time, FIT_UINT32 tot
     session_mesg.total_elapsed_time = (timestamp - start_time) * 1000;
     session_mesg.total_timer_time = (timestamp - start_time) * 1000;
     session_mesg.total_distance = totaldist;
+    session_mesg.start_position_lat = latstart;
+    session_mesg.start_position_long = lonstart;
+    session_mesg.end_position_lat = latend;
+    session_mesg.end_position_long = lonend;
     session_mesg.sport = FIT_SPORT_CYCLING;
     session_mesg.sub_sport = FIT_SUB_SPORT_GENERIC;
     session_mesg.first_lap_index = 0;
