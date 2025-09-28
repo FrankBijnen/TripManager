@@ -1,0 +1,232 @@
+unit UnitSqlite;
+
+interface
+
+uses
+  System.Generics.Collections, System.Classes,
+  SQLiteWrap;
+
+type
+  TSqlColumn = record
+    Table_Name: UTF8String;
+    Table_Type: UTF8String;
+    Column_Name: UTF8String;
+    Column_Type: UTF8String;
+    PK: UTF8String;
+  end;
+  TSqlColumns = Tlist<TSqlColumn>;
+
+  TVehicleProfile = record
+    Valid: boolean;
+    Vehicle_Id: integer;
+    TruckType: integer;
+    Name: UTF8String;
+    GUID: UTF8String;
+    VehicleType: integer;
+    TransportMode: integer;
+    AdventurousLevel: integer;
+  end;
+
+  TSqlResult = Tlist<Variant>;
+  TSqlResults = TObjectList<TSqlResult>;
+
+function GetTables(const DbName: string): TStringList;
+function GetColumns(const DbName: string;
+                    const TabName: string): TSqlColumns; overload;
+function GetColumns(const Db: TSQLiteDatabase;
+                    const TabName: string): TSqlColumns; overload;
+function ExecSqlQuery(const DbName: string;
+                      const Query: string): TSqlResults;
+function GetAvoidancesChanged(const DbName: string): string;
+function GetVehicleProfile(const DbName: string): TVehicleProfile;
+
+implementation
+
+uses
+  System.Variants, System.SysUtils,
+  Winapi.Windows;
+
+function TableNames(const Db: TSqliteDatabase): TStringList;
+var
+  TableTab: TSqliteTable;
+  SQL: string;
+begin
+  result := TStringList.Create;
+
+  Db.ParamsClear;
+  SQL :=
+    'SELECT m.name AS table_name' + #13#10 +
+    'FROM sqlite_master AS m ' + #13#10 +
+    'ORDER BY m.name' ;
+
+  TableTab := Db.GetTable(SQL);
+  try
+    while not TableTab.EOF do
+    begin
+      result.Add(string(TableTab.FieldAsStringUnicode(0)));
+      TableTab.Next;
+    end;
+  finally
+    TableTab.free;
+  end;
+end;
+
+function GetColumns(const Db: TSQLiteDatabase;
+                    const TabName: string): TSqlColumns;
+var
+  ColumnTab: TSqliteTable;
+  AColumn: TSqlColumn;
+  SQL: string;
+begin
+  result := TSqlColumns.Create;
+
+  Db.ParamsClear;
+  Db.AddParamTextUnicode(':Tab', UTF8String(TabName));
+  SQL :=
+    'SELECT m.name AS table_name, m.type AS table_type, ' + #13#10 +
+    '  p.name AS column_name, p.type AS data_type, ' + #13#10 +
+    '  CASE p.pk WHEN 1 THEN ''PK'' END AS const ' + #13#10 +
+    'FROM sqlite_master AS m ' + #13#10 +
+    '  INNER JOIN pragma_table_info(table_name) AS p ' + #13#10 +
+    'WHERE m.name NOT IN (''sqlite_sequence'') ' + #13#10 +
+    'and m.name like :Tab '+ #13#10 +
+    'ORDER BY m.name, p.cid; ' ;
+
+  ColumnTab := Db.GetTable(SQL);
+  try
+    while not ColumnTab.EOF do
+    begin
+      AColumn.Table_Name := ColumnTab.FieldAsStringUnicode(0);
+      AColumn.Table_Type := ColumnTab.FieldAsStringUnicode(1);
+      AColumn.Column_Name := ColumnTab.FieldAsStringUnicode(2);
+      AColumn.Column_Type := ColumnTab.FieldAsStringUnicode(3);
+      AColumn.PK := ColumnTab.FieldAsStringUnicode(4);
+
+      result.Add(AColumn);
+      ColumnTab.Next;
+    end;
+  finally
+    ColumnTab.free;
+  end;
+end;
+
+function GetColumns(const DbName: string;
+                    const TabName: String): TSqlColumns;
+var
+  Db: TSQLiteDatabase;
+begin
+  Db := TSQLiteDatabase.Create(DbName);
+  try
+    result := GetColumns(Db, TabName);
+  finally
+    Db.Free;
+  end;
+end;
+
+function GetTables(const DbName: string): TStringList;
+var
+  DB: TSQLiteDatabase;
+begin
+  DB := TSqliteDatabase.Create(DBName);
+  try
+    result := TableNames(DB);
+  finally
+    DB.Free;
+  end;
+end;
+
+function ExecSqlQuery(const DbName: string;
+                      const Query: string): TSqlResults;
+var
+  DB: TSQLiteDatabase;
+  QTab: TSQLiteTable;
+  AResult: TSqlResult;
+  Index: integer;
+begin
+  result := TSqlResults.Create(true);
+  DB := TSqliteDatabase.Create(DBName);
+  try
+    QTab := Db.GetTable(Query);
+    try
+      while not QTab.EOF do
+      begin
+        AResult := TSqlResult.Create;
+        for Index := 0 to QTab.ColCount -1 do
+          AResult.Add(QTab.FieldAsStringUnicode(Index));
+        result.Add(AResult);
+        QTab.Next;
+      end;
+    finally
+      QTab.Free
+    end;
+  finally
+    DB.Free;
+  end;
+end;
+
+function GetAvoidancesChanged(const DbName: string): string;
+var
+  SqlResults: TSqlResults;
+  ALine: TSqlResult;
+  DBValue: cardinal;
+begin
+  result := '';
+  SqlResults := ExecSqlQuery(DbName,
+    'Select value from data_number ' + #13#10 +
+    'where context like ''%None%'' and name like ''%Avoid%''' + #13#10+
+    'limit 1;');
+  try
+    for ALine in SqlResults do
+    begin
+      DBValue := ALine[0];
+      result := '0x' + IntToHex(DBValue, 8);
+      break;
+    end;
+  finally
+    SqlResults.Free;
+  end;
+end;
+
+function MkGuid(const HexGuid: string): string;
+begin
+  result := LowerCase(HexGuid);
+  insert('-', result, 9);
+  insert('-', result, 14);
+  insert('-', result, 19);
+  insert('-', result, 24);
+end;
+
+function GetVehicleProfile(const DbName: string): TVehicleProfile;
+var
+  SqlResults: TSqlResults;
+  ALine: TSqlResult;
+begin
+  FillChar(result, SizeOf(result), 0);
+
+  SqlResults := ExecSqlQuery(DbName,
+    'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + #13#10 +
+    'from active_vehicle a' + #13#10 +
+    'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + #13#10 +
+    'limit 1');
+  try
+    for ALine in SqlResults do
+    begin
+      if (ALine.Count < 7) then
+        exit;
+      result.Valid            := true;
+      result.Vehicle_Id       := Aline[0];
+      result.TruckType        := Aline[1];
+      result.Name             := Utf8String(VarToStr(Aline[2]));
+      result.GUID             := Utf8String(MkGuid(VarToStr(Aline[3])));
+      result.VehicleType      := ALine[4];
+      result.TransportMode    := ALine[5];
+      result.AdventurousLevel := ALine[6];
+      break;
+    end;
+  finally
+    SqlResults.Free;
+  end;
+end;
+
+end.
+

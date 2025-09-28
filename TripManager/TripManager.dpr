@@ -22,7 +22,6 @@ uses
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
   UFrmShowLog in 'UFrmShowLog.pas' {FrmShowLog},
   UFrmEditRoutePref in 'UFrmEditRoutePref.pas' {FrmEditRoutePref},
-  UnitRegistryKeys in 'UnitRegistryKeys.pas',
   UnitRegistry in '..\CommonUnits\UnitRegistry.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
@@ -48,7 +47,8 @@ uses
   UFrmSelectGPX in '..\CommonUnits\UFrmSelectGPX.pas' {FrmSelectGPX},
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
-  UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas';
+  UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
+  UnitRegistryKeys;
 
 {$R *.res}
 

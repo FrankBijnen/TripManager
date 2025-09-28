@@ -35,6 +35,7 @@ const
   HtmlExtension           = 'html';
   KmlExtension            = 'kml';
   FitExtension            = 'fit';
+  DBExtension             = 'db';
   CurrentMapItem          = 'CurrentMapItem';
 
   FileSysTrip             = 'FileSys';
@@ -333,6 +334,7 @@ type
     function ModelFromDescription(const ModelDescription: string): TGarminModel;
     function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
 
+    procedure ReadDeviceDB(GarminModel: TGarminModel);
     function ReadGarminDevice(var ModelDescription: string): TGarminModel;
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
@@ -398,7 +400,7 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils,
   Winapi.ShellAPI, Vcl.Clipbrd,
   MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
-  UnitGpxTripCompare,
+  UnitGpxTripCompare, UnitSqlite,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
@@ -519,9 +521,58 @@ begin
     result := TGarminModel.GarminGeneric;
 end;
 
+procedure TFrmTripManager.ReadDeviceDB(GarminModel: TGarminModel);
+const
+  SettingsDb = 'settings.db';
+  ProfileDb = 'vehicle_profile.db';
+
+var
+  DBPath, Friendlyname: string;
+  LDelim: integer;
+  Vehicle_Profile: TVehicleProfile;
+begin
+  if not CheckDevice(false) then
+    exit;
+  if not (GarminModel in [TGarminModel.XT2, TGarminModel.Tread2]) then
+    exit;
+
+// Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
+  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, ''));
+  LDelim := LastDelimiter('\', DBPath) -1;
+  DBPath := Copy(DBPath, 1, LDelim) + '\SQlite';
+
+// Copy DB files
+  if (GetIdForPath(CurrentDevice.PortableDev, DBPath, Friendlyname) <> '') then
+  begin
+    if (CopyDeviceFile(DBPath, SettingsDb)) then
+    begin
+      SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
+
+      if (CopyDeviceFile(DBPath, ProfileDb)) then
+      begin
+        Vehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb);
+        if (Vehicle_Profile.Valid) then
+        begin
+          SetRegistry(Reg_VehicleProfileGuid, string(Vehicle_Profile.GUID));
+          if (Vehicle_Profile.GUID = XT2_VehicleProfileGuid) then
+            SetRegistry(Reg_VehicleProfileHash, XT2_VehicleProfileHash)
+          else if (Vehicle_Profile.GUID = Tread2_VehicleProfileGuid) then
+            SetRegistry(Reg_VehicleProfileHash, Tread2_VehicleProfileHash)
+          else
+            SetRegistry(Reg_VehicleProfileHash, 0);
+          SetRegistry(Reg_VehicleId, Vehicle_Profile.Vehicle_Id);
+          SetRegistry(Reg_VehicleProfileTruckType, Vehicle_Profile.TruckType);
+          SetRegistry(Reg_VehicleProfileName, string(Vehicle_Profile.Name));
+          SetRegistry(Reg_DefAdvLevel, Vehicle_Profile.AdventurousLevel);
+        end;
+      end;
+    end;
+  end;
+end;
+
 function TFrmTripManager.ReadGarminDevice(var ModelDescription: string): TGarminModel;
 var
-  DevicePath, DBPath: string;
+  DevicePath: string;
   NFile: string;
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode: TXmlVSNode;
@@ -534,22 +585,13 @@ begin
 
 // Location of GarminDevice.Xml and SQLite
   DevicePath := '?:\Garmin';
-  DBPath := '';
   case result of
     TGarminModel.XT,
     TGarminModel.XT2,
     TGarminModel.Tread2:
     begin
       DevicePath := 'Internal Storage\Garmin';
-      DBPath := 'Internal Storage\.System\SQLite';
     end
-  end;
-
-// Copy DB files
-  if (DBPath <> '') then
-  begin
-    if (CopyDeviceFile(DBPath, 'settings.db')) then
-       (CopyDeviceFile(DBPath, 'vehicle_profile.db'));
   end;
 
 // Copy and read GarminDevice.xml
@@ -1395,6 +1437,7 @@ begin
   PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
+  ReadDeviceDB(TGarminModel(CmbModel.ItemIndex));
 end;
 
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
@@ -1903,7 +1946,7 @@ begin
 
   // Guess model from FriendlyName
   GuessModel(CurrentDevice.FriendlyName);
-
+  ReadDeviceDB(TGarminModel(CmbModel.ItemIndex));
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
@@ -2083,7 +2126,8 @@ begin
             (ContainsText(Ext, GPIExtension)) or
             (ContainsText(Ext, HtmlExtension)) or
             (ContainsText(Ext, KmlExtension)) or
-            (ContainsText(Ext, FitExtension));
+            (ContainsText(Ext, FitExtension)) or
+            (ContainsText(Ext, DBExtension));
 
 end;
 
@@ -2126,7 +2170,10 @@ begin
   else if (ContainsText(Ext, GPIExtension)) then
     LoadGPiFile(ShellListView1.SelectedFolder.PathName, false)
   else if (ContainsText(Ext, FitExtension)) then
-    LoadFitFile(ShellListView1.SelectedFolder.PathName, false);
+    LoadFitFile(ShellListView1.SelectedFolder.PathName, false)
+  else if (ContainsText(Ext, DBExtension)) then
+    ExecSqlQuery(ShellListView1.SelectedFolder.PathName, 'Select * from items').Free;
+//    GetColumns(ShellListView1.SelectedFolder.PathName, 'items').Free;
 end;
 
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);

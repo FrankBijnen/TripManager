@@ -77,7 +77,7 @@
         <VerInfo_MinorVer>6</VerInfo_MinorVer>
         <DCC_MapFile>3</DCC_MapFile>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DCC_UnitSearchPath>..\CommonUnits\Vcl.ShellControls;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\CommonUnits\Vcl.ShellControls;..\CommonUnits\SqliteWrap;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Build>334</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -165,7 +165,6 @@
         <DCCReference Include="UFrmEditRoutePref.pas">
             <Form>FrmEditRoutePref</Form>
         </DCCReference>
-        <DCCReference Include="UnitRegistryKeys.pas"/>
         <DCCReference Include="..\CommonUnits\UnitRegistry.pas"/>
         <DCCReference Include="..\CommonUnits\BCHex\BCHexEditor.pas"/>
         <DCCReference Include="..\CommonUnits\DirMon\Monitor.pas"/>
@@ -197,9 +196,7 @@
         <DCCReference Include="..\CommonUnits\UFrmPlaces.pas">
             <Form>FrmPlaces</Form>
         </DCCReference>
-        <DCCReference Include="..\CommonUnits\UnitUSBEvent.pas">
-            <Form>$R *.res</Form>
-        </DCCReference>
+        <DCCReference Include="..\CommonUnits\UnitUSBEvent.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
