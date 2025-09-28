@@ -46,6 +46,9 @@ uses
   System.Variants, System.SysUtils,
   Winapi.Windows;
 
+const
+  CRLF = #13#10;
+
 function TableNames(const Db: TSqliteDatabase): TStringList;
 var
   TableTab: TSqliteTable;
@@ -55,9 +58,9 @@ begin
 
   Db.ParamsClear;
   SQL :=
-    'SELECT m.name AS table_name' + #13#10 +
-    'FROM sqlite_master AS m ' + #13#10 +
-    'ORDER BY m.name' ;
+    'SELECT m.name AS table_name' + CRLF +
+    'FROM sqlite_master AS m ' + CRLF +
+    'ORDER BY m.name;' ;
 
   TableTab := Db.GetTable(SQL);
   try
@@ -83,14 +86,14 @@ begin
   Db.ParamsClear;
   Db.AddParamTextUnicode(':Tab', UTF8String(TabName));
   SQL :=
-    'SELECT m.name AS table_name, m.type AS table_type, ' + #13#10 +
-    '  p.name AS column_name, p.type AS data_type, ' + #13#10 +
-    '  CASE p.pk WHEN 1 THEN ''PK'' END AS const ' + #13#10 +
-    'FROM sqlite_master AS m ' + #13#10 +
-    '  INNER JOIN pragma_table_info(table_name) AS p ' + #13#10 +
-    'WHERE m.name NOT IN (''sqlite_sequence'') ' + #13#10 +
-    'and m.name like :Tab '+ #13#10 +
-    'ORDER BY m.name, p.cid; ' ;
+    'SELECT m.name AS table_name, m.type AS table_type, ' + CRLF +
+    '  p.name AS column_name, p.type AS data_type, ' + CRLF +
+    '  CASE p.pk WHEN 1 THEN ''PK'' END AS const ' + CRLF +
+    'FROM sqlite_master AS m ' + CRLF +
+    '  INNER JOIN pragma_table_info(table_name) AS p ' + CRLF +
+    'WHERE m.name NOT IN (''sqlite_sequence'') ' + CRLF +
+    'and m.name like :Tab '+ CRLF +
+    'ORDER BY m.name, p.cid;' ;
 
   ColumnTab := Db.GetTable(SQL);
   try
@@ -172,8 +175,8 @@ var
 begin
   result := '';
   SqlResults := ExecSqlQuery(DbName,
-    'Select value from data_number ' + #13#10 +
-    'where context like ''%None%'' and name like ''%Avoid%''' + #13#10+
+    'Select value from data_number ' + CRLF +
+    'where context like ''%None%'' and name like ''%Avoid%''' + CRLF+
     'limit 1;');
   try
     for ALine in SqlResults do
@@ -204,10 +207,10 @@ begin
   FillChar(result, SizeOf(result), 0);
 
   SqlResults := ExecSqlQuery(DbName,
-    'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + #13#10 +
-    'from active_vehicle a' + #13#10 +
-    'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + #13#10 +
-    'limit 1');
+    'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+    'from active_vehicle a' + CRLF +
+    'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
+    'limit 1;');
   try
     for ALine in SqlResults do
     begin
@@ -229,4 +232,3 @@ begin
 end;
 
 end.
-

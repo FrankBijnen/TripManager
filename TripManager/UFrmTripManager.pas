@@ -334,7 +334,7 @@ type
     function ModelFromDescription(const ModelDescription: string): TGarminModel;
     function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
 
-    procedure ReadDeviceDB(GarminModel: TGarminModel);
+    procedure ReadDeviceDB;
     function ReadGarminDevice(var ModelDescription: string): TGarminModel;
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
@@ -521,7 +521,7 @@ begin
     result := TGarminModel.GarminGeneric;
 end;
 
-procedure TFrmTripManager.ReadDeviceDB(GarminModel: TGarminModel);
+procedure TFrmTripManager.ReadDeviceDB;
 const
   SettingsDb = 'settings.db';
   ProfileDb = 'vehicle_profile.db';
@@ -533,7 +533,7 @@ var
 begin
   if not CheckDevice(false) then
     exit;
-  if not (GarminModel in [TGarminModel.XT2, TGarminModel.Tread2]) then
+  if not (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
     exit;
 
 // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
@@ -583,16 +583,11 @@ begin
   if not CheckDevice(false) then
     exit;
 
-// Location of GarminDevice.Xml and SQLite
-  DevicePath := '?:\Garmin';
-  case result of
-    TGarminModel.XT,
-    TGarminModel.XT2,
-    TGarminModel.Tread2:
-    begin
-      DevicePath := 'Internal Storage\Garmin';
-    end
-  end;
+// Location of GarminDevice.Xml
+  if (result in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) then
+    DevicePath := 'Internal Storage\Garmin'
+  else
+    DevicePath := '?:\Garmin';
 
 // Copy and read GarminDevice.xml
   NFile := 'GarminDevice.xml';
@@ -1092,9 +1087,11 @@ end;
 
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
 var
+  HasMtpDevice: boolean;
   DeviceName: string;
 begin
-  if Assigned(CurrentDevice) then
+  HasMtpDevice := Assigned(CurrentDevice);
+  if HasMtpDevice then
     DeviceName := CurrentDevice.FriendlyName
   else
     DeviceName := PrefDevice;
@@ -1103,7 +1100,11 @@ begin
   try
     SelectDevice(DeviceName);
     if CheckDevice(false) then
+    begin
+      if not (HasMtpDevice) then // No device was connected, now it is. Read settings.
+        ReadDeviceDB;
       ReloadFileList;
+    end;
   except
     CurrentDevice := nil; // Prevent needless tries
   end;
@@ -1437,7 +1438,6 @@ begin
   PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
   GuessModel(PrefDevice);
   ReadDefaultFolders;
-  ReadDeviceDB(TGarminModel(CmbModel.ItemIndex));
 end;
 
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
@@ -1838,6 +1838,7 @@ begin
 
   GetDeviceList;
   SelectDevice(PrefDevice);
+  ReadDeviceDB;
   BgDeviceClick(BgDevice);
 end;
 
@@ -1946,7 +1947,7 @@ begin
 
   // Guess model from FriendlyName
   GuessModel(CurrentDevice.FriendlyName);
-  ReadDeviceDB(TGarminModel(CmbModel.ItemIndex));
+
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
@@ -1978,6 +1979,7 @@ begin
   begin
     ReadDefaultFolders;
     SelectDevice(CmbDevices.ItemIndex);
+    ReadDeviceDB;
 
     ListFiles;
   end;
@@ -4524,6 +4526,7 @@ begin
 
       CmbDevices.ItemIndex := Index;
       SelectDevice(Index);
+      ReadDeviceDB;
       BgDeviceClick(BgDevice);
     end;
   end;
