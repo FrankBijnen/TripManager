@@ -4,6 +4,7 @@ interface
 
 uses
   System.Generics.Collections, System.Classes,
+  Data.DB, Datasnap.DBClient,
   SQLiteWrap;
 
 type
@@ -30,7 +31,7 @@ type
   TSqlResult = Tlist<Variant>;
   TSqlResults = TObjectList<TSqlResult>;
 
-function GetTables(const DbName: string): TStringList;
+procedure GetTables(const DbName: string; TabList: TStrings);
 function GetColumns(const DbName: string;
                     const TabName: string): TSqlColumns; overload;
 function GetColumns(const Db: TSQLiteDatabase;
@@ -39,34 +40,36 @@ function ExecSqlQuery(const DbName: string;
                       const Query: string): TSqlResults;
 function GetAvoidancesChanged(const DbName: string): string;
 function GetVehicleProfile(const DbName: string): TVehicleProfile;
-
+procedure CDSFromQuery(const DbName: string;
+                       const Query: string;
+                       const ACds: TClientDataSet);
 implementation
 
 uses
-  System.Variants, System.SysUtils,
+  System.Variants, System.SysUtils, System.StrUtils,
   Winapi.Windows;
 
 const
   CRLF = #13#10;
 
-function TableNames(const Db: TSqliteDatabase): TStringList;
+procedure TableNames(const Db: TSqliteDatabase; TabList: TStrings);
 var
   TableTab: TSqliteTable;
   SQL: string;
 begin
-  result := TStringList.Create;
-
+  TabList.Clear;
   Db.ParamsClear;
   SQL :=
     'SELECT m.name AS table_name' + CRLF +
     'FROM sqlite_master AS m ' + CRLF +
-    'ORDER BY m.name;' ;
+    'WHERE m.type IN (''table'')' + CRLF +
+    'ORDER BY m.name;';
 
   TableTab := Db.GetTable(SQL);
   try
     while not TableTab.EOF do
     begin
-      result.Add(string(TableTab.FieldAsStringUnicode(0)));
+      TabList.Add(string(TableTab.FieldAsStringUnicode(0)));
       TableTab.Next;
     end;
   finally
@@ -91,7 +94,7 @@ begin
     '  CASE p.pk WHEN 1 THEN ''PK'' END AS const ' + CRLF +
     'FROM sqlite_master AS m ' + CRLF +
     '  INNER JOIN pragma_table_info(table_name) AS p ' + CRLF +
-    'WHERE m.name NOT IN (''sqlite_sequence'') ' + CRLF +
+    'WHERE m.type IN (''table'') ' + CRLF +
     'and m.name like :Tab '+ CRLF +
     'ORDER BY m.name, p.cid;' ;
 
@@ -126,13 +129,13 @@ begin
   end;
 end;
 
-function GetTables(const DbName: string): TStringList;
+procedure GetTables(const DbName: string; TabList: TStrings);
 var
   DB: TSQLiteDatabase;
 begin
   DB := TSqliteDatabase.Create(DBName);
   try
-    result := TableNames(DB);
+    TableNames(DB, TabList);
   finally
     DB.Free;
   end;
@@ -165,6 +168,92 @@ begin
   finally
     DB.Free;
   end;
+end;
+
+
+function FieldTypeFromSql(const SqlType: string): TFieldType;
+begin
+  if (ContainsText(SqlType, 'BOOL')) then
+    result := ftInteger
+  else if (ContainsText(SqlType, 'INT')) then
+    result := ftInteger
+  else if (ContainsText(SqlType, 'REAL')) then
+    result := ftFloat
+  else if (ContainsText(SqlType, 'BLOB')) then
+    result := ftBlob
+  else if (ContainsText(SqlType, 'TEXT')) then
+    result := ftMemo
+  else
+    result := ftString;
+end;
+
+function FieldSizeFromSql(const SqlType: string): integer;
+begin
+  if (FieldTypeFromSql(SqlType) = ftString) then
+    result := 255
+  else
+    result := 0;
+end;
+
+procedure CDSFromQuery(const DbName: string;
+                       const Query: string;
+                       const ACds: TClientDataSet);
+var
+  DB: TSQLiteDatabase;
+  QTab: TSQLiteTable;
+  Index: integer;
+  AMemStream: TBytesStream;
+begin
+  DB := TSqliteDatabase.Create(DBName);
+  try
+    QTab := Db.GetTable(Query);
+    ACds.Close;
+    ACds.DisableControls;
+    ACds.ReadOnly := false;
+    ACds.FieldDefs.Clear;
+    for Index := 0 to QTab.ColCount -1 do
+      ACds.FieldDefs.Add(QTab.Columns[Index],
+                         FieldTypeFromSql(QTab.Types[Index]),
+                         FieldSizeFromSql(QTab.Types[Index]),
+                         false);
+    try
+      ACds.CreateDataSet;
+      for Index := 0 to QTab.ColCount -1 do
+        if (FieldTypeFromSql(QTab.Types[Index]) = ftString) then
+         ACds.Fields[Index].DisplayWidth := 15;
+      ACds.LogChanges := false;
+
+      while not QTab.EOF do
+      begin
+        ACds.Insert;
+        for Index := 0 to QTab.ColCount -1 do
+        begin
+          case Acds.Fields[Index].DataType of
+            TFieldType.ftInteger:
+              Acds.Fields[Index].AsInteger := Qtab.FieldAsInteger(Index);
+            TFieldType.ftFloat:
+              Acds.Fields[Index].AsFloat := Qtab.FieldAsDouble(Index);
+            TFieldType.ftBlob:
+              begin
+                AMemStream := Qtab.FieldAsBlobBytes(Index);
+                Acds.Fields[Index].AsBytes := AMemStream.Bytes;
+                AMemStream.Free;
+              end
+            else
+              Acds.Fields[Index].Value := string(Qtab.FieldAsStringUnicode(Index));
+          end;
+        end;
+        ACds.Post;
+        QTab.Next;
+      end;
+    finally
+      QTab.Free;
+      ACds.EnableControls;
+    end;
+  finally
+    DB.Free;
+  end;
+
 end;
 
 function GetAvoidancesChanged(const DbName: string): string;

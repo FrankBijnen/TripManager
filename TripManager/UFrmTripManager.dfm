@@ -683,6 +683,70 @@ object FrmTripManager: TFrmTripManager
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
       end
     end
+    object TsSQlite: TTabSheet
+      Caption = 'SQlite'
+      ImageIndex = 2
+      object Splitter1: TSplitter
+        Left = 0
+        Top = 283
+        Width = 631
+        Height = 5
+        Cursor = crVSplit
+        Align = alBottom
+        ExplicitTop = 190
+      end
+      object PnlSQliteTop: TPanel
+        Left = 0
+        Top = 0
+        Width = 631
+        Height = 25
+        Align = alTop
+        TabOrder = 0
+        object CmbSQliteTabs: TComboBox
+          Left = 1
+          Top = 1
+          Width = 224
+          Height = 21
+          Align = alLeft
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = CmbSQliteTabsChange
+        end
+      end
+      object DbgDeviceDb: TDBGrid
+        Left = 0
+        Top = 25
+        Width = 631
+        Height = 258
+        Align = alClient
+        DataSource = DsDeviceDb
+        Options = [dgAlwaysShowEditor, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgMultiSelect]
+        TabOrder = 1
+        TitleFont.Charset = DEFAULT_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -11
+        TitleFont.Name = 'Tahoma'
+        TitleFont.Style = []
+        OnColEnter = DbgDeviceDbColEnter
+      end
+      object DBMemo: TMemo
+        Left = 0
+        Top = 288
+        Width = 631
+        Height = 90
+        Align = alBottom
+        Font.Charset = OEM_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Consolas'
+        Font.Style = []
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 2
+        OnDblClick = DBMemoDblClick
+      end
+    end
   end
   object PCTTripInfo: TPageControl
     Left = 0
@@ -813,6 +877,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -820,7 +885,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -1263,5 +1328,22 @@ object FrmTripManager: TFrmTripManager
     OnTimer = StatusTimerTimer
     Left = 209
     Top = 130
+  end
+  object DsDeviceDb: TDataSource
+    DataSet = CdsDeviceDb
+    Left = 765
+    Top = 403
+  end
+  object CdsDeviceDb: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    AfterOpen = CdsDeviceDbAfterOpen
+    AfterScroll = CdsDeviceDbAfterScroll
+    Left = 765
+    Top = 483
+  end
+  object SaveBlob: TSaveDialog
+    Left = 685
+    Top = 611
   end
 end

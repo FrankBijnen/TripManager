@@ -14,9 +14,9 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ImgList,
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
-
+  Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent;
+  UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent, Vcl.DBGrids, Vcl.DBCtrls;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -48,6 +48,10 @@ const
   TripNameColWidth        = 250;
 
 type
+  // Get Access to Col of DBGrid
+  TDBGrid = class(Vcl.DBGrids.TDBGrid)
+  end;
+
   TMapReq = record
     Coords: string;
     Desc: string;
@@ -185,6 +189,15 @@ type
     N11: TMenuItem;
     N10: TMenuItem;
     CheckandFixcurrentgpx1: TMenuItem;
+    TsSQlite: TTabSheet;
+    PnlSQliteTop: TPanel;
+    CmbSQliteTabs: TComboBox;
+    DbgDeviceDb: TDBGrid;
+    DsDeviceDb: TDataSource;
+    CdsDeviceDb: TClientDataSet;
+    DBMemo: TMemo;
+    Splitter1: TSplitter;
+    SaveBlob: TSaveDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -272,6 +285,11 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure CheckandFixcurrentgpx1Click(Sender: TObject);
     procedure BgDeviceItems0Click(Sender: TObject);
+    procedure CmbSQliteTabsChange(Sender: TObject);
+    procedure CdsDeviceDbAfterOpen(DataSet: TDataSet);
+    procedure CdsDeviceDbAfterScroll(DataSet: TDataSet);
+    procedure DbgDeviceDbColEnter(Sender: TObject);
+    procedure DBMemoDblClick(Sender: TObject);
   private
     { Private declarations }
     PrefDevice: string;
@@ -326,6 +344,7 @@ type
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
     procedure LoadFitFile(const FileName: string; const FromDevice: boolean);
+    procedure LoadSQlFile(const FileName: string; const FromDevice: boolean);
 
     procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
@@ -334,6 +353,8 @@ type
     function ModelFromDescription(const ModelDescription: string): TGarminModel;
     function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
 
+    procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
+    procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure ReadDeviceDB;
     function ReadGarminDevice(var ModelDescription: string): TGarminModel;
     procedure GuessModel(const FriendlyName: string);
@@ -398,7 +419,8 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils,
-  Winapi.ShellAPI, Vcl.Clipbrd,
+  Winapi.ShellAPI,
+  Vcl.Clipbrd,
   MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
   UnitGpxTripCompare, UnitSqlite,
   UDmRoutePoints, TripManager_GridSelItem,
@@ -645,6 +667,99 @@ end;
 procedure TFrmTripManager.CloseDevice;
 begin
   CurrentDevice := nil;
+end;
+
+procedure TFrmTripManager.GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
+begin
+  Text := ReplaceAll(Copy(Sender.AsString, 1, 1024), [#0, #9, #10], ['.', '.', ' ']);
+end;
+
+procedure TFrmTripManager.GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
+var
+  B: TBytes;
+  Index: integer;
+begin
+  Text := '';
+  B := Sender.AsBytes;
+  if Length(B) < 16 then
+    exit;
+  for Index := 0 to 3 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 4 to 5 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 6 to 7 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 8 to 9 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 10 to 15 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := LowerCase(Text);
+end;
+
+procedure TFrmTripManager.CdsDeviceDbAfterOpen(DataSet: TDataSet);
+var
+  AField: TField;
+begin
+  for AField in DataSet.Fields do
+  begin
+    if (AField is TBlobField) then
+    begin
+      if (ContainsText(Afield.FieldName, 'UID')) then
+      begin
+        AField.OnGetText := GetGUID;
+        Afield.DisplayWidth := 40;
+      end
+      else
+      begin
+        AField.OnGetText := GetBlob;
+        AField.Tag := 1;
+      end;
+    end;
+  end;
+end;
+
+procedure TFrmTripManager.CdsDeviceDbAfterScroll(DataSet: TDataSet);
+var
+  AField: TField;
+  B: TBytes;
+  Index: integer;
+  TmpText: string;
+begin
+  if (Dataset.ControlsDisabled) then
+    exit;
+
+  AField := Dataset.FieldByName(DbgDeviceDb.Columns[DbgDeviceDb.Col -1].FieldName);
+  if (AField.Tag = 1) then
+  begin
+    TmpText := Format('%sChars (Max. 1024):%s%s%s', [#10, #10, AField.DisplayText, #10]);
+
+    B := AField.AsBytes;
+    TmpText := Format('Blob size: %d (Double Click to save to file)%sHex Dump:%s', [Length(B), TmpText, #10]);
+    for Index := 0 to Length(B) -1 do
+    begin
+      TmpText := TmpText + IntToHex(B[Index], 2);
+      if ((Index+1) mod 4 = 0) then
+        TmpText := TmpText + ' ';
+    end;
+    DBMemo.Lines.Text := TmpText;
+  end
+  else
+    DBMemo.Lines.Text := Afield.DisplayText;
+end;
+
+procedure TFrmTripManager.DBMemoDblClick(Sender: TObject);
+var
+  AField: TField;
+begin
+  SaveBlob.InitialDir := ShellTreeView1.Path;
+  AField := CdsDeviceDb.FieldByName(DbgDeviceDb.Columns[DbgDeviceDb.Col -1].FieldName);
+  SaveBlob.FileName := Afield.FieldName;
+  if (SaveBlob.Execute) then
+    TFile.WriteAllBytes(SaveBlob.FileName, AField.AsBytes);
 end;
 
 procedure TFrmTripManager.CheckandFixcurrentgpx1Click(Sender: TObject);
@@ -1808,6 +1923,7 @@ begin
   if not USBEvent.RegisterUSBHandler(GUID_DEVINTERFACE_WPD) then
     ShowMessage('Failed to register WPD Events');
 
+  TsSQlite.TabVisible := false;
   HexEdit := TBCHexEditor.Create(Self);
   HexEdit.Parent := HexPanel;
   HexEdit.Align := alClient;
@@ -2016,6 +2132,22 @@ begin
   SetRegistry(Reg_GarminModel, CmbModel.Text);
 end;
 
+procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);
+var
+  CrWait, CrNormal: HCURSOR;
+begin
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  try
+    DBMemo.Lines.Clear;
+    CDSFromQuery(ShellListView1.SelectedFolder.PathName,
+                 Format('Select * from %s', [CmbSQliteTabs.Text]),
+                 CdsDeviceDb);
+  finally
+    SetCursor(CrNormal);
+  end;
+end;
+
 function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
 var P: integer;
 begin
@@ -2174,8 +2306,7 @@ begin
   else if (ContainsText(Ext, FitExtension)) then
     LoadFitFile(ShellListView1.SelectedFolder.PathName, false)
   else if (ContainsText(Ext, DBExtension)) then
-    ExecSqlQuery(ShellListView1.SelectedFolder.PathName, 'Select * from items').Free;
-//    GetColumns(ShellListView1.SelectedFolder.PathName, 'items').Free;
+    LoadSQlFile(ShellListView1.SelectedFolder.PathName, false);
 end;
 
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
@@ -3479,6 +3610,11 @@ begin
   DeleteObjects(false);
 end;
 
+procedure TFrmTripManager.DbgDeviceDbColEnter(Sender: TObject);
+begin
+  CdsDeviceDbAfterScroll(CdsDeviceDb);
+end;
+
 procedure TFrmTripManager.DeleteDirsClick(Sender: TObject);
 begin
   DeleteObjects(true);
@@ -3904,8 +4040,6 @@ end;
 procedure TFrmTripManager.LoadTripFile(const FileName: string; const FromDevice: boolean);
 var
   CrWait, CrNormal: HCURSOR;
-//  AStream: TBufferedFileStream;
-//  MemStream: TMemoryStream;
   ANItem: TBaseItem;
   CurrentNode: TTreeNode;
   RootNode: TTreeNode;
@@ -3964,6 +4098,7 @@ begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CRNormal := SetCursor(CrWait);
 
+  TsSQlite.TabVisible := false;
   TsTripGpiInfo.Caption := 'Trip info';
 
   ATripList.Clear;
@@ -4049,6 +4184,7 @@ var
   RootNode: TTreeNode;
   GPIRec: TGPI;
 begin
+  TsSQlite.TabVisible := false;
   if (Assigned(ATripList)) then
     ATripList.Clear;
   if (Assigned(AFitInfo)) then
@@ -4105,13 +4241,13 @@ var
   FitInfo, FormattedGpx, OError: string;
   Rc: DWORD;
 begin
+  TsSQlite.TabVisible := false;
   if (Assigned(ATripList)) then
     ATripList.Clear;
   if (Assigned(APOIList)) then
     APOIList.Clear;
 
   TsTripGpiInfo.Caption := 'Course(fit) info';
-
   TvTrip.LockDrawing;
   TvTrip.items.BeginUpdate;
   TvTrip.Items.Clear;
@@ -4155,6 +4291,15 @@ begin
   RootNode.Selected := true;
   BtnSaveTripValues.Enabled := false;
   BtnSaveTripGpiFile.Enabled := false;
+end;
+
+procedure TFrmTripManager.LoadSQlFile(const FileName: string; const FromDevice: boolean);
+begin
+  TsSQlite.TabVisible := true;
+  PctHexOsm.ActivePage := TsSQlite;
+  GetTables(FileName, CmbSQliteTabs.Items);
+  CmbSQliteTabs.ItemIndex := Min(0, CmbSQliteTabs.Items.Count -1);
+  CmbSQliteTabsChange(CmbSQliteTabs);
 end;
 
 procedure TFrmTripManager.SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
