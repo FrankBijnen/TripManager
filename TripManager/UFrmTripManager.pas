@@ -191,13 +191,18 @@ type
     CheckandFixcurrentgpx1: TMenuItem;
     TsSQlite: TTabSheet;
     PnlSQliteTop: TPanel;
-    CmbSQliteTabs: TComboBox;
     DbgDeviceDb: TDBGrid;
     DsDeviceDb: TDataSource;
     CdsDeviceDb: TClientDataSet;
     DBMemo: TMemo;
-    Splitter1: TSplitter;
+    SpltGridBlob: TSplitter;
     SaveBlob: TSaveDialog;
+    MemoSQL: TMemo;
+    PnlQuickSql: TPanel;
+    LblSqlResults: TLabel;
+    PnlQuickSqlGo: TPanel;
+    CmbSQliteTabs: TComboBox;
+    BitBtnSQLGo: TBitBtn;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -290,6 +295,8 @@ type
     procedure CdsDeviceDbAfterScroll(DataSet: TDataSet);
     procedure DbgDeviceDbColEnter(Sender: TObject);
     procedure DBMemoDblClick(Sender: TObject);
+    procedure BitBtnSQLGoClick(Sender: TObject);
+    procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
     PrefDevice: string;
@@ -889,6 +896,27 @@ procedure TFrmTripManager.BgDeviceItems0Click(Sender: TObject);
 begin
   if (CmbModel.ItemIndex in [Ord(TGarminModel.GarminGeneric), Ord(TGarminModel.Unknown)]) then
     Abort;
+end;
+
+procedure TFrmTripManager.BitBtnSQLGoClick(Sender: TObject);
+var
+  CrWait, CrNormal: HCURSOR;
+begin
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+
+  LblSqlResults.Caption := Format('Executing: %s', [MemoSQL.Lines.Text]);
+  LblSqlResults.Update;
+  try
+    DBMemo.Lines.Clear;
+    LblSqlResults.Caption := Format('Records selected: %d',
+                                    [CDSFromQuery(ShellListView1.SelectedFolder.PathName,
+                                                  MemoSQL.Lines.Text,
+                                                  CdsDeviceDb)
+                                    ]);
+  finally
+    SetCursor(CrNormal);
+  end;
 end;
 
 procedure TFrmTripManager.BtnApplyCoordsClick(Sender: TObject);
@@ -2133,19 +2161,9 @@ begin
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);
-var
-  CrWait, CrNormal: HCURSOR;
 begin
-  CrWait := LoadCursor(0, IDC_WAIT);
-  CrNormal := SetCursor(CrWait);
-  try
-    DBMemo.Lines.Clear;
-    CDSFromQuery(ShellListView1.SelectedFolder.PathName,
-                 Format('Select * from %s', [CmbSQliteTabs.Text]),
-                 CdsDeviceDb);
-  finally
-    SetCursor(CrNormal);
-  end;
+  MemoSQL.Lines.Text := Format('Select * from %s limit 100;', [CmbSQliteTabs.Text]);
+  BitBtnSQLGoClick(BitBtnSQLGo);
 end;
 
 function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
@@ -4029,6 +4047,12 @@ procedure TFrmTripManager.MapTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
   EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, "%s", %s);', [FMapReq.Desc, FMapReq.Coords, FMapReq.Zoom, FMapReq.TimeOut]));
+end;
+
+procedure TFrmTripManager.MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = VK_F5) then
+    BitBtnSQLGoClick(BitBtnSQLGo);
 end;
 
 procedure TFrmTripManager.LoadHex(const FileName: string);

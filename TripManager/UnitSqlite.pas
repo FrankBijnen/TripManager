@@ -40,9 +40,9 @@ function ExecSqlQuery(const DbName: string;
                       const Query: string): TSqlResults;
 function GetAvoidancesChanged(const DbName: string): string;
 function GetVehicleProfile(const DbName: string): TVehicleProfile;
-procedure CDSFromQuery(const DbName: string;
-                       const Query: string;
-                       const ACds: TClientDataSet);
+function CDSFromQuery(const DbName: string;
+                      const Query: string;
+                      const ACds: TClientDataSet): integer;
 implementation
 
 uses
@@ -170,7 +170,6 @@ begin
   end;
 end;
 
-
 function FieldTypeFromSql(const SqlType: string): TFieldType;
 begin
   if (ContainsText(SqlType, 'BOOL')) then
@@ -195,15 +194,16 @@ begin
     result := 0;
 end;
 
-procedure CDSFromQuery(const DbName: string;
-                       const Query: string;
-                       const ACds: TClientDataSet);
+function CDSFromQuery(const DbName: string;
+                      const Query: string;
+                      const ACds: TClientDataSet): integer;
 var
   DB: TSQLiteDatabase;
   QTab: TSQLiteTable;
   Index: integer;
   AMemStream: TBytesStream;
 begin
+  result := 0;
   DB := TSqliteDatabase.Create(DBName);
   try
     QTab := Db.GetTable(Query);
@@ -244,6 +244,7 @@ begin
           end;
         end;
         ACds.Post;
+        Inc(result);
         QTab.Next;
       end;
     finally

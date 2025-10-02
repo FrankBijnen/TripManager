@@ -686,7 +686,7 @@ object FrmTripManager: TFrmTripManager
     object TsSQlite: TTabSheet
       Caption = 'SQlite'
       ImageIndex = 2
-      object Splitter1: TSplitter
+      object SpltGridBlob: TSplitter
         Left = 0
         Top = 283
         Width = 631
@@ -699,25 +699,109 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 631
-        Height = 25
+        Height = 105
         Align = alTop
         TabOrder = 0
-        object CmbSQliteTabs: TComboBox
+        object MemoSQL: TMemo
+          Left = 1
+          Top = 57
+          Width = 629
+          Height = 47
+          Align = alClient
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Consolas'
+          Font.Style = []
+          Lines.Strings = (
+            'MemoSQL')
+          ParentFont = False
+          TabOrder = 0
+          OnKeyUp = MemoSQLKeyUp
+        end
+        object PnlQuickSql: TPanel
           Left = 1
           Top = 1
-          Width = 224
-          Height = 21
-          Align = alLeft
-          Style = csDropDownList
-          TabOrder = 0
-          OnChange = CmbSQliteTabsChange
+          Width = 629
+          Height = 56
+          Align = alTop
+          TabOrder = 1
+          object LblSqlResults: TLabel
+            Left = 1
+            Top = 33
+            Width = 627
+            Height = 22
+            Align = alClient
+            AutoSize = False
+            Caption = 'LblSqlResults'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+            Layout = tlCenter
+            ExplicitLeft = 96
+            ExplicitTop = 32
+            ExplicitWidth = 31
+            ExplicitHeight = 13
+          end
+          object PnlQuickSqlGo: TPanel
+            Left = 1
+            Top = 1
+            Width = 627
+            Height = 32
+            Align = alTop
+            Caption = 'PnlQuickSqlGo'
+            TabOrder = 0
+            object CmbSQliteTabs: TComboBox
+              AlignWithMargins = True
+              Left = 4
+              Top = 4
+              Width = 562
+              Height = 24
+              Align = alClient
+              Style = csDropDownList
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clWindowText
+              Font.Height = -13
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ParentFont = False
+              TabOrder = 0
+              OnChange = CmbSQliteTabsChange
+            end
+            object BitBtnSQLGo: TBitBtn
+              Left = 569
+              Top = 1
+              Width = 57
+              Height = 30
+              Align = alRight
+              Glyph.Data = {
+                76010000424D7601000000000000760000002800000020000000100000000100
+                04000000000000010000130B0000130B00001000000000000000000000000000
+                800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+                FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+                33333333333333333333EEEEEEEEEEEEEEE333FFFFFFFFFFFFF3E00000000000
+                00E337777777777777F3E0F77777777770E337F33333333337F3E0F333333333
+                70E337F3333F333337F3E0F33303333370E337F3337FF33337F3E0F333003333
+                70E337F33377FF3337F3E0F33300033370E337F333777FF337F3E0F333000033
+                70E337F33377773337F3E0F33300033370E337F33377733337F3E0F333003333
+                70E337F33377333337F3E0F33303333370E337F33373333337F3E0F333333333
+                70E337F33333333337F3E0FFFFFFFFFFF0E337FFFFFFFFFFF7F3E00000000000
+                00E33777777777777733EEEEEEEEEEEEEEE33333333333333333}
+              NumGlyphs = 2
+              TabOrder = 1
+              OnClick = BitBtnSQLGoClick
+            end
+          end
         end
       end
       object DbgDeviceDb: TDBGrid
         Left = 0
-        Top = 25
+        Top = 105
         Width = 631
-        Height = 258
+        Height = 178
         Align = alClient
         DataSource = DsDeviceDb
         Options = [dgAlwaysShowEditor, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgMultiSelect]
