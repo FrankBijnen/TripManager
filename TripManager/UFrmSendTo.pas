@@ -28,6 +28,8 @@ type
     MemoAdditional: TMemo;
     MemoTasks: TMemo;
     BtnHelp: TBitBtn;
+    PnlModel: TPanel;
+    CmbTripOption: TComboBox;
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PCTDestinationChange(Sender: TObject);
@@ -62,7 +64,8 @@ var
 implementation
 
 uses
-  UnitRegistry, UnitRegistryKeys, UnitStringUtils;
+  System.TypInfo, System.Math,
+  UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -83,6 +86,13 @@ const
     'Send a KML file. To display in Google Earth, or other compatible application.',
     'Send a HTML file. To display in a browser.',
     'Send a Fit file. For Edge models');
+
+  TripOptions: string =
+    'Recalculation forced' + #10 +
+    'No recalculation forced (BC only)' + #10 +
+    'Preserve route to track (BC only)' + #10 +
+    'Preserve route to track + locations (BC only)' + #10 +
+    'Preserve route to track + locations + route prefs (BC only)';
 
 procedure TFrmSendTo.EnableItems;
 begin
@@ -112,6 +122,9 @@ begin
 end;
 
 procedure TFrmSendTo.UpdateDesign;
+var
+  RegModelValue: string;
+  TripModel: TTripModel;
 begin
   // Show/hide
   if (ShowHelp) then
@@ -125,6 +138,15 @@ begin
 
   // Update texts
   LblModel.Caption := GetRegistry(Reg_GarminModel, ''); // LblModel is only visible for Trip models
+  CmbTripOption.Items.Text := TripOptions;
+
+  // GarminModel has entries not valid for Trips. UnitTripObjects should check, and correct.
+  RegModelValue := StringReplace(GetRegistry(Reg_GarminModel, ''), ' ', '', [rfReplaceAll]);
+  TripModel := TTripModel(GetEnumValue(TypeInfo(TTripModel), RegModelValue));
+  if (TripModel = TTripModel.XT) then
+    CmbTripOption.Items.Delete(Ord(TTripOption.ttTripTrackLocPrefs));
+  CmbTripOption.ItemIndex := Min(CmbTripOption.Items.Count -1, Ord(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc))));
+
   case PCTDestination.ActivePageIndex of
     0:begin
         SendToDest := TSendToDest.stDevice;
@@ -178,6 +200,8 @@ end;
 
 procedure TFrmSendTo.StorePrefs;
 begin
+  SetRegistry(Reg_TripOption, CmbTripOption.ItemIndex);
+
   Funcs := TSetProcessOptions.StorePrefs(TvSelections);
 end;
 

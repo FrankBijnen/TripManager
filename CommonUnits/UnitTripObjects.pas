@@ -1,4 +1,4 @@
-﻿unit unitTripObjects;
+﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
 interface

@@ -56,7 +56,7 @@ object FrmSendTo: TFrmSendTo
     Left = 0
     Top = 89
     Width = 592
-    Height = 105
+    Height = 112
     Align = alTop
     Caption = 'Choose destination'
     TabOrder = 1
@@ -64,8 +64,8 @@ object FrmSendTo: TFrmSendTo
       Left = 2
       Top = 17
       Width = 588
-      Height = 86
-      ActivePage = TabFolder
+      Height = 93
+      ActivePage = TabDevice
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -80,6 +80,7 @@ object FrmSendTo: TFrmSendTo
       TabStop = False
       OnChange = PCTDestinationChange
       OnChanging = PCTDestinationChanging
+      ExplicitHeight = 86
       object TabDevice: TTabSheet
         Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
@@ -92,7 +93,7 @@ object FrmSendTo: TFrmSendTo
           Left = 0
           Top = 0
           Width = 580
-          Height = 56
+          Height = 63
           TabStop = False
           Align = alClient
           Color = clInfoBk
@@ -115,6 +116,7 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitHeight = 56
         end
       end
       object TabFolder: TTabSheet
@@ -124,7 +126,7 @@ object FrmSendTo: TFrmSendTo
           Left = 0
           Top = 0
           Width = 580
-          Height = 56
+          Height = 63
           Align = alClient
           Color = clInfoBk
           Font.Charset = DEFAULT_CHARSET
@@ -144,18 +146,20 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitHeight = 56
         end
       end
     end
   end
   object GrpDestination: TGroupBox
     Left = 0
-    Top = 194
+    Top = 201
     Width = 592
     Height = 34
     Align = alTop
     Caption = 'Destination device and folder(s)'
     TabOrder = 3
+    ExplicitTop = 194
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
@@ -184,43 +188,70 @@ object FrmSendTo: TFrmSendTo
   end
   object GrpModel: TGroupBox
     Left = 0
-    Top = 228
+    Top = 235
     Width = 592
     Height = 38
     Align = alTop
     Caption = 'Model used for creating .trip files'
     TabOrder = 2
-    object LblModel: TLabel
-      AlignWithMargins = True
-      Left = 7
-      Top = 19
-      Width = 578
-      Height = 15
-      Margins.Left = 5
-      Margins.Top = 2
-      Margins.Right = 5
-      Margins.Bottom = 2
+    ExplicitTop = 228
+    object PnlModel: TPanel
+      Left = 2
+      Top = 17
+      Width = 588
+      Height = 41
       Align = alTop
-      Color = clWindow
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Segoe UI'
-      Font.Style = [fsBold]
-      ParentColor = False
-      ParentFont = False
-      Transparent = False
-      Layout = tlCenter
-      WordWrap = True
-      StyleElements = [seBorder]
-      ExplicitWidth = 3
+      TabOrder = 0
+      object LblModel: TLabel
+        Left = 1
+        Top = 1
+        Width = 199
+        Height = 39
+        Margins.Left = 5
+        Margins.Top = 2
+        Margins.Right = 5
+        Margins.Bottom = 2
+        Align = alClient
+        Color = clWindow
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        StyleElements = [seBorder]
+        ExplicitLeft = 6
+        ExplicitTop = 3
+        ExplicitWidth = 15
+        ExplicitHeight = 576
+      end
+      object CmbTripOption: TComboBox
+        Left = 200
+        Top = 1
+        Width = 387
+        Height = 23
+        Align = alRight
+        TabOrder = 0
+        Text = 'CmbTripOption'
+        Items.Strings = (
+          'Recalculation forced'
+          'No recalculation forced (BC only)'
+          'Preserve route to track (BC only)'
+          'Preserve route to track + locations (BC only)'
+          
+            'Preserve route to track + locations + route prefs (BC, XT2/Tread' +
+            ' 2 only)')
+      end
     end
   end
   object TvSelections: TTreeView
     Left = 0
-    Top = 266
+    Top = 273
     Width = 592
-    Height = 285
+    Height = 278
     Align = alClient
     AutoExpand = True
     CheckBoxes = True
@@ -270,6 +301,8 @@ object FrmSendTo: TFrmSendTo
       28002E0068006D0074006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
+    ExplicitTop = 266
+    ExplicitHeight = 285
   end
   object PnlBot: TPanel
     Left = 0
