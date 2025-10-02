@@ -22,20 +22,20 @@ const
   SelectMTPDevice         = 'Select an MTP device';
   UpDirString             = '..';
 
-  GpxExtension            = 'gpx';
-  GpxMask                 = '*.' + GpxExtension;
+  GpxExtension            = '.gpx';
+  GpxMask                 = '*' + GpxExtension;
 
-  TripExtension           = 'trip';
-  TripMask                = '*.' + TripExtension;
+  TripExtension           = '.trip';
+  TripMask                = '*' + TripExtension;
 
-  GPIExtension            = 'gpi';
-  GPIMask                 = '*.' + GPIExtension;
-  UnlExtension            = 'unl';
+  GPIExtension            = '.gpi';
+  GPIMask                 = '*' + GPIExtension;
+  UnlExtension            = '.unl';
 
-  HtmlExtension           = 'html';
-  KmlExtension            = 'kml';
-  FitExtension            = 'fit';
-  DBExtension             = 'db';
+  HtmlExtension           = '.html';
+  KmlExtension            = '.kml';
+  FitExtension            = '.fit';
+  DBExtension             = '.db';
   CurrentMapItem          = 'CurrentMapItem';
 
   FileSysTrip             = 'FileSys';
@@ -351,7 +351,7 @@ type
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
     procedure LoadFitFile(const FileName: string; const FromDevice: boolean);
-    procedure LoadSQlFile(const FileName: string; const FromDevice: boolean);
+    procedure LoadSqlFile(const FileName: string; const FromDevice: boolean);
 
     procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
@@ -1804,7 +1804,7 @@ begin
 
   if (FrmNewTrip.ShowModal = mrOk) then
   begin
-    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
+    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + FrmNewTrip.EdNewTrip.Text, TripExtension);
     EditTrip(true);
   end;
 end;
@@ -1818,7 +1818,7 @@ begin
 
   if (FrmNewTrip.ShowModal = mrOk) then
   begin
-    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, '.' + TripExtension);
+    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, TripExtension);
     EditTrip(true);
   end;
 end;
@@ -2324,7 +2324,7 @@ begin
   else if (ContainsText(Ext, FitExtension)) then
     LoadFitFile(ShellListView1.SelectedFolder.PathName, false)
   else if (ContainsText(Ext, DBExtension)) then
-    LoadSQlFile(ShellListView1.SelectedFolder.PathName, false);
+    LoadSqlFile(ShellListView1.SelectedFolder.PathName, false);
 end;
 
 procedure TFrmTripManager.ShellListView1ColumnClick(Sender: TObject; Column: TListColumn);
@@ -2432,7 +2432,7 @@ begin
                               GetRoutesTmp, OOutput, OError, Rc);
         if (Rc <> 0) then
           raise Exception.Create(OOutput + #10 + OError);
-        ActGpxFile := GetRoutesTmp + ChangeFileExt(ExtractFilename(ActGpxFile), '.' + GpxExtension);
+        ActGpxFile := GetRoutesTmp + ChangeFileExt(ExtractFilename(ActGpxFile), GpxExtension);
         TFile.WriteAllText(ActGpxFile, OOutput);
       end;
 
@@ -3567,7 +3567,7 @@ begin
                          (ContainsText(ANitem.SubItems[2], GPIExtension))
                        );
       UnlockFiles := UnlockFiles or
-         (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, ChangeFileExt(ANitem.Caption, '.' + UnlExtension) ) <> '');
+         (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, ChangeFileExt(ANitem.Caption, UnlExtension) ) <> '');
     end;
     Inc(SelCount);
   end;
@@ -3713,7 +3713,7 @@ begin
         TripFileName := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
         TmpTripList.LoadFromFile(TripFileName);
         TripName := TmTripName(TmpTripList.GetItem('mTripName')).AsString;
-        TripFilename := TripName + '.' + TripExtension;
+        TripFilename := TripName + TripExtension;
 
         // Check already exists
         if (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TripFilename) <> '') then
@@ -4288,7 +4288,7 @@ begin
       raise Exception.Create(FitInfo + #10 + OError);
     AFitInfo.Text := FitInfo;
 
-    ActGpxFile := GetRoutesTmp + ChangeFileExt(ExtractFilename(FileName), '.' + GpxExtension);
+    ActGpxFile := GetRoutesTmp + ChangeFileExt(ExtractFilename(FileName), GpxExtension);
     DeleteTempFiles(GetRoutesTmp, '*.*');
     Sto_RedirectedExecute(Format('Fit2Gpx.exe "%s"', [FileName]),
                           GetRoutesTmp, FormattedGpx, OError, Rc);
@@ -4317,13 +4317,13 @@ begin
   BtnSaveTripGpiFile.Enabled := false;
 end;
 
-procedure TFrmTripManager.LoadSQlFile(const FileName: string; const FromDevice: boolean);
+procedure TFrmTripManager.LoadSqlFile(const FileName: string; const FromDevice: boolean);
 begin
-  TsSQlite.TabVisible := true;
-  PctHexOsm.ActivePage := TsSQlite;
   GetTables(FileName, CmbSQliteTabs.Items);
   CmbSQliteTabs.ItemIndex := Min(0, CmbSQliteTabs.Items.Count -1);
   CmbSQliteTabsChange(CmbSQliteTabs);
+  TsSQlite.TabVisible := true;
+  PctHexOsm.ActivePage := TsSQlite;
 end;
 
 procedure TFrmTripManager.SetCheckMark(const AListItem: TListItem; const NewValue: boolean);

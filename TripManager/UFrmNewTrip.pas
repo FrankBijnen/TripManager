@@ -45,9 +45,9 @@ uses
 procedure TFrmNewTrip.ShowResultFile;
 begin
   if (CurrentDevice <> nil) then
-    EdResultFile.Text := ChangeFileExt(IncludeTrailingPathDelimiter(DevicePath) + EdNewTrip.Text, '.' + TripExtension)
+    EdResultFile.Text := ChangeFileExt(IncludeTrailingPathDelimiter(DevicePath) + EdNewTrip.Text, TripExtension)
   else
-    EdResultFile.Text := ChangeFileExt(IncludeTrailingPathDelimiter(CurPath) + EdNewTrip.Text, '.' + TripExtension);
+    EdResultFile.Text := ChangeFileExt(IncludeTrailingPathDelimiter(CurPath) + EdNewTrip.Text, TripExtension);
   BtnOk.Enabled := (EdNewTrip.Text <> '');
 end;
 
