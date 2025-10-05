@@ -168,7 +168,7 @@ object FrmTripManager: TFrmTripManager
             'XT2'
             'Tread 2'
             'Edge'
-            'Generic'
+            'Garmin'
             'Unknown')
         end
       end

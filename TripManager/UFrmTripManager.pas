@@ -299,7 +299,6 @@ type
     procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
-    PrefDevice: string;
     DeviceFile: Boolean;
     HexEditFile: string;
 
@@ -367,7 +366,8 @@ type
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
     procedure SelectDevice(const Indx: integer); overload;
-    procedure SelectDevice(const Device: string); overload;
+    procedure SelectDeviceByName(const Device: string = '');
+    procedure SelectDeviceById(const Device: string);
     function GetItemType(const AListview: TListView): TDirType;
 
     procedure CloseDevice;
@@ -556,7 +556,7 @@ const
   ProfileDb = 'vehicle_profile.db';
 
 var
-  DBPath, Friendlyname: string;
+  ModelIndex, DBPath, Friendlyname: string;
   LDelim: integer;
   Vehicle_Profile: TVehicleProfile;
 begin
@@ -566,7 +566,8 @@ begin
     exit;
 
 // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
-  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, ''));
+  ModelIndex := GetRegistry(Reg_CurrentModel, '0');
+  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, '', ModelIndex));
   LDelim := LastDelimiter('\', DBPath) -1;
   DBPath := Copy(DBPath, 1, LDelim) + '\SQlite';
 
@@ -592,7 +593,7 @@ begin
           SetRegistry(Reg_VehicleId, Vehicle_Profile.Vehicle_Id);
           SetRegistry(Reg_VehicleProfileTruckType, Vehicle_Profile.TruckType);
           SetRegistry(Reg_VehicleProfileName, string(Vehicle_Profile.Name));
-          SetRegistry(Reg_DefAdvLevel, Vehicle_Profile.AdventurousLevel);
+          SetRegistry(Reg_DefAdvLevel, Vehicle_Profile.AdventurousLevel +1);
         end;
       end;
     end;
@@ -666,8 +667,11 @@ begin
     CmbModelChange(CmbModel);
   end;
 
-  SetRegistry(Reg_CurrentDevice, ModelDisplayed);
   SetRegistry(Reg_GarminModel, CmbModel.Text);
+  SetRegistry(Reg_CurrentDevice, ModelDisplayed);
+  SetRegistry(Reg_CurrentModel, ModelIndex);
+
+  ReadDefaultFolders;
 end;
 
 // No need to close manually.
@@ -1231,17 +1235,17 @@ end;
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
 var
   HasMtpDevice: boolean;
-  DeviceName: string;
+  DeviceId: string;
 begin
   HasMtpDevice := Assigned(CurrentDevice);
   if HasMtpDevice then
-    DeviceName := CurrentDevice.FriendlyName
+    DeviceId := CurrentDevice.Device
   else
-    DeviceName := PrefDevice;
+    DeviceId := '';
 
   GetDeviceList;
   try
-    SelectDevice(DeviceName);
+    SelectDeviceById(DeviceId);
     if CheckDevice(false) then
     begin
       if not (HasMtpDevice) then // No device was connected, now it is. Read settings.
@@ -1563,24 +1567,34 @@ end;
 procedure TFrmTripManager.BtnSetDeviceDefaultClick(Sender: TObject);
 var
   CurrentDevicePath: string;
+  ModelIndex: integer;
+  SubKey: string;
 begin
-  CheckDevice;
+  // Allow setting model without an MTP device connected
+  if (not CheckDevice(false)) then
+  begin
+    ModelIndex := CmbModel.ItemIndex;
+    SubKey := IntToStr(ModelIndex);
+    SetRegistry(Reg_CurrentModel, ModelIndex);
+    SetRegistry(Reg_PrefDev_Key, '', SubKey);
+    exit;
+  end;
+
   // Make Drive letter a ?. Allow wildcard.
   CurrentDevicePath := GetDevicePath(FCurrentPath);
   if (Copy(CurrentDevicePath, 2, 2) = ':\') then
     CurrentDevicePath[1] := '?';
 
   // Save Device settings
-  SetRegistry(Reg_PrefDev_Key, CurrentDevice.FriendlyName);
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  SubKey := IntToStr(ModelIndex);
+  SetRegistry(Reg_PrefDev_Key, CurrentDevice.FriendlyName, SubKey);
   case (BgDevice.ItemIndex) of
-    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath);
-    1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath);
-    2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath);
+    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, SubKey);
+    1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath, SubKey);
+    2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath, SubKey);
   end;
-
-  PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
-  GuessModel(PrefDevice);
-  ReadDefaultFolders;
+  GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
 end;
 
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
@@ -1981,7 +1995,7 @@ begin
   end;
 
   GetDeviceList;
-  SelectDevice(PrefDevice);
+  SelectDeviceByName;
   ReadDeviceDB;
   BgDeviceClick(BgDevice);
 end;
@@ -2097,17 +2111,55 @@ begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
 end;
 
-procedure TFrmTripManager.SelectDevice(const Device: string);
+procedure TFrmTripManager.SelectDeviceByName(const Device: string = '');
 var
   Index: integer;
+  KnownDevices: TStringList;
 begin
+  if (Device <> '') then
+  begin
+    KnownDevices := TStringList.Create;
+    KnownDevices.Add(Device);
+  end
+  else
+    KnownDevices := TSetProcessOptions.GetKnownDevices;
+
+  try
   CmbDevices.ItemIndex := -1;
   CmbDevices.Text := SelectMTPDevice;
 
   for Index := 0 to DeviceList.Count - 1 do
   begin
     // Does this device match our registry setting? Select right away
-    if (SameText(TMTP_Device(DeviceList[Index]).FriendlyName, Device)) then
+      if (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
+    begin
+      CmbDevices.ItemIndex := Index;
+      SelectDevice(Index);
+      break;
+    end;
+  end;
+  finally
+    KnownDevices.Free;
+  end;
+end;
+
+procedure TFrmTripManager.SelectDeviceById(const Device: string);
+var
+  Index: integer;
+begin
+  if (Device = '') then
+  begin
+    SelectDeviceByName;
+    exit;
+  end;
+
+  CmbDevices.ItemIndex := -1;
+  CmbDevices.Text := SelectMTPDevice;
+
+  for Index := 0 to DeviceList.Count - 1 do
+  begin
+    // Does this device match our registry setting? Select right away
+    if (TMTP_Device(DeviceList[Index]).Device = Device) then
     begin
       CmbDevices.ItemIndex := Index;
       SelectDevice(Index);
@@ -2121,7 +2173,6 @@ begin
   if (CmbDevices.ItemIndex > -1) and
      (CmbDevices.ItemIndex < CmbDevices.Items.Count) then
   begin
-    ReadDefaultFolders;
     SelectDevice(CmbDevices.ItemIndex);
     ReadDeviceDB;
 
@@ -2130,7 +2181,11 @@ begin
 end;
 
 procedure TFrmTripManager.CmbModelChange(Sender: TObject);
+var
+  ModelIndex: integer;
 begin
+  ModelIndex := CmbModel.ItemIndex;
+
   BgDevice.ItemIndex := 0; // Default to trips
   BgDevice.Items[0].Caption := 'Trips';
   BgDevice.Items[1].Caption := 'Gpx';
@@ -2155,8 +2210,8 @@ begin
     end;
   end;
 
-  SetRegistry(Reg_EnableTripFuncs, (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]));
-  SetRegistry(Reg_EnableFitFuncs, (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.GarminEdge]));
+  SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]));
+  SetRegistry(Reg_EnableFitFuncs, (TGarminModel(ModelIndex) in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_GarminModel, CmbModel.Text);
 end;
 
@@ -3664,7 +3719,7 @@ begin
   NewName := OldName;
   if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) and
      (Assigned(ATripList)) then
-    NewName := ATripList.GetValue('mTripName') + '.' + TripExtension;
+    NewName := ATripList.GetValue('mTripName') + TripExtension;
 
   if not (InputQuery('Rename file.', Format('Type a new name for %s', [OldName]), NewName)) then
     exit;
@@ -3938,7 +3993,7 @@ begin
 
     // Save Device and folder info
     DeviceFolder[BgDevice.ItemIndex] := GetDevicePath(FCurrentPath);
-    EdDeviceFolder.Text := CurrentDevice.FriendlyName + '\' + DeviceFolder[BgDevice.ItemIndex];
+    EdDeviceFolder.Text := IncludeTrailingPathDelimiter(CurrentDevice.FriendlyName) + DeviceFolder[BgDevice.ItemIndex];
 
     // Trips need to be checked, and tripname filled
     case BgDevice.ItemIndex of
@@ -4404,10 +4459,18 @@ begin
 end;
 
 procedure TFrmTripManager.ReadDefaultFolders;
+var
+  ModelIndex: integer;
+  SubKey: string;
 begin
-  DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val);
-  DeviceFolder[1] := GetRegistry(Reg_PrefDevGpxFolder_Key,   Reg_PrefDevGpxFolder_Val);
-  DeviceFolder[2] := GetRegistry(Reg_PrefDevPoiFolder_Key,   Reg_PrefDevPoiFolder_Val);
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  SubKey := IntToStr(ModelIndex);
+  DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key,
+                                 TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey);
+  DeviceFolder[1] := GetRegistry(Reg_PrefDevGpxFolder_Key,
+                                 TSetProcessOptions.GetKnownPath(ModelIndex, 1), SubKey);
+  DeviceFolder[2] := GetRegistry(Reg_PrefDevPoiFolder_Key,
+                                 TSetProcessOptions.GetKnownPath(ModelIndex, 2), SubKey);
 end;
 
 procedure TFrmTripManager.ReadColumnSettings;
@@ -4461,10 +4524,15 @@ begin
 end;
 
 procedure TFrmTripManager.ReadSettings;
+var
+  ModelIndex: integer;
 begin
-  PrefDevice := GetRegistry(Reg_PrefDev_Key, XT_Name);
-  GuessModel(PrefDevice);
-  ReadDefaultFolders;
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  if (Assigned(CurrentDevice)) then
+    GuessModel(CurrentDevice.FriendlyName)
+  else
+    GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
+
   WarnModel := GetRegistry(Reg_WarnModel_Key, True);
   WarnRecalc := mrNone;
   RoutePointTimeOut := GetRegistry(Reg_RoutePointTimeOut_Key, Reg_RoutePointTimeOut_Val);
@@ -4654,50 +4722,56 @@ end;
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
   Index: integer;
-  SelectedDeviceName: string;
+  SelectedDevice: string;
+  KnownDevices: TStringList;
 begin
-  // Save currently selected device name
-  if Assigned(CurrentDevice) then
-    SelectedDeviceName := CurrentDevice.FriendlyName
-  else
-    SelectedDeviceName := '';
+  KnownDevices := TSetProcessOptions.GetKnownDevices;
+  try
+    // Save currently selected device Id
+    if Assigned(CurrentDevice) then
+      SelectedDevice := CurrentDevice.Device
+    else
+      SelectedDevice := '';
 
-  // Removed USB device is our connected device?
-  if (Inserted = false) and
-     (Assigned(CurrentDevice)) and
-     (SameText(CurrentDevice.Device, DeviceName)) then
-  begin
-    Index := DeviceIdInList(DeviceName);  // List before remove
-    if (Index > -1) then
-      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Disconnected');
-  end;
-
-  // rebuild device list
-  GetDeviceList;
-
-  // Select the previously selected device and reload the file list
-  if (SelectedDeviceName <> '') then
-  begin
-    SelectDevice(SelectedDeviceName);
-    if CheckDevice(false) then
-      ReloadFileList;
-  end;
-
-  // No Device connected and inserted USB device is our preferred device?
-  if (Inserted) and
-     (SelectedDeviceName = '') then
-  begin
-    Index := DeviceIdInList(DeviceName); // List after insert
-    if (Index > -1) and
-       (TMTP_Device(DeviceList[Index]).FriendlyName = PrefDevice) then
+    // Removed USB device is our connected device?
+    if (Inserted = false) and
+       (Assigned(CurrentDevice)) and
+       (SameText(CurrentDevice.Device, DeviceName)) then
     begin
-      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Connected');
-
-      CmbDevices.ItemIndex := Index;
-      SelectDevice(Index);
-      ReadDeviceDB;
-      BgDeviceClick(BgDevice);
+      Index := DeviceIdInList(DeviceName);  // List before remove
+      if (Index > -1) then
+        ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Disconnected');
     end;
+
+    // rebuild device list
+    GetDeviceList;
+
+    // Select the previously selected device and reload the file list
+    if (SelectedDevice <> '') then
+    begin
+      SelectDeviceById(SelectedDevice);
+      if CheckDevice(false) then
+        ReloadFileList;
+    end;
+
+    // No Device connected and inserted USB device is our preferred device?
+    if (Inserted) and
+       (SelectedDevice = '') then
+    begin
+      Index := DeviceIdInList(DeviceName); // List after insert
+      if (Index > -1) and
+         (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
+      begin
+        ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Connected');
+
+        CmbDevices.ItemIndex := Index;
+        SelectDevice(Index);
+        ReadDeviceDB;
+        BgDeviceClick(BgDevice);
+      end;
+    end;
+  finally
+    KnownDevices.Free;
   end;
 end;
 
@@ -4707,6 +4781,7 @@ begin
   SbPostProcess.Panels[1].Text := Status;
 
   CurrentDevice := nil;
+  CmbModel.ItemIndex := Ord(TGarminModel.Unknown);
   ReadDefaultFolders;
   TvTrip.Items.Clear;
   ClearTripInfo;

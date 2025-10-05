@@ -3,17 +3,18 @@ unit UnitRegistry;
 interface
 
 uses
-  System.Win.Registry, System.TypInfo, Winapi.Windows;
+  System.Win.Registry, System.TypInfo,
+  Winapi.Windows;
 
 const
   BooleanValues: array[boolean] of string = ('False', 'True');
 
-function GetRegistry(const Name: string; const Default: string = ''): string; overload;
+function GetRegistry(const Name: string; const Default: string = ''; const SubKey: string = ''): string; overload;
 function GetRegistry(const Name: string; const Default: boolean): boolean; overload;
 function GetRegistry(const Name: string; const Default: integer): integer; overload;
 function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo): integer; overload;
 
-procedure SetRegistry(const Name, Value: string); overload;
+procedure SetRegistry(const Name, Value: string; const SubKey: string = ''); overload;
 procedure SetRegistry(const Name: string; Value: boolean); overload;
 procedure SetRegistry(const Name: string; Value: integer); overload;
 
@@ -21,7 +22,8 @@ implementation
 
 uses
   Vcl.Forms,
-  System.SysUtils;
+  System.SysUtils,
+  UnitStringUtils;
 
 function ApplicationKey: string;
 begin
@@ -44,9 +46,14 @@ begin
     result := Default;
 end;
 
-function GetRegistry(const Name: string; const Default: string = ''): string;
+function GetRegistry(const Name: string; const Default: string = ''; const SubKey: string = ''): string;
+var
+  KeyName: string;
 begin
-  result := GetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, Default);
+  KeyName := ApplicationKey;
+  if (SubKey <> '') then
+    KeyName := KeyName + '\' + ReplaceAll(SubKey, [':\'],  ['']);
+  result := GetRegistryValue(HKEY_CURRENT_USER, KeyName, Name, Default);
 end;
 
 function GetRegistry(const Name: string; const Default: boolean): boolean;
@@ -78,9 +85,14 @@ begin
   end;
 end;
 
-procedure SetRegistry(const Name, Value: string);
+procedure SetRegistry(const Name, Value: string; const SubKey: string = '');
+var
+  KeyName: string;
 begin
-  SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, Value);
+  KeyName := ApplicationKey;
+  if (SubKey <> '') then
+    KeyName := KeyName + '\' + ReplaceAll(SubKey, [':\'],  ['']);
+  SetRegistryValue(HKEY_CURRENT_USER, KeyName, Name, Value);
 end;
 
 procedure SetRegistry(const Name: string; Value: boolean);

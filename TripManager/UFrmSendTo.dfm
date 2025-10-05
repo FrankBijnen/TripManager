@@ -80,7 +80,6 @@ object FrmSendTo: TFrmSendTo
       TabStop = False
       OnChange = PCTDestinationChange
       OnChanging = PCTDestinationChanging
-      ExplicitHeight = 86
       object TabDevice: TTabSheet
         Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
@@ -116,7 +115,6 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
-          ExplicitHeight = 56
         end
       end
       object TabFolder: TTabSheet
@@ -146,7 +144,6 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
-          ExplicitHeight = 56
         end
       end
     end
@@ -159,7 +156,6 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Destination device and folder(s)'
     TabOrder = 3
-    ExplicitTop = 194
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
@@ -194,7 +190,6 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Model used for creating .trip files'
     TabOrder = 2
-    ExplicitTop = 228
     object PnlModel: TPanel
       Left = 2
       Top = 17
@@ -223,10 +218,8 @@ object FrmSendTo: TFrmSendTo
         Transparent = False
         WordWrap = True
         StyleElements = [seBorder]
-        ExplicitLeft = 6
-        ExplicitTop = 3
-        ExplicitWidth = 15
-        ExplicitHeight = 576
+        ExplicitWidth = 3
+        ExplicitHeight = 15
       end
       object CmbTripOption: TComboBox
         Left = 200
@@ -301,8 +294,6 @@ object FrmSendTo: TFrmSendTo
       28002E0068006D0074006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
-    ExplicitTop = 266
-    ExplicitHeight = 285
   end
   object PnlBot: TPanel
     Left = 0

@@ -71,7 +71,7 @@ uses
 
 const
   SelectionHelp: array[IdTrip..IdFit] of string = (
-    'Send .trip files. Immediately available in Trip planner. No import required, but will recalculate.',
+    'Send .trip files. Immediately available in Trip planner. No import required, recalculation depends on Trip option.',
     'Send tracks created from selected GPX file. Convert to trip, or show on map, on the device.',
     'Send complete unmodified GPX file. No recalculation forced.',
     'Send routes containing only Via and Shaping points. Recalculation forced.',
@@ -88,11 +88,14 @@ const
     'Send a Fit file. For Edge models');
 
   TripOptions: string =
-    'Recalculation forced' + #10 +
-    'No recalculation forced (BC only)' + #10 +
-    'Preserve route to track (BC only)' + #10 +
-    'Preserve route to track + locations (BC only)' + #10 +
-    'Preserve route to track + locations + route prefs (BC only)';
+    'Recalculation forced'
+     + #10 + 'No recalculation forced (BC only)'
+     + #10 + 'Preserve track to route (BC only)'
+{$IFDEF ALLTRIPTRACKS}
+     + #10 + 'Preserve track to route + locations (BC only)'
+     + #10 + 'Preserve track to route + locations + route prefs (BC only)'
+{$ENDIF}
+     ;
 
 procedure TFrmSendTo.EnableItems;
 begin
@@ -124,7 +127,11 @@ end;
 procedure TFrmSendTo.UpdateDesign;
 var
   RegModelValue: string;
+  DevName, SubKey: string;
+  ModelIndex: integer;
+{$IFDEF ALLTRIPTRACKS}
   TripModel: TTripModel;
+{$ENDIF}
 begin
   // Show/hide
   if (ShowHelp) then
@@ -142,30 +149,38 @@ begin
 
   // GarminModel has entries not valid for Trips. UnitTripObjects should check, and correct.
   RegModelValue := StringReplace(GetRegistry(Reg_GarminModel, ''), ' ', '', [rfReplaceAll]);
+{$IFDEF ALLTRIPTRACKS}
   TripModel := TTripModel(GetEnumValue(TypeInfo(TTripModel), RegModelValue));
   if (TripModel = TTripModel.XT) then
     CmbTripOption.Items.Delete(Ord(TTripOption.ttTripTrackLocPrefs));
+{$ENDIF}
   CmbTripOption.ItemIndex := Min(CmbTripOption.Items.Count -1, Ord(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc))));
 
   case PCTDestination.ActivePageIndex of
     0:begin
         SendToDest := TSendToDest.stDevice;
-
+        DevName := GetRegistry(Reg_CurrentDevice, '');
+        ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+        SubKey := IntToStr(ModelIndex);
         LblDestinations.Caption :=
-          Format('Device:%s %s%s',      [#9, GetRegistry(Reg_CurrentDevice, ''), #10#10]);
+          Format('Device:%s %s%s',        [#9, DevName, #10#10]);
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val), #10])
+            Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
+                    TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey), #10])
         else if GetRegistry(Reg_EnableFitFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.fit files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val), #10]);
+            Format('.fit files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
+                    TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey), #10]);
 
         LblDestinations.Caption := LblDestinations.Caption +
-          Format('.gpx files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevGpxFolder_Key, Reg_PrefDevGpxFolder_Val), #10]);
+          Format('.gpx files:%s %s%s',    [#9, GetRegistry(Reg_PrefDevGpxFolder_Key,
+                    TSetProcessOptions.GetKnownPath(ModelIndex, 1), SubKey), #10]);
 
         if (GetRegistry(Reg_EnableFitFuncs, false) = false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.gpi files:%s %s',    [#9, GetRegistry(Reg_PrefDevPoiFolder_Key, Reg_PrefDevPoiFolder_Val)]);
+            Format('.gpi files:%s %s',    [#9,  GetRegistry(Reg_PrefDevPoiFolder_Key,
+                    TSetProcessOptions.GetKnownPath(ModelIndex, 2), SubKey), #10]);
       end;
     1:begin
         SendToDest := TSendToDest.stWindows;

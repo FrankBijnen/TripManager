@@ -108,10 +108,16 @@ procedure AddGridLine(const AGrid: TStringGrid; var ARow: integer; const AKey: s
                       DefaultValue: string = ''; ADesc: string = '');
 var
   ACardinal: Cardinal;
+  RegKey, SubKey: string;
 begin
   AGrid.Cells[0, ARow] := AKey;
   AGrid.Cells[1, ARow] := ADesc;
-  AGrid.Cells[2, ARow] := GetRegistry(AKey, DefaultValue);
+  RegKey := AKey;
+  if (Pos('\', RegKey) > 0) then
+    SubKey := NextField(RegKey, '\')
+  else
+    SubKey := '';
+  AGrid.Cells[2, ARow] := GetRegistry(RegKey, DefaultValue, SubKey);
 
   if (Startstext('0x', AGrid.Cells[2, ARow])) and
      (Startstext('Date: ', AGrid.Cells[1, ARow])) then
@@ -164,6 +170,8 @@ end;
 procedure TFrmAdvSettings.LoadSettings_Device;
 var
   CurRow: integer;
+  ModelIndex: integer;
+  SubKey: string;
 begin
   GridDeviceSettings.RowCount := GridDeviceSettings.FixedRows +1;
   GridDeviceSettings.BeginUpdate;
@@ -176,11 +184,17 @@ begin
     AddGridLine(GridDeviceSettings, CurRow, '');
 
     AddGridLine(GridDeviceSettings, CurRow, '', '', '-Preferred device and folders-');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDev_Key,             XT_Name,                    'Default device to use');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDevTripsFolder_Key,  Reg_PrefDevTripsFolder_Val, 'Default trips folder');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDevGpxFolder_Key,    Reg_PrefDevGPXFolder_Val,   'Default GPX folder');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefDevPoiFolder_Key,    Reg_PrefDevPoiFolder_Val,   'Default GPI folder');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefFileSysFolder_Key,   Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
+    ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+    SubKey := IntToStr(ModelIndex) + '\';
+    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDev_Key,
+                TSetProcessOptions.GetKnownDevice(ModelIndex) ,'Default device to use');
+    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDevTripsFolder_Key,
+                TSetProcessOptions.GetKnownPath(ModelIndex, 0), 'Default trips folder');
+    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDevGpxFolder_Key,
+                TSetProcessOptions.GetKnownPath(ModelIndex, 1), 'Default GPX folder');
+    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDevPoiFolder_Key,
+                TSetProcessOptions.GetKnownPath(ModelIndex, 2), 'Default GPI folder');
+    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefFileSysFolder_Key,            Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
     AddGridLine(GridDeviceSettings, CurRow, '');
 
     AddGridLine(GridDeviceSettings, CurRow, '', '', '-Creating Way point files (*.gpx)-');
@@ -220,8 +234,8 @@ begin
     AddGridLine(GridZumoSettings, CurRow, '', '', '0=Force calculation');
     AddGridLine(GridZumoSettings, CurRow, '', '', '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Only for BaseCamp calculated routes-');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '1=No calculation, 2=TripTrack, 3=TripTrack + Locations');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '4=TripTrack + Locations + RoutePrefs');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '1=No calculation');
+    AddGridLine(GridZumoSettings, CurRow, '', '', '2=Preserve Track to Route');
     AddGridLine(GridZumoSettings, CurRow, '');
     AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow, Reg_AllowGrouping,               'True', 'Group trips from the same GPX');
@@ -400,12 +414,19 @@ end;
 procedure TFrmAdvSettings.SaveGrid(AGrid: TStringGrid);
 var
   Index: integer;
+  AKey, ASubKey: string;
 begin
   for Index := AGrid.FixedRows to AGrid.RowCount do
   begin
     if (AGrid.Cells[0, Index] = '') then
       continue;
-    SetRegistry(AGrid.Cells[0, Index], AGrid.Cells[2, Index]);
+    AKey := AGrid.Cells[0, Index];
+    if (Pos('\', AKey) > 0) then
+      ASubKey := NextField(AKey, '\')
+    else
+      ASubKey := '';
+
+    SetRegistry(AKey, AGrid.Cells[2, Index], ASubKey);
   end;
 end;
 

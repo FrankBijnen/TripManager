@@ -102,12 +102,24 @@ begin
     result := ExpandConstant('{autopf32}');
 end;
 
+procedure MoveRegKey(RegKey, RegName: string);
+var   
+  RegValue: string;
+begin
+  if RegQueryStringValue(HKCU, RegKey, RegName, RegValue) then
+  begin
+    RegWriteStringValue(HKCU, RegKey + '\0', RegName, RegValue);
+    RegWriteStringValue(HKCU, RegKey + '\1', RegName, RegValue);
+    RegWriteStringValue(HKCU, RegKey + '\2', RegName, RegValue);
+    RegDeleteValue(HKCU, RegKey, RegName);
+  end;
+end;
+
 function InitializeSetup(): Boolean;
 var
   RegKey: string;
   ErrorCode: integer;
   UninstallString: string;
-  ZumoModel: string;
 begin
   Result := true;
   RegKey := 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#MyAppId}') + '_is1';
@@ -122,11 +134,12 @@ begin
   
   // Clean old registry keys
   RegKey := 'SOFTWARE\TDBware\' + ExpandConstant('{#MyAppName}');
-  if RegQueryStringValue(HKCU, RegKey, 'ZumoModel', ZumoModel) then
-  begin
-    if RegWriteStringValue(HKCU, RegKey, 'GarminModel', ZumoModel) then
-      RegDeleteValue(HKCU, RegKey, 'ZumoModel');
-  end;
+  
+  MoveRegKey(RegKey, 'PrefDeviceGpxFolder');
+  MoveRegKey(RegKey, 'PrefDevicePoiFolder');
+  
+  RegDeleteValue(HKCU, RegKey, 'CurrentDevice');
+  RegDeleteValue(HKCU, RegKey, 'ZumoModel');
   RegDeleteValue(HKCU, RegKey, 'EnableSendTo');
   RegDeleteValue(HKCU, RegKey, 'TripNameInList');
   RegDeleteValue(HKCU, RegKey, 'ExploreUuid');

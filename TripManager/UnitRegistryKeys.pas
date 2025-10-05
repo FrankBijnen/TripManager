@@ -3,6 +3,7 @@ unit UnitRegistryKeys;
 interface
 
 uses
+  System.Classes,
   UnitGpxDefs;
 
 const
@@ -30,6 +31,7 @@ const
 
   Reg_ProcessBegin            = 'ProcessBegin';
   Reg_CurrentDevice           = 'CurrentDevice';
+  Reg_CurrentModel            = 'CurrentModel';
   Reg_BeginSymbol             = 'BeginSymbol';
   Reg_BeginStr                = 'BeginStr';
   Reg_BeginAddress            = 'BeginAddress';
@@ -97,12 +99,16 @@ const
     IdGpiShpPt    = 11;
   IdKml           = 12; // Only Windows
   IdHtml          = 13; // Only Windows
-  IdFit           = 14; // Test
+  IdFit           = 14; // Edge Fit files
+
+  Garmin_Name     = 'Garmin';
+  Edge_Name       = 'Edge';
 
 type
 
   TSetProcessOptions = class
-    public
+  private
+  public
     procedure SetFixedPrefs(Sender: Tobject);
     procedure SetPostProcessPrefs(Sender: TObject);
     procedure SetSendToPrefs(Sender: TObject);
@@ -111,6 +117,9 @@ type
     procedure SavePrefs(Sender: TObject);
     class procedure SetPrefs(TvSelections: TObject);
     class function StorePrefs(TvSelections: TObject): TGPXFuncArray;
+    class function GetKnownDevices: TStringList;
+    class function GetKnownDevice(DevIndex: integer): string;
+    class function GetKnownPath(DevIndex, PathId: integer): string;
   end;
 
 var
@@ -119,7 +128,7 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Classes, System.StrUtils, System.DateUtils, System.TypInfo,
+  System.SysUtils,System.StrUtils, System.DateUtils, System.TypInfo,
   Vcl.ComCtrls,
   UnitRegistry, UnitProcessOptions, UnitTripObjects;
 
@@ -145,7 +154,7 @@ begin
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
-    DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel1)));
+    DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2)) -1);
 
     // XT2 Defaults
     VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);
@@ -360,6 +369,57 @@ begin
       if (Items[IdFit].Checked) then
         result := result + [TGPXFunc.CreateFITPoints];
     end;
+  end;
+end;
+
+class function TSetProcessOptions.GetKnownDevices: TStringList;
+begin
+  result := TStringList.Create;
+  result.Add(GetRegistry(Reg_PrefDev_Key, XT_Name,      '0'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, XT2_Name,     '1'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Tread2_Name,  '2'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '3'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '4'));
+end;
+
+class function TSetProcessOptions.GetKnownDevice(DevIndex: integer): string;
+var
+  KnownDevices: TStringList;
+begin
+  result := '';
+  KnownDevices := GetKnownDevices;
+  try
+    if (DevIndex >= 0) and
+       (DevIndex < KnownDevices.Count) then
+      result := KnownDevices[DevIndex];
+  finally
+    KnownDevices.Free;
+  end;
+end;
+
+class function TSetProcessOptions.GetKnownPath(DevIndex, PathId: integer): string;
+begin
+  result := '';
+  case TGarminModel(DevIndex) of
+    TGarminModel.XT,
+    TGarminModel.XT2,
+    TGarminModel.Tread2:
+      case PathId of
+        0: result := Reg_PrefDevTripsFolder_Val;
+        1: result := Reg_PrefDevGpxFolder_Val;
+        2: result := Reg_PrefDevPoiFolder_Val;
+      end;
+    TGarminModel.GarminEdge:
+      case PathId of
+        0: result := '?:\Garmin\Courses';
+        1: result := '?:\Garmin\NewFiles';
+        2: result := '?:\Garmin\Activities';
+      end;
+    TGarminModel.GarminGeneric:
+      case PathId of
+        1: result := '?:\Garmin\GPX';
+        2: result := '?:\Garmin\POI';
+      end;
   end;
 end;
 
