@@ -56,6 +56,7 @@ type
     Funcs: TGPXFuncArray;
     SendToDest: TSendToDest;
     HasCurrentDevice: boolean;
+    DisplayedDevice: string;
   end;
 
 var
@@ -89,11 +90,11 @@ const
 
   TripOptions: string =
     'Recalculation forced'
-     + #10 + 'No recalculation forced (BC only)'
-     + #10 + 'Preserve track to route (BC only)'
+     + #10 + 'No recalculation forced (BaseCamp calculated GPX only)'
+     + #10 + 'Preserve track to route (BaseCamp calculated GPX only)'
 {$IFDEF ALLTRIPTRACKS}
-     + #10 + 'Preserve track to route + locations (BC only)'
-     + #10 + 'Preserve track to route + locations + route prefs (BC only)'
+     + #10 + 'Preserve track to route + locations (BaseCamp calculated GPX only)'
+     + #10 + 'Preserve track to route + locations + route prefs (BaseCamp calculated GPX only)'
 {$ENDIF}
      ;
 
@@ -126,11 +127,11 @@ end;
 
 procedure TFrmSendTo.UpdateDesign;
 var
-  RegModelValue: string;
-  DevName, SubKey: string;
+  TripModel: TTripModel;
+  SubKey: string;
   ModelIndex: integer;
 {$IFDEF ALLTRIPTRACKS}
-  TripModel: TTripModel;
+  RegModelValue: string;
 {$ENDIF}
 begin
   // Show/hide
@@ -144,13 +145,12 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  LblModel.Caption := GetRegistry(Reg_GarminModel, ''); // LblModel is only visible for Trip models
+  TripModel := TTripModel(GetRegistry(Reg_CurrentModel, 0));
+  LblModel.Caption := GetEnumName(TypeInfo(TTripModel), Ord(TripModel));
   CmbTripOption.Items.Text := TripOptions;
 
-  // GarminModel has entries not valid for Trips. UnitTripObjects should check, and correct.
-  RegModelValue := StringReplace(GetRegistry(Reg_GarminModel, ''), ' ', '', [rfReplaceAll]);
 {$IFDEF ALLTRIPTRACKS}
-  TripModel := TTripModel(GetEnumValue(TypeInfo(TTripModel), RegModelValue));
+  // Delete Entry not valid for XT
   if (TripModel = TTripModel.XT) then
     CmbTripOption.Items.Delete(Ord(TTripOption.ttTripTrackLocPrefs));
 {$ENDIF}
@@ -159,11 +159,10 @@ begin
   case PCTDestination.ActivePageIndex of
     0:begin
         SendToDest := TSendToDest.stDevice;
-        DevName := GetRegistry(Reg_CurrentDevice, '');
         ModelIndex := GetRegistry(Reg_CurrentModel, 0);
         SubKey := IntToStr(ModelIndex);
         LblDestinations.Caption :=
-          Format('Device:%s %s%s',        [#9, DevName, #10#10]);
+          Format('Device:%s %s%s',        [#9, DisplayedDevice, #10#10]);
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
@@ -205,6 +204,7 @@ begin
 
   // Repaint Treeview. Needed for disabled items
   TvSelections.Repaint;
+  BtnOk.SetFocus;
 end;
 
 procedure TFrmSendTo.SetPrefs;

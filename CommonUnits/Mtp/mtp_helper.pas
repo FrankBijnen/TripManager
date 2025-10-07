@@ -599,21 +599,25 @@ var
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
   Hr: Hresult;
 begin
-  Hr := S_False;
-  if (IsDirectory(Prop_Val)) then
-  begin
+  // Get the (original) name of the object.
+  // This is preferred, because it includes the extension
+  Dev_Val.fmtid := WPD_OBJECT_ORIGINAL_FILE_NAME_FMTID;
+  Dev_Val.pid := WPD_OBJECT_ORIGINAL_FILE_NAME_PID;
+  Hr := Prop_Val.GetStringValue(Dev_Val, result);
+  if (Hr = S_OK) and
+     (result <> '') then
+    exit;
+
+  // Get the display name.
+  // This is used as a fallback, when ORIGINAL_FILE_NAME returns ''. eg E:
     Dev_Val.fmtid := WPD_OBJECT_NAME_FMTID;
     Dev_Val.pid := WPD_OBJECT_NAME_PID;
     Hr := Prop_Val.GetStringValue(Dev_Val, result);
-  end;
-  if (Hr <> S_OK) then
-  begin
-    // Get the (original) name of the object
-    Dev_Val.fmtid := WPD_OBJECT_ORIGINAL_FILE_NAME_FMTID;
-    Dev_Val.pid := WPD_OBJECT_ORIGINAL_FILE_NAME_PID;
-    Hr := Prop_Val.GetStringValue(Dev_Val, result);
-  end;
-  if (Hr <> S_OK) then
+  if (Hr = S_OK) and
+     (result <> '') then
+    exit;
+
+  // Can occur when getting the name of the parent of the First Storage Id: 'DEVICE'
     result := '';
 end;
 

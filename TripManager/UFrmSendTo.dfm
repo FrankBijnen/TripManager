@@ -3,7 +3,7 @@ object FrmSendTo: TFrmSendTo
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Send to'
-  ClientHeight = 603
+  ClientHeight = 601
   ClientWidth = 592
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -56,7 +56,7 @@ object FrmSendTo: TFrmSendTo
     Left = 0
     Top = 89
     Width = 592
-    Height = 112
+    Height = 105
     Align = alTop
     Caption = 'Choose destination'
     TabOrder = 1
@@ -64,7 +64,7 @@ object FrmSendTo: TFrmSendTo
       Left = 2
       Top = 17
       Width = 588
-      Height = 93
+      Height = 86
       ActivePage = TabDevice
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
@@ -80,6 +80,7 @@ object FrmSendTo: TFrmSendTo
       TabStop = False
       OnChange = PCTDestinationChange
       OnChanging = PCTDestinationChanging
+      ExplicitHeight = 93
       object TabDevice: TTabSheet
         Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
@@ -92,7 +93,7 @@ object FrmSendTo: TFrmSendTo
           Left = 0
           Top = 0
           Width = 580
-          Height = 63
+          Height = 56
           TabStop = False
           Align = alClient
           Color = clInfoBk
@@ -115,6 +116,7 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitHeight = 63
         end
       end
       object TabFolder: TTabSheet
@@ -124,7 +126,7 @@ object FrmSendTo: TFrmSendTo
           Left = 0
           Top = 0
           Width = 580
-          Height = 63
+          Height = 56
           Align = alClient
           Color = clInfoBk
           Font.Charset = DEFAULT_CHARSET
@@ -144,18 +146,20 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitHeight = 63
         end
       end
     end
   end
   object GrpDestination: TGroupBox
     Left = 0
-    Top = 201
+    Top = 194
     Width = 592
-    Height = 34
+    Height = 40
     Align = alTop
     Caption = 'Destination device and folder(s)'
-    TabOrder = 3
+    TabOrder = 2
+    ExplicitTop = 201
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
@@ -184,12 +188,13 @@ object FrmSendTo: TFrmSendTo
   end
   object GrpModel: TGroupBox
     Left = 0
-    Top = 235
+    Top = 234
     Width = 592
-    Height = 38
+    Height = 40
     Align = alTop
     Caption = 'Model used for creating .trip files'
-    TabOrder = 2
+    TabOrder = 3
+    ExplicitTop = 235
     object PnlModel: TPanel
       Left = 2
       Top = 17
@@ -227,8 +232,9 @@ object FrmSendTo: TFrmSendTo
         Width = 387
         Height = 23
         Align = alRight
+        Style = csDropDownList
         TabOrder = 0
-        Text = 'CmbTripOption'
+        TabStop = False
         Items.Strings = (
           'Recalculation forced'
           'No recalculation forced (BC only)'
@@ -242,9 +248,9 @@ object FrmSendTo: TFrmSendTo
   end
   object TvSelections: TTreeView
     Left = 0
-    Top = 273
+    Top = 274
     Width = 592
-    Height = 278
+    Height = 275
     Align = alClient
     AutoExpand = True
     CheckBoxes = True
@@ -294,14 +300,17 @@ object FrmSendTo: TFrmSendTo
       28002E0068006D0074006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
+    ExplicitTop = 273
+    ExplicitHeight = 278
   end
   object PnlBot: TPanel
     Left = 0
-    Top = 570
+    Top = 568
     Width = 592
     Height = 33
     Align = alBottom
-    TabOrder = 6
+    TabOrder = 5
+    ExplicitTop = 570
     DesignSize = (
       592
       33)
@@ -338,10 +347,11 @@ object FrmSendTo: TFrmSendTo
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 551
+    Top = 549
     Width = 592
     Height = 19
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 551
   end
 end

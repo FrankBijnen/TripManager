@@ -329,7 +329,6 @@ type
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
     procedure USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
-
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     function SelectedScPosn: TmScPosn;
     function SelectedLocation: TLocation;
@@ -351,14 +350,10 @@ type
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
     procedure LoadFitFile(const FileName: string; const FromDevice: boolean);
     procedure LoadSqlFile(const FileName: string; const FromDevice: boolean);
-
     procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
     function CopyDeviceFile(const APath, AFile: string): boolean;
-
-    function ModelFromDescription(const ModelDescription: string): TGarminModel;
     function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
-
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure ReadDeviceDB;
@@ -369,14 +364,12 @@ type
     procedure SelectDeviceByName(const Device: string = '');
     procedure SelectDeviceById(const Device: string);
     function GetItemType(const AListview: TListView): TDirType;
-
     procedure CloseDevice;
     function CheckDevice(RaiseException: boolean = true): boolean;
     procedure GetDeviceList;
     function GetDevicePath(const CompletePath: string): string;
     function GetSelectedFile: string;
     procedure SetSelectedFile(AFile: string);
-
     procedure SetCurrentPath(const APath: string);
     function CopyFileToTmp(const AListItem: TListItem): string;
     procedure CopyFileFromTmp(const LocalFile: string; const AListItem: TListItem);
@@ -390,7 +383,6 @@ type
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
     procedure CheckSupportedModel(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
-
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
@@ -526,22 +518,6 @@ begin
   result := true;
 end;
 
-function TFrmTripManager.ModelFromDescription(const ModelDescription: string): TGarminModel;
-begin
-  if (ContainsText(ModelDescription, Tread2_Name)) then
-    result := TGarminModel.Tread2
-  else if (ContainsText(ModelDescription, XT2_Name)) then
-    result := TGarminModel.XT2
-  else if (ContainsText(ModelDescription, XT_Name)) then
-    result := TGarminModel.XT
-  else if (ContainsText(ModelDescription, 'Garmin')) then
-    result := TGarminModel.GarminGeneric
-  else if (ContainsText(ModelDescription, 'Edge')) then
-    result := TGarminModel.GarminEdge
-  else
-    result := TGarminModel.Unknown;
-end;
-
 function TFrmTripManager.ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
 begin
   if (ContainsText(ModelDescription, 'Edge')) then
@@ -556,7 +532,7 @@ const
   ProfileDb = 'vehicle_profile.db';
 
 var
-  ModelIndex, DBPath, Friendlyname: string;
+  SubKey, DBPath, Friendlyname: string;
   LDelim: integer;
   Vehicle_Profile: TVehicleProfile;
 begin
@@ -566,8 +542,8 @@ begin
     exit;
 
 // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
-  ModelIndex := GetRegistry(Reg_CurrentModel, '0');
-  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, '', ModelIndex));
+  SubKey := GetRegistry(Reg_CurrentModel, '0');
+  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, '', SubKey));
   LDelim := LastDelimiter('\', DBPath) -1;
   DBPath := Copy(DBPath, 1, LDelim) + '\SQlite';
 
@@ -607,7 +583,7 @@ var
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode: TXmlVSNode;
 begin
-  result := ModelFromDescription(ModelDescription);
+  result := TSetProcessOptions.GetModelFromDescription(ModelDescription);
 
 // Need a device to check better
   if not CheckDevice(false) then
@@ -635,7 +611,7 @@ begin
 
       // Update model from GarminDevice.xml
       ModelDescription := FindSubNodeValue(ModelNode, 'Description');
-      result := ModelFromDescription(ModelDescription);
+      result := TSetProcessOptions.GetModelFromDescription(ModelDescription);
       if (result = TGarminModel.Unknown) then
         result := ModelFromGarminDevice(ModelDescription);
     finally
@@ -667,10 +643,7 @@ begin
     CmbModelChange(CmbModel);
   end;
 
-  SetRegistry(Reg_GarminModel, CmbModel.Text);
-  SetRegistry(Reg_CurrentDevice, ModelDisplayed);
   SetRegistry(Reg_CurrentModel, ModelIndex);
-
   ReadDefaultFolders;
 end;
 
@@ -1124,6 +1097,8 @@ begin
   // Revert to default (startup) locations
   ReadDefaultFolders;
   FrmSendTo.HasCurrentDevice := CheckDevice(false);
+  if (FrmSendTo.HasCurrentDevice) then
+    FrmSendTo.DisplayedDevice := CurrentDevice.DisplayedDevice;
   if (FrmSendTo.ShowModal <> ID_OK) then
     exit;
 
@@ -1570,13 +1545,10 @@ var
   ModelIndex: integer;
   SubKey: string;
 begin
-  // Allow setting model without an MTP device connected
+  // Allow setting Default model without an MTP device connected
   if (not CheckDevice(false)) then
   begin
-    ModelIndex := CmbModel.ItemIndex;
-    SubKey := IntToStr(ModelIndex);
-    SetRegistry(Reg_CurrentModel, ModelIndex);
-    SetRegistry(Reg_PrefDev_Key, '', SubKey);
+    GuessModel(TSetProcessOptions.GetDefaultDevice(CmbModel.ItemIndex));
     exit;
   end;
 
@@ -2086,7 +2058,7 @@ begin
   LstFiles.Clear;
   DeviceList := GetDevices;
   for Index := 0 to DeviceList.Count - 1 do
-    CmbDevices.Items.Add(TMTP_Device(DeviceList[Index]).FriendlyName + ' (' + TMTP_Device(DeviceList[Index]).Description + ')');
+    CmbDevices.Items.Add(TMTP_Device(DeviceList[Index]).DisplayedDevice);
 end;
 
 procedure TFrmTripManager.SelectDevice(const Indx: integer);
@@ -2125,19 +2097,19 @@ begin
     KnownDevices := TSetProcessOptions.GetKnownDevices;
 
   try
-  CmbDevices.ItemIndex := -1;
-  CmbDevices.Text := SelectMTPDevice;
+    CmbDevices.ItemIndex := -1;
+    CmbDevices.Text := SelectMTPDevice;
 
-  for Index := 0 to DeviceList.Count - 1 do
-  begin
-    // Does this device match our registry setting? Select right away
-      if (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
+    for Index := 0 to DeviceList.Count - 1 do
     begin
-      CmbDevices.ItemIndex := Index;
-      SelectDevice(Index);
-      break;
+      // Does this device match our registry setting? Select right away
+        if (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
+      begin
+        CmbDevices.ItemIndex := Index;
+        SelectDevice(Index);
+        break;
+      end;
     end;
-  end;
   finally
     KnownDevices.Free;
   end;
@@ -2212,7 +2184,7 @@ begin
 
   SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]));
   SetRegistry(Reg_EnableFitFuncs, (TGarminModel(ModelIndex) in [TGarminModel.GarminEdge]));
-  SetRegistry(Reg_GarminModel, CmbModel.Text);
+  SetRegistry(Reg_CurrentModel, CmbModel.ItemIndex);
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);
@@ -4781,7 +4753,9 @@ begin
   SbPostProcess.Panels[1].Text := Status;
 
   CurrentDevice := nil;
-  CmbModel.ItemIndex := Ord(TGarminModel.Unknown);
+  CmbModel.ItemIndex := GetRegistry(Reg_CurrentModel, 0);
+  GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(CmbModel.ItemIndex), IntToStr(CmbModel.ItemIndex)));
+
   ReadDefaultFolders;
   TvTrip.Items.Clear;
   ClearTripInfo;

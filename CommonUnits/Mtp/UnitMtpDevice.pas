@@ -36,10 +36,13 @@ type
     Description: string;
     FriendlyName: string;
     PortableDev: IMTPDevice;
+    function DisplayedDevice: string;
   end;
 
 implementation
 
+uses
+  System.SysUtils;
 
 constructor TBASE_Data.Create(const AIsFolder: boolean;
                               const ASortValue: int64;
@@ -77,6 +80,11 @@ begin
   UpdateListItem(result, ASubItems);
 
   result.Data := Self;
+end;
+
+function TMTP_Device.DisplayedDevice: string;
+begin
+  result := Format('%s (%s)', [FriendlyName, Description]);
 end;
 
 end.

@@ -2603,7 +2603,7 @@ begin
         Writeln('Processing started for: ', GPXMask);
 {$IFDEF TRIPOBJECTS}
 {$IFDEF REGISTRYKEYS}
-        Writeln('Selected model: ', GetRegistry(Reg_GarminModel, XT_Name));
+        Writeln('Selected model: ', GetEnumName(TypeInfo(TTripModel), GetRegistry(Reg_CurrentModel, 0)));
 {$ENDIF}
 {$ENDIF}
         Write('Selected functions:');

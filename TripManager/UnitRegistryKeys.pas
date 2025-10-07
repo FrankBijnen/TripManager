@@ -12,9 +12,6 @@ const
   Reg_TrackColor              = 'TrackColor';         // User preferred track color
   Reg_MinDistTrackPoints_Key  = 'MinDistTrackPoints'; // Use to filter trackpoints
 
-  // All supported models
-  Reg_GarminModel             = 'GarminModel';
-
   // XT1 and XT2
   Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
   Reg_AllowGrouping           = 'AllowGrouping';
@@ -30,7 +27,6 @@ const
   Reg_VehicleProfileName          = 'VehicleProfileName';
 
   Reg_ProcessBegin            = 'ProcessBegin';
-  Reg_CurrentDevice           = 'CurrentDevice';
   Reg_CurrentModel            = 'CurrentModel';
   Reg_BeginSymbol             = 'BeginSymbol';
   Reg_BeginStr                = 'BeginStr';
@@ -119,6 +115,9 @@ type
     class function StorePrefs(TvSelections: TObject): TGPXFuncArray;
     class function GetKnownDevices: TStringList;
     class function GetKnownDevice(DevIndex: integer): string;
+    class function GetDefaultDevices: TStringList;
+    class function GetDefaultDevice(DevIndex: integer): string;
+    class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
     class function GetKnownPath(DevIndex, PathId: integer): string;
   end;
 
@@ -133,8 +132,6 @@ uses
   UnitRegistry, UnitProcessOptions, UnitTripObjects;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
-var
-  RegModelValue: string;
 begin
   with Sender as TProcessOptions do
   begin
@@ -146,9 +143,8 @@ begin
     TrackColor := GetRegistry(Reg_TrackColor, '');
     MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
 
-    // GarminModel has entries not valid for Trips. UnitTripObjects should check, and correct.
-    RegModelValue := StringReplace(GetRegistry(Reg_GarminModel, ''), ' ', '', [rfReplaceAll]);
-    TripModel := TTripModel(GetEnumValue(TypeInfo(TTripModel), RegModelValue));
+    // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
+    TripModel := TTripModel(GetRegistry(Reg_CurrentModel, 0));
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
@@ -382,18 +378,70 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '4'));
 end;
 
+class function TSetProcessOptions.GetDefaultDevices: TStringList;
+begin
+  result := TStringList.Create;
+  result.Add(XT_Name);
+  result.Add(XT2_Name);
+  result.Add(Tread2_Name);
+  result.Add(Edge_Name);
+  result.Add(Garmin_Name);
+end;
+
 class function TSetProcessOptions.GetKnownDevice(DevIndex: integer): string;
 var
-  KnownDevices: TStringList;
+  Devices: TStringList;
 begin
   result := '';
-  KnownDevices := GetKnownDevices;
+  Devices := GetKnownDevices;
   try
     if (DevIndex >= 0) and
-       (DevIndex < KnownDevices.Count) then
-      result := KnownDevices[DevIndex];
+       (DevIndex < Devices.Count) then
+      result := Devices[DevIndex];
   finally
-    KnownDevices.Free;
+    Devices.Free;
+  end;
+end;
+
+class function TSetProcessOptions.GetDefaultDevice(DevIndex: integer): string;
+var
+  Devices: TStringList;
+begin
+  Devices := GetDefaultDevices;
+  try
+    if (DevIndex >= 0) and
+       (DevIndex < Devices.Count) then
+      result := Devices[DevIndex];
+  finally
+    Devices.Free;
+  end;
+end;
+
+class function TSetProcessOptions.GetModelFromDescription(const ModelDescription: string): TGarminModel;
+var
+  Devices: TStringList;
+  DevIndex: integer;
+begin
+  result := TGarminModel.Unknown;
+
+  if (ContainsText(ModelDescription, Tread2_Name)) then
+    exit(TGarminModel.Tread2)
+  else if (ContainsText(ModelDescription, XT2_Name)) then
+    exit(TGarminModel.XT2)
+  else if (ContainsText(ModelDescription, XT_Name)) then
+    exit(TGarminModel.XT)
+  else if (ContainsText(ModelDescription, Garmin_Name)) then
+    exit(TGarminModel.GarminGeneric)
+  else if (ContainsText(ModelDescription, Edge_Name)) then
+    exit(TGarminModel.GarminEdge);
+
+  Devices := GetKnownDevices;
+  try
+    for DevIndex := 0 to Devices.Count -1 do
+      if (SameText(ModelDescription, Devices[DevIndex])) then
+        exit(TGarminModel(DevIndex));
+  finally
+    Devices.Free;
   end;
 end;
 
