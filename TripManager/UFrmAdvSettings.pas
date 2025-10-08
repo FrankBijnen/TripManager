@@ -138,26 +138,43 @@ begin
   try
 
     CurRow := 1;
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Window startup-');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_Maximized_Key,       'False', 'Start TripManager maximized');
-    AddGridLine(GridGeneralSettings, CurRow, '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Window startup-');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_Maximized_Key,
+                                              'False',
+                                              'Start TripManager maximized');
+    AddGridLine(GridGeneralSettings, CurRow,  '');
 
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Tracks-');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_MinDistTrackPoints_Key,  '0', 'Minimum distance between track points (meters)');
-    AddGridLine(GridGeneralSettings, CurRow, '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Tracks-');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_MinDistTrackPoints_Key,
+                                              '0',
+                                              'Minimum distance between track points (meters)');
+    AddGridLine(GridGeneralSettings, CurRow,  '');
 
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Compare-');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_CompareDistOK_Key,  IntToStr(Reg_CompareDistOK_Val), 'Compare distance OK (meters)');
-    AddGridLine(GridGeneralSettings, CurRow, '');
-    AddGridLine(GridGeneralSettings, CurRow, '', '', '-Map display-');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_MapTilerApi_Key,         '',   'Api-Key for enabling Map Tiler. https://www.maptiler.com');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Compare-');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_CompareDistOK_Key,
+                                              IntToStr(Reg_CompareDistOK_Val),
+                                              'Compare distance OK (meters)');
+    AddGridLine(GridGeneralSettings, CurRow,  '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Map display-');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_MapTilerApi_Key,
+                                              '',
+                                              'Api-Key for enabling Map Tiler. https://www.maptiler.com');
 
-    AddGridLine(GridGeneralSettings, CurRow, Reg_GeoSearchTimeOut_Key,    Reg_GeoSearchTimeOut_Val,   'Time (ms) to show Found place balloon');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_RoutePointTimeOut_Key,   Reg_RoutePointTimeOut_Val,  'Time (ms) to show Route point balloon');
-    AddGridLine(GridGeneralSettings, CurRow, Reg_TripColor_Key,           Reg_TripColor_Val,          'Trip file color on Map. Choose from:');
-    AddGridLine(GridGeneralSettings, CurRow, '',                          '',                         'Black, (Dark)Red, (Dark)Green');
-    AddGridLine(GridGeneralSettings, CurRow, '',                          '',                         '(Dark)Yellow, (Dark)Blue, (Dark)Magenta');
-    AddGridLine(GridGeneralSettings, CurRow, '',                          '',                         '(Dark)Cyan, LightGray, DarkGray, White');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_GeoSearchTimeOut_Key,
+                                              Reg_GeoSearchTimeOut_Val,
+                                              'Time (ms) to show Found place balloon');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_RoutePointTimeOut_Key,
+                                              Reg_RoutePointTimeOut_Val,
+                                              'Time (ms) to show Route point balloon');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_TripColor_Key,
+                                              Reg_TripColor_Val,
+                                              'Trip file color on Map. Choose from:');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '',
+                                              'Black, (Dark)Red, (Dark)Green');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '',
+                                              '(Dark)Yellow, (Dark)Blue, (Dark)Magenta');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '',
+                                              '(Dark)Cyan, LightGray, DarkGray, White');
 
     GridGeneralSettings.RowCount := CurRow;
     AddGridHeader(GridGeneralSettings);
@@ -179,36 +196,62 @@ begin
 
     CurRow := 1;
 
-    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Device-');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_EnableDirFuncs,      'False', 'Enable creating and deleting folders');
-    AddGridLine(GridDeviceSettings, CurRow, '');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '', '-Device-');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_EnableDirFuncs,
+                                      'False',
+                                      'Enable creating and deleting folders');
+    AddGridLine(GridDeviceSettings,   CurRow, '');
 
-    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Preferred device and folders-');
     ModelIndex := GetRegistry(Reg_CurrentModel, 0);
     SubKey := IntToStr(ModelIndex) + '\';
-    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDev_Key,
-                TSetProcessOptions.GetKnownDevice(ModelIndex) ,'Default device to use');
-    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDevTripsFolder_Key,
-                TSetProcessOptions.GetKnownPath(ModelIndex, 0), 'Default trips folder');
-    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDevGpxFolder_Key,
-                TSetProcessOptions.GetKnownPath(ModelIndex, 1), 'Default GPX folder');
-    AddGridLine(GridDeviceSettings, CurRow, SubKey + Reg_PrefDevPoiFolder_Key,
-                TSetProcessOptions.GetKnownPath(ModelIndex, 2), 'Default GPI folder');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_PrefFileSysFolder_Key,            Reg_PrefFileSysFolder_Val,  'Last used Windows folder');
-    AddGridLine(GridDeviceSettings, CurRow, '');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '',
+                                      Format('-Preferred folders (Model: %s)-', [TSetProcessOptions.GetDefaultDevice(ModelIndex)]));
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDev_Key,
+                                      '',
+                                      'Override device name');
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevTripsFolder_Key,
+                                      TSetProcessOptions.GetKnownPath(ModelIndex, 0),
+                                      'Default trips folder');
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevGpxFolder_Key,
+                                      TSetProcessOptions.GetKnownPath(ModelIndex, 1),
+                                      'Default GPX folder');
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevPoiFolder_Key,
+                                      TSetProcessOptions.GetKnownPath(ModelIndex, 2),
+                                      'Default GPI folder');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_PrefFileSysFolder_Key,
+                                      Reg_PrefFileSysFolder_Val,
+                                      'Last used Windows folder');
+    AddGridLine(GridDeviceSettings,   CurRow, '');
 
-    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Creating Way point files (*.gpx)-');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncWayPointWpt,   'True',  'Add original Way points');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncWayPointVia,   'False', 'Add Via points from route');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncWayPointShape, 'False', 'Add Shaping points from route');
-    AddGridLine(GridDeviceSettings, CurRow, '');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '',
+                                      '-Creating Way point files (*.gpx)-');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncWayPointWpt,
+                                      'True',
+                                      'Add original Way points');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncWayPointVia,
+                                      'False',
+                                      'Add Via points from route');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncWayPointShape,
+                                      'False',
+                                      'Add Shaping points from route');
+    AddGridLine(GridDeviceSettings,   CurRow, '');
 
-    AddGridLine(GridDeviceSettings, CurRow, '', '', '-Creating Poi files (*.gpi)-');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncGpiWayPt,      'True',  'Add original Way points');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncGpiViaPt,      'False', 'Add Via points from route');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_FuncGpiShpPt,      'False', 'Add Shaping points from route');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_GPISymbolSize,     '80x80', 'Size of symbols (24x24 48x48 or 80x80)');
-    AddGridLine(GridDeviceSettings, CurRow, Reg_GPIProximity,      '500',   'Default proximity for alerts in meters');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '', '-Creating Poi files (*.gpi)-');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncGpiWayPt,
+                                      'True',
+                                      'Add original Way points');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncGpiViaPt,
+                                      'False',
+                                      'Add Via points from route');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncGpiShpPt,
+                                      'False',
+                                      'Add Shaping points from route');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_GPISymbolSize,
+                                      '80x80',
+                                      'Size of symbols (24x24 48x48 or 80x80)');
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_GPIProximity,
+                                      '500',
+                                      'Default proximity for alerts in meters');
 
     GridDeviceSettings.RowCount := CurRow;
 
@@ -228,26 +271,41 @@ begin
   try
 
     CurRow := 1;
-    AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating trips-');
-    AddGridLine(GridZumoSettings, CurRow, Reg_ScPosn_Unknown1,             '0', '');
-    AddGridLine(GridZumoSettings, CurRow, Reg_TripOption,                  '0', 'Trip create options');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '0=Force calculation');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '-Only for BaseCamp calculated routes-');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '1=No calculation');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '2=Preserve Track to Route');
-    AddGridLine(GridZumoSettings, CurRow, '');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT1 trips-');
-    AddGridLine(GridZumoSettings, CurRow, Reg_AllowGrouping,               'True', 'Group trips from the same GPX');
-    AddGridLine(GridZumoSettings, CurRow, '');
-    AddGridLine(GridZumoSettings, CurRow, '', '', '-Defaults for creating XT2 trips-');
-    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileGuid,          XT2_VehicleProfileGuid);
-    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileHash,          XT2_VehicleProfileHash);
-    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleId,                   XT2_VehicleId);
-    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileTruckType,     XT2_VehicleProfileTruckType);
-    AddGridLine(GridZumoSettings, CurRow, Reg_VehicleProfileName,          XT2_VehicleProfileName);
-    AddGridLine(GridZumoSettings, CurRow, Reg_AvoidancesChangedTimeAtSave, XT2_AvoidancesChangedTimeAtSave, 'Date: ');
-    AddGridLine(GridZumoSettings, CurRow, Reg_DefAdvLevel,                 IntToStr(Ord(TAdvlevel.advLevel2)), 'Default Adventurous Level (1-4)');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_ScPosn_Unknown1,
+                                            '0',
+                                            '');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_TripOption,
+                                            '0',
+                                            'Trip create options');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '0=Force calculation');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Only for BaseCamp calculated routes-');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '1=No calculation');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '2=Preserve Track to Route');
+    AddGridLine(GridZumoSettings, CurRow,   '');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
+                                            'True',
+                                            'Group trips from the same GPX');
+    AddGridLine(GridZumoSettings, CurRow,   '');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2 trips-');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
+                                            XT2_AvoidancesChangedTimeAtSave,
+                                            'Date: ');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileGuid,
+                                            XT2_VehicleProfileGuid);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileHash,
+                                            XT2_VehicleProfileHash);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleId,
+                                            XT2_VehicleId);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,
+                                            XT2_VehicleProfileTruckType);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileName,
+                                            XT2_VehicleProfileName);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_DefAdvLevel,
+                                            IntToStr(Ord(TAdvlevel.advLevel2)),
+                                            'Default Adventurous Level (1-4)');
     GridZumoSettings.RowCount := CurRow;
 
     AddGridHeader(GridZumoSettings);
@@ -267,11 +325,19 @@ begin
   try
 
     CurRow := 1;
-    AddGridLine(GridGeoCodeSettings, CurRow, '', '', '-GeoCode settings-');
-    AddGridLine(GridGeoCodeSettings, CurRow, Reg_GeoCodeUrl,       GeoSettings.GeoCodeUrl,    'Open URL in a browser for more info.');
-    AddGridLine(GridGeoCodeSettings, CurRow, Reg_GeoCodeApiKey,    GeoSettings.GeoCodeApiKey, 'Enter your API_Key here and click Validate');
-    AddGridLine(GridGeoCodeSettings, CurRow, Reg_ThrottleGeoCode,  IntToStr(GeoSettings.ThrottleGeoCode), 'Minimum time in ms between calls');
-    AddGridLine(GridGeoCodeSettings, CurRow, Reg_SelectUniqPlace,  'False',                   'Auto select unique places');
+    AddGridLine(GridGeoCodeSettings, CurRow,  '', '', '-GeoCode settings-');
+    AddGridLine(GridGeoCodeSettings, CurRow,  Reg_GeoCodeUrl,
+                                              GeoSettings.GeoCodeUrl,
+                                              'Open URL in a browser for more info.');
+    AddGridLine(GridGeoCodeSettings, CurRow,  Reg_GeoCodeApiKey,
+                                              GeoSettings.GeoCodeApiKey,
+                                              'Enter your API_Key here and click Validate');
+    AddGridLine(GridGeoCodeSettings, CurRow,  Reg_ThrottleGeoCode,
+                                              IntToStr(GeoSettings.ThrottleGeoCode),
+                                              'Minimum time in ms between calls');
+    AddGridLine(GridGeoCodeSettings, CurRow,  Reg_SelectUniqPlace,
+                                              'False',
+                                              'Auto select unique places');
     GridGeoCodeSettings.RowCount := CurRow;
 
     AddGridHeader(GridGeoCodeSettings);

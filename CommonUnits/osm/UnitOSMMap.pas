@@ -166,7 +166,8 @@ begin
   Html.Add('              e.feature.renderIntent = "select";');
   Html.Add('              e.feature.layer.drawFeature(e.feature);');
   Html.Add('              var parm1 = (e.feature.layer.name) ? e.feature.layer.name : "";');
-  Html.Add('              var parm2 = (e.feature.url) ? e.feature.url : "";');
+  Html.Add('              var parm2 = (e.feature.data.tooltip) ? e.feature.data.tooltip :');
+  Html.Add('                                                    (e.feature.url) ? e.feature.url : "";');
   Html.Add('              SendMessage("' + OSMGetRoutePoint + '", parm1, parm2);');
   Html.Add('              }');
   Html.Add('           },');
@@ -306,26 +307,28 @@ begin
   Html.Add('     routepoints[IdLayer] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
   Html.Add('  }');
 
-  Html.Add('  function AddPOI(PoiName, PointLat, PointLon, ImageFile){');
+  Html.Add('  function AddPOI(PoiName, PointLat, PointLon, PngFile, Id){');
   Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     var Id = POILayer.push(new OpenLayers.Layer.Vector(PoiName, {');
-  Html.Add('         styleMap: new OpenLayers.StyleMap({');
-  Html.Add('             externalGraphic: ImageFile,');
-  Html.Add('             graphicWidth: 20, graphicHeight: 20, graphicXOffset: -10, graphicYOffset: -10,');
-  Html.Add('             title: PoiName');
-  Html.Add('         })');
-  Html.Add('     })) -1;');
-  Html.Add('     POILayer[Id].displayInLayerSwitcher = false;');
-
-  Html.Add('');
   Html.Add('     var myLocation = new OpenLayers.Geometry.Point(PointLon, PointLat)');
   Html.Add('         .transform(''EPSG:4326'', ''EPSG:3857'');');
+
+  Html.Add('     if (!POILayer[Id]) {');
+  Html.Add('        POILayer[Id] = new OpenLayers.Layer.Vector(Id, {');
+  Html.Add('            styleMap: new OpenLayers.StyleMap({');
+  Html.Add('                externalGraphic: PngFile,');
+  Html.Add('                graphicWidth: 20, graphicHeight: 20, graphicXOffset: -10, graphicYOffset: -10,');
+  Html.Add('                title: Id');
+  Html.Add('            })');
+  Html.Add('        });');
+
+  Html.Add('        POILayer[Id].displayInLayerSwitcher = false;');
+  Html.Add('        map.addLayer(POILayer[Id]);');
+  Html.Add('     }');
   Html.Add('');
-  Html.Add('     POILayer[Id].addFeatures([new OpenLayers.Feature.Vector(myLocation, {tooltip: ''OpenLayers''})]);');
-  Html.Add('     map.addLayer(POILayer[Id]);');
+  Html.Add('     POILayer[Id].addFeatures([new OpenLayers.Feature.Vector(myLocation, {tooltip: PoiName})]);');
 
   // poipoints needed for CreateExtent
-  Html.Add('     poipoints[Id] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
+  Html.Add('     poipoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
   Html.Add('  };');
 
   Html.Add('  function AddTrkPoint(PointLat, PointLon){');

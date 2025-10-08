@@ -1548,11 +1548,12 @@ begin
   // Allow setting Default model without an MTP device connected
   if (not CheckDevice(false)) then
   begin
+    SetRegistry(Reg_PrefDev_Key, '', IntToStr(CmbModel.ItemIndex));
     GuessModel(TSetProcessOptions.GetDefaultDevice(CmbModel.ItemIndex));
     exit;
   end;
 
-  // Make Drive letter a ?. Allow wildcard.
+  // Make drive letter a ?. Allow wildcard.
   CurrentDevicePath := GetDevicePath(FCurrentPath);
   if (Copy(CurrentDevicePath, 2, 2) = ':\') then
     CurrentDevicePath[1] := '?';
@@ -2524,14 +2525,25 @@ procedure TFrmTripManager.LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
 var
   OsmTrack: TStringList;
   AGPXwayPoint: TGPXWayPoint;
+  Category: string;
 begin
   if not Assigned(CurrentGpi) then
     exit;
   OsmTrack := TStringList.Create;
   try
     for AGPXwayPoint in CurrentGpi do
-      OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%s.png");',
-                          [EscapeDQuote(string(AGPXwayPoint.Name)), AGPXwayPoint.Lat, AGPXwayPoint.Lon, AGPXwayPoint.Symbol] ));
+    begin
+      Category := Format('Poi Symbol: %s ', [AGPXwayPoint.Symbol]);
+      if (AGPXwayPoint.Category <> '') then
+        Category := Category + Format('Category: %s ', [AGPXwayPoint.Category]);
+      if (AGPXwayPoint.Speed <> 0) then
+        Category := Category + Format('Speed: %d ', [AGPXwayPoint.Speed]);
+      Category := EscapeDQuote(Category);
+      OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%s.png", "%s");',
+                          [EscapeDQuote(string(AGPXwayPoint.Name)),
+                           AGPXwayPoint.Lat, AGPXwayPoint.Lon,
+                           AGPXwayPoint.Symbol, Category] ));
+    end;
     DeleteCompareFiles;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     if (CreateOSMMapHtml) then
