@@ -556,7 +556,7 @@ begin
 
       if (CopyDeviceFile(DBPath, ProfileDb)) then
       begin
-        Vehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb);
+        Vehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(CmbModel.ItemIndex));
         if (Vehicle_Profile.Valid) then
         begin
           SetRegistry(Reg_VehicleProfileGuid, string(Vehicle_Profile.GUID));
@@ -1445,6 +1445,7 @@ var
   GpxSelected: boolean;
   TagsToShow: TTagsToShow;
   AnItem: TListItem;
+  Index: integer;
 begin
   if (ATripList = nil) or
     (ATripList.GetItem('mAllRoutes') = nil) then
@@ -1489,6 +1490,13 @@ begin
         TTagsToShow.RteTrk:
           GPXFileObj.CompareGpxTrack(FrmShowLog.LbLog.Items, OsmTrack);
       end;
+
+//TODO: Universal route generation
+//      for Index := 0 to FrmShowLog.LbLog.Items.Count -1 do
+//        FrmShowLog.LbLog.Header[Index] := not (ContainsText(FrmShowLog.LbLog.Items[Index], ' .trip file')) and
+      for Index := 0 to FrmShowLog.LbLog.Items.Count -1 do
+        FrmShowLog.LbLog.Header[Index] := true;
+
       DeleteCompareFiles;
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,

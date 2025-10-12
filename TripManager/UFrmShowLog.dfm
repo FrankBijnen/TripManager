@@ -37,7 +37,7 @@ object FrmShowLog: TFrmShowLog
       OnClick = BtnCloseClick
     end
   end
-  object LbLog: TListBox
+  object LbLog: TCheckListBox
     Left = 0
     Top = 0
     Width = 624
@@ -48,7 +48,6 @@ object FrmShowLog: TFrmShowLog
     Font.Height = -11
     Font.Name = 'Consolas'
     Font.Style = []
-    ItemHeight = 13
     ParentFont = False
     TabOrder = 1
     OnClick = LbLogClick

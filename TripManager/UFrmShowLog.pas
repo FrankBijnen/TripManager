@@ -4,13 +4,13 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.CheckLst;
 
 type
   TFrmShowLog = class(TForm)
     PnlBot: TPanel;
     BtnClose: TBitBtn;
-    LbLog: TListBox;
+    LbLog: TCheckListBox;
     procedure BtnCloseClick(Sender: TObject);
     procedure LbLogClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);

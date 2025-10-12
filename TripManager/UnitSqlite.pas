@@ -5,7 +5,8 @@ interface
 uses
   System.Generics.Collections, System.Classes,
   Data.DB, Datasnap.DBClient,
-  SQLiteWrap;
+  SQLiteWrap,
+  UnitGpxDefs;
 
 type
   TSqlColumn = record
@@ -36,10 +37,12 @@ function GetColumns(const DbName: string;
                     const TabName: string): TSqlColumns; overload;
 function GetColumns(const Db: TSQLiteDatabase;
                     const TabName: string): TSqlColumns; overload;
-function ExecSqlQuery(const DbName: string;
-                      const Query: string): TSqlResults;
+procedure ExecSqlQuery(const DbName: string;
+                       const Query: string;
+                       const Results: TSqlResults);
 function GetAvoidancesChanged(const DbName: string): string;
-function GetVehicleProfile(const DbName: string): TVehicleProfile;
+function GetVehicleProfile(const DbName: string;
+                           const Model: TGarminModel): TVehicleProfile;
 function CDSFromQuery(const DbName: string;
                       const Query: string;
                       const ACds: TClientDataSet): integer;
@@ -141,15 +144,15 @@ begin
   end;
 end;
 
-function ExecSqlQuery(const DbName: string;
-                      const Query: string): TSqlResults;
+procedure ExecSqlQuery(const DbName: string;
+                       const Query: string;
+                       const Results: TSqlResults);
 var
   DB: TSQLiteDatabase;
   QTab: TSQLiteTable;
   AResult: TSqlResult;
   Index: integer;
 begin
-  result := TSqlResults.Create(true);
   DB := TSqliteDatabase.Create(DBName);
   try
     QTab := Db.GetTable(Query);
@@ -159,7 +162,7 @@ begin
         AResult := TSqlResult.Create;
         for Index := 0 to QTab.ColCount -1 do
           AResult.Add(QTab.FieldAsStringUnicode(Index));
-        result.Add(AResult);
+        Results.Add(AResult);
         QTab.Next;
       end;
     finally
@@ -201,9 +204,13 @@ var
   DB: TSQLiteDatabase;
   QTab: TSQLiteTable;
   Index: integer;
+  DupName: integer;
   AMemStream: TBytesStream;
+  AddedFields: TStringList;
+  FieldNameToAdd: string;
 begin
   result := 0;
+  AddedFields := TStringList.Create;
   DB := TSqliteDatabase.Create(DBName);
   try
     QTab := Db.GetTable(Query);
@@ -212,10 +219,23 @@ begin
     ACds.ReadOnly := false;
     ACds.FieldDefs.Clear;
     for Index := 0 to QTab.ColCount -1 do
-      ACds.FieldDefs.Add(QTab.Columns[Index],
+    begin
+      // Check for duplicate FieldName
+      FieldNameToAdd := QTab.Columns[Index];
+      DupName := 1;
+      while (AddedFields.IndexOf(FieldNameToAdd) > 0) do
+      begin
+        Inc(DupName);
+        FieldNameToAdd := Format('%s_%d', [QTab.Columns[Index], DupName]);
+      end;
+      AddedFields.Add(FieldNameToAdd);
+
+      // Now add to FieldDefs
+      ACds.FieldDefs.Add(FieldNameToAdd,
                          FieldTypeFromSql(QTab.Types[Index]),
                          FieldSizeFromSql(QTab.Types[Index]),
                          false);
+    end;
     try
       ACds.CreateDataSet;
       for Index := 0 to QTab.ColCount -1 do
@@ -253,8 +273,8 @@ begin
     end;
   finally
     DB.Free;
+    AddedFields.Free;
   end;
-
 end;
 
 function GetAvoidancesChanged(const DbName: string): string;
@@ -264,11 +284,13 @@ var
   DBValue: cardinal;
 begin
   result := '';
-  SqlResults := ExecSqlQuery(DbName,
-    'Select value from data_number ' + CRLF +
-    'where context like ''%None%'' and name like ''%Avoid%''' + CRLF+
-    'limit 1;');
+  SqlResults := TSqlResults.Create;
   try
+    ExecSqlQuery(DbName,
+      'Select value from data_number ' + CRLF +
+      'where context like ''%None%'' and name like ''%Avoid%''' + CRLF+
+      'limit 1;',
+      SqlResults);
     for ALine in SqlResults do
     begin
       DBValue := ALine[0];
@@ -289,18 +311,35 @@ begin
   insert('-', result, 24);
 end;
 
-function GetVehicleProfile(const DbName: string): TVehicleProfile;
+function GetVehicleProfile(const DbName: string;
+                           const Model: TGarminModel): TVehicleProfile;
 var
   SqlResults: TSqlResults;
   ALine: TSqlResult;
 begin
   FillChar(result, SizeOf(result), 0);
+  SqlResults := TSqlResults.Create;
+  case Model of
+    TGarminModel.Tread2:
+      ExecSqlQuery(DbName,
+        'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
+        '(select Hex(g.description) from properties_dbg g' + CRLF +
+        '  where g."description:1" = ''guid'' and g.value = a.value limit 1) as Guid_Data,' + CRLF +
+        'v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+        'from properties_dbg a' + CRLF +
+        'inner join vehicle_profile v on (v.vehicle_id = a.value)' + CRLF +
+        'where a."description:1" = ''active_profile''' + CRLF +
+        'limit 1;',
+        SqlResults);
+    else
+      ExecSqlQuery(DbName,
+        'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+        'from active_vehicle a' + CRLF +
+        'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
+        'limit 1;',
+        SqlResults);
+  end;
 
-  SqlResults := ExecSqlQuery(DbName,
-    'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
-    'from active_vehicle a' + CRLF +
-    'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
-    'limit 1;');
   try
     for ALine in SqlResults do
     begin
