@@ -318,12 +318,12 @@ begin
     begin
       result := result + [TGPXFunc.CreateWayPoints];
       if (Items[IdWayPointWpt].Checked = false) and
-         (Items[IdWayPointWpt].Checked = false) and
-         (Items[IdWayPointWpt].Checked = false) then
+         (Items[IdWayPointVia].Checked = false) and
+         (Items[IdWayPointShp].Checked = false) then
         raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
          [#10, Items[IdWayPointWpt].Text,
           #10, Items[IdWayPointVia].Text,
-          #10, Items[IdWayPointVia].Text]));
+          #10, Items[IdWayPointShp].Text]));
     end;
       SetRegistry(Reg_FuncWayPointWpt, Items[IdWayPointWpt].Checked);
       SetRegistry(Reg_FuncWayPointVia, Items[IdWayPointVia].Checked);
