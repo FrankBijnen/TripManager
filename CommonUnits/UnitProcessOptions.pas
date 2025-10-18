@@ -238,7 +238,7 @@ begin
   TripModel := TTripModel.XT;
   ScPosn_Unknown1 := 0;
   VehicleProfileGuid := XT2_VehicleProfileGuid;
-  VehicleProfileHash := XT2_VehicleProfileHash;
+  VehicleProfileHash := '0';
   VehicleId := XT2_VehicleId;
   VehicleProfileTruckType := XT2_VehicleProfileTruckType;
   VehicleProfileName := XT2_VehicleProfileName;

@@ -273,8 +273,7 @@ begin
     CurRow := 1;
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_ScPosn_Unknown1,
-                                            '0',
-                                            '');
+                                            '0');
     AddGridLine(GridZumoSettings, CurRow,   Reg_TripOption,
                                             '0',
                                             'Trip create options');
@@ -296,7 +295,7 @@ begin
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileGuid,
                                             XT2_VehicleProfileGuid);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileHash,
-                                            XT2_VehicleProfileHash);
+                                            '0');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleId,
                                             XT2_VehicleId);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,

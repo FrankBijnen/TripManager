@@ -25,21 +25,29 @@ void WriteMessage(FIT_UINT8 local_mesg_number, const void *mesg_pointer, FIT_UIN
 void WriteDeveloperField(const void* data, FIT_UINT16 data_size, FILE *fp);
 void WriteData(const void *data, FIT_UINT16 data_size, FILE *fp);
 void ParseBuf(char *buf,
+              FIT_UINT16 *otype,
               FIT_DATE_TIME *otimestamp,
               FIT_UINT32 *olat,
               FIT_UINT32 *olon,
               FIT_UINT32 *odist,
-              FIT_UINT16 *oele);
+              FIT_UINT16 *oele,
+              char *oname);
 
 void WriteFileId(FIT_DATE_TIME timestamp, FIT_UINT8 local_mesg_number);
 void WriteCourse(char *CourseName, FIT_UINT8 local_mesg_number);
 void WriteEvent(FIT_DATE_TIME timestamp, FIT_EVENT_TYPE event_type, FIT_UINT8 local_mesg_number);
-void WriteRecord(FIT_DATE_TIME timestamp,
-                 FIT_UINT32 lat,
-                 FIT_UINT32 lon,
-                 FIT_UINT32 dist,
-                 FIT_UINT16 ele,
-                 FIT_UINT8 local_mesg_number);
+void WriteTrkPt(FIT_DATE_TIME timestamp,
+                FIT_UINT32 lat,
+                FIT_UINT32 lon,
+                FIT_UINT32 dist,
+                FIT_UINT16 ele,
+                FIT_UINT8 local_mesg_number);
+void WriteRtePt(FIT_DATE_TIME timestamp,
+                FIT_UINT32 lat,
+                FIT_UINT32 lon,
+                FIT_UINT32 dist,
+                char *RtePtName,
+                FIT_UINT8 local_mesg_number);
 void WriteLap(FIT_DATE_TIME timestamp,
               FIT_UINT32 start_time, FIT_UINT32 totaldist, FIT_UINT32 latstart, FIT_UINT32 lonstart, FIT_UINT32 latend, FIT_UINT32 lonend,
               FIT_UINT8 local_mesg_number);
@@ -54,8 +62,9 @@ static FILE *fp;       // File pointer
 int main(void)
 {
   char buf[255];  // Buffer for reading STDIN
-  char CourseName[FIT_COURSE_MESG_NAME_COUNT]; 	// Course name
-  char FitFile[FIT_COURSE_MESG_NAME_COUNT]; 		// Fit File
+  char CourseName[FIT_COURSE_MESG_NAME_COUNT];  // Course name
+  char RtePtName[FIT_COURSE_MESG_NAME_COUNT];   // route point
+  char FitFile[FIT_COURSE_MESG_NAME_COUNT];     // Fit File
 
   // Parsed buffer
   FIT_DATE_TIME timestamp;
@@ -67,6 +76,8 @@ int main(void)
   FIT_UINT32 lonend = 0;
   FIT_UINT32 dist1, totaldist = 0;
   FIT_UINT16 ele1 = 0;
+  FIT_UINT16 type1 = 0;
+  FIT_UINT16 deftype = 0xff;
   FIT_UINT8 mesg_number = 0;
 
   if (fgets(buf, sizeof(buf), stdin) == NULL)
@@ -93,7 +104,7 @@ int main(void)
   WriteFileHeader(fp);
 
   buf[strcspn(buf, "\n")] = 0;
-  ParseBuf(buf, &timestamp, &lat1, &lon1, &dist1, &ele1);
+  ParseBuf(buf, &type1, &timestamp, &lat1, &lon1, &dist1, &ele1, RtePtName);
   FIT_DATE_TIME start_time = timestamp;
   latstart = lat1;
   lonstart = lon1;
@@ -103,15 +114,35 @@ int main(void)
 
   WriteEvent(timestamp, FIT_EVENT_TYPE_START, mesg_number++);
 
-  WriteMessageDefinition(mesg_number, fit_mesg_defs[FIT_MESG_RECORD], FIT_RECORD_MESG_DEF_SIZE, fp);
   do
   {
     buf[strcspn(buf, "\n")] = 0;
-    ParseBuf(buf, &timestamp, &lat1, &lon1, &dist1, &ele1);
-    totaldist += dist1;
-    WriteRecord(timestamp, lat1, lon1, totaldist, ele1, mesg_number);
+    ParseBuf(buf, &type1, &timestamp, &lat1, &lon1, &dist1, &ele1, RtePtName);
+    switch (type1)
+    {
+      case 0:
+        if (deftype != type1)
+        {
+          WriteMessageDefinition(mesg_number, fit_mesg_defs[FIT_MESG_COURSE_POINT], FIT_COURSE_POINT_MESG_DEF_SIZE, fp);
+        }
+        WriteRtePt(timestamp, lat1, lon1, totaldist, RtePtName, mesg_number);
+        break;
 
+      case 1:
+        totaldist += dist1;
+        if (deftype != type1)
+        {
+          WriteMessageDefinition(mesg_number +1, fit_mesg_defs[FIT_MESG_RECORD], FIT_RECORD_MESG_DEF_SIZE, fp);
+        }
+        WriteTrkPt(timestamp, lat1, lon1, totaldist, ele1, mesg_number +1);
+        break;
+
+      default:
+        ;
+    }
+    deftype = type1;
   } while (fgets(buf, sizeof(buf), stdin) != NULL);
+  mesg_number++;
   mesg_number++;
   latend = lat1;
   lonend = lon1;
@@ -199,20 +230,23 @@ void WriteData(const void *data, FIT_UINT16 data_size, FILE *fp)
 }
 
 void ParseBuf(char *buf,
+              FIT_UINT16 *otype,
               FIT_DATE_TIME *otimestamp,
               FIT_UINT32 *olat,
               FIT_UINT32 *olon,
               FIT_UINT32 *odist,
-              FIT_UINT16 *oele)
+              FIT_UINT16 *oele,
+              char *oname)
 {
-  int a = 0, b = 0, c = 0, d = 0, e = 0;
-
-  sscanf(buf, "%d,%d,%d,%d,%d", &a, &b, &c, &d, &e);
-  *otimestamp = a;
-  *olat = b;
-  *olon = c;
-  *odist = d;
-  *oele = e;
+  int a = 0, b = 0, c = 0, d = 0, e = 0, f = 0;
+  oname[0] = '\0';
+  sscanf(buf, "%d,%d,%d,%d,%d,%d,%s", &a, &b, &c, &d, &e, &f, oname);
+  *otype = a;
+  *otimestamp = b;
+  *olat = c;
+  *olon = d;
+  *odist = e;
+  *oele = f;
 }
 
 // Write file id message.
@@ -257,12 +291,12 @@ void WriteEvent(FIT_DATE_TIME timestamp, FIT_EVENT_TYPE event_type, FIT_UINT8 lo
 }
 
 // Write Record message
-void WriteRecord(FIT_DATE_TIME timestamp,
-                 FIT_UINT32 lat,
-                 FIT_UINT32 lon,
-                 FIT_UINT32 dist,
-                 FIT_UINT16 ele,
-                 FIT_UINT8 local_mesg_number)
+void WriteTrkPt(FIT_DATE_TIME timestamp,
+                FIT_UINT32 lat,
+                FIT_UINT32 lon,
+                FIT_UINT32 dist,
+                FIT_UINT16 ele,
+                FIT_UINT8 local_mesg_number)
 {
   FIT_RECORD_MESG record_mesg;
   Fit_InitMesg(fit_mesg_defs[FIT_MESG_RECORD], &record_mesg);
@@ -275,6 +309,28 @@ void WriteRecord(FIT_DATE_TIME timestamp,
   record_mesg.distance = dist;
 
   WriteMessage(local_mesg_number, &record_mesg, FIT_RECORD_MESG_SIZE, fp);
+}
+
+// Write route point as ?
+void WriteRtePt(FIT_DATE_TIME timestamp,
+                FIT_UINT32 lat,
+                FIT_UINT32 lon,
+                FIT_UINT32 dist,
+                char *RtePtName,
+                FIT_UINT8 local_mesg_number)
+{
+  FIT_COURSE_POINT_MESG rtept_mesg;
+  Fit_InitMesg(fit_mesg_defs[FIT_MESG_COURSE_POINT], &rtept_mesg);
+
+  // Only write these fields
+  rtept_mesg.timestamp = timestamp;
+  rtept_mesg.position_lat = lat;
+  rtept_mesg.position_long = lon;
+  rtept_mesg.distance = dist;
+  rtept_mesg.type = FIT_COURSE_POINT_NAVAID;
+  snprintf(rtept_mesg.name, sizeof(rtept_mesg.name), "%s", RtePtName);
+
+  WriteMessage(local_mesg_number, &rtept_mesg, FIT_COURSE_POINT_MESG_SIZE, fp);
 }
 
 // Write Lap message.
@@ -298,7 +354,7 @@ void WriteLap(FIT_DATE_TIME timestamp,
   lap_mesg.total_ascent = 0;
   lap_mesg.total_descent = 0;
   lap_mesg.total_calories = 0;
-  double avg_speed = (lap_mesg.total_distance  * 10) / (timestamp - start_time);
+  double avg_speed = (timestamp - start_time > 0) ? (lap_mesg.total_distance  * 10) / (timestamp - start_time) : 0;
   lap_mesg.avg_speed = avg_speed;
   lap_mesg.max_speed = 0;
 
@@ -331,7 +387,7 @@ void WriteSession(FIT_DATE_TIME timestamp,
   session_mesg.total_descent = 0;
   session_mesg.total_calories = 0;
   session_mesg.max_speed = 0;
-  double avg_speed = (session_mesg.total_distance  * 10) / (timestamp - start_time);
+  double avg_speed = (timestamp - start_time > 0) ? (session_mesg.total_distance  * 10) / (timestamp - start_time) : 0;
   session_mesg.avg_speed = avg_speed;
   session_mesg.num_laps = 1;
 

@@ -1928,6 +1928,7 @@ procedure TGPXFile.Track2FITTrackPoints(Track: TXmlVSNode;
                                         TrackStringList: TStringList);
 var
   TrackPoint: TXmlVSNode;
+  Rte, RtePt: TXmlVSNode;
   Coords: TCoords;
   PrevCoords: TCoords;
   UnixTime: cardinal;
@@ -1948,7 +1949,8 @@ begin
   TrackStringList.Clear;
   UnixTime := 0;
 
-  TrackStringList.Add(EscapeFileName(Track.Name));
+  TrackStringList.Add(Format('%s', [EscapeFileName(Track.Name)]));
+
   for TrackPoint in Track.ChildNodes do
   begin
     if (TrackPoint.Name = 'trkpt') then
@@ -1964,6 +1966,26 @@ begin
       break;
     end;
   end;
+
+  for Rte in RouteViaPointList do
+  begin
+    if (Rte.NodeName <> Track.Name) then
+      continue;
+    for RtePt in Rte.ChildNodes do
+    begin
+      Coords.FromAttributes(RtePt.AttributeList);
+      TrackStringList.Add(Format('0,%u,%u,%u,%1.0f,%s,%s',
+                                [UnixTime,
+                                 CoordAsInt(Coords.Lat),
+                                 CoordAsInt(Coords.Lon),
+                                 0.0,
+                                 '0',
+                                 ReplaceAll(FindSubNodeValue(RtePt, 'name'), [' ', #9], ['_', '_'])
+                                ]));
+
+    end;
+  end;
+
   for TrackPoint in Track.ChildNodes do
   begin
     if (TrackPoint.Name <> 'trkpt') then
@@ -1981,11 +2003,12 @@ begin
     Ele := FindSubNodeValue(TrackPoint, 'ele');
     if (Ele = '') then
       Ele := '0';
-    TrackStringList.Add(Format('%u,%u,%u,%1.0f,%s', [UnixTime,
-                                               CoordAsInt(Coords.Lat),
-                                               CoordAsInt(Coords.Lon),
-                                               CurrentDist,
-                                               Ele]));
+    TrackStringList.Add(Format('1,%u,%u,%u,%1.0f,%s',
+                              [UnixTime,
+                               CoordAsInt(Coords.Lat),
+                               CoordAsInt(Coords.Lon),
+                               CurrentDist,
+                               Ele]));
   end;
   TrackStringList.Add(Chr(26)); // EOF for Stdin
 end;

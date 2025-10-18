@@ -11,7 +11,7 @@ const
   XT_Name                           = 'zūmo XT';
   XT2_Name                          = 'zūmo XT2';
   XT2_VehicleProfileGuid            = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
-  XT2_VehicleProfileHash            = '135656608';
+  XT2_VehicleProfileHash            = '135656608'; // Not used
   XT2_VehicleId                     = '1';
   XT2_VehicleProfileTruckType       = '7';
   XT2_AvoidancesChangedTimeAtSave   = '';
@@ -20,7 +20,7 @@ const
   Tread2_Name                       = 'Tread 2';
   Tread2_VehicleProfileName         = 'Tread Profile';
   Tread2_VehicleProfileGuid         = 'c21c922c-553f-4783-85f8-c0a13f52d960';
-  Tread2_VehicleProfileHash         = '61578528';
+  Tread2_VehicleProfileHash         = '61578528'; // Not used
   Tread2_TmScPosnSize               = 16;
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);

@@ -535,6 +535,7 @@ var
   SubKey, DBPath, Friendlyname: string;
   LDelim: integer;
   Vehicle_Profile: TVehicleProfile;
+  DefAdvLevel: integer;
 begin
   if not CheckDevice(false) then
     exit;
@@ -560,16 +561,13 @@ begin
         if (Vehicle_Profile.Valid) then
         begin
           SetRegistry(Reg_VehicleProfileGuid, string(Vehicle_Profile.GUID));
-          if (Vehicle_Profile.GUID = XT2_VehicleProfileGuid) then
-            SetRegistry(Reg_VehicleProfileHash, XT2_VehicleProfileHash)
-          else if (Vehicle_Profile.GUID = Tread2_VehicleProfileGuid) then
-            SetRegistry(Reg_VehicleProfileHash, Tread2_VehicleProfileHash)
-          else
-            SetRegistry(Reg_VehicleProfileHash, 0);
           SetRegistry(Reg_VehicleId, Vehicle_Profile.Vehicle_Id);
           SetRegistry(Reg_VehicleProfileTruckType, Vehicle_Profile.TruckType);
           SetRegistry(Reg_VehicleProfileName, string(Vehicle_Profile.Name));
-          SetRegistry(Reg_DefAdvLevel, Vehicle_Profile.AdventurousLevel +1);
+          // Only load Default Adventurous level from profile if invalid
+          DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
+          if not (DefAdvLevel in [1..4]) then
+            SetRegistry(Reg_DefAdvLevel, Vehicle_Profile.AdventurousLevel +1);
         end;
       end;
     end;
