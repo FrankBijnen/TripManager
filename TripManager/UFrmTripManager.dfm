@@ -72,7 +72,7 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 166
           Top = 5
-          Width = 135
+          Width = 129
           Height = 21
           Margins.Left = 1
           Margins.Top = 4
@@ -84,6 +84,7 @@ object FrmTripManager: TFrmTripManager
           OnChange = CmbDevicesChange
           Items.Strings = (
             'Select an MTP device')
+          ExplicitWidth = 135
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
@@ -151,9 +152,9 @@ object FrmTripManager: TFrmTripManager
         end
         object CmbModel: TComboBox
           AlignWithMargins = True
-          Left = 303
+          Left = 297
           Top = 5
-          Width = 68
+          Width = 74
           Height = 21
           Margins.Left = 1
           Margins.Top = 4
@@ -170,6 +171,7 @@ object FrmTripManager: TFrmTripManager
             'Edge'
             'Garmin'
             'Unknown')
+          ExplicitLeft = 303
         end
       end
       object LstFiles: TListView

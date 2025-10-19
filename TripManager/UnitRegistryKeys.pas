@@ -102,6 +102,17 @@ const
 
 type
 
+  TGarminDevice = record
+    GarminModel: TGarminModel;
+    ModelDescription: string;
+    GpxPath: string;
+    GpiPath: string;
+    CoursePath: string;
+    NewFilesPath: string;
+    ActivitiesPath: string;
+    procedure Init;
+  end;
+
   TSetProcessOptions = class
   private
   public
@@ -123,6 +134,7 @@ type
 
 var
   SetProcessOptions: TSetProcessOptions;
+  GarminDevice: TGarminDevice;
 
 implementation
 
@@ -459,20 +471,31 @@ begin
       end;
     TGarminModel.GarminEdge:
       case PathId of
-        0: result := '?:\Garmin\Courses';
-        1: result := '?:\Garmin\NewFiles';
-        2: result := '?:\Garmin\Activities';
+        0: result := GarminDevice.CoursePath;
+        1: result := GarminDevice.NewFilesPath;
+        2: result := GarminDevice.ActivitiesPath;
       end;
     TGarminModel.GarminGeneric:
       case PathId of
-        1: result := '?:\Garmin\GPX';
-        2: result := '?:\Garmin\POI';
+        1: result := GarminDevice.GpxPath;
+        2: result := GarminDevice.GpiPath;
       end;
   end;
 end;
 
+// Default paths. Can be overruled by GarminDevice.Xml
+procedure TGarminDevice.Init;
+begin
+  CoursePath      := '?:\Garmin\Courses';
+  NewFilesPath    := '?:\Garmin\NewFiles';
+  ActivitiesPath  := '?:\Garmin\Activities';
+  GpxPath         := '?:\Garmin\GPX';
+  GpiPath         := '?:\Garmin\POI';
+end;
+
 initialization
   SetProcessOptions := TSetProcessOptions.Create;
+  GarminDevice.Init;
 
 finalization
   SetProcessOptions.Free;

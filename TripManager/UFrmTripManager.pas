@@ -14,9 +14,11 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ImgList,
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
+  Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
-  UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent, Vcl.DBGrids, Vcl.DBCtrls;
+  UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent,
+  UnitRegistryKeys;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -357,7 +359,7 @@ type
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure ReadDeviceDB;
-    function ReadGarminDevice(var ModelDescription: string): TGarminModel;
+    function ReadGarminDevice(const ModelDescription: string): TGarminDevice;
     procedure GuessModel(const FriendlyName: string);
     function DeviceIdInList(const DeviceName: string): integer;
     procedure SelectDevice(const Indx: integer); overload;
@@ -382,7 +384,7 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
-    procedure CheckSupportedModel(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
+    procedure CheckModelSupportsTrips(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
@@ -420,7 +422,7 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
-  MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
+  MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
   UnitGpxTripCompare, UnitSqlite,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
@@ -462,7 +464,7 @@ begin
                                      GetTracksExt]));
 end;
 
-procedure TFrmTripManager.CheckSupportedModel(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
+procedure TFrmTripManager.CheckModelSupportsTrips(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
 var
   Rc: integer;
   GPXFunc: TGPXFunc;
@@ -574,21 +576,46 @@ begin
   end;
 end;
 
-function TFrmTripManager.ReadGarminDevice(var ModelDescription: string): TGarminModel;
+function TFrmTripManager.ReadGarminDevice(const ModelDescription: string): TGarminDevice;
 var
   DevicePath: string;
   NFile: string;
   XmlDoc: TXmlVSDocument;
-  DeviceNode, ModelNode: TXmlVSNode;
+  DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
+
+  function GetPath(CheckNode: TXmlVSNode; AName, Direction, AExt: string): string;
+  var
+    DataTypeNode, FileNode, LocationNode: TXmlVSNode;
+  begin
+    result := '';
+    for DataTypeNode in CheckNode.ChildNodes do
+    begin
+      if (SameText(FindSubNodeValue(DataTypeNode, 'Name'), AName)) then
+      begin
+        for FileNode in DataTypeNode.ChildNodes do
+        begin
+          if (FindSubNodeValue(FileNode, 'TransferDirection') = Direction) then
+          begin
+            LocationNode := FileNode.Find('Location');
+            if (Assigned(LocationNode)) and
+               (SameText(FindSubNodeValue(LocationNode, 'FileExtension'), AExt)) then
+              exit(Format('?:\%s', [ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\'])]));
+          end;
+        end;
+      end;
+    end;
+  end;
+
 begin
-  result := TSetProcessOptions.GetModelFromDescription(ModelDescription);
+  result.Init;
+  result.GarminModel := TSetProcessOptions.GetModelFromDescription(ModelDescription);
 
 // Need a device to check better
   if not CheckDevice(false) then
     exit;
 
 // Location of GarminDevice.Xml
-  if (result in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) then
+  if (result.GarminModel in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) then
     DevicePath := 'Internal Storage\Garmin'
   else
     DevicePath := '?:\Garmin';
@@ -606,12 +633,22 @@ begin
       ModelNode := DeviceNode.Find('Model');
       if (ModelNode = nil) then
         exit;
+      MassStorageNode := DeviceNode.Find('MassStorageMode');
 
       // Update model from GarminDevice.xml
-      ModelDescription := FindSubNodeValue(ModelNode, 'Description');
-      result := TSetProcessOptions.GetModelFromDescription(ModelDescription);
-      if (result = TGarminModel.Unknown) then
-        result := ModelFromGarminDevice(ModelDescription);
+      result.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
+      result.GarminModel := TSetProcessOptions.GetModelFromDescription(result.ModelDescription);
+      if (result.GarminModel = TGarminModel.Unknown) then
+        result.GarminModel := ModelFromGarminDevice(result.ModelDescription);
+      // Get default paths
+      if (Assigned(MassStorageNode)) then
+      begin
+        result.GpxPath := GetPath(MassStorageNode, 'GPSData', 'InputToUnit', 'gpx');
+        result.GpiPath := GetPath(MassStorageNode, 'CustomPOI', 'InputToUnit', 'gpi');
+        result.CoursePath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'OutputFromUnit', 'fit');
+        result.NewFilesPath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'InputToUnit', 'fit');
+        result.ActivitiesPath := GetPath(MassStorageNode, 'FIT_TYPE_4', 'OutputFromUnit', 'fit');
+      end;
     finally
       XmlDoc.Free;
     end;
@@ -624,14 +661,15 @@ var
   ModelIndex: integer;
 begin
   ModelDisplayed := FriendlyName;
-  ModelIndex := Ord(ReadGarminDevice(ModelDisplayed));
+  GarminDevice := ReadGarminDevice(ModelDisplayed);
+  ModelIndex := Ord(GarminDevice.GarminModel);
 
   // Change description for 'old' Garmin units and Edge
   case TGarminModel(ModelIndex) of
     TGarminModel.GarminEdge,
     TGarminModel.GarminGeneric:
       if (ModelDisplayed <> CmbModel.Items[ModelIndex]) then
-        CmbModel.Items[ModelIndex] := ModelDisplayed;
+        CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
   end;
 
   // Model changed?
@@ -1111,7 +1149,7 @@ begin
     if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
       BgDeviceClick(BgDevice);
 {$ENDIF}
-    CheckSupportedModel(TGarminModel(CmbModel.ItemIndex), FrmSendTo.Funcs);
+    CheckModelSupportsTrips(TGarminModel(CmbModel.ItemIndex), FrmSendTo.Funcs);
 
     for AnItem in ShellListView1.Items do
     begin
@@ -1551,13 +1589,9 @@ var
   ModelIndex: integer;
   SubKey: string;
 begin
-  // Allow setting Default model without an MTP device connected
+  // Need a device
   if (not CheckDevice(false)) then
-  begin
-    SetRegistry(Reg_PrefDev_Key, '', IntToStr(CmbModel.ItemIndex));
-    GuessModel(TSetProcessOptions.GetDefaultDevice(CmbModel.ItemIndex));
     exit;
-  end;
 
   // Make drive letter a ?. Allow wildcard.
   CurrentDevicePath := GetDevicePath(FCurrentPath);
@@ -1567,7 +1601,6 @@ begin
   // Save Device settings
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := IntToStr(ModelIndex);
-  SetRegistry(Reg_PrefDev_Key, CurrentDevice.FriendlyName, SubKey);
   case (BgDevice.ItemIndex) of
     0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, SubKey);
     1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath, SubKey);
@@ -2110,7 +2143,7 @@ begin
     for Index := 0 to DeviceList.Count - 1 do
     begin
       // Does this device match our registry setting? Select right away
-        if (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
+      if (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
       begin
         CmbDevices.ItemIndex := Index;
         SelectDevice(Index);
