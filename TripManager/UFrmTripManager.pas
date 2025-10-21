@@ -317,7 +317,6 @@ type
     AFitInfo: TStringList;
 
     WarnRecalc: integer; // MrNone, MrYes, MrNo, mrIgnore
-    WarnModel: boolean;
     WarnOverWrite: integer;  // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
     ModifiedList: TStringList;
     DirectoryMonitor: TDirectoryMonitor;
@@ -384,7 +383,6 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
-    procedure CheckModelSupportsTrips(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
@@ -464,35 +462,9 @@ begin
                                      GetTracksExt]));
 end;
 
-procedure TFrmTripManager.CheckModelSupportsTrips(const GarminModel: TGarminModel; const AllFuncs: array of TGPXFunc);
-var
-  Rc: integer;
-  GPXFunc: TGPXFunc;
+procedure DeleteTripTrackFiles;
 begin
-  if not WarnModel then
-    exit;
-
-  for GPXFunc in AllFuncs do
-  begin
-    case GPXFunc of
-      TGPXFunc.CreateTrips:
-      begin
-        case GarminModel of
-          TGarminModel.XT,
-          TGarminModel.XT2,
-          TGarminModel.Tread2:;  // Fall thru
-          else
-            begin
-              Rc := MessageDlg('Trip files created may not work for selected model.',
-                               TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbIgnore], 0);
-              if (Rc = ID_IGNORE) then
-                SetRegistry(Reg_WarnModel_Key, 'False');
-              WarnModel := false;
-            end;
-        end;
-      end;
-    end;
-  end;
+  DeleteTempFiles(GetOSMTemp, Format('\%s_%s_track%s', [App_Prefix, CurrentMapItem, GetTracksExt]));
 end;
 
 function TFrmTripManager.CopyDeviceFile(const APath, AFile: string): boolean;
@@ -1157,7 +1129,6 @@ begin
     if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
       BgDeviceClick(BgDevice);
 {$ENDIF}
-    CheckModelSupportsTrips(TGarminModel(CmbModel.ItemIndex), FrmSendTo.Funcs);
 
     for AnItem in ShellListView1.Items do
     begin
@@ -2551,13 +2522,15 @@ begin
 
   try
     DeleteCompareFiles;
+    DeleteTripTrackFiles;
+
     CurrentTrip.CreateOSMPoints(OsmTrack, OSMColor(GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val)));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     TrackToRouteInfoMap := CurrentTrip.GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
     if (Assigned(TrackToRouteInfoMap)) and
        (TrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt > 0)  then
     begin
-      OsmTrack.Text := TrackToRouteInfoMap.GetCoords(ProcessOptions.TrackColor);
+      OsmTrack.Text := TrackToRouteInfoMap.GetCoords(ProcessOptions.TripTrackColor);
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s_track%s', [App_Prefix, Id, GetTracksExt]));
     end;
     if (CreateOSMMapHtml) then
@@ -4564,7 +4537,6 @@ begin
   else
     GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
 
-  WarnModel := GetRegistry(Reg_WarnModel_Key, True);
   WarnRecalc := mrNone;
   RoutePointTimeOut := GetRegistry(Reg_RoutePointTimeOut_Key, Reg_RoutePointTimeOut_Val);
   GeoSearchTimeOut := GetRegistry(Reg_GeoSearchTimeOut_Key, Reg_GeoSearchTimeOut_Val);

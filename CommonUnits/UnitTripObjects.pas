@@ -580,6 +580,7 @@ type
     FTrackHeader: TTrackHeader;
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure Clear;
     procedure InitFromGpxxRpt(RtePts: TObject);
     function GetCoords(Color: string = ''): string;
   end;
@@ -2211,7 +2212,7 @@ begin
                    [CoordAsDec(Swap32(LatAsInt)), CoordAsDec(Swap32(LonAsInt))], FloatFormatSettings);
 end;
 
-procedure TTrackpoint.Init;
+procedure TTrackPoint.Init;
 begin
   // Prefix
   Sizes1[0]   := $67000000; // Cant figure this out
@@ -2275,12 +2276,19 @@ begin
     result := result + #10 + Format('    CreateTrack(''%s'', ''%s'');', [Name, Color]);
 end;
 
+procedure TmTrackToRouteInfoMap.Clear;
+begin
+  SetLength(FBytes, 0); // Force zeroes
+  FLenValue := SizeOf(Cardinal);
+  SetLength(FBytes, FLenValue);
+end;
+
 procedure TmTrackToRouteInfoMap.InitFromGpxxRpt(RtePts: TObject);
 var
   RtePtNode, GpxxRptNode: TXmlVSNode;
   PrevCoords, Coords: TCoords;
   TmpStream: TMemoryStream;
-  Trackpoint: TTrackpoint;
+  TrackPoint: TTrackPoint;
   TrkPtCnt: integer;
   TrkPtSize: cardinal;
 
@@ -2290,9 +2298,9 @@ var
        (Coords.Lat <> PrevCoords.Lat) then
     begin
       Inc(TrkPtCnt);
-      Trackpoint.LonAsInt := Swap32(CoordAsInt(Coords.Lon));
-      Trackpoint.LatAsInt := Swap32(CoordAsInt(Coords.Lat));
-      TmpStream.Write(Trackpoint, SizeOf(Trackpoint));
+      TrackPoint.LonAsInt := Swap32(CoordAsInt(Coords.Lon));
+      TrackPoint.LatAsInt := Swap32(CoordAsInt(Coords.Lat));
+      TmpStream.Write(TrackPoint, SizeOf(TrackPoint));
     end;
     PrevCoords := Coords;
   end;
@@ -2301,7 +2309,7 @@ begin
   TmpStream := TMemoryStream.Create;
   try
     TrkPtCnt := 0;
-    Trackpoint.Init;
+    TrackPoint.Init;
     FillChar(PrevCoords, SizeOf(PrevCoords), 0);
     RtePtNode := TXmlVSNodeList(RtePts).FirstChild;
     while (RtePtNode <> nil) do
@@ -2343,7 +2351,7 @@ begin
     SetLength(FBytes, SizeOf(FTrackHeader) + TmpStream.Size);
     Move(FTrackHeader, FBytes[0], SizeOf(FTrackHeader));
     TmpStream.Position := 0;
-    TmpStream.Read(Fbytes[SizeOf(FTrackHeader)], TmpStream.Size);
+    TmpStream.Read(FBytes[SizeOf(FTrackHeader)], TmpStream.Size);
     FLenValue := SizeOf(FTrackHeader) + TmpStream.Size;
   finally
     TmpStream.Free;
@@ -3805,7 +3813,6 @@ begin
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
-
       // Add udb's for all Via and Shaping found in Locations.
       // Will be discarded when recalculated on the Zumo.
       if (Assigned(Locations)) then
@@ -3822,7 +3829,10 @@ begin
     case (CalcModel) of
       TTripModel.XT2,
       TTripModel.Tread2:
+      begin
+        TmTrackToRouteInfoMap(GetItem('mTrackToRouteInfoMap')).Clear;
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
+      end;
     end;
   finally
     RoutePointList.Free;
@@ -4031,24 +4041,6 @@ begin
 
             RoadClass := Copy(CMapSegRoad, 1, 2);
             CMapSegRoad := Copy(CMapSegRoad, 5);
-
-// '2114' Occurs when switching to another mapsegment.
-// We could skip it, but doesn't seem to harm
-//            if (Copy(CMapSegRoad, 17, 4) = '2114') then
-//            begin
-//              ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
-//              continue;
-//            end;
-
-//TODO: Is this needed?
-//            if (Copy(CMapSegRoad, 17, 4) = '2117') then
-//            begin
-//              CMapSegRoad[29] := '0';
-//              CMapSegRoad[30] := '0';
-//              CMapSegRoad[31] := '0';
-//              CMapSegRoad[32] := '0';
-//            end;
-
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
             AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
             AnUdbHandle.Add(AnUdbDir);

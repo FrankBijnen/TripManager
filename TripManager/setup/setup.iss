@@ -145,4 +145,5 @@ begin
   RegDeleteValue(HKCU, RegKey, 'ExploreUuid');
   RegDeleteValue(HKCU, RegKey, 'ForceRecalc');     
   RegDeleteValue(HKCU, RegKey, 'AddSubClasses');    
+  RegDeleteValue(HKCU, RegKey, 'WarnModel');    
 end;

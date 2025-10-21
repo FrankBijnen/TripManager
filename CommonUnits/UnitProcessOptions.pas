@@ -150,6 +150,7 @@ type
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
     function DistanceStr: string;
     function GetDistOKMeters: double;
+    function TripTrackColor: string;
     property DistOKMeters: double read GetDistOKMeters;
   end;
 
@@ -306,6 +307,13 @@ end;
 function TProcessOptions.GetDistOKMeters: double;
 begin
   result := CompareDistanceOK / 1000;
+end;
+
+function TProcessOptions.TripTrackColor: string;
+begin
+  result := DefTrackColor;
+  if (TrackColor <> '') then
+    result := TrackColor;
 end;
 
 end.

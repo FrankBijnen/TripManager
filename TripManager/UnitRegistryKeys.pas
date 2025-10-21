@@ -74,7 +74,6 @@ const
   Reg_EnableDirFuncs              = 'EnableDirFuncs';
   Reg_EnableFitFuncs              = 'EnableFitFuncs';
   Reg_EnableTripFuncs             = 'EnableTripFuncs';
-  Reg_WarnModel_Key               = 'WarnModel';
   Reg_TripColor_Key               = 'TripColor';
   Reg_TripColor_Val               = 'Magenta';
   Reg_Maximized_Key               = 'Maximized';
