@@ -762,7 +762,6 @@ type
     FUdbPrefValue:     TUdbPrefValue;
     FValue:            TUdbHandleValue;
     FUdbDirList:       TUdbDirList;
-    FSubLength: Cardinal;
     function ComputeUnknown3Size: Cardinal;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
@@ -786,7 +785,6 @@ type
   private
     FValue:            TmAllRoutesValue;
     FUdBList: TUdbHandleList;
-    procedure Calculate(AStream: TMemoryStream); override;
     procedure WritePrefix(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure WriteTerminator(AStream: TMemoryStream); override;
@@ -2939,12 +2937,15 @@ begin
   FUdbHandleId := AHandleId; // Only value seen = 1
   FillChar(FValue, SizeOf(FValue), 0);
 
+  FillChar(FUdbPrefValue, SizeOf(FUdbPrefValue), 0);
+  FUdbPrefValue.DataType := dtUdbPref;
+  FUdbPrefValue.PrefId := FUdbHandleId;
+
 // Leaving it to Zeroes, to force recalculation
   if not (ForceRecalc) then
     FValue.CalcStatus := CalculationMagic[AModel];
 
   FValue.AllocUnknown3(AModel);
-  FSubLength := 0;
   FUdbDirList := TUdbDirList.Create;
 end;
 
@@ -2975,28 +2976,10 @@ begin
             (SizeOf(FValue) - SizeOf(FValue.Unknown3) - SizeOf(FValue.CalcStatus)) -
             // SizeOf UdbDir's
             (FValue.UDbDirCount * SizeOf(TUdbDirValue));
-
-(* Bug fixes for enabling Win64
-SizeOf(FValue.Unknown3) = 4 for 32 bits, 8 for 64 bits
-SizeOf(TUdbDir) = 4 for 32 bits, 8 for 64 bits. But should be the size of the record.
-Because Unnoticed until now, because this function gets called when a trip is not calculated and UDbDirCount=0.
-
-  result := // SizeOf UDbHandle
-            Swap32(FValue.UdbHandleSize) -
-            // SizeOf fixed part (excluding Unknown3)
-            (SizeOf(FValue) - SizeOf(FValue.UdbHandleSize) - Sizeof(FValue.CalcStatus)) -
-            // SizeOf UdbDir's
-            (FValue.UDbDirCount * SizeOf(TUdbDir));
-*)
 end;
 
 procedure TmUdbDataHndl.WritePrefix(AStream: TMemoryStream);
 begin
-  FillChar(FUdbPrefValue, Sizeof(FUdbPrefValue), 0);
-  FUdbPrefValue.PrefixSize := SubLength + SizeOf(FUdbPrefValue.DataType) + SizeOf(FUdbPrefValue.PrefId);
-  FUdbPrefValue.DataType := dtUdbPref;
-  FUdbPrefValue.PrefId := FUdbHandleId;
-
   FUdbPrefValue.SwapCardinals;
   AStream.Write(FUdbPrefValue, SizeOf(FUdbPrefValue));
   FUdbPrefValue.SwapCardinals;
@@ -3011,7 +2994,9 @@ var
   AnItem: TUdbDir;
 begin
   inherited WriteValue(AStream);
+
   FValue.UDbDirCount := FUdbDirList.Count;
+
   FValue.SwapCardinals;
   AStream.Write(FValue.UdbHandleSize, SizeOf(FValue.UdbHandleSize));
   AStream.Write(FValue.CalcStatus, SizeOf(FValue.CalcStatus));
@@ -3019,17 +3004,20 @@ begin
   AStream.Write(FValue.UDbDirCount, SizeOf(FValue.UDbDirCount));
   AStream.Write(FValue.Unknown3[0], Length(FValue.Unknown3));
   FValue.SwapCardinals;
-  for AnItem in FUdbDirList do
+
+  for AnItem in Items do
     ANitem.Write(AStream);
 end;
 
 procedure TmUdbDataHndl.WriteTerminator(AStream: TMemoryStream);
 begin
+  inherited WriteTerminator(AStream);
+
   if not FCalculated then
   begin
-    FEndPos := AStream.Position;
     FLenValue := SubLength - SizeOf(FLenName) - FLenName - SizeOf(FLenValue) - SizeOf(FDataType) - SizeOf(FInitiator);
     FValue.UdbHandleSize := FLenValue -4;
+    FUdbPrefValue.PrefixSize  := SubLength + SizeOf(FUdbPrefValue.DataType) + SizeOf(FUdbPrefValue.PrefId);
   end;
 end;
 
@@ -3073,7 +3061,10 @@ begin
   for UdbHandleCnt := 0 to FValue.UdbHandleCount -1 do
   begin
     AnUdbHandle := TmUdbDataHndl.Create(UdbHandleCnt);
+
     AStream.Read(AnUdbHandle.FUdbPrefValue, SizeOf(AnUdbHandle.FUdbPrefValue));
+    AnUdbHandle.FUdbPrefValue.SwapCardinals;
+
     AnUdbHandle.FUdbHandleId := Swap32(AnUdbHandle.FUdbPrefValue.PrefId);
 
     BytesRead := ReadKeyVAlues(AStream,
@@ -3137,14 +3128,6 @@ begin
   FUdBList.Add(AnUdbHandle);
 end;
 
-procedure TmAllRoutes.Calculate(AStream: TMemoryStream);
-begin
-  inherited Calculate(AStream);
-
-  FValue.UdbHandleCount := FUdBList.Count;
-  FLenValue := SubLength - SizeOf(FLenName) - FLenName - SizeOf(FLenValue) - SizeOf(FDataType) - SizeOf(FInitiator);
-end;
-
 procedure TmAllRoutes.WritePrefix(AStream: TMemoryStream);
 begin
   inherited WritePrefix(AStream);
@@ -3153,6 +3136,12 @@ end;
 procedure TmAllRoutes.WriteTerminator(AStream: TMemoryStream);
 begin
   inherited WriteTerminator(AStream);
+
+  if not FCalculated then
+  begin
+    FValue.UdbHandleCount := FUdBList.Count;
+    FLenValue := SubLength - SizeOf(FLenName) - FLenName - SizeOf(FLenValue) - SizeOf(FDataType) - SizeOf(FInitiator);
+  end;
 end;
 
 procedure TmAllRoutes.WriteValue(AStream: TMemoryStream);
@@ -3221,14 +3210,15 @@ var
 begin
   for ANItem in ItemList do
   begin
-    if (ANItem is TBaseItem) then
-      ANitem.FCalculated := false
-    else if (ANItem is TmLocations) then
+    ANitem.FCalculated := false;
+
+    if (ANItem is TmLocations) then
     begin
       for ALocation in TmLocations(ANItem).Locations do
         ALocation.FCalculated := false;
-    end
-    else if (ANItem is TmAllRoutes) then
+    end;
+
+    if (ANItem is TmAllRoutes) then
     begin
       for AnUdbHandle in TmAllRoutes(ANItem).Items do
       begin
@@ -3237,6 +3227,7 @@ begin
           AnUdbDir.FCalculated := false;
       end;
     end;
+
   end;
 end;
 

@@ -56,7 +56,7 @@ Source: "..\Win64\FitInfo.exe";           DestDir: "{app}"; Components: Executab
 Source: "..\Win64\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 ; Images
-Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: recursesubdirs; Excludes: "*.png,*.jbf,*.db"
+Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db"
 
 [Registry]
 

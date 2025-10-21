@@ -27,6 +27,9 @@ type
     VehicleType: integer;
     TransportMode: integer;
     AdventurousLevel: integer;
+    function Changed(IName, IGUID: UTF8String;
+                     IVehicle_Id, ITruckType, ITransportMode: integer): boolean; overload;
+    function Changed(IVehicleProfile: TVehicleProfile): boolean; overload;
   end;
 
   TSqlResult = Tlist<Variant>;
@@ -54,6 +57,25 @@ uses
 
 const
   CRLF = #13#10;
+
+function TVehicleProfile.Changed(IName, IGUID: UTF8String;
+                                 IVehicle_Id, ITruckType, ITransportMode: integer): boolean;
+begin
+  result := (Name <> IName) or
+            (GUID <> IGUID) or
+            (Vehicle_Id <> IVehicle_Id) or
+            (TruckType <> ITruckType) or
+            (TransportMode <> ITransportMode);
+end;
+
+function TVehicleProfile.Changed(IVehicleProfile: TVehicleProfile): boolean;
+begin
+  result := Changed(IVehicleProfile.Name,
+                    IVehicleProfile.GUID,
+                    IVehicleProfile.Vehicle_Id,
+                    IVehicleProfile.TruckType,
+                    IVehicleProfile.TransportMode);
+end;
 
 procedure TableNames(const Db: TSqliteDatabase; TabList: TStrings);
 var
@@ -319,28 +341,28 @@ var
 begin
   FillChar(result, SizeOf(result), 0);
   SqlResults := TSqlResults.Create;
-  case Model of
-    TGarminModel.Tread2:
-      ExecSqlQuery(DbName,
-        'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
-        '(select Hex(g.description) from properties_dbg g' + CRLF +
-        '  where g."description:1" = ''guid'' and g.value = a.value limit 1) as Guid_Data,' + CRLF +
-        'v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
-        'from properties_dbg a' + CRLF +
-        'inner join vehicle_profile v on (v.vehicle_id = a.value)' + CRLF +
-        'where a."description:1" = ''active_profile''' + CRLF +
-        'limit 1;',
-        SqlResults);
-    else
-      ExecSqlQuery(DbName,
-        'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
-        'from active_vehicle a' + CRLF +
-        'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
-        'limit 1;',
-        SqlResults);
-  end;
-
   try
+    case Model of
+      TGarminModel.Tread2:
+        ExecSqlQuery(DbName,
+          'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
+          '(select Hex(g.description) from properties_dbg g' + CRLF +
+          '  where g."description:1" = ''guid'' and g.value = a.value limit 1) as Guid_Data,' + CRLF +
+          'v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+          'from properties_dbg a' + CRLF +
+          'inner join vehicle_profile v on (v.vehicle_id = a.value)' + CRLF +
+          'where a."description:1" = ''active_profile''' + CRLF +
+          'limit 1;',
+          SqlResults);
+      else
+        ExecSqlQuery(DbName,
+          'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+          'from active_vehicle a' + CRLF +
+          'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
+          'limit 1;',
+          SqlResults);
+    end;
+
     for ALine in SqlResults do
     begin
       if (ALine.Count < 7) then

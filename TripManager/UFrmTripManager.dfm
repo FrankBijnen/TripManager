@@ -84,7 +84,6 @@ object FrmTripManager: TFrmTripManager
           OnChange = CmbDevicesChange
           Items.Strings = (
             'Select an MTP device')
-          ExplicitWidth = 135
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
@@ -171,7 +170,6 @@ object FrmTripManager: TFrmTripManager
             'Edge'
             'Garmin'
             'Unknown')
-          ExplicitLeft = 303
         end
       end
       object LstFiles: TListView

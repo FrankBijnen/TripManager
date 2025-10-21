@@ -529,49 +529,58 @@ begin
 end;
 
 procedure TFrmTripManager.ReadDeviceDB;
-const
-  SettingsDb = 'settings.db';
-  ProfileDb = 'vehicle_profile.db';
-
 var
-  SubKey, DBPath, Friendlyname: string;
+  SubKey, DBPath: string;
   LDelim: integer;
-  Vehicle_Profile: TVehicleProfile;
+  NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   DefAdvLevel: integer;
+
 begin
-  if not CheckDevice(false) then
-    exit;
+  // Check the connected Device needs reading SQlite
   if not (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
     exit;
+  if not CheckDevice(false) then
+    exit;
 
-// Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
+  // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
   SubKey := GetRegistry(Reg_CurrentModel, '0');
-  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, '', SubKey));
+  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val, SubKey));
   LDelim := LastDelimiter('\', DBPath) -1;
   DBPath := Copy(DBPath, 1, LDelim) + '\SQlite';
 
-// Copy DB files
-  if (GetIdForPath(CurrentDevice.PortableDev, DBPath, Friendlyname) <> '') then
-  begin
-    if (CopyDeviceFile(DBPath, SettingsDb)) then
-    begin
-      SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
+  // Copy settings.db, Update Avoidances changed
+  if (CopyDeviceFile(DBPath, SettingsDb)) then
+    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
-      if (CopyDeviceFile(DBPath, ProfileDb)) then
-      begin
-        Vehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(CmbModel.ItemIndex));
-        if (Vehicle_Profile.Valid) then
-        begin
-          SetRegistry(Reg_VehicleProfileGuid, string(Vehicle_Profile.GUID));
-          SetRegistry(Reg_VehicleId, Vehicle_Profile.Vehicle_Id);
-          SetRegistry(Reg_VehicleProfileTruckType, Vehicle_Profile.TruckType);
-          SetRegistry(Reg_VehicleProfileName, string(Vehicle_Profile.Name));
-          // Only load Default Adventurous level from profile if invalid
-          DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
-          if not (DefAdvLevel in [1..4]) then
-            SetRegistry(Reg_DefAdvLevel, Vehicle_Profile.AdventurousLevel +1);
-        end;
-      end;
+  // Copy vehicle_profile.db
+  if (CopyDeviceFile(DBPath, ProfileDb)) then
+  begin
+    OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
+    OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
+    OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
+    OldVehicle_Profile.Name             := UTF8String(GetRegistry(Reg_VehicleProfileName, ''));
+    OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
+    OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
+
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(CmbModel.ItemIndex));
+    if (NewVehicle_Profile.Valid) and
+       (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
+    begin
+      // Update Vehicle profile
+      SetRegistry(Reg_VehicleProfileGuid,       string(NewVehicle_Profile.GUID));
+      SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id);
+      SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType);
+      SetRegistry(Reg_VehicleProfileName,       string(NewVehicle_Profile.Name));
+      SetRegistry(Reg_VehicleType,              NewVehicle_Profile.VehicleType);
+      SetRegistry(Reg_VehicleTransportMode,     NewVehicle_Profile.TransportMode);
+
+      // Changed Vehicle profile. Set hash to 0
+      SetRegistry(Reg_VehicleProfileHash, 0);
+
+      // Only load Default Adventurous level from profile if invalid
+      DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
+      if not (DefAdvLevel in [1..4]) then
+        SetRegistry(Reg_DefAdvLevel,            NewVehicle_Profile.AdventurousLevel +1);
     end;
   end;
 end;
@@ -590,18 +599,16 @@ var
     result := '';
     for DataTypeNode in CheckNode.ChildNodes do
     begin
-      if (SameText(FindSubNodeValue(DataTypeNode, 'Name'), AName)) then
+      if not (SameText(FindSubNodeValue(DataTypeNode, 'Name'), AName)) then
+        continue;
+      for FileNode in DataTypeNode.ChildNodes do
       begin
-        for FileNode in DataTypeNode.ChildNodes do
-        begin
-          if (FindSubNodeValue(FileNode, 'TransferDirection') = Direction) then
-          begin
-            LocationNode := FileNode.Find('Location');
-            if (Assigned(LocationNode)) and
-               (SameText(FindSubNodeValue(LocationNode, 'FileExtension'), AExt)) then
-              exit(Format('?:\%s', [ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\'])]));
-          end;
-        end;
+        if (FindSubNodeValue(FileNode, 'TransferDirection') <> Direction) then
+          continue;
+        LocationNode := FileNode.Find('Location');
+        if (Assigned(LocationNode)) and
+           (SameText(FindSubNodeValue(LocationNode, 'FileExtension'), AExt)) then
+          exit(Format('?:\%s', [ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\'])]));
       end;
     end;
   end;
@@ -616,12 +623,12 @@ begin
 
 // Location of GarminDevice.Xml
   if (result.GarminModel in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) then
-    DevicePath := 'Internal Storage\Garmin'
+    DevicePath := InternalStorage + Garmin
   else
-    DevicePath := '?:\Garmin';
+    DevicePath := NonMTPRoot + Garmin;
 
 // Copy and read GarminDevice.xml
-  NFile := 'GarminDevice.xml';
+  NFile := GarminDeviceXML;
   if (CopyDeviceFile(DevicePath, NFile)) then
   begin
     XmlDoc := TXmlVSDocument.Create;
@@ -640,6 +647,7 @@ begin
       result.GarminModel := TSetProcessOptions.GetModelFromDescription(result.ModelDescription);
       if (result.GarminModel = TGarminModel.Unknown) then
         result.GarminModel := ModelFromGarminDevice(result.ModelDescription);
+
       // Get default paths
       if (Assigned(MassStorageNode)) then
       begin

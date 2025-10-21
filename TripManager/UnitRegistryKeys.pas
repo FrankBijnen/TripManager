@@ -7,78 +7,88 @@ uses
   UnitGpxDefs;
 
 const
-  Reg_GPISymbolSize           = 'GPISymbolsSize';
-  Reg_GPIProximity            = 'GPIProximity';
-  Reg_TrackColor              = 'TrackColor';         // User preferred track color
-  Reg_MinDistTrackPoints_Key  = 'MinDistTrackPoints'; // Use to filter trackpoints
+  // Device recognition constants
+  InternalStorage                 = 'Internal Storage\';
+  NonMTPRoot                      = '?:\';
+  Garmin                          = 'Garmin';
+  SettingsDb                      = 'settings.db';
+  ProfileDb                       = 'vehicle_profile.db';
+  GarminDeviceXML                 = 'GarminDevice.xml';
 
-  // XT1 and XT2
-  Reg_ScPosn_Unknown1         = 'ScPosn_Unknown1';
-  Reg_AllowGrouping           = 'AllowGrouping';
-  Reg_TripOption              = 'TripOption';
-  Reg_DefAdvLevel             = 'DefAdvLevel';
+  Reg_GPISymbolSize               = 'GPISymbolsSize';
+  Reg_GPIProximity                = 'GPIProximity';
+  Reg_TrackColor                  = 'TrackColor';         // User preferred track color
+  Reg_MinDistTrackPoints_Key      = 'MinDistTrackPoints'; // Use to filter trackpoints
 
-  //XT2
+  // XT1 and XT2 and Tread 2
+  Reg_ScPosn_Unknown1             = 'ScPosn_Unknown1';
+  Reg_AllowGrouping               = 'AllowGrouping';
+  Reg_TripOption                  = 'TripOption';
+  Reg_DefAdvLevel                 = 'DefAdvLevel';
+
+  // XT2 and Tread 2
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
   Reg_VehicleProfileHash          = 'VehicleProfileHash';
   Reg_VehicleId                   = 'VehicleId';
   Reg_VehicleProfileTruckType     = 'VehicleProfileTruckType';
   Reg_AvoidancesChangedTimeAtSave = 'AvoidancesChangedTimeAtSave';
   Reg_VehicleProfileName          = 'VehicleProfileName';
+  Reg_VehicleType                 = 'VehicleType';
+  Reg_VehicleTransportMode        = 'VehicleTransportMode';
 
-  Reg_ProcessBegin            = 'ProcessBegin';
-  Reg_CurrentModel            = 'CurrentModel';
-  Reg_BeginSymbol             = 'BeginSymbol';
-  Reg_BeginStr                = 'BeginStr';
-  Reg_BeginAddress            = 'BeginAddress';
+  Reg_ProcessBegin                = 'ProcessBegin';
+  Reg_CurrentModel                = 'CurrentModel';
+  Reg_BeginSymbol                 = 'BeginSymbol';
+  Reg_BeginStr                    = 'BeginStr';
+  Reg_BeginAddress                = 'BeginAddress';
 
-  Reg_ProcessEnd              = 'ProcessEnd';
-  Reg_EndSymbol               = 'EndSymbol';
-  Reg_EndStr                  = 'EndStr';
-  Reg_EndAddress              = 'EndAddress';
+  Reg_ProcessEnd                  = 'ProcessEnd';
+  Reg_EndSymbol                   = 'EndSymbol';
+  Reg_EndStr                      = 'EndStr';
+  Reg_EndAddress                  = 'EndAddress';
 
-  Reg_ProcessWpt              = 'ProcessWpt';
-  Reg_ProcessCategory         = 'ProcessCategory';
-  Reg_WayPtAddress            = 'WayPtAddress';
+  Reg_ProcessWpt                  = 'ProcessWpt';
+  Reg_ProcessCategory             = 'ProcessCategory';
+  Reg_WayPtAddress                = 'WayPtAddress';
 
-  Reg_ProcessVia              = 'ProcessVia';
-  Reg_ViaAddress              = 'ViaAddress';
+  Reg_ProcessVia                  = 'ProcessVia';
+  Reg_ViaAddress                  = 'ViaAddress';
 
-  Reg_ProcessShape            = 'ProcessShape';
-  Reg_ShapingName             = 'ShapingName';
-  Reg_DistanceUnit            = 'DistanceUnit';
-  Reg_ShapeAddress            = 'ShapeAddress';
-  Reg_CompareDistOK_Key       = 'CompareDistOK';
-  Reg_CompareDistOK_Val       = 500;
+  Reg_ProcessShape                = 'ProcessShape';
+  Reg_ShapingName                 = 'ShapingName';
+  Reg_DistanceUnit                = 'DistanceUnit';
+  Reg_ShapeAddress                = 'ShapeAddress';
+  Reg_CompareDistOK_Key           = 'CompareDistOK';
+  Reg_CompareDistOK_Val           = 500;
 
-  Reg_PrefFileSysFolder_Key   = 'PrefFileSysFolder';
-  Reg_PrefFileSysFolder_Val   = 'rfDesktop';
-  Reg_PrefDev_Key             = 'PrefDevice';
-  Reg_PrefDevTripsFolder_Key  = 'PrefDeviceTripsFolder';
-  Reg_PrefDevTripsFolder_Val  = 'Internal Storage\.System\Trips';
+  Reg_PrefFileSysFolder_Key       = 'PrefFileSysFolder';
+  Reg_PrefFileSysFolder_Val       = 'rfDesktop';
+  Reg_PrefDev_Key                 = 'PrefDevice';
+  Reg_PrefDevTripsFolder_Key      = 'PrefDeviceTripsFolder';
+  Reg_PrefDevTripsFolder_Val      = InternalStorage + '.System\Trips';
 
-  Reg_PrefDevGpxFolder_Key    = 'PrefDeviceGpxFolder';
-  Reg_PrefDevGpxFolder_Val    = 'Internal Storage\GPX';
-  Reg_PrefDevPoiFolder_Key    = 'PrefDevicePoiFolder';
-  Reg_PrefDevPoiFolder_Val    = 'Internal Storage\POI';
-  Reg_EnableDirFuncs          = 'EnableDirFuncs';
-  Reg_EnableFitFuncs          = 'EnableFitFuncs';
-  Reg_EnableTripFuncs         = 'EnableTripFuncs';
-  Reg_WarnModel_Key           = 'WarnModel';
-  Reg_TripColor_Key           = 'TripColor';
-  Reg_TripColor_Val           = 'Magenta';
-  Reg_Maximized_Key           = 'Maximized';
-  Reg_WidthColumns_Key        = 'WidthColumns';
-  Reg_WidthColumns_Val        = '145,55,75,100';
-  Reg_SortColumn_Key          = 'SortColumn';
-  Reg_SortAscending_Key       = 'SortAscending';
-  Reg_RoutePointTimeOut_Key   = 'RoutePointTimeOut';
-  Reg_RoutePointTimeOut_Val   = '5000';
-  Reg_GeoSearchTimeOut_Key    = 'GeoSearchTimeOut';
-  Reg_GeoSearchTimeOut_Val    = '8000';
+  Reg_PrefDevGpxFolder_Key        = 'PrefDeviceGpxFolder';
+  Reg_PrefDevGpxFolder_Val        = InternalStorage + 'GPX';
+  Reg_PrefDevPoiFolder_Key        = 'PrefDevicePoiFolder';
+  Reg_PrefDevPoiFolder_Val        = InternalStorage + 'POI';
+  Reg_EnableDirFuncs              = 'EnableDirFuncs';
+  Reg_EnableFitFuncs              = 'EnableFitFuncs';
+  Reg_EnableTripFuncs             = 'EnableTripFuncs';
+  Reg_WarnModel_Key               = 'WarnModel';
+  Reg_TripColor_Key               = 'TripColor';
+  Reg_TripColor_Val               = 'Magenta';
+  Reg_Maximized_Key               = 'Maximized';
+  Reg_WidthColumns_Key            = 'WidthColumns';
+  Reg_WidthColumns_Val            = '145,55,75,100';
+  Reg_SortColumn_Key              = 'SortColumn';
+  Reg_SortAscending_Key           = 'SortAscending';
+  Reg_RoutePointTimeOut_Key       = 'RoutePointTimeOut';
+  Reg_RoutePointTimeOut_Val       = '5000';
+  Reg_GeoSearchTimeOut_Key        = 'GeoSearchTimeOut';
+  Reg_GeoSearchTimeOut_Val        = '8000';
 
-  Reg_SavedMapPosition_Key    = 'SavedMapPosition';
-  Reg_DefaultCoordinates      = '48.854918, 2.346558'; // Somewhere in Paris
+  Reg_SavedMapPosition_Key        = 'SavedMapPosition';
+  Reg_DefaultCoordinates          = '48.854918, 2.346558'; // Somewhere in Paris
 
 const
   IdTrip          = 0;
@@ -486,11 +496,11 @@ end;
 // Default paths. Can be overruled by GarminDevice.Xml
 procedure TGarminDevice.Init;
 begin
-  CoursePath      := '?:\Garmin\Courses';
-  NewFilesPath    := '?:\Garmin\NewFiles';
-  ActivitiesPath  := '?:\Garmin\Activities';
-  GpxPath         := '?:\Garmin\GPX';
-  GpiPath         := '?:\Garmin\POI';
+  CoursePath      := NonMTPRoot + Garmin + '\Courses';
+  NewFilesPath    := NonMTPRoot + Garmin + '\NewFiles';
+  ActivitiesPath  := NonMTPRoot + Garmin + '\Activities';
+  GpxPath         := NonMTPRoot + Garmin + '\GPX';
+  GpiPath         := NonMTPRoot + Garmin + '\POI';
 end;
 
 initialization

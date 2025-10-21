@@ -7,12 +7,37 @@
 #include "stdio.h"
 #include "string.h"
 #include <math.h>
+#include <windows.h>
+#include <timezoneapi.h>
 #include "fit_convert.h"
 
 void TimeStamp2Buf(FIT_DATE_TIME timestamp, char* buf, int buflen)
 {
+  SYSTEMTIME utcdate, localdate;
+
   time_t tms = timestamp + 631065600; // Seconds since 1989 something
   struct tm ts = *gmtime(&tms);
+
+  memset(&utcdate, 0, sizeof(utcdate));
+  utcdate.wYear = ts.tm_year + 1900;
+  utcdate.wMonth = ts.tm_mon +1;
+  utcdate.wDay = ts.tm_mday;
+  utcdate.wHour = ts.tm_hour;
+  utcdate.wMinute = ts.tm_min;
+  utcdate.wSecond = ts.tm_sec;
+  utcdate.wDayOfWeek = ts.tm_wday;
+
+  SystemTimeToTzSpecificLocalTime(NULL, &utcdate, &localdate);
+
+  memset(&ts, 0, sizeof(ts));
+  ts.tm_year = localdate.wYear - 1900;
+  ts.tm_mon = localdate.wMonth -1;
+  ts.tm_mday = localdate.wDay;
+  ts.tm_hour = localdate.wHour;
+  ts.tm_min = localdate.wMinute;
+  ts.tm_sec = localdate.wSecond;
+  ts.tm_wday = localdate.wDayOfWeek;
+
   strftime(buf, buflen, "%Y-%m-%d %H:%M:%S", &ts);
 }
 
