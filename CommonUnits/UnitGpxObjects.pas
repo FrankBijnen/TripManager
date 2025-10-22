@@ -1029,7 +1029,7 @@ begin
       ComputeDistance(RtePtNode);
     inc(ShapingPointCnt);
 
-    case (ProcessOptions.ShapingPointName) of
+    case ProcessOptions.ShapingPointName of
       TShapingPointName.Unchanged:
         ShapePtName := FindSubNodeValue(RtePtNode, 'name');
       TShapingPointName.Route_Sequence:

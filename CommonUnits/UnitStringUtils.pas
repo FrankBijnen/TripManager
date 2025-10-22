@@ -21,7 +21,6 @@ function Swap32(I: T4Bytes): T4Bytes; overload; inline;
 function Swap32(I: Cardinal): Cardinal; overload; inline;
 function Swap32(I: integer): integer; overload; inline;
 function Swap32(I: single): single; overload; inline;
-function CoordAsDec(const ACoord: string): double;
 function ValidLatLon(const Lat, Lon: string): boolean;
 procedure ParseLatLon(const LatLon: string; var Lat, Lon: string);
 procedure AdjustLatLon(var Lat, Lon: string; No_Decimals: integer);
@@ -171,12 +170,6 @@ end;
 function Swap32(I: single): single;
 begin
   result := Single(Swap32(T4BYtes(I)));
-end;
-
-function CoordAsDec(const ACoord: string): double;
-begin
-  if not TryStrToFloat(ACoord, result, FloatFormatSettings) then
-    result := 0;
 end;
 
 function ValidLatLon(const Lat, Lon: string): boolean;

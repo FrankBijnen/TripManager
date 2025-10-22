@@ -1680,7 +1680,7 @@ end;
 
 procedure TFrmTripManager.ShowWarnRecalc;
 begin
-  case (WarnRecalc) of
+  case WarnRecalc of
     mrIgnore:
       exit;
   end;
@@ -1691,7 +1691,7 @@ end;
 
 procedure TFrmTripManager.ShowWarnOverWrite(const AFile: string);
 begin
-  case (WarnOverWrite) of
+  case WarnOverWrite of
     mrNoToAll,
     mrYesToAll:
       exit;
@@ -2184,21 +2184,21 @@ begin
 
   case TGarminModel(CmbModel.ItemIndex) of
     TGarminModel.GarminEdge:
-    begin
-      BgDevice.Items[0].Caption := 'Courses';
-      BgDevice.Items[1].Caption := 'NewFiles';
-      BgDevice.Items[2].Caption := 'Activities';
-    end;
+      begin
+        BgDevice.Items[0].Caption := 'Courses';
+        BgDevice.Items[1].Caption := 'NewFiles';
+        BgDevice.Items[2].Caption := 'Activities';
+      end;
     TGarminModel.GarminGeneric:
-    begin
-      BgDevice.Items[0].Caption := 'Unused';
-      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
-    end;
+      begin
+        BgDevice.Items[0].Caption := 'Unused';
+        BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+      end;
     TGarminModel.Unknown:
-    begin
-      BgDevice.Items[0].Caption := 'Unused';
-      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
-    end;
+      begin
+        BgDevice.Items[0].Caption := 'Unused';
+        BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+      end;
   end;
 
   SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]));
@@ -2391,15 +2391,14 @@ end;
 
 procedure TFrmTripManager.ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  case Key of
-    Ord('A'):
-    begin
-      if (ssCtrl in Shift) and
-         (Key = Ord('A')) then
-      begin
-        ShellListView1.SelectAll;
-        ShellListView1Click(Sender);
-      end;
+  if (ssCtrl in Shift) then
+  begin
+    case Key of
+      Ord('A'):
+        begin
+          ShellListView1.SelectAll;
+          ShellListView1Click(Sender);
+        end;
     end;
   end;
 end;
@@ -2762,6 +2761,14 @@ var
                                  TGridSelItem.Create(ABaseData));
   end;
 
+  procedure AddScPosn(AScPosn: TmScPosn);
+  begin
+    VlTripInfo.Strings.AddPair(AScPosn.DisplayName, AScPosn.AsString,
+                               TGridSelItem.Create(AScPosn));
+    VlTripInfo.Strings.AddObject(AScPosn.DisplayName + '_LatLon' + VlTripInfo.Strings.NameValueSeparator + AScPosn.MapCoords,
+                                 TGridSelItem.Create(AScPosn, AScPosn.LenValue, AScPosn.OffsetValue));
+  end;
+
   procedure AddTrackToRouteInfoMap(ATrackToRouteInfoMap: TmTrackToRouteInfoMap);
   var
     Offset: integer;
@@ -2799,8 +2806,6 @@ var
       end;
       VlTripInfo.Strings.AddPair('*** End mTrackToRouteInfoMap', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ATrackToRouteInfoMap, 1, ATrackToRouteInfoMap.SelEnd - ATrackToRouteInfoMap.SelStart -1 ));
-
-
     finally
       CoordsList.Free;
     end;
@@ -2885,7 +2890,9 @@ var
 
     for ANitem in ALocation.LocationItems do
     begin
-      if (ANitem is TBaseDataItem) then
+      if (AnItem is TmScPosn) then
+        AddScPosn(TmScPosn(ANitem))
+      else if (ANitem is TBaseDataItem) then
         AddBaseData(TBaseDataItem(ANitem));
     end;
 
@@ -2966,7 +2973,7 @@ var
                                                     SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1),
                                                     OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown1)));
     end;
-    VlTripInfo.Strings.AddPair('Coordinates', Format('%s', [AnUdbDir.MapCoords]),
+    VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s', [AnUdbDir.MapCoords]),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
@@ -3342,7 +3349,7 @@ begin
         continue;
       end;
 
-      case (AnItem.EditMode) of
+      case AnItem.EditMode of
         TEditMode.emNone:
           VlTripInfo.ItemProps[Index].ReadOnly := true;
         TEditMode.emEdit: // Default
@@ -3379,7 +3386,7 @@ begin
     if (TUdbDir(Node.Data).UdbDirValue.SubClass.PointType = $3) or
        (TUdbDir(Node.Data).IsTurn)  then
       Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
-    case (TUdbDir(Node.Data).Status) of
+    case TUdbDir(Node.Data).Status of
       TUdbDirStatus.udsRoutePointNOK:
         Sender.Canvas.Brush.Color := clWebAqua;
       TUdbDirStatus.udsRoadNOK:
@@ -3410,7 +3417,7 @@ begin
     exit;
   if (ACol = 0) then
   begin
-    case (TUdbDir(AGridSelItem.BaseItem).Status) of
+    case TUdbDir(AGridSelItem.BaseItem).Status of
       TUdbDirStatus.udsRoutePointNOK:
         VlTripInfo.Canvas.Brush.Color := clWebAqua;
       TUdbDirStatus.udsRoadNOK:
@@ -4045,7 +4052,8 @@ begin
 end;
 
 procedure TFrmTripManager.LstFilesDblClick(Sender: TObject);
-begin              case GetItemType(LstFiles) of
+begin
+  case GetItemType(LstFiles) of
     TDirType.Up:
       ListFiles(TListFilesDir.lfUp);
     TDirType.Down:
