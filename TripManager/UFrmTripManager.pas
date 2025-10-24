@@ -3334,12 +3334,11 @@ begin
       AddPOIList(TPOIList(Node.Data))
     else if (TObject(Node.Data) is TGPXWayPoint) then
       AddGPXWayPoint(TGPXWayPoint(Node.Data), true)
-// Fit Info
-//TODO Create own Object
+// Fit Info. Only shown as raw data
     else if (TObject(Node.Data) is TStringList) then
       AddStringList(TStringList(Node.Data));
 
-// Prepare TripInfo
+// Set Editmode of VlTripInfo
     for Index := 0 to VlTripInfo.Strings.Count -1 do
     begin
       AnItem := TGridSelItem.BaseDataItem(VlTripInfo, Index);

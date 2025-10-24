@@ -4142,6 +4142,7 @@ begin
   end;
 end;
 
+// The order of the items may be changed. EG Move mTripName after Theader does also work.
 procedure TTripList.CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
 begin
   AddHeader(THeader.Create);
