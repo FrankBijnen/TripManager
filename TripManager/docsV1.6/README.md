@@ -36,6 +36,8 @@ Throughout the docs here the terms Way point, Via point and Shaping point are us
      <li><a href="WalkThroughs/12%20Using%20Trip%20Editor.pdf">Using Trip Editor (*New in V1.4*)</a></li>
      <li><a href="WalkThroughs/13%20Import%20from,%20export%20to%20CSV%20or%20Excel.pdf">Import from, export to CSV or Excel (*New in V1.5*)</a></li>
      <li><a href="WalkThroughs/14%20Fixing%20invalid%20current.gpx.pdf">Fixing invalid current.gpx (*New in V1.5*)</a></li>
+     <li><a href="WalkThroughs/15%20Using%20Explore%20and%20Tripmanager%20together%20with%20the%20XT.pdf">Using Explore and Tripmanager together with the XT</a></li>
+     <li><a href="WalkThroughs/16%20Using%20older%20Zumo's.pdf">Using older Zumo's</a></li>
 </ol><br>
 
 <h4>Technical info on the data formats.</h4>
