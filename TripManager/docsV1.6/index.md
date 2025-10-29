@@ -1,11 +1,9 @@
+<html>
 <head>
 <title>TripManager</title>
 </head>
-<frameset cols="20%,*" frameborder="1" framespacing="1">
-<frame name="toc" src="left.html">
-<frame name="stuff" src="topicintro.html">
-</frameset>
-  <noframes>
-  This website requires Frames.
-  </noframes>
+<body>
+<a href="index.html" target="_blank">Open in new window</a>
+
+</body>
 </html>
