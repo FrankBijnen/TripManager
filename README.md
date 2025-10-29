@@ -32,7 +32,8 @@ Creating and modifying trips works for the XT2.<br>
 
 # Documentation available
 
- - [Documentation html](https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docsV1.6/index.md)
+ - [Documentation html](https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md)
  - [Documentation md](TripManager/docs/README.md)
 
-Frank
+- [V1.6 Documentation html](https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docsV1.6/index.md)
+ Frank
