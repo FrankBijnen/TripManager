@@ -36,6 +36,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: ExecutableWin32;                  Description: "Install Executable (Win32)";            types: full;          Check: Win32;
 Name: ExecutableWin64;                  Description: "Install Executable (Win64)";            types: full;          Check: Win64;
 Name: Symbols;                          Description: "Install Symbols";                       types: full;
+Name: Docs;                             Description: "Install offline docs";                  types: full;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
@@ -57,6 +58,8 @@ Source: "..\Win64\WebView2Loader.dll";    DestDir: "{app}"; Components: Executab
 Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 ; Images
 Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db"
+; Docs
+Source: "..\Docs\*";                      DestDir: "{app}\Docs";        Components: Docs;     Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db,*.jpg,*.docx"
 
 [Registry]
 

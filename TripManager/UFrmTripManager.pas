@@ -205,6 +205,7 @@ type
     PnlQuickSqlGo: TPanel;
     CmbSQliteTabs: TComboBox;
     BitBtnSQLGo: TBitBtn;
+    Action4: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -299,6 +300,7 @@ type
     procedure DBMemoDblClick(Sender: TObject);
     procedure BitBtnSQLGoClick(Sender: TObject);
     procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Action4Execute(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -854,6 +856,12 @@ begin
     ReadSettings;
 
   BgDeviceClick(BgDevice);
+end;
+
+procedure TFrmTripManager.Action4Execute(Sender: TObject);
+begin
+  ShellExecute(0, 'Open', PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Docs/README.html'),
+               '','', SW_SHOWNORMAL);
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
