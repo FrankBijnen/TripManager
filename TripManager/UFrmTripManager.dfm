@@ -1299,6 +1299,7 @@ object FrmTripManager: TFrmTripManager
               end
               item
                 Action = Action4
+                Caption = 'O&ffline documentation'
               end
               item
                 Caption = '-'
@@ -1336,6 +1337,11 @@ object FrmTripManager: TFrmTripManager
       Category = 'Advanced'
       Caption = 'Settings'
       OnExecute = Action3Execute
+    end
+    object Action4: TAction
+      Category = 'Help'
+      Caption = 'Offline documentation'
+      OnExecute = Action4Execute
     end
   end
   object PopupTripInfo: TPopupMenu

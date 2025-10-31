@@ -59,7 +59,7 @@ Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: Executab
 ; Images
 Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db"
 ; Docs
-Source: "..\Docs\*";                      DestDir: "{app}\Docs";        Components: Docs;     Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db,*.jpg,*.docx"
+Source: "..\chmdocs\*";                   DestDir: "{app}\Docs";        Components: Docs;     Flags: ignoreversion;
 
 [Registry]
 
