@@ -1298,6 +1298,12 @@ object FrmTripManager: TFrmTripManager
                 Caption = '-'
               end
               item
+                Action = Action4
+              end
+              item
+                Caption = '-'
+              end
+              item
                 Action = Action2
                 Caption = '&Online documentation'
               end>

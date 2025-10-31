@@ -844,7 +844,7 @@ end;
 procedure TFrmTripManager.Action2Execute(Sender: TObject);
 begin
   ShellExecute(0, 'Open',
-               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md',
+               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/htmldocs/topicintro.html',
                '','', SW_SHOWNORMAL);
 end;
 
@@ -860,7 +860,7 @@ end;
 
 procedure TFrmTripManager.Action4Execute(Sender: TObject);
 begin
-  ShellExecute(0, 'Open', PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Docs/README.html'),
+  ShellExecute(0, 'Open', PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Docs/TripManager.chm'),
                '','', SW_SHOWNORMAL);
 end;
 

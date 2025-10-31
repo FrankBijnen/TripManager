@@ -20,7 +20,8 @@ begin
   while (Rc = 0) do
   begin
     AHtml := TFile.ReadAllText(Fs.Name, TEncoding.UTF8);
-    AHtml := ReplaceAll(AHtml, ['?.html"'], ['"'], [rfReplaceAll]);
+//    AHtml := ReplaceAll(AHtml, ['?.html"'], ['"'], [rfReplaceAll]);
+    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;</span>'], ['"', '>&middot;&nbsp;&nbsp;&nbsp;</span>'], [rfReplaceAll]);
     TFile.WriteAllText(Fs.Name, AHtml);
     Rc := FindNext(Fs);
   end;
