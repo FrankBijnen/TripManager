@@ -23,9 +23,22 @@ begin
   begin
     AHtml := TFile.ReadAllText(Fs.Name, TEncoding.UTF8);
 //    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;&nbsp;&nbsp;<'], ['"', '>&middot;&nbsp;<'], [rfReplaceAll]);
-    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;</span>'], ['"', '>&middot;&nbsp;&nbsp;&nbsp;</span>'], [rfReplaceAll]);
-
-
+//    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;</span>'], ['"', '>&middot;&nbsp;&nbsp;&nbsp;</span>'], [rfReplaceAll]);
+    AHtml := ReplaceAll(AHtml, ['?.html"',
+                                '>&middot;&nbsp;&nbsp;&nbsp;&nbsp;</span>',
+                                '>&middot;&nbsp;&nbsp;</span>',
+                                '>&middot;&nbsp;</span>',
+                                '>&Oslash;&nbsp;&nbsp;&nbsp;</span>',
+                                '>&Oslash;&nbsp;&nbsp;</span>',
+                                '>&Oslash;&nbsp;</span>'],
+                               ['"',
+                                '>&middot;&nbsp;&nbsp;&nbsp;</span>',
+                                '>&middot;&nbsp;&nbsp;&nbsp;</span>',
+                                '>&middot;&nbsp;&nbsp;&nbsp;</span>',
+                                '>&Oslash;</span>',
+                                '>&Oslash;</span>',
+                                '>&Oslash;</span>'],
+                               [rfReplaceAll]);
     TFile.WriteAllText(Fs.Name, AHtml);
     Rc := FindNext(Fs);
   end;
