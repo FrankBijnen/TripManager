@@ -844,7 +844,7 @@ end;
 procedure TFrmTripManager.Action2Execute(Sender: TObject);
 begin
   ShellExecute(0, 'Open',
-               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/docs/README.md',
+               'https://htmlpreview.github.io/?https://github.com/FrankBijnen/TripManager/blob/main/TripManager/htmldocs/tableofcontents.html',
                '','', SW_SHOWNORMAL);
 end;
 
