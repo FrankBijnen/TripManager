@@ -14,7 +14,9 @@ Throughout the docs here the terms Way point, Via point and Shaping point are us
 <a href="https://www.zumouserforums.co.uk/app.php/ZXT-P04">Zumo XT and Basecamp - Everything That You Need to Know.</a><br><br>
 
 <br><b>General info:</b><br><br>
-<li><a href="Tripmanager%20Overview.pdf">Trip Manager Overview</a></li><br><br>
+<li><a href="Tripmanager%20Overview.pdf">Trip Manager Overview</a></li><br>
+<li><a href="tableofcontents.html">HTML Docs</a></li><br><br>
+
 
 <br><b>Users guide:</b> Contributed by Steve Follen.<br><br>
 <li><a href="SMFollen/Trip%20Manager%20Users%20Guide_V1.5.pdf">Trip Manager Users guide V1.5 (*New in V1.5)</a></li><br><br>
