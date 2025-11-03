@@ -15,6 +15,7 @@ Throughout the docs here the terms Way point, Via point and Shaping point are us
 
 <br><b>General info:</b><br><br>
 <li><a href="Tripmanager%20Overview.pdf">Trip Manager Overview</a></li><br>
+<li><a href="tableofcontents.html">HTML Docs</a></li><br><br>
 
 
 <br><b>Users guide:</b> Contributed by Steve Follen.<br><br>
