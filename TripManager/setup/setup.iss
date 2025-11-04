@@ -59,7 +59,7 @@ Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: Executab
 ; Images
 Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db"
 ; Docs
-Source: "..\chmdocs\*";                   DestDir: "{app}\ChmDocs";     Components: Docs;     Flags: ignoreversion;
+Source: "..\docs\tripmanager.chm";        DestDir: "{app}\ChmDocs";     Components: Docs;     Flags: ignoreversion;
 
 [Registry]
 

@@ -2718,7 +2718,7 @@ begin
 end;
 
 // UdbDir Create for <gpxx:rpt>
-constructor TUdbDir.Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist:Double);
+constructor TUdbDir.Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: Double);
 begin
   Create(Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass,9,8)]));
 
@@ -2730,7 +2730,7 @@ begin
     $1f, $21:
       begin
         // Table taken from default Basecamp Motorcycle profile.
-        //TODO Make configurable
+        //TODO RoadSpeed Make configurable
         case (StrToIntDef('$' + RoadClass, 0)) of
           1:  FValue.Time := Round(3600 * dist / 108);  // Interstate Highway
           2:  FValue.Time := Round(3600 * dist / 93);   // Major Highway
@@ -3883,7 +3883,7 @@ begin
       if (Index > 0) then
         CurDist := CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
       PrevCoords := Coords;
-
+//TODO Road speed
       AnUdbDir := TUdbDir.Create(Copy(SubClasses[Index], 5),
                                  Copy(SubClasses[Index], 1, 2),
                                  Coords.Lat, Coords.Lon, CurDist);
@@ -4016,6 +4016,7 @@ begin
             RoadClass := Copy(CMapSegRoad, 1, 2);
             CMapSegRoad := Copy(CMapSegRoad, 5);
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
+//TODO Roadspeed
             AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
             AnUdbHandle.Add(AnUdbDir);
 
