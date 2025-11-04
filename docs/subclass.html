@@ -134,193 +134,188 @@ subclasses are reset to &lsquo;Empty&rsquo;. </span></font><font color="#010101"
 the Subclass, although it would be expected. Furthermore the &lsquo;Empty&rsquo; 
 value gets assigned in some scenario&rsquo;s, and does not seem to have a 
 negative effect. Not in Basecamp nor in the XT.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ><br></font></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" ><b>Layout:</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Because no documentation is available containing the layout, and I lack 
-inspiration, I named the fields 1 to 9.</span></font><font color="#010101" ></font></div><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+inspiration, I named the fields 1 to 9.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >(TBD = To Be Defined)</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 1</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >2 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Can refer to a &lsquo;line/road&rsquo;, or a &lsquo;point&rsquo;. See the road and 
-    point types. Screen shot from GPSMAPEDIT.</span></font><font color="#010101" ></font></div>
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Can refer to a &lsquo;line/road&rsquo;, or a &lsquo;point&rsquo;. See the road and point types. 
+    Screen shot from GPSMAPEDIT.</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 2</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >4 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >An integer specifying the map segment nbr.</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 3</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >4 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >This field is most likely a unique id of the road segment. 
-    Placing points along the same road this nbr. remains the 
-    same. But when passing a junction for example this nbr. 
-    changes. </span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >There are clues that the last 2 bytes are flags. See 
-    RoadId Flags</span></font><font color="#010101" ></font></div>
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >This field is most likely a unique id of the road segment. Placing points 
+    along the same road this nbr. remains the same. But when passing a 
+    junction for example this nbr. changes. </span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >There are clues that the last 2 bytes are flags. See RoadId Flags</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 4</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Looks like a type field. Values found:</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >0F = Begin</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >0D = Shaping point</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >01 = Via Point</span></font><font color="#010101" ></font></div>
-    </td></tr></table><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+    </td></tr></table><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="639"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Following fields are only valid for Shaping Points. See the explanation in the 
-    sample.</span></font><font color="#010101" ></font></div>
-    </td></tr></table><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+    <td valign="top"  width="777"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Following fields are only valid for Shaping Points. See the explanation in the sample.</span></font><font color="#010101" ></font></div>
+    </td></tr></table><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 5</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Lat Byte 0</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 6</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Lon Byte 0</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 7</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Reserved = 00</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 8</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >2 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Lat Bytes 1 &amp; 2</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 9</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >2 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Lon Bytes 1 &amp; 2</span></font><font color="#010101" ></font></div>
-    </td></tr></table><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+    </td></tr></table><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="639"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="777"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >For Via Points</span></font><font color="#010101" ></font></div>
-    </td></tr></table><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+    </td></tr></table><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 
-    5-9</span></font><font color="#010101" ></font></div>
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 5-9</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >7 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >To be determined.</span></font><font color="#010101" ></font></div>
-    </td></tr></table><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >TBD</span></font><font color="#010101" ></font></div>
+    </td></tr></table><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="639"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="777"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >For Ghost Points &lt;gpxx:rpt</span></font><font color="#010101" ></font></div>
-    </td></tr></table><table border="1"  width="654"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+    </td></tr></table><table border="1"  width="792"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 4</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Looks like a type field. Values found:</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >21 = Begin, or End of a segment. (Segment from Route 
-    point to route point)</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >21 = Begin, or End of a segment. (Segment between Route points)</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1F = Intermediate</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 5</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Direction indicator. See Direction values</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 6</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >TBD</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 7</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >1 Byte</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Reserved = 00</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 8</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >2 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >TBD</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="55"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="93"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Field 9</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="94"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="75"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >2 Bytes</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="459"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="579"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >TBD</span></font><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Integers have to read &lsquo;backwards&rsquo;. Little Endian.</span></font><font color="#010101" ><br clear="all"  style="page-break-before:always" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" ><u>Sample RtePt:&nbsp;&nbsp; </u></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" > &lt;rtept lat=&quot;51.600542971864343&quot; lon=&quot;5.660406164824963&quot;&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;time&gt;2022-10-09T17:45:21Z&lt;/time&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;name&gt;Erpseweg1&lt;/name&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;sym&gt;Waypoint&lt;/sym&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;extensions&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;trp:ShapingPoint /&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;gpxx:RoutePointExtension&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" > 
+    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >Integers have to be read &lsquo;backwards&rsquo;. Little Endian.</span></font><font color="#010101" ><br clear="all"  style="page-break-before:always" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" ><u>Sample RtePt:&nbsp;&nbsp; </u></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" > &lt;rtept lat=&quot;51.600542971864343&quot; lon=&quot;5.660406164824963&quot;&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;time&gt;2022-10-09T17:45:21Z&lt;/time&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;name&gt;Erpseweg1&lt;/name&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;sym&gt;Waypoint&lt;/sym&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;extensions&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;trp:ShapingPoint /&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;gpxx:RoutePointExtension&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" > 
 &lt;gpxx:Subclass&gt;040089969800050026010D24040097B17206&lt;/gpxx:Subclass&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&lt;!-- Note that the empty Subclass does not conflict with the fields found! -
 -&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0000 00000000 FFFFFFFF FF FFFFFFFFFFFFFF</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&lt;gpxx:Subclass&gt;</span><span style="font-size:15pt;background:#ffff00" >0400</span><span style="font-size:15pt;background:#ffffff" > </span><span style="font-size:15pt;background:#00ff00" >89969800</span><span style="font-size:15pt;background:#ffffff" > </span><span style="font-size:15pt;background:#00ffff" >05002601</span><span style="font-size:15pt;background:#ffffff" > </span><span style="font-size:15pt;background:#ff00ff" >0D</span><span style="font-size:15pt;background:#ffffff" > </span><span style="font-size:15pt;background:#ff0000" >24040097B17206</span><span style="font-size:15pt;background:#ffffff" >&lt;/gpxx:Subclass&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" >&lt;!&mdash;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" ><b>Field 1 (Little Endian)</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt;background:#ffff00" >00 04</span><span style="font-size:15pt;background:#ffffff" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = Road type, or Point Type. &lsquo;polyline arterial road&rsquo; (See Road 
 types)</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt" ><b>Field 2 (Little Endian)</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:15pt;background:#00ff00" >00 98 96 89</span><span style="font-size:15pt;background:#ffffff" > = 10000009&nbsp; = Map Segment. (Sample is not City Navigator, 
