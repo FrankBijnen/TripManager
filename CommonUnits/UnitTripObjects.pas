@@ -737,11 +737,11 @@ type
     procedure SwapCardinals;
   end;
 
-const Unknown3Size:     array[TTripModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
-      CalculationMagic: array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
-      ShapeBitmap:      array[TTripModel] of Cardinal = ($90, $c0, $c0, $90);
-      Unknown3DistOffset = $14;
-      Unknown3TimeOffset = $18;
+const Unknown3Size:       array[TTripModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
+      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
+      ShapeBitmapOffset:  array[TTripModel] of Cardinal = ($90, $c0, $c0, $90);
+      Unknown3DistOffset  = $14;
+      Unknown3TimeOffset  = $18;
 
 type
   TUdbHandleValue = packed record
@@ -3977,7 +3977,7 @@ begin
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
       TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
-      GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[ShapeBitmap[CalcModel]]);
+      GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[ShapeBitmapOffset[CalcModel]]);
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];

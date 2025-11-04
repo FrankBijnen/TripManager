@@ -3099,7 +3099,12 @@ var
                                                    AnUdbhandle.OffsetValue +
                                                      OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
                                                      Unknown3TimeOffset));
-
+    VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', DupeString('-', DupeCount),
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Byte),
+                                                   AnUdbhandle.OffsetValue +
+                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
+                                                     IntPtr(ShapeBitmapOffset[ATripList.TripModel])));
     for ANitem in AnUdbhandle.Items do
     begin
       if (ANitem is TUdbDir) then
