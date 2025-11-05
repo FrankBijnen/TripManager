@@ -2571,6 +2571,7 @@ var
       Writeln(#9, '/Routes             = Create GPX Stripped Routes');
       Writeln(#9, '/Tracks             = Create GPX Tracks');
       Writeln(#9, '/Wpts or /WayPoints = Create GPX WayPoints');
+      Writeln(#9, '/Poi or /Gpi        = Create Points Of Interest');
       Writeln(#9, '/Kml                = Create KML Google Earth');
       Writeln(#9, '/Html               = Create HTML');
       Writeln(#9, '/Poly               = Create POLY');

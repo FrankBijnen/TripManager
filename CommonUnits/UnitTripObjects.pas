@@ -2984,7 +2984,6 @@ procedure TmUdbDataHndl.WriteValue(AStream: TMemoryStream);
 var
   AnItem: TUdbDir;
 begin
-//  FValue.UDbDirCount := FUdbDirList.Count;
   FValue.SwapCardinals;
   AStream.Write(FValue.UdbHandleSize, SizeOf(FValue.UdbHandleSize));
   AStream.Write(FValue.CalcStatus, SizeOf(FValue.CalcStatus));
@@ -3070,8 +3069,12 @@ begin
     AStream.Read(AnUdbHandle.FValue.Unknown2[0], SizeOf(AnUdbHandle.FValue.Unknown2));
     AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));
 
+    // Alloc Unknown3 block
+    // Use the known size for known models
+    // Compute it for $00000000
+    // Default for XT
     AnUdbHandle.FValue.AllocUnknown3; // Default to XT
-    for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
+    for AModel := Low(TTripModel) to High(TTripModel) do
     begin
       if (AnUdbHandle.FValue.CalcStatus = CalculationMagic[AModel]) then
       begin

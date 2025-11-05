@@ -4320,7 +4320,7 @@ begin
     begin
       if (PnlTripGpiInfo.Caption = '') then
         PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
-      TvTrip.Items.AddChildObject(RootNode, String(AGPXWayPoint.Name), AGPXWayPoint);
+      TvTrip.Items.AddChildObject(RootNode, string(AGPXWayPoint.Name), AGPXWayPoint);
     end;
 
     RootNode.Expand(false);
