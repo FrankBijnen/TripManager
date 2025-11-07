@@ -25,6 +25,7 @@ begin
 //    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;&nbsp;&nbsp;<'], ['"', '>&middot;&nbsp;<'], [rfReplaceAll]);
 //    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;</span>'], ['"', '>&middot;&nbsp;&nbsp;&nbsp;</span>'], [rfReplaceAll]);
     AHtml := ReplaceAll(AHtml, ['?.html"',
+                                '<font face="Arial" size="2">',
                                 '>&middot;&nbsp;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;</span>',
@@ -32,6 +33,7 @@ begin
                                 '>&Oslash;&nbsp;&nbsp;</span>',
                                 '>&Oslash;&nbsp;</span>'],
                                ['"',
+                                '<font face="Calibri" size="3">',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',

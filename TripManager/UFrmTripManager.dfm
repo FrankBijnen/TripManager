@@ -961,7 +961,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 7171437
@@ -969,7 +968,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -1291,21 +1290,20 @@ object FrmTripManager: TFrmTripManager
           item
             Items = <
               item
-                Action = Action1
+                Action = ActAbout
                 Caption = '&About'
               end
               item
                 Caption = '-'
               end
               item
-                Action = Action4
-                Caption = 'O&ffline documentation'
+                Action = ActInstalledDoc
               end
               item
                 Caption = '-'
               end
               item
-                Action = Action2
+                Action = ActOnline
                 Caption = '&Online documentation'
               end>
             Caption = '&Help'
@@ -1313,7 +1311,7 @@ object FrmTripManager: TFrmTripManager
           item
             Items = <
               item
-                Action = Action3
+                Action = ActSettings
                 Caption = '&Settings'
               end>
             Caption = '&Advanced'
@@ -1323,25 +1321,26 @@ object FrmTripManager: TFrmTripManager
     Left = 313
     Top = 65
     StyleName = 'Platform Default'
-    object Action1: TAction
+    object ActAbout: TAction
       Category = 'Help'
       Caption = 'About'
-      OnExecute = Action1Execute
+      OnExecute = ActAboutExecute
     end
-    object Action2: TAction
+    object ActOnline: TAction
       Category = 'Help'
       Caption = 'Online documentation'
-      OnExecute = Action2Execute
+      OnExecute = ActOnlineExecute
     end
-    object Action3: TAction
+    object ActSettings: TAction
       Category = 'Advanced'
       Caption = 'Settings'
-      OnExecute = Action3Execute
+      OnExecute = ActSettingsExecute
     end
-    object Action4: TAction
+    object ActInstalledDoc: TAction
       Category = 'Help'
-      Caption = 'Offline documentation'
-      OnExecute = Action4Execute
+      Caption = 'Installed Documentation'
+      OnExecute = ActInstalledDocExecute
+      OnUpdate = ActInstalledDocUpdate
     end
   end
   object PopupTripInfo: TPopupMenu

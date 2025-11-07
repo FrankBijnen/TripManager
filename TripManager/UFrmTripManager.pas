@@ -49,6 +49,9 @@ const
   TripNameCol             = 5;
   TripNameColWidth        = 250;
 
+  OnlineHelp              = 'https://frankbijnen.github.io/TripManager/';
+  LocalHelp               = 'ChmDocs/TripManager.chm';
+
 type
   // Get Access to Col of DBGrid
   TDBGrid = class(Vcl.DBGrids.TDBGrid)
@@ -158,11 +161,11 @@ type
     OpenTrip: TOpenDialog;
     ActionMainMenuBar: TActionMainMenuBar;
     ActionManager: TActionManager;
-    Action1: TAction;
-    Action2: TAction;
+    ActAbout: TAction;
+    ActOnline: TAction;
     PopupTripInfo: TPopupMenu;
     CopyValueFromTrip: TMenuItem;
-    Action3: TAction;
+    ActSettings: TAction;
     N7: TMenuItem;
     SaveCSV1: TMenuItem;
     SaveTrip: TSaveDialog;
@@ -205,7 +208,7 @@ type
     PnlQuickSqlGo: TPanel;
     CmbSQliteTabs: TComboBox;
     BitBtnSQLGo: TBitBtn;
-    Action4: TAction;
+    ActInstalledDoc: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -266,10 +269,10 @@ type
     procedure LstFilesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ChkWatchClick(Sender: TObject);
     procedure ShellListView1DblClick(Sender: TObject);
-    procedure Action1Execute(Sender: TObject);
-    procedure Action2Execute(Sender: TObject);
+    procedure ActAboutExecute(Sender: TObject);
+    procedure ActOnlineExecute(Sender: TObject);
     procedure CopyValueFromTripClick(Sender: TObject);
-    procedure Action3Execute(Sender: TObject);
+    procedure ActSettingsExecute(Sender: TObject);
     procedure SaveCSV1Click(Sender: TObject);
     procedure SaveGPX1Click(Sender: TObject);
     procedure BtnGeoSearchClick(Sender: TObject);
@@ -300,7 +303,8 @@ type
     procedure DBMemoDblClick(Sender: TObject);
     procedure BitBtnSQLGoClick(Sender: TObject);
     procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure Action4Execute(Sender: TObject);
+    procedure ActInstalledDocExecute(Sender: TObject);
+    procedure ActInstalledDocUpdate(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -836,19 +840,17 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.Action1Execute(Sender: TObject);
+procedure TFrmTripManager.ActAboutExecute(Sender: TObject);
 begin
   ShowMessage(VerInfo);
 end;
 
-procedure TFrmTripManager.Action2Execute(Sender: TObject);
+procedure TFrmTripManager.ActOnlineExecute(Sender: TObject);
 begin
-  ShellExecute(0, 'Open',
-               'https://frankbijnen.github.io/TripManager/',
-               '','', SW_SHOWNORMAL);
+  ShellExecute(0, 'Open', OnlineHelp, '','', SW_SHOWNORMAL);
 end;
 
-procedure TFrmTripManager.Action3Execute(Sender: TObject);
+procedure TFrmTripManager.ActSettingsExecute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   FrmAdvSettings.SampleTrip := ATripList;
@@ -858,10 +860,15 @@ begin
   BgDeviceClick(BgDevice);
 end;
 
-procedure TFrmTripManager.Action4Execute(Sender: TObject);
+procedure TFrmTripManager.ActInstalledDocExecute(Sender: TObject);
 begin
-  ShellExecute(0, 'Open', PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'ChmDocs/TripManager.chm'),
+  ShellExecute(0, 'Open', PChar(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + LocalHelp),
                '','', SW_SHOWNORMAL);
+end;
+
+procedure TFrmTripManager.ActInstalledDocUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := FileExists(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + LocalHelp);
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
