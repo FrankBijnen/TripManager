@@ -294,6 +294,26 @@ completely. </span></font><font color="#010101" ></font></div><table border="1" 
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x08</span></font><font color="#010101" ></font></div>
     </td>
     <td valign="top"  width="87"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Cardinal 
+    array</span></font><font color="#010101" ></font></div>
+    </td>
+    <td valign="top"  width="69"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >varies</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >(multiple 
+    of 4)</span></font><font color="#010101" ></font></div>
+    </td>
+    <td valign="top"  width="561"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The 1st cardinal defines the length. Divide by 4 to get the number of 
+    entries in the array.</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Examples:</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >mVersionNumber</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >mScPosn</span></font><font color="#010101" ></font></div>
+    </td></tr>
+    <tr>
+    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x08</span></font><font color="#010101" ></font></div>
+    </td>
+    <td valign="top"  width="87"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Version</span></font><font color="#010101" ></font></div>
     </td>
     <td valign="top"  width="69"  style="border: solid #010101 1px;" >
@@ -302,8 +322,8 @@ completely. </span></font><font color="#010101" ></font></div><table border="1" 
     <td valign="top"  width="561"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Defines the version. Consist of 2 cardinals</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Values seen:</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Major</b>: 0x0000 0004</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Minor</b>: 0x0700 0000 for XT and 0x1000 0000 for XT2</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Length: </b>0x0000 0004</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Version</b>: 0x0700 0000 for XT, 0x1000 0000 for XT2 and Tread 2</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
     <td valign="top"  width="39"  style="border: solid #010101 1px;" >
@@ -319,10 +339,51 @@ completely. </span></font><font color="#010101" ></font></div><table border="1" 
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Defines the position, in GPS coordinates of a location (Via, or Shaping)</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Consists of 4 cardinals: (5 for Tread 2)</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Length</b>: 0x0000 000C = 12 for XT(2), 0x0000 0010 = 16 for Tread 2</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Unknown</b>:&nbsp; values seen: 0x022EECB4,&nbsp; 0x02F0FF04. When creating a trip 
-    file this field can be set to zeroes. Recalculation on the XT(2) will set the 
-    correct value.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Unknown_Tread2: </b>always 0x0000 0000 </span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Unknown</b>: </span></font><font color="#010101" ></font></div>
+    <table border="1"  bordercolor="#000000"  width="562"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+        <tr>
+        <td valign="top"  width="135"  height="21"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Model</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="409"  height="21"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Values seen</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="135"  height="21"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >XT</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="409"  height="21"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x022E6D2C</span></font><font color="#010101" ></font></div>
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x022EECB4</span></font><font color="#010101" ></font></div>
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x02333AEC</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="135"  height="68"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >XT2</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="409"  height="68"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x02F0FF04</span></font><font color="#010101" ></font></div>
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x02FE26DC</span></font><font color="#010101" ></font></div>
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x030D7DC8</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="135"  height="21"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Tread 2</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="409"  height="21"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >0x05C79A00</span></font><font color="#010101" ></font></div>
+        </td></tr>
+    </table>
+    <div align="left" ><br>
+    </div>
+    <font color="#010101" >
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >When creating a trip file this field can be set to zeroes. Recalculation on 
+    the Zumo will set the correct value. Appears to change when a new 
+    firmware version is loaded on the device.</span></font><font color="#010101" ></font></div>
+    <div align="left" ><br>
+    </div>
+    <font color="#010101" >
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Unknown_Tread2: </b>always 0x0000 0000 </span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Lat:</b></span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Lon: </b>See below how to read these numbers.</span></font><font color="#010101" ></font></div>
     </td></tr>
@@ -337,8 +398,8 @@ completely. </span></font><font color="#010101" ></font></div><table border="1" 
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Varies</span></font><font color="#010101" ></font></div>
     </td>
     <td valign="top"  width="561"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The lists mLocations and mAllroutes have a &lsquo;prefix&rsquo; block. For more info 
-    see mLocations and mAllroutes.</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The lists mLocations, mAllroutes and possible THeader have a &lsquo;prefix&rsquo; 
+    block. For more info see mLocations and mAllroutes.</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
     <td valign="top"  width="39"  style="border: solid #010101 1px;" >
