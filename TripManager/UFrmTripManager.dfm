@@ -1298,6 +1298,7 @@ object FrmTripManager: TFrmTripManager
               end
               item
                 Action = ActInstalledDoc
+                Caption = '&Installed documentation'
               end
               item
                 Caption = '-'
