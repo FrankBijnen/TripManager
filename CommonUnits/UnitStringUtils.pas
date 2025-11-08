@@ -17,6 +17,7 @@ function NextField(var AString: string; const ADelimiter: string): string;
 function ReplaceAll(const AString: string;
                     const OldPatterns, NewPatterns: array of string;
                     Flags: TReplaceFlags = [rfReplaceAll]): string;
+procedure SetSubString(var AString: string; const Pos: integer; SubString: string);
 function Swap32(I: T4Bytes): T4Bytes; overload; inline;
 function Swap32(I: Cardinal): Cardinal; overload; inline;
 function Swap32(I: integer): integer; overload; inline;
@@ -147,6 +148,15 @@ begin
   result := StringReplace(AString, OldPatterns[0], NewPatterns[0], Flags);
   for Index := 1 to PatternHigh do
     result := StringReplace(result, OldPatterns[Index], NewPatterns[Index], Flags);
+end;
+
+procedure SetSubString(var AString: string; const Pos: integer; SubString: string);
+var
+  ActPos: integer;
+begin
+  ActPos := Min(Length(AString), Pos);
+  Delete(Astring, ActPos, Length(SubString));
+  Insert(SubString, AString, ActPos);
 end;
 
 function Swap32(I: T4Bytes): T4Bytes;

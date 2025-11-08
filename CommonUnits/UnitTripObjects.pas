@@ -2710,6 +2710,7 @@ begin
   FValue.SubClass.MapSegment := Swap32($00000180);
   // The leftmost byte appears to be the <rte> number in the GPX. First <rte> gets 00, Next gets 01 etc.
   FValue.SubClass.RoadId := Swap32($00f0ffff + (RouteCnt shl 24));
+
   FillCompressedLatLon;
   FValue.Unknown1     := Swap32($51590469);
   FValue.Time         := $ff;
@@ -4018,6 +4019,17 @@ begin
 
             RoadClass := Copy(CMapSegRoad, 1, 2);
             CMapSegRoad := Copy(CMapSegRoad, 5);
+//TODO CEP
+// Switch to intermediate ?
+// '2114' Occurs when switching to another mapsegment.
+//            if (Copy(CMapSegRoad, 17, 4) = '2114') then
+//              SetSubString(CMapSegRoad, 17, '1F');
+
+//TODO CEP
+// Approach route point. Need to clear for CEP
+            if (Copy(CMapSegRoad, 17, 4) = '2117') then
+              SetSubString(CMapSegRoad, 29, '0000');
+
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
 //TODO Roadspeed
             AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
