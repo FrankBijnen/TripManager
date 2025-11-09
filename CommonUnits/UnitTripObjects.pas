@@ -1,6 +1,8 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
+{.$DEFINE TODOCEP} // Fixes for CEP to UdbDir. Not Working
+//TODO RoadSpeed  Make the road speeds configurable
 interface
 
 uses
@@ -701,7 +703,7 @@ type
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(ALocation: TLocation; RouteCnt: cardinal); reintroduce; overload;
+    constructor Create(ALocation: TLocation; RouteCnt: Cardinal); reintroduce; overload;
     constructor Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
     procedure WriteValue(AStream: TMemoryStream); override;
     function SubLength: Cardinal; override;
@@ -2682,7 +2684,7 @@ begin
 end;
 
 // UdbDir Create for <rtept>
-constructor TUdbDir.Create(ALocation: TLocation; RouteCnt: cardinal);
+constructor TUdbDir.Create(ALocation: TLocation; RouteCnt: Cardinal);
 var
   AmScPosn: TmScPosn;
 begin
@@ -2708,9 +2710,12 @@ begin
     end;
   end;
   FValue.SubClass.MapSegment := Swap32($00000180);
+{$IFDEF TODOCEP}
   // The leftmost byte appears to be the <rte> number in the GPX. First <rte> gets 00, Next gets 01 etc.
   FValue.SubClass.RoadId := Swap32($00f0ffff + (RouteCnt shl 24));
-
+{$ELSE}
+  FValue.SubClass.RoadId := Swap32($00f0ffff);
+{$ENDIF}
   FillCompressedLatLon;
   FValue.Unknown1     := Swap32($51590469);
   FValue.Time         := $ff;
@@ -3887,7 +3892,7 @@ begin
       if (Index > 0) then
         CurDist := CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
       PrevCoords := Coords;
-//TODO Road speed
+//TODO RoadSpeed
       AnUdbDir := TUdbDir.Create(Copy(SubClasses[Index], 5),
                                  Copy(SubClasses[Index], 1, 2),
                                  Coords.Lat, Coords.Lon, CurDist);
@@ -4019,19 +4024,19 @@ begin
 
             RoadClass := Copy(CMapSegRoad, 1, 2);
             CMapSegRoad := Copy(CMapSegRoad, 5);
-//TODO CEP
-// Switch to intermediate ?
-// '2114' Occurs when switching to another mapsegment.
-//            if (Copy(CMapSegRoad, 17, 4) = '2114') then
-//              SetSubString(CMapSegRoad, 17, '1F');
 
-//TODO CEP
+{$IFDEF TODOCEP}
+// '2114' Occurs when switching to another mapsegment.
+// Switch to intermediate
+            if (Copy(CMapSegRoad, 17, 4) = '2114') then
+              SetSubString(CMapSegRoad, 17, '1F');
+
 // Approach route point. Need to clear for CEP
             if (Copy(CMapSegRoad, 17, 4) = '2117') then
               SetSubString(CMapSegRoad, 29, '0000');
-
+{$ENDIF}
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
-//TODO Roadspeed
+//TODO RoadSpeed
             AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
             AnUdbHandle.Add(AnUdbDir);
 
