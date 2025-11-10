@@ -1,4 +1,11 @@
-﻿<html><head>
+﻿layout: forward
+target: https://frankbijnen.github.io/TripManager
+targettitle: TripManager V1.6
+time: 10
+message: This isn't here any more!
+
+
+<html><head>
 <meta http-equiv="Keywords" content="TripManager, Zumo, XT, XT2, Garmin, Trips, Routes, GPX">
 <meta http-equiv="Description" content="TripManager">
 <meta http-equiv="Content-Language" content="en-us">
