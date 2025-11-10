@@ -3,12 +3,6 @@
 <meta http-equiv="Description" content="TripManager">
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<meta http-equiv="refresh" content="0;url=https://frankbijnen.github.io/TripManager"/>
-<link rel="canonical" href="htps://frankbijnen.github.io/TripManager"/>
-<title>Redirecting to frankbijnen.github.io/TripManager</title>
-
-
 </head>
 
 <body>
