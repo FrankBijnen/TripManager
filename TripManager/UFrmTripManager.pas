@@ -3649,7 +3649,8 @@ begin
     begin
       UnSafeExt := not ( (ContainsText(ANitem.SubItems[2], GpxExtension)) or
                          (ContainsText(ANitem.SubItems[2], TripExtension)) or
-                         (ContainsText(ANitem.SubItems[2], GPIExtension))
+                         (ContainsText(ANitem.SubItems[2], GPIExtension)) or
+                         (ContainsText(ANitem.SubItems[2], FITExtension))
                        );
       UnlockFiles := UnlockFiles or
          (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, ChangeFileExt(ANitem.Caption, UnlExtension) ) <> '');
@@ -3683,6 +3684,13 @@ begin
                                                            CurrentDevice.FriendlyName]),
                  TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
     exit;
+
+  if (AllowRecurse) then
+  begin
+    if (MessageDlg('This will allow you to delete files that have unsafe extensions to delete. Continue?',
+                   TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
+      exit;
+  end;
 
   // Do the work
   CrWait := LoadCursor(0, IDC_WAIT);

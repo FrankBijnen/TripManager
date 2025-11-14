@@ -1963,6 +1963,8 @@ begin
         UnixTime := TUnixDate.DateTimeAsCardinal(WinDateTime)
       else
         UnixTime := TUnixDate.DateTimeAsCardinal(Now);
+      UnixTime := UnixTime + Cardinal(TrackId);  // Time needs to be unique.
+
       break;
     end;
   end;
@@ -2092,6 +2094,7 @@ var
   Track : TXmlVSNode;
   TrackId: integer;
   TrackPointList: TStringList;
+  DisplayColor: string;
   ResOut, ResErr: string;
   ResExit: DWord;
 begin
@@ -2100,7 +2103,12 @@ begin
     TrackId := 0;
     for Track in FTrackList do
     begin
+      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+      if (DisplayColor = '') then
+        continue;
+
       Track2FITTrackPoints(Track, TrackId, TrackPointList);
+      Inc(TrackId);
       Sto_RedirectedExecute('trk2fit.exe', FOutDir, ResOut, ResErr, ResExit, TrackPointList.Text);
       if (ResExit <> 0) then
         raise Exception.Create(Track.NodeValue + #10 + ResOut + #10 + ResErr);
