@@ -3,7 +3,7 @@ Manage the trips on the z&#0361;mo XT(2).<br>
 
 This program has been tested on the XT, the XT2 and Tread 2. <br>
 
-#Credits
+# Credits
 - John Heath and Steve Follen for their work on the XT2.<br>
 - ProofResistant for his work on the Tread 2.<br>
 - Members of Zumo User Forums. https://zumouserforums.co.uk/<br>
