@@ -22,7 +22,7 @@ This program has been tested on the XT, and the XT2. Thanks to John Heath and St
 
 # Documentation available
 
- - [Documentation Index](https://frankbijnen.github.io/TripManager/)
+ - [Index](https://frankbijnen.github.io/TripManager/)
  - [Content](https://frankbijnen.github.io/TripManager/toc.html)
 
 
