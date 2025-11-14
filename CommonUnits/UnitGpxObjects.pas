@@ -2404,6 +2404,7 @@ procedure TGPXFile.DoCreateTrips;
 var
   ParentTripId: Cardinal;
   RteNode, GpxNode: TXmlVSNode;
+  DisplayColor: string;
   RouteCnt: integer;
 {$ENDIF}
 begin
@@ -2417,11 +2418,14 @@ begin
   RouteCnt := 0;
   for RteNode in GpxNode.ChildNodes do
   begin
-    if (RteNode.Name = 'rte') then // Only want <rte> nodes. No <trk> or <wpt>
-    begin
-      ProcessTrip(RteNode, RouteCnt, ParentTripId);
-      Inc(RouteCnt);
-    end;
+    if (RteNode.Name <> 'rte') then // Only want <rte> nodes. No <trk> or <wpt>
+      continue;
+    DisplayColor := FrmSelectGPX.TrackSelectedColor(FindSubNodeValue(RteNode, 'name'), RteNode.Name);
+    if (DisplayColor = '') then
+      continue;
+
+    ProcessTrip(RteNode, RouteCnt, ParentTripId);
+    Inc(RouteCnt);
   end;
 {$ENDIF}
 end;
@@ -2437,6 +2441,15 @@ var
   GpxFileObj: TGPXFile;
   SubCaption: string;
   CrWait, CrNormal: HCURSOR;
+
+  function AddSubCaption(const SubCaption, Element: string): string;
+  begin
+    result := SubCaption;
+    if (result <> '') then
+      result := result + ', ';
+    result := result + Element;
+  end;
+
 begin
 
   GpxFileObj := TGPXFile.Create(GPXFile, ForceOutDir, FunctionPrefs, SavePrefs, OutStringList, SeqNo);
@@ -2472,35 +2485,17 @@ begin
     begin
       case Func of
         CreateTracks:
-        begin
-          if (SubCaption <> '') then
-            SubCaption := SubCaption + ', ';
-          SubCaption := SubCaption + 'Tracks';
-        end;
+          SubCaption := AddSubCaption(SubCaption, 'Tracks');
         CreateKML:
-        begin
-          if (SubCaption <> '') then
-            SubCaption := SubCaption + ', ';
-          SubCaption := SubCaption + 'Kml';
-        end;
+          SubCaption := AddSubCaption(SubCaption, 'Kml');
         CreateHTML:
-        begin
-          if (SubCaption <> '') then
-            SubCaption := SubCaption + ', ';
-          SubCaption := SubCaption + 'Html';
-        end;
+          SubCaption := AddSubCaption(SubCaption, 'Html');
         CreateOSMPoints:
-        begin
-          if (SubCaption <> '') then
-            SubCaption := SubCaption + ', ';
-          SubCaption := SubCaption + 'Map';
-        end;
+          SubCaption := AddSubCaption(SubCaption, 'Map');
         CreateFITPoints:
-        begin
-          if (SubCaption <> '') then
-            SubCaption := SubCaption + ', ';
-          SubCaption := SubCaption + 'Fit';
-        end;
+          SubCaption := AddSubCaption(SubCaption, 'Fit');
+        CreateTrips:
+          SubCaption := AddSubCaption(SubCaption, 'Trip');
       end;
     end;
 
