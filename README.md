@@ -2,11 +2,12 @@
 Manage the trips on the z&#0361;mo XT(2).<br>
 
 This program has been tested on the XT, the XT2 and Tread 2. <br>
-Credits<br>
-John Heath and Steve Follen for their work on the XT2.<br>
-ProofResistant for his work on the Tread 2.<br>
-Members of Zumo User Forums. https://zumousersforums.co.uk<br>
-Anyone I forgot to mention.
+
+#Credits
+- John Heath and Steve Follen for their work on the XT2.<br>
+- ProofResistant for his work on the Tread 2.<br>
+- Members of Zumo User Forums. https://zumouserforums.co.uk/<br>
+- Anyone I forgot to mention.
 
 # Download release
 [Latest](https://github.com/FrankBijnen/TripManager/releases/latest)<br>
