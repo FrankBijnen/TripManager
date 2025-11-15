@@ -199,11 +199,14 @@ implementation
 uses
   System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils, System.UITypes,
   Vcl.Dialogs,
-  UnitStringUtils, UnitOSMMap,
+{$IFDEF OSMMAP}
+  UnitOSMMap,
+{$ENDIF}
 {$IFDEF REGISTRYKEYS}
   UnitRegistryKeys,
+  UnitRegistry,
 {$ENDIF}
-  UnitRegistry;
+  UnitStringUtils;
 
 // Not configurable
 const
@@ -1844,6 +1847,7 @@ end;
 procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
                                         var TrackId: integer;
                                         TrackStringList: TStringList);
+{$IFDEF OSMMAP}
 var
   Lon, Lat, DisplayColor, Color, LayerName, RoutePointName: string;
   RouteWayPoint, WayPoint: TXmlVSNode;
@@ -1852,7 +1856,9 @@ var
   RtePtExtensions: TXmlVSNode;
   LayerId: integer;
   TrackPointAttribute: TXmlVSAttribute;
+{$ENDIF}
 begin
+{$IFDEF OSMMAP}
   TrackStringList.Clear;
   DisplayColor := FrmSelectGpx.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
   if (DisplayColor = '') then
@@ -1920,12 +1926,13 @@ begin
     end;
   end;
   TrackStringList.Add(Format('     CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
+{$ENDIF}
 end;
-
 
 procedure TGPXFile.Track2FITTrackPoints(Track: TXmlVSNode;
                                         var TrackId: integer;
                                         TrackStringList: TStringList);
+{$IFDEF TRIPOBJECTS}
 var
   TrackPoint: TXmlVSNode;
   Rte, RtePt: TXmlVSNode;
@@ -1944,8 +1951,9 @@ const
   begin
     result := Round(SimpleRoundTo(CoordDec, -10) * 4294967296 / 360);
   end;
-
+{$ENDIF}
 begin
+{$IFDEF TRIPOBJECTS}
   TrackStringList.Clear;
   UnixTime := 0;
 
@@ -2013,15 +2021,19 @@ begin
                                Ele]));
   end;
   TrackStringList.Add(Chr(26)); // EOF for Stdin
+{$ENDIF}
 end;
 
 procedure TGPXFile.DoCreateHTML;
+{$IFDEF OSMMAP}
 var
   OutFile: string;
   Track : TXmlVSNode;
   TrackId: integer;
   TrackPointList: TStringList;
+{$ENDIF}
 begin
+{$IFDEF OSMMAP}
   TrackPointList := TStringList.Create;
   try
     for Track in FTrackList do
@@ -2036,6 +2048,7 @@ begin
   finally
     TrackPointList.Free;
   end;
+{$ENDIF}
 end;
 
 procedure TGPXFile.DoCreateOSMPoints;

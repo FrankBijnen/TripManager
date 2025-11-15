@@ -158,8 +158,8 @@ implementation
 
 uses
   System.SysUtils,
-  UnitRegistry,
 {$IFDEF REGISTRYKEYS}
+  UnitRegistry,
   UnitRegistryKeys,
 {$ENDIF}
   UnitStringUtils;
