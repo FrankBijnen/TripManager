@@ -9,13 +9,16 @@
 #pragma link "dsnap.bpi"
 #pragma link "vclwinx.bpi"
 #pragma link "vcldb.bpi"
+#pragma link "vclx.bpi"
 #pragma hdrstop
 #include "..\CommonUnits\UnitStringUtils.hpp"
+
 #include <tchar.h>
 
 //---------------------------------------------------------------------------
 #include <Vcl.Styles.hpp>
 #include <Vcl.Themes.hpp>
+#include <midas.hpp>
 USEFORMNS("..\CommonUnits\UFrmGeoSearch.pas", Ufrmgeosearch, FGeoSearch);
 USEFORMNS("..\CommonUnits\UFrmPlaces.pas", Ufrmplaces, FrmPlaces);
 USEFORMNS("..\CommonUnits\UFrmSelectGPX.pas", Ufrmselectgpx, FrmSelectGPX);

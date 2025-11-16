@@ -22,7 +22,7 @@
 #include <System.UITypes.hpp>
 #include <Data.DB.hpp>
 #include <Datasnap.DBClient.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
 #include <UnitVerySimpleXml.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -54,6 +54,7 @@ __published:
 	Data::Db::TStringField* CdsRouteRoutePreference;
 	Data::Db::TStringField* CdsRouteTransportationMode;
 	Data::Db::TDateTimeField* CdsRouteDepartureDate;
+	Data::Db::TWordField* CdsRoutePointsRoutePref;
 	void __fastcall CdsRoutePointsAfterInsert(Data::Db::TDataSet* DataSet);
 	void __fastcall CdsRoutePointsAfterScroll(Data::Db::TDataSet* DataSet);
 	void __fastcall CdsRoutePointsBeforePost(Data::Db::TDataSet* DataSet);

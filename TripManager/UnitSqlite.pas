@@ -53,7 +53,8 @@ implementation
 
 uses
   System.Variants, System.SysUtils, System.StrUtils,
-  Winapi.Windows;
+  Winapi.Windows,
+  SQLite3;
 
 const
   CRLF = #13#10;
@@ -109,6 +110,9 @@ var
   AColumn: TSqlColumn;
   SQL: string;
 begin
+  if not SQLite3Loaded then
+    exit(nil);
+
   result := TSqlColumns.Create;
 
   Db.ParamsClear;
@@ -146,6 +150,9 @@ function GetColumns(const DbName: string;
 var
   Db: TSQLiteDatabase;
 begin
+  if not SQLite3Loaded then
+    exit(nil);
+
   Db := TSQLiteDatabase.Create(DbName);
   try
     result := GetColumns(Db, TabName);
@@ -158,6 +165,9 @@ procedure GetTables(const DbName: string; TabList: TStrings);
 var
   DB: TSQLiteDatabase;
 begin
+  if not SQLite3Loaded then
+    exit;
+
   DB := TSqliteDatabase.Create(DBName);
   try
     TableNames(DB, TabList);
@@ -175,6 +185,9 @@ var
   AResult: TSqlResult;
   Index: integer;
 begin
+  if not SQLite3Loaded then
+    exit;
+
   DB := TSqliteDatabase.Create(DBName);
   try
     QTab := Db.GetTable(Query);
@@ -232,6 +245,9 @@ var
   FieldNameToAdd: string;
 begin
   result := 0;
+  if not SQLite3Loaded then
+    exit;
+
   AddedFields := TStringList.Create;
   DB := TSqliteDatabase.Create(DBName);
   try

@@ -74,6 +74,7 @@ public:
 	System::UnicodeString Description;
 	System::UnicodeString FriendlyName;
 	IMTPDevice PortableDev;
+	System::UnicodeString __fastcall DisplayedDevice();
 public:
 	/* TObject.Create */ inline __fastcall TMTP_Device() : System::TObject() { }
 	/* TObject.Destroy */ inline __fastcall virtual ~TMTP_Device() { }

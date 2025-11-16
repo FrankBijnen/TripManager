@@ -21,7 +21,7 @@
 #include <UnitVerySimpleXml.hpp>
 #include <UnitGpxDefs.hpp>
 #include <UnitGPXObjects.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
 #include <Xml.VerySimple.hpp>
 
 //-- user supplied -----------------------------------------------------------

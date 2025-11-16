@@ -1245,10 +1245,15 @@ begin
 end;
 
 initialization
-  SQLite3_Initialize;
+  if LoadSQLite3 then
+  begin
+    if Assigned(SQLite3_Initialize) then
+      SQLite3_Initialize;
+  end;
 
 finalization
-  SQLite3_Shutdown;
+  if Assigned(SQLite3_Shutdown) then
+    SQLite3_Shutdown;
 
 end.
 

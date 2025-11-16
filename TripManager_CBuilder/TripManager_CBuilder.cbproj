@@ -65,8 +65,6 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
-        <DynamicRTL>true</DynamicRTL>
         <UsePackages>true</UsePackages>
         <IntermediateOutputDir>.\$(Platform)\$(Config)</IntermediateOutputDir>
         <FinalOutputDir>.\$(Platform)\$(Config)</FinalOutputDir>
@@ -76,7 +74,7 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <AllPackageLibs>rtl.lib;vcl.lib;vcledge.lib;vclactnband.lib;dbrtl.lib;dsnap.lib</AllPackageLibs>
+        <AllPackageLibs>rtl.lib;vcl.lib;vcledge.lib;vclactnband.lib;dbrtl.lib;dsnap.lib;vcldb.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
         <Icon_MainIcon>$(BDS)\bin\cbuilder_PROJECTICON.ico</Icon_MainIcon>
@@ -85,12 +83,22 @@
         <SanitizedProjectName>TripManager_CBuilder</SanitizedProjectName>
         <VerInfo_Locale>1043</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <IncludePath>..\CommonUnits\VerySimpleXml\;..\CommonUnits\Vcl.ShellControls\;..\CommonUnits\osm\;..\CommonUnits\Mtp\;..\CommonUnits\LVSort\;..\CommonUnits\kml\;..\CommonUnits\DirMon\;..\CommonUnits\BCHex\;..\CommonUnits\osm\Resources\;..\CommonUnits\;..\TripManager\;$(IncludePath)</IncludePath>
-        <DCC_UnitSearchPath>..\CommonUnits;..\CommonUnits\BCHex;..\CommonUnits\DirMon;..\CommonUnits\kml;..\CommonUnits\LVSort;..\CommonUnits\Mtp;..\CommonUnits\osm;..\CommonUnits\VerySimpleXml;..\CommonUnits\Vcl.ShellControls;..\TripManager;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <ILINK_LibraryPath>..\CommonUnits\VerySimpleXml\;..\CommonUnits\Vcl.ShellControls\;..\CommonUnits\osm\;..\CommonUnits\Mtp\;..\CommonUnits\LVSort\;..\CommonUnits\kml\;..\CommonUnits\DirMon\;..\CommonUnits\BCHex\;..\CommonUnits\osm\Resources\;..\CommonUnits\;..\TripManager\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>..\CommonUnits\Vcl.ShellControls\;..\CommonUnits\osm\;..\CommonUnits\Mtp\;..\CommonUnits\kml\;..\CommonUnits\DirMon\;..\CommonUnits\BCHex\;..\CommonUnits\osm\Resources\;..\CommonUnits\VerySimpleXml\;..\CommonUnits\SqliteWrap\;..\CommonUnits\;..\TripManager\;$(IncludePath)</IncludePath>
+        <DCC_UnitSearchPath>..\CommonUnits;..\CommonUnits\BCHex;..\CommonUnits\DirMon;..\CommonUnits\kml;..\CommonUnits\LVSort;..\CommonUnits\Mtp;..\CommonUnits\osm;..\CommonUnits\VerySimpleXml;..\CommonUnits\Vcl.ShellControls;..\CommonUnits\SqliteWrap;..\TripManager;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <ILINK_LibraryPath>..\CommonUnits\VerySimpleXml\;..\CommonUnits\Vcl.ShellControls\;..\CommonUnits\osm\;..\CommonUnits\Mtp\;..\CommonUnits\kml\;..\CommonUnits\DirMon\;..\CommonUnits\BCHex\;..\CommonUnits\osm\Resources\;..\CommonUnits\SqliteWrap\;..\CommonUnits\;..\TripManager\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <Custom_Styles>&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;</Custom_Styles>
-        <Defines>TRIPOBJECTS;$(Defines)</Defines>
+        <Defines>NOMIDL;TRIPOBJECTS;GEOCODE;REGISTRYKEYS;OSMMAP;KML;GPI;$(Defines)</Defines>
+        <ILINK_LinkwithZLib>false</ILINK_LinkwithZLib>
+        <ILINK_LinkwithSQLite>false</ILINK_LinkwithSQLite>
+        <ILINK_LinkwithRegEx>false</ILINK_LinkwithRegEx>
+        <ILINK_LinkwithPThread>false</ILINK_LinkwithPThread>
+        <ILINK_LinkwithIntebaseTogo>false</ILINK_LinkwithIntebaseTogo>
+        <ILINK_LinkwithIndy>false</ILINK_LinkwithIndy>
+        <ILINK_LinkwithSQL>false</ILINK_LinkwithSQL>
+        <DCC_CBuilderOutput>JPN</DCC_CBuilderOutput>
+        <ILINK_Verbose>true</ILINK_Verbose>
+        <BCC_InstructionSet>6</BCC_InstructionSet>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <PackageImports>adortl;appanalytics;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindcompvclsmp;bindcompvclwinx;bindengine;CloudService;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;FireDAC;FireDACADSDriver;FireDACCommon;FireDACCommonDriver;FireDACCommonODBC;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACPgDriver;FireDACSqliteDriver;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;FMXTee;FmxTeeUI;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;RESTBackendComponents;RESTComponents;rtl;soapmidas;soaprtl;soapserver;Tee;TeeDB;TeeUI;tethering;vcl;vclactnband;vcldb;vcldsnap;vcledge;vclFireDAC;vclie;vclimg;VCLRESTComponents;VclSmp;vcltouch;vclwinx;vclx;xmlrtl;$(PackageImports)</PackageImports>
@@ -101,6 +109,7 @@
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <ILINK_LibraryPath>G:\TDB_Tools\TripManager_CBuilder\Win32\Release\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <PackageImports>adortl;appanalytics;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindcompvclsmp;bindcompvclwinx;bindengine;CloudService;CustomIPTransport;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXInterBaseDriver;DBXMySQLDriver;DBXSqliteDriver;dsnap;dsnapcon;dsnapxml;FireDAC;FireDACADSDriver;FireDACCommon;FireDACCommonDriver;FireDACCommonODBC;FireDACIBDriver;FireDACMSAccDriver;FireDACMySQLDriver;FireDACPgDriver;FireDACSqliteDriver;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;FMXTee;FmxTeeUI;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;RESTBackendComponents;RESTComponents;rtl;soapmidas;soaprtl;soapserver;Tee;TeeDB;TeeUI;tethering;vcl;vclactnband;vcldb;vcldsnap;vcledge;vclFireDAC;vclie;vclimg;VCLRESTComponents;VclSmp;vcltouch;vclwinx;vclx;xmlrtl;$(PackageImports)</PackageImports>
@@ -140,7 +149,7 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
-        <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi</LinkPackageImports>
+        <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi;vclactnband.bpi;dbrtl.bpi;dsnap.bpi;vcldb.bpi</LinkPackageImports>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
@@ -154,7 +163,7 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
-        <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi;vclactnband.bpi;dbrtl.bpi;dsnap.bpi</LinkPackageImports>
+        <LinkPackageImports>rtl.bpi;vcl.bpi;vcledge.bpi;vclactnband.bpi;dbrtl.bpi;dsnap.bpi;vcldb.bpi</LinkPackageImports>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>

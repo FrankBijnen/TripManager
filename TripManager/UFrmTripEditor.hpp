@@ -38,7 +38,7 @@
 #include <Vcl.Grids.hpp>
 #include <Vcl.DBGrids.hpp>
 #include <Data.DB.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
 #include <TripManager_DBGrid.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -134,6 +134,7 @@ private:
 	TTripFileUpdate FTripFileUpdated;
 	TRoutePointsShowing FRoutePointsShowing;
 	void __fastcall CopyToClipBoard(bool Cut);
+	void __fastcall SaveChanges();
 	
 public:
 	System::UnicodeString CurPath;
@@ -141,7 +142,7 @@ public:
 	System::UnicodeString CurFile;
 	bool CurNewFile;
 	bool CurDevice;
-	Unittripobjects::TZumoModel CurModel;
+	Unittripobjects::TTripModel CurModel;
 	__property TTripFileUpdate OnTripFileCanceled = {read=FTripFileCanceled, write=FTripFileCanceled};
 	__property TTripFileUpdate OnTripFileUpdating = {read=FTripFileUpdating, write=FTripFileUpdating};
 	__property TTripFileUpdate OnTripFileUpdated = {read=FTripFileUpdated, write=FTripFileUpdated};

@@ -5,11 +5,13 @@ interface
 uses
   System.Classes,
   Winapi.Windows,
-  UnitGpxDefs,
 {$IFDEF TRIPOBJECTS}
   UnitTripObjects,
 {$ENDIF}
-  UnitGpi;
+{$IFDEF GPI}
+  UnitGpi,
+{$ENDIF}
+  UnitGpxDefs;
 
 const
   Reg_FuncTrip                = 'FuncTrip';
@@ -209,7 +211,9 @@ begin
   ProcessWayPtsInGpi := true;
   ProcessViaPtsInGpi := true;
   ProcessShapePtsInGpi := false;
+{$IFDEF GPI}
   GPISymbolsDir := DefGpiSymbolsDir;
+{$ENDIF}
   DefaultProximityStr := '';
 
   ProcessCategory := [pcSymbol, pcGPX];

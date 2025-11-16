@@ -18,9 +18,9 @@
 #include <SysInit.hpp>
 #include <System.Classes.hpp>
 #include <Winapi.Windows.hpp>
-#include <UnitGpxDefs.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
 #include <UnitGpi.hpp>
+#include <UnitGpxDefs.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -34,6 +34,7 @@ class PASCALIMPLEMENTATION TProcessOptions : public System::TObject
 	typedef System::TObject inherited;
 	
 public:
+	bool SkipTrackDialog;
 	bool HasConsole;
 	HWND LookUpWindow;
 	unsigned LookUpMessage;
@@ -60,6 +61,7 @@ public:
 	System::UnicodeString ViaPointCategory;
 	bool ProcessCreateRoutePoints;
 	bool ProcessTracks;
+	int MinDistTrackPoint;
 	bool ProcessWayPtsFromRoute;
 	bool ProcessWayPtsInWayPts;
 	bool ProcessViaPtsInWayPts;
@@ -80,7 +82,7 @@ public:
 	System::UnicodeString CatSymbol;
 	System::UnicodeString CatGPX;
 	System::UnicodeString CatRoute;
-	Unittripobjects::TZumoModel ZumoModel;
+	Unittripobjects::TTripModel TripModel;
 	unsigned ScPosn_Unknown1;
 	System::UnicodeString VehicleProfileGuid;
 	System::UnicodeString VehicleProfileHash;
@@ -90,6 +92,7 @@ public:
 	unsigned AvoidancesChangedTimeAtSave;
 	bool AllowGrouping;
 	Unittripobjects::TTripOption TripOption;
+	Unittripobjects::TAdvlevel DefAdvLevel;
 	System::Classes::TNotifyEvent FOnSetFuncPrefs;
 	System::Classes::TNotifyEvent FOnSavePrefs;
 	__fastcall TProcessOptions(System::Classes::TNotifyEvent OnSetFuncPrefs, System::Classes::TNotifyEvent OnSavePrefs);
@@ -98,6 +101,7 @@ public:
 	void __fastcall SetProcessCategory(bool ProcessWpt, System::UnicodeString WayPtCat);
 	System::UnicodeString __fastcall DistanceStr();
 	double __fastcall GetDistOKMeters();
+	System::UnicodeString __fastcall TripTrackColor();
 	__property double DistOKMeters = {read=GetDistOKMeters};
 };
 
@@ -117,6 +121,7 @@ public:
 #define Reg_FuncGpiShpPt L"FuncGpiShpPt"
 #define Reg_FuncKml L"FuncKml"
 #define Reg_FuncHtml L"FuncHtml"
+#define Reg_FuncFit L"FuncFit"
 }	/* namespace Unitprocessoptions */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITPROCESSOPTIONS)
 using namespace Unitprocessoptions;

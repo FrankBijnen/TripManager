@@ -16,6 +16,7 @@
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
+#include <System.Classes.hpp>
 #include <UnitGpxDefs.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -23,8 +24,23 @@
 namespace Unitregistrykeys
 {
 //-- forward type declarations -----------------------------------------------
+struct TGarminDevice;
 class DELPHICLASS TSetProcessOptions;
 //-- type declarations -------------------------------------------------------
+struct DECLSPEC_DRECORD TGarminDevice
+{
+public:
+	Unitgpxdefs::TGarminModel GarminModel;
+	System::UnicodeString ModelDescription;
+	System::UnicodeString GpxPath;
+	System::UnicodeString GpiPath;
+	System::UnicodeString CoursePath;
+	System::UnicodeString NewFilesPath;
+	System::UnicodeString ActivitiesPath;
+	void __fastcall Init();
+};
+
+
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TSetProcessOptions : public System::TObject
 {
@@ -35,9 +51,16 @@ public:
 	void __fastcall SetPostProcessPrefs(System::TObject* Sender);
 	void __fastcall SetSendToPrefs(System::TObject* Sender);
 	void __fastcall SetCmdLinePrefs(System::TObject* Sender);
+	void __fastcall SetSkipTrackDlgPrefs(System::TObject* Sender);
 	void __fastcall SavePrefs(System::TObject* Sender);
 	__classmethod void __fastcall SetPrefs(System::TObject* TvSelections);
 	__classmethod Unitgpxdefs::TGPXFuncArray __fastcall StorePrefs(System::TObject* TvSelections);
+	__classmethod System::Classes::TStringList* __fastcall GetKnownDevices();
+	__classmethod System::UnicodeString __fastcall GetKnownDevice(int DevIndex);
+	__classmethod System::Classes::TStringList* __fastcall GetDefaultDevices();
+	__classmethod System::UnicodeString __fastcall GetDefaultDevice(int DevIndex);
+	__classmethod Unitgpxdefs::TGarminModel __fastcall GetModelFromDescription(const System::UnicodeString ModelDescription);
+	__classmethod System::UnicodeString __fastcall GetKnownPath(int DevIndex, int PathId);
 public:
 	/* TObject.Create */ inline __fastcall TSetProcessOptions() : System::TObject() { }
 	/* TObject.Destroy */ inline __fastcall virtual ~TSetProcessOptions() { }
@@ -47,21 +70,30 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
+#define InternalStorage L"Internal Storage\\"
+#define NonMTPRoot L"?:\\"
+#define Garmin L"Garmin"
+#define SettingsDb L"settings.db"
+#define ProfileDb L"vehicle_profile.db"
+#define GarminDeviceXML L"GarminDevice.xml"
 #define Reg_GPISymbolSize L"GPISymbolsSize"
 #define Reg_GPIProximity L"GPIProximity"
 #define Reg_TrackColor L"TrackColor"
-#define Reg_ZumoModel L"ZumoModel"
+#define Reg_MinDistTrackPoints_Key L"MinDistTrackPoints"
 #define Reg_ScPosn_Unknown1 L"ScPosn_Unknown1"
 #define Reg_AllowGrouping L"AllowGrouping"
 #define Reg_TripOption L"TripOption"
+#define Reg_DefAdvLevel L"DefAdvLevel"
 #define Reg_VehicleProfileGuid L"VehicleProfileGuid"
 #define Reg_VehicleProfileHash L"VehicleProfileHash"
 #define Reg_VehicleId L"VehicleId"
 #define Reg_VehicleProfileTruckType L"VehicleProfileTruckType"
 #define Reg_AvoidancesChangedTimeAtSave L"AvoidancesChangedTimeAtSave"
 #define Reg_VehicleProfileName L"VehicleProfileName"
+#define Reg_VehicleType L"VehicleType"
+#define Reg_VehicleTransportMode L"VehicleTransportMode"
 #define Reg_ProcessBegin L"ProcessBegin"
-#define Reg_CurrentDevice L"CurrentDevice"
+#define Reg_CurrentModel L"CurrentModel"
 #define Reg_BeginSymbol L"BeginSymbol"
 #define Reg_BeginStr L"BeginStr"
 #define Reg_BeginAddress L"BeginAddress"
@@ -85,13 +117,13 @@ static _DELPHI_CONST System::Word Reg_CompareDistOK_Val = System::Word(0x1f4);
 #define Reg_PrefDev_Key L"PrefDevice"
 #define Reg_PrefDevTripsFolder_Key L"PrefDeviceTripsFolder"
 #define Reg_PrefDevTripsFolder_Val L"Internal Storage\\.System\\Trips"
-#define Reg_TripNameInList L"TripNameInList"
 #define Reg_PrefDevGpxFolder_Key L"PrefDeviceGpxFolder"
 #define Reg_PrefDevGpxFolder_Val L"Internal Storage\\GPX"
 #define Reg_PrefDevPoiFolder_Key L"PrefDevicePoiFolder"
 #define Reg_PrefDevPoiFolder_Val L"Internal Storage\\POI"
 #define Reg_EnableDirFuncs L"EnableDirFuncs"
-#define Reg_WarnModel_Key L"WarnModel"
+#define Reg_EnableFitFuncs L"EnableFitFuncs"
+#define Reg_EnableTripFuncs L"EnableTripFuncs"
 #define Reg_TripColor_Key L"TripColor"
 #define Reg_TripColor_Val L"Magenta"
 #define Reg_Maximized_Key L"Maximized"
@@ -119,7 +151,11 @@ static _DELPHI_CONST System::Int8 IdGpiViaPt = System::Int8(0xa);
 static _DELPHI_CONST System::Int8 IdGpiShpPt = System::Int8(0xb);
 static _DELPHI_CONST System::Int8 IdKml = System::Int8(0xc);
 static _DELPHI_CONST System::Int8 IdHtml = System::Int8(0xd);
+static _DELPHI_CONST System::Int8 IdFit = System::Int8(0xe);
+#define Garmin_Name L"Garmin"
+#define Edge_Name L"Edge"
 extern DELPHI_PACKAGE TSetProcessOptions* SetProcessOptions;
+extern DELPHI_PACKAGE TGarminDevice GarminDevice;
 }	/* namespace Unitregistrykeys */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITREGISTRYKEYS)
 using namespace Unitregistrykeys;

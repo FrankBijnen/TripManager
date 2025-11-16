@@ -22,14 +22,15 @@
 #include <System.Math.hpp>
 #include <Xml.XMLIntf.hpp>
 #include <UnitVerySimpleXml.hpp>
-#include <UnitGpxDefs.hpp>
-#include <UnitProcessOptions.hpp>
+#include <Vcl.ComCtrls.hpp>
 #include <kml_helper.hpp>
-#include <UFrmSelectGPX.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
+#include <UnitGeoCode.hpp>
 #include <UnitGpi.hpp>
 #include <UnitBmp.hpp>
-#include <Vcl.ComCtrls.hpp>
+#include <UnitGpxDefs.hpp>
+#include <UnitProcessOptions.hpp>
+#include <UFrmSelectGPX.hpp>
 #include <Xml.VerySimple.hpp>
 
 //-- user supplied -----------------------------------------------------------
@@ -49,6 +50,7 @@ private:
 	Unitverysimplexml::TXmlVSNodeList* FRouteViaPointList;
 	Unitverysimplexml::TXmlVSNodeList* FTrackList;
 	System::Classes::TStringList* FWayPointsProcessedList;
+	Unitgpxdefs::TCoords PrevTrackCoords;
 	Unitverysimplexml::TXmlVSNode* CurrentTrack;
 	Unitverysimplexml::TXmlVSNode* CurrentViaPointRoute;
 	Unitverysimplexml::TXmlVSNode* CurrentWayPointFromRoute;
@@ -83,7 +85,7 @@ private:
 	void __fastcall ProcessGPX();
 	void __fastcall ComputeDistance(Unitverysimplexml::TXmlVSNode* RptNode);
 	void __fastcall ClearSubClass(Unitverysimplexml::TXmlVSNode* ANode);
-	void __fastcall UnglitchNode(Unitverysimplexml::TXmlVSNode* RtePtNode, Unitverysimplexml::TXmlVSNode* ExtensionNode, Unitgpi::TGPXString ViaPtName);
+	void __fastcall UnglitchNode(Unitverysimplexml::TXmlVSNode* RtePtNode, Unitverysimplexml::TXmlVSNode* ExtensionNode, System::UTF8String ViaPtName);
 	void __fastcall EnsureSubNodeAfter(Unitverysimplexml::TXmlVSNode* ANode, System::UnicodeString ChildNode, const System::UnicodeString *AfterNodes, const System::NativeInt AfterNodes_High);
 	void __fastcall RenameSubNode(Unitverysimplexml::TXmlVSNode* RtePtNode, const System::UnicodeString NodeName, const System::UnicodeString NewName);
 	void __fastcall LookUpAddrRtePt(Unitverysimplexml::TXmlVSNode* RtePtNode);
@@ -108,7 +110,6 @@ private:
 	void __fastcall ProcessGPXNode(Unitverysimplexml::TXmlVSNode* GpxNode);
 	void __fastcall StripRtePt(Unitverysimplexml::TXmlVSNode* const RtePtNode);
 	void __fastcall StripRte(Unitverysimplexml::TXmlVSNode* const RteNode);
-	double __fastcall GetTotalDistance(const System::UnicodeString ATripName);
 	bool __fastcall BuildSubClassesList(Unitverysimplexml::TXmlVSNodeList* const RtePts);
 	int __fastcall CreateLocations(Unittripobjects::TmLocations* Locations, Unitverysimplexml::TXmlVSNodeList* RtePts);
 	void __fastcall UpdateTemplate(const System::UnicodeString TripName, unsigned ParentTripId, Unitverysimplexml::TXmlVSNodeList* RtePts);
@@ -120,6 +121,7 @@ protected:
 	void __fastcall CloneSubNodes(Unitverysimplexml::TXmlVSNodeList* FromNodes, Unitverysimplexml::TXmlVSNodeList* ToNodes);
 	void __fastcall CloneNode(Unitverysimplexml::TXmlVSNode* FromNode, Unitverysimplexml::TXmlVSNode* ToNode);
 	void __fastcall Track2OSMTrackPoints(Unitverysimplexml::TXmlVSNode* Track, int &TrackId, System::Classes::TStringList* TrackStringList);
+	void __fastcall Track2FITTrackPoints(Unitverysimplexml::TXmlVSNode* Track, int &TrackId, System::Classes::TStringList* TrackStringList);
 	
 public:
 	Ufrmselectgpx::TFrmSelectGPX* FrmSelectGpx;
@@ -135,9 +137,10 @@ public:
 	void __fastcall DoCreateHTML();
 	void __fastcall DoCreateOSMPoints();
 	void __fastcall DoCreatePOLY();
+	void __fastcall DoCreateFITPoints();
 	void __fastcall DoCreateRoutes();
 	void __fastcall DoCreateTrips();
-	void __fastcall ProcessTrip(Unitverysimplexml::TXmlVSNode* const RteNode, unsigned ParentTripId);
+	void __fastcall ProcessTrip(Unitverysimplexml::TXmlVSNode* const RteNode, unsigned RouteCnt, unsigned ParentTripId);
 	void __fastcall FixCurrentGPX();
 	void __fastcall AnalyzeGpx();
 	__property System::Classes::TStringList* SubClassList = {read=FSubClassList};

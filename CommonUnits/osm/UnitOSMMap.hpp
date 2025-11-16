@@ -48,7 +48,7 @@ public:
 };
 
 
-typedef System::StaticArray<TMapTilerLayer, 4> Unitosmmap__1;
+typedef System::StaticArray<TMapTilerLayer, 5> Unitosmmap__1;
 
 typedef System::StaticArray<TMapLayer, 2> Unitosmmap__2;
 

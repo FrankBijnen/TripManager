@@ -6,3 +6,4 @@ Changes:
 - Updated uses statements. Windows -> Winapi.Windows
 - Added Types to TSQLiteTable
 - Added FieldAsBlobBytes to TSQLiteTable
+- Load Sqlite3.dll dynamically (SafeLoadLibrary and GetProcAddress) for CBuilder compatibility)

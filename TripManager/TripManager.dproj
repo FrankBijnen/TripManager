@@ -72,7 +72,7 @@
         <SanitizedProjectName>TripManager</SanitizedProjectName>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.7.0.346;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.6;Comments=Use at your own risk</VerInfo_Keys>
-        <DCC_Define>NOMIDL;TRIPOBJECTS;GEOCODE;REGISTRYKEYS;OSMMAP;$(DCC_Define)</DCC_Define>
+        <DCC_Define>NOMIDL;TRIPOBJECTS;GEOCODE;REGISTRYKEYS;OSMMAP;KML;GPI;$(DCC_Define)</DCC_Define>
         <Custom_Styles>&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;</Custom_Styles>
         <VerInfo_MinorVer>7</VerInfo_MinorVer>
         <DCC_MapFile>3</DCC_MapFile>

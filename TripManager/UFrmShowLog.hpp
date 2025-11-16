@@ -28,6 +28,7 @@
 #include <Vcl.ExtCtrls.hpp>
 #include <Vcl.StdCtrls.hpp>
 #include <Vcl.Buttons.hpp>
+#include <Vcl.CheckLst.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
@@ -43,7 +44,7 @@ class PASCALIMPLEMENTATION TFrmShowLog : public Vcl::Forms::TForm
 __published:
 	Vcl::Extctrls::TPanel* PnlBot;
 	Vcl::Buttons::TBitBtn* BtnClose;
-	Vcl::Stdctrls::TListBox* LbLog;
+	Vcl::Checklst::TCheckListBox* LbLog;
 	void __fastcall BtnCloseClick(System::TObject* Sender);
 	void __fastcall LbLogClick(System::TObject* Sender);
 	void __fastcall FormKeyPress(System::TObject* Sender, System::WideChar &Key);

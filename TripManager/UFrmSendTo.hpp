@@ -66,6 +66,8 @@ __published:
 	Vcl::Stdctrls::TMemo* MemoAdditional;
 	Vcl::Stdctrls::TMemo* MemoTasks;
 	Vcl::Buttons::TBitBtn* BtnHelp;
+	Vcl::Extctrls::TPanel* PnlModel;
+	Vcl::Stdctrls::TComboBox* CmbTripOption;
 	void __fastcall FormShow(System::TObject* Sender);
 	void __fastcall FormClose(System::TObject* Sender, System::Uitypes::TCloseAction &Action);
 	void __fastcall PCTDestinationChange(System::TObject* Sender);
@@ -91,6 +93,7 @@ public:
 	Unitgpxdefs::TGPXFuncArray Funcs;
 	TSendToDest SendToDest;
 	bool HasCurrentDevice;
+	System::UnicodeString DisplayedDevice;
 public:
 	/* TCustomForm.Create */ inline __fastcall virtual TFrmSendTo(System::Classes::TComponent* AOwner) : Vcl::Forms::TForm(AOwner) { }
 	/* TCustomForm.CreateNew */ inline __fastcall virtual TFrmSendTo(System::Classes::TComponent* AOwner, int Dummy) : Vcl::Forms::TForm(AOwner, Dummy) { }

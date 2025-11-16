@@ -16,7 +16,7 @@
 #pragma pack(push,8)
 #include <System.hpp>
 #include <SysInit.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
 #include <Vcl.ValEdit.hpp>
 
 //-- user supplied -----------------------------------------------------------

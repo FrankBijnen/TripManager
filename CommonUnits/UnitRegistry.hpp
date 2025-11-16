@@ -30,11 +30,11 @@ typedef System::StaticArray<System::UnicodeString, 2> Unitregistry__1;
 
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE Unitregistry__1 BooleanValues;
-extern DELPHI_PACKAGE System::UnicodeString __fastcall GetRegistry(const System::UnicodeString Name, const System::UnicodeString Default = System::UnicodeString())/* overload */;
+extern DELPHI_PACKAGE System::UnicodeString __fastcall GetRegistry(const System::UnicodeString Name, const System::UnicodeString Default = System::UnicodeString(), const System::UnicodeString SubKey = System::UnicodeString())/* overload */;
 extern DELPHI_PACKAGE bool __fastcall GetRegistry(const System::UnicodeString Name, const bool Default)/* overload */;
 extern DELPHI_PACKAGE int __fastcall GetRegistry(const System::UnicodeString Name, const int Default)/* overload */;
 extern DELPHI_PACKAGE int __fastcall GetRegistry(const System::UnicodeString Name, const int Default, System::Typinfo::PTypeInfo AType)/* overload */;
-extern DELPHI_PACKAGE void __fastcall SetRegistry(const System::UnicodeString Name, const System::UnicodeString Value)/* overload */;
+extern DELPHI_PACKAGE void __fastcall SetRegistry(const System::UnicodeString Name, const System::UnicodeString Value, const System::UnicodeString SubKey = System::UnicodeString())/* overload */;
 extern DELPHI_PACKAGE void __fastcall SetRegistry(const System::UnicodeString Name, bool Value)/* overload */;
 extern DELPHI_PACKAGE void __fastcall SetRegistry(const System::UnicodeString Name, int Value)/* overload */;
 }	/* namespace Unitregistry */

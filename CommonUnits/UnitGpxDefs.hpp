@@ -43,13 +43,15 @@ public:
 };
 
 
-enum DECLSPEC_DENUM TGPXFunc : unsigned char { PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML, CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints };
+enum DECLSPEC_DENUM TGPXFunc : unsigned char { PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML, CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints };
 
 typedef System::DynamicArray<TGPXFunc> TGPXFuncArray;
 
 enum DECLSPEC_DENUM Unitgpxdefs__1 : unsigned char { scCompare, scFirst, ScLast };
 
 typedef System::Set<Unitgpxdefs__1, Unitgpxdefs__1::scCompare, Unitgpxdefs__1::ScLast> TSubClassType;
+
+enum DECLSPEC_DENUM TGarminModel : unsigned char { XT, XT2, Tread2, GarminEdge, GarminGeneric, Unknown };
 
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE double EarthRadiusKm;

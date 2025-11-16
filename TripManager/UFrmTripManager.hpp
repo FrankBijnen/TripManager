@@ -49,6 +49,10 @@
 #include <Vcl.ActnMenus.hpp>
 #include <Vcl.ActnList.hpp>
 #include <Vcl.PlatformDefaultStyleActnCtrls.hpp>
+#include <Vcl.DBGrids.hpp>
+#include <Vcl.DBCtrls.hpp>
+#include <Data.DB.hpp>
+#include <Datasnap.DBClient.hpp>
 #include <Monitor.hpp>
 #include <BCHexEditor.hpp>
 #include <mtp_helper.hpp>
@@ -57,11 +61,12 @@
 #include <TripManager_ValEdit.hpp>
 #include <UnitListViewSort.hpp>
 #include <UnitMtpDevice.hpp>
-#include <unitTripObjects.hpp>
+#include <UnitTripObjects.hpp>
 #include <UnitGpxDefs.hpp>
 #include <UnitGPXObjects.hpp>
 #include <UnitGpi.hpp>
 #include <UnitUSBEvent.hpp>
+#include <UnitRegistryKeys.hpp>
 #include <System.UITypes.hpp>
 #include <System.Types.hpp>
 
@@ -70,9 +75,24 @@
 namespace Ufrmtripmanager
 {
 //-- forward type declarations -----------------------------------------------
+class DELPHICLASS TDBGrid;
 struct TMapReq;
 class DELPHICLASS TFrmTripManager;
 //-- type declarations -------------------------------------------------------
+class PASCALIMPLEMENTATION TDBGrid : public Vcl::Dbgrids::TDBGrid
+{
+	typedef Vcl::Dbgrids::TDBGrid inherited;
+	
+public:
+	/* TCustomDBGrid.Create */ inline __fastcall virtual TDBGrid(System::Classes::TComponent* AOwner) : Vcl::Dbgrids::TDBGrid(AOwner) { }
+	/* TCustomDBGrid.Destroy */ inline __fastcall virtual ~TDBGrid() { }
+	
+public:
+	/* TWinControl.CreateParented */ inline __fastcall TDBGrid(HWND ParentWindow) : Vcl::Dbgrids::TDBGrid(ParentWindow) { }
+	
+};
+
+
 struct DECLSPEC_DRECORD TMapReq
 {
 public:
@@ -190,11 +210,11 @@ __published:
 	Vcl::Dialogs::TOpenDialog* OpenTrip;
 	Vcl::Actnmenus::TActionMainMenuBar* ActionMainMenuBar;
 	Vcl::Actnman::TActionManager* ActionManager;
-	Vcl::Actnlist::TAction* Action1;
-	Vcl::Actnlist::TAction* Action2;
+	Vcl::Actnlist::TAction* ActAbout;
+	Vcl::Actnlist::TAction* ActOnline;
 	Vcl::Menus::TPopupMenu* PopupTripInfo;
 	Vcl::Menus::TMenuItem* CopyValueFromTrip;
-	Vcl::Actnlist::TAction* Action3;
+	Vcl::Actnlist::TAction* ActSettings;
 	Vcl::Menus::TMenuItem* N7;
 	Vcl::Menus::TMenuItem* SaveCSV1;
 	Vcl::Dialogs::TSaveDialog* SaveTrip;
@@ -223,6 +243,21 @@ __published:
 	Vcl::Menus::TMenuItem* N11;
 	Vcl::Menus::TMenuItem* N10;
 	Vcl::Menus::TMenuItem* CheckandFixcurrentgpx1;
+	Vcl::Comctrls::TTabSheet* TsSQlite;
+	Vcl::Extctrls::TPanel* PnlSQliteTop;
+	TDBGrid* DbgDeviceDb;
+	Data::Db::TDataSource* DsDeviceDb;
+	Datasnap::Dbclient::TClientDataSet* CdsDeviceDb;
+	Vcl::Stdctrls::TMemo* DBMemo;
+	Vcl::Extctrls::TSplitter* SpltGridBlob;
+	Vcl::Dialogs::TSaveDialog* SaveBlob;
+	Vcl::Stdctrls::TMemo* MemoSQL;
+	Vcl::Extctrls::TPanel* PnlQuickSql;
+	Vcl::Stdctrls::TLabel* LblSqlResults;
+	Vcl::Extctrls::TPanel* PnlQuickSqlGo;
+	Vcl::Stdctrls::TComboBox* CmbSQliteTabs;
+	Vcl::Buttons::TBitBtn* BitBtnSQLGo;
+	Vcl::Actnlist::TAction* ActInstalledDoc;
 	void __fastcall FormCreate(System::TObject* Sender);
 	void __fastcall FormDestroy(System::TObject* Sender);
 	void __fastcall BtnRefreshClick(System::TObject* Sender);
@@ -282,10 +317,10 @@ __published:
 	void __fastcall LstFilesKeyUp(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall ChkWatchClick(System::TObject* Sender);
 	void __fastcall ShellListView1DblClick(System::TObject* Sender);
-	void __fastcall Action1Execute(System::TObject* Sender);
-	void __fastcall Action2Execute(System::TObject* Sender);
+	void __fastcall ActAboutExecute(System::TObject* Sender);
+	void __fastcall ActOnlineExecute(System::TObject* Sender);
 	void __fastcall CopyValueFromTripClick(System::TObject* Sender);
-	void __fastcall Action3Execute(System::TObject* Sender);
+	void __fastcall ActSettingsExecute(System::TObject* Sender);
 	void __fastcall SaveCSV1Click(System::TObject* Sender);
 	void __fastcall SaveGPX1Click(System::TObject* Sender);
 	void __fastcall BtnGeoSearchClick(System::TObject* Sender);
@@ -308,9 +343,18 @@ __published:
 	void __fastcall MnuPrevDiffClick(System::TObject* Sender);
 	void __fastcall FormKeyDown(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
 	void __fastcall CheckandFixcurrentgpx1Click(System::TObject* Sender);
+	void __fastcall BgDeviceItems0Click(System::TObject* Sender);
+	void __fastcall CmbSQliteTabsChange(System::TObject* Sender);
+	void __fastcall CdsDeviceDbAfterOpen(Data::Db::TDataSet* DataSet);
+	void __fastcall CdsDeviceDbAfterScroll(Data::Db::TDataSet* DataSet);
+	void __fastcall DbgDeviceDbColEnter(System::TObject* Sender);
+	void __fastcall DBMemoDblClick(System::TObject* Sender);
+	void __fastcall BitBtnSQLGoClick(System::TObject* Sender);
+	void __fastcall MemoSQLKeyUp(System::TObject* Sender, System::Word &Key, System::Classes::TShiftState Shift);
+	void __fastcall ActInstalledDocExecute(System::TObject* Sender);
+	void __fastcall ActInstalledDocUpdate(System::TObject* Sender);
 	
 private:
-	System::UnicodeString PrefDevice;
 	bool DeviceFile;
 	System::UnicodeString HexEditFile;
 	Unitmtpdevice::TMTP_Device* CurrentDevice;
@@ -322,8 +366,8 @@ private:
 	Bchexeditor::TBCHexEditor* HexEdit;
 	Unittripobjects::TTripList* ATripList;
 	Unitgpi::TPOIList* APOIList;
+	System::Classes::TStringList* AFitInfo;
 	int WarnRecalc;
-	bool WarnModel;
 	int WarnOverWrite;
 	System::Classes::TStringList* ModifiedList;
 	Monitor::TDirectoryMonitor* DirectoryMonitor;
@@ -348,16 +392,27 @@ private:
 	void __fastcall LoadHex(const System::UnicodeString FileName);
 	void __fastcall LoadTripOnMap(Unittripobjects::TTripList* CurrentTrip, System::UnicodeString Id);
 	void __fastcall LoadGpiOnMap(Unitgpi::TPOIList* CurrentGpi, System::UnicodeString Id);
+	void __fastcall LoadFitOnMap(System::UnicodeString FitAsGpxFile, System::UnicodeString Id);
+	void __fastcall AddToMap(System::UnicodeString FileName);
 	void __fastcall MapRequest(const System::UnicodeString Coords, const System::UnicodeString Desc, const System::UnicodeString TimeOut, const System::UnicodeString ZoomLevel = System::UnicodeString());
 	void __fastcall SaveTripGpiFile();
 	void __fastcall LoadTripFile(const System::UnicodeString FileName, const bool FromDevice);
 	void __fastcall LoadGpiFile(const System::UnicodeString FileName, const bool FromDevice);
+	void __fastcall LoadFitFile(const System::UnicodeString FileName, const bool FromDevice);
+	void __fastcall LoadSqlFile(const System::UnicodeString FileName, const bool FromDevice);
 	void __fastcall FreeDeviceData(const void * ACustomData);
 	void __fastcall FreeDevices();
+	bool __fastcall CopyDeviceFile(const System::UnicodeString APath, const System::UnicodeString AFile);
+	Unitgpxdefs::TGarminModel __fastcall ModelFromGarminDevice(const System::UnicodeString ModelDescription);
+	void __fastcall GetBlob(Data::Db::TField* Sender, System::UnicodeString &Text, bool DisplayText);
+	void __fastcall GetGUID(Data::Db::TField* Sender, System::UnicodeString &Text, bool DisplayText);
+	void __fastcall ReadDeviceDB();
+	Unitregistrykeys::TGarminDevice __fastcall ReadGarminDevice(const System::UnicodeString ModelDescription);
 	void __fastcall GuessModel(const System::UnicodeString FriendlyName);
 	int __fastcall DeviceIdInList(const System::UnicodeString DeviceName);
 	void __fastcall SelectDevice(const int Indx)/* overload */;
-	void __fastcall SelectDevice(const System::UnicodeString Device)/* overload */;
+	void __fastcall SelectDeviceByName(const System::UnicodeString Device = System::UnicodeString());
+	void __fastcall SelectDeviceById(const System::UnicodeString Device);
 	TDirType __fastcall GetItemType(Vcl::Comctrls::TListView* const AListview);
 	void __fastcall CloseDevice();
 	bool __fastcall CheckDevice(bool RaiseException = true);
@@ -377,7 +432,6 @@ private:
 	void __fastcall GroupTrips(bool Group);
 	void __fastcall SetRouteParm(TRouteParm ARouteParm, System::Byte Value);
 	void __fastcall CheckTrips();
-	void __fastcall CheckSupportedModel(const Unittripobjects::TZumoModel ZumoModel, const Unitgpxdefs::TGPXFunc *AllFuncs, const System::NativeInt AllFuncs_High);
 	void __fastcall ShowWarnRecalc();
 	void __fastcall ShowWarnOverWrite(const System::UnicodeString AFile);
 	void __fastcall ReadDefaultFolders();
@@ -420,23 +474,26 @@ public:
 //-- var, const, procedure ---------------------------------------------------
 #define SelectMTPDevice L"Select an MTP device"
 #define UpDirString L".."
-#define GpxExtension L"gpx"
+#define GpxExtension L".gpx"
 #define GpxMask L"*.gpx"
-#define TripExtension L"trip"
+#define TripExtension L".trip"
 #define TripMask L"*.trip"
-#define GPIExtension L"gpi"
+#define GPIExtension L".gpi"
 #define GPIMask L"*.gpi"
-#define UnlExtension L"unl"
-#define HtmlExtension L"html"
-#define KmlExtension L"kml"
-#define CurrentTrip L"CurrentTrip"
-#define CurrentGPI L"CurrentGPI"
+#define UnlExtension L".unl"
+#define HtmlExtension L".html"
+#define KmlExtension L".kml"
+#define FitExtension L".fit"
+#define DBExtension L".db"
+#define CurrentMapItem L"CurrentMapItem"
 #define FileSysTrip L"FileSys"
 #define CompareTrip L"Compare"
 static _DELPHI_CONST System::Word WM_DIRCHANGED = System::Word(0x401);
 static _DELPHI_CONST System::Word WM_ADDRLOOKUP = System::Word(0x402);
 static _DELPHI_CONST System::Int8 TripNameCol = System::Int8(0x5);
 static _DELPHI_CONST System::Byte TripNameColWidth = System::Byte(0xfa);
+#define OnlineHelp L"https://frankbijnen.github.io/TripManager/"
+#define LocalHelp L"ChmDocs/TripManager.chm"
 extern DELPHI_PACKAGE TFrmTripManager* FrmTripManager;
 }	/* namespace Ufrmtripmanager */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UFRMTRIPMANAGER)

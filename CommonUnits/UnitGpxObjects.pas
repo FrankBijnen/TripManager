@@ -7,10 +7,10 @@ uses
   System.Classes, System.SysUtils,
   WinApi.Windows, System.Math,
   Xml.XMLIntf, UnitVerySimpleXml,
-  UnitGpxDefs,
-  UnitProcessOptions,
+  Vcl.ComCtrls,
+{$IFDEF KML}
   kml_helper,
-  UfrmSelectGpx,
+{$ENDIF}
 {$IFDEF MAPUTILS}
   UnitMapUtils,
 {$ENDIF}
@@ -20,8 +20,12 @@ uses
 {$IFDEF GEOCODE}
   UnitGeoCode,
 {$ENDIF}
+{$IFDEF GPI}
   UnitGPI, UnitBMP,
-  Vcl.ComCtrls;
+{$ENDIF}
+  UnitGpxDefs,
+  UnitProcessOptions,
+  UfrmSelectGpx;
 
 type
 
@@ -66,11 +70,12 @@ type
     function MapSegFromSubClass(const CalculatedSubclass: string): integer;
 {$ENDIF}
     function WayPointNotProcessed(WayPoint: TXmlVSNode): boolean;
+{$IFDEF GPI}
     function GPXWayPoint(CatId, BmpId: integer; WayPoint: TXmlVSNode): TGPXWayPoint;
     function GetSpeedFromName(WptName: string): integer;
     function GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
     function GPXCategory(Category: string): TGPXCategory;
-
+{$ENDIF}
     procedure FreeGlobals;
     procedure CreateGlobals;
     procedure ClearGlobals;
@@ -79,7 +84,7 @@ type
 
     procedure ComputeDistance(RptNode: TXmlVSNode);
     procedure ClearSubClass(ANode: TXmlVSNode);
-    procedure UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName:TGPXString);
+    procedure UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName: UTF8String);
     procedure EnsureSubNodeAfter(ANode: TXmlVSNode; ChildNode: string; const AfterNodes: array of string);
     procedure RenameSubNode(RtePtNode: TXmlVSNode; const NodeName:string; const NewName: string);
     procedure LookUpAddrRtePt(RtePtNode: TXmlVSNode);
@@ -535,7 +540,7 @@ begin
   end;
 end;
 
-procedure TGPXfile.UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName:TGPXString);
+procedure TGPXfile.UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName: UTF8String);
 var
   RptNode, DebugNode: TXmlVSNode;
   ViaPtCoord, NextCoord: TCoords;
@@ -1055,7 +1060,7 @@ begin
     if (ProcessOptions.ProcessShape) then
     begin
       Symbol := ProcessOptions.DefShapePtSymbol;
-      UnglitchNode(RtePtNode, ExtensionNode, TGPXString(ShapePtName));
+      UnglitchNode(RtePtNode, ExtensionNode, UTF8String(ShapePtName));
 
       RenameNode(RtePtNode, ShapePtName);
 
@@ -1374,6 +1379,7 @@ begin
   result := true;
 end;
 
+{$IFDEF GPI}
 function TGPXfile.GetSpeedFromName(WptName: string): integer;
 var
   SpeedStr: string;
@@ -1443,6 +1449,7 @@ begin
   result := TGPXCategory.Create;
   result.Category := TGPXString(Category);
 end;
+{$ENDIF}
 
 constructor TGPXFile.Create(const GPXFile:string;
                             const OutDir: string;
@@ -1689,6 +1696,7 @@ begin
 end;
 
 procedure TGPXFile.DoCreatePOI;
+{$IFDEF GPI}
 var
   OutFile: string;
   RouteWayPoints, WayPoint: TXmlVSNode;
@@ -1699,7 +1707,9 @@ var
   BmpId: integer;
   IsViaPt: boolean;
   ExtensionsNode: TXmlVSNode;
+{$ENDIF}
 begin
+{$IFDEF GPI}
   OutFile := ChangeFileExt(FOutDir + FBaseFile, '.gpi');
   try
     S := TBufferedFileStream.Create(OutFile, fmCreate);
@@ -1757,9 +1767,11 @@ begin
     on E:Exception do
       MessageDlg(e.Message, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
   end;
+{$ENDIF}
 end;
 
 procedure TGPXFile.DoCreateKML;
+{$IFDEF KML}
 var
   OutFile, Lon, Lat, Ele, DisplayColor: string;
   RouteWayPoint, WayPoint: TXmlVSNode;
@@ -1769,7 +1781,9 @@ var
   TrackPoint: TXmlVSNode;
   TrackPointAttribute: TXmlVSAttribute;
   Helper: TKMLHelper;
+{$ENDIF}
 begin
+{$IFDEF KML}
   OutFile := FOutDir + ChangeFileExt(ExtractFileName(FGPXFile), '.kml');
   Helper := TKMLHelper.Create(OutFile);
   Helper.FormatSettings := GetLocaleSetting;
@@ -1842,6 +1856,7 @@ begin
   finally
     Helper.Free;
   end;
+{$ENDIF}
 end;
 
 procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
