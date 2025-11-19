@@ -77,7 +77,7 @@
         <VerInfo_MinorVer>7</VerInfo_MinorVer>
         <DCC_MapFile>3</DCC_MapFile>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DCC_UnitSearchPath>..\CommonUnits\Vcl.ShellControls;..\CommonUnits\SqliteWrap;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\CommonUnits\Vcl.ShellControls;..\CommonUnits\SqliteWrap;..\CommonUnits\kml;..\CommonUnits\mtp;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Build>346</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -168,12 +168,10 @@
         <DCCReference Include="..\CommonUnits\UnitRegistry.pas"/>
         <DCCReference Include="..\CommonUnits\BCHex\BCHexEditor.pas"/>
         <DCCReference Include="..\CommonUnits\DirMon\Monitor.pas"/>
-        <DCCReference Include="..\CommonUnits\kml\ogckml23.pas"/>
         <DCCReference Include="..\CommonUnits\kml\kml_helper.pas"/>
         <DCCReference Include="..\CommonUnits\UnitListViewSort.pas"/>
         <DCCReference Include="..\CommonUnits\Mtp\mtp_helper.pas"/>
         <DCCReference Include="..\CommonUnits\Mtp\UnitMtpDevice.pas"/>
-        <DCCReference Include="..\CommonUnits\Mtp\PortableDeviceApiLib_TLB.pas"/>
         <DCCReference Include="..\CommonUnits\osm\UnitOSMMap.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas"/>

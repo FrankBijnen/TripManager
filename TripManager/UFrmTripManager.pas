@@ -2999,27 +2999,29 @@ var
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Unknown1),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown1)));
+
     VlTripInfo.Strings.AddPair('Time', Format('%d sec.', [AnUdbDir.UdbDirValue.Time]),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Time),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Time)));
+
     VlTripInfo.Strings.AddPair('Border', Format('%d', [AnUdbDir.UdbDirValue.Border]),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Border),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Border)));
-    VlTripInfo.Strings.AddPair('UdbDir Unknown2', Format('%d bytes', [SizeOf(AnUdbDir.UdbDirValue.Unknown2)]
-                                                        ),
+
+    VlTripInfo.Strings.AddPair('UdbDir Unknown2', Format('%d bytes', [SizeOf(AnUdbDir.UdbDirValue.Unknown2)]),
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Unknown2),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown2)));
 
     VlTripInfo.Strings.AddPair('Address', AnUdbDir.DisplayName,
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.Name),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Name)));
+                                                  AnUdbDir.DisplayLength,
+                                                  SizeOf(AnUdbDir.UdbDirValue)));
 
     VlTripInfo.Strings.AddPair('*** End UdbDir', DupeString('-', DupeCount),
-                              TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) -1));
+                              TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) + AnUdbDir.NameLength -1));
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), RoutePointTimeOut);
@@ -3029,7 +3031,7 @@ var
   procedure AddUdbHandle(AnUdbhandle: TmUdbDataHndl);
   var
     ANitem: TBaseItem;
-    OffSetPref: integer;
+    OffSetPref, LUnknown2: integer;
   begin
     OffSetPref := - SizeOf(AnUdbhandle.PrefValue);
     VlTripInfo.Strings.AddPair('*** UdbPrefix', DupeString('-', DupeCount),
@@ -3080,38 +3082,43 @@ var
                                                    SizeOf(AnUdbhandle.UdbHandleValue.CalcStatus),
                                                    AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.CalcStatus) ));
 
-    VlTripInfo.Strings.AddPair('Unknown2', '150 bytes',
+    LUnknown2 := Length(AnUdbhandle.UdbHandleValue.Unknown2);
+    VlTripInfo.Strings.AddPair('Unknown2', Format('%d bytes', [LUnknown2]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(AnUdbhandle.UdbHandleValue.Unknown2),
+                                                   LUnknown2,
                                                    AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown2) ));
 
+    LUnknown2 := LUnknown2 - SizeOf(AnUdbhandle.UdbHandleValue.Unknown2);
     VlTripInfo.Strings.AddPair('UdbDir count', Format('%d', [AnUdbhandle.UdbHandleValue.UDbDirCount]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(AnUdbhandle.UdbHandleValue.UDbDirCount),
-                                                   AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.UDbDirCount) ));
+                                                   AnUdbhandle.OffsetValue + LUnknown2+ OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.UDbDirCount) ));
 
     VlTripInfo.Strings.AddPair('Unknown3', Format('%d bytes', [Length(AnUdbhandle.UdbHandleValue.Unknown3)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3),
-                                                   AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) ));
-    VlTripInfo.Strings.AddPair('Unknown3 dist', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(Unknown3DistOffset)]),
+                                                   AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) ));
+
+    VlTripInfo.Strings.AddPair('Unknown3 dist', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal),
-                                                   AnUdbhandle.OffsetValue +
+                                                   AnUdbhandle.OffsetValue + LUnknown2 +
                                                      OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     Unknown3DistOffset));
-    VlTripInfo.Strings.AddPair('Unknown3 Time', Format('%d (seconds)', [AnUdbhandle.UdbHandleValue.GetUnknown3(Unknown3TimeOffset)]),
+                                                     AnUdbhandle.DistOffset));
+
+    VlTripInfo.Strings.AddPair('Unknown3 Time', Format('%d (seconds)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal),
-                                                   AnUdbhandle.OffsetValue +
+                                                   AnUdbhandle.OffsetValue + LUnknown2 +
                                                      OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     Unknown3TimeOffset));
+                                                     AnUdbhandle.TimeOffset));
+
     VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Byte),
-                                                   AnUdbhandle.OffsetValue +
+                                                   AnUdbhandle.OffsetValue + LUnknown2 +
                                                      OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     IntPtr(ShapeBitmapOffset[ATripList.TripModel])));
+                                                     IntPtr(AnUdbhandle.ShapeOffset)));
     for ANitem in AnUdbhandle.Items do
     begin
       if (ANitem is TUdbDir) then
@@ -4434,6 +4441,7 @@ end;
 procedure TFrmTripManager.CheckFile(const AListItem: TListItem);
 var TmpTripList: TTripList;
     LocalFile: string;
+    Imported: TBooleanItem;
 begin
   if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
     exit;
@@ -4454,7 +4462,11 @@ begin
        (TObject(AListItem.Data) is TMTP_Data) then
     with TMTP_Data(AListItem.Data) do
     begin
-      IsNotSavedTrip := TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean;
+      Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
+      if (Imported = nil) then
+        IsNotSavedTrip := false
+      else
+        IsNotSavedTrip := Imported.AsBoolean;
       SetCheckMark(AListItem, not IsNotSavedTrip);
       CalculatedModel := Ord(TmpTripList.CalculatedModel);
       if (TmpTripList.CalculatedModel = TTripModel.Unknown) then
@@ -4474,6 +4486,7 @@ var
   TmpTripList: TTripList;
   LocalFile: string;
   NewCheck: boolean;
+  Imported: TBooleanItem;
 begin
   NewCheck := NewValue;
   TmpTripList := TTripList.Create;
@@ -4485,8 +4498,9 @@ begin
 
     // Check mImported by loading tmp file
     TmpTripList.LoadFromFile(LocalFile);
-
-    TBooleanItem(TmpTripList.GetItem('mImported')).AsBoolean := NewValue;
+    Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
+    if (Imported <> nil) then
+      Imported.AsBoolean := NewValue;
     TmpTripList.SaveToFile(LocalFile);
 
     CopyFileFromTmp(LocalFile, AListItem);

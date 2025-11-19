@@ -25,9 +25,16 @@ const
   Tread2_VehicleProfileGuid         = 'c21c922c-553f-4783-85f8-c0a13f52d960';
   Tread2_VehicleProfileHash         = '61578528'; // Not used
   Tread2_TmScPosnSize               = 16;
+
+  Zumo340_TmScPosnSize              = 8;
+  TurnMagic: array[0..3] of byte   = ($47, $4E, $00, $00);
+
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
-  TTripModel        = (XT, XT2, Tread2, Unknown);
+//TODO nuvi2595
+//  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo340, Nuvi2595, Unknown);
+  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo340, Unknown);
+  //Drive 51 = 595
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmDirect           = $04,
@@ -111,7 +118,36 @@ const
                                                         );
   UdbDirTurn  = 'Turn';
 
+// XT, XT2, TREAD 2, 595, 340, UNKNOWN
+// nuvi2595
+
+//const Ucs4Model:          array[TTripModel] of boolean = (true, true, true, false, false, false, true);
+//      UdbDirAddressSize:  array[TTripModel] of integer = (121 * 4, 121 * 4, 121  * 4, 32 * 2, 66 * 2, 21 * 2, 121 * 4);
+//      Unknown2Size:       array[TTripModel] of integer = (150, 150, 150, 76, 72, 72, 150);
+//      Unknown3Size:       array[TTripModel] of integer = (1288, 1448, 1348, 294, 130, 134, 1288);
+//
+//      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $00000000, $00300030, $ffffffff);
+//      Unknown3ShapeBitmapOffset:
+//                          array[TTripModel] of Cardinal = ($90, $c0, $c0, $8e, $66, $8e, $90);
+//      Unknown3DistOffset: array[TTripModel] of integer =  ($14, $14, $14, $12, $12, $12, $14);
+//      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $16, $18);
+//      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $05, $08);
+
+const Ucs4Model:          array[TTripModel] of boolean = (true, true, true, false, false, true);
+      UdbDirAddressSize:  array[TTripModel] of integer = (121 * 4, 121 * 4, 121  * 4, 32 * 2, 66 * 2, 121 * 4);
+      Unknown2Size:       array[TTripModel] of integer = (150, 150, 150, 76, 72, 150);
+      Unknown3Size:       array[TTripModel] of integer = (1288, 1448, 1348, 294, 130, 1288);
+
+      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $00000000, $ffffffff);
+      Unknown3ShapeBitmapOffset:
+                          array[TTripModel] of Cardinal = ($90, $c0, $c0, $8e, $66, $90);
+      Unknown3DistOffset: array[TTripModel] of integer =  ($14, $14, $14, $12, $12, $14);
+      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $18);
+      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $08);
+
+
 type
+  TTripList = class;
 
   TOSMRoutePoint = record
     Name: string;
@@ -124,6 +160,7 @@ type
     FStartPos:         Cardinal;
     FEndPos:           Cardinal;
     FCalculated:       boolean;
+    FTripList:         TTripList;
     procedure Calculate(AStream: TMemoryStream); virtual;
     procedure BeginWrite(AStream: TMemoryStream); virtual;
     procedure WriteValue(AStream: TMemoryStream); virtual; abstract;
@@ -139,6 +176,7 @@ type
     property SelEnd: Cardinal read FEndPos;
     property EditMode: TEditMode read GetEditMode;
     property PickList: string read GetPickList;
+    property TripList: TTripList read FTripList;
   end;
   TItemList = Tlist<TBaseItem>;
 
@@ -237,7 +275,11 @@ type
   // Type 08 (Version)
   TVersionValue = packed record
     Major:            Cardinal;
-    Minor:            Cardinal;
+    case boolean of
+    false:
+      (MinorB:        byte);
+    true:
+      (MinorC:        Cardinal);
   end;
   TmVersionNumber = class(TBaseDataItem)
   private
@@ -255,6 +297,11 @@ type
   TPosnValue = packed record
     procedure SwapCardinals;
     case ScnSize: Cardinal of
+    Zumo340_TmScPosnSize:         // Zum340, Nuvi 2595
+      (
+        Lat_8:                    integer;
+        Lon_8:                    integer;
+      );
     TmScPosnSize:         // XT, XT2
       (
         Unknown1:                Cardinal;
@@ -264,8 +311,8 @@ type
     Tread2_TmScPosnSize:  // Tread 2
       (
         Unknown1_16: array[0..1] of Cardinal;
-        Lat_16:                     integer;
-        Lon_16:                     integer;
+        Lat_16:                   integer;
+        Lon_16:                   integer;
       );
   end;
   TmScPosn = class(TBaseDataItem)
@@ -291,18 +338,20 @@ type
   TStringItem = class(TBaseDataItem)
   private
     FByteSize:         Word;
-    FValue:            UCS4String;
+    FRawBytes:         TBytes;
+    FValue:            string;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     function GetEditMode: TEditMode; override;
     procedure SetValue(NewValue: string); override;
     // Only allocates space
     constructor Create(AName: ShortString; Chars: Word); reintroduce; overload;
+    function AsUCS4: UCS4String;
+    procedure ToUCS4(AString: string);
+    procedure ToWide(AString: string);
   public
-    // Create from WideString
-    constructor Create(AName: ShortString; AValue: WideString); reintroduce; overload;
-    // Create from UCS4String
-    constructor Create(AName: ShortString; AValue: UCS4String); reintroduce; overload;
+    // Create from String
+    constructor Create(AName: ShortString; AValue: string); reintroduce; overload;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
   end;
@@ -404,12 +453,15 @@ type
 
   TmRoutePreference = class(TByteItem)
   private
+    FBytes:            TBytes;
+    procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     procedure SetValue(AValue: string); override;
     function GetEditMode: TEditMode; override;
     function GetPickList: string; override;
   public
     constructor Create(AValue: TRoutePreference = rmFasterTime);
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     class function RoutePreference(AValue: string): TRoutePreference;
     class function AdvLevel(AValue: string): TAdvlevel;
   end;
@@ -662,10 +714,7 @@ type
   end;
 
 {*** All routes ***}
-const
-  TurnMagic: array[0..3] of byte   = ($47, $4E, $00, $00);
 
-type
   TSubClass = packed record
     MapSegment:       Cardinal;
     RoadId:           Cardinal;
@@ -684,7 +733,7 @@ type
         Time:             word;
         Unknown2:         array[0..1] of word);
   end;
-  TUdbDirValue = packed record
+  TUdbDirFixedValue = packed record
     SubClass:         TSubClass;
     Lat:              integer;
     Lon:              integer;
@@ -692,22 +741,25 @@ type
     Time:             byte;
     Border:           byte;
     Unknown2:         array[0..8] of word;
-    Name:             array[0..120] of UCS4Char;
     procedure SwapCardinals;
   end;
   TUdbDir = class(TBaseItem)
   private
-    FValue:            TUdbDirValue;
+    FValue:            TUdbDirFixedValue;
+    FName:             TBytes;
     FUdbDirStatus:     TUdbDirStatus;
-    constructor Create(AName: WideString;
+    constructor Create(AModel: TTripModel;
+                       AName: WideString;
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(ALocation: TLocation; RouteCnt: Cardinal); reintroduce; overload;
-    constructor Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
+    constructor Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: Cardinal); reintroduce; overload;
+    constructor Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
     procedure WriteValue(AStream: TMemoryStream); override;
     function SubLength: Cardinal; override;
     function GetName: string;
+    function GetDisplayLength: integer;
+    function GetNameLength: integer;
     function GetMapCoords: string;
     function GetMapSegRoad: string;
     function GetMapSegRoadExclBit: string;
@@ -720,7 +772,9 @@ type
     function Lon: Double;
     function IsTurn: boolean;
     property DisplayName: string read GetName;
-    property UdbDirValue: TUdbDirValue read FValue;
+    property DisplayLength: integer read GetDisplayLength;
+    property NameLength: integer read GetNameLength;
+    property UdbDirValue: TUdbDirFixedValue read FValue;
     property MapCoords: string read GetMapCoords;
     property MapSegRoad: string read GetMapSegRoad;
     property MapSegRoadExclBit: string read GetMapSegRoadExclBit;
@@ -739,24 +793,18 @@ type
     procedure SwapCardinals;
   end;
 
-const Unknown3Size:       array[TTripModel] of integer = (1288, 1448, 1348, 1288);      // Default unknown to XT size
-      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $00000000);
-      ShapeBitmapOffset:  array[TTripModel] of Cardinal = ($90, $c0, $c0, $90);
-      Unknown3DistOffset  = $14;
-      Unknown3TimeOffset  = $18;
-
-type
   TUdbHandleValue = packed record
     UdbHandleSize:    Cardinal;
-    CalcStatus:       Cardinal; // Only value seen for XT: 0538feff, for XT2 05d8feff. Set it to Zeroes, to force recalculation
-    Unknown2:         array[0..149] of byte;
+    CalcStatus:       Cardinal; // See CalculationMagic. Set it to Zeroes, to force recalculation
+    Unknown2:         TBytes;
     UDbDirCount:      WORD;
-    Unknown3:         array of byte;
+    Unknown3:         TBytes;
     procedure SwapCardinals;
-    procedure AllocUnknown3(AModel: TTripModel = TTripModel.XT); overload;
-    procedure AllocUnknown3(ASize: cardinal); overload;
-    procedure UpdateUnknown3(const Offset: integer; const Value: cardinal);
-    function GetUnknown3(const Offset: integer): cardinal;
+    procedure AllocUnknown(AModel: TTripModel = TTripModel.XT);
+    procedure AllocUnknown2(ASize: Cardinal);
+    procedure AllocUnknown3(ASize: Cardinal);
+    procedure UpdateUnknown3(const Offset: integer; const Value: Cardinal);
+    function GetUnknown3(const Offset: integer): Cardinal;
   end;
   TmUdbDataHndl = class(TBaseDataItem)
   private
@@ -764,10 +812,14 @@ type
     FUdbPrefValue:     TUdbPrefValue;
     FValue:            TUdbHandleValue;
     FUdbDirList:       TUdbDirList;
-    function ComputeUnknown3Size: Cardinal;
     procedure BeginWrite(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure EndWrite(AStream: TMemoryStream); override;
+    function ComputeUnknown3Size(AModel: TTripModel): integer;
+    function GetModel: TTripModel;
+    function GetDistOffset: integer;
+    function GetTimeOffset: integer;
+    function GetShapeOffset: integer;
   public
     constructor Create(AHandleId: Cardinal; AModel: TTripModel = TTripModel.XT; ForceRecalc: boolean = true); reintroduce;
     destructor Destroy; override;
@@ -776,6 +828,9 @@ type
     property PrefValue: TUdbPrefValue read FUdbPrefValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
     property Items: TUdbDirList read FUdbDirList;
+    property DistOffset: integer read GetDistOffset;
+    property TimeOffset: integer read GetTimeOffset;
+    property ShapeOffset: integer read GetShapeOffset;
   end;
   TUdbHandleList = Tlist<TmUdbDataHndl>;
 
@@ -803,13 +858,16 @@ type
   private
     FHeader: THeader;
     FItemList: TItemList;
-    FRouteCnt: cardinal;
+    FRouteCnt: Cardinal;
+    FTripModel: TTripModel;
+    FCalculatedModel: TTripModel;
+    FIsUcs4: boolean;
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
     function GetTripModel: TTripModel;
-    function GetCalcModel(AModel: TTripModel): TTripModel;
-    function GetIsCalculatedModel: TTripModel;
+    function GetCalculatedModel: TTripModel; overload;
+    function GetCalculatedModel(AModel: TTripModel): TTripModel;  overload;
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure AddLocation_XT(Locations: TmLocations;
@@ -882,9 +940,10 @@ type
     procedure SaveAsGPX(const GPXFile: string);
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
-    property TripModel: TTripModel read GetTripModel;
-    property CalculatedModel: TTripModel read GetIsCalculatedModel;
-    property RouteCnt: cardinal read FRouteCnt write FRouteCnt;
+    property TripModel: TTripModel read FTripModel;
+    property CalculatedModel: TTripModel read FCalculatedModel;
+    property IsUcs4: boolean read FIsUcs4;
+    property RouteCnt: Cardinal read FRouteCnt write FRouteCnt;
   end;
 
 implementation
@@ -903,7 +962,7 @@ var
 procedure BreakPoint;
 {$IFDEF DEBUG}
 asm int 3
-  {$ELSE}
+{$ELSE}
 begin
 {$ENDIF}
 end;
@@ -985,12 +1044,14 @@ begin
   Move(AUCS4String[0], AnUCS4Array[0], MaxLen * SizeOf(UCS4Char));
 end;
 
-function UCS4ArrayToString(AnUCS4Array: array of UCS4Char; Length: integer): string;
+function UCS4ByteArrayToString(AnUCS4ByteArray: TBytes): string;
 var
+  Len: integer;
   AUCS4String: UCS4String;
 begin
-  SetLength(AUCS4String, Length);
-  Move(AnUCS4Array[0], AUCS4String[0], Length * SizeOf(UCS4Char));
+  Len := Length(AnUCS4ByteArray);
+  SetLength(AUCS4String, (Len div SizeOf(UCS4Char)) +1);
+  Move(AnUCS4ByteArray[0], AUCS4String[0], Len);
   result := UCS4StringToUnicodeString(AUCS4String);
   SetLength(result, StrLen(PChar(result)));  // Drop trailing zeroes
 end;
@@ -1047,7 +1108,8 @@ begin
 end;
 
 // Create, and Initialize from stream, class by name
-function CreateBaseItemByName(AKeyName: ShortString;
+function CreateBaseItemByName(ATripList: TTripList;
+                              AKeyName: ShortString;
                               AValueLen: Cardinal;
                               ADataType: byte;
                               AStream: TStream): TBaseItem;
@@ -1064,6 +1126,7 @@ begin
   if (Assigned(APersistentClass)) then
   begin
     result := TBaseItem(APersistentClass.Create);
+    result.FTripList := ATripList;
     result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
   end
   else
@@ -1074,31 +1137,37 @@ begin
         begin
           AStream.Read(AByte, SizeOf(AByte));
           result := TByteItem.Create(AKeyName, AByte);
+          result.FTripList := ATripList;
         end;
       dtCardinal:
         begin;
           AStream.Read(ACardinal, SizeOf(ACardinal));
           result := TCardinalItem.Create(AKeyName, Swap32(ACardinal));
+          result.FTripList := ATripList;
         end;
       dtSingle:
         begin;
           AStream.Read(ASingle, SizeOf(ASingle));
           result := TSingleItem.Create(AKeyName, Swap32(ASingle));
+          result.FTripList := ATripList;
         end;
       dtBoolean:
         begin;
           AStream.Read(ABoolean, SizeOf(ABoolean));
           result := TBooleanItem.Create(AKeyName, ABoolean);
+          result.FTripList := ATripList;
         end;
       dtString:
         begin;
           result := TStringItem.Create(AKeyName);
+          result.FTripList := ATripList;
           TStringItem(result).InitFromStream(AKeyName, AValueLen, dtString, AStream);
         end;
       else
       begin
         // Create a Raw data item. Only holds bytes
         result := TRawDataItem.Create;
+        result.FTripList := ATripList;
         result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
       end;
     end;
@@ -1138,7 +1207,7 @@ begin
   if (self is TBaseDataItem) then
   begin
     AllocConsole;
-    Writeln(TBaseDataItem(self).Name, ' ', self.StartPos, '=', self.SubLength);
+    Writeln(TBaseDataItem(self).Name, ' ', FStartPos, '=', SubLength);
   end;
 {$ENDIF}
 end;
@@ -1430,16 +1499,30 @@ constructor TmVersionNumber.Create(AMajor: Cardinal = 4;
                                    AMinor: Cardinal = 7);
 
 begin
-  inherited Create('mVersionNumber', SizeOf(FValue), dtVersion);
-  FValue.Major := Swap32(AMajor);
-  FValue.Minor := AMinor;
+  case AMajor of
+    1:
+      begin
+        inherited Create('mVersionNumber', SizeOf(FValue.Major) + SizeOf(FValue.MinorB), dtVersion);
+        FValue.Major := Swap32(AMajor);
+        FValue.MinorB := AMinor;
+      end
+    else
+    begin
+      inherited Create('mVersionNumber', SizeOf(FValue), dtVersion);
+      FValue.Major := Swap32(AMajor);
+      FValue.MinorC := AMinor;
+    end;
+  end;
 end;
 
 procedure TmVersionNumber.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
   AStream.Read(FValue.Major, SizeOf(FValue.Major));
-  AStream.Read(FValue.Minor, SizeOf(FValue.Minor));
+  if (ALenValue = SizeOf(FValue.Major) + SizeOf(FValue.MinorB)) then
+    AStream.Read(FValue.MinorB, SizeOf(FValue.MinorB))
+  else
+    AStream.Read(FValue.MinorC, SizeOf(FValue.MinorC));
 end;
 
 destructor TmVersionNumber.Destroy;
@@ -1449,12 +1532,19 @@ end;
 
 procedure TmVersionNumber.WriteValue(AStream: TMemoryStream);
 begin
-  AStream.Write(FValue, SizeOf(FValue));
+  AStream.Write(FValue.Major, SizeOf(FValue.Major));
+  if (FLenValue = SizeOf(FValue.Major) + SizeOf(FValue.MinorB)) then
+    AStream.Write(FValue.MinorB, SizeOf(FValue.MinorB))
+  else
+    AStream.Write(FValue.MinorC, SizeOf(FValue.MinorC));
 end;
 
 function TmVersionNumber.GetValue: string;
 begin
-  result := Format('0x%s / 0x%s', [IntToHex(FValue.Major, 8), IntToHex(FValue.Minor, 8)]);
+  if (FLenValue = SizeOf(FValue.Major) + SizeOf(FValue.MinorB)) then
+    result := Format('0x%s / 0x%s', [IntToHex(FValue.Major, 8), IntToHex(FValue.MinorB, 2)])
+  else
+    result := Format('0x%s / 0x%s', [IntToHex(FValue.Major, 8), IntToHex(FValue.MinorC, 8)]);
 end;
 
 {*** ScPosn ***}
@@ -1466,6 +1556,13 @@ end;
 constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal = TmScPosnSize);
 begin
   case ASize of
+    Zumo340_TmScPosnSize:
+      begin
+        inherited Create('mScPosn', SizeOf(FValue), dtPosn);
+        FValue.ScnSize := + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
+        FValue.Lat_8 := (CoordAsInt(ALat));
+        FValue.Lon_8 := (CoordAsInt(ALon));
+      end;
     Tread2_TmScPosnSize:
       begin
         inherited Create('mScPosn', SizeOf(FValue), dtPosn);
@@ -1497,6 +1594,11 @@ begin
   FValue.SwapCardinals; // Unknown1, Lat and Lon are not swapped
 
   case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      begin
+        AStream.Read(FValue.Lat_8, SizeOf(FValue.Lat_8));
+        AStream.Read(FValue.Lon_8, SizeOf(FValue.Lon_8));
+      end;
     Tread2_TmScPosnSize:
       begin
         AStream.Read(FValue.Unknown1_16, SizeOf(FValue.Unknown1_16));
@@ -1520,6 +1622,13 @@ end;
 procedure TmScPosn.WriteValue(AStream: TMemoryStream);
 begin
   case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      begin
+        FValue.SwapCardinals;
+        AStream.Write(FValue.ScnSize, SizeOf(FValue.ScnSize));
+        AStream.Write(FValue.Lat_8, SizeOf(FValue.Lat_8));
+        AStream.Write(FValue.Lon_8, SizeOf(FValue.Lon_8));
+      end;
     Tread2_TmScPosnSize:
       begin
         FValue.SwapCardinals;
@@ -1545,6 +1654,11 @@ end;
 function TmScPosn.GetValue: string;
 begin
   case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      begin
+        result := Format('Lat, Lon: %s',
+                        [MapCoords]);
+      end;
     Tread2_TmScPosnSize:
       begin
         result := Format('Unknown1: 0x%s, Unknown2: 0x%s, Lat, Lon: %s',
@@ -1566,6 +1680,8 @@ begin
   result := inherited GetOffSetValue + SizeOf(FValue.ScnSize);
 
   case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      ; // Do nothing
     Tread2_TmScPosnSize:
       result := result + SizeOf(FValue.Unknown1_16);
     else
@@ -1576,6 +1692,8 @@ end;
 function TmScPosn.GetLenValue: Cardinal;
 begin
   case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      result := SizeOf(FValue.Lat_8) + SizeOf(FValue.Lon_8);
     Tread2_TmScPosnSize:
       result := SizeOf(FValue.Lat_16) + SizeOf(FValue.Lon_16);
     else
@@ -1586,6 +1704,8 @@ end;
 function TmScPosn.GetMapCoords: string;
 begin
   case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      result := FormatMapCoords(CoordAsDec(FValue.Lat_8), CoordAsDec(FValue.Lon_8));
     Tread2_TmScPosnSize:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_16), CoordAsDec(FValue.Lon_16));
     else
@@ -1602,6 +1722,11 @@ begin
 
   ParseLatLon(LatLon, Lat, Lon);
   case result.ScnSize of
+    Zumo340_TmScPosnSize:
+      begin
+        result.Lat_8 := CoordAsInt(CoordAsDec(Lat));
+        result.Lon_8 := CoordAsInt(CoordAsDec(Lon));
+      end;
     Tread2_TmScPosnSize:
       begin
         result.Lat_16 := CoordAsInt(CoordAsDec(Lat));
@@ -1621,6 +1746,39 @@ begin
 end;
 
 {*** String ***}
+function TStringItem.AsUCS4: UCS4String;
+var
+  Chars: integer;
+  ByteLength: word;
+begin
+  ByteLength := Swap(FByteSize);
+  Chars := (ByteLength div SizeOf(UCS4Char)) +1; // Null terminator
+  SetLength(result, Chars);
+  Move(FRawBytes[0], result[0], ByteLength);
+end;
+
+procedure TStringItem.ToUCS4(AString: string);
+var
+  Temp: UCS4String;
+  ByteLength: word;
+begin
+  Temp := UnicodeStringToUCS4String(AString);
+  ByteLength := High(Temp) * SizeOf(UCS4Char);
+  FByteSize := Swap(ByteLength);
+  SetLength(FRawBytes, ByteLength);
+  Move(Temp[0], FRawBytes[0], ByteLength);
+  FLenValue := SizeOf(FByteSize) + (Length(AString) * SizeOf(UCS4Char));
+end;
+
+procedure TStringItem.ToWide(AString: string);
+begin
+  FByteSize := ByteLength(AString);
+  SetLength(FRawBytes, FByteSize);
+  Move(AString[1], FRawBytes[0], FByteSize);
+  FLenValue := SizeOf(FByteSize) + FByteSize;
+  FByteSize := Swap(FByteSize);
+end;
+
 constructor TStringItem.Create(AName: ShortString; Chars: Word);
 begin
   inherited Create(AName,
@@ -1628,27 +1786,19 @@ begin
                    dtString);
 
   FByteSize := Swap(Chars * SizeOf(UCS4Char));
+  SetLength(FRawBytes, FByteSize);
+  SetLength(FValue, 0);
 end;
 
-constructor TStringItem.Create(AName: ShortString; AValue: WideString);
+constructor TStringItem.Create(AName: ShortString; AValue: string);
 begin
   Create(AName, Length(AValue));
-
-  FValue := WideStringToUCS4String(AValue);
-  ToPrivate(FValue);
-end;
-
-constructor TStringItem.Create(AName: ShortString; AValue: UCS4String);
-begin
-  //Note AValue has a null terminator. Doesn't count
-  Create(AName, High(AValue));
-
-  FValue := Copy(AValue, 0, Length(AValue));
+  FValue := AValue;
+  SetLength(FRawBytes, 0);
 end;
 
 procedure TStringItem.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 var
-  Chars: integer;
   ByteLength: word;
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
@@ -1656,10 +1806,10 @@ begin
   AStream.Read(FByteSize, SizeOf(FByteSize));
   // Compute Sizes
   ByteLength := Swap(FByteSize);
-  Chars := (ByteLength div SizeOf(UCS4Char)) +1; // Null terminator
   // Read from stream
-  SetLength(FValue, Chars);
-  AStream.Read(FValue[0], ByteLength);
+  SetLength(FRawBytes, ByteLength + SizeOf(UCS4Char));
+  AStream.Read(FRawBytes[0], ByteLength);
+  SetLength(FValue, 0);
 end;
 
 destructor TStringItem.Destroy;
@@ -1669,13 +1819,32 @@ end;
 
 procedure TStringItem.WriteValue(AStream: TMemoryStream);
 begin
+  if not FCalculated and
+     (Length(FValue) <> 0) and
+     (Length(FRawBytes) = 0) then
+  begin
+    if (TripList.IsUcs4) then
+      ToUCS4(FValue)
+    else
+      ToWide(FValue);
+    SetLength(FValue, 0);
+  end;
+
   AStream.Write(FByteSize, SizeOf(FByteSize));
-  AStream.Write(FValue[0], High(FValue) * SizeOf(UCS4Char));  // Dont write last
+  AStream.Write(FRawBytes[0], Swap(FByteSize));  // Write exactly bytesize.
 end;
 
 function TStringItem.GetValue: string;
 begin
-  result := UCS4StringToUnicodeString(FromPrivate(FValue));
+  if not FCalculated and
+     (Length(FValue) <> 0) and
+     (Length(FRawBytes) = 0) then
+    exit(FValue);
+
+  if (TripList.IsUcs4) then
+    result := UCS4StringToUnicodeString(FromPrivate(AsUCS4))
+  else
+    result := PWideChar(@FRawBytes[0]);
 end;
 
 function TStringItem.GetEditMode: TEditMode;
@@ -1685,10 +1854,8 @@ end;
 
 procedure TStringItem.SetValue(NewValue: string);
 begin
-  FValue := UnicodeStringToUCS4String(NewValue);
-  ToPrivate(FValue);
-  FByteSize := Swap(Length(NewValue) * SizeOf(UCS4Char));
-  FLenValue := SizeOf(FByteSize) + (Length(NewValue) * SizeOf(UCS4Char));
+  FValue := NewValue;
+  SetLength(FRawBytes, 0);
 end;
 
 {*** Specialized classes ***}
@@ -1853,6 +2020,22 @@ begin
   inherited Create('mRoutePreference', Ord(AValue));
 end;
 
+procedure TmRoutePreference.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
+var
+  SavePos: Cardinal;
+begin
+  SavePos := AStream.Position;
+  inherited InitFromStream(AName, ALenValue, ADataType, AStream);
+
+  // Zumo 340?
+  if (ADataType <> dtByte) then
+  begin
+    SetLength(FBytes, FLenValue);
+    AStream.Seek(SavePos, TSeekOrigin.soBeginning);
+    AStream.Read(Fbytes, FLenValue);
+  end;
+end;
+
 class function TmRoutePreference.RoutePreference(AValue: string): TRoutePreference;
 var
   RoutePreference: integer;
@@ -1871,6 +2054,18 @@ begin
     result := TAdvlevel.advNA
   else
     result := TAdvlevel(AdvLevel);
+end;
+
+procedure TmRoutePreference.WriteValue(AStream: TMemoryStream);
+begin
+  // Zumo 340?
+  if (FDataType <> dtByte) then
+  begin
+    AStream.Write(FBytes, FLenValue);
+    exit;
+  end;
+
+  inherited WriteValue(AStream);
 end;
 
 function TmRoutePreference.GetValue: string;
@@ -2432,6 +2627,7 @@ procedure TLocation.Add(ANitem: TBaseItem);
 begin
   Inc(FValue.Count);
   FValue.Size := FValue.Size + ANitem.SubLength;
+  ANitem.FTripList := TripList;
   FItems.Add(ANitem);
 end;
 
@@ -2505,14 +2701,13 @@ var
   TmpItemCount: integer;
   ALocationValue: TLocationValue;
   ABaseItem: TBaseItem;
-
   BytesRead: integer;
   KeyLen: Cardinal;
   KeyName: ShortString;
+  SavePos: Cardinal;
   ValueLen: Cardinal;
   DataType: Byte;
   Initiator: AnsiChar;
-
 begin
   inherited InitFromStream(AName, SizeOf(FItemCount), ADataType, AStream);
   FItemList := TItemList.Create;
@@ -2539,8 +2734,15 @@ begin
                                  DataType);
       if (BytesRead = 0) then
         break;
-      ABaseItem := CreateBaseItemByName(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
-      Add(ABaseItem)
+      SavePos := AStream.Position;
+      ABaseItem := CreateBaseItemByName(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      Add(ABaseItem);
+      ABaseItem.FTripList := TripList;
+      if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
+      begin
+        BreakPoint;
+        AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
+      end;
     end;
   end;
 end;
@@ -2568,6 +2770,7 @@ end;
 
 procedure TmLocations.AddLocation(ALocation: TLocation);
 begin
+  ALocation.FTripList := TripList;
   FLocation := ALocation;
   FItemList.Add(ALocation);
   FItemCount := FItemCount +1;
@@ -2575,11 +2778,11 @@ end;
 
 function TmLocations.Add(ANItem: TBaseItem): TBaseItem;
 begin
+  ANItem.FTripList := TripList;
   FItemList.Add(ANItem);
   FLocation.Add(ANItem);
   result := ANItem;
 end;
-
 
 function TmLocations.GetViaPointCount: Integer;
 var
@@ -2663,20 +2866,29 @@ begin
     ComprLatLon[Indx] := StrToUInt('$' + Copy(GPXSubClass, 19 + (Indx * 2), 2));
 end;
 
-procedure TUdbDirValue.SwapCardinals;
+procedure TUdbDirFixedValue.SwapCardinals;
 begin
   Lat := Swap32(Lat);
   Lon := Swap32(Lon);
 end;
 
-constructor TUdbDir.Create(AName: WideString;
+constructor TUdbDir.Create(AModel: TTripModel;
+                           AName: WideString;
                            ALat: double = 0;
                            ALon: double = 0;
                            APointType: byte = $03);
 begin
   inherited Create;
   FillChar(FValue, SizeOf(FValue), 0);
-  WideStringToUCS4Array(AName, FValue.Name); // Copy Name
+// TODO check length
+  SetLength(FName, UdbDirAddressSize[AModel]);
+
+  case Ucs4Model[AModel] of
+    true:
+      WideStringToUCS4Array(AName, UCS4String(FName)); // Copy Name
+    false:
+      StrPCopy(PWideChar(FName), AName);
+  end;
   FValue.Lat := Swap32(CoordAsInt(ALat));
   FValue.Lon := Swap32(CoordAsInt(ALon));
   FValue.SubClass.PointType := APointType;
@@ -2684,20 +2896,25 @@ begin
 end;
 
 // UdbDir Create for <rtept>
-constructor TUdbDir.Create(ALocation: TLocation; RouteCnt: Cardinal);
+constructor TUdbDir.Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: Cardinal);
 var
   AmScPosn: TmScPosn;
 begin
   if not Assigned(ALocation) then
   begin
-    Create('');
+    Create(AModel, '');
     exit;
   end;
 
-  Create(ALocation.LocationTmName.AsString);
+  Create(AModel, ALocation.LocationTmName.AsString);
 
   AmScPosn := ALocation.LocationTmScPosn;
   case AmScPosn.FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      begin
+        FValue.Lat := Swap32(AmScPosn.FValue.Lat_8);
+        FValue.Lon := Swap32(AmScPosn.FValue.Lon_8);
+      end;
     Tread2_TmScPosnSize:
       begin
         FValue.Lat := Swap32(AmScPosn.FValue.Lat_16);
@@ -2724,9 +2941,9 @@ begin
 end;
 
 // UdbDir Create for <gpxx:rpt>
-constructor TUdbDir.Create(GPXSubClass, RoadClass: string; Lat, Lon, Dist: Double);
+constructor TUdbDir.Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon, Dist: Double);
 begin
-  Create(Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass,9,8)]));
+  Create(AModel, Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass,9,8)]));
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
@@ -2754,6 +2971,7 @@ procedure TUdbDir.WriteValue(AStream: TMemoryStream);
 begin
   FValue.SwapCardinals;
   AStream.Write(FValue, SizeOf(FValue));
+  AStream.Write(FName, Length(FName));
   FValue.SwapCardinals;
 end;
 
@@ -2777,7 +2995,26 @@ begin
   if (IsTurn) then
     result := UdbDirTurn
   else
-    result := UCS4ArrayToString(FValue.Name, Length(FValue.Name));
+  begin
+    case TripList.IsUcs4 of
+      true:
+        result := UCS4ByteArrayToString(FName);
+      false:
+        result := PWideChar(FName);
+    end;
+  end;
+end;
+
+function TUdbDir.GetDisplayLength: integer;
+begin
+  result := ByteLength(GetName);
+  if (TripList.IsUcs4) then
+    result := result * 2;
+end;
+
+function TUdbDir.GetNameLength: integer;
+begin
+  result := Length(FName);
 end;
 
 function TUdbDir.GetMapCoords: string;
@@ -2880,7 +3117,7 @@ end;
 
 function TUdbDir.IsTurn: boolean;
 begin
-  result := CompareMem(@TurnMagic[0], @FValue.Name[1], SizeOf(TurnMagic));
+  result := CompareMem(@TurnMagic[0], @FName[4], SizeOf(TurnMagic));
 end;
 
 {*** UdbPref *** }
@@ -2891,22 +3128,28 @@ begin
 end;
 
 {*** UdbHandle ***}
-procedure TudbHandleValue.SwapCardinals;
+procedure TUdbHandleValue.SwapCardinals;
 begin
   UdbHandleSize := Swap32(UdbHandleSize);
 end;
 
-procedure TudbHandleValue.AllocUnknown3(AModel: TTripModel = TTripModel.XT);
+procedure TUdbHandleValue.AllocUnknown(AModel: TTripModel = TTripModel.XT);
 begin
+  SetLength(Self.Unknown2, Unknown2Size[AModel]);
   SetLength(Self.Unknown3, Unknown3Size[AModel]);
 end;
 
-procedure TudbHandleValue.AllocUnknown3(ASize: cardinal);
+procedure TUdbHandleValue.AllocUnknown2(ASize: cardinal);
+begin
+  SetLength(Self.Unknown2, ASize);
+end;
+
+procedure TUdbHandleValue.AllocUnknown3(ASize: cardinal);
 begin
   SetLength(Self.Unknown3, ASize);
 end;
 
-procedure TudbHandleValue.UpdateUnknown3(const Offset: integer; const Value: cardinal);
+procedure TUdbHandleValue.UpdateUnknown3(const Offset: integer; const Value: cardinal);
 var
   PUpdVal: ^cardinal;
 begin
@@ -2917,7 +3160,7 @@ begin
   PUpdVal^ := Value;
 end;
 
-function TudbHandleValue.GetUnknown3(const Offset: integer): cardinal;
+function TUdbHandleValue.GetUnknown3(const Offset: integer): cardinal;
 var
   PUpdVal: ^cardinal;
 begin
@@ -2941,8 +3184,7 @@ begin
 // Leaving it to Zeroes, to force recalculation
   if not (ForceRecalc) then
     FValue.CalcStatus := CalculationMagic[AModel];
-
-  FValue.AllocUnknown3(AModel);
+  FValue.AllocUnknown(AModel);
   FUdbDirList := TUdbDirList.Create;
 end;
 
@@ -2962,17 +3204,23 @@ end;
 
 procedure TmUdbDataHndl.Add(AnUdbDir: TUdbDir);
 begin
+  AnUdbDir.FTripList := TripList;
   FUdbDirList.Add(AnUdbDir);
 end;
 
-function TmUdbDataHndl.ComputeUnknown3Size: Cardinal;
+function TmUdbDataHndl.ComputeUnknown3Size(AModel: TTripModel): integer;
+var
+  TotalHandleSize: integer;
+  UdbDirSize: integer;
 begin
-  result := // SizeOf UDbHandle
-            Swap32(FValue.UdbHandleSize) -
-            // SizeOf fixed part (excluding Unknown3)
-            (SizeOf(FValue) - SizeOf(FValue.Unknown3) - SizeOf(FValue.CalcStatus)) -
-            // SizeOf UdbDir's
-            (FValue.UDbDirCount * SizeOf(TUdbDirValue));
+  TotalHandleSize := Swap32(integer(FValue.UdbHandleSize)) -
+                     // SizeOf fixed part (excluding Unknown3)
+                     (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount));
+  UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + UdbDirAddressSize[AModel]));
+  result := TotalHandleSize - UdbDirSize;
+//TODO nuvi2595
+//if (AModel = TTripModel.Nuvi2595) then
+//  dec(result, 4);
 end;
 
 procedure TmUdbDataHndl.BeginWrite(AStream: TMemoryStream);
@@ -2993,7 +3241,7 @@ begin
   FValue.SwapCardinals;
   AStream.Write(FValue.UdbHandleSize, SizeOf(FValue.UdbHandleSize));
   AStream.Write(FValue.CalcStatus, SizeOf(FValue.CalcStatus));
-  AStream.Write(FValue.Unknown2[0], SizeOf(FValue.Unknown2));
+  AStream.Write(FValue.Unknown2[0], Length(FValue.Unknown2));
   AStream.Write(FValue.UDbDirCount, SizeOf(FValue.UDbDirCount));
   AStream.Write(FValue.Unknown3[0], Length(FValue.Unknown3));
   FValue.SwapCardinals;
@@ -3004,6 +3252,7 @@ end;
 
 procedure TmUdbDataHndl.EndWrite(AStream: TMemoryStream);
 begin
+
   inherited EndWrite(AStream);
 
   if not FCalculated then
@@ -3013,6 +3262,34 @@ begin
     FValue.UdbHandleSize := FLenValue -4;
     FUdbPrefValue.PrefixSize  := SubLength + SizeOf(FUdbPrefValue.DataType) + SizeOf(FUdbPrefValue.PrefId);
   end;
+end;
+
+function TmUdbDataHndl.GetModel: TTripModel;
+var
+  AModel: TTripModel;
+begin
+  result := TTripModel.Unknown;
+  // Is the size of the first Unknown3 known to be from an XT or XT2?
+  for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
+  begin
+    if (Length(FValue.Unknown3) = Unknown3Size[AModel]) then
+      exit(AModel);
+  end;
+end;
+
+function TmUdbDataHndl.GetDistOffset: integer;
+begin
+  result := Unknown3DistOffset[FTripList.FTripModel];
+end;
+
+function TmUdbDataHndl.GetTimeOffset: integer;
+begin
+  result := Unknown3TimeOffset[FTripList.FTripModel];
+end;
+
+function TmUdbDataHndl.GetShapeOffset: integer;
+begin
+  result := Unknown3ShapeBitmapOffset[FTripList.FTripModel];
 end;
 
 {*** AllRoutesList ***}
@@ -3036,13 +3313,14 @@ var
   BytesRead: integer;
   KeyLen: Cardinal;
   KeyName: ShortString;
+  SavePosUdb, SavePos: Cardinal;
   ValueLen: Cardinal;
   DataType: Byte;
   Initiator: AnsiChar;
 
   UdbDirCnt: integer;
   AnUdbDir: TUdbDir;
-  AModel: TTripModel;
+  SelModel, AModel: TTripModel;
 
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
@@ -3058,7 +3336,6 @@ begin
 
     AStream.Read(AnUdbHandle.FUdbPrefValue, SizeOf(AnUdbHandle.FUdbPrefValue));
     AnUdbHandle.FUdbPrefValue.SwapCardinals;
-
     AnUdbHandle.FUdbHandleId := Swap32(AnUdbHandle.FUdbPrefValue.PrefId);
 
     BytesRead := ReadKeyVAlues(AStream,
@@ -3069,41 +3346,53 @@ begin
                                DataType);
     if (BytesRead = 0) then
       break;
-
+    SavePos := AStream.Position;
     AStream.Read(AnUdbHandle.FValue.UdbHandleSize, SizeOf(AnUdbHandle.FValue.UdbHandleSize));
     AStream.Read(AnUdbHandle.FValue.CalcStatus, SizeOf(AnUdbHandle.FValue.CalcStatus));
-    AStream.Read(AnUdbHandle.FValue.Unknown2[0], SizeOf(AnUdbHandle.FValue.Unknown2));
-    AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));
 
     // Alloc Unknown3 block
     // Use the known size for known models
     // Compute it for $00000000
-    // Default for XT
-    AnUdbHandle.FValue.AllocUnknown3; // Default to XT
+    // Default for Unknown
+    SelModel := TTripModel.Unknown;
+    SavePosUdb :=  AStream.Position;
     for AModel := Low(TTripModel) to High(TTripModel) do
     begin
-      if (AnUdbHandle.FValue.CalcStatus = CalculationMagic[AModel]) then
+      AnUdbHandle.FValue.AllocUnknown2(Unknown2Size[AModel]);
+      AStream.Seek(SavePosUdb, TSeekOrigin.soBeginning);
+      AStream.Read(AnUdbHandle.FValue.Unknown2[0], Length(AnUdbHandle.FValue.Unknown2));
+      AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));
+      if (AnUdbHandle.ComputeUnknown3Size(AModel) = Unknown3Size[AModel]) then
       begin
-        if (AModel = TTripModel.Unknown) then
-          AnUdbHandle.FValue.AllocUnknown3(AnUdbHandle.ComputeUnknown3Size)
-        else
-          AnUdbHandle.FValue.AllocUnknown3(AModel);
+        SelModel := AModel;
+        AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[SelModel]);
         break;
       end;
     end;
 
+    if (SelModel = TTripModel.Unknown) then
+      AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[TTripModel.Unknown]);
     AStream.Read(AnUdbHandle.FValue.Unknown3[0], Length(AnUdbHandle.FValue.Unknown3));
+
     AnUdbHandle.FValue.SwapCardinals;
 
     for UdbDirCnt := 0 to AnUdbHandle.FValue.UDbDirCount -1 do
     begin
       AnUdbDir := TUdbDir.Create('');
       AStream.Read(AnUdbDir.FValue, SizeOf(AnUdbDir.FValue));
+      SetLength(AnUdbDir.FName, UdbDirAddressSize[SelModel]);
+      AStream.Read(AnUdbDir.FName[0], Length(AnUdbDir.FName));
       AnUdbDir.FValue.SwapCardinals;
+      AnUdbHandle.FTripList := TripList;
       AnUdbHandle.Add(AnUdbDir);
     end;
 
     AddUdbHandle(AnUdbHandle);
+    if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
+    begin
+      BreakPoint;
+      AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
+    end;
   end;
 end;
 
@@ -3123,6 +3412,7 @@ end;
 
 procedure TmAllRoutes.AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
 begin
+  AnUdbHandle.FTripList := TripList;
   FUdBList.Add(AnUdbHandle);
 end;
 
@@ -3188,6 +3478,7 @@ end;
 
 function TTripList.Add(ANItem: TBaseItem): TBaseItem;
 begin
+  ANItem.FTripList := Self;
   ItemList.Add(ANItem);
   result := ANItem;
 end;
@@ -3199,10 +3490,13 @@ var
   AnUdbHandle: TBaseItem;
   AnUdbDir: TbaseItem;
 begin
+  FTripModel := GetTripModel;
+  FIsUcs4 := Ucs4Model[FTripModel];
+  FCalculatedModel := GetCalculatedModel;
+
   for ANItem in ItemList do
   begin
     ANitem.FCalculated := false;
-
     if (ANItem is TmLocations) then
     begin
       for ALocation in TmLocations(ANItem).Locations do
@@ -3330,6 +3624,7 @@ var
   BytesRead: integer;
   KeyLen: Cardinal;
   KeyName: ShortString;
+  SavePos: Cardinal;
   ValueLen: Cardinal;
   DataType: Byte;
   Initiator: AnsiChar;
@@ -3358,8 +3653,15 @@ begin
                                DataType);
     if (BytesRead = 0) then
       break;
-    ABaseItem := CreateBaseItemByName(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+    SavePos := AStream.Position;
+    ABaseItem := CreateBaseItemByName(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
     Add(ABaseItem);
+    ABaseItem.FTripList := Self;
+    if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
+    begin
+      BreakPoint;
+      AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
+    end;
 
   end;
   UpdLocsFromRoutePrefs;
@@ -3757,7 +4059,6 @@ end;
 
 procedure TTripList.ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
 var
-  CalcModel: TTripModel;
   AllRoutes: TBaseItem;
   Index: integer;
   ViaCount: integer;
@@ -3768,7 +4069,8 @@ var
   ProcessOptions: TProcessOptions;
 begin
   // If the model is not supplied, try to get it from the data
-  CalcModel := GetCalcModel(AModel);
+  FCalculatedModel := GetCalculatedModel(AModel);
+  FTripModel := FCalculatedModel;
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -3795,21 +4097,22 @@ begin
     // The XT(2) recalculates all.
     for Index := 1 to ViaCount -1 do
     begin
-      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel);
+      AnUdbHandle := TmUdbDataHndl.Create(1, CalculatedModel);
+      AnUdbHandle.FTripList := Self;
       // Add udb's for all Via and Shaping found in Locations.
       // Will be discarded when recalculated on the Zumo.
       if (Assigned(Locations)) then
       begin
         TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
         for ALocation in RoutePointList do
-          AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
+          AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
       end;
 
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
     // Recreate RoutePreferences
-    case CalcModel of
+    case CalculatedModel of
       TTripModel.XT2,
       TTripModel.Tread2:
         begin
@@ -3846,7 +4149,6 @@ procedure TTripList.TripTrack(const AModel: TTripModel;
                               const RtePts: TObject;
                               const SubClasses: TStringList);
 var
-  CalcModel: TTripModel;
   Locations: TBaseItem;
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
@@ -3863,7 +4165,8 @@ begin
   TotalTime := 0;
   TotalDist := 0;
   // If the model is not supplied, try to get it from the data
-  CalcModel := GetCalcModel(AModel);
+  FCalculatedModel := GetCalculatedModel(AModel);
+  FTripModel := FCalculatedModel;
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -3873,14 +4176,15 @@ begin
   if not Assigned(Locations) then
     exit;
 
-  AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, false);
+  AnUdbHandle := TmUdbDataHndl.Create(1, CalculatedModel, false);
+  AnUdbHandle.FTripList := Self;
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
     // Add begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
+    AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
 
     // Add intermediates
     CurDist := 0;
@@ -3893,7 +4197,8 @@ begin
         CurDist := CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
       PrevCoords := Coords;
 //TODO RoadSpeed
-      AnUdbDir := TUdbDir.Create(Copy(SubClasses[Index], 5),
+      AnUdbDir := TUdbDir.Create(CalculatedModel,
+                                 Copy(SubClasses[Index], 5),
                                  Copy(SubClasses[Index], 1, 2),
                                  Coords.Lat, Coords.Lon, CurDist);
       AnUdbHandle.Add(AnUdbDir);
@@ -3904,11 +4209,11 @@ begin
     // Add End
     TmLocations(Locations).GetRoutePoints(2, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
+    AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
 
     // Update Time and Dist
-    AnUdbHandle.FValue.UpdateUnknown3(Unknown3TimeOffset, TotalTime);
-    AnUdbHandle.FValue.UpdateUnknown3(Unknown3DistOffset, Round(TotalDist));
+    AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, TotalTime);
+    AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, Round(TotalDist));
 
     // Add to AllRoutes
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
@@ -3921,7 +4226,7 @@ begin
     SetPreserveTrackToRoute(RtePts);
 
     // Recreate RoutePreferences
-    case CalcModel of
+    case CalculatedModel of
       TTripModel.XT2,
       TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
@@ -3936,7 +4241,6 @@ end;
 procedure TTripList.SaveCalculated(const AModel: TTripModel;
                                    const RtePts: TObject);
 var
-  CalcModel: TTripModel;
   AllRoutes: TBaseItem;
   Index: integer;
   ViaCount, RoutePtCount: integer;
@@ -3955,7 +4259,8 @@ begin
   TotalTime := 0;
   TotalDist := 0;
   // If the model is not supplied, try to get it from the data
-  CalcModel := GetCalcModel(AModel);
+  FCalculatedModel := GetCalculatedModel(AModel);
+  FTripModel := FCalculatedModel;
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -3978,7 +4283,8 @@ begin
   try
     for Index := 1 to ViaCount -1 do
     begin
-      AnUdbHandle := TmUdbDataHndl.Create(1, CalcModel, ProcessOptions.TripOption = TTripOption.ttCalc);
+      AnUdbHandle := TmUdbDataHndl.Create(1, CalculatedModel, ProcessOptions.TripOption = TTripOption.ttCalc);
+      AnUdbHandle.FTripList := Self;
       UdbDist := 0;
       UdbTime := 0;
       ScanRtePt := FirstRtePt;
@@ -3986,11 +4292,11 @@ begin
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
       TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
-      GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[ShapeBitmapOffset[CalcModel]]);
+      GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[AnUdbHandle.ShapeOffset]);
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
-        AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
+        AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
 
         while (ScanRtePt <> nil) do
         begin
@@ -4037,7 +4343,7 @@ begin
 {$ENDIF}
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
 //TODO RoadSpeed
-            AnUdbDir := TUdbDir.Create(CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
+            AnUdbDir := TUdbDir.Create(CalculatedModel, CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
             AnUdbHandle.Add(AnUdbDir);
 
             UdbTime := UdbTime + AnUdbDir.FValue.Time;
@@ -4050,13 +4356,13 @@ begin
 
       // Add end route point
       ALocation := RoutePointList[RoutePointList.Count -1];
-      AnUdbHandle.Add(TUdbDir.Create(ALocation, RouteCnt));
+      AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
 
       // update dist and time
       TotalDist := TotalDist + UdbDist;
       TotalTime := TotalTime + UdbTime;
-      AnUdbHandle.FValue.UpdateUnknown3(Unknown3TimeOffset, UdbTime);
-      AnUdbHandle.FValue.UpdateUnknown3(Unknown3DistOffset, Round(UdbDist));
+      AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, UdbTime);
+      AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, Round(UdbDist));
 
       // Add to Allroutes
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
@@ -4069,7 +4375,7 @@ begin
     (GetItem('mTotalTripTime') as TmTotalTripTime).AsCardinal := TotalTime;
 
     // Recreate RoutePreferences
-    case CalcModel of
+    case CalculatedModel of
       TTripModel.XT2,
       TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
@@ -4099,7 +4405,6 @@ end;
 function TTripList.GetTripModel: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
-  AModel: TTripModel;
 begin
   // Default XT
   result := TTripModel.XT;
@@ -4109,23 +4414,11 @@ begin
   if not Assigned(AnUdbHandle) then
     exit;
 
-  // Is the size of the first Unknown3 known to be from an XT or XT2?
-  for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
-  begin
-    if (Length(AnUdbHandle.FValue.Unknown3) = Unknown3Size[AModel]) then
-      exit(AModel);
-  end;
-end;
-
-function TTripList.GetCalcModel(AModel: TTripModel): TTripModel;
-begin
-  result := AModel;
-  if not (result in [TTripModel.XT, TTripModel.XT2, TTripModel.Tread2]) then
-    result := GetTripModel;
+  result := AnUdbHandle.GetModel;
 end;
 
 // Get the model where the trip is calculated for. By checking for the magic number
-function TTripList.GetIsCalculatedModel: TTripModel;
+function TTripList.GetCalculatedModel: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
   AModel: TTripModel;
@@ -4142,6 +4435,14 @@ begin
     if ((AnUdbHandle.FValue.CalcStatus) = CalculationMagic[AModel]) then
       exit(AModel);
   end;
+end;
+
+function TTripList.GetCalculatedModel(AModel: TTripModel): TTripModel;
+begin
+  result := AModel;
+  if (result < Low(TTripModel)) or
+     (result > Pred(High(TTripModel))) then
+    result := TripModel;
 end;
 
 function TTripList.InitAllRoutes: TBaseItem;
