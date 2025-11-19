@@ -118,9 +118,7 @@ const
                                                         );
   UdbDirTurn  = 'Turn';
 
-// XT, XT2, TREAD 2, 595, 340, UNKNOWN
 // nuvi2595
-
 //const Ucs4Model:          array[TTripModel] of boolean = (true, true, true, false, false, false, true);
 //      UdbDirAddressSize:  array[TTripModel] of integer = (121 * 4, 121 * 4, 121  * 4, 32 * 2, 66 * 2, 21 * 2, 121 * 4);
 //      Unknown2Size:       array[TTripModel] of integer = (150, 150, 150, 76, 72, 72, 150);
@@ -133,17 +131,16 @@ const
 //      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $16, $18);
 //      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $05, $08);
 
-const Ucs4Model:          array[TTripModel] of boolean = (true, true, true, false, false, true);
-      UdbDirAddressSize:  array[TTripModel] of integer = (121 * 4, 121 * 4, 121  * 4, 32 * 2, 66 * 2, 121 * 4);
-      Unknown2Size:       array[TTripModel] of integer = (150, 150, 150, 76, 72, 150);
-      Unknown3Size:       array[TTripModel] of integer = (1288, 1448, 1348, 294, 130, 1288);
-
+// XT, XT2, TREAD 2, 595 and Drive 51, 340, UNKNOWN
+const Ucs4Model:          array[TTripModel] of boolean  = (true, true, true, false, false, true);
+      UdbDirAddressSize:  array[TTripModel] of integer  = (121 * 4,   121 * 4,   121 * 4,   32 * 2,    66 * 2,    121 * 4);
+      Unknown2Size:       array[TTripModel] of integer  = (150,       150,       150,       76,        72,        150);
+      Unknown3Size:       array[TTripModel] of integer  = (1288,      1448,      1348,      294,       130,       1288);
       CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $00000000, $ffffffff);
-      Unknown3ShapeBitmapOffset:
-                          array[TTripModel] of Cardinal = ($90, $c0, $c0, $8e, $66, $90);
-      Unknown3DistOffset: array[TTripModel] of integer =  ($14, $14, $14, $12, $12, $14);
-      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $18);
-      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $08);
+      Unknown3ShapeOffset:array[TTripModel] of Cardinal = ($90,       $c0,       $c0,       $8e,       $66,       $90);
+      Unknown3DistOffset: array[TTripModel] of integer  = ($14,       $14,       $14,       $12,       $12,       $14);
+      Unknown3TimeOffset: array[TTripModel] of integer  = ($18,       $18,       $18,       $16,       $16,       $18);
+      VersionSize:        array[TTripModel] of integer  = ($08,       $08,       $08,       $05,       $05,       $08);
 
 
 type
@@ -800,9 +797,9 @@ type
     UDbDirCount:      WORD;
     Unknown3:         TBytes;
     procedure SwapCardinals;
-    procedure AllocUnknown(AModel: TTripModel = TTripModel.XT);
     procedure AllocUnknown2(ASize: Cardinal);
     procedure AllocUnknown3(ASize: Cardinal);
+    procedure AllocUnknown(AModel: TTripModel = TTripModel.XT);
     procedure UpdateUnknown3(const Offset: integer; const Value: Cardinal);
     function GetUnknown3(const Offset: integer): Cardinal;
   end;
@@ -817,6 +814,7 @@ type
     procedure EndWrite(AStream: TMemoryStream); override;
     function ComputeUnknown3Size(AModel: TTripModel): integer;
     function GetModel: TTripModel;
+    function GetModelDescription: string;
     function GetDistOffset: integer;
     function GetTimeOffset: integer;
     function GetShapeOffset: integer;
@@ -827,6 +825,7 @@ type
     property HandleId: Cardinal read FUdbHandleId;
     property PrefValue: TUdbPrefValue read FUdbPrefValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
+    property ModelDescription: string read GetModelDescription;
     property Items: TUdbDirList read FUdbDirList;
     property DistOffset: integer read GetDistOffset;
     property TimeOffset: integer read GetTimeOffset;
@@ -842,6 +841,7 @@ type
   private
     FValue:            TmAllRoutesValue;
     FUdBList: TUdbHandleList;
+    function ModelFromUnknow3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure EndWrite(AStream: TMemoryStream); override;
   public
@@ -860,14 +860,15 @@ type
     FItemList: TItemList;
     FRouteCnt: Cardinal;
     FTripModel: TTripModel;
-    FCalculatedModel: TTripModel;
+    FModelDescription: string;
     FIsUcs4: boolean;
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
+    function GetIsCalculated: boolean;
     function GetTripModel: TTripModel;
-    function GetCalculatedModel: TTripModel; overload;
-    function GetCalculatedModel(AModel: TTripModel): TTripModel;  overload;
+    function GetCalculationModel(AModel: TTripModel): TTripModel;
+    procedure GetModel;
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure AddLocation_XT(Locations: TmLocations;
@@ -916,7 +917,6 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
-
     procedure AddLocation(Locations: TmLocations;
                           ProcessOptions: TObject;
                           RoutePoint: TRoutePoint;
@@ -940,8 +940,9 @@ type
     procedure SaveAsGPX(const GPXFile: string);
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
+    property IsCalculated: boolean read GetIsCalculated;
     property TripModel: TTripModel read FTripModel;
-    property CalculatedModel: TTripModel read FCalculatedModel;
+    property ModelDescription: string read FModelDescription;
     property IsUcs4: boolean read FIsUcs4;
     property RouteCnt: Cardinal read FRouteCnt write FRouteCnt;
   end;
@@ -3133,12 +3134,6 @@ begin
   UdbHandleSize := Swap32(UdbHandleSize);
 end;
 
-procedure TUdbHandleValue.AllocUnknown(AModel: TTripModel = TTripModel.XT);
-begin
-  SetLength(Self.Unknown2, Unknown2Size[AModel]);
-  SetLength(Self.Unknown3, Unknown3Size[AModel]);
-end;
-
 procedure TUdbHandleValue.AllocUnknown2(ASize: cardinal);
 begin
   SetLength(Self.Unknown2, ASize);
@@ -3147,6 +3142,12 @@ end;
 procedure TUdbHandleValue.AllocUnknown3(ASize: cardinal);
 begin
   SetLength(Self.Unknown3, ASize);
+end;
+
+procedure TUdbHandleValue.AllocUnknown(AModel: TTripModel = TTripModel.XT);
+begin
+  AllocUnknown2(Unknown2Size[AModel]);
+  AllocUnknown3(Unknown3Size[AModel]);
 end;
 
 procedure TUdbHandleValue.UpdateUnknown3(const Offset: integer; const Value: cardinal);
@@ -3214,13 +3215,10 @@ var
   UdbDirSize: integer;
 begin
   TotalHandleSize := Swap32(integer(FValue.UdbHandleSize)) -
-                     // SizeOf fixed part (excluding Unknown3)
                      (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount));
   UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + UdbDirAddressSize[AModel]));
   result := TotalHandleSize - UdbDirSize;
-//TODO nuvi2595
-//if (AModel = TTripModel.Nuvi2595) then
-//  dec(result, 4);
+//TODO nuvi2595. The computed size is 4 bytes off...
 end;
 
 procedure TmUdbDataHndl.BeginWrite(AStream: TMemoryStream);
@@ -3269,27 +3267,43 @@ var
   AModel: TTripModel;
 begin
   result := TTripModel.Unknown;
-  // Is the size of the first Unknown3 known to be from an XT or XT2?
-  for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
+
+  // Is the CalcStatus known?
+  if (FValue.CalcStatus <> 0) then
+  begin
+    for AModel := Low(TTripModel) to High(TTripModel) do
+    begin
+      if (FValue.CalcStatus = CalculationMagic[AModel]) then
+        exit(AModel);
+    end;
+  end;
+
+  // Is the size of Unknown3 a known size of a model?
+  for AModel := Low(TTripModel) to High(TTripModel) do
   begin
     if (Length(FValue.Unknown3) = Unknown3Size[AModel]) then
       exit(AModel);
   end;
 end;
 
+function TmUdbDataHndl.GetModelDescription: string;
+begin
+  result := GetEnumName(TypeInfo(TTripModel), Ord(GetModel));
+end;
+
 function TmUdbDataHndl.GetDistOffset: integer;
 begin
-  result := Unknown3DistOffset[FTripList.FTripModel];
+  result := Unknown3DistOffset[FTripList.TripModel];
 end;
 
 function TmUdbDataHndl.GetTimeOffset: integer;
 begin
-  result := Unknown3TimeOffset[FTripList.FTripModel];
+  result := Unknown3TimeOffset[FTripList.TripModel];
 end;
 
 function TmUdbDataHndl.GetShapeOffset: integer;
 begin
-  result := Unknown3ShapeBitmapOffset[FTripList.FTripModel];
+  result := Unknown3ShapeOffset[FTripList.TripModel];
 end;
 
 {*** AllRoutesList ***}
@@ -3303,6 +3317,19 @@ begin
   inherited Create('mAllRoutes', 0, dtList); // Will get Length later, Via Calculate
   FillChar(FValue, SizeOf(FValue), 0);
   FUdBList := TUdbHandleList.Create;
+end;
+
+function TmAllRoutes.ModelFromUnknow3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
+begin
+  result := AModel;
+  AnUdbHandle.FValue.AllocUnknown2(Unknown2Size[AModel]); // Alloc the correct unknown2 size.
+  AStream.Read(AnUdbHandle.FValue.Unknown2[0], Length(AnUdbHandle.FValue.Unknown2));
+  AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount)); // Need the UdbDirCount to calculate
+  AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[AModel]);
+  AStream.Read(AnUdbHandle.FValue.Unknown3[0], Length(AnUdbHandle.FValue.Unknown3));
+
+  if (AnUdbHandle.ComputeUnknown3Size(AModel) <> Unknown3Size[AModel]) then
+    result := TTripModel.Unknown;
 end;
 
 procedure TmAllRoutes.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
@@ -3321,7 +3348,6 @@ var
   UdbDirCnt: integer;
   AnUdbDir: TUdbDir;
   SelModel, AModel: TTripModel;
-
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
   FUdBList := TUdbHandleList.Create;
@@ -3350,29 +3376,33 @@ begin
     AStream.Read(AnUdbHandle.FValue.UdbHandleSize, SizeOf(AnUdbHandle.FValue.UdbHandleSize));
     AStream.Read(AnUdbHandle.FValue.CalcStatus, SizeOf(AnUdbHandle.FValue.CalcStatus));
 
-    // Alloc Unknown3 block
-    // Use the known size for known models
-    // Compute it for $00000000
-    // Default for Unknown
-    SelModel := TTripModel.Unknown;
-    SavePosUdb :=  AStream.Position;
-    for AModel := Low(TTripModel) to High(TTripModel) do
+    // Alloc Unknown2 and unknown3 blocks
+    // Check for known calculation magic
+    SelModel := TTripModel.Unknown;     // Default to Unknown
+    if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 340 has 0, even if calculated.
     begin
-      AnUdbHandle.FValue.AllocUnknown2(Unknown2Size[AModel]);
-      AStream.Seek(SavePosUdb, TSeekOrigin.soBeginning);
-      AStream.Read(AnUdbHandle.FValue.Unknown2[0], Length(AnUdbHandle.FValue.Unknown2));
-      AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));
-      if (AnUdbHandle.ComputeUnknown3Size(AModel) = Unknown3Size[AModel]) then
+      for AModel := Low(TTripModel) to High(TTripModel) do
       begin
-        SelModel := AModel;
-        AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[SelModel]);
-        break;
+        if (AnUdbHandle.FValue.CalcStatus = CalculationMagic[AModel]) then
+        begin
+          SelModel := ModelFromUnknow3Size(AModel, AnUdbHandle, AStream);
+          break;
+        end;
       end;
     end;
 
+    // Check for known unknown3 size
     if (SelModel = TTripModel.Unknown) then
-      AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[TTripModel.Unknown]);
-    AStream.Read(AnUdbHandle.FValue.Unknown3[0], Length(AnUdbHandle.FValue.Unknown3));
+    begin
+      SavePosUdb :=  AStream.Position;
+      for AModel := Low(TTripModel) to High(TTripModel) do
+      begin
+        AStream.Seek(SavePosUdb, TSeekOrigin.soBeginning); // reposition to start of UDBDir
+        SelModel := ModelFromUnknow3Size(AModel, AnUdbHandle, AStream);    // Now we have the UdbDirCount, we can compute the size.
+        if (SelModel = AModel) then
+          break;
+      end;
+    end;
 
     AnUdbHandle.FValue.SwapCardinals;
 
@@ -3490,9 +3520,7 @@ var
   AnUdbHandle: TBaseItem;
   AnUdbDir: TbaseItem;
 begin
-  FTripModel := GetTripModel;
-  FIsUcs4 := Ucs4Model[FTripModel];
-  FCalculatedModel := GetCalculatedModel;
+  GetModel;
 
   for ANItem in ItemList do
   begin
@@ -4069,8 +4097,7 @@ var
   ProcessOptions: TProcessOptions;
 begin
   // If the model is not supplied, try to get it from the data
-  FCalculatedModel := GetCalculatedModel(AModel);
-  FTripModel := FCalculatedModel;
+  FTripModel := GetCalculationModel(AModel);
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4097,7 +4124,7 @@ begin
     // The XT(2) recalculates all.
     for Index := 1 to ViaCount -1 do
     begin
-      AnUdbHandle := TmUdbDataHndl.Create(1, CalculatedModel);
+      AnUdbHandle := TmUdbDataHndl.Create(1, TripModel);
       AnUdbHandle.FTripList := Self;
       // Add udb's for all Via and Shaping found in Locations.
       // Will be discarded when recalculated on the Zumo.
@@ -4105,14 +4132,14 @@ begin
       begin
         TmLocations(Locations).GetRoutePoints(Index, RoutePointList);
         for ALocation in RoutePointList do
-          AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
+          AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
       end;
 
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
     // Recreate RoutePreferences
-    case CalculatedModel of
+    case TripModel of
       TTripModel.XT2,
       TTripModel.Tread2:
         begin
@@ -4165,8 +4192,7 @@ begin
   TotalTime := 0;
   TotalDist := 0;
   // If the model is not supplied, try to get it from the data
-  FCalculatedModel := GetCalculatedModel(AModel);
-  FTripModel := FCalculatedModel;
+  FTripModel := GetCalculationModel(AModel);
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4176,7 +4202,7 @@ begin
   if not Assigned(Locations) then
     exit;
 
-  AnUdbHandle := TmUdbDataHndl.Create(1, CalculatedModel, false);
+  AnUdbHandle := TmUdbDataHndl.Create(1, TripModel, false);
   AnUdbHandle.FTripList := Self;
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
@@ -4184,7 +4210,7 @@ begin
     // Add begin
     TmLocations(Locations).GetRoutePoints(1, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
+    AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
     // Add intermediates
     CurDist := 0;
@@ -4197,7 +4223,7 @@ begin
         CurDist := CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
       PrevCoords := Coords;
 //TODO RoadSpeed
-      AnUdbDir := TUdbDir.Create(CalculatedModel,
+      AnUdbDir := TUdbDir.Create(TripModel,
                                  Copy(SubClasses[Index], 5),
                                  Copy(SubClasses[Index], 1, 2),
                                  Coords.Lat, Coords.Lon, CurDist);
@@ -4209,7 +4235,7 @@ begin
     // Add End
     TmLocations(Locations).GetRoutePoints(2, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
+    AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
     // Update Time and Dist
     AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, TotalTime);
@@ -4226,7 +4252,7 @@ begin
     SetPreserveTrackToRoute(RtePts);
 
     // Recreate RoutePreferences
-    case CalculatedModel of
+    case TripModel of
       TTripModel.XT2,
       TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
@@ -4259,8 +4285,7 @@ begin
   TotalTime := 0;
   TotalDist := 0;
   // If the model is not supplied, try to get it from the data
-  FCalculatedModel := GetCalculatedModel(AModel);
-  FTripModel := FCalculatedModel;
+  FTripModel := GetCalculationModel(AModel);
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4283,7 +4308,7 @@ begin
   try
     for Index := 1 to ViaCount -1 do
     begin
-      AnUdbHandle := TmUdbDataHndl.Create(1, CalculatedModel, ProcessOptions.TripOption = TTripOption.ttCalc);
+      AnUdbHandle := TmUdbDataHndl.Create(1, TripModel, ProcessOptions.TripOption = TTripOption.ttCalc);
       AnUdbHandle.FTripList := Self;
       UdbDist := 0;
       UdbTime := 0;
@@ -4296,7 +4321,7 @@ begin
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
-        AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
+        AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
         while (ScanRtePt <> nil) do
         begin
@@ -4343,7 +4368,7 @@ begin
 {$ENDIF}
             Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
 //TODO RoadSpeed
-            AnUdbDir := TUdbDir.Create(CalculatedModel, CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
+            AnUdbDir := TUdbDir.Create(TripModel, CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
             AnUdbHandle.Add(AnUdbDir);
 
             UdbTime := UdbTime + AnUdbDir.FValue.Time;
@@ -4356,7 +4381,7 @@ begin
 
       // Add end route point
       ALocation := RoutePointList[RoutePointList.Count -1];
-      AnUdbHandle.Add(TUdbDir.Create(CalculatedModel, ALocation, RouteCnt));
+      AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
       // update dist and time
       TotalDist := TotalDist + UdbDist;
@@ -4375,7 +4400,7 @@ begin
     (GetItem('mTotalTripTime') as TmTotalTripTime).AsCardinal := TotalTime;
 
     // Recreate RoutePreferences
-    case CalculatedModel of
+    case TripModel of
       TTripModel.XT2,
       TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
@@ -4401,7 +4426,8 @@ begin
   result := AllRoutes.Items[0];
 end;
 
-// Get the model by checking the size. This function reports the model even if not calculated.
+// Get the model by checking the magic number, or the size.
+// This function reports the model even if not calculated.
 function TTripList.GetTripModel: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
@@ -4417,32 +4443,35 @@ begin
   result := AnUdbHandle.GetModel;
 end;
 
-// Get the model where the trip is calculated for. By checking for the magic number
-function TTripList.GetCalculatedModel: TTripModel;
+// Is the TripList calculated? Need UDBdir > 0
+function TTripList.GetIsCalculated: boolean;
 var
   AnUdbHandle: TmUdbDataHndl;
-  AModel: TTripModel;
 begin
-  result := TTripModel.Unknown;
-  AnUdbHandle := FirstUdbDataHndle;
+  result := false;
 
-  if not Assigned(AnUdbHandle) or
-     (AnUdbHandle.FValue.CalcStatus = 0) then
+  AnUdbHandle := FirstUdbDataHndle;
+  if not Assigned(AnUdbHandle) then
+    exit;
+  if (AnUdbHandle.FValue.UDbDirCount = 0) then
     exit;
 
-  for AModel := Low(TTripModel) to High(TTripModel) do  // Future use
-  begin
-    if ((AnUdbHandle.FValue.CalcStatus) = CalculationMagic[AModel]) then
-      exit(AModel);
-  end;
+  result := true;
 end;
 
-function TTripList.GetCalculatedModel(AModel: TTripModel): TTripModel;
+function TTripList.GetCalculationModel(AModel: TTripModel): TTripModel;
 begin
   result := AModel;
   if (result < Low(TTripModel)) or
      (result > Pred(High(TTripModel))) then
-    result := TripModel;
+    result := GetTripModel;
+end;
+
+procedure TTripList.GetModel;
+begin
+  FTripModel := GetTripModel;
+  FIsUcs4 := Ucs4Model[FTripModel];
+  FModelDescription := GetEnumName(TypeInfo(TTripModel), Ord(FTripModel));
 end;
 
 function TTripList.InitAllRoutes: TBaseItem;

@@ -3077,7 +3077,8 @@ var
                                                    SizeOf(AnUdbhandle.UdbHandleValue.UdbHandleSize),
                                                    AnUdbhandle.OffsetValue));
 
-    VlTripInfo.Strings.AddPair('Calculation status', Format('0x%s (0x0538FEFF=XT 0x05d8FEFF=XT2 0x0574FEFF=Tread 2)', [IntToHex(AnUdbhandle.UdbHandleValue.CalcStatus, 8)]),
+    VlTripInfo.Strings.AddPair('Calculation status', Format('0x%s (%s)',
+                                                       [IntToHex(AnUdbhandle.UdbHandleValue.CalcStatus, 8), AnUdbhandle.ModelDescription]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(AnUdbhandle.UdbHandleValue.CalcStatus),
                                                    AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.CalcStatus) ));
@@ -4244,7 +4245,7 @@ begin
     HexEditFile := FileName;
 
     if (DeviceFile) and
-       (ATripList.CalculatedModel = TTripModel.Unknown) then
+       (ATripList.IsCalculated = false) then
     begin
       SbPostProcess.Panels[0].Text := 'Not calculated trip. Marked with !';
       SbPostProcess.Panels[1].Text := 'BaseCamp may have problems reading current.gpx';
@@ -4265,9 +4266,11 @@ begin
     TripName := ATripList.GetValue('mTripName');
     ParentTripName := ATripList.GetValue('mParentTripName');
 
-    PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
-    if (TripName <> ParentTripName) then
-      PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
+//    PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
+//    if (TripName <> ParentTripName) then
+//      PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
+
+    PnlTripGpiInfo.Caption := Format('%s, Trip: %s, Model: %s', [PnlTripGpiInfo.Caption, TripName, ATripList.ModelDescription]);
 
     TvTrip.Items.Clear;
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
@@ -4468,8 +4471,8 @@ begin
       else
         IsNotSavedTrip := Imported.AsBoolean;
       SetCheckMark(AListItem, not IsNotSavedTrip);
-      CalculatedModel := Ord(TmpTripList.CalculatedModel);
-      if (TmpTripList.CalculatedModel = TTripModel.Unknown) then
+      IsCalculated := TmpTripList.IsCalculated;
+      if (IsCalculated = false) then
         AListItem.ImageIndex := 2;
     end;
 
