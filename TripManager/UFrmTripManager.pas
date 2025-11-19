@@ -4270,7 +4270,7 @@ begin
     if SameText(ChangeFileExt(TripFileName, ''), TripName) then
       TripFileName := ''
     else
-      TripFileName := Format('%s ,', [TripFileName]);
+      TripFileName := Format('%s, ', [TripFileName]);
     if (ParentTripName = TripName) then
       ParentTripName := ''
     else
