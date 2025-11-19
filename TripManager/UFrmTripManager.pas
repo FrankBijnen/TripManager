@@ -4169,6 +4169,7 @@ var
   ANItem: TBaseItem;
   CurrentNode: TTreeNode;
   RootNode: TTreeNode;
+  TripFileName: string;
   TripName: string;
   ParentTripName: string;
 
@@ -4195,7 +4196,7 @@ var
         begin
           FirstLocation := false;
           if (TmArrival(ANItem).AsUnixDateTime <> 0) then
-            PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Departure:' + TmArrival(ANItem).AsString;
+            PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Departure: u' + TmArrival(ANItem).AsString;
         end;
         TvTrip.Items.AddChildObject(CurrentLocation, TBaseDataItem(ANItem).DisplayName, ANItem);
         if (ANItem is TmName) then
@@ -4261,16 +4262,20 @@ begin
       PnlTripGpiInfo.Color := clLime
     else
       PnlTripGpiInfo.Color := clAqua;
-    PnlTripGpiInfo.Caption := ExtractFileName(FileName);
 
     TripName := ATripList.GetValue('mTripName');
     ParentTripName := ATripList.GetValue('mParentTripName');
 
-//    PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Trip:' + TripName;
-//    if (TripName <> ParentTripName) then
-//      PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ' (' + ParentTripName + ')';
-
-    PnlTripGpiInfo.Caption := Format('%s, Trip: %s, Model: %s', [PnlTripGpiInfo.Caption, TripName, ATripList.ModelDescription]);
+    TripFileName := ExtractFileName(FileName);
+    if SameText(ChangeFileExt(TripFileName, ''), TripName) then
+      TripFileName := ''
+    else
+      TripFileName := Format('%s ,', [TripFileName]);
+    if (ParentTripName = TripName) then
+      ParentTripName := ''
+    else
+      ParentTripName := Format(' (%s)', [ParentTripName]);
+    PnlTripGpiInfo.Caption := Format('%sTrip: %s, Model: %s%s', [TripFileName, TripName, ATripList.ModelDescription, ParentTripName]);
 
     TvTrip.Items.Clear;
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
