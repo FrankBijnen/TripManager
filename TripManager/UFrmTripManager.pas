@@ -2197,7 +2197,7 @@ begin
   BgDevice.Items[1].Caption := 'Gpx';
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
 
-  case TGarminModel(CmbModel.ItemIndex) of
+  case TGarminModel(ModelIndex) of
     TGarminModel.GarminEdge:
       begin
         BgDevice.Items[0].Caption := 'Courses';
@@ -2216,9 +2216,10 @@ begin
       end;
   end;
 
-  SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]));
+  SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in
+     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Zumo3x0]));
   SetRegistry(Reg_EnableFitFuncs, (TGarminModel(ModelIndex) in [TGarminModel.GarminEdge]));
-  SetRegistry(Reg_CurrentModel, CmbModel.ItemIndex);
+  SetRegistry(Reg_CurrentModel, ModelIndex);
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);

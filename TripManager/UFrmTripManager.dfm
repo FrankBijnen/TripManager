@@ -167,6 +167,8 @@ object FrmTripManager: TFrmTripManager
             'XT'
             'XT2'
             'Tread 2'
+            'zumo 595'
+            'z'#363'mo 3x0'
             'Edge'
             'Garmin'
             'Unknown')

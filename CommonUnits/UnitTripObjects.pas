@@ -25,7 +25,8 @@ const
   Tread2_VehicleProfileGuid         = 'c21c922c-553f-4783-85f8-c0a13f52d960';
   Tread2_VehicleProfileHash         = '61578528'; // Not used
   Tread2_TmScPosnSize               = 16;
-
+  Zumo595Name                       = 'zumo 595';
+  Zumo3x0Name                       = 'zūmo 3x0';
   Zumo340_TmScPosnSize              = 8;
   TurnMagic: array[0..3] of byte   = ($47, $4E, $00, $00);
 
@@ -33,7 +34,7 @@ type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
 //TODO nuvi2595
 //  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo340, Nuvi2595, Unknown);
-  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo340, Unknown);
+  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo3x0, Unknown);
   //Drive 51 = 595
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
@@ -67,6 +68,7 @@ const
   dtBoolean       = 7;
   dtVersion       = 8;
   dtPosn          = 8;
+  dt3x0RoutePref  = 8;
   dtLctnPref      = 10;
   dtUdbPref       = 10;
   dtUdbHandle     = 11;
@@ -131,7 +133,7 @@ const
 //      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $16, $18);
 //      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $05, $08);
 
-// XT, XT2, TREAD 2, 595 and Drive 51, 340, UNKNOWN
+// XT, XT2, TREAD 2, 595 and Drive 51, 3x0, UNKNOWN
 const Ucs4Model:          array[TTripModel] of boolean  = (true, true, true, false, false, true);
       UdbDirAddressSize:  array[TTripModel] of integer  = (121 * 4,   121 * 4,   121 * 4,   32 * 2,    66 * 2,    121 * 4);
       Unknown2Size:       array[TTripModel] of integer  = (150,       150,       150,       76,        72,        150);
@@ -457,7 +459,7 @@ type
     function GetEditMode: TEditMode; override;
     function GetPickList: string; override;
   public
-    constructor Create(AValue: TRoutePreference = rmFasterTime);
+    constructor Create(AValue: TRoutePreference = rmFasterTime; ALenValue: Cardinal = 1; ADataType: byte = dtByte);
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     class function RoutePreference(AValue: string): TRoutePreference;
     class function AdvLevel(AValue: string): TAdvlevel;
@@ -545,6 +547,16 @@ type
   TmName = class(TStringItem)
   public
     constructor Create(AValue: string);
+  end;
+
+  TmPhoneNumber = class(TStringItem)
+  public
+    constructor Create(AValue: string);
+  end;
+
+  TmShaping = class(TBooleanItem)
+  public
+    constructor Create(AValue: boolean = false);
   end;
 
 {*** XT2 ***}
@@ -680,6 +692,7 @@ type
     destructor Destroy; override;
     procedure Add(ANitem: TBaseItem);
     function LocationTmAttr: TmAttr;
+    function LocationTmShaping: TmShaping;
     function LocationTmName: TmName;
     function LocationTmAddress: TmAddress;
     function LocationTmScPosn: TmScPosn;
@@ -871,6 +884,7 @@ type
     procedure GetModel;
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
+    procedure UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
     procedure AddLocation_XT(Locations: TmLocations;
                              ProcessOptions: TObject;
                              RoutePoint: TRoutePoint;
@@ -893,9 +907,23 @@ type
                              Lat, Lon: double;
                              DepartureDate: TDateTime;
                              Name, Address: string);
+    procedure AddLocation_Zumo595(Locations: TmLocations;
+                                  ProcessOptions: TObject;
+                                  RoutePoint: TRoutePoint;
+                                  Lat, Lon: double;
+                                  DepartureDate: TDateTime;
+                                  Name, Address: string);
+    procedure AddLocation_Zumo3x0(Locations: TmLocations;
+                                  ProcessOptions: TObject;
+                                  RoutePoint: TRoutePoint;
+                                  Lat, Lon: double;
+                                  DepartureDate: TDateTime;
+                                  Name, Address: string);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
     procedure UpdLocsFromRoutePrefs;
   public
@@ -1559,7 +1587,9 @@ begin
   case ASize of
     Zumo340_TmScPosnSize:
       begin
-        inherited Create('mScPosn', SizeOf(FValue), dtPosn);
+        inherited Create('mScPosn',
+                         SizeOf(FValue.ScnSize) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
+                         dtPosn);
         FValue.ScnSize := + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
         FValue.Lat_8 := (CoordAsInt(ALat));
         FValue.Lon_8 := (CoordAsInt(ALon));
@@ -1576,9 +1606,8 @@ begin
     else
     begin
       inherited Create('mScPosn',
-                        SizeOf(FValue.ScnSize) + SizeOf(FValue.Unknown1) +
-                        Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
-                        dtPosn);
+                       SizeOf(FValue.ScnSize) + SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
+                       dtPosn);
       FValue.ScnSize      := SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon);
       FValue.Unknown1     := AUnknown1;
       FValue.Lat          := (CoordAsInt(ALat));
@@ -2016,9 +2045,18 @@ begin
   inherited Create('mImported', AValue);
 end;
 
-constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime);
+constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; ALenValue: Cardinal = 1; ADataType: byte = dtByte);
 begin
   inherited Create('mRoutePreference', Ord(AValue));
+
+  // Zumo 340?
+  if (ADataType <> dtByte) then
+  begin
+    FDataType := ADataType;
+    FLenValue := ALenValue;
+    SetLength(FBytes, FLenValue);
+    FBytes[3] := Ord(AValue);
+  end;
 end;
 
 procedure TmRoutePreference.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
@@ -2029,11 +2067,12 @@ begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
 
   // Zumo 340?
-  if (ADataType <> dtByte) then
+  if (ADataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, FLenValue);
     AStream.Seek(SavePos, TSeekOrigin.soBeginning);
     AStream.Read(Fbytes, FLenValue);
+    FValue := FBytes[3];
   end;
 end;
 
@@ -2081,6 +2120,11 @@ end;
 procedure TmRoutePreference.SetValue(AValue: string);
 begin
   FValue := Ord(TmRoutePreference.RoutePreference(AValue));
+  if (FDataType = dt3x0RoutePref) then
+  begin
+    SetLength(FBytes, 5);
+    FBytes[3] := FValue;
+  end;
 end;
 
 function TmRoutePreference.GetEditMode: TEditMode;
@@ -2270,6 +2314,18 @@ end;
 constructor TmName.Create(AValue: string);
 begin
   inherited Create('mName', AValue);
+end;
+
+{ TmPhoneNumber, only for Zumo3X0}
+constructor TmPhoneNumber.Create(AValue: string);
+begin
+  inherited Create('mPhoneNumber', AValue);
+end;
+
+{ TmShaping, only for Zumo3X0}
+constructor TmShaping.Create(AValue: boolean = false);
+begin
+  inherited Create('mShaping', AValue);
 end;
 
 { TBaseRoutePreferences }
@@ -2644,6 +2700,18 @@ begin
   end;
 end;
 
+function TLocation.LocationTmShaping: TmShaping;
+var
+  AnItem: TBaseItem;
+begin
+  result := nil;
+  for AnItem in FItems do
+  begin
+    if (AnItem is TmShaping) then
+      exit(TmShaping(AnItem));
+  end;
+end;
+
 function TLocation.LocationTmName: TmName;
 var
   AnItem: TBaseItem;
@@ -2790,11 +2858,25 @@ var
   Location: TBaseItem;
 begin
   result := 0;
-  for Location in Locations do
-  begin
-    if (Location is TmAttr) and
-       (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
-      Inc(result);
+  case (TripList.TripModel) of
+    TTripModel.Zumo3x0:
+      begin
+        for Location in Locations do
+        begin
+          if (Location is TmShaping) and
+             (TmShaping(Location).AsBoolean = false) then
+            Inc(result);
+        end;
+      end
+    else
+    begin
+      for Location in Locations do
+      begin
+        if (Location is TmAttr) and
+           (TmAttr(Location).AsRoutePoint = TRoutePoint.rpVia) then
+          Inc(result);
+      end;
+    end;
   end;
 end;
 
@@ -2803,23 +2885,47 @@ procedure TmLocations.GetRoutePoints(ViaPoint: integer; RoutePointList: TList<TL
 var
   ALocation: TBaseItem;
   AmAttr: TmAttr;
+  AmShaping: TmShaping;
   ViaCnt: integer;
 begin
   RoutePointList.Clear;
   ViaCnt := 0;
-  for ALocation in FItemList do
-  begin
-    if (ALocation is TLocation) then
+  case (TripList.TripModel) of
+    TTripModel.Zumo3x0:
+      begin
+        for ALocation in FItemList do
+        begin
+          if (ALocation is TLocation) then
+          begin
+            AmShaping := TLocation(ALocation).LocationTmShaping;
+            if (AmShaping = nil) then
+              continue;
+            if (AmShaping.AsBoolean = false) then
+              Inc(ViaCnt);
+            if (ViaCnt >= ViaPoint) then
+              RoutePointList.Add(Tlocation(ALocation));
+            if (ViaCnt > ViaPoint) then
+              exit;
+          end;
+        end;
+      end
+    else
     begin
-      AmAttr := TLocation(ALocation).LocationTmAttr;
-      if (AmAttr = nil) then
-        continue;
-      if (AmAttr.AsRoutePoint = TRoutePoint.rpVia) then
-        Inc(ViaCnt);
-      if (ViaCnt >= ViaPoint) then
-        RoutePointList.Add(Tlocation(ALocation));
-      if (ViaCnt > ViaPoint) then
-        exit;
+      for ALocation in FItemList do
+      begin
+        if (ALocation is TLocation) then
+        begin
+          AmAttr := TLocation(ALocation).LocationTmAttr;
+          if (AmAttr = nil) then
+            continue;
+          if (AmAttr.AsRoutePoint = TRoutePoint.rpVia) then
+            Inc(ViaCnt);
+          if (ViaCnt >= ViaPoint) then
+            RoutePointList.Add(Tlocation(ALocation));
+          if (ViaCnt > ViaPoint) then
+            exit;
+        end;
+      end;
     end;
   end;
 end;
@@ -4065,6 +4171,41 @@ begin
   end;
 end;
 
+procedure TTripList.AddLocation_Zumo595(Locations: TmLocations;
+                                        ProcessOptions: TObject;
+                                        RoutePoint: TRoutePoint;
+                                        Lat, Lon: double;
+                                        DepartureDate: TDateTime;
+                                        Name, Address: string);
+begin
+  Locations.AddLocation(TLocation.Create);
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+  Locations.Add(TmIsDFSPoint.Create);
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmAttr.Create(RoutePoint));
+  Locations.Add(TmShapingRadius.Create);
+end;
+
+procedure TTripList.AddLocation_Zumo3x0(Locations: TmLocations;
+                                        ProcessOptions: TObject;
+                                        RoutePoint: TRoutePoint;
+                                        Lat, Lon: double;
+                                        DepartureDate: TDateTime;
+                                        Name, Address: string);
+begin
+  Locations.AddLocation(TLocation.Create);
+  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmPhoneNumber.Create(''));
+  Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Zumo340_TmScPosnSize));
+end;
+
 procedure TTripList.AddLocation(Locations: TmLocations;
                                 ProcessOptions: Tobject;
                                 RoutePoint: TRoutePoint;
@@ -4079,6 +4220,10 @@ begin
       AddLocation_XT2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Tread2:
       AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+    TTripModel.Zumo595:
+      AddLocation_Zumo595(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+    TTripModel.Zumo3x0:
+      AddLocation_Zumo3x0(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     else
       // No RoutePref for XT
       AddLocation_XT(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
@@ -4172,6 +4317,19 @@ begin
     PreserveTrackToRoute.AsBoolean := true;
 end;
 
+procedure TTripList.UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
+var
+  TotalTripDistance: TmTotalTripDistance;
+  TotalTripTime: TmTotalTripTime;
+begin
+  TotalTripDistance := (GetItem('mTotalTripDistance') as TmTotalTripDistance);
+  if (Assigned(TotalTripDistance)) then
+    TotalTripDistance.AsSingle := TotalDist;
+  TotalTripTime := (GetItem('mTotalTripTime') as TmTotalTripTime);
+  if (Assigned(TotalTripTime)) then
+    TotalTripTime.AsCardinal := TotalTime;
+end;
+
 procedure TTripList.TripTrack(const AModel: TTripModel;
                               const RtePts: TObject;
                               const SubClasses: TStringList);
@@ -4245,8 +4403,7 @@ begin
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 
     // Update Dist and Time
-    (GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := TotalDist;
-    (GetItem('mTotalTripTime') as TmTotalTripTime).AsCardinal := TotalTime;
+    UpdateDistAndTime(TotalDist, TotalTime);
 
     // Mark as TripTrack
     SetPreserveTrackToRoute(RtePts);
@@ -4396,8 +4553,8 @@ begin
     if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc, TTripOption.ttTripTrackLocPrefs]) then
       SetPreserveTrackToRoute(RtePts);
 
-    (GetItem('mTotalTripDistance') as TmTotalTripDistance).AsSingle := TotalDist;
-    (GetItem('mTotalTripTime') as TmTotalTripTime).AsCardinal := TotalTime;
+    // Update Dist and Time
+    UpdateDistAndTime(TotalDist, TotalTime);
 
     // Recreate RoutePreferences
     case TripModel of
@@ -4640,6 +4797,49 @@ begin
   end;
 end;
 
+// The order of the items may be changed. EG Move mTripName after Theader does also work.
+procedure TTripList.CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+begin
+  AddHeader(THeader.Create);
+  Add(TmTotalTripDistance.Create);
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+  Add(TmAllRoutes.Create);
+  Add(TmTripDate.Create);
+  Add(TmParentTripId.Create(0));
+  Add(TmImported.Create);
+  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmLocations.Create);
+  Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmTotalTripTime.Create);
+  Add(TmDayNumber.Create);
+  Add(TmTripName.Create(TripName));
+  Add(TmAvoidancesChanged.Create);
+  Add(TmParentTripName.Create(TripName));
+  Add(TmVersionNumber.Create(1, 6));
+  Add(TmIsRoundTrip.Create);
+  Add(TmOptimized.Create);
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Zumo595, 2);
+end;
+
+procedure TTripList.CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
+begin
+  AddHeader(THeader.Create);
+  Add(TmAllRoutes.Create);
+  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmLocations.Create);
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5, dt3x0RoutePref));
+  Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+  Add(TmTripName.Create(TripName));
+  Add(TmVersionNumber.Create(1, 3));
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Zumo3x0, 2);
+end;
+
 procedure TTripList.CreateTemplate(const AModel: TTripModel;
                                    const TripName: string;
                                    const CalculationMode: string = '';
@@ -4652,6 +4852,10 @@ begin
       CreateTemplate_XT2(TripName, CalculationMode, TransportMode);
     TTripModel.Tread2:
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo595:
+      CreateTemplate_Zumo595(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo3x0:
+      CreateTemplate_Zumo3x0(TripName, CalculationMode, TransportMode);
     else
       CreateTemplate_XT(TripName, CalculationMode, TransportMode);
   end;
@@ -4780,7 +4984,9 @@ begin
     TmRoutePreferencesAdventurousScenicRoads,
     TmRoutePreferencesAdventurousMode,
     TmRoutePreferencesAdventurousPopularPaths,
-    TmTrackToRouteInfoMap
+    TmTrackToRouteInfoMap,
+//Zumo340
+    TmShaping, TmPhoneNumber
     ]);
 end;
 

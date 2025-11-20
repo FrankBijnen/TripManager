@@ -395,8 +395,10 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, XT_Name,      '0'));
   result.Add(GetRegistry(Reg_PrefDev_Key, XT2_Name,     '1'));
   result.Add(GetRegistry(Reg_PrefDev_Key, Tread2_Name,  '2'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '3'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '4'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '4'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '5'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '6'));
 end;
 
 class function TSetProcessOptions.GetDefaultDevices: TStringList;
@@ -405,6 +407,8 @@ begin
   result.Add(XT_Name);
   result.Add(XT2_Name);
   result.Add(Tread2_Name);
+  result.Add(Zumo595Name);
+  result.Add(Zumo3x0Name);
   result.Add(Edge_Name);
   result.Add(Garmin_Name);
 end;

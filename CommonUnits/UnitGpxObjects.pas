@@ -2348,14 +2348,17 @@ end;
 
 procedure TGPXFile.UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 var
-  ViaPointCount: integer;
-  HasSubClasses: boolean;
-  Locations:     TmLocations;
+  ViaPointCount:  integer;
+  HasSubClasses:  boolean;
+  Locations:      TmLocations;
+  ParentTripName: TmParentTripName;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel = TTripModel.XT) then
     (FTripList.GetItem('mParentTripId') as TmParentTripId).AsCardinal := ParentTripId;
-  (FTripList.GetItem('mParentTripName') as TmParentTripName).AsString := FBaseFile;
+  ParentTripName := FTripList.GetItem('mParentTripName') as TmParentTripName;
+  if (Assigned(ParentTripName)) then
+    ParentTripName.AsString := FBaseFile;
 
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
