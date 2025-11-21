@@ -654,7 +654,8 @@ begin
   case TGarminModel(ModelIndex) of
     TGarminModel.GarminEdge,
     TGarminModel.GarminGeneric:
-      if (ModelDisplayed <> CmbModel.Items[ModelIndex]) then
+      if (ModelDisplayed <> CmbModel.Items[ModelIndex]) and
+         (GarminDevice.ModelDescription <> '') then
         CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
   end;
 
