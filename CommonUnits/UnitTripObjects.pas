@@ -34,7 +34,7 @@ type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
 //TODO nuvi2595
 //  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo340, Nuvi2595, Unknown);
-  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo3x0, Unknown);
+  TTripModel        = (XT, XT2, Tread2, Zumo595, Drive51, Zumo3x0, Unknown);
   //Drive 51 = 595
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
@@ -133,17 +133,17 @@ const
 //      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $16, $18);
 //      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $05, $08);
 
-// XT, XT2, TREAD 2, 595 and Drive 51, 3x0, UNKNOWN
-const Ucs4Model:          array[TTripModel] of boolean  = (true, true, true, false, false, true);
-      UdbDirAddressSize:  array[TTripModel] of integer  = (121 * 4,   121 * 4,   121 * 4,   32 * 2,    66 * 2,    121 * 4);
-      Unknown2Size:       array[TTripModel] of integer  = (150,       150,       150,       76,        72,        150);
-      Unknown3Size:       array[TTripModel] of integer  = (1288,      1448,      1348,      294,       130,       1288);
-      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $00000000, $ffffffff);
-      Unknown3ShapeOffset:array[TTripModel] of Cardinal = ($90,       $c0,       $c0,       $8e,       $66,       $90);
-      Unknown3DistOffset: array[TTripModel] of integer  = ($14,       $14,       $14,       $12,       $12,       $14);
-      Unknown3TimeOffset: array[TTripModel] of integer  = ($18,       $18,       $18,       $16,       $16,       $18);
-      VersionSize:        array[TTripModel] of integer  = ($08,       $08,       $08,       $05,       $05,       $08);
-
+// XT, XT2, TREAD 2, 595, Drive5x, 3x0, UNKNOWN
+// Assign unique sizes for model UNKNOWN to Unknown2 and Unknown3
+const Ucs4Model:          array[TTripModel] of boolean  = (true, true, true, false, false, false, true);
+      UdbDirAddressSize:  array[TTripModel] of integer  = (121 * 4,   121 * 4,   121 * 4,   32 * 2,    32 * 2,    66 * 2,    121 * 4);
+      Unknown2Size:       array[TTripModel] of integer  = (150,       150,       150,       76,        76,        72,        0);
+      Unknown3Size:       array[TTripModel] of integer  = (1288,      1448,      1348,      294,       294,       130,       512);
+      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $0170feff, $00000000, $ffffffff);
+      Unknown3ShapeOffset:array[TTripModel] of Cardinal = ($90,       $c0,       $c0,       $8e,       $8e,       $66,       $90);
+      Unknown3DistOffset: array[TTripModel] of integer  = ($14,       $14,       $14,       $12,       $12,       $12,       $14);
+      Unknown3TimeOffset: array[TTripModel] of integer  = ($18,       $18,       $18,       $16,       $16,       $16,       $18);
+      VersionSize:        array[TTripModel] of integer  = ($08,       $08,       $08,       $05,       $05,       $05,       $08);
 
 type
   TTripList = class;
@@ -913,6 +913,12 @@ type
                                   Lat, Lon: double;
                                   DepartureDate: TDateTime;
                                   Name, Address: string);
+    procedure AddLocation_Drive51(Locations: TmLocations;
+                                  ProcessOptions: TObject;
+                                  RoutePoint: TRoutePoint;
+                                  Lat, Lon: double;
+                                  DepartureDate: TDateTime;
+                                  Name, Address: string);
     procedure AddLocation_Zumo3x0(Locations: TmLocations;
                                   ProcessOptions: TObject;
                                   RoutePoint: TRoutePoint;
@@ -923,6 +929,7 @@ type
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
     procedure UpdLocsFromRoutePrefs;
@@ -4189,6 +4196,24 @@ begin
   Locations.Add(TmShapingRadius.Create);
 end;
 
+procedure TTripList.AddLocation_Drive51(Locations: TmLocations;
+                                        ProcessOptions: TObject;
+                                        RoutePoint: TRoutePoint;
+                                        Lat, Lon: double;
+                                        DepartureDate: TDateTime;
+                                        Name, Address: string);
+begin
+  Locations.AddLocation(TLocation.Create);
+  Locations.Add(TmAttr.Create(RoutePoint));
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmisTravelapseDestination.Create);
+  Locations.Add(TmShapingRadius.Create);
+  Locations.Add(TmName.Create(Name));
+end;
+
 procedure TTripList.AddLocation_Zumo3x0(Locations: TmLocations;
                                         ProcessOptions: TObject;
                                         RoutePoint: TRoutePoint;
@@ -4222,6 +4247,8 @@ begin
       AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo595:
       AddLocation_Zumo595(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+    TTripModel.Drive51:
+      AddLocation_Drive51(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo3x0:
       AddLocation_Zumo3x0(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     else
@@ -4589,15 +4616,21 @@ function TTripList.GetTripModel: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
 begin
-  // Default XT
-  result := TTripModel.XT;
+  // Default Unknown
+  result := TTripModel.Unknown;
 
   // Try to get first TmUdbDataHndl
   AnUdbHandle := FirstUdbDataHndle;
   if not Assigned(AnUdbHandle) then
     exit;
 
+  // Get model from UdnHandle
   result := AnUdbHandle.GetModel;
+
+  // 595 and drive5 share the same UDBHandle size, but the drive 51 has no mIsRoundTrip
+  if (result = TTripModel.Zumo595) and
+     (GetItem('mIsRoundTrip') = nil) then
+    result := TTripModel.Drive51;
 end;
 
 // Is the TripList calculated? Need UDBdir > 0
@@ -4824,6 +4857,32 @@ begin
   ForceRecalc(TTripModel.Zumo595, 2);
 end;
 
+procedure TTripList.CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
+begin
+  AddHeader(THeader.Create);
+  Add(TmOptimized.Create);
+  Add(TmParentTripId.Create(0));
+  Add(TmDayNumber.Create);
+  Add(TmTripDate.Create);
+  Add(TmParentTripName.Create(TripName));
+  Add(TmTotalTripTime.Create);
+  Add(TmImported.Create);
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmAvoidancesChanged.Create);
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+  Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmLocations.Create);
+  Add(TmTotalTripDistance.Create);
+  Add(TmVersionNumber.Create(1, 6));
+  Add(TmAllRoutes.Create);
+  Add(TmTripName.Create(TripName));
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Drive51, 2);
+end;
+
+
 procedure TTripList.CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
 begin
   AddHeader(THeader.Create);
@@ -4854,6 +4913,8 @@ begin
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo595:
       CreateTemplate_Zumo595(TripName, CalculationMode, TransportMode);
+    TTripModel.Drive51:
+      CreateTemplate_Drive51(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo3x0:
       CreateTemplate_Zumo3x0(TripName, CalculationMode, TransportMode);
     else

@@ -2927,7 +2927,7 @@ var
       VlTripInfo.Strings.AddPair('*** mLocations', DupeString('-', DupeCount),
                                  TGridSelItem.Create(AmLocations));
 
-      VlTripInfo.Strings.AddPair('Size', Format('Size: %d', [LenValue]),
+      VlTripInfo.Strings.AddPair('Size', Format('%d', [LenValue]),
                                  TGridSelItem.Create(AmLocations,
                                                      SizeOf(LenValue),
                                                      AmLocations.OffsetLenValue));
@@ -3175,15 +3175,15 @@ var
                                  TGridSelItem.Create(AHeader));
       VlTripInfo.Strings.AddPair('ID', string(ID),
                                  TGridSelItem.Create(AHeader, SizeOf(ID)));
-      VlTripInfo.Strings.AddPair('SubLength',     Format('%d', [SubLength]),
+      VlTripInfo.Strings.AddPair('Size',          Format('%d', [SubLength]),
                                  TGridSelItem.Create(AHeader,
                                                      SizeOf(SubLength),
                                                      OffsetInRecord(HeaderValue, SubLength) ));
-      VlTripInfo.Strings.AddPair('HeaderLength',  Format('%d', [HeaderLength]),
+      VlTripInfo.Strings.AddPair('Datatype',      Format('%d', [HeaderLength]),
                                  TGridSelItem.Create(AHeader,
                                                      SizeOf(HeaderLength),
                                                      OffsetInRecord(HeaderValue, HeaderLength) ));
-      VlTripInfo.Strings.AddPair('TotalItems',    Format('%d', [TotalItems]),
+      VlTripInfo.Strings.AddPair('Item count',    Format('%d', [TotalItems]),
                                  TGridSelItem.Create(AHeader,
                                                      SizeOf(TotalItems),
                                                      OffsetInRecord(HeaderValue, TotalItems) ));
@@ -4275,12 +4275,14 @@ begin
     if (ParentTripName = TripName) then
       ParentTripName := ''
     else
-      ParentTripName := Format(' (%s)', [ParentTripName]);
-    PnlTripGpiInfo.Caption := Format('%sTrip: %s, Model: %s%s', [TripFileName, TripName, ATripList.ModelDescription, ParentTripName]);
+      ParentTripName := Format(', (%s)', [ParentTripName]);
+    PnlTripGpiInfo.Caption := Format('%sTrip: %s%s', [TripFileName, TripName, ParentTripName]);
 
     TvTrip.Items.Clear;
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
-    TvTrip.Items.AddChildObject(RootNode, ATripList.Header.ClassName, ATripList.Header);
+    TvTrip.Items.AddChildObject(RootNode,
+                                Format('%s (%s)', [ATripList.Header.ClassName, ATripList.ModelDescription]),
+                                ATripList.Header);
 
     for ANItem in ATripList.ItemList do
     begin
