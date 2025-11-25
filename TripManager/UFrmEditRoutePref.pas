@@ -58,7 +58,7 @@ begin
     Locations := CurTripList.GetItem('mLocations') as TmLocations;
     for ViaPt := 1 to Locations.ViaPointCount -1 do
     begin
-      Locations.GetRoutePoints(ViaPt, RoutePointList);
+      Locations.GetSegmentPoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
       Location.RoutePref := TRoutePreference.rmFasterTime;
       Location.AdvLevel := TAdvlevel.advNA;
@@ -120,7 +120,7 @@ begin
     Locations := CurTripList.GetItem('mLocations') as TmLocations;
     for ViaPt := 1 to Locations.ViaPointCount do
     begin
-      Locations.GetRoutePoints(ViaPt, RoutePointList);
+      Locations.GetSegmentPoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
       if (IntToIdent(Ord(Location.RoutePref), RoutePreference, RoutePreferenceMap)) then
       begin

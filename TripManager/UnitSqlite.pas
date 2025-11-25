@@ -283,7 +283,7 @@ begin
 
       while not QTab.EOF do
       begin
-        ACds.Insert;
+        ACds.Append;
         for Index := 0 to QTab.ColCount -1 do
         begin
           case Acds.Fields[Index].DataType of

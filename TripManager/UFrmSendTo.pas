@@ -101,19 +101,22 @@ const
 procedure TFrmSendTo.EnableItems;
 begin
   TvSelections.Items[IdTrip].Enabled := GetRegistry(Reg_EnableTripFuncs, false);
-  TvSelections.Items[IdWayPoint].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdWayPointWpt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdWayPointVia].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdWayPointShp].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdGpi].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdGpiWayPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdGpiViaPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdGpiShpPt].Enabled := (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdTrack].Enabled := GetRegistry(Reg_EnableGpxFuncs, false);
+  TvSelections.Items[IdCompleteRoute].Enabled := GetRegistry(Reg_EnableGpxFuncs, false);
+  TvSelections.Items[IdStrippedRoute].Enabled := GetRegistry(Reg_EnableGpxFuncs, false);
+  TvSelections.Items[IdWayPoint].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdWayPointWpt].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdWayPointVia].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdWayPointShp].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpi].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpiWayPt].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpiViaPt].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpiShpPt].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdFit].Enabled := GetRegistry(Reg_EnableFitFuncs, false);
 
   case PCTDestination.ActivePageIndex of
     0:begin
-        TvSelections.Items[IdCompleteRoute].Enabled := true;
+        TvSelections.Items[IdCompleteRoute].Enabled := GetRegistry(Reg_EnableGpxFuncs, false);
         TvSelections.Items[IdKml].Enabled := false;
         TvSelections.Items[IdHtml].Enabled := false;
       end;
@@ -172,11 +175,13 @@ begin
             Format('.fit files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
                     TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey), #10]);
 
-        LblDestinations.Caption := LblDestinations.Caption +
-          Format('.gpx files:%s %s%s',    [#9, GetRegistry(Reg_PrefDevGpxFolder_Key,
-                    TSetProcessOptions.GetKnownPath(ModelIndex, 1), SubKey), #10]);
+        if GetRegistry(Reg_EnableGpxFuncs, false) then
+          LblDestinations.Caption := LblDestinations.Caption +
+            Format('.gpx files:%s %s%s',    [#9, GetRegistry(Reg_PrefDevGpxFolder_Key,
+                      TSetProcessOptions.GetKnownPath(ModelIndex, 1), SubKey), #10]);
 
-        if (GetRegistry(Reg_EnableFitFuncs, false) = false) then
+        if (GetRegistry(Reg_EnableGpiFuncs, false)) and
+           (GetRegistry(Reg_EnableFitFuncs, false) = false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.gpi files:%s %s',    [#9,  GetRegistry(Reg_PrefDevPoiFolder_Key,
                     TSetProcessOptions.GetKnownPath(ModelIndex, 2), SubKey), #10]);

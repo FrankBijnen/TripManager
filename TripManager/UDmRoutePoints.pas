@@ -515,12 +515,10 @@ begin
       begin
         CdsRoutePoints.Insert; // Id is autoassigned
 
-        // TmAttr
-        CdsRoutePointsViaPoint.AsBoolean := false;
-        ANItem := TLocation(Location).LocationTmAttr;
-        if (Assigned(ANItem)) and
-           (Pos('Via', TmAttr(ANItem).AsString) = 1) then
-          CdsRoutePointsViaPoint.AsBoolean := true;
+        // TmAttr, tmShaping
+        if (TLocation(Location).IsViaPoint) then
+          CdsRoutePointsViaPoint.AsBoolean := TLocation(Location).IsViaPoint;
+
         // TmName
         ANItem := TLocation(Location).LocationTmName;
         if (Assigned(ANItem)) then

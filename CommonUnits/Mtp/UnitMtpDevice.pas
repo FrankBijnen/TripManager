@@ -32,9 +32,11 @@ type
   end;
 
   TMTP_Device = class(TObject)
+    ID: integer;
     Device: string;
     Description: string;
     FriendlyName: string;
+    Serial: string;
     PortableDev: IMTPDevice;
     function DisplayedDevice: string;
   end;

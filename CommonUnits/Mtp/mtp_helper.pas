@@ -518,10 +518,28 @@ begin
   result := (Hr = S_OK);
 end;
 
-function GetDevId(RawDevice:string):widestring;
+function GetDevId(RawDevice: WideString): WideString;
 begin
-  Result := RawDevice;
-  Result := Trim(Copy(Result, Pos(widestring('\\?'), Result), Length(Result)));
+  Result := Trim(Copy(RawDevice, Pos(WideString('\\?'), RawDevice)));
+end;
+
+function GetSerial(var IDeviceName: string): string;
+var
+  TempDev: string;
+  NextVal: string;
+begin
+  result := '';
+  TempDev := IDeviceName;
+  NextVal := NextField(TempDev, '#');
+  while (NextVal <> '') do
+  begin
+    if (Pos('{', NextVal) > 0) and
+       (Pos('}', NextVal) > 0) then // A GUID?
+      break;
+    result := NextVal;
+    NextVal := NextField(TempDev, '#');
+  end;
+  result := NextField(result, '&');
 end;
 
 function IsDirectory(Prop_Val: IPortableDeviceValues): Boolean;
@@ -866,10 +884,13 @@ begin
 
       //  Create device object
       AMTP_Device := TMTP_Device.Create;
+      AMTP_Device.ID := I;
       AMTP_Device.Description := Trim(DevDescription);
       AMTP_Device.FriendlyName := Trim(DevFriendlyName);
-      AMTP_Device.Device := GetDevId(Trim(PDevs[I]));
+      AMTP_Device.Device := GetDevId(PDevs[I]);
+      AMTP_Device.Serial := GetSerial(AMTP_Device.Device);
       AMTP_Device.PortableDev := nil;
+
       result.Add(AMTP_Device);
     end;
   end;

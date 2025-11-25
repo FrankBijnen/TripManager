@@ -9,6 +9,7 @@ uses
 const
   // Device recognition constants
   InternalStorage                 = 'Internal Storage\';
+  SystemTrips                     = '.System\Trips';
   NonMTPRoot                      = '?:\';
   Garmin                          = 'Garmin';
   SettingsDb                      = 'settings.db';
@@ -65,7 +66,7 @@ const
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
   Reg_PrefDev_Key                 = 'PrefDevice';
   Reg_PrefDevTripsFolder_Key      = 'PrefDeviceTripsFolder';
-  Reg_PrefDevTripsFolder_Val      = InternalStorage + '.System\Trips';
+  Reg_PrefDevTripsFolder_Val      = InternalStorage + SystemTrips;
 
   Reg_PrefDevGpxFolder_Key        = 'PrefDeviceGpxFolder';
   Reg_PrefDevGpxFolder_Val        = InternalStorage + 'GPX';
@@ -74,6 +75,8 @@ const
   Reg_EnableDirFuncs              = 'EnableDirFuncs';
   Reg_EnableFitFuncs              = 'EnableFitFuncs';
   Reg_EnableTripFuncs             = 'EnableTripFuncs';
+  Reg_EnableGpxFuncs              = 'EnableGpxFuncs';
+  Reg_EnableGpiFuncs              = 'EnableGpiFuncs';
   Reg_TripColor_Key               = 'TripColor';
   Reg_TripColor_Val               = 'Magenta';
   Reg_Maximized_Key               = 'Maximized';
@@ -396,9 +399,10 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, XT2_Name,     '1'));
   result.Add(GetRegistry(Reg_PrefDev_Key, Tread2_Name,  '2'));
   result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '4'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '5'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '6'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Drive51Name,  '4'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '5'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '6'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '7'));
 end;
 
 class function TSetProcessOptions.GetDefaultDevices: TStringList;
@@ -408,6 +412,7 @@ begin
   result.Add(XT2_Name);
   result.Add(Tread2_Name);
   result.Add(Zumo595Name);
+  result.Add(Drive51Name);
   result.Add(Zumo3x0Name);
   result.Add(Edge_Name);
   result.Add(Garmin_Name);
@@ -455,6 +460,12 @@ begin
     exit(TGarminModel.XT2)
   else if (ContainsText(ModelDescription, XT_Name)) then
     exit(TGarminModel.XT)
+  else if (ContainsText(ModelDescription, Zumo595Name)) then
+    exit(TGarminModel.Zumo595)
+  else if (ContainsText(ModelDescription, Drive51Name)) then
+    exit(TGarminModel.Drive51)
+  else if (ContainsText(ModelDescription, Zumo3x0Name)) then
+    exit(TGarminModel.Zumo3x0)
   else if (ContainsText(ModelDescription, Garmin_Name)) then
     exit(TGarminModel.GarminGeneric)
   else if (ContainsText(ModelDescription, Edge_Name)) then
@@ -482,13 +493,26 @@ begin
         1: result := Reg_PrefDevGpxFolder_Val;
         2: result := Reg_PrefDevPoiFolder_Val;
       end;
+    TGarminModel.Zumo595,
+    TGarminModel.Drive51:
+      case PathId of
+        0: result := SystemTrips;
+        1: result := GarminDevice.GpxPath;
+        2: result := GarminDevice.GpiPath;
+      end;
+    TGarminModel.Zumo3x0:
+      case PathId of
+        0: result := NonMTPRoot + SystemTrips;
+        1: result := GarminDevice.GpxPath;
+        2: result := GarminDevice.GpiPath;
+      end;
     TGarminModel.GarminEdge:
       case PathId of
         0: result := GarminDevice.CoursePath;
         1: result := GarminDevice.NewFilesPath;
         2: result := GarminDevice.ActivitiesPath;
       end;
-    TGarminModel.GarminGeneric:
+    else
       case PathId of
         1: result := GarminDevice.GpxPath;
         2: result := GarminDevice.GpiPath;

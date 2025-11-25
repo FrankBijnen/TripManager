@@ -124,8 +124,11 @@ uses
 procedure TFrmTripEditor.BtnCancelClick(Sender: TObject);
 begin
 // Restore Trip
-  if  Assigned(FTripFileCanceled) then
-      FTripFileCanceled(Self);
+  if (fsModal in FormState) then
+    exit;
+
+  if Assigned(FTripFileCanceled) then
+    FTripFileCanceled(Self);
 
   Close;
 end;
@@ -147,6 +150,9 @@ end;
 
 procedure TFrmTripEditor.BtnOkClick(Sender: TObject);
 begin
+  if (fsModal in FormState) then
+    exit;
+
   SaveChanges;
 
   if Assigned(FTripFileUpdated) then
@@ -306,8 +312,12 @@ end;
 
 procedure TFrmTripEditor.FormShow(Sender: TObject);
 begin
+// Clear treeview to avoid AV's when the TripList's items are deleted
+  if Assigned(FTripFileUpdating) then
+    FTripFileUpdating(Self);
   if Assigned(FRoutePointsShowing) then
     FRoutePointsShowing(Self, true);
+
   GrpRoute.Caption := '';
   if (CurDevice) then
     GrpRoute.Caption := 'Device ';

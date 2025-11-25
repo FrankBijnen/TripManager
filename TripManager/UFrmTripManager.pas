@@ -295,7 +295,7 @@ type
     procedure MnuPrevDiffClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure CheckandFixcurrentgpx1Click(Sender: TObject);
-    procedure BgDeviceItems0Click(Sender: TObject);
+    procedure BgDeviceItemsTripsClick(Sender: TObject);
     procedure CmbSQliteTabsChange(Sender: TObject);
     procedure CdsDeviceDbAfterOpen(DataSet: TDataSet);
     procedure CdsDeviceDbAfterScroll(DataSet: TDataSet);
@@ -305,6 +305,7 @@ type
     procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ActInstalledDocExecute(Sender: TObject);
     procedure ActInstalledDocUpdate(Sender: TObject);
+    procedure BgDeviceItemsGpxPoiClick(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -365,8 +366,9 @@ type
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure ReadDeviceDB;
     function ReadGarminDevice(const ModelDescription: string): TGarminDevice;
-    procedure GuessModel(const FriendlyName: string);
+    procedure GuessModel(const DisplayedDevice: string);
     function DeviceIdInList(const DeviceName: string): integer;
+    function KnownDeviceIndex(KnownDevices: TStringList): integer;
     procedure SelectDevice(const Indx: integer); overload;
     procedure SelectDeviceByName(const Device: string = '');
     procedure SelectDeviceById(const Device: string);
@@ -375,6 +377,7 @@ type
     function CheckDevice(RaiseException: boolean = true): boolean;
     procedure GetDeviceList;
     function GetDevicePath(const CompletePath: string): string;
+    procedure SetDeviceDisplayPath;
     function GetSelectedFile: string;
     procedure SetSelectedFile(AFile: string);
     procedure SetCurrentPath(const APath: string);
@@ -397,6 +400,7 @@ type
     procedure OnSetPostProcessPrefs(Sender: TObject);
     procedure ReadSettings;
     procedure ClearTripInfo;
+    procedure InstallTripEdit;
     procedure EditTrip(NewFile: boolean);
     procedure SyncDiff(Sender: TObject);
   protected
@@ -565,7 +569,7 @@ end;
 
 function TFrmTripManager.ReadGarminDevice(const ModelDescription: string): TGarminDevice;
 var
-  DevicePath: string;
+  CurDevId, DevId: integer;
   NFile: string;
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
@@ -595,19 +599,45 @@ begin
   result.Init;
   result.GarminModel := TSetProcessOptions.GetModelFromDescription(ModelDescription);
 
-// Need a device to check better
+  // Need a device to check better
   if not CheckDevice(false) then
     exit;
 
-// Location of GarminDevice.Xml
-  if (result.GarminModel in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) then
-    DevicePath := InternalStorage + Garmin
-  else
-    DevicePath := NonMTPRoot + Garmin;
-
-// Copy and read GarminDevice.xml
+  // Location of GarminDevice.Xml
   NFile := GarminDeviceXML;
-  if (CopyDeviceFile(DevicePath, NFile)) then
+
+  // Copy and read GarminDevice.xml
+  CurDevId := CurrentDevice.Id;
+  DeleteFile(GetDeviceTmp + NFile);
+  try
+    if not (CopyDeviceFile(NonMTPRoot + Garmin, NFile)) and
+       not (CopyDeviceFile(InternalStorage + Garmin, NFile)) then
+    begin
+      // There is no garmindevice in ?:\Garmin, or Internal Storage\Garmin
+      // Check other devices with the same serialId.
+      // It could be the SD Card, or a hidden MTP partition as found with the 595
+      for DevId := 0 to DeviceList.Count -1 do
+      begin
+        if DevId = CurDevId then
+          continue;
+        if (TMTP_Device(DeviceList[DevId]).Serial = TMTP_Device(DeviceList[CurDevId]).Serial) then
+        begin
+          CurrentDevice := DeviceList[DevId];
+          if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev, true)) then
+          begin
+            if (CopyDeviceFile(NonMTPRoot + Garmin, NFile)) or
+               (CopyDeviceFile(InternalStorage + Garmin, NFile)) then
+             break;
+          end;
+        end;
+      end;
+    end;
+  finally
+    CurrentDevice := DeviceList[CurDevId];
+  end;
+
+  // Do we have the XML?
+  if (FileExists(GetDeviceTmp + NFile)) then
   begin
     XmlDoc := TXmlVSDocument.Create;
     try
@@ -641,12 +671,12 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.GuessModel(const FriendlyName: string);
+procedure TFrmTripManager.GuessModel(const DisplayedDevice: string);
 var
   ModelDisplayed: string;
   ModelIndex: integer;
 begin
-  ModelDisplayed := FriendlyName;
+  ModelDisplayed := DisplayedDevice;
   GarminDevice := ReadGarminDevice(ModelDisplayed);
   ModelIndex := Ord(GarminDevice.GarminModel);
 
@@ -901,9 +931,15 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.BgDeviceItems0Click(Sender: TObject);
+procedure TFrmTripManager.BgDeviceItemsTripsClick(Sender: TObject);
 begin
   if (CmbModel.ItemIndex in [Ord(TGarminModel.GarminGeneric), Ord(TGarminModel.Unknown)]) then
+    Abort;
+end;
+
+procedure TFrmTripManager.BgDeviceItemsGpxPoiClick(Sender: TObject);
+begin
+  if (CmbModel.ItemIndex in [Ord(TGarminModel.Zumo595), Ord(TGarminModel.Drive51)]) then
     Abort;
 end;
 
@@ -1014,7 +1050,7 @@ begin
 
       GetFileFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId, ShellTreeView1.Path, AnItem.Caption);
     end;
-    EdDeviceFolder.Text := FCurrentPath;
+    SetDeviceDisplayPath;
     ShellListView1.Refresh;
   finally
     SetCursor(CrNormal);
@@ -1197,7 +1233,7 @@ begin
                   continue;
                 end;
                 if (not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
-                  raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.FriendlyName]));
+                  raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.DisplayedDevice]));
               end;
 
               // Transfer
@@ -1208,7 +1244,7 @@ begin
               // Did the transfer work?
               if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
                 raise Exception.Create(Format('Could not overwrite file: %s on %s',
-                                              [ExtractFileName(TempFile), CurrentDevice.FriendlyName]));
+                                              [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
 
               Rc := FindNext(Fs);
             end;
@@ -1320,12 +1356,21 @@ begin
   result := EditMapCoords.Text;
 end;
 
+procedure TFrmTripManager.InstallTripEdit;
+begin
+// Set FrmTripEditor Events
+  FrmTripEditor.OnTripFileCanceled := TripFileCanceled;
+  FrmTripEditor.OnTripFileUpdating := TripFileUpdating;
+  FrmTripEditor.OnTripFileUpdated := TripFileUpdated;
+  FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
+
+// Set DmRoutePoints events
+  DmRoutePoints.OnGetMapCoords := GetMapCoords;
+  DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
+end;
+
 procedure TFrmTripManager.EditTrip(NewFile: boolean);
 begin
-// Clear treeview to avoid AV's when the TripList's items are deleted
-  TvTrip.Items.Clear;
-  ClearTripInfo;
-
 // Create new empty triplist?
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
@@ -1340,19 +1385,11 @@ begin
   FrmTripEditor.CurNewFile := NewFile;
 
 // Set FrmTripEditor Events
-  FrmTripEditor.OnTripFileCanceled := TripFileCanceled;
-  FrmTripEditor.OnTripFileUpdating := TripFileUpdating;
-  FrmTripEditor.OnTripFileUpdated := TripFileUpdated;
-  FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
-
-// Set DmRoutePoints events
-  DmRoutePoints.OnGetMapCoords := GetMapCoords;
-  DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
+  InstallTripEdit;
 
 // Position left from the map.
   FrmTripEditor.Top := Top;
   FrmTripEditor.Left := Left;
-  FrmTripEditor.Show;
 end;
 
 procedure TFrmTripManager.ReloadTripOnMap(Sender: TObject);
@@ -1482,6 +1519,9 @@ begin
     (ATripList.GetItem('mAllRoutes') = nil) then
     exit;
 
+  // Handlers
+  EditTrip(false);
+
   TagsToShow := TTagsToShow(TMenuItem(Sender).Tag);  //Rte = 20, Track = 30
   OpenTrip.DefaultExt := GpxExtension;
   OpenTrip.Filter := GpxMask + '|' + GpxMask;
@@ -1522,11 +1562,9 @@ begin
           GPXFileObj.CompareGpxTrack(FrmShowLog.LbLog.Items, OsmTrack);
       end;
 
-//TODO: Universal route generation
-//      for Index := 0 to FrmShowLog.LbLog.Items.Count -1 do
-//        FrmShowLog.LbLog.Header[Index] := not (ContainsText(FrmShowLog.LbLog.Items[Index], ' .trip file')) and
       for Index := 0 to FrmShowLog.LbLog.Items.Count -1 do
-        FrmShowLog.LbLog.Header[Index] := true;
+        FrmShowLog.LbLog.Header[Index] := not (ContainsText(FrmShowLog.LbLog.Items[Index], TripFile)) and
+                                          not (ContainsText(FrmShowLog.LbLog.Items[Index], GpxFile));
 
       DeleteCompareFiles;
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
@@ -1536,6 +1574,7 @@ begin
                                               GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
       FrmShowLog.FSyncTreeview := SyncDiff;
+      FrmShowLog.CompareGpx := OpenTrip.FileName;
       FrmShowLog.Show;
     end;
   finally
@@ -1588,8 +1627,8 @@ begin
   if (not CheckDevice(false)) then
     exit;
 
-  // Make drive letter a ?. Allow wildcard.
   CurrentDevicePath := GetDevicePath(FCurrentPath);
+  // Make drive letter a ?. Allow WildCard.
   if (Copy(CurrentDevicePath, 2, 2) = ':\') then
     CurrentDevicePath[1] := '?';
 
@@ -1731,7 +1770,7 @@ procedure TFrmTripManager.EdFileSysFolderKeyPress(Sender: TObject; var Key: Char
 begin
   if (Key = #13) then
   begin
-    ShellTreeView1.Path := EdFileSysFolder.Text;
+    ShellTreeView1.Path := TPath.GetFullPath(EdFileSysFolder.Text);
     Key := #0;
   end;
 end;
@@ -1827,6 +1866,7 @@ begin
   begin
     HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + FrmNewTrip.EdNewTrip.Text, TripExtension);
     EditTrip(true);
+    FrmTripEditor.Show;
   end;
 end;
 
@@ -1841,6 +1881,7 @@ begin
   begin
     HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + FrmNewTrip.EdNewTrip.Text, TripExtension);
     EditTrip(true);
+    FrmTripEditor.Show;
   end;
 end;
 
@@ -1934,6 +1975,7 @@ end;
 procedure TFrmTripManager.MnuTripEditClick(Sender: TObject);
 begin
   EditTrip(false);
+  FrmTripEditor.Show;
 end;
 
 procedure TFrmTripManager.EditMapCoordsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2087,13 +2129,18 @@ end;
 procedure TFrmTripManager.GetDeviceList;
 var
   Index: integer;
+  ModelDisplayed: string;
 begin
   CurrentDevice := nil;
   FreeDevices;
   LstFiles.Clear;
+
   DeviceList := GetDevices;
   for Index := 0 to DeviceList.Count - 1 do
-    CmbDevices.Items.Add(TMTP_Device(DeviceList[Index]).DisplayedDevice);
+  begin
+    ModelDisplayed := TMTP_Device(DeviceList[Index]).DisplayedDevice;
+    CmbDevices.Items.Add(ModelDisplayed);
+  end;
 end;
 
 procedure TFrmTripManager.SelectDevice(const Indx: integer);
@@ -2108,19 +2155,33 @@ begin
 
   CurrentDevice := DeviceList[Indx];
   if not ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev, false) then
-    raise exception.Create(Format('Device %s could not be opened.', [CurrentDevice.FriendlyName]));
+    raise exception.Create(Format('Device %s could not be opened.', [CurrentDevice.DisplayedDevice]));
 
-  // Guess model from FriendlyName
-  GuessModel(CurrentDevice.FriendlyName);
+  // Guess model from DisplayedDevice
+  GuessModel(CurrentDevice.DisplayedDevice);
 
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
 end;
 
+function TFrmTripManager.KnownDeviceIndex(KnownDevices: TStringList): integer;
+var
+  KnownIndex, DevIndex: integer;
+begin
+  result := -1;
+  for KnownIndex := 0 to KnownDevices.Count -1 do
+  begin
+    for DevIndex := 0 to DeviceList.Count -1 do
+    begin
+      if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[DevIndex]).DisplayedDevice)) then
+        exit(DevIndex);
+    end;
+  end;
+end;
+
 procedure TFrmTripManager.SelectDeviceByName(const Device: string = '');
 var
-  Index: integer;
   KnownDevices: TStringList;
 begin
   if (Device <> '') then
@@ -2134,17 +2195,8 @@ begin
   try
     CmbDevices.ItemIndex := -1;
     CmbDevices.Text := SelectMTPDevice;
-
-    for Index := 0 to DeviceList.Count - 1 do
-    begin
-      // Does this device match our registry setting? Select right away
-      if (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
-      begin
-        CmbDevices.ItemIndex := Index;
-        SelectDevice(Index);
-        break;
-      end;
-    end;
+    CmbDevices.ItemIndex := KnownDeviceIndex(KnownDevices);
+    SelectDevice(CmbDevices.ItemIndex);
   finally
     KnownDevices.Free;
   end;
@@ -2199,17 +2251,19 @@ begin
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
 
   case TGarminModel(ModelIndex) of
+    TGarminModel.Zumo595,
+    TGarminModel.Drive51:
+      begin
+        BgDevice.Items[1].Caption := 'Unused';
+        BgDevice.Items[2].Caption := 'Unused';
+      end;
     TGarminModel.GarminEdge:
       begin
         BgDevice.Items[0].Caption := 'Courses';
         BgDevice.Items[1].Caption := 'NewFiles';
         BgDevice.Items[2].Caption := 'Activities';
       end;
-    TGarminModel.GarminGeneric:
-      begin
-        BgDevice.Items[0].Caption := 'Unused';
-        BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
-      end;
+    TGarminModel.GarminGeneric,
     TGarminModel.Unknown:
       begin
         BgDevice.Items[0].Caption := 'Unused';
@@ -2218,7 +2272,9 @@ begin
   end;
 
   SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in
-     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Zumo3x0]));
+     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
+  SetRegistry(Reg_EnableGpxFuncs, not (TGarminModel(ModelIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]));
+  SetRegistry(Reg_EnableGpiFuncs, not (TGarminModel(ModelIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableFitFuncs, (TGarminModel(ModelIndex) in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_CurrentModel, ModelIndex);
 end;
@@ -2230,13 +2286,22 @@ begin
 end;
 
 function TFrmTripManager.GetDevicePath(const CompletePath: string): string;
-var P: integer;
+var
+  P: integer;
 begin
   result := CompletePath;
+
   P := Pos('\', result);
   if (P > 1) and
      (Pos(':\', result) = 0) then
     result := Copy(result, P + 1, Length(result));
+end;
+
+procedure TFrmTripManager.SetDeviceDisplayPath;
+begin
+  EdDeviceFolder.Text := DeviceFolder[BgDevice.ItemIndex];
+  if (Pos(':', EdDeviceFolder.Text) <> 2) then
+    EdDeviceFolder.Text := IncludeTrailingPathDelimiter(CurrentDevice.FriendlyName) + EdDeviceFolder.Text;
 end;
 
 procedure TFrmTripManager.SetCurrentPath(const APath: string);
@@ -3671,7 +3736,7 @@ begin
   if (SelCount = 0) then
   begin
     MessageDlg(Format('No %s are selected to delete from %s.', [ObjectName[AllowRecurse],
-                                                                CurrentDevice.FriendlyName]),
+                                                                CurrentDevice.DisplayedDevice]),
                  TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
     exit;
   end;
@@ -3691,7 +3756,7 @@ begin
   // Prompt for verification
   if (MessageDlg(Format('%d %s will be deleted from %s.', [SelCount,
                                                            ObjectName[AllowRecurse],
-                                                           CurrentDevice.FriendlyName]),
+                                                           CurrentDevice.DisplayedDevice]),
                  TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> ID_OK) then
     exit;
 
@@ -3717,7 +3782,7 @@ begin
       if not DelFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId, AllowRecurse) then
         raise Exception.Create(Format('Could not remove %s: %s on %s', [ObjectName[AllowRecurse],
                                                                         ANitem.Caption,
-                                                                        CurrentDevice.FriendlyName]));
+                                                                        CurrentDevice.DisplayedDevice]));
     end;
 
     ReloadFileList;
@@ -4041,7 +4106,7 @@ begin
 
     // Save Device and folder info
     DeviceFolder[BgDevice.ItemIndex] := GetDevicePath(FCurrentPath);
-    EdDeviceFolder.Text := IncludeTrailingPathDelimiter(CurrentDevice.FriendlyName) + DeviceFolder[BgDevice.ItemIndex];
+    SetDeviceDisplayPath;
 
     // Trips need to be checked, and tripname filled
     case BgDevice.ItemIndex of
@@ -4198,7 +4263,7 @@ var
         begin
           FirstLocation := false;
           if (TmArrival(ANItem).AsUnixDateTime <> 0) then
-            PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Departure: u' + TmArrival(ANItem).AsString;
+            PnlTripGpiInfo.Caption := PnlTripGpiInfo.Caption + ', Departure: ' + TmArrival(ANItem).AsString;
         end;
         TvTrip.Items.AddChildObject(CurrentLocation, TBaseDataItem(ANItem).DisplayName, ANItem);
         if (ANItem is TmName) then
@@ -4594,7 +4659,7 @@ var
 begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   if (Assigned(CurrentDevice)) then
-    GuessModel(CurrentDevice.FriendlyName)
+    GuessModel(CurrentDevice.DisplayedDevice)
   else
     GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
 
@@ -4785,7 +4850,7 @@ end;
 
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
-  Index: integer;
+  KnownIndex, Index: integer;
   SelectedDevice: string;
   KnownDevices: TStringList;
 begin
@@ -4804,7 +4869,7 @@ begin
     begin
       Index := DeviceIdInList(DeviceName);  // List before remove
       if (Index > -1) then
-        ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Disconnected');
+        ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Disconnected');
     end;
 
     // rebuild device list
@@ -4823,15 +4888,20 @@ begin
        (SelectedDevice = '') then
     begin
       Index := DeviceIdInList(DeviceName); // List after insert
-      if (Index > -1) and
-         (KnownDevices.IndexOf(TMTP_Device(DeviceList[Index]).FriendlyName) > -1) then
+      if (Index > -1) then
       begin
-        ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).FriendlyName, 'Connected');
+        for KnownIndex := 0 to KnownDevices.Count -1 do
+        begin
+          if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[Index]).DisplayedDevice)) then
+          begin
+            ConnectedDeviceChanged(Format('%d=%s', [Index, TMTP_Device(DeviceList[Index]).DisplayedDevice]), 'Connected');
 
-        CmbDevices.ItemIndex := Index;
-        SelectDevice(Index);
-        ReadDeviceDB;
-        BgDeviceClick(BgDevice);
+            CmbDevices.ItemIndex := Index;
+            SelectDevice(Index);
+            ReadDeviceDB;
+            BgDeviceClick(BgDevice);
+          end;
+        end;
       end;
     end;
   finally
