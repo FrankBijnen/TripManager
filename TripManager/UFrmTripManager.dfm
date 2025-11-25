@@ -161,16 +161,16 @@ object FrmTripManager: TFrmTripManager
           Margins.Top = 4
           Margins.Right = 1
           Align = alRight
+          Style = csDropDownList
           Constraints.MinWidth = 40
           TabOrder = 3
-          Text = 'Unknown'
           OnChange = CmbModelChange
           Items.Strings = (
             'XT'
             'XT2'
             'Tread 2'
             'zumo 595'
-            'Drive 51'
+            'Drive 51 '
             'z'#363'mo 3x0'
             'Edge'
             'Garmin'

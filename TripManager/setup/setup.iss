@@ -148,5 +148,12 @@ begin
   RegDeleteValue(HKCU, RegKey, 'ExploreUuid');
   RegDeleteValue(HKCU, RegKey, 'ForceRecalc');     
   RegDeleteValue(HKCU, RegKey, 'AddSubClasses');    
-  RegDeleteValue(HKCU, RegKey, 'WarnModel');    
+  RegDeleteValue(HKCU, RegKey, 'WarnModel');  
+  // Temporary. Remove with release
+  RegDeleteKeyIncludingSubkeys(HKCU, RegKey + '\4');  
+  RegDeleteKeyIncludingSubkeys(HKCU, RegKey + '\5');  
+  RegDeleteKeyIncludingSubkeys(HKCU, RegKey + '\6');  
+  RegDeleteKeyIncludingSubkeys(HKCU, RegKey + '\7');  
+  RegDeleteKeyIncludingSubkeys(HKCU, RegKey + '\8');  
+  
 end;

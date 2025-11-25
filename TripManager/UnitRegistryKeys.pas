@@ -496,9 +496,7 @@ begin
     TGarminModel.Zumo595,
     TGarminModel.Drive51:
       case PathId of
-        0: result := SystemTrips;
-        1: result := GarminDevice.GpxPath;
-        2: result := GarminDevice.GpiPath;
+        0: result := NonMTPRoot + SystemTrips;
       end;
     TGarminModel.Zumo3x0:
       case PathId of

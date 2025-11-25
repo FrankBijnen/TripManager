@@ -570,7 +570,7 @@ end;
 function TFrmTripManager.ReadGarminDevice(const ModelDescription: string): TGarminDevice;
 var
   CurDevId, DevId: integer;
-  NFile: string;
+  NFile, FriendlyPath: string;
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
 
@@ -653,8 +653,14 @@ begin
       // Update model from GarminDevice.xml
       result.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
       result.GarminModel := TSetProcessOptions.GetModelFromDescription(result.ModelDescription);
-      if (result.GarminModel = TGarminModel.Unknown) then
-        result.GarminModel := ModelFromGarminDevice(result.ModelDescription);
+      case result.GarminModel of
+        TGarminModel.Zumo595,
+        TGarminModel.Drive51:
+          if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTrips, FriendlyPath) = '') then
+            result.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
+        TGarminModel.Unknown:
+          result.GarminModel := ModelFromGarminDevice(result.ModelDescription);
+      end;
 
       // Get default paths
       if (Assigned(MassStorageNode)) then
@@ -681,6 +687,8 @@ begin
   ModelIndex := Ord(GarminDevice.GarminModel);
 
   // Change description for 'old' Garmin units and Edge
+  CmbModel.items[Ord(TGarminModel.GarminEdge)] := Edge_Name;
+  CmbModel.items[Ord(TGarminModel.GarminGeneric)] := Garmin_Name;
   case TGarminModel(ModelIndex) of
     TGarminModel.GarminEdge,
     TGarminModel.GarminGeneric:
