@@ -3232,6 +3232,13 @@ var
         AddUdbHandle(TmUdbDataHndl(ANitem));
     end;
 
+    if (Length(AmAllRoutes.Trailer) > 0) then
+      VlTripInfo.Strings.AddPair('Trailer', Format('%d bytes', [Length(AmAllRoutes.Trailer)]),
+                                 TGridSelItem.Create(AmAllRoutes,
+                                                     Length(AmAllRoutes.Trailer),
+                                                     AmAllRoutes.SelEnd - AmAllRoutes.SelStart - Cardinal(Length(AmAllRoutes.Trailer))));
+
+
     VlTripInfo.Strings.AddPair('*** End AllRoutes', DupeString('-', DupeCount),
                                TGridSelItem.Create(AmAllRoutes,
                                                    1,

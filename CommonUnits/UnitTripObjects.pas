@@ -119,32 +119,33 @@ const
                                                         );
   UdbDirTurn  = 'Turn';
 
-// nuvi2595
-//const Ucs4Model:          array[TTripModel] of boolean = (true, true, true, false, false, false, true);
-//      UdbDirAddressSize:  array[TTripModel] of integer = (121 * 4, 121 * 4, 121  * 4, 32 * 2, 66 * 2, 21 * 2, 121 * 4);
-//      Unknown2Size:       array[TTripModel] of integer = (150, 150, 150, 76, 72, 72, 150);
-//      Unknown3Size:       array[TTripModel] of integer = (1288, 1448, 1348, 294, 130, 134, 1288);
+// nuvi2595 values found
+//const Ucs4Model:          array[TTripModel] of boolean = (false);
+//      UdbDirAddressSize:  array[TTripModel] of integer = (21 * 2);
+//      Unknown2Size:       array[TTripModel] of integer = (72);
+//      Unknown3Size:       array[TTripModel] of integer = (134);
 //
-//      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $00000000, $00300030, $ffffffff);
-//      Unknown3ShapeBitmapOffset:
-//                          array[TTripModel] of Cardinal = ($90, $c0, $c0, $8e, $66, $8e, $90);
-//      Unknown3DistOffset: array[TTripModel] of integer =  ($14, $14, $14, $12, $12, $12, $14);
-//      Unknown3TimeOffset: array[TTripModel] of integer =  ($18, $18, $18, $16, $16, $16, $18);
-//      VersionSize:        array[TTripModel] of integer =  ($08, $08, $08, $05, $05, $05, $08);
+//      CalculationMagic:   array[TTripModel] of Cardinal = ($00300030);
+//      Unknown3ShapeOffset:array[TTripModel] of Cardinal = ($8e);
+//      Unknown3DistOffset: array[TTripModel] of integer =  ($12);
+//      Unknown3TimeOffset: array[TTripModel] of integer =  ($16);
+//      VersionSize:        array[TTripModel] of integer =  ($05);
 
-// XT, XT2, TREAD 2, 595, Drive5x, 3x0, UNKNOWN
 // Assign unique sizes for model UNKNOWN to Unknown2 and Unknown3
-const Ucs4Model:          array[TTripModel] of boolean  = (true, true, true, false, false, false, false);
-      UdbDirAddressSize:  array[TTripModel] of integer  = (121 * 4,   121 * 4,   121 * 4,   32 * 2,    32 * 2,    66 * 2,    64 * 2);
-      Unknown2Size:       array[TTripModel] of integer  = (150,       150,       150,       76,        76,        72,        0);
-      Unknown3Size:       array[TTripModel] of integer  = (1288,      1448,      1348,      294,       294,       130,       512);
-      CalculationMagic:   array[TTripModel] of Cardinal = ($0538feff, $05d8feff, $0574feff, $0170feff, $0170feff, $00000000, $ffffffff);
-      Unknown3ShapeOffset:array[TTripModel] of Cardinal = ($90,       $c0,       $c0,       $8e,       $8e,       $66,       $90);
-      Unknown3DistOffset: array[TTripModel] of integer  = ($14,       $14,       $14,       $12,       $12,       $12,       $14);
-      Unknown3TimeOffset: array[TTripModel] of integer  = ($18,       $18,       $18,       $16,       $16,       $16,       $18);
-      VersionSize:        array[TTripModel] of integer  = ($08,       $08,       $08,       $05,       $05,       $05,       $08);
+//                                                        XT        XT2       TREAD 2   595       DRIVE 51  340       UNKNOWN
+const Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    true);
+      UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   64 * 2);
+      Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       76,       72,       0);
+      Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      294,      130,      512);
+      AllRoutesTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false);
+      CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$0170feff,$00000000,$ffffffff);
+      Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $8e,      $66,      $90);
+      Unknown3DistOffset: array[TTripModel] of integer  =($14,      $14,      $14,      $12,      $12,      $12,      $14);
+      Unknown3TimeOffset: array[TTripModel] of integer  =($18,      $18,      $18,      $16,      $16,      $16,      $18);
+      VersionSize:        array[TTripModel] of integer  =($08,      $08,      $08,      $05,      $05,      $05,      $08);
 
-      StringLoaded: word = $ffff;
+      StringLoaded:       word = $ffff;
+      UdbDirMagic:        Cardinal = $51590469;
 type
   TTripList = class;
 
@@ -296,22 +297,22 @@ type
   TPosnValue = packed record
     procedure SwapCardinals;
     case ScnSize: Cardinal of
-    Zumo340_TmScPosnSize:         // Zum340, Nuvi 2595
+    Zumo340_TmScPosnSize:         // Zum340
       (
         Lat_8:                    integer;
         Lon_8:                    integer;
       );
-    TmScPosnSize:         // XT, XT2
+    TmScPosnSize:                 // XT, XT2, 595, 590, drive 51
       (
-        Unknown1:                Cardinal;
-        Lat:                     integer;
-        Lon:                     integer;
+        Unknown1:                 Cardinal;
+        Lat:                      integer;
+        Lon:                      integer;
       );
-    Tread2_TmScPosnSize:  // Tread 2
+    Tread2_TmScPosnSize:          // Tread 2
       (
         Unknown1_16: array[0..1] of Cardinal;
-        Lat_16:                   integer;
-        Lon_16:                   integer;
+        Lat_16:                     integer;
+        Lon_16:                     integer;
       );
   end;
   TmScPosn = class(TBaseDataItem)
@@ -857,7 +858,8 @@ type
   private
     FValue:            TmAllRoutesValue;
     FUdBList: TUdbHandleList;
-    function ModelFromUnknow3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
+    FTrailer:          TBytes;
+    function ModelFromUnknown3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure EndWrite(AStream: TMemoryStream); override;
   public
@@ -867,6 +869,7 @@ type
     procedure AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
     property Items: TUdbHandleList read FUdBList;
     property AllRoutesValue: TmAllRoutesValue read FValue;
+    property Trailer: TBytes read FTrailer;
   end;
 
 {*** Trip List ***}
@@ -3054,7 +3057,7 @@ begin
   FValue.SubClass.RoadId := Swap32($00f0ffff);
 {$ENDIF}
   FillCompressedLatLon;
-  FValue.Unknown1     := Swap32($51590469);
+  FValue.Unknown1     := Swap32(UdbDirMagic);
   FValue.Time         := $ff;
   FValue.Border       := $ff;
   FValue.Unknown2[2]  := Swap($8001);
@@ -3068,7 +3071,7 @@ begin
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
   FValue.SubClass.Init(GPXSubClass);
-  FValue.Unknown1 := Swap32($51590469);
+  FValue.Unknown1 := Swap32(UdbDirMagic);
   case (FValue.SubClass.PointType) of
     $1f, $21:
       begin
@@ -3337,7 +3340,6 @@ begin
                      (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount));
   UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + UdbDirAddressSize[AModel]));
   result := TotalHandleSize - UdbDirSize;
-//TODO nuvi2595. The computed size is 4 bytes off...
 end;
 
 procedure TmUdbDataHndl.BeginWrite(AStream: TMemoryStream);
@@ -3436,9 +3438,14 @@ begin
   inherited Create('mAllRoutes', 0, dtList); // Will get Length later, Via Calculate
   FillChar(FValue, SizeOf(FValue), 0);
   FUdBList := TUdbHandleList.Create;
+  SetLength(FTrailer, 0);
 end;
 
-function TmAllRoutes.ModelFromUnknow3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
+function TmAllRoutes.ModelFromUnknown3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
+var
+  Diff: integer;
+  SavePos: int64;
+  FirstUdbDir: TUdbDirFixedValue;
 begin
   result := AModel;
   AnUdbHandle.FValue.AllocUnknown2(Unknown2Size[AModel]); // Alloc the correct unknown2 size.
@@ -3447,8 +3454,30 @@ begin
   AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[AModel]);
   AStream.Read(AnUdbHandle.FValue.Unknown3[0], Length(AnUdbHandle.FValue.Unknown3));
 
-  if (AnUdbHandle.ComputeUnknown3Size(AModel) <> Unknown3Size[AModel]) then
-    result := TTripModel.Unknown;
+  Diff := AnUdbHandle.ComputeUnknown3Size(AModel) - Unknown3Size[AModel];
+
+  if (AllRoutesTrailer[AModel] = false) then
+  begin
+    if (Diff <> 0) then
+      result := TTripModel.Unknown;
+  end
+  else
+  begin
+    SavePos := AStream.Position;
+    try
+      if (AnUdbHandle.FValue.UDbDirCount > 0) then
+      begin
+        // Allow a trailer for the 340
+        AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir));
+        if (Diff < 0) or
+           (Diff > SizeOf(TUdbDirFixedValue)) or
+           (Swap32(FirstUdbDir.Unknown1) <> UdbDirMagic) then
+          exit(TTripModel.Unknown);
+      end;
+    finally
+      AStream.Seek(SavePos, TSeekOrigin.soBeginning);
+    end;
+  end;
 end;
 
 procedure TmAllRoutes.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
@@ -3467,6 +3496,7 @@ var
   UdbDirCnt: integer;
   AnUdbDir: TUdbDir;
   SelModel, AModel: TTripModel;
+  Diff: Int64;
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
   FUdBList := TUdbHandleList.Create;
@@ -3497,14 +3527,14 @@ begin
 
     // Alloc Unknown2 and unknown3 blocks
     // Check for known calculation magic
-    SelModel := TTripModel.Unknown;     // Default to Unknown
+    SelModel := TTripModel.Unknown;               // Default to Unknown
     if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 340 has 0, even if calculated.
     begin
       for AModel := Low(TTripModel) to High(TTripModel) do
       begin
         if (AnUdbHandle.FValue.CalcStatus = CalculationMagic[AModel]) then
         begin
-          SelModel := ModelFromUnknow3Size(AModel, AnUdbHandle, AStream);
+          SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream);
           break;
         end;
       end;
@@ -3517,7 +3547,7 @@ begin
       for AModel := Low(TTripModel) to High(TTripModel) do
       begin
         AStream.Seek(SavePosUdb, TSeekOrigin.soBeginning);              // reposition to start of UDBDir
-        SelModel := ModelFromUnknow3Size(AModel, AnUdbHandle, AStream); // Now we have the UdbDirCount, we can compute the size.
+        SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream); // Now we have the UdbDirCount, we can compute the size.
         if (SelModel = AModel) then
           break;
       end;
@@ -3538,12 +3568,21 @@ begin
 
     // Should not occur
     AddUdbHandle(AnUdbHandle);
-    if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
+    Diff := (SavePos + ValueLen - SizeOf(Initiator)) - AStream.Position;
+    if (Diff > 0) and
+       (AllRoutesTrailer[SelModel]) then // The 340 can have trailer bytes. Trip from a Track
+    begin
+      SetLength(FTrailer, Diff);
+      AStream.Read(FTrailer[0], Length(FTrailer));
+      continue;
+    end;
+
+    // Should not occur
+    if (Diff <> 0) then
     begin
       BreakPoint;
       AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
     end;
-
   end;
 end;
 
@@ -3588,6 +3627,8 @@ begin
 
   for ANitem in FUdBList do
     ANitem.Write(AStream);
+
+  AStream.Write(FTrailer, SizeOf(FTrailer));
 end;
 
 {*** TripList ***}
@@ -4248,11 +4289,11 @@ begin
   Locations.AddLocation(TLocation.Create);
   Locations.Add(TmAddress.Create(Address));
   Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmDuration.Create);
+  Locations.Add(TmDuration.Create(0));
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
   Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Zumo340_TmScPosnSize));
+  Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
 end;
 
 procedure TTripList.AddLocation(Locations: TmLocations;
@@ -4353,8 +4394,11 @@ procedure TTripList.SetPreserveTrackToRoute(const RtePts: TObject);
 var
   TrackToRouteInfoMap: TmTrackToRouteInfoMap;
   PreserveTrackToRoute: TmPreserveTrackToRoute;
+  DayNumber: TmDayNumber;
 begin
-  (GetItem('mDayNumber') as TmDayNumber).AsByte := 0;
+  DayNumber := (GetItem('mDayNumber') as TmDayNumber);
+  if Assigned(DayNumber) then
+    DayNumber.AsByte := 0;
 
   // Create TrackToRouteInfoMap for XT2 and Tread2
   TrackToRouteInfoMap := GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
