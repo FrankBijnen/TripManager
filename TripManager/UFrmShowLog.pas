@@ -78,6 +78,7 @@ var
   LastCoords, NewCoords: TCoords;
   SegmentOnly: boolean;
   ProcessOptions: TProcessOptions;
+  AnUdbDir: TUdbDir;
 begin
   ProcessOptions := TProcessOptions.Create;
   try
@@ -96,8 +97,16 @@ begin
         continue;
       end;
 
+      // Only Continue
+      if (FileType = TripFile) then
+      begin
+        AnUdbDir := TUdbDir(LbLog.Items.Objects[Index]);
+        if (AnUdbDir.UdbDirValue.SubClass.Direction <> 0) then
+          continue;
+      end;
+
       NewCoords := CoordsFromData(LbLog.Items.Objects[Index]);
-      if (CoordDistance(NewCoords, LastCoords, TDistanceUnit.duKm) < ProcessOptions.CompareDistanceOK / 1000) then
+      if (CoordDistance(NewCoords, LastCoords, TDistanceUnit.duKm) < ProcessOptions.CompareDistanceOK / 100) then
         continue;
 
       LastCoords := NewCoords;
@@ -153,7 +162,6 @@ begin
     AddedShape := 0;
     RoutePt := -1;
     OldLocations.GetRoutePoints(RoutePointList);
-
     for Index := 0 to LbLog.Items.Count -1 do
     begin
       if (LbLog.Checked[Index]) and
@@ -195,12 +203,14 @@ begin
       if (ContainsText(LbLog.Items[Index], CheckSeg)) and
          (LbLog.items.Objects[Index] is TUdbDir) then
       begin
-        Inc(RoutePt);
-        AddedShape := 0;
         AnUdbDir := LbLog.Items.Objects[Index] as TUdbDir;
         if (AnUdbDir.UdbDirValue.SubClass.PointType <> $03) then
           continue;
+        Inc(RoutePt);
+        if (RoutePt >  RoutePointList.Count -1) then // Past end?
+          break;
 
+        AddedShape := 0;
         if (RoutePointList[RoutePt].IsViaPoint) then
           RoutePoint := TRoutePoint.rpVia
         else
@@ -304,6 +314,7 @@ end;
 procedure TFrmShowLog.FormShow(Sender: TObject);
 begin
   LbLog.ItemIndex := 0;
+  LbLogClick(LbLog);
 end;
 
 procedure TFrmShowLog.LbLogClick(Sender: TObject);
@@ -328,6 +339,12 @@ begin
       ACanvas.Brush.Color := FStyleServices.GetStyleColor(scButtonPressed)
     else
       ACanvas.Brush.Color := FStyleServices.GetStyleColor(scListBox);
+
+    if (ContainsText(TCheckListBox(Control).Items[Index], CheckSeg)) then
+    begin
+      ACanvas.Font.Style := [TFontStyle.fsBold];
+      ACanvas.Font.Size := ACanvas.Font.Size + 2;
+     end;
   end;
 
   Flags := DrawTextBiDiModeFlags(DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX);
