@@ -3085,18 +3085,18 @@ var
                                                   SizeOf(AnUdbDir.UdbDirValue.Border),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Border)));
 
-    VlTripInfo.Strings.AddPair('UdbDir Unknown2', Format('%d bytes', [SizeOf(AnUdbDir.UdbDirValue.Unknown2)]),
+    VlTripInfo.Strings.AddPair('UdbDir Unknown2', Format('%d bytes', [Length(AnUdbDir.Unknown2)]),
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.Unknown2),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown2)));
+                                                  Length(AnUdbDir.Unknown2),
+                                                  SizeOf(AnUdbDir.UdbDirValue)));
 
     VlTripInfo.Strings.AddPair('Address', AnUdbDir.DisplayName,
                               TGridSelItem.Create(AnUdbDir,
-                                                  AnUdbDir.DisplayLength,
-                                                  SizeOf(AnUdbDir.UdbDirValue)));
+                                                  AnUdbDir.DisplayLength, SizeOf(AnUdbDir.UdbDirValue) + Length(AnUdbDir.Unknown2)));
 
     VlTripInfo.Strings.AddPair('*** End UdbDir', DupeString('-', DupeCount),
-                              TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) + AnUdbDir.NameLength -1));
+                              TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) + Length(AnUdbDir.Unknown2) +
+                                                               AnUdbDir.NameLength -1));
     if (ZoomToPoint) then
       MapRequest(AnUdbDir.MapCoords,
                  Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), RoutePointTimeOut);
@@ -3200,6 +3200,13 @@ var
       if (ANitem is TUdbDir) then
         AddUdbDir(TUdbDir(ANitem), false);
     end;
+
+    if (Length(AnUdbhandle.Trailer) > 0) then
+      VlTripInfo.Strings.AddPair('Trailer', Format('%d bytes', [Length(AnUdbhandle.Trailer)]),
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     Length(AnUdbhandle.Trailer),
+                                                     AnUdbhandle.SelEnd - AnUdbhandle.SelStart - Cardinal(Length(AnUdbhandle.Trailer))));
+
     VlTripInfo.Strings.AddPair('*** End UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle, 1, AnUdbhandle.SelEnd - AnUdbhandle.SelStart -1));
   end;
@@ -3231,13 +3238,6 @@ var
       if (ANitem is TmUdbDataHndl) then
         AddUdbHandle(TmUdbDataHndl(ANitem));
     end;
-
-    if (Length(AmAllRoutes.Trailer) > 0) then
-      VlTripInfo.Strings.AddPair('Trailer', Format('%d bytes', [Length(AmAllRoutes.Trailer)]),
-                                 TGridSelItem.Create(AmAllRoutes,
-                                                     Length(AmAllRoutes.Trailer),
-                                                     AmAllRoutes.SelEnd - AmAllRoutes.SelStart - Cardinal(Length(AmAllRoutes.Trailer))));
-
 
     VlTripInfo.Strings.AddPair('*** End AllRoutes', DupeString('-', DupeCount),
                                TGridSelItem.Create(AmAllRoutes,
