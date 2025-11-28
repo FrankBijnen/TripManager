@@ -148,7 +148,7 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  TripModel := TTripModel(GetRegistry(Reg_CurrentModel, 0));
+  TripModel := TTripModel(TSetProcessOptions.Garmin2TripModel(GetRegistry(Reg_CurrentModel, 0)));
   LblModel.Caption := GetEnumName(TypeInfo(TTripModel), Ord(TripModel));
   CmbTripOption.Items.Text := TripOptions;
 

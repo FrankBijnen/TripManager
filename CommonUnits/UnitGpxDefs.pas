@@ -23,7 +23,8 @@ type
     procedure FromAttributes(Attributes: TObject);
   end;
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
-              CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints);
+              CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints,
+              CreateCompleteRoutes);
   TGPXFuncArray = Array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: The first elements should be the same as UnitTripObjects.TTripModel

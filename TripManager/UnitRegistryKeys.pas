@@ -142,6 +142,7 @@ type
     class function GetDefaultDevice(DevIndex: integer): string;
     class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
     class function GetKnownPath(DevIndex, PathId: integer): string;
+    class function Garmin2TripModel(Garmin: integer): integer;
   end;
 
 var
@@ -168,7 +169,7 @@ begin
     MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
-    TripModel := TTripModel(GetRegistry(Reg_CurrentModel, 0));
+    TripModel := TTripModel(TSetProcessOptions.Garmin2TripModel(GetRegistry(Reg_CurrentModel, 0)));
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
@@ -326,48 +327,64 @@ begin
         result := result + [TGPXFunc.CreateTrips];
     end;
 
-    SetRegistry(Reg_FuncTrack, Items[IdTrack].Checked);
-    if (Items[IdTrack].Checked) then
-      result := result + [TGPXFunc.CreateTracks];
+    if (Items[IdTrack].Enabled) then
+    begin
+      SetRegistry(Reg_FuncTrack, Items[IdTrack].Checked);
+      if (Items[IdTrack].Checked) then
+        result := result + [TGPXFunc.CreateTracks];
+    end;
 
-    SetRegistry(Reg_FuncStrippedRoute, Items[IdStrippedRoute].Checked);
-    if (Items[IdStrippedRoute].Checked) then
-      result := result + [TGPXFunc.CreateRoutes];
+    if (Items[IdStrippedRoute].Enabled) then
+    begin
+      SetRegistry(Reg_FuncStrippedRoute, Items[IdStrippedRoute].Checked);
+      if (Items[IdStrippedRoute].Checked) then
+        result := result + [TGPXFunc.CreateRoutes];
+    end;
 
     if (Items[IdCompleteRoute].Enabled) then
+    begin
       SetRegistry(Reg_FuncCompleteRoute, Items[IdCompleteRoute].Checked);
-
-    SetRegistry(Reg_FuncWayPoint, Items[IdWayPoint].Checked);
-    if (Items[IdWayPoint].Checked) then
-    begin
-      result := result + [TGPXFunc.CreateWayPoints];
-      if (Items[IdWayPointWpt].Checked = false) and
-         (Items[IdWayPointVia].Checked = false) and
-         (Items[IdWayPointShp].Checked = false) then
-        raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
-         [#10, Items[IdWayPointWpt].Text,
-          #10, Items[IdWayPointVia].Text,
-          #10, Items[IdWayPointShp].Text]));
+      if (Items[IdCompleteRoute].Checked) then
+        result := result + [TGPXFunc.CreateCompleteRoutes];
     end;
-      SetRegistry(Reg_FuncWayPointWpt, Items[IdWayPointWpt].Checked);
-      SetRegistry(Reg_FuncWayPointVia, Items[IdWayPointVia].Checked);
-      SetRegistry(Reg_FuncWayPointShape, Items[IdWayPointShp].Checked);
 
-    SetRegistry(Reg_FuncGpi, Items[IdGpi].Checked);
-    if (Items[IdGpi].Checked) then
+    if (Items[IdWayPoint].Enabled) then
     begin
-      result := result + [TGPXFunc.CreatePOI];
-      if (Items[IdGpiWayPt].Checked = false) and
-         (Items[IdGpiViaPt].Checked = false) and
-         (Items[IdGpiShpPt].Checked = false) then
-        raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
-         [#10, Items[IdGpiWayPt].Text,
-          #10, Items[IdGpiViaPt].Text,
-          #10, Items[IdGpiShpPt].Text]));
+      SetRegistry(Reg_FuncWayPoint, Items[IdWayPoint].Checked);
+      if (Items[IdWayPoint].Checked) then
+      begin
+        result := result + [TGPXFunc.CreateWayPoints];
+        if (Items[IdWayPointWpt].Checked = false) and
+           (Items[IdWayPointVia].Checked = false) and
+           (Items[IdWayPointShp].Checked = false) then
+          raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
+           [#10, Items[IdWayPointWpt].Text,
+            #10, Items[IdWayPointVia].Text,
+            #10, Items[IdWayPointShp].Text]));
+      end;
+        SetRegistry(Reg_FuncWayPointWpt, Items[IdWayPointWpt].Checked);
+        SetRegistry(Reg_FuncWayPointVia, Items[IdWayPointVia].Checked);
+        SetRegistry(Reg_FuncWayPointShape, Items[IdWayPointShp].Checked);
     end;
-      SetRegistry(Reg_FuncGpiWayPt, Items[IdGpiWayPt].Checked);
-      SetRegistry(Reg_FuncGpiViaPt, Items[IdGpiViaPt].Checked);
-      SetRegistry(Reg_FuncGpiShpPt, Items[IdGpiShpPt].Checked);
+
+    if (Items[IdGpi].Enabled) then
+    begin
+      SetRegistry(Reg_FuncGpi, Items[IdGpi].Checked);
+      if (Items[IdGpi].Checked) then
+      begin
+        result := result + [TGPXFunc.CreatePOI];
+        if (Items[IdGpiWayPt].Checked = false) and
+           (Items[IdGpiViaPt].Checked = false) and
+           (Items[IdGpiShpPt].Checked = false) then
+          raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
+           [#10, Items[IdGpiWayPt].Text,
+            #10, Items[IdGpiViaPt].Text,
+            #10, Items[IdGpiShpPt].Text]));
+      end;
+        SetRegistry(Reg_FuncGpiWayPt, Items[IdGpiWayPt].Checked);
+        SetRegistry(Reg_FuncGpiViaPt, Items[IdGpiViaPt].Checked);
+        SetRegistry(Reg_FuncGpiShpPt, Items[IdGpiShpPt].Checked);
+    end;
 
     if (Items[IdKml].Enabled) then
     begin
@@ -516,6 +533,27 @@ begin
         2: result := GarminDevice.GpiPath;
       end;
   end;
+end;
+
+class function TSetProcessOptions.Garmin2TripModel(Garmin: integer): integer;
+begin
+  case TGarminModel(Garmin) of
+    TGarminModel.XT:
+      result := Ord(TTripModel.XT);
+    TGarminModel.XT2:
+      result := Ord(TTripModel.XT2);
+    TGarminModel.Tread2:
+      result := Ord(TTripModel.Tread2);
+    TGarminModel.Zumo595:
+      result := Ord(TTripModel.Zumo595);
+    TGarminModel.Drive51:
+      result := Ord(TTripModel.Drive51);
+    TGarminModel.Zumo3x0:
+      result := Ord(TTripModel.Zumo3x0);
+    else
+      result := Ord(TTripModel.Unknown);
+  end;
+
 end;
 
 // Default paths. Can be overruled by GarminDevice.Xml

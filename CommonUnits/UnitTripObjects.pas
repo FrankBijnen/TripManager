@@ -125,8 +125,8 @@ const
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 340  Nuvi 2595 Unknown
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    true);
   UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
-  UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       16,       0);
-  Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       76,       72,       72,       0);
+  UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       16,       20);
+  Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       76,       72,       72,       80);
   Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      294,      130,      134,      512);
   UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     false);
   CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$0170feff,$00000000,$00300030,$ffffffff);
@@ -1094,6 +1094,14 @@ begin
   Move(AnUCS4ByteArray[0], AUCS4String[0], Len);
   result := UCS4StringToUnicodeString(AUCS4String);
   SetLength(result, StrLen(PChar(result)));  // Drop trailing zeroes
+end;
+
+procedure WideStringToWideArray(AWideString: WideString; AWideArray: Tbytes);
+var
+  MaxLen: Cardinal;
+begin
+  MaxLen := Min(Length(AWideString) * SizeOf(WideChar), High(AWideArray));
+  Move(AWideString[1], AWideArray[0], MaxLen);
 end;
 
 procedure GenShapeBitmap(const NumShapes: integer; OBuf: PByte);
@@ -2991,8 +2999,10 @@ constructor TUdbDir.Create(AModel: TTripModel;
                            ALat: double = 0;
                            ALon: double = 0;
                            APointType: byte = $03);
+
 begin
   inherited Create;
+
   FillChar(FValue, SizeOf(FValue), 0);
   SetLength(FUnknown2, UdbDirUnknown2Size[AModel]);
   SetLength(FName, UdbDirAddressSize[AModel]);
@@ -3000,7 +3010,7 @@ begin
     true:
       WideStringToUCS4Array(AName, UCS4String(FName)); // Copy Name
     false:
-      StrPCopy(PWideChar(FName), AName);
+      WideStringToWideArray(AName, FName);
   end;
   FValue.Lat := Swap32(CoordAsInt(ALat));
   FValue.Lon := Swap32(CoordAsInt(ALon));
@@ -3057,7 +3067,7 @@ end;
 // UdbDir Create for <gpxx:rpt>
 constructor TUdbDir.Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon, Dist: Double);
 begin
-  Create(AModel, Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass,9,8)]));
+  Create(AModel, Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass, 9, 8)]));
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));

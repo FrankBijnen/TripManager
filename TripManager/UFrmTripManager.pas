@@ -1166,6 +1166,7 @@ var
   AnItem: TListItem;
   Fs: TSearchRec;
   Rc: integer;
+  AFunc: TGPXFunc;
 begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
@@ -1210,8 +1211,16 @@ begin
                                       GetRoutesTmp, nil, AnItem.Index);
 
             // Need to copy the complete route?
-            if (GetRegistry(Reg_FuncCompleteRoute, false)) then
-              CopyFile(PWideChar(GPXFile), PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)), false);
+            for AFunc in FrmSendTo.Funcs do
+            begin
+              if (AFunc = CreateCompleteRoutes) then
+              begin
+                CopyFile(PWideChar(GPXFile),
+                         PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)),
+                         false);
+                Break;
+              end;
+            end;
 
             {$IFNDEF DEBUG_TRANSFER}
             // The Temp directory 'Routes' now has all the files to send.
