@@ -952,9 +952,10 @@ begin
   TimeOriginal := '';
   DateOriginal := '';
 
-  // Prefer date authored => date created => date modified
-  Dev_Val.fmtid := WPD_OBJECT_DATE_AUTHORED_FMTID;
-  Dev_Val.pid := WPD_OBJECT_DATE_AUTHORED_Pid;
+  // Prefer date modified => date authored => date created
+
+  Dev_Val.fmtid := WPD_OBJECT_DATE_MODIFIED_FMTID;
+  Dev_Val.pid := WPD_OBJECT_DATE_MODIFIED_PID;
   Hr := Prop_Val.GetValue(Dev_Val, PropVar);
   if (HR <> S_OK) then
   begin
@@ -964,8 +965,8 @@ begin
   end;
   if (HR <> S_OK) then
   begin
-    Dev_Val.fmtid := WPD_OBJECT_DATE_MODIFIED_FMTID;
-    Dev_Val.pid := WPD_OBJECT_DATE_MODIFIED_PID;
+    Dev_Val.fmtid := WPD_OBJECT_DATE_AUTHORED_FMTID;
+    Dev_Val.pid := WPD_OBJECT_DATE_AUTHORED_Pid;
     Hr := Prop_Val.GetValue(Dev_Val, PropVar);
   end;
   if (HR = S_OK) then

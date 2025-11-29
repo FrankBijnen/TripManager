@@ -1166,7 +1166,6 @@ var
   AnItem: TListItem;
   Fs: TSearchRec;
   Rc: integer;
-  AFunc: TGPXFunc;
 begin
   if (ShellListView1.SelectedFolder = nil) then
     exit;
@@ -1209,18 +1208,6 @@ begin
             TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
                                       SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
                                       GetRoutesTmp, nil, AnItem.Index);
-
-            // Need to copy the complete route?
-            for AFunc in FrmSendTo.Funcs do
-            begin
-              if (AFunc = CreateCompleteRoutes) then
-              begin
-                CopyFile(PWideChar(GPXFile),
-                         PWideChar(IncludeTrailingPathDelimiter(GetRoutesTmp) + ExtractFilename(GPXFile)),
-                         false);
-                Break;
-              end;
-            end;
 
             {$IFNDEF DEBUG_TRANSFER}
             // The Temp directory 'Routes' now has all the files to send.
@@ -2294,6 +2281,13 @@ begin
   SetRegistry(Reg_EnableGpiFuncs, not (TGarminModel(ModelIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableFitFuncs, (TGarminModel(ModelIndex) in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_CurrentModel, ModelIndex);
+
+  ReadDefaultFolders;
+  if (CheckDevice(false)) then
+  begin
+    SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
+    ListFiles;
+  end;
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);

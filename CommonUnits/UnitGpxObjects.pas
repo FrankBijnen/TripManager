@@ -178,6 +178,7 @@ type
     procedure DoCreatePOLY;
     procedure DoCreateFITPoints;
     procedure DoCreateRoutes;
+    procedure DoCreateCompleteRoutes;
     procedure DoCreateTrips;
 {$IFDEF TRIPOBJECTS}
     procedure ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
@@ -2181,7 +2182,6 @@ var
   RteNode, GpxNode: TXmlVSNode;
   Node2Delete: TXmlVSNode;
   Node2DeletePos: integer;
-
 begin
   GpxNode := FXmlDocument.ChildNodes.find('gpx');  // Look for <gpx> node
   if (GpxNode = nil) or
@@ -2220,6 +2220,15 @@ begin
              ExtractFileExt(FGPXFile);
   FXmlDocument.Encoding := 'utf-8';
   FXmlDocument.SaveToFile(OutFile);
+end;
+
+procedure TGPXFile.DoCreateCompleteRoutes;
+var
+  OutFile: string;
+begin
+  OutFile := FOutDir + ExtractFilename(FGPXFile);
+  if not CopyFile(PWideChar(FGPXFile), PWideChar(OutFile), false) then
+    raise Exception.Create(Format('Could not copy %s to:%s%s', [FGPXFile, #10, FOutDir]))
 end;
 
 {$IFDEF TRIPOBJECTS}
@@ -2498,6 +2507,7 @@ begin
         CreateHTML,
         CreatePOLY,
         CreateRoutes,
+        CreateCompleteRoutes,
         CreateTrips,
         CreateFITPoints:
           begin
@@ -2563,6 +2573,8 @@ begin
           GpxFileObj.DoCreatePOLY;
         CreateTrips:
           GpxFileObj.DoCreateTrips;
+        CreateCompleteRoutes:
+          GpxFileObj.DoCreateCompleteRoutes;
       end;
     end;
 
