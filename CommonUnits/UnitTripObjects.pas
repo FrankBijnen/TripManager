@@ -4034,7 +4034,7 @@ begin
     begin
       HasUdbs := HasUdbs or (UdbDataHndl.Items.Count > 0);
       for UdbDir in UdbDataHndl.Items do
-        OutStringList.Add(Format('    AddTrkPoint(%.6g,%.6g);', [UdbDir.Lat, UdbDir.Lon], FloatFormatSettings ) );
+        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(UdbDir.Lat, UdbDir.Lon)]) );
     end;
   end;
 
