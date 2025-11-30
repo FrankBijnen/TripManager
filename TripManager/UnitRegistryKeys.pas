@@ -546,14 +546,9 @@ begin
       result := Ord(TTripModel.Tread2);
     TGarminModel.Zumo595:
       result := Ord(TTripModel.Zumo595);
-    TGarminModel.Drive51:
-      result := Ord(TTripModel.Drive51);
-    TGarminModel.Zumo3x0:
-      result := Ord(TTripModel.Zumo3x0);
     else
       result := Ord(TTripModel.Unknown);
   end;
-
 end;
 
 // Default paths. Can be overruled by GarminDevice.Xml

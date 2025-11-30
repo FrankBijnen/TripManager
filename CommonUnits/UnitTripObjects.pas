@@ -123,6 +123,7 @@ const
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 340  Nuvi 2595 Unknown
+  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    true);
   UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       16,       20);
@@ -1096,7 +1097,7 @@ begin
   SetLength(result, StrLen(PChar(result)));  // Drop trailing zeroes
 end;
 
-procedure WideStringToWideArray(AWideString: WideString; AWideArray: Tbytes);
+procedure WideStringToWideArray(AWideString: WideString; AWideArray: TBytes);
 var
   MaxLen: Cardinal;
 begin
@@ -3006,9 +3007,10 @@ begin
   FillChar(FValue, SizeOf(FValue), 0);
   SetLength(FUnknown2, UdbDirUnknown2Size[AModel]);
   SetLength(FName, UdbDirAddressSize[AModel]);
+  // Copy Name
   case Ucs4Model[AModel] of
     true:
-      WideStringToUCS4Array(AName, UCS4String(FName)); // Copy Name
+      WideStringToUCS4Array(AName, UCS4String(FName));
     false:
       WideStringToWideArray(AName, FName);
   end;
@@ -3797,6 +3799,9 @@ procedure TTripList.SaveToFile(AFile: string);
 var
   AStream: TMemoryStream;
 begin
+  if not (SafeToSave[TripModel]) then
+    raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
+
   AStream := TMemoryStream.Create;
   try
     try
@@ -5117,7 +5122,7 @@ begin
     TmRoutePreferencesAdventurousMode,
     TmRoutePreferencesAdventurousPopularPaths,
     TmTrackToRouteInfoMap,
-//Zumo340
+  // Zumo340
     TmShaping, TmPhoneNumber
     ]);
 end;
