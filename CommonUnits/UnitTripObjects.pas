@@ -3799,9 +3799,10 @@ procedure TTripList.SaveToFile(AFile: string);
 var
   AStream: TMemoryStream;
 begin
+{$IFNDEF DEBUG}
   if not (SafeToSave[TripModel]) then
     raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
-
+{$ENDIF}
   AStream := TMemoryStream.Create;
   try
     try
@@ -4296,7 +4297,7 @@ begin
   Locations.AddLocation(TLocation.Create);
   Locations.Add(TmAddress.Create(Address));
   Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmDuration.Create(0));
+  Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
   Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Zumo340_TmScPosnSize));
