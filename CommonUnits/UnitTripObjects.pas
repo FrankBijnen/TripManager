@@ -4242,8 +4242,8 @@ begin
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmAttr.Create(RoutePoint));
     Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Tread2_TmScPosnSize));
+    Locations.Add(TmAttr.Create(RoutePoint));
     Locations.Add(TmAddress.Create(Address));
     Locations.Add(TmName.Create(Name));
   finally
@@ -4828,7 +4828,7 @@ begin
     Add(TmVersionNumber.Create(4, $10));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
-    Add(TByteItem.Create('mVehicleId', 1));
+    Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
@@ -4878,19 +4878,19 @@ begin
     Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
     Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
     Add(TmParentTripId.Create(0));
-    Add(TByteItem.Create('mVehicleId', 1));
+    Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmIsRoundTrip.Create);
-    Add(TmRoutePreferences.Create);
+    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+    Add(TmRoutePreferences.Create);
     Add(TBooleanItem.Create('mIsDeviceRoute', true));
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     Add(TStringItem.Create('mVehicleProfileGuid', Tread2_VehicleProfileGuid));
