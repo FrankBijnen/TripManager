@@ -1,13 +1,13 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
-{.$DEFINE TODOCEP} // Fixes for CEP to UdbDir. Not Working
 //TODO RoadSpeed  Make the road speeds configurable
 interface
 
 uses
   System.SysUtils, System.Variants, System.Classes, System.Generics.Collections,
-  Winapi.Windows;
+  Winapi.Windows,
+  UnitGpxDefs;
 
 const
   XT_Name                           = 'zūmo XT';
@@ -752,19 +752,21 @@ type
     FUnknown2:         TBytes;
     FName:             TBytes;
     FUdbDirStatus:     TUdbDirStatus;
+    FRoadClass:        string;
     constructor Create(AModel: TTripModel;
                        AName: WideString;
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
     constructor Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: Cardinal); reintroduce; overload;
-    constructor Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon, Dist: double); reintroduce; overload;
+    constructor Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon: double); reintroduce; overload;
     procedure WriteValue(AStream: TMemoryStream); override;
     function SubLength: Cardinal; override;
     function GetName: string;
     function GetDisplayLength: integer;
     function GetNameLength: integer;
     function GetMapCoords: string;
+    function GetCoords: TCoords;
     function GetMapSegRoad: string;
     function GetMapSegRoadExclBit: string;
     function GetPointType: string;
@@ -775,11 +777,13 @@ type
     function Lat: Double;
     function Lon: Double;
     function IsTurn: boolean;
+    procedure ComputeTime(Dist: Double);
     property DisplayName: string read GetName;
     property DisplayLength: integer read GetDisplayLength;
     property NameLength: integer read GetNameLength;
     property UdbDirValue: TUdbDirFixedValue read FValue;
     property Unknown2: TBytes read FUnknown2;
+    property Coords: TCoords read GetCoords;
     property MapCoords: string read GetMapCoords;
     property MapSegRoad: string read GetMapSegRoad;
     property MapSegRoadExclBit: string read GetMapSegRoadExclBit;
@@ -787,6 +791,7 @@ type
     property Direction: string read GetDirection;
     property ComprLatLon: string read GetComprLatLon;
     property Status: TUdbDirStatus read FUdbDirStatus write FUdbDirStatus;
+    property RoadClass: string read FRoadClass write FRoadClass; // Only valid in SaveCalculated
   end;
   TUdbDirList = Tlist<TUdbDir>;
 
@@ -984,7 +989,7 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo, System.UITypes,
   Vcl.Dialogs,
-  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions, UnitGpxDefs;
+  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
 
 const
   Coord_Decimals = '%1.6f';
@@ -3052,12 +3057,7 @@ begin
     end;
   end;
   FValue.SubClass.MapSegment := Swap32($00000180);
-{$IFDEF TODOCEP}
-  // The leftmost byte appears to be the <rte> number in the GPX. First <rte> gets 00, Next gets 01 etc.
-  FValue.SubClass.RoadId := Swap32($00f0ffff + (RouteCnt shl 24));
-{$ELSE}
   FValue.SubClass.RoadId := Swap32($00f0ffff);
-{$ENDIF}
   FillCompressedLatLon;
   FValue.Unknown1     := Swap32(UdbDirMagic);
   FValue.Time         := $ff;
@@ -3067,7 +3067,7 @@ begin
 end;
 
 // UdbDir Create for <gpxx:rpt>
-constructor TUdbDir.Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon, Dist: Double);
+constructor TUdbDir.Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon: Double);
 begin
   Create(AModel, Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass, 9, 8)]));
 
@@ -3075,22 +3075,8 @@ begin
   FValue.Lon := Swap32(CoordAsInt(Lon));
   FValue.SubClass.Init(GPXSubClass);
   FValue.Unknown1 := Swap32(UdbDirMagic);
-  case (FValue.SubClass.PointType) of
-    $1f, $21:
-      begin
-        // Table taken from default Basecamp Motorcycle profile.
-        //TODO RoadSpeed Make configurable
-        case (StrToIntDef('$' + RoadClass, 0)) of
-          1:  FValue.Time := Round(3600 * dist / 108);  // Interstate Highway
-          2:  FValue.Time := Round(3600 * dist / 93);   // Major Highway
-          3:  FValue.Time := Round(3600 * dist / 72);   // Other Highway
-          4:  FValue.Time := Round(3600 * dist / 56);   // Collector Road
-          12: FValue.Time := Round(3600 * dist / 15);   // Round about
-          else
-              FValue.Time := Round(3600 * dist / 40);   // Default for all others. EG Residential
-        end;
-      end;
-  end;
+
+  FRoadClass := RoadClass; // Not saved in Trip File
 end;
 
 procedure TUdbDir.WriteValue(AStream: TMemoryStream);
@@ -3147,6 +3133,12 @@ end;
 function TUdbDir.GetMapCoords: string;
 begin
   result := FormatMapCoords(Lat, Lon);
+end;
+
+function TUdbDir.GetCoords: TCoords;
+begin
+  result.Lat := Lat;
+  result.Lon := Lon;
 end;
 
 function TUdbDir.GetMapSegRoad: string;
@@ -3245,6 +3237,22 @@ end;
 function TUdbDir.IsTurn: boolean;
 begin
   result := CompareMem(@TurnMagic[0], @FName[4], SizeOf(TurnMagic));
+end;
+
+procedure TUdbDir.ComputeTime(Dist: Double);
+begin
+  // Table taken from default Basecamp Motorcycle profile.
+  //TODO RoadSpeed Make configurable
+  case (StrToIntDef('$' + RoadClass, 0)) of
+    1:  FValue.Time := Round(3600 * Dist / 108);  // Interstate Highway
+    2:  FValue.Time := Round(3600 * Dist / 93);   // Major Highway
+    3:  FValue.Time := Round(3600 * Dist / 72);   // Other Highway
+    4:  FValue.Time := Round(3600 * Dist / 56);   // Arterial Road
+    5:  FValue.Time := Round(3600 * Dist / 48);   // Collector Road
+    12: FValue.Time := Round(3600 * Dist / 15);   // Round about
+    else
+        FValue.Time := Round(3600 * Dist / 20);   // Default for all others. EG Residential
+  end;
 end;
 
 {*** UdbPref *** }
@@ -4443,26 +4451,23 @@ var
   AllRoutes: TBaseItem;
   Index: integer;
   AnUdbHandle: TmUdbDataHndl;
-  AnUdbDir: TUdbDir;
+  PrevUdbDir, AnUdbDir: TUdbDir;
   GpxRptNode: TXmlVSNode;
-  PrevCoords, Coords: TCoords;
+  Coords: TCoords;
   TotalTime: integer;
   TotalDist, CurDist: double;
   ProcessOptions: TProcessOptions;
 begin
-  TotalTime := 0;
-  TotalDist := 0;
-  // If the model is not supplied, try to get it from the data
-  FTripModel := GetCalculationModel(AModel);
-
-  // All Routes
-  AllRoutes := InitAllRoutes;
-
   // Need locations
   Locations := GetItem('mLocations');
   if not Assigned(Locations) then
     exit;
 
+  // If the model is not supplied, try to get it from the data
+  FTripModel := GetCalculationModel(AModel);
+
+  // All Routes
+  AllRoutes := InitAllRoutes;
   AnUdbHandle := TmUdbDataHndl.Create(1, TripModel, false);
   AnUdbHandle.FTripList := Self;
   ProcessOptions := TProcessOptions.Create;
@@ -4473,24 +4478,32 @@ begin
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
+    TotalTime := 0;
+    TotalDist := 0;
+    PrevUdbDir := nil;
     // Add intermediates
-    CurDist := 0;
     for Index := 0 to SubClasses.Count -1 do
     begin
       GpxRptNode := TXmlVSNode(SubClasses.Objects[Index]);
-
       Coords.FromAttributes(GpxRptNode.AttributeList);
-      if (Index > 0) then
-        CurDist := CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
-      PrevCoords := Coords;
-//TODO RoadSpeed
       AnUdbDir := TUdbDir.Create(TripModel,
-                                 Copy(SubClasses[Index], 5),
-                                 Copy(SubClasses[Index], 1, 2),
-                                 Coords.Lat, Coords.Lon, CurDist);
+                                 Copy(SubClasses[Index], 5),    // SubClass to use in UdbDir
+                                 Copy(SubClasses[Index], 1, 2), // RoadClass
+                                 Coords.Lat, Coords.Lon);
       AnUdbHandle.Add(AnUdbDir);
-      TotalTime := TotalTime + AnUdbDir.FValue.Time;
-      TotalDist := TotalDist + (CurDist * 1000);
+
+      if (Assigned(PrevUdbDir)) then
+      begin
+        // Distance and time from Previous UdbDir
+        CurDist := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
+        PrevUdbDir.ComputeTime(CurDist);
+
+        // Totals for the UdbHdandle
+        TotalTime := TotalTime + PrevUdbDir.FValue.Time;
+        TotalDist := TotalDist + (CurDist * 1000);
+      end;
+
+      PrevUdbDir := AnUdbDir;
     end;
 
     // Add End
@@ -4534,9 +4547,9 @@ var
   ALocation: TLocation;
   Locations: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
-  AnUdbDir: TUdbDir;
+  AnUdbDir, PrevUdbDir: TUdbDir;
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
-  CMapSegRoad, PrevRoadClass, RoadClass: string;
+  CMapSegRoad: string;
   PrevCoords, Coords: TCoords;
   TotalDist, UdbDist, CurDist: double;
   TotalTime, UdbTime: cardinal;
@@ -4555,7 +4568,7 @@ begin
   if not Assigned(Locations) then
     exit;
 
- // Count from already assigned Locations
+  // Count from already assigned Locations
   ViaCount := TmLocations(Locations).ViaPointCount;
 
   // At least a begin and end point needed. So at least 1 UdbHandle
@@ -4583,68 +4596,70 @@ begin
         ALocation := RoutePointList[RoutePtCount];
         AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
+        // Lookup the location <rtept> in the GPX
         while (ScanRtePt <> nil) do
         begin
           if (SameText(ALocation.LocationTmName.AsString, FindSubNodeValue(ScanRtePt, 'name'))) then
             break;
           ScanRtePt := ScanRtePt.NextSibling;
         end;
-
-        if (ScanRtePt = nil) then // Cant be
+        if (ScanRtePt = nil) then // Should not occur.
+        begin
+          BreakPoint;
           continue;
-        FirstRtePt := ScanRtePt; // restart search here
+        end;
+        FirstRtePt := ScanRtePt; // restart next search in GPX here
 
-        FillChar(PrevCoords, SizeOf(PrevCoords), 0);
+        // Init PrevCoords
         ScanGpxxRptNode := GetFirstExtensionsNode(ScanRtePt);
-        if (ScanGpxxRptNode <> nil) then
-          PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
+        if (ScanGpxxRptNode = nil) then // Should not occur.
+        begin
+          BreakPoint;
+          continue;
+        end;
+        PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
+
         CurDist := 0;
+        PrevUdbDir := nil;
         while (ScanGpxxRptNode <> nil) do
         begin
           Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
-          CurDist := CurDist + CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
-          PrevCoords := Coords;
+
+          // Create a UdbDir, for every <SubClass> node.
           CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
           if (CMapSegRoad <> '') then
           begin
-            // First record
-            if (RoadClass <> '') then
-              PrevRoadClass := RoadClass
-            else
-              PrevRoadClass := Copy(CMapSegRoad, 1, 2);
-
-            RoadClass := Copy(CMapSegRoad, 1, 2);
-            CMapSegRoad := Copy(CMapSegRoad, 5);
-
-{$IFDEF TODOCEP}
-// '2114' Occurs when switching to another mapsegment.
-// Switch to intermediate
-            if (Copy(CMapSegRoad, 17, 4) = '2114') then
-              SetSubString(CMapSegRoad, 17, '1F');
-
-// Approach route point. Need to clear for CEP
-            if (Copy(CMapSegRoad, 17, 4) = '2117') then
-              SetSubString(CMapSegRoad, 29, '0000');
-{$ENDIF}
-            Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
-//TODO RoadSpeed
-            AnUdbDir := TUdbDir.Create(TripModel, CMapSegRoad, PrevRoadClass, Coords.Lat, Coords.Lon, CurDist);
+            AnUdbDir := TUdbDir.Create(TripModel,
+                                       Copy(CMapSegRoad, 5),    // SubClass to use in UdbDir
+                                       Copy(CMapSegRoad, 1, 2), // RoadClass
+                                       Coords.Lat, Coords.Lon);
             AnUdbHandle.Add(AnUdbDir);
 
-            UdbTime := UdbTime + AnUdbDir.FValue.Time;
-            UdbDist := UdbDist + (CurDist * 1000);
+            // Compute the time based on the RoadClass of the previous UdbDir
+            if (Assigned(PrevUdbDir)) then
+            begin
+              PrevUdbDir.ComputeTime(CurDist);
+
+              // Totals for the UdbHdandle
+              UdbTime := UdbTime + PrevUdbDir.FValue.Time;
+              UdbDist := UdbDist + (CurDist * 1000);
+            end;
+
             CurDist := 0;
+            PrevUdbDir := AnUdbDir;
           end;
+
+          CurDist := CurDist + CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
+          PrevCoords := Coords;
           ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
         end;
       end;
 
-      // Add end route point
+      // Add end route point. Of this segment
       ALocation := RoutePointList[RoutePointList.Count -1];
       AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
 
-      // update dist and time
-      TotalDist := TotalDist + UdbDist;
+      TotalDist := TotalDist + UdbDist; // Totals for the Trip
       TotalTime := TotalTime + UdbTime;
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, UdbTime);
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, Round(UdbDist));

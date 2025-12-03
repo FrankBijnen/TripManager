@@ -61,6 +61,8 @@ const
   Reg_ShapeAddress                = 'ShapeAddress';
   Reg_CompareDistOK_Key           = 'CompareDistOK';
   Reg_CompareDistOK_Val           = 500;
+  Reg_RoadSpeeds_Key              = 'RoadSpeeds';
+  Reg_RoadSpeeds_Val              = '1=108;2=93;3=72;4=52;5=36;12=15;=25';
 
   Reg_PrefFileSysFolder_Key       = 'PrefFileSysFolder';
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
