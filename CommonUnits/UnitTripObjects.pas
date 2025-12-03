@@ -1,6 +1,7 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
+{.$DEFINE DEBUG_TIME}
 //TODO RoadSpeed  Make the road speeds configurable
 interface
 
@@ -432,6 +433,7 @@ type
   private
     function GetValue: string; override;
   public
+    class function TripTime(AValue: cardinal): string;
     constructor Create(AValue: Cardinal = 0);
   end;
 
@@ -2040,15 +2042,20 @@ begin
   inherited Create('mTotalTripTime', AValue);
 end;
 
-function TmTotalTripTime.GetValue: string;
+class function TmTotalTripTime.TripTime(AValue: cardinal): string;
 var
   Hour, Min: integer;
 begin
-  Hour := Trunc(FValue / 60 / 60);
-  Min := Trunc(FValue / 60);
+  Hour := Trunc(AValue / 60 / 60);
+  Min := Trunc(AValue / 60);
   MIn := Min - (Hour * 60);
   result := Format('%d Hour %d Min.', [Hour, Min]);
-  result := result + Format(' (%d Seconds)', [FValue]);
+  result := result + Format(' (%d Seconds)', [AValue]);
+end;
+
+function TmTotalTripTime.GetValue: string;
+begin
+  result := TmTotalTripTime.TripTime(FValue);
 end;
 
 constructor TmImported.Create(AValue: boolean = false);
@@ -3240,19 +3247,32 @@ begin
 end;
 
 procedure TUdbDir.ComputeTime(Dist: Double);
+var
+  Tmp: double;
 begin
   // Table taken from default Basecamp Motorcycle profile.
   //TODO RoadSpeed Make configurable
+//  case (StrToIntDef('$' + RoadClass, 0)) of
+//    1:  FValue.Time := Round(3600 * Dist / 108);  // Interstate Highway
+//    2:  FValue.Time := Round(3600 * Dist / 93);   // Major Highway
+//    3:  FValue.Time := Round(3600 * Dist / 72);   // Other Highway
+//    4:  FValue.Time := Round(3600 * Dist / 56);   // Arterial Road
+//    5:  FValue.Time := Round(3600 * Dist / 48);   // Collector Road
+//    12: FValue.Time := Round(3600 * Dist / 15);   // Round about
+//    else
+//        FValue.Time := Round(3600 * Dist / 20);   // Default for all others. EG Residential
+//  end;
   case (StrToIntDef('$' + RoadClass, 0)) of
-    1:  FValue.Time := Round(3600 * Dist / 108);  // Interstate Highway
-    2:  FValue.Time := Round(3600 * Dist / 93);   // Major Highway
-    3:  FValue.Time := Round(3600 * Dist / 72);   // Other Highway
-    4:  FValue.Time := Round(3600 * Dist / 56);   // Arterial Road
-    5:  FValue.Time := Round(3600 * Dist / 48);   // Collector Road
-    12: FValue.Time := Round(3600 * Dist / 15);   // Round about
+    1:  Tmp := Round(3600 * Dist / 108);  // Interstate Highway
+    2:  Tmp := Round(3600 * Dist / 72);   // Major Highway
+    3:  Tmp := Round(3600 * Dist / 56);   // Other Highway
+    4:  Tmp := Round(3600 * Dist / 50);   // Arterial Road
+    5:  Tmp := Round(3600 * Dist / 48);   // Collector Road
+    12: Tmp := Round(3600 * Dist / 15);   // Round about
     else
-        FValue.Time := Round(3600 * Dist / 20);   // Default for all others. EG Residential
+        Tmp := Round(3600 * Dist / 20);   // Default for all others. EG Residential
   end;
+  FValue.Time := Min(254, Round(Tmp));    // Overflow!
 end;
 
 {*** UdbPref *** }
@@ -4351,6 +4371,7 @@ var
 begin
   // If the model is not supplied, try to get it from the data
   FTripModel := GetCalculationModel(AModel);
+  FIsUcs4 := Ucs4Model[FTripModel];
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4465,6 +4486,7 @@ begin
 
   // If the model is not supplied, try to get it from the data
   FTripModel := GetCalculationModel(AModel);
+  FIsUcs4 := Ucs4Model[FTripModel];
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4547,7 +4569,7 @@ var
   ALocation: TLocation;
   Locations: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
-  AnUdbDir, PrevUdbDir: TUdbDir;
+  AnUdbDir, PrevUdbDir, RtePtUdbDir: TUdbDir;
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
   CMapSegRoad: string;
   PrevCoords, Coords: TCoords;
@@ -4559,6 +4581,7 @@ begin
   TotalDist := 0;
   // If the model is not supplied, try to get it from the data
   FTripModel := GetCalculationModel(AModel);
+  FIsUcs4 := Ucs4Model[FTripModel];
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4594,7 +4617,13 @@ begin
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
-        AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
+        RtePtUdbDir := TUdbDir.Create(TripModel, ALocation, RouteCnt);
+        AnUdbHandle.Add(RtePtUdbDir);
+
+{$IFDEF DEBUGTIME}
+        AllocConsole;
+        Writeln(RtePtUdbDir.GetName);
+{$ENDIF}
 
         // Lookup the location <rtept> in the GPX
         while (ScanRtePt <> nil) do
@@ -4643,6 +4672,9 @@ begin
               // Totals for the UdbHdandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;
               UdbDist := UdbDist + (CurDist * 1000);
+{$IFDEF DEBUGTIME}
+              Writeln(' Dist:', ((TotalDist + UdbDist)/1000):4:2, 'Km. Time: ', TmTotalTripTime.TripTime(TotalTime + UdbTime));
+{$ENDIF}
             end;
 
             CurDist := 0;
@@ -4657,10 +4689,14 @@ begin
 
       // Add end route point. Of this segment
       ALocation := RoutePointList[RoutePointList.Count -1];
-      AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
+      RtePtUdbDir := TUdbDir.Create(TripModel, ALocation, RouteCnt);
+      AnUdbHandle.Add(RtePtUdbDir);
 
       TotalDist := TotalDist + UdbDist; // Totals for the Trip
       TotalTime := TotalTime + UdbTime;
+{$IFDEF DEBUGTIME}
+      Writeln(RtePtUdbDir.GetName);
+{$ENDIF}
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, UdbTime);
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, Round(UdbDist));
 
