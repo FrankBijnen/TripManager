@@ -9,8 +9,12 @@ uses
 function ComputeTime(const RoadClass: byte; const Dist: Double): double;
 function TripTimeAsHrMin(AValue: cardinal): string;
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
-                       const SegmentId, RoutePointId: integer;
-                       const RoutePointName, RoadClass: string; const Dist: double): byte;
+                       const SegmentId, RoutePointId, UdbId: integer;
+                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): byte; overload;
+procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
+                        const SegmentId, RoutePointId, UdbId: integer;
+                        const RoutePointName, MapSegRoadId: string;
+                        const Dist: double; const Time: byte); overload;
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);
 
 implementation
@@ -21,6 +25,7 @@ uses
 function DescriptionFromRoadClass(const RoadClass: byte): string;
 begin
   case RoadClass of
+    0:  result := '';
     1:  result := 'Interstate highway';
     2:  result := 'Major highway';
     3:  result := 'Other highway';
@@ -34,7 +39,7 @@ begin
     11: result := 'Major higway connector';
     12: result := 'Round about';
     else
-        result := Format('RoadClass: %s', [RoadClass]);
+        result := Format('RoadClass: %s', [IntToHex(RoadClass, 2)]);
   end;
 end;
 
@@ -69,15 +74,28 @@ begin
   result := result + Format(' (%d Seconds)', [AValue]);
 end;
 
+function DisplaySpeed(ATripInfo: TTripInfo): string;
+begin
+  if (ATripInfo.Speed > 0) then
+    result := Format('%d', [ATripInfo.Speed])
+  else
+  begin
+    if (ATripInfo.Time > 0) then
+      result := Format('%d', [Round(ATripInfo.Distance * 3600 / ATripInfo.Time)])
+    else
+      result := 'N/A'
+  end;
+end;
+
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
-                       const SegmentId, RoutePointId: integer;
-                       const RoutePointName, RoadClass: string; const Dist: double): byte;
+                       const SegmentId, RoutePointId, UdbId: integer;
+                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): byte;
 var
   ATripInfo: TTripInfo;
   DistTime: double;
   TripInfoKey: string;
 begin
-  TripInfoKey := Format('%.3d_%.3d_%s_%s', [SegmentId, RoutePointId, RoutePointName, RoadClass]);
+  TripInfoKey := Format('%.3d_%.3d_%.5d', [SegmentId, RoutePointId, UdbId]);
   if (ATripInfoList.ContainsKey(TripInfoKey)) then
     ATripInfo := ATripInfoList.Items[TripInfoKey]
   else
@@ -87,6 +105,7 @@ begin
     ATripInfo.RoutePointId := RoutePointId;
     ATripInfo.RoutePoint := RoutePointName;
     ATripInfo.RoadClass := StrToIntDef('$' + RoadClass, 0);
+    ATripInfo.MapSegRoadId := MapsegRoadId;
     ATripInfo.Description := DescriptionFromRoadClass(ATripInfo.RoadClass);
     ATripInfo.Speed := SpeedFromRoadClass(ATripInfo.RoadClass);
     ATripInfoList.Add(TripInfoKey, ATripInfo);
@@ -95,6 +114,32 @@ begin
   ATripInfo.Distance := ATripInfo.Distance + Dist;
   ATripInfo.Time := ATripInfo.Time + DistTime;
   result := Min(254, Round(DistTime));
+end;
+
+procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
+                        const SegmentId, RoutePointId, UdbId: integer;
+                        const RoutePointName, MapSegRoadId: string;
+                        const Dist: double; const Time: byte);
+var
+  ATripInfo: TTripInfo;
+  TripInfoKey: string;
+begin
+  TripInfoKey := Format('%.3d_%.3d_%.5d', [SegmentId, RoutePointId, UdbId]);
+  if (ATripInfoList.ContainsKey(TripInfoKey)) then
+    ATripInfo := ATripInfoList.Items[TripInfoKey]
+  else
+  begin
+    ATripInfo := TTripInfo.Create;
+    ATripInfo.SegmentId := SegmentId;
+    ATripInfo.RoutePointId := RoutePointId;
+    ATripInfo.RoutePoint := RoutePointName;
+    ATripInfo.MapSegRoadId := MapsegRoadId;
+    ATripInfo.Description := DescriptionFromRoadClass(ATripInfo.RoadClass);
+    ATripInfo.Speed := 0;
+    ATripInfoList.Add(TripInfoKey, ATripInfo);
+  end;
+  ATripInfo.Distance := ATripInfo.Distance + Dist;
+  ATripInfo.Time := ATripInfo.Time + Time;
 end;
 
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);
@@ -124,7 +169,7 @@ begin
         Lst.Delimiter := ';';
         Lst.StrictDelimiter := true;
 
-        Lst.AddStrings(['Route point', 'Road Class', 'Description', 'Speed (Kmh)',
+        Lst.AddStrings(['Route point', 'Road ID', 'Road Class', 'Description', 'Speed (Kmh)',
                         'Distance (Km)', 'Time (Sec)', 'Trip Distance (Km)', 'Trip Time (Sec)', 'Trip time']);
         Writer.WriteLine(Lst.DelimitedText);
 
@@ -151,6 +196,7 @@ begin
                               'Total',
                               '',
                               '',
+                              '',
                               Format('%f', [RpDist]),
                               Format('%f', [RpTime]),
                               Format('%f', [TotDist]),
@@ -173,9 +219,10 @@ begin
 
           Lst.Clear;
           Lst.AddStrings([ATripInfo.RoutePoint,
+                          ATripInfo.MapSegRoadId,
                           Format('(0x%s)', [IntToHex(ATripInfo.RoadClass, 2)]),
                           ATripInfo.Description,
-                          IntToStr(ATripInfo.Speed),
+                          DisplaySpeed(ATripInfo),
                           Format('%f', [ATripInfo.Distance]),
                           Format('%f', [ATripInfo.Time])]);
           Writer.WriteLine(Lst.DelimitedText);
@@ -188,6 +235,7 @@ begin
           Lst.Clear;
           Lst.AddStrings([CurRoutePoint,
                           'Total',
+                          '',
                           '',
                           '',
                           Format('%f', [RpDist]),

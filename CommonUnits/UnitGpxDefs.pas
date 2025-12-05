@@ -36,6 +36,7 @@ type
     RoutePointId: integer;
     RoutePoint: string;
     RoadClass: byte;
+    MapSegRoadId: string;
     Description: string;
     Speed: integer;
     Distance: double;

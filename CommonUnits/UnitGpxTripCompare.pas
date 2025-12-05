@@ -19,7 +19,6 @@ type
     FCheckSegmentOK: boolean;
     FCheckRouteOK: boolean;
     FGpxRptList: Tlist;
-    function DisplayMapSegRoad(const MapSegRoad: string): string;
     function AddGpxRptPt(const FromNode: TXmlVSNode;
                          const ANodeValue: string): TXmlVSNode;
     function GetRouteNode(const RouteName: string): TXmlVSNode;
@@ -105,12 +104,6 @@ end;
 destructor TGPXTripCompare.Destroy;
 begin
   inherited Destroy;
-end;
-
-function TGPXTripCompare.DisplayMapSegRoad(const MapSegRoad: string): string;
-begin
-  result := MapSegRoad;
-  Insert(' ' ,result, 9);
 end;
 
 // Adds an XML node containing lat/lan values and a nodevalue to the objects of Messages.
@@ -283,7 +276,7 @@ begin
   Messages.Add('');
   Messages.AddObject(Format('  No matching RtePt found for: %s MapSeg + Road:%s, Lat:%s, Lon:%s',
                             [FUdbDir.DisplayName,
-                             DisplayMapSegRoad(FUdbDir.MapSegRoad),
+                             FUdbDir.MapSegRoadDisplay,
                              CTripLat, CTripLon]), FUdbDir);
 end;
 
@@ -319,7 +312,7 @@ begin
   BestDist := CoordDistance(CoordTrip, NextCoordGpx, TDistanceUnit.duKm);
   //
   result := AddGpxRptPt(NextBestRpt, Format('      %s: MapSeg + Road: %s, Lat: %s, Lon: %s, Distance: %1.0f Mtr',
-                                        [GpxFile, DisplayMapSegRoad(BestSubClass),
+                                        [GpxFile, BestSubClass,
                                          BestLat, BestLon, BestDist * 1000]));
 end;
 
@@ -352,7 +345,7 @@ begin
   Messages.Add('');
   Messages.AddObject(Format('  %s: %s', [CheckFail, FUdbDir.DisplayName]), FUdbDir);
   Messages.AddObject(Format('     %s: MapSeg + Road: %s, Lat: %s, Lon: %s',
-                            [TripFile, DisplayMapSegRoad(FUdbDir.MapSegRoad), CTripLat, CTripLon]), FUdbDir);
+                            [TripFile, FUdbDir.MapSegRoadDisplay, CTripLat, CTripLon]), FUdbDir);
   Messages.AddObject(MsgGpxRpt.NodeValue, MsgGpxRpt);
 end;
 
@@ -389,7 +382,10 @@ begin
 
   if (ScanRtePt <> nil) and
      (ScanRtePt.Find('gpxx:Subclass') <> nil) then
-    result := Copy(FindSubNodeValue(ScanRtePt, 'gpxx:Subclass'), 5, 16);
+  begin
+    result := FindSubNodeValue(ScanRtePt, 'gpxx:Subclass');
+    result := Format('%s %s', [Copy(result, 5, 8), Copy(result, 13, 8)]);
+  end;
 end;
 
 // Scan for best matching Subclass
@@ -700,7 +696,6 @@ var
   TripLat, TripLon: string;
   NextTrkPt, MsgTrkPt: TXmlVSNode;
   BestDist: double;
-
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
@@ -726,7 +721,7 @@ begin
   Messages.AddObject(Format('  Coordinates NOT OK: %s',
                             [FUdbDir.DisplayName]), FUdbDir);
   Messages.AddObject(Format('    %s: Lat: %s, Lon: %s, MapSeg + Road: %s, ',
-                            [TripFile, TripLat, TripLon, DisplayMapSegRoad(FUdbDir.MapSegRoad)]), FUdbDir);
+                            [TripFile, TripLat, TripLon, FUdbDir.MapSegRoadDisplay]), FUdbDir);
   Messages.AddObject(MsgTrkPt.NodeValue, MsgTrkPt);
 end;
 

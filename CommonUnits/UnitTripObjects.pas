@@ -766,7 +766,9 @@ type
     function GetNameLength: integer;
     function GetMapCoords: string;
     function GetCoords: TCoords;
+    function GetMapSegRoadFmt(FmtStr: string): string;
     function GetMapSegRoad: string;
+    function GetMapSegRoadDisplay: string;
     function GetMapSegRoadExclBit: string;
     function GetPointType: string;
     function GetDirection: string;
@@ -783,6 +785,7 @@ type
     property Unknown2: TBytes read FUnknown2;
     property Coords: TCoords read GetCoords;
     property MapCoords: string read GetMapCoords;
+    property MapSegRoadDisplay: string read GetMapSegRoadDisplay;
     property MapSegRoad: string read GetMapSegRoad;
     property MapSegRoadExclBit: string read GetMapSegRoadExclBit;
     property PointType: string read GetPointType;
@@ -3136,10 +3139,20 @@ begin
   result.Lon := Lon;
 end;
 
+function TUdbDir.GetMapSegRoadFmt(FmtStr: string): string;
+begin
+  result := Format(FmtStr, [IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8),
+                            IntToHex(Swap32(UdbDirValue.SubClass.RoadId), 8)]);
+end;
+
 function TUdbDir.GetMapSegRoad: string;
 begin
-  result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8);
-  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId), 8);
+  result := GetMapSegRoadFmt('%s%s');
+end;
+
+function TUdbDir.GetMapSegRoadDisplay: string;
+begin
+  result := GetMapSegRoadFmt('%s %s');
 end;
 
 function TUdbDir.GetMapSegRoadExclBit: string;
@@ -3486,10 +3499,12 @@ var
   DataType: Byte;
   Initiator: AnsiChar;
 
-  UdbDirCnt: integer;
-  AnUdbDir: TUdbDir;
+  UdbDirCnt, RtePtCnt: integer;
+  PrevUdbDir, AnUdbDir: TUdbDir;
   SelModel, AModel: TTripModel;
   Diff: Int64;
+  Distance: double;
+  DistTime: byte;
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
   FUdBList := TUdbHandleList.Create;
@@ -3498,6 +3513,7 @@ begin
   AStream.Read(FValue.UdbHandleCount, SizeOf(FValue.UdbHandleCount));
   FValue.UdbHandleCount := Swap32(FValue.UdbHandleCount);
 
+  RtePtCnt := 0;
   for UdbHandleCnt := 0 to FValue.UdbHandleCount -1 do
   begin
     AnUdbHandle := TmUdbDataHndl.Create(UdbHandleCnt);
@@ -3545,9 +3561,16 @@ begin
           break;
       end;
     end;
-
     AnUdbHandle.FValue.SwapCardinals;
 
+    if (TripList.TripModel = TTripModel.Unknown) then
+    begin
+      TripList.FTripModel := SelModel;
+      TripList.FIsUcs4 := Ucs4Model[TripList.FTripModel];
+    end;
+
+
+    PrevUdbDir := nil;
     for UdbDirCnt := 0 to AnUdbHandle.FValue.UDbDirCount -1 do
     begin
       AnUdbDir := TUdbDir.Create('');
@@ -3559,6 +3582,25 @@ begin
       AnUdbDir.FValue.SwapCardinals;
       AnUdbHandle.FTripList := TripList;
       AnUdbHandle.Add(AnUdbDir);
+
+      if (AnUdbDir.FValue.SubClass.PointType = 3) then
+        Inc(RtePtCnt);
+
+      if (PrevUdbDir = nil) then
+      begin
+        DistTime := 0;
+        Distance := 0;
+      end
+      else
+      begin
+        DistTime := PrevUdbDir.FValue.Time;
+        Distance := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
+      end;
+
+      AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
+                    AnUdbDir.GetName, AnUdbDir.MapSegRoadDisplay, Distance, DistTime);
+
+      PrevUdbDir := AnUdbDir;
     end;
 
     AddUdbHandle(AnUdbHandle);
@@ -3645,6 +3687,10 @@ procedure TTripList.Clear;
 var
   ANitem: TBaseItem;
 begin
+  FTripModel := TTripModel.Unknown;
+  FIsUcs4 := Ucs4Model[FTripModel];
+  FTripInfoList.Clear;
+
   if (Assigned(ItemList)) then
   begin
     for ANitem in ItemList do
@@ -4530,7 +4576,7 @@ procedure TTripList.SaveCalculated(const AModel: TTripModel;
                                    const RtePts: TObject);
 var
   AllRoutes: TBaseItem;
-  Index: integer;
+  Index, UdbId: integer;
   ViaCount, RoutePtCount: integer;
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
@@ -4568,6 +4614,7 @@ begin
   ProcessOptions := TProcessOptions.Create;
   FirstRtePt := TXmlVSNodeList(RtePts).FirstChild;
   RoutePointList := TList<TLocation>.Create;
+  UdbId := 0;
   try
     for Index := 1 to ViaCount -1 do
     begin
@@ -4629,7 +4676,9 @@ begin
             // Compute the time based on the RoadClass of the previous UdbDir
             if (Assigned(PrevUdbDir)) then
             begin
-              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, RtePtUdbDir.GetName, PrevUdbDir.RoadClass, CurDist);
+              Inc(UdbId);
+              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, UdbId, RtePtUdbDir.GetName,
+                                                      PrevUdbDir.RoadClass, PrevUdbDir.MapSegRoadDisplay, CurDist);
 
               // Totals for the UdbHdandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;

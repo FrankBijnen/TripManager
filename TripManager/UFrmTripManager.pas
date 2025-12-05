@@ -209,6 +209,8 @@ type
     CmbSQliteTabs: TComboBox;
     BitBtnSQLGo: TBitBtn;
     ActInstalledDoc: TAction;
+    N12: TMenuItem;
+    MnuTripOverview: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -306,6 +308,7 @@ type
     procedure ActInstalledDocExecute(Sender: TObject);
     procedure ActInstalledDocUpdate(Sender: TObject);
     procedure BgDeviceItemsGpxPoiClick(Sender: TObject);
+    procedure MnuTripOverviewClick(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -1554,7 +1557,7 @@ begin
     GPXFileObj.AnalyzeGpx;
     GpxSelected := GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
                                                'Select 1 Route or Track',
-                                                TagsToShow, ATripList.GetValue('mTripName'));
+                                               TagsToShow, ATripList.GetValue('mTripName'));
     if (GpXSelected) then
     begin
       SetCursor(CrWait);
@@ -3033,9 +3036,7 @@ var
   procedure AddUdbDir(AnUdbDir: TUdbDir; ZoomToPoint: boolean);
   begin
     VlTripInfo.Strings.AddPair('*** UdbDir', DupeString('-', DupeCount), TGridSelItem.Create(AnUdbDir));
-    VlTripInfo.Strings.AddPair('MapSegment + RoadId', Format('%s %s',
-                                 [IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.MapSegment), 8),
-                                  IntToHex(Swap32(AnUdbDir.UdbDirValue.SubClass.RoadId), 8)]),
+    VlTripInfo.Strings.AddPair('MapSegment + RoadId', AnUdbDir.MapSegRoadDisplay,
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
                                                     SizeOf(AnUdbDir.UdbDirValue.SubClass.RoadId),
@@ -3928,6 +3929,17 @@ begin
   finally
     SetCursor(CrNormal);
   end;
+end;
+
+procedure TFrmTripManager.MnuTripOverviewClick(Sender: TObject);
+begin
+  SaveTrip.Filter := '*.csv|*.csv';
+  SaveTrip.InitialDir := ShellTreeView1.Path;
+  SaveTrip.FileName := ChangeFileExt(ExtractFileName(HexEditFile), '.csv');
+  if not SaveTrip.Execute then
+    exit;
+
+  ATripList.ExportTripInfo(SaveTrip.FileName);
 end;
 
 procedure TFrmTripManager.GroupTrips(Group: Boolean);
