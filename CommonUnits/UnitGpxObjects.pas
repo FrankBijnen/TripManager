@@ -2432,6 +2432,8 @@ begin
     UpdateTemplate(TripName, ParentTripId, RtePts);
     // Write to File
     FTripList.SaveToFile(OutFile);
+//TODO parm
+    FTripList.ExportTripInfo(ChangeFileExt(OutFile, '.csv'));
   finally
     RtePts.Free;
     FTripList.Free;

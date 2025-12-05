@@ -1,8 +1,6 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
 {.$DEFINE DEBUG_ENUMS}
-{.$DEFINE DEBUG_TIME}
-//TODO RoadSpeed  Make the road speeds configurable
 interface
 
 uses
@@ -433,7 +431,6 @@ type
   private
     function GetValue: string; override;
   public
-    class function TripTime(AValue: cardinal): string;
     constructor Create(AValue: Cardinal = 0);
   end;
 
@@ -779,7 +776,6 @@ type
     function Lat: Double;
     function Lon: Double;
     function IsTurn: boolean;
-    procedure ComputeTime(Dist: Double);
     property DisplayName: string read GetName;
     property DisplayLength: integer read GetDisplayLength;
     property NameLength: integer read GetNameLength;
@@ -879,6 +875,8 @@ type
     FTripModel: TTripModel;
     FModelDescription: string;
     FIsUcs4: boolean;
+    FTripInfoList: TTripInfoList;
+
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
@@ -945,6 +943,7 @@ type
     function Add(ANItem: TBaseItem): TBaseItem;
     procedure SaveToStream(AStream: TMemoryStream);
     procedure SaveToFile(AFile: string);
+    procedure ExportTripInfo(AFile: string);
     function LoadFromStream(AStream: TStream): boolean;
     function LoadFromFile(AFile: string): boolean;
     procedure Assign(ATripList: TTripList);
@@ -991,7 +990,7 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo, System.UITypes,
   Vcl.Dialogs,
-  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
+  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions, UnitTripOverview;
 
 const
   Coord_Decimals = '%1.6f';
@@ -2042,20 +2041,9 @@ begin
   inherited Create('mTotalTripTime', AValue);
 end;
 
-class function TmTotalTripTime.TripTime(AValue: cardinal): string;
-var
-  Hour, Min: integer;
-begin
-  Hour := Trunc(AValue / 60 / 60);
-  Min := Trunc(AValue / 60);
-  MIn := Min - (Hour * 60);
-  result := Format('%d Hour %d Min.', [Hour, Min]);
-  result := result + Format(' (%d Seconds)', [AValue]);
-end;
-
 function TmTotalTripTime.GetValue: string;
 begin
-  result := TmTotalTripTime.TripTime(FValue);
+  result := TripTimeAsHrMin(FValue);
 end;
 
 constructor TmImported.Create(AValue: boolean = false);
@@ -3246,34 +3234,6 @@ begin
   result := CompareMem(@TurnMagic[0], @FName[4], SizeOf(TurnMagic));
 end;
 
-procedure TUdbDir.ComputeTime(Dist: Double);
-var
-  Tmp: double;
-begin
-  // Table taken from default Basecamp Motorcycle profile.
-  //TODO RoadSpeed Make configurable
-//  case (StrToIntDef('$' + RoadClass, 0)) of
-//    1:  FValue.Time := Round(3600 * Dist / 108);  // Interstate Highway
-//    2:  FValue.Time := Round(3600 * Dist / 93);   // Major Highway
-//    3:  FValue.Time := Round(3600 * Dist / 72);   // Other Highway
-//    4:  FValue.Time := Round(3600 * Dist / 56);   // Arterial Road
-//    5:  FValue.Time := Round(3600 * Dist / 48);   // Collector Road
-//    12: FValue.Time := Round(3600 * Dist / 15);   // Round about
-//    else
-//        FValue.Time := Round(3600 * Dist / 20);   // Default for all others. EG Residential
-//  end;
-  case (StrToIntDef('$' + RoadClass, 0)) of
-    1:  Tmp := Round(3600 * Dist / 108);  // Interstate Highway
-    2:  Tmp := Round(3600 * Dist / 72);   // Major Highway
-    3:  Tmp := Round(3600 * Dist / 56);   // Other Highway
-    4:  Tmp := Round(3600 * Dist / 50);   // Arterial Road
-    5:  Tmp := Round(3600 * Dist / 48);   // Collector Road
-    12: Tmp := Round(3600 * Dist / 15);   // Round about
-    else
-        Tmp := Round(3600 * Dist / 20);   // Default for all others. EG Residential
-  end;
-  FValue.Time := Min(254, Round(Tmp));    // Overflow!
-end;
 
 {*** UdbPref *** }
 procedure TUdbPrefValue.SwapCardinals;
@@ -3669,6 +3629,7 @@ begin
   inherited Create;
   FRouteCnt := 0;
   FItemList := TItemList.Create;
+  FTripInfoList := TTripInfoList.Create([doOwnsValues]);
 end;
 
 destructor TTripList.Destroy;
@@ -3676,6 +3637,7 @@ begin
   Clear;
 
   FItemList.Free;
+  FTripInfoList.Free;
   inherited Destroy;
 end;
 
@@ -3842,6 +3804,11 @@ begin
   finally
     AStream.Free;
   end;
+end;
+
+procedure TTripList.ExportTripInfo(AFile: string);
+begin
+  ExportTripInfoToCSV(FTripInfoList, AFile);
 end;
 
 function TTripList.LoadFromStream(AStream: TStream): boolean;
@@ -4518,7 +4485,7 @@ begin
       begin
         // Distance and time from Previous UdbDir
         CurDist := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
-        PrevUdbDir.ComputeTime(CurDist);
+        PrevUdbDir.FValue.Time := Min(254, Round(ComputeTime( StrToIntDef('$' + PrevUdbDir.RoadClass, 0), CurDist)));
 
         // Totals for the UdbHdandle
         TotalTime := TotalTime + PrevUdbDir.FValue.Time;
@@ -4620,11 +4587,6 @@ begin
         RtePtUdbDir := TUdbDir.Create(TripModel, ALocation, RouteCnt);
         AnUdbHandle.Add(RtePtUdbDir);
 
-{$IFDEF DEBUGTIME}
-        AllocConsole;
-        Writeln(RtePtUdbDir.GetName);
-{$ENDIF}
-
         // Lookup the location <rtept> in the GPX
         while (ScanRtePt <> nil) do
         begin
@@ -4667,14 +4629,11 @@ begin
             // Compute the time based on the RoadClass of the previous UdbDir
             if (Assigned(PrevUdbDir)) then
             begin
-              PrevUdbDir.ComputeTime(CurDist);
+              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, RtePtUdbDir.GetName, PrevUdbDir.RoadClass, CurDist);
 
               // Totals for the UdbHdandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;
               UdbDist := UdbDist + (CurDist * 1000);
-{$IFDEF DEBUGTIME}
-              Writeln(' Dist:', ((TotalDist + UdbDist)/1000):4:2, 'Km. Time: ', TmTotalTripTime.TripTime(TotalTime + UdbTime));
-{$ENDIF}
             end;
 
             CurDist := 0;
@@ -4694,14 +4653,12 @@ begin
 
       TotalDist := TotalDist + UdbDist; // Totals for the Trip
       TotalTime := TotalTime + UdbTime;
-{$IFDEF DEBUGTIME}
-      Writeln(RtePtUdbDir.GetName);
-{$ENDIF}
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, UdbTime);
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, Round(UdbDist));
 
       // Add to Allroutes
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
+
     end;
 
     if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc, TTripOption.ttTripTrackLocPrefs]) then

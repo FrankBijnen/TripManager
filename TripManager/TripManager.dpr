@@ -46,8 +46,9 @@ uses
   UFrmGeoSearch in '..\CommonUnits\UFrmGeoSearch.pas' {FGeoSearch},
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
   UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
+  UnitTripOverview in '..\CommonUnits\UnitTripOverview.pas',
   UnitRegistryKeys;
-
+  
 {$R *.res}
 
 begin

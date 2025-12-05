@@ -3,7 +3,7 @@ unit UnitGpxDefs;
 interface
 
 uses
-  UnitVerySimpleXml;
+  UnitVerySimpleXml, System.Generics.Collections;
 
 const
   EarthRadiusKm: Double = 6371.009;
@@ -29,6 +29,19 @@ type
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: The first elements should be the same as UnitTripObjects.TTripModel
   TGarminModel  = (XT, XT2, Tread2, Zumo595, Drive51, Zumo3x0, GarminEdge, GarminGeneric, Unknown);
+
+  // Trip Info to CSV
+  TTripInfo = class(TObject)
+    SegmentId: integer;
+    RoutePointId: integer;
+    RoutePoint: string;
+    RoadClass: byte;
+    Description: string;
+    Speed: integer;
+    Distance: double;
+    Time: double;
+  end;
+  TTripInfoList = TObjectDictionary<string, TTripInfo>;
 
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;
