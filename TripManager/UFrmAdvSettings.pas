@@ -77,7 +77,7 @@ implementation
 
 uses
   System.UITypes, System.StrUtils, System.Math,
-  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects, UnitGeoCode, UnitOSMMap;
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects, UnitGeoCode, UnitOSMMap, UnitGpi;
 
 {$R *.dfm}
 
@@ -248,7 +248,7 @@ begin
                                       'Add Shaping points from route');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_GPISymbolSize,
                                       '80x80',
-                                      'Size of symbols (24x24 48x48 or 80x80)');
+                                      'Size of symbols (24x24, 48x48 or 80x80)');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_GPIProximity,
                                       '500',
                                       'Default proximity for alerts in meters');
@@ -501,6 +501,11 @@ begin
   SaveGrid(GridDeviceSettings);
   SaveGrid(GridZumoSettings);
   SaveGrid(GridGeoCodeSettings);
+
+  TSetProcessOptions.CheckSymbolsDir;
+  if (GetRegistry(Reg_ValidGpiSymbols, false) = false) then
+    MessageDlg(Format('Selected symbol size: (%s) is not installed.%sGPI functions disabled.', [GetRegistry(Reg_GPISymbolSize, ''), #10]),
+               TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
 
   SetRegistry(Reg_AddressFormat, ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));
 end;

@@ -79,6 +79,7 @@ const
   Reg_EnableTripFuncs             = 'EnableTripFuncs';
   Reg_EnableGpxFuncs              = 'EnableGpxFuncs';
   Reg_EnableGpiFuncs              = 'EnableGpiFuncs';
+  Reg_ValidGpiSymbols             = 'ValidGpiSymbols';
   Reg_TripColor_Key               = 'TripColor';
   Reg_TripColor_Val               = 'Magenta';
   Reg_Maximized_Key               = 'Maximized';
@@ -145,6 +146,7 @@ type
     class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
     class function GetKnownPath(DevIndex, PathId: integer): string;
     class function Garmin2TripModel(Garmin: integer): integer;
+    class procedure CheckSymbolsDir;
   end;
 
 var
@@ -156,7 +158,7 @@ implementation
 uses
   System.SysUtils,System.StrUtils, System.DateUtils, System.TypInfo,
   Vcl.ComCtrls,
-  UnitRegistry, UnitProcessOptions, UnitTripObjects;
+  UnitRegistry, UnitProcessOptions, UnitTripObjects, UnitGpi;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
 begin
@@ -189,7 +191,7 @@ begin
     DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2)) -1);
 
     // GPI defaults
-    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'Symbols\' +
+    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir +
                        GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
@@ -551,6 +553,14 @@ begin
     else
       result := Ord(TTripModel.Unknown);
   end;
+end;
+
+class procedure TSetProcessOptions.CheckSymbolsDir;
+var
+  SymbolsDir: string;
+begin
+  SymbolsDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '');
+  SetRegistry(Reg_ValidGpiSymbols, DirectoryExists(SymbolsDir));
 end;
 
 // Default paths. Can be overruled by GarminDevice.Xml

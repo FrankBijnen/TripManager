@@ -108,7 +108,9 @@ begin
   TvSelections.Items[IdWayPointWpt].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdWayPointVia].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdWayPointShp].Enabled := GetRegistry(Reg_EnableGpxFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
-  TvSelections.Items[IdGpi].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
+  TvSelections.Items[IdGpi].Enabled := (GetRegistry(Reg_ValidGpiSymbols, false) = true) and
+                                       (GetRegistry(Reg_EnableGpiFuncs, false) = true) and
+                                       (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdGpiWayPt].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdGpiViaPt].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);
   TvSelections.Items[IdGpiShpPt].Enabled := GetRegistry(Reg_EnableGpiFuncs, false) and (GetRegistry(Reg_EnableFitFuncs, false) = false);

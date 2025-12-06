@@ -212,7 +212,7 @@ begin
   ProcessViaPtsInGpi := true;
   ProcessShapePtsInGpi := false;
 {$IFDEF GPI}
-  GPISymbolsDir := DefGpiSymbolsDir;
+  GPISymbolsDir := DefGpiSmallSymbolsDir;
 {$ENDIF}
   DefaultProximityStr := '';
 

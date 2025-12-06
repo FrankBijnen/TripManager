@@ -14,7 +14,8 @@ const
   GpiName: TGPXString         = 'my.gpi';
   GpiVersion: Word            = 0;
   DefTransparentColor: DWORD  = $00ff00ff;
-  DefGpiSymbolsDir            = 'Symbols\24x24\';
+  DefGpiSymbolsDir            = 'Symbols\';
+  DefGpiSmallSymbolsDir       = DefGpiSymbolsDir + '24x24\';
   Reg_GPISymbolSize           = 'GPISymbolsSize';
   Reg_GPIProximity            = 'GPIProximity';
 
@@ -57,7 +58,7 @@ type
     Bitmap: TGPXString;
     BitmapId: Word;
     GpiSymbolsDir: TGPXString;
-    constructor Create(SymbolsDir: TGPXString = DefGpiSymbolsDir);
+    constructor Create(SymbolsDir: TGPXString = DefGpiSmallSymbolsDir);
     destructor Destroy; override;
   end;
 
@@ -375,7 +376,7 @@ begin
   inherited;
 end;
 
-constructor TGPXBitmap.Create(SymbolsDir: TGPXString = DefGpiSymbolsDir);
+constructor TGPXBitmap.Create(SymbolsDir: TGPXString = DefGpiSmallSymbolsDir);
 begin
   GpiSymbolsDir := SymbolsDir;
   inherited Create;

@@ -3583,23 +3583,22 @@ begin
       AnUdbHandle.FTripList := TripList;
       AnUdbHandle.Add(AnUdbDir);
 
-      if (AnUdbDir.FValue.SubClass.PointType = 3) then
-        Inc(RtePtCnt);
-
-      if (PrevUdbDir = nil) then
+      if (PrevUdbDir <> nil) then
       begin
-        DistTime := 0;
-        Distance := 0;
-      end
-      else
-      begin
-        DistTime := PrevUdbDir.FValue.Time;
-        Distance := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
+        if (PrevUdbDir.FValue.SubClass.PointType = 3) then
+        begin
+          Inc(RtePtCnt);
+          AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
+                        PrevUdbDir.GetName, '', 0, 0);
+        end
+        else
+        begin
+          DistTime := PrevUdbDir.FValue.Time;
+          Distance := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
+          AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
+                        PrevUdbDir.GetName, PrevUdbDir.MapSegRoadDisplay, Distance, DistTime);
+        end;
       end;
-
-      AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
-                    AnUdbDir.GetName, AnUdbDir.MapSegRoadDisplay, Distance, DistTime);
-
       PrevUdbDir := AnUdbDir;
     end;
 
@@ -4693,6 +4692,13 @@ begin
           PrevCoords := Coords;
           ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
         end;
+
+        // Totals for the UdbHdandle
+        if (Assigned(PrevUdbDir)) then
+        begin
+          UdbTime := UdbTime + PrevUdbDir.FValue.Time;
+          UdbDist := UdbDist + (CurDist * 1000);
+        end;
       end;
 
       // Add end route point. Of this segment
@@ -4722,7 +4728,6 @@ begin
       TTripModel.Tread2:
         SetRoutePrefs_XT2_Tread2(TmLocations(Locations), ProcessOptions);
     end;
-
   finally
     RoutePointList.Free;
     ProcessOptions.Free;

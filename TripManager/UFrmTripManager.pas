@@ -1227,7 +1227,10 @@ begin
               else if (ContainsText(ExtractFileExt(Fs.Name), GPIExtension)) then
                 SetCurrentPath(DeviceFolder[2])
               else
+              begin
+                Rc := FindNext(Fs);
                 continue;
+              end;
 
               // Overwrite?
               CurrentObjectid := GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TempFile);
@@ -4687,6 +4690,7 @@ procedure TFrmTripManager.ReadSettings;
 var
   ModelIndex: integer;
 begin
+  TSetProcessOptions.CheckSymbolsDir;
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   if (Assigned(CurrentDevice)) then
     GuessModel(CurrentDevice.DisplayedDevice)

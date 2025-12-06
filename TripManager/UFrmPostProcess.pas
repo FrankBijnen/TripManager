@@ -67,12 +67,9 @@ var
 implementation
 
 uses
-  System.TypInfo, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitGpxDefs, UnitProcessOptions;
+  System.TypInfo, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitGpxDefs, UnitGpi, UnitProcessOptions;
 
 {$R *.dfm}
-
-const
-  SymbolsDir = 'Symbols\24x24';
 
 procedure TFrmPostProcess.LoadSymbols;
 var
@@ -95,7 +92,7 @@ begin
     ImgListSymbols.Clear;
     ImgListSymbols.Width := 24;
     ImgListSymbols.Height := 24;
-    Dir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + SymbolsDir;
+    Dir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSmallSymbolsDir;
     Rc := FindFirst(Dir + '\*.bmp', faAnyFile - faDirectory, Fs);
     while (Rc = 0) do
     begin
