@@ -1165,7 +1165,7 @@ end;
 procedure TFrmTripManager.BtnSendToClick(Sender: TObject);
 var
   CrWait, CRNormal: HCURSOR;
-  GPXFile, TempFile, CurrentObjectId, SavedFolderId: string;
+  GPXFile, TempFile, TempExt, CurrentObjectId, SavedFolderId: string;
   AnItem: TListItem;
   Fs: TSearchRec;
   Rc: integer;
@@ -1218,19 +1218,22 @@ begin
             Rc := FindFirst(GetRoutesTmp + '\*.*', faAnyFile - faDirectory, Fs);
             while (Rc = 0) do
             begin
+              // Save the File name and Extension. The rest of the loop must use these vars.
               TempFile := Fs.Name;
-              if (ContainsText(ExtractFileExt(Fs.Name), TripExtension)) or
-                 (ContainsText(ExtractFileExt(Fs.Name), FitExtension)) then
+              TempExt := ExtractFileExt(TempFile);
+
+              // Make sure we read the next, so we can use Continue in the loop
+              Rc := FindNext(Fs);
+
+              if (ContainsText(TempExt, TripExtension)) or
+                 (ContainsText(TempExt, FitExtension)) then
                 SetCurrentPath(DeviceFolder[0])
-              else if (ContainsText(ExtractFileExt(Fs.Name), GpxExtension)) then
+              else if (ContainsText(TempExt, GpxExtension)) then
                 SetCurrentPath(DeviceFolder[1])
-              else if (ContainsText(ExtractFileExt(Fs.Name), GPIExtension)) then
+              else if (ContainsText(TempExt, GPIExtension)) then
                 SetCurrentPath(DeviceFolder[2])
               else
-              begin
-                Rc := FindNext(Fs);
                 continue;
-              end;
 
               // Overwrite?
               CurrentObjectid := GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TempFile);
@@ -1238,10 +1241,7 @@ begin
               begin
                 ShowWarnOverWrite(TempFile);
                 if (WarnOverWrite in [mrNo, mrNoToAll]) then
-                begin
-                  Rc := FindNext(Fs);
                   continue;
-                end;
                 if (not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
                   raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.DisplayedDevice]));
               end;
@@ -1256,7 +1256,6 @@ begin
                 raise Exception.Create(Format('Could not overwrite file: %s on %s',
                                               [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
 
-              Rc := FindNext(Fs);
             end;
             FindClose(Fs);
             {$ENDIF}
@@ -1643,14 +1642,13 @@ begin
     CurrentDevicePath[1] := '?';
 
   // Save Device settings
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  ModelIndex := CmbModel.ItemIndex;
   SubKey := IntToStr(ModelIndex);
   case (BgDevice.ItemIndex) of
     0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, SubKey);
     1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath, SubKey);
     2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath, SubKey);
   end;
-  GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
 end;
 
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
@@ -3086,11 +3084,6 @@ var
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.Time),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Time)));
-
-    VlTripInfo.Strings.AddPair('Border', Format('%d', [AnUdbDir.UdbDirValue.Border]),
-                              TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.Border),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Border)));
 
     VlTripInfo.Strings.AddPair('UdbDir Unknown2', Format('%d bytes', [Length(AnUdbDir.Unknown2)]),
                               TGridSelItem.Create(AnUdbDir,

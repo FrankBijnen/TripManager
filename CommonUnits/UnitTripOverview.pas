@@ -10,11 +10,11 @@ function ComputeTime(const RoadClass: byte; const Dist: Double): double;
 function TripTimeAsHrMin(AValue: cardinal): string;
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
                        const SegmentId, RoutePointId, UdbId: integer;
-                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): byte; overload;
+                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): word; overload;
 procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
                         const SegmentId, RoutePointId, UdbId: integer;
                         const RoutePointName, MapSegRoadId: string;
-                        const Dist: double; const Time: byte); overload;
+                        const Dist: double; const Time: word); overload;
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);
 
 implementation
@@ -60,7 +60,7 @@ end;
 
 function ComputeTime(const RoadClass: byte; const Dist: Double): double;
 begin
-  result := Round(3600 * Dist / SpeedFromRoadClass(RoadClass));
+  result := (3600 * Dist) / SpeedFromRoadClass(RoadClass);
 end;
 
 function TripTimeAsHrMin(AValue: cardinal): string;
@@ -89,7 +89,7 @@ end;
 
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
                        const SegmentId, RoutePointId, UdbId: integer;
-                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): byte;
+                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): word;
 var
   ATripInfo: TTripInfo;
   DistTime: double;
@@ -113,13 +113,13 @@ begin
   DistTime := ComputeTime(ATripInfo.RoadClass, Dist);
   ATripInfo.Distance := ATripInfo.Distance + Dist;
   ATripInfo.Time := ATripInfo.Time + DistTime;
-  result := Min(254, Round(DistTime));
+  result := Min($fffe, Round(DistTime));
 end;
 
 procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
                         const SegmentId, RoutePointId, UdbId: integer;
                         const RoutePointName, MapSegRoadId: string;
-                        const Dist: double; const Time: byte);
+                        const Dist: double; const Time: word);
 var
   ATripInfo: TTripInfo;
   TripInfoKey: string;

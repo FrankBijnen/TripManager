@@ -741,8 +741,7 @@ type
     Lat:              integer;
     Lon:              integer;
     Unknown1:         Cardinal;
-    Time:             byte;
-    Border:           byte;
+    Time:             word;
     procedure SwapCardinals;
   end;
   TUdbDir = class(TBaseItem)
@@ -971,7 +970,8 @@ type
     procedure ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
     procedure TripTrack(const AModel: TTripModel;
                         const RtePts: TObject;
-                        const SubClasses: TStringList);
+                        const SubClasses: TStringList;
+                        const GpxDist: double = 0);
     procedure SaveCalculated(const AModel: TTripModel;
                             const RtePts: TObject);
     procedure CreateTemplate(const AModel: TTripModel;
@@ -3058,8 +3058,7 @@ begin
   FValue.SubClass.RoadId := Swap32($00f0ffff);
   FillCompressedLatLon;
   FValue.Unknown1     := Swap32(UdbDirMagic);
-  FValue.Time         := $ff;
-  FValue.Border       := $ff;
+  FValue.Time         := $ffff;
   FUnknown2[4]        := $80;
   FUnknown2[5]        := $01;
 end;
@@ -3504,7 +3503,7 @@ var
   SelModel, AModel: TTripModel;
   Diff: Int64;
   Distance: double;
-  DistTime: byte;
+  DistTime: word;
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
   FUdBList := TUdbHandleList.Create;
@@ -4476,7 +4475,8 @@ end;
 
 procedure TTripList.TripTrack(const AModel: TTripModel;
                               const RtePts: TObject;
-                              const SubClasses: TStringList);
+                              const SubClasses: TStringList;
+                              const GpxDist: double = 0);
 var
   Locations: TBaseItem;
   RoutePointList: TList<TLocation>;
@@ -4530,7 +4530,7 @@ begin
       begin
         // Distance and time from Previous UdbDir
         CurDist := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
-        PrevUdbDir.FValue.Time := Min(254, Round(ComputeTime( StrToIntDef('$' + PrevUdbDir.RoadClass, 0), CurDist)));
+        PrevUdbDir.FValue.Time := Min( $fffe, Round(ComputeTime( StrToIntDef('$' + PrevUdbDir.RoadClass, 0), CurDist)));
 
         // Totals for the UdbHdandle
         TotalTime := TotalTime + PrevUdbDir.FValue.Time;
@@ -4553,6 +4553,12 @@ begin
     TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 
     // Update Dist and Time
+    if (GpxDist <> 0) and
+       (TotalDist <> 0) then
+    begin
+      TotalTime := Round(TotalTime / TotalDist * GpxDist);
+      TotalDist := GpxDist;
+    end;
     UpdateDistAndTime(TotalDist, TotalTime);
 
     // Mark as TripTrack
@@ -4648,12 +4654,9 @@ begin
         FirstRtePt := ScanRtePt; // restart next search in GPX here
 
         // Init PrevCoords
+        FillChar(PrevCoords, SizeOf(PrevCoords), 0);
         ScanGpxxRptNode := GetFirstExtensionsNode(ScanRtePt);
-        if (ScanGpxxRptNode = nil) then // Should not occur.
-        begin
-          BreakPoint;
-          continue;
-        end;
+        if (ScanGpxxRptNode <> nil) then
         PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
 
         CurDist := 0;
@@ -4661,6 +4664,10 @@ begin
         while (ScanGpxxRptNode <> nil) do
         begin
           Coords.FromAttributes(ScanGpxxRptNode.AttributeList);
+
+          // Compute distance from prev udb
+          CurDist := CurDist + CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
+          PrevCoords := Coords;
 
           // Create a UdbDir, for every <SubClass> node.
           CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
@@ -4672,7 +4679,7 @@ begin
                                        Coords.Lat, Coords.Lon);
             AnUdbHandle.Add(AnUdbDir);
 
-            // Compute the time based on the RoadClass of the previous UdbDir
+            // Update the Time of the previous UdbDir
             if (Assigned(PrevUdbDir)) then
             begin
               Inc(UdbId);
@@ -4684,12 +4691,11 @@ begin
               UdbDist := UdbDist + (CurDist * 1000);
             end;
 
+            // Reset Distance
             CurDist := 0;
             PrevUdbDir := AnUdbDir;
           end;
 
-          CurDist := CurDist + CoordDistance(PrevCoords, Coords, TDistanceUnit.duKm);
-          PrevCoords := Coords;
           ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
         end;
 

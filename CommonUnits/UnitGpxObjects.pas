@@ -1128,7 +1128,7 @@ end;
 
 procedure TGPXFile.ProcessRte(const RteNode: TXmlVSNode);
 var
-  RtePtNode, RteNameNode: TXmlVSNode;
+  RtePtNode, RteNameNode, NumberNode: TXmlVSNode;
   ExtensionsNode, RouteExtension: TXmlVSNode;
   RtePts: TXmlVSNodeList;
   Cnt: integer;
@@ -1153,13 +1153,14 @@ begin
     CurrentViaPointRoute.NodeValue := CurrentRouteTrackName;
   end;
 
+  NumberNode := nil;
   if (ProcessOptions.ProcessTracks) then
   begin
     FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
     CurrentTrack.AddChild('desc').NodeValue := 'Rte';
-
+    NumberNode := CurrentTrack.AddChild('number');
     if (ExtensionsNode <> nil) then
     begin
       RouteExtension := ExtensionsNode.Find('gpxx:RouteExtension');
@@ -1188,6 +1189,8 @@ begin
       ProcessRtePt(RtePtNode, CurrentRouteTrackName, Cnt, RtePts.Count);
     end;
   end;
+  if (Assigned(NumberNode)) then
+    NumberNode.NodeValue := Format('%f', [TotalDistance * 1000]);
 
   RtePts.Free;
 end;
@@ -2355,12 +2358,15 @@ begin
   end;
 end;
 
+
 procedure TGPXFile.UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 var
   ViaPointCount:  integer;
   HasSubClasses:  boolean;
   Locations:      TmLocations;
   ParentTripName: TmParentTripName;
+  RouteNode: TXmlVSNode;
+  GpxDistance: double;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel = TTripModel.XT) then
@@ -2375,8 +2381,16 @@ begin
   HasSubClasses := BuildSubClassesList(RtePts);
 
   if ((ProcessOptions.TripOption in [TTripOption.ttTripTrack]) and HasSubClasses) then
+  begin
+    // Get distance from GPX, the subclasses are not accurate enough
+    GpxDistance := 0;
+    RouteNode := FTrackList.Find(TripName);
+    if (Assigned(RouteNode)) then
+      TryStrToFloat(FindSubNodeValue(RouteNode, 'number'), GpxDistance);
+
     // Create TripTrack from BC calculation
-    FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList)
+    FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList, GpxDistance);
+  end
   else if ((ViaPointCount >= 2)and HasSubClasses) then
     // Create AllRoutes from BC calculation
     FTripList.SaveCalculated(FTripList.TripModel, RtePts)
