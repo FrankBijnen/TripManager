@@ -10,17 +10,21 @@ function ComputeTime(const RoadClass: byte; const Dist: Double): double;
 function TripTimeAsHrMin(AValue: cardinal): string;
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
                        const SegmentId, RoutePointId, UdbId: integer;
-                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): word; overload;
+                       const RoutePoint, RoadClass: string;
+                       const UdbDir: TObject;
+                       const Dist: double): word; overload;
 procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
                         const SegmentId, RoutePointId, UdbId: integer;
-                        const RoutePointName, MapSegRoadId: string;
+                        const RoutePoint: string;
+                        const UdbDir: TObject;
                         const Dist: double; const Time: word); overload;
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);
 
 implementation
 
 uses
-  System.Math;
+  System.Math,
+  UnitTripObjects;
 
 function DescriptionFromRoadClass(const RoadClass: byte): string;
 begin
@@ -89,7 +93,9 @@ end;
 
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
                        const SegmentId, RoutePointId, UdbId: integer;
-                       const RoutePointName, RoadClass, MapSegRoadId: string; const Dist: double): word;
+                       const RoutePoint, RoadClass: string;
+                       const UdbDir: TObject;
+                       const Dist: double): word;
 var
   ATripInfo: TTripInfo;
   DistTime: double;
@@ -103,9 +109,9 @@ begin
     ATripInfo := TTripInfo.Create;
     ATripInfo.SegmentId := SegmentId;
     ATripInfo.RoutePointId := RoutePointId;
-    ATripInfo.RoutePoint := RoutePointName;
+    ATripInfo.RoutePoint := RoutePoint;
     ATripInfo.RoadClass := StrToIntDef('$' + RoadClass, 0);
-    ATripInfo.MapSegRoadId := MapsegRoadId;
+    ATripInfo.MapSegRoadId := TUdbDir(UdbDir).MapSegRoadDisplay;
     ATripInfo.Description := DescriptionFromRoadClass(ATripInfo.RoadClass);
     ATripInfo.Speed := SpeedFromRoadClass(ATripInfo.RoadClass);
     ATripInfoList.Add(TripInfoKey, ATripInfo);
@@ -118,7 +124,8 @@ end;
 
 procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
                         const SegmentId, RoutePointId, UdbId: integer;
-                        const RoutePointName, MapSegRoadId: string;
+                        const RoutePoint: string;
+                        const UdbDir: TObject;
                         const Dist: double; const Time: word);
 var
   ATripInfo: TTripInfo;
@@ -132,8 +139,8 @@ begin
     ATripInfo := TTripInfo.Create;
     ATripInfo.SegmentId := SegmentId;
     ATripInfo.RoutePointId := RoutePointId;
-    ATripInfo.RoutePoint := RoutePointName;
-    ATripInfo.MapSegRoadId := MapsegRoadId;
+    ATripInfo.RoutePoint := RoutePoint;
+    ATripInfo.MapSegRoadId := TUdbDir(UdbDir).MapSegRoadDisplay;
     ATripInfo.Description := DescriptionFromRoadClass(ATripInfo.RoadClass);
     ATripInfo.Speed := 0;
     ATripInfoList.Add(TripInfoKey, ATripInfo);

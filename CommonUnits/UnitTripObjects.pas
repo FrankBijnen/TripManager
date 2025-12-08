@@ -3499,7 +3499,7 @@ var
   Initiator: AnsiChar;
 
   UdbDirCnt, RtePtCnt: integer;
-  PrevUdbDir, AnUdbDir: TUdbDir;
+  PrevUdbDir, RtePtUdbDir, AnUdbDir: TUdbDir;
   SelModel, AModel: TTripModel;
   Diff: Int64;
   Distance: double;
@@ -3568,8 +3568,8 @@ begin
       TripList.FIsUcs4 := Ucs4Model[TripList.FTripModel];
     end;
 
-
     PrevUdbDir := nil;
+    RtePtUdbDir := nil;
     for UdbDirCnt := 0 to AnUdbHandle.FValue.UDbDirCount -1 do
     begin
       AnUdbDir := TUdbDir.Create('');
@@ -3587,15 +3587,20 @@ begin
         if (PrevUdbDir.FValue.SubClass.PointType = 3) then
         begin
           Inc(RtePtCnt);
+          RtePtUdbDir := PrevUdbDir;
           AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
-                        PrevUdbDir.GetName, '', 0, 0);
+                        RtePtUdbDir.GetName,
+                        PrevUdbDir, 0, 0);
         end
         else
         begin
           DistTime := PrevUdbDir.FValue.Time;
           Distance := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
+          if (RtePtUdbDir = nil) then // Failsafe.
+            RtePtUdbDir := PrevUdbDir;
           AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
-                        PrevUdbDir.GetName, PrevUdbDir.MapSegRoadDisplay, Distance, DistTime);
+                        RtePtUdbDir.GetName,
+                        PrevUdbDir, Distance, DistTime);
         end;
       end;
       PrevUdbDir := AnUdbDir;
@@ -4683,8 +4688,9 @@ begin
             if (Assigned(PrevUdbDir)) then
             begin
               Inc(UdbId);
-              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, UdbId, RtePtUdbDir.GetName,
-                                                      PrevUdbDir.RoadClass, PrevUdbDir.MapSegRoadDisplay, CurDist);
+              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, UdbId,
+                                                      RtePtUdbDir.GetName, PrevUdbDir.RoadClass,
+                                                      PrevUdbDir, CurDist);
 
               // Totals for the UdbHdandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;
