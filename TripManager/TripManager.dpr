@@ -48,7 +48,7 @@ uses
   UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitTripOverview in '..\CommonUnits\UnitTripOverview.pas',
   UnitRegistryKeys;
-  
+
 {$R *.res}
 
 begin

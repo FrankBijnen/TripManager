@@ -118,6 +118,7 @@ type
     ProcessDistance: boolean;                 // True, Compute distance. Added in KML, and name of shaping points
     DistanceUnit: TDistanceUnit;              // duKm, Kilometers.
     CompareDistanceOK: integer;               // 500, Meters.
+    MinShapeDist: integer;                    // 2500, Meters.
 
     ProcessCategory: set of TProcessCategory; // [pcSymbol, pcGPX], Add Categories to WayPoints
     ProcessAddrWayPt: boolean;                // False
@@ -151,9 +152,11 @@ type
     procedure DoPrefSaved;
     procedure SetProcessCategory(ProcessWpt: boolean; WayPtCat: string);
     function DistanceStr: string;
-    function GetDistOKMeters: double;
+    function GetDistOKKms: double;
+    function GetMinShapeDistKms: double;
     function TripTrackColor: string;
-    property DistOKMeters: double read GetDistOKMeters;
+    property DistOKKms: double read GetDistOKKms;
+    property MinShapeDistKms: double read GetMinShapeDistKms;
   end;
 
 implementation
@@ -225,6 +228,7 @@ begin
   DistanceUnit := duKm;
 
   CompareDistanceOK := 500;
+  MinShapeDist := 2500;
 
   DefTrackColor := 'Blue';
   TrackColor := '';
@@ -308,9 +312,14 @@ begin
     result := 'Km';
 end;
 
-function TProcessOptions.GetDistOKMeters: double;
+function TProcessOptions.GetDistOKKms: double;
 begin
   result := CompareDistanceOK / 1000;
+end;
+
+function TProcessOptions.GetMinShapeDistKms: double;
+begin
+  result := MinShapeDist / 1000;
 end;
 
 function TProcessOptions.TripTrackColor: string;

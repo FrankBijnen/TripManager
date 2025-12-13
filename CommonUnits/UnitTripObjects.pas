@@ -1,6 +1,5 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
-{.$DEFINE DEBUG_ENUMS}
 interface
 
 uses
@@ -29,6 +28,7 @@ const
   Zumo3x0Name                       = 'zūmo 3x0';
   Zumo340_TmScPosnSize              = 8;
   TurnMagic: array[0..3] of byte    = ($47, $4E, $00, $00);
+  TripFileName                      = '0:/.System/Trips/%s.trip';
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
@@ -36,6 +36,7 @@ type
   //Drive 51 = 595
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
+                       rmOffRoad          = $02,
                        rmDirect           = $04,
                        rmCurvyRoads       = $07,
                        rmTripTrack        = $09,
@@ -121,8 +122,13 @@ const
   UdbDirMagic:  Cardinal  = $51590469;
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
-// Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 340  Nuvi 2595 Unknown
-  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false);
+// Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 3x0  Nuvi 2595 Unknown
+{$IFDEF UNSAFEMODELS}
+  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     true,     true,    false,    false);
+{$ELSE}
+  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false);
+{$ENDIF}
+  RefreshTripsNeeded: array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    true);
   UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       16,       20);
@@ -723,6 +729,7 @@ type
     RoadId:           Cardinal;
     PointType:        byte;
     procedure Init(const GPXSubClass: string);
+    procedure InitRec(const GPXSubClass: string);
     case integer of
     0: (Direction:        byte;
         Unknown1:         array[0..5] of byte);
@@ -756,7 +763,7 @@ type
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: Cardinal); reintroduce; overload;
+    constructor Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: integer); reintroduce; overload;
     constructor Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon: double); reintroduce; overload;
     procedure WriteValue(AStream: TMemoryStream); override;
     function SubLength: Cardinal; override;
@@ -2058,13 +2065,14 @@ constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; AL
 begin
   inherited Create('mRoutePreference', Ord(AValue));
 
-  // Zumo 340?
+  // Zumo 3x0
   if (ADataType <> dtByte) then
   begin
     FDataType := ADataType;
     FLenValue := ALenValue;
     SetLength(FBytes, FLenValue);
-    FBytes[3] := Ord(AValue);
+    FBytes[3] := $01;
+    FBytes[4] := Ord(AValue);
   end;
 end;
 
@@ -2076,12 +2084,12 @@ begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
 
   // Zumo 340?
-  if (ADataType = dt3x0RoutePref) then
+  if (FDataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, FLenValue);
     AStream.Seek(SavePos, TSeekOrigin.soBeginning);
     AStream.Read(Fbytes, FLenValue);
-    FValue := FBytes[3];
+    FValue := FBytes[4];
   end;
 end;
 
@@ -2107,7 +2115,6 @@ end;
 
 procedure TmRoutePreference.WriteValue(AStream: TMemoryStream);
 begin
-  // Zumo 340?
   if (FDataType <> dtByte) then
   begin
     AStream.Write(FBytes, FLenValue);
@@ -2121,9 +2128,6 @@ function TmRoutePreference.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, RoutePreferenceMap)) then
     result := 'N/A';
-{$IFDEF DEBUG_ENUMS}
-  result := result + Format(' (%d)', [FValue]);
-{$ENDIF}
 end;
 
 procedure TmRoutePreference.SetValue(AValue: string);
@@ -2132,7 +2136,11 @@ begin
   if (FDataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, 5);
-    FBytes[3] := FValue;
+    FillChar(FBytes[0], Length(FBytes), 0);
+    FBytes[3] := $01;
+    if (TRoutePreference(FValue) = rmDirect) then
+      FValue := Ord(TRoutePreference.rmOffRoad);
+    FBytes[4] := FValue;
   end;
 end;
 
@@ -2147,11 +2155,7 @@ var
 begin
   result := '';
   for Index := MinRoutePreferenceUserConfig to MaxRoutePreferenceUserConfig do
-    result := result + RoutePreferenceMap[index].Name +
-{$IFDEF DEBUG_ENUMS}
-                       Format(' (%d)', [RoutePreferenceMap[Index].Value]) +
-{$ENDIF}
-                       #10;
+    result := result + RoutePreferenceMap[index].Name + #10;
 end;
 
 constructor TmTransportationMode.Create(AValue: TTransportMode = tmMotorcycling);
@@ -2173,9 +2177,6 @@ function TmTransportationMode.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, TransportModeMap)) then
     result := 'N/A';
-{$IFDEF DEBUG_ENUMS}
-  result := result + Format(' (%d)', [FValue]);
-{$ENDIF}
 end;
 
 procedure TmTransportationMode.SetValue(AValue: string);
@@ -2194,11 +2195,7 @@ var
 begin
   result := '';
   for Index := 0 to High(TransportModeMap) do
-    result := result + TransportModeMap[Index].Name +
-{$IFDEF DEBUG_ENUMS}
-                       Format(' (%d)', [TransportModeMap[Index].Value]) +
-{$ENDIF}
-                       #10;
+    result := result + TransportModeMap[Index].Name + #10;
 end;
 
 constructor TmTotalTripDistance.Create(AValue: single = 0);
@@ -2992,6 +2989,14 @@ begin
     ComprLatLon[Indx] := StrToUInt('$' + Copy(GPXSubClass, 19 + (Indx * 2), 2));
 end;
 
+procedure TSubClass.InitRec(const GPXSubClass: string);
+begin
+  MapSegment  := Swap32(StrToUInt('$12345678'));
+  RoadId      := Swap32(StrToUInt('$12345678'));
+  PointType   := StrToUInt('$' + Copy(GPXSubClass, 17, 2));
+  Direction   := StrToUInt('$' + Copy(GPXSubClass, 19, 2));
+end;
+
 procedure TUdbDirFixedValue.SwapCardinals;
 begin
   Lat := Swap32(Lat);
@@ -3024,7 +3029,7 @@ begin
 end;
 
 // UdbDir Create for <rtept>
-constructor TUdbDir.Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: Cardinal);
+constructor TUdbDir.Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: integer);
 var
   AmScPosn: TmScPosn;
 begin
@@ -3070,6 +3075,9 @@ begin
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
+  if (RoadClass = '00') then
+    FValue.SubClass.InitRec(GPXSubClass)
+  else
   FValue.SubClass.Init(GPXSubClass);
   FValue.Unknown1 := Swap32(UdbDirMagic);
 
@@ -3838,10 +3846,9 @@ procedure TTripList.SaveToFile(AFile: string);
 var
   AStream: TMemoryStream;
 begin
-{$IFNDEF DEBUG}
   if not (SafeToSave[TripModel]) then
     raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
-{$ENDIF}
+
   AStream := TMemoryStream.Create;
   try
     try
@@ -4424,7 +4431,6 @@ begin
         for ALocation in RoutePointList do
           AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
       end;
-
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
 
@@ -4594,7 +4600,7 @@ var
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir, PrevUdbDir, RtePtUdbDir: TUdbDir;
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
-  CMapSegRoad: string;
+  CMapSegRoad, RoadClass: string;
   PrevCoords, Coords: TCoords;
   TotalDist, UdbDist, CurDist: double;
   TotalTime, UdbTime: cardinal;
@@ -4678,9 +4684,13 @@ begin
           CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
           if (CMapSegRoad <> '') then
           begin
+            if (ProcessOptions.TripOption = TTripOption.ttCalc) then
+              RoadClass := '00'
+            else
+              RoadClass := Copy(CMapSegRoad, 1, 2);
             AnUdbDir := TUdbDir.Create(TripModel,
                                        Copy(CMapSegRoad, 5),    // SubClass to use in UdbDir
-                                       Copy(CMapSegRoad, 1, 2), // RoadClass
+                                       RoadClass,               // RoadClass
                                        Coords.Lat, Coords.Lon);
             AnUdbHandle.Add(AnUdbDir);
 
@@ -4851,7 +4861,7 @@ begin
   Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTotalTripDistance.Create);
-  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmVersionNumber.Create);
@@ -4894,7 +4904,7 @@ begin
     Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
     Add(TmRoutePreferences.Create);
     Add(TmImported.Create);
-    Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+    Add(TmFileName.Create(Format(TripFileName, [TripName])));
 
     CheckHRGuid(CreateGUID(Uid));
     Add(TStringItem.Create('mExploreUuid',
@@ -4959,7 +4969,7 @@ begin
     Add(TmIsRoundTrip.Create);
     Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-    Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+    Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
@@ -4990,7 +5000,7 @@ begin
   Add(TmTripDate.Create);
   Add(TmParentTripId.Create(0));
   Add(TmImported.Create);
-  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmPartOfSplitRoute.Create);
@@ -5021,7 +5031,7 @@ begin
   Add(TmAvoidancesChanged.Create);
   Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTotalTripDistance.Create);
   Add(TmVersionNumber.Create(1, 6));
@@ -5032,12 +5042,11 @@ begin
   ForceRecalc(TTripModel.Drive51, 2);
 end;
 
-
 procedure TTripList.CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
 begin
   AddHeader(THeader.Create);
   Add(TmAllRoutes.Create);
-  Add(TmFileName.Create(Format('0:/.System/Trips/%s.trip', [TripName])));
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5, dt3x0RoutePref));

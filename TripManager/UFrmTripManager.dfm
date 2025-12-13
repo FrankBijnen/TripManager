@@ -163,13 +163,13 @@ object FrmTripManager: TFrmTripManager
           Align = alRight
           Style = csDropDownList
           Constraints.MinWidth = 40
+          DropDownCount = 12
           TabOrder = 3
           OnChange = CmbModelChange
           Items.Strings = (
             'XT'
             'XT2'
             'Tread 2'
-            'zumo 595'
             'Edge'
             'Garmin'
             'Unknown')
@@ -964,6 +964,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -971,7 +972,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

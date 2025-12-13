@@ -367,6 +367,7 @@ type
     function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
+    function GetDbPath: string;
     procedure ReadDeviceDB;
     function ReadGarminDevice(const ModelDescription: string): TGarminDevice;
     procedure GuessModel(const DisplayedDevice: string);
@@ -395,6 +396,7 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
+    procedure RefreshTrips;
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
@@ -513,25 +515,38 @@ begin
     result := TGarminModel.GarminGeneric;
 end;
 
+function TFrmTripManager.GetDbPath: string;
+var
+  ModelIndex: integer;
+  SubKey, DbPath: string;
+  LDelim: integer;
+begin
+  // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  SubKey := IntToStr(ModelIndex);
+  DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
+                                         TModelConv.GetKnownPath(ModelIndex, 0),
+                                         SubKey));
+  LDelim := LastDelimiter('\', DbPath) -1;
+  DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
+  if (GetIdForPath(CurrentDevice.PortableDev, DbPath, result) = '') then
+    result := '';
+end;
+
 procedure TFrmTripManager.ReadDeviceDB;
 var
-  SubKey, DBPath: string;
-  LDelim: integer;
+  DBPath: string;
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   DefAdvLevel: integer;
-
 begin
   // Check the connected Device needs reading SQlite
-  if not (TGarminModel(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
+  if not (TModelConv.Cmb2Garmin(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
     exit;
   if not CheckDevice(false) then
     exit;
 
-  // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
-  SubKey := GetRegistry(Reg_CurrentModel, '0');
-  DBPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key, Reg_PrefDevTripsFolder_Val, SubKey));
-  LDelim := LastDelimiter('\', DBPath) -1;
-  DBPath := Copy(DBPath, 1, LDelim) + '\SQlite';
+  // SQLite path
+  DBPath := GetDbPath;
 
   // Copy settings.db, Update Avoidances changed
   if (CopyDeviceFile(DBPath, SettingsDb)) then
@@ -547,7 +562,7 @@ begin
     OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
     OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
 
-    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(CmbModel.ItemIndex));
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(TModelConv.Cmb2Garmin(CmbModel.ItemIndex)));
     if (NewVehicle_Profile.Valid) and
        (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
     begin
@@ -579,6 +594,7 @@ var
 
   function GetPath(CheckNode: TXmlVSNode; AName, Direction, AExt: string): string;
   var
+    NewPath, FriendlyPath: string;
     DataTypeNode, FileNode, LocationNode: TXmlVSNode;
   begin
     result := '';
@@ -593,14 +609,21 @@ var
         LocationNode := FileNode.Find('Location');
         if (Assigned(LocationNode)) and
            (SameText(FindSubNodeValue(LocationNode, 'FileExtension'), AExt)) then
-          exit(Format('?:\%s', [ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\'])]));
+        begin
+          NewPath := ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\']);
+          result := Format('%s%s', [NonMTPRoot, NewPath]);
+          if (GetIdForPath(CurrentDevice.PortableDev, result, FriendlyPath) <> '') then
+            exit
+          else
+            exit(Format('%s%s', [InternalStorage, NewPath]));
+        end;
       end;
     end;
   end;
 
 begin
   result.Init;
-  result.GarminModel := TSetProcessOptions.GetModelFromDescription(ModelDescription);
+  result.GarminModel := TModelConv.GetModelFromDescription(ModelDescription);
 
   // Need a device to check better
   if not CheckDevice(false) then
@@ -655,11 +678,12 @@ begin
 
       // Update model from GarminDevice.xml
       result.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
-      result.GarminModel := TSetProcessOptions.GetModelFromDescription(result.ModelDescription);
+      result.GarminModel := TModelConv.GetModelFromDescription(result.ModelDescription);
       case result.GarminModel of
         TGarminModel.Zumo595,
-        TGarminModel.Drive51:
-          if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTrips, FriendlyPath) = '') then
+        TGarminModel.Drive51,
+        TGarminModel.Zumo3x0:
+          if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
             result.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         TGarminModel.Unknown:
           result.GarminModel := ModelFromGarminDevice(result.ModelDescription);
@@ -687,14 +711,14 @@ var
 begin
   ModelDisplayed := DisplayedDevice;
   GarminDevice := ReadGarminDevice(ModelDisplayed);
-  ModelIndex := Ord(GarminDevice.GarminModel);
+  ModelIndex := TModelConv.Garmin2Cmb(GarminDevice.GarminModel);
 
   // Change description for 'old' Garmin units and Edge
-  CmbModel.items[Ord(TGarminModel.GarminEdge)] := Edge_Name;
-  CmbModel.items[Ord(TGarminModel.GarminGeneric)] := Garmin_Name;
-  case TGarminModel(ModelIndex) of
-    TGarminModel.GarminEdge,
-    TGarminModel.GarminGeneric:
+  CmbModel.items[TModelConv.Garmin2Cmb(TGarminModel.GarminEdge)] := Edge_Name;
+  CmbModel.items[TModelConv.Garmin2Cmb(TGarminModel.GarminGeneric)] := Garmin_Name;
+  if (ModelIndex = TModelConv.Garmin2Cmb(TGarminModel.GarminEdge)) or
+     (ModelIndex = TModelConv.Garmin2Cmb(TGarminModel.GarminGeneric)) then
+  begin
       if (ModelDisplayed <> CmbModel.Items[ModelIndex]) and
          (GarminDevice.ModelDescription <> '') then
         CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
@@ -944,13 +968,13 @@ end;
 
 procedure TFrmTripManager.BgDeviceItemsTripsClick(Sender: TObject);
 begin
-  if (CmbModel.ItemIndex in [Ord(TGarminModel.GarminGeneric), Ord(TGarminModel.Unknown)]) then
+  if (TModelConv.Cmb2Garmin(CmbModel.ItemIndex) in [TGarminModel.GarminGeneric, TGarminModel.Unknown]) then
     Abort;
 end;
 
 procedure TFrmTripManager.BgDeviceItemsGpxPoiClick(Sender: TObject);
 begin
-  if (CmbModel.ItemIndex in [Ord(TGarminModel.Zumo595), Ord(TGarminModel.Drive51)]) then
+  if (TModelConv.Cmb2Garmin(CmbModel.ItemIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]) then
     Abort;
 end;
 
@@ -1255,7 +1279,6 @@ begin
               if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
                 raise Exception.Create(Format('Could not overwrite file: %s on %s',
                                               [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
-
             end;
             FindClose(Fs);
             {$ENDIF}
@@ -1384,7 +1407,7 @@ begin
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
   if (NewFile) then
-    ATripList.CreateTemplate(TTripModel(CmbModel.ItemIndex), FrmNewTrip.EdNewTrip.Text);
+    ATripList.CreateTemplate(TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0))), FrmNewTrip.EdNewTrip.Text);
 
 // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
@@ -2036,6 +2059,9 @@ begin
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
+
+  TModelConv.GetDefaultDevices(CmbModel.Items);
+  CmbModel.Items.Add('Unknown');
   ReadSettings;
 
   ATripList := TTripList.Create;
@@ -2050,7 +2076,6 @@ begin
   except
     ShellTreeView1.Root := Reg_PrefFileSysFolder_Val;
   end;
-
   GetDeviceList;
   SelectDeviceByName;
   ReadDeviceDB;
@@ -2168,9 +2193,14 @@ begin
   // Guess model from DisplayedDevice
   GuessModel(CurrentDevice.DisplayedDevice);
 
+  // Refresh Trips folder? (Zumo 3x0)
+  if (RefreshTripsNeeded[TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0)))]) then
+    RefreshTrips;
+
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
+
 end;
 
 function TFrmTripManager.KnownDeviceIndex(KnownDevices: TStringList): integer;
@@ -2198,7 +2228,7 @@ begin
     KnownDevices.Add(Device);
   end
   else
-    KnownDevices := TSetProcessOptions.GetKnownDevices;
+    KnownDevices := TModelConv.GetKnownDevices;
 
   try
     CmbDevices.ItemIndex := -1;
@@ -2250,15 +2280,16 @@ end;
 procedure TFrmTripManager.CmbModelChange(Sender: TObject);
 var
   ModelIndex: integer;
+  GarminModel: TGarminModel;
 begin
   ModelIndex := CmbModel.ItemIndex;
-
+  GarminModel := TModelConv.Cmb2Garmin(ModelIndex);
   BgDevice.ItemIndex := 0; // Default to trips
   BgDevice.Items[0].Caption := 'Trips';
   BgDevice.Items[1].Caption := 'Gpx';
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
 
-  case TGarminModel(ModelIndex) of
+  case GarminModel of
     TGarminModel.Zumo595,
     TGarminModel.Drive51:
       begin
@@ -2279,11 +2310,11 @@ begin
       end;
   end;
 
-  SetRegistry(Reg_EnableTripFuncs, (TGarminModel(ModelIndex) in
+  SetRegistry(Reg_EnableTripFuncs, (GarminModel in
      [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
-  SetRegistry(Reg_EnableGpxFuncs, not (TGarminModel(ModelIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableGpiFuncs, not (TGarminModel(ModelIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableFitFuncs, (TGarminModel(ModelIndex) in [TGarminModel.GarminEdge]));
+  SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
+  SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
+  SetRegistry(Reg_EnableFitFuncs, (GarminModel in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_CurrentModel, ModelIndex);
 
   ReadDefaultFolders;
@@ -2320,7 +2351,8 @@ begin
 end;
 
 procedure TFrmTripManager.SetCurrentPath(const APath: string);
-var FriendlyPath: string;
+var
+  FriendlyPath: string;
 begin
   CheckDevice;
 
@@ -2488,6 +2520,9 @@ end;
 
 procedure TFrmTripManager.ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+  if (Key = VK_F2) and (ShellListView1.Selected <> nil) then
+    ShellListView1.Selected.EditCaption;
+
   if (ssCtrl in Shift) then
   begin
     case Key of
@@ -2690,7 +2725,8 @@ begin
 end;
 
 procedure TFrmTripManager.CheckTrips;
-var AListItem: TListItem;
+var
+  AListItem: TListItem;
     CrNormal,CrWait: HCURSOR;
 begin
   CrWait := LoadCursor(0,IDC_WAIT);
@@ -2698,6 +2734,97 @@ begin
   try
     for AListItem in LstFiles.Items do
       CheckFile(AListItem);
+  finally
+    SetCursor(CrNormal);
+  end;
+end;
+
+procedure TFrmTripManager.RefreshTrips;
+var
+  FriendlyPath, TempFile, SystemPath, SystemTripsPath, LastRefreshFile: string;
+  Rc: integer;
+  Fs: TSearchRec;
+  CrNormal,CrWait: HCURSOR;
+  AListItem: TListItem;
+  File_Info: TFile_Info;
+  LDelim: integer;
+  SystemId, SystemTripsId, SystemSqlId: string;
+  CompletePath: WideString;
+begin
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+
+  try
+    // Make sure we do this for the .System\Trips folder
+    ReadDefaultFolders;
+
+    SystemTripsId := GetIdForPath(CurrentDevice.PortableDev, DeviceFolder[0], FriendlyPath);
+    LDelim := LastDelimiter('\', FriendlyPath) -1;
+    SystemPath := Copy(FriendlyPath, 1, LDelim);          // .System
+    SystemTripsPath := ExtractFileName(FriendlyPath);     // Trips
+    if not SameText(TripsPath, SystemTripsPath) then      // And the sub folder should be Trips
+      exit;
+
+    // DateTime of system,db
+    SystemSqlId := GetIdForPath(CurrentDevice.PortableDev, GetDbPath, FriendlyPath);
+    if (GetIdForFile(CurrentDevice.PortableDev, SystemSqlId, SystemDb, File_Info) = '') then
+      exit;
+
+    // Is there a .tmp in trips?
+    LastRefreshFile := Format('%10d.tmp', [TUnixDate.DateTimeAsCardinal(File_Info.ObjDate)]);
+    if (GetIdForFile(CurrentDevice.PortableDev, SystemTripsId, LastRefreshFile) <> '') then
+      exit;
+
+    // Need to recreate trips
+    ReadFilesFromDevice(CurrentDevice.PortableDev, LstFiles.Items, SystemTripsId, CompletePath);
+
+    // Clean temp
+    DeleteTempFiles(CreatedTempPath, '*.*');
+
+    // Create lastrefresh file
+    TFile.WriteAllText(CreatedTempPath + LastRefreshFile, '');
+
+    // Copy Files to Temp directory
+    for AListItem in LstFiles.Items do
+    begin
+      if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
+        continue;
+
+      TempFile := CopyFileToTmp(AListItem);
+      if (TempFile = '') then
+        exit;
+    end;
+
+    // Delete and recreate .System\Trips
+    DelFromDevice(CurrentDevice.PortableDev, SystemTripsId, true);
+    SystemId := GetIdForPath(CurrentDevice.PortableDev, SystemPath, FriendlyPath);
+    CreatePath(CurrentDevice.PortableDev, SystemId, SystemTripsPath);
+
+    SetCurrentPath(DeviceFolder[0]); // Rescan .System\Trips
+    if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + LastRefreshFile, FSavedFolderId) = '') then
+      raise Exception.Create(Format('Could not overwrite file: %s on %s',
+                                    [LastRefreshFile, CurrentDevice.DisplayedDevice]));
+
+    Rc := FindFirst(CreatedTempPath + TripMask, faAnyFile - faDirectory, Fs);
+    while (Rc = 0) do
+    begin
+      // Save the File name and Extension. The rest of the loop must use these vars.
+      TempFile := Fs.Name;
+      // Make sure we read the next, so we can use Continue in the loop
+      Rc := FindNext(Fs);
+
+      // Transfer
+      EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
+      EdFileSysFolder.Update;
+      TempFile := IncludeTrailingPathDelimiter(CreatedTempPath) + TempFile;
+
+      // Did the transfer work?
+      if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
+        raise Exception.Create(Format('Could not overwrite file: %s on %s',
+                                      [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
+    end;
+
+    FindClose(Fs);
   finally
     SetCursor(CrNormal);
   end;
@@ -4136,7 +4263,7 @@ begin
 
     // Trips need to be checked, and tripname filled
     case BgDevice.ItemIndex of
-      0: CheckTrips;
+      0:  CheckTrips;
     // Future use
     end;
 
@@ -4622,11 +4749,11 @@ begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := IntToStr(ModelIndex);
   DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key,
-                                 TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey);
+                                 TModelConv.GetKnownPath(ModelIndex, 0), SubKey);
   DeviceFolder[1] := GetRegistry(Reg_PrefDevGpxFolder_Key,
-                                 TSetProcessOptions.GetKnownPath(ModelIndex, 1), SubKey);
+                                 TModelConv.GetKnownPath(ModelIndex, 1), SubKey);
   DeviceFolder[2] := GetRegistry(Reg_PrefDevPoiFolder_Key,
-                                 TSetProcessOptions.GetKnownPath(ModelIndex, 2), SubKey);
+                                 TModelConv.GetKnownPath(ModelIndex, 2), SubKey);
 end;
 
 procedure TFrmTripManager.ReadColumnSettings;
@@ -4688,7 +4815,7 @@ begin
   if (Assigned(CurrentDevice)) then
     GuessModel(CurrentDevice.DisplayedDevice)
   else
-    GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
+    GuessModel(GetRegistry(Reg_PrefDev_Key, TModelConv.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
 
   WarnRecalc := mrNone;
   RoutePointTimeOut := GetRegistry(Reg_RoutePointTimeOut_Key, Reg_RoutePointTimeOut_Val);
@@ -4881,7 +5008,7 @@ var
   SelectedDevice: string;
   KnownDevices: TStringList;
 begin
-  KnownDevices := TSetProcessOptions.GetKnownDevices;
+  KnownDevices := TModelConv.GetKnownDevices;
   try
     // Save currently selected device Id
     if Assigned(CurrentDevice) then
@@ -4943,7 +5070,7 @@ begin
 
   CurrentDevice := nil;
   CmbModel.ItemIndex := GetRegistry(Reg_CurrentModel, 0);
-  GuessModel(GetRegistry(Reg_PrefDev_Key, TSetProcessOptions.GetKnownDevice(CmbModel.ItemIndex), IntToStr(CmbModel.ItemIndex)));
+  GuessModel(GetRegistry(Reg_PrefDev_Key, TModelConv.GetKnownDevice(CmbModel.ItemIndex), IntToStr(CmbModel.ItemIndex)));
 
   ReadDefaultFolders;
   TvTrip.Items.Clear;

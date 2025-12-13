@@ -425,11 +425,11 @@ begin
 
       ANItem := FTripList.GetItem('mRoutePreference');
       if (ANItem <> nil) then
-        TmRoutePreference(ANItem).AsByte := Ord(TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString));
+        TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
 
       ANItem := FTripList.GetItem('mTransportationMode');
       if (ANItem <> nil) then
-        TmTransportationMode(ANItem).AsByte := Ord(TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString));
+        TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
 
       ANItem := FTripList.GetArrival;
       if (ANItem <> nil) then

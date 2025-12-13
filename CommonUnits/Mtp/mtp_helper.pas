@@ -350,7 +350,14 @@ function GetIdForPath(PortableDev: IMTPDevice;
 function GetIdForFile(PortableDev: IMTPDevice;
                       SPath: WideString;
                       SFile: WideString;
-                      AListItem: TListItem = nil): string;
+                      AlistItem: TListItem): string; overload;
+function GetIdForFile(PortableDev: IMTPDevice;
+                      SPath: WideString;
+                      SFile: WideString;
+                      var File_Info: TFile_Info): string; overload;
+function GetIdForFile(PortableDev: IMTPDevice;
+                      SPath: WideString;
+                      SFile: WideString): string; overload;
 function GetFileFromDevice(PortableDev: IMTPDevice; SFile, SSaveTo, NFile: WideString): Boolean;
 function DelFromDevice(PortableDev: IMTPDevice; SFile: WideString; const Recurse: Boolean = false): Boolean;
 function CreatePath(PortableDev: IMTPDevice; Parent, DirName: WideString): Boolean;
@@ -463,60 +470,6 @@ begin
   end;
 end;
 
-//https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/setting-properties-for-a-single-object
-// Notes: if 'NewName' already exists, no error is thrown.
-//        For the Zumo XT it is enough to just modify original name. For other device we may need object_name also.
-const BoolFalse = 0;
-
-function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): boolean;
-var
-  Content: IPortableDeviceContent;
-  Properties: IPortableDeviceProperties;
-  Attributes: IPortableDeviceValues;
-  Results: IPortableDeviceValues;
-  ObjectPropertiesToWrite: IPortableDeviceValues;
-  CanWrite: integer;
-  Hr: HResult;
-// In PortableDeviceApiLib_TLB some methods have 'var', and thus require a variable.
-  ObjectOriginalNameKey: PortableDeviceApiLib_TLB._tagpropertykey;
-  CanWriteKey: PortableDeviceApiLib_TLB._tagpropertykey;
-
-begin
-  result := false;
-  Hr := PortableDev.Content(Content);
-  if (Hr <> S_OK) then
-    exit;
-
-  Hr := Content.Properties(Properties);
-  if (Hr <> S_OK) then
-    exit;
-
-// Can we write Original name?
-  ObjectOriginalNameKey.fmtid := WPD_OBJECT_ORIGINAL_FILE_NAME_FMTID;
-  ObjectOriginalNameKey.pid := WPD_OBJECT_ORIGINAL_FILE_NAME_PID;
-  Hr := Properties.GetPropertyAttributes(PwideChar(ObjectId), ObjectOriginalNameKey, Attributes);
-  if (Hr <> S_OK) then
-    exit;
-
-  CanWriteKey.fmtid := WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_FMTID;
-  CanWriteKey.pid := WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_PID;
-  Hr := Attributes.GetBoolValue(CanWriteKey, CanWrite);
-  if (Hr <> S_OK) or
-     (CanWrite = BoolFalse) then
-    exit;
-
-// Yes, can modify original name.
-  ObjectPropertiesToWrite := CreateComObject(CLASS_PortableDeviceValues) as IPortableDeviceValues;
-  Hr := ObjectPropertiesToWrite.SetStringValue(ObjectOriginalNameKey, PWideChar(NewName));
-  if (HR <> S_OK) then
-    exit;
-
-// Change Original name.
-  Hr := Properties.SetValues(PWideChar(ObjectId),
-                             ObjectPropertiesToWrite,
-                             Results);
-  result := (Hr = S_OK);
-end;
 
 function GetDevId(RawDevice: WideString): WideString;
 begin
@@ -659,6 +612,61 @@ begin
 
   // get back string into a PROPVARIANT
   PValues.GetValue(Dev_Val, PropVarValue);
+end;
+
+
+//https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/setting-properties-for-a-single-object
+// Notes: if 'NewName' already exists, no error is thrown.
+//        For the Zumo XT it is enough to just modify original name. For other device we may need object_name also.
+const BoolFalse = 0;
+
+function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): boolean;
+var
+  Content: IPortableDeviceContent;
+  Properties: IPortableDeviceProperties;
+  Attributes: IPortableDeviceValues;
+  Results: IPortableDeviceValues;
+  ObjectPropertiesToWrite: IPortableDeviceValues;
+  CanWrite: integer;
+  Hr: HResult;
+// In PortableDeviceApiLib_TLB some methods have 'var', and thus require a variable.
+  ObjectOriginalNameKey: PortableDeviceApiLib_TLB._tagpropertykey;
+  CanWriteKey: PortableDeviceApiLib_TLB._tagpropertykey;
+begin
+  result := false;
+  Hr := PortableDev.Content(Content);
+  if (Hr <> S_OK) then
+    exit;
+
+  Hr := Content.Properties(Properties);
+  if (Hr <> S_OK) then
+    exit;
+
+// Can we write Original name?
+  ObjectOriginalNameKey.fmtid := WPD_OBJECT_ORIGINAL_FILE_NAME_FMTID;
+  ObjectOriginalNameKey.pid := WPD_OBJECT_ORIGINAL_FILE_NAME_PID;
+  Hr := Properties.GetPropertyAttributes(PwideChar(ObjectId), ObjectOriginalNameKey, Attributes);
+  if (Hr <> S_OK) then
+    exit;
+
+  CanWriteKey.fmtid := WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_FMTID;
+  CanWriteKey.pid := WPD_PROPERTY_ATTRIBUTE_CAN_WRITE_PID;
+  Hr := Attributes.GetBoolValue(CanWriteKey, CanWrite);
+  if (Hr <> S_OK) or
+     (CanWrite = BoolFalse) then
+    exit;
+
+// Yes, can modify original name.
+  ObjectPropertiesToWrite := CreateComObject(CLASS_PortableDeviceValues) as IPortableDeviceValues;
+  Hr := ObjectPropertiesToWrite.SetStringValue(ObjectOriginalNameKey, PWideChar(NewName));
+  if (HR <> S_OK) then
+    exit;
+
+// Change Original name.
+  Hr := Properties.SetValues(PWideChar(ObjectId),
+                             ObjectPropertiesToWrite,
+                             Results);
+  result := (Hr = S_OK);
 end;
 
 function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = true): Boolean;
@@ -850,13 +858,15 @@ begin
   result := Tlist.Create;
 
   PMan := CoPortableDeviceManager.Create;
-  if PMan.RefreshDeviceList <> S_OK then
+  if (PMan.RefreshDeviceList <> S_OK) then
     exit;
+
   // Determine how many WPD devices are connected
   IDevCount := 0;
   if PMan.GetDevices(PWideChar(nil^), IDevCount) <> S_OK then
     exit;
-  if IDevCount>0 then
+
+  if (IDevCount > 0) then
   begin
     // Retrieve the device id for each connected device
     SetLength(PDevs, IDevCount);
@@ -870,14 +880,14 @@ begin
 
       //Get Friendly Name
       IDevNameLen := 0;
-      if PMan.GetDeviceFriendlyName(PDevs[I], Word(nil^), IDevNameLen) <> S_OK then
+      if (PMan.GetDeviceFriendlyName(PDevs[I], Word(nil^), IDevNameLen) <> S_OK) then
         continue;
       SetLength(DevFriendlyName, IDevNameLen);
       PMan.GetDeviceFriendlyName(PDevs[I], PWord(PWideChar(DevFriendlyName))^, IDevNameLen);
 
       //Get Description
       IDevNameLen := 0;
-      if PMan.GetDeviceDescription(PDevs[I], Word(nil^), IDevNameLen) <> S_OK then
+      if (PMan.GetDeviceDescription(PDevs[I], Word(nil^), IDevNameLen) <> S_OK) then
         continue;
       SetLength(DevDescription, IDevNameLen);
       PMan.GetDeviceDescription(PDevs[I], PWord(PWideChar(DevDescription))^, IDevNameLen);
@@ -924,20 +934,56 @@ begin
     Result := ObjectId;
 end;
 
-procedure FillObjectProperties(ObjId: PWideChar; Prop: IPortableDeviceProperties;
-                               AListItems: TListItems; AListItem: TListItem); overload;
+procedure GetObjectDateTime(ObjId: PWideChar; Prop_Val: IPortableDeviceValues;
+                            var ObjDate: TDateTime; var TimeOriginal: string; var DateOriginal: string);
 var
-  ObjName: PWideChar;
   PropVar: Tag_Inner_PROPVARIANT;
-  ObjDate: TDateTime;
-  DateOriginal, TimeOriginal: string;
-  ObjSize: int64;
+  Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
+  Hr: HResult;
+begin
+  ObjDate := EncodeDate(1899, 12, 30);
+  TimeOriginal := '';
+  DateOriginal := '';
+
+  // Prefer date modified => date created => date authored
+  Dev_Val.fmtid := WPD_OBJECT_DATE_MODIFIED_FMTID;
+  Dev_Val.pid := WPD_OBJECT_DATE_MODIFIED_PID;
+  Hr := Prop_Val.GetValue(Dev_Val, PropVar);
+
+  if (HR <> S_OK) then
+  begin
+    Dev_Val.fmtid := WPD_OBJECT_DATE_CREATED_FMTID;
+    Dev_Val.pid := WPD_OBJECT_DATE_CREATED_PID;
+    Hr := Prop_Val.GetValue(Dev_Val, PropVar);
+  end;
+
+  if (HR <> S_OK) then
+  begin
+    Dev_Val.fmtid := WPD_OBJECT_DATE_AUTHORED_FMTID;
+    Dev_Val.pid := WPD_OBJECT_DATE_AUTHORED_Pid;
+    Hr := Prop_Val.GetValue(Dev_Val, PropVar);
+  end;
+
+  if (HR = S_OK) then
+  begin
+    ObjDate := PropVarToDate(PropVar);
+    TimeOriginal := FormatDateTime('yyyy-MM-DD"T"hh:mm:ss', ObjDate);
+    DateOriginal := NextField(TimeOriginal, 'T');
+  end;
+end;
+
+function GetFileInfo(ObjId: PWideChar;
+                     Prop: IPortableDeviceProperties;
+                     var File_Info: TFile_Info): boolean;
+var
   Keys: IPortableDeviceKeyCollection;
   Prop_Val: IPortableDeviceValues;
+
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-  AMTP_Data: TMTP_Data;
-  Hr: Hresult;
 begin
+  result := false;
+  FillChar(File_Info, SizeOf(File_Info), 0);
+
   //Get object prop.
   Prop.GetSupportedProperties(ObjId, Keys);
   Prop.GetValues(ObjId, Keys, Prop_Val);
@@ -945,69 +991,55 @@ begin
     exit;
 
   // Get the name of the object.
-  ObjName := PropValToName(Prop_Val);
+  File_Info.ObjName := PropValToName(Prop_Val);
 
-  // Get the date and time
-  ObjDate := EncodeDate(1899, 12, 30);
-  TimeOriginal := '';
-  DateOriginal := '';
+  // Is directory?
+  File_Info.IsFolder := IsDirectory(Prop_Val);
 
-  // Prefer date modified => date authored => date created
-
-  Dev_Val.fmtid := WPD_OBJECT_DATE_MODIFIED_FMTID;
-  Dev_Val.pid := WPD_OBJECT_DATE_MODIFIED_PID;
-  Hr := Prop_Val.GetValue(Dev_Val, PropVar);
-  if (HR <> S_OK) then
-  begin
-    Dev_Val.fmtid := WPD_OBJECT_DATE_CREATED_FMTID;
-    Dev_Val.pid := WPD_OBJECT_DATE_CREATED_PID;
-    Hr := Prop_Val.GetValue(Dev_Val, PropVar);
-  end;
-  if (HR <> S_OK) then
-  begin
-    Dev_Val.fmtid := WPD_OBJECT_DATE_AUTHORED_FMTID;
-    Dev_Val.pid := WPD_OBJECT_DATE_AUTHORED_Pid;
-    Hr := Prop_Val.GetValue(Dev_Val, PropVar);
-  end;
-  if (HR = S_OK) then
-  begin
-    ObjDate := PropVarToDate(PropVar);
-    TimeOriginal := FormatDateTime('yyyy-MM-DD"T"hh:mm:ss', ObjDate);
-    DateOriginal := NextField(TimeOriginal, 'T');
-  end;
+  // Get the Date and time
+  GetObjectDateTime(ObjId, Prop_Val, File_Info.ObjDate, File_Info.TimeOriginal, File_Info.DateOriginal);
 
   // Get the Size
   Dev_Val.fmtid := WPD_OBJECT_SIZE_FMTID;
   Dev_Val.pid := WPD_OBJECT_SIZE_PID;
-  Prop_Val.GetSignedLargeIntegerValue(Dev_Val, ObjSize);
-
-  // Fill Listitem
-  if (AListItem = nil) then
-  begin
-    AMTP_Data := TMTP_Data.Create(IsDirectory(Prop_Val), ObjSize, ObjId , ObjDate);
-    AMTP_Data.CreateListItem(AListItems, ObjName, [DateOriginal, TimeOriginal, ExtractFileExt(ObjName), SenSize(ObjSize), '']);
-  end
-  else
-  begin
-    AMTP_Data := TMTP_Data(AListItem.Data);
-    AMTP_Data.IsFolder := IsDirectory(Prop_Val);
-    AMTP_Data.ObjectId := ObjId;
-    AMTP_Data.Created := ObjDate;
-    AMTP_Data.SortValue := ObjSize;
-    AMTP_Data.UpdateListItem(AListItem, [DateOriginal, TimeOriginal, ExtractFileExt(ObjName), SenSize(ObjSize)]);
-  end;
+  Prop_Val.GetSignedLargeIntegerValue(Dev_Val, File_Info.ObjSize);
+  result := true;
 end;
 
-procedure FillObjectProperties(ObjId: PWideChar; Prop: IPortableDeviceProperties;
+procedure FillObjectProperties(ObjId: PWideChar;
+                               Prop: IPortableDeviceProperties;
                                AListItem: TListItem); overload;
+var
+  AMTP_Data: TMTP_Data;
+  File_Info: TFile_Info;
 begin
-  FillObjectProperties(ObjId, Prop, AListItem.Owner, AListItem);
+  AMTP_Data := TMTP_Data(AListItem.Data);
+  if not GetFileInfo(ObjId, Prop, File_Info) then
+    exit;
+
+  AMTP_Data.IsFolder := File_Info.IsFolder;
+  AMTP_Data.ObjectId := ObjId;
+  AMTP_Data.Created := File_Info.ObjDate;
+  AMTP_Data.SortValue := File_Info.ObjSize;
+
+  AMTP_Data.UpdateListItem(AListItem, [File_Info.DateOriginal,
+                                       File_Info.TimeOriginal,
+                                       ExtractFileExt(File_Info.ObjName),
+                                       SenSize(File_Info.ObjSize)]);
 end;
 
-procedure FillObjectProperties(ObjId: PWideChar; Prop: IPortableDeviceProperties;
+procedure FillObjectProperties(ObjId: PWideChar;
+                               Prop: IPortableDeviceProperties;
                                AListItems: TListItems); overload;
+var
+  AMTP_Data: TMTP_Data;
+  File_Info: TFile_Info;
 begin
-  FillObjectProperties(ObjId, Prop, AListItems, nil);
+  if not GetFileInfo(ObjId, Prop, File_Info) then
+    exit;
+  AMTP_Data := TMTP_Data.Create(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
+  AMTP_Data.CreateListItem(AListItems, File_Info.ObjName,
+                           [File_Info.DateOriginal, File_Info.TimeOriginal, ExtractFileExt(File_Info.ObjName), SenSize(File_Info.ObjSize), '']);
 end;
 
 function EnumContentsOfFolder(Content: IPortableDeviceContent;
@@ -1195,23 +1227,53 @@ begin
   end;
 end;
 
-function GetIdForFile(PortableDev: IMTPDevice;
+function GetPropForFile(PortableDev: IMTPDevice;
                       SPath: WideString;
                       SFile: WideString;
-                      AListItem: TListItem = nil): string;
+                      var Prop: IPortableDeviceProperties): string;
 var
-  Prop: IPortableDeviceProperties;
   Content: IPortableDeviceContent;
   FriendlyName: string;
 begin
+  result := '';
+  Prop := nil;
   if PortableDev.Content(Content) <> S_OK then
     exit;
   result := FindItemInFolder(Content, SPath, SFile, FriendlyName);
-  if (AListItem <> nil) then
-  begin
     Content.Properties(Prop);
-    FillObjectProperties(PWideChar(result), Prop, AListItem);
-  end;
+end;
+
+function GetIdForFile(PortableDev: IMTPDevice;
+                      SPath: WideString;
+                      SFile: WideString;
+                      AlistItem: TListItem): string;
+var
+  Prop: IPortableDeviceProperties;
+begin
+  result := GetPropForFile(PortableDev, SPath, SFile, Prop);
+  if (Prop <> nil) then
+    FillObjectProperties(PWideChar(result), Prop, AlistItem);
+end;
+
+function GetIdForFile(PortableDev: IMTPDevice;
+                      SPath: WideString;
+                      SFile: WideString;
+                      var File_Info: TFile_Info): string;
+var
+  Prop: IPortableDeviceProperties;
+begin
+  result := GetPropForFile(PortableDev, SPath, SFile, Prop);
+  if (Prop <> nil) then
+    GetFileInfo(PWideChar(result), Prop, File_Info);
+end;
+
+function GetIdForFile(PortableDev: IMTPDevice;
+                      SPath: WideString;
+                      SFile: WideString): string;
+var
+  Prop: IPortableDeviceProperties;
+begin
+  result := GetPropForFile(PortableDev, SPath, SFile, Prop);
 end;
 
 function GetIdForPath(PortableDev: IMTPDevice;
@@ -1531,7 +1593,7 @@ begin
     exit;
 
 // And get properties
-  FillObjectProperties(PWideChar(NewObjectId), Prop, AListItem);
+  GetIdForFile(PortableDev, SSaveTo, OriginalName, AListItem);
 
   result := true;
 end;

@@ -140,7 +140,7 @@ type
 {$IFDEF TRIPOBJECTS}
     function BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
     function CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList): integer;
-    procedure UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
+    procedure UpdateTemplate(const TripName: string; RouteCnt, ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 {$ENDIF}
   protected
     function MapSegRoadExclBit(const ASubClass: string): string;
@@ -2359,21 +2359,22 @@ begin
 end;
 
 
-procedure TGPXFile.UpdateTemplate(const TripName: string; ParentTripId: cardinal; RtePts: TXmlVSNodeList);
+procedure TGPXFile.UpdateTemplate(const TripName: string; RouteCnt, ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 var
-  ViaPointCount:  integer;
-  HasSubClasses:  boolean;
-  Locations:      TmLocations;
-  ParentTripName: TmParentTripName;
-  RouteNode: TXmlVSNode;
-  GpxDistance: double;
+  ViaPointCount:    integer;
+  HasSubClasses:    boolean;
+  Locations:        TmLocations;
+  mParentTripName:  TmParentTripName;
+  RouteNode:        TXmlVSNode;
+  GpxDistance:      double;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel = TTripModel.XT) then
     (FTripList.GetItem('mParentTripId') as TmParentTripId).AsCardinal := ParentTripId;
-  ParentTripName := FTripList.GetItem('mParentTripName') as TmParentTripName;
-  if (Assigned(ParentTripName)) then
-    ParentTripName.AsString := FBaseFile;
+
+  mParentTripName := FTripList.GetItem('mParentTripName') as TmParentTripName;
+  if (Assigned(mParentTripName)) then
+    mParentTripName.AsString := FBaseFile;
 
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
@@ -2414,7 +2415,7 @@ begin
   try
     FTripList.RouteCnt := RouteCnt;
     TripName := FindSubNodeValue(RteNode, 'name');
-    OutFile := FOutDir + EscapeFileName(TripName) + '.trip';
+    OutFile := Format('%s%s%s', [FOutDir, EscapeFileName(TripName), '.trip']);
 
     // Get TransportationMode
     TransportMode := '';
@@ -2443,11 +2444,15 @@ begin
     end;
     FTripList.CreateTemplate(ProcessOptions.TripModel,
                              TripName, CalculationMode, TransportMode);
-    UpdateTemplate(TripName, ParentTripId, RtePts);
+
+    UpdateTemplate(TripName, RouteCnt, ParentTripId, RtePts);
+
     // Write to File
     FTripList.SaveToFile(OutFile);
+
 //TODO parm
     FTripList.ExportTripInfo(ChangeFileExt(OutFile, '.csv'));
+
   finally
     RtePts.Free;
     FTripList.Free;
@@ -2689,7 +2694,7 @@ begin
         Writeln('Processing started for: ', GPXMask);
 {$IFDEF TRIPOBJECTS}
 {$IFDEF REGISTRYKEYS}
-        Writeln('Selected model: ', GetEnumName(TypeInfo(TTripModel), GetRegistry(Reg_CurrentModel, 0)));
+        Writeln('Selected model: ', TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0)));
 {$ENDIF}
 {$ENDIF}
         Write('Selected functions:');

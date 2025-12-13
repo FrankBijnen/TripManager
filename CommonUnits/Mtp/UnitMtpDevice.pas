@@ -31,6 +31,15 @@ type
   TMTP_Data = class(TBASE_Data)
   end;
 
+  TFile_Info = record
+    ObjName: PWideChar;
+    IsFolder: boolean;
+    ObjDate: TDateTime;
+    DateOriginal: string;
+    TimeOriginal: string;
+    ObjSize: int64;
+  end;
+
   TMTP_Device = class(TObject)
     ID: integer;
     Device: string;

@@ -96,7 +96,7 @@ constructor TGPXTripCompare.Create(const AGPXFile: string; ATripList: TTripList;
 begin
   inherited Create(AGPXFile, nil, nil); // Default processOptions are OK
 
-  FDistOKMeters := ProcessOptions.GetDistOKMeters;
+  FDistOKMeters := ProcessOptions.GetDistOKKms;
   FAllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
   FGpxRptList := AGpxRptList;
 end;

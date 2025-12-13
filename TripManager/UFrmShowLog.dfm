@@ -96,6 +96,6 @@ object FrmShowLog: TFrmShowLog
   object SaveTrip: TSaveDialog
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Left = 370
-    Top = 401
+    Top = 393
   end
 end

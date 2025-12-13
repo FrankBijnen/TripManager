@@ -106,7 +106,7 @@ begin
       end;
 
       NewCoords := CoordsFromData(LbLog.Items.Objects[Index]);
-      if (CoordDistance(NewCoords, LastCoords, TDistanceUnit.duKm) < ProcessOptions.CompareDistanceOK / 100) then
+      if (CoordDistance(NewCoords, LastCoords, TDistanceUnit.duKm) < ProcessOptions.MinShapeDistKms) then
         continue;
 
       LastCoords := NewCoords;

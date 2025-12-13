@@ -3,9 +3,9 @@ unit UFrmAdvSettings;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls,
-  Vcl.Menus;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls, Vcl.Menus,
+  Unit_StringGrid;
 
 type
   TFrmAdvSettings = class(TForm)
@@ -51,6 +51,7 @@ type
   private
     { Private declarations }
     SamplePlace: TObject;
+    procedure GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
     function GetSampleDataItem(const ABase: TObject): string;
     function GetSampleItem(const KeyName: ShortString): string;
     function GetSampleLocationItem(const ClassName: string): string;
@@ -80,6 +81,8 @@ uses
   UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects, UnitGeoCode, UnitOSMMap, UnitGpi;
 
 {$R *.dfm}
+
+
 
 procedure TFrmAdvSettings.Smallestplace1Click(Sender: TObject);
 begin
@@ -133,6 +136,7 @@ procedure TFrmAdvSettings.LoadSettings_General;
 var
   CurRow: integer;
 begin
+  GridGeneralSettings.OnModified := GridModified;
   GridGeneralSettings.RowCount := GridGeneralSettings.FixedRows +1;
   GridGeneralSettings.BeginUpdate;
   try
@@ -154,6 +158,9 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  Reg_CompareDistOK_Key,
                                               IntToStr(Reg_CompareDistOK_Val),
                                               'Compare distance OK (meters)');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_MinShapeDist_Key,
+                                              IntToStr(Reg_MinShapeDist_Val),
+                                              'Minimum distance added Shaping points (meters)');
     AddGridLine(GridGeneralSettings, CurRow,  '');
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Map display-');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MapTilerApi_Key,
@@ -190,6 +197,7 @@ var
   ModelIndex: integer;
   SubKey: string;
 begin
+  GridDeviceSettings.OnModified := GridModified;
   GridDeviceSettings.RowCount := GridDeviceSettings.FixedRows +1;
   GridDeviceSettings.BeginUpdate;
   try
@@ -205,18 +213,18 @@ begin
     ModelIndex := GetRegistry(Reg_CurrentModel, 0);
     SubKey := IntToStr(ModelIndex) + '\';
     AddGridLine(GridDeviceSettings,   CurRow, '', '',
-                                      Format('-Preferred folders (Model: %s)-', [TSetProcessOptions.GetDefaultDevice(ModelIndex)]));
+                                      Format('-Preferred folders (Model: %s)-', [TModelConv.GetDefaultDevice(ModelIndex)]));
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDev_Key,
                                       '',
                                       'Override device name');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevTripsFolder_Key,
-                                      TSetProcessOptions.GetKnownPath(ModelIndex, 0),
+                                      TModelConv.GetKnownPath(ModelIndex, 0),
                                       'Default trips folder');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevGpxFolder_Key,
-                                      TSetProcessOptions.GetKnownPath(ModelIndex, 1),
+                                      TModelConv.GetKnownPath(ModelIndex, 1),
                                       'Default GPX folder');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevPoiFolder_Key,
-                                      TSetProcessOptions.GetKnownPath(ModelIndex, 2),
+                                      TModelConv.GetKnownPath(ModelIndex, 2),
                                       'Default GPI folder');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_PrefFileSysFolder_Key,
                                       Reg_PrefFileSysFolder_Val,
@@ -266,6 +274,7 @@ procedure TFrmAdvSettings.LoadSettings_XT2;
 var
   CurRow: integer;
 begin
+  GridZumoSettings.OnModified := GridModified;
   GridZumoSettings.RowCount := GridZumoSettings.FixedRows +1;
   GridZumoSettings.BeginUpdate;
   try
@@ -318,6 +327,7 @@ procedure TFrmAdvSettings.LoadSettings_GeoCode;
 var
   CurRow: integer;
 begin
+  GridGeoCodeSettings.OnModified := GridModified;
   GridGeoCodeSettings.RowCount := GridGeoCodeSettings.FixedRows +1;
   ReadGeoCodeSettings;
   GridGeoCodeSettings.BeginUpdate;
@@ -405,6 +415,12 @@ begin
   end;
 end;
 
+procedure TFrmAdvSettings.GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
+begin
+  if (Copy(TStringGrid(Sender).Cells[0, Arow], 1, 1) <> '*') then
+    TStringGrid(Sender).Cells[0, Arow] := '*' + TStringGrid(Sender).Cells[0, Arow];
+end;
+
 procedure TFrmAdvSettings.LookupSamplePlace(UseCache: boolean);
 begin
   if (SamplePlace = nil) and
@@ -483,9 +499,9 @@ var
 begin
   for Index := AGrid.FixedRows to AGrid.RowCount do
   begin
-    if (AGrid.Cells[0, Index] = '') then
+    if (Copy(AGrid.Cells[0, Index], 1, 1) <> '*') then
       continue;
-    AKey := AGrid.Cells[0, Index];
+    AKey := Copy(AGrid.Cells[0, Index], 2);
     if (Pos('\', AKey) > 0) then
       ASubKey := NextField(AKey, '\')
     else

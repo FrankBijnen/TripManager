@@ -9,9 +9,11 @@ uses
 const
   // Device recognition constants
   InternalStorage                 = 'Internal Storage\';
-  SystemTrips                     = '.System\Trips';
+  TripsPath                       = 'Trips';
+  SystemTripsPath                 = '.System\' + TripsPath;
   NonMTPRoot                      = '?:\';
   Garmin                          = 'Garmin';
+  SystemDb                        = 'system.db';
   SettingsDb                      = 'settings.db';
   ProfileDb                       = 'vehicle_profile.db';
   GarminDeviceXML                 = 'GarminDevice.xml';
@@ -61,6 +63,8 @@ const
   Reg_ShapeAddress                = 'ShapeAddress';
   Reg_CompareDistOK_Key           = 'CompareDistOK';
   Reg_CompareDistOK_Val           = 500;
+  Reg_MinShapeDist_Key            = 'MinShapeDist';
+  Reg_MinShapeDist_Val            = 2500;
   Reg_RoadSpeeds_Key              = 'RoadSpeeds';
   Reg_RoadSpeeds_Val              = '1=108;2=93;3=72;4=52;5=36;12=15;=25';
 
@@ -68,7 +72,7 @@ const
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
   Reg_PrefDev_Key                 = 'PrefDevice';
   Reg_PrefDevTripsFolder_Key      = 'PrefDeviceTripsFolder';
-  Reg_PrefDevTripsFolder_Val      = InternalStorage + SystemTrips;
+  Reg_PrefDevTripsFolder_Val      = InternalStorage + SystemTripsPath;
 
   Reg_PrefDevGpxFolder_Key        = 'PrefDeviceGpxFolder';
   Reg_PrefDevGpxFolder_Val        = InternalStorage + 'GPX';
@@ -139,14 +143,18 @@ type
     procedure SavePrefs(Sender: TObject);
     class procedure SetPrefs(TvSelections: TObject);
     class function StorePrefs(TvSelections: TObject): TGPXFuncArray;
+    class procedure CheckSymbolsDir;
+  end;
+  TModelConv = class
     class function GetKnownDevices: TStringList;
     class function GetKnownDevice(DevIndex: integer): string;
-    class function GetDefaultDevices: TStringList;
+    class procedure GetDefaultDevices(Devices: TStrings);
     class function GetDefaultDevice(DevIndex: integer): string;
     class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
     class function GetKnownPath(DevIndex, PathId: integer): string;
-    class function Garmin2TripModel(Garmin: integer): integer;
-    class procedure CheckSymbolsDir;
+    class function Cmb2Garmin(CmbIndex: integer): TGarminModel;
+    class function Cmb2Trip(CmbIndex: integer): integer;
+    class function Garmin2Cmb(Garmin: TGarminModel): integer;
   end;
 
 var
@@ -173,7 +181,7 @@ begin
     MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
-    TripModel := TTripModel(TSetProcessOptions.Garmin2TripModel(GetRegistry(Reg_CurrentModel, 0)));
+    TripModel := TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0)));
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
@@ -195,6 +203,7 @@ begin
                        GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
+    MinShapeDist := GetRegistry(Reg_MinShapeDist_Key, Reg_MinShapeDist_Val);
 
     ProcessCategory := [];
   end;
@@ -413,7 +422,15 @@ begin
   end;
 end;
 
-class function TSetProcessOptions.GetKnownDevices: TStringList;
+class procedure TSetProcessOptions.CheckSymbolsDir;
+var
+  SymbolsDir: string;
+begin
+  SymbolsDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '');
+  SetRegistry(Reg_ValidGpiSymbols, DirectoryExists(SymbolsDir));
+end;
+
+class function TModelConv.GetKnownDevices: TStringList;
 begin
   result := TStringList.Create;
   result.Add(GetRegistry(Reg_PrefDev_Key, XT_Name,      '0'));
@@ -426,39 +443,44 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '7'));
 end;
 
-class function TSetProcessOptions.GetDefaultDevices: TStringList;
+class procedure TModelConv.GetDefaultDevices(Devices: TStrings);
 begin
-  result := TStringList.Create;
-  result.Add(XT_Name);
-  result.Add(XT2_Name);
-  result.Add(Tread2_Name);
-  result.Add(Zumo595Name);
-  result.Add(Drive51Name);
-  result.Add(Zumo3x0Name);
-  result.Add(Edge_Name);
-  result.Add(Garmin_Name);
+  Devices.Clear;
+  Devices.Add(XT_Name);
+  Devices.Add(XT2_Name);
+  Devices.Add(Tread2_Name);
+{$IFDEF UNSAFEMODELS}
+  Devices.Add(Zumo595Name);
+  Devices.Add(Drive51Name);
+  Devices.Add(Zumo3x0Name);
+{$ENDIF}
+  Devices.Add(Edge_Name);
+  Devices.Add(Garmin_Name);
 end;
 
-class function TSetProcessOptions.GetKnownDevice(DevIndex: integer): string;
+class function TModelConv.GetKnownDevice(DevIndex: integer): string;
 var
   Devices: TStringList;
+  GarminIndex: integer;
 begin
   result := '';
+  GarminIndex := Ord(Cmb2Garmin(DevIndex));
   Devices := GetKnownDevices;
   try
-    if (DevIndex >= 0) and
-       (DevIndex < Devices.Count) then
-      result := Devices[DevIndex];
+    if (GarminIndex >= 0) and
+       (GarminIndex < Devices.Count) then
+      result := Devices[GarminIndex];
   finally
     Devices.Free;
   end;
 end;
 
-class function TSetProcessOptions.GetDefaultDevice(DevIndex: integer): string;
+class function TModelConv.GetDefaultDevice(DevIndex: integer): string;
 var
   Devices: TStringList;
 begin
-  Devices := GetDefaultDevices;
+  Devices := TStringList.Create;
+  GetDefaultDevices(Devices);
   try
     if (DevIndex >= 0) and
        (DevIndex < Devices.Count) then
@@ -468,7 +490,7 @@ begin
   end;
 end;
 
-class function TSetProcessOptions.GetModelFromDescription(const ModelDescription: string): TGarminModel;
+class function TModelConv.GetModelFromDescription(const ModelDescription: string): TGarminModel;
 var
   Devices: TStringList;
   DevIndex: integer;
@@ -502,10 +524,10 @@ begin
   end;
 end;
 
-class function TSetProcessOptions.GetKnownPath(DevIndex, PathId: integer): string;
+class function TModelConv.GetKnownPath(DevIndex, PathId: integer): string;
 begin
   result := '';
-  case TGarminModel(DevIndex) of
+  case Cmb2Garmin(DevIndex) of
     TGarminModel.XT,
     TGarminModel.XT2,
     TGarminModel.Tread2:
@@ -517,11 +539,11 @@ begin
     TGarminModel.Zumo595,
     TGarminModel.Drive51:
       case PathId of
-        0: result := NonMTPRoot + SystemTrips;
+        0: result := NonMTPRoot + SystemTripsPath;
       end;
     TGarminModel.Zumo3x0:
       case PathId of
-        0: result := NonMTPRoot + SystemTrips;
+        0: result := NonMTPRoot + SystemTripsPath;
         1: result := GarminDevice.GpxPath;
         2: result := GarminDevice.GpiPath;
       end;
@@ -539,9 +561,30 @@ begin
   end;
 end;
 
-class function TSetProcessOptions.Garmin2TripModel(Garmin: integer): integer;
+class function TModelConv.Cmb2Garmin(CmbIndex: integer): TGarminModel;
 begin
-  case TGarminModel(Garmin) of
+  case CmbIndex of
+    0: result := TGarminModel.XT;
+    1: result := TGarminModel.XT2;
+    2: result := TGarminModel.Tread2;
+{$IFDEF UNSAFEMODELS}
+    3: result := TGarminModel.Zumo595;
+    4: result := TGarminModel.Drive51;
+    5: result := TGarminModel.Zumo3x0;
+    6: result := TGarminModel.GarminEdge;
+    7: result := TGarminModel.GarminGeneric;
+{$ELSE}
+    3: result := TGarminModel.GarminEdge;
+    4: result := TGarminModel.GarminGeneric;
+{$ENDIF}
+    else
+      result := TGarminModel.Unknown;
+  end;
+end;
+
+class function TModelConv.Cmb2Trip(CmbIndex: integer): integer;
+begin
+  case TGarminModel(Cmb2Garmin(CmbIndex)) of
     TGarminModel.XT:
       result := Ord(TTripModel.XT);
     TGarminModel.XT2:
@@ -550,17 +593,49 @@ begin
       result := Ord(TTripModel.Tread2);
     TGarminModel.Zumo595:
       result := Ord(TTripModel.Zumo595);
+    TGarminModel.Drive51:
+      result := Ord(TTripModel.Drive51);
+    TGarminModel.Zumo3x0:
+      result := Ord(TTripModel.Zumo3x0);
     else
       result := Ord(TTripModel.Unknown);
   end;
 end;
 
-class procedure TSetProcessOptions.CheckSymbolsDir;
-var
-  SymbolsDir: string;
+class function TModelConv.Garmin2Cmb(Garmin: TGarminModel): integer;
 begin
-  SymbolsDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '');
-  SetRegistry(Reg_ValidGpiSymbols, DirectoryExists(SymbolsDir));
+  case Garmin of
+    TGarminModel.XT:
+      result := 0;
+    TGarminModel.XT2:
+      result := 1;
+    TGarminModel.Tread2:
+      result := 2;
+{$IFDEF UNSAFEMODELS}
+    TGarminModel.Zumo595:
+      result := 3;
+    TGarminModel.Drive51:
+      result := 4;
+    TGarminModel.Zumo3x0:
+      result := 5;
+    TGarminModel.GarminEdge:
+      result := 6;
+    TGarminModel.GarminGeneric:
+      result := 7;
+    else
+      result := 8;
+{$ELSE}
+    TGarminModel.GarminEdge:
+      result := 3;
+    TGarminModel.Zumo595,
+    TGarminModel.Drive51,
+    TGarminModel.Zumo3x0,
+    TGarminModel.GarminGeneric:
+      result := 4;
+    else
+      result := 5;
+{$ENDIF}
+  end;
 end;
 
 // Default paths. Can be overruled by GarminDevice.Xml

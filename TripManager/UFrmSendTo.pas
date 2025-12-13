@@ -150,7 +150,7 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  TripModel := TTripModel(TSetProcessOptions.Garmin2TripModel(GetRegistry(Reg_CurrentModel, 0)));
+  TripModel := TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0)));
   LblModel.Caption := GetEnumName(TypeInfo(TTripModel), Ord(TripModel));
   CmbTripOption.Items.Text := TripOptions;
 
@@ -159,6 +159,7 @@ begin
   if (TripModel = TTripModel.XT) then
     CmbTripOption.Items.Delete(Ord(TTripOption.ttTripTrackLocPrefs));
 {$ENDIF}
+
   CmbTripOption.ItemIndex := Min(CmbTripOption.Items.Count -1, Ord(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc))));
 
   case PCTDestination.ActivePageIndex of
@@ -171,22 +172,22 @@ begin
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey), #10])
+                    TModelConv.GetKnownPath(ModelIndex, 0), SubKey), #10])
         else if GetRegistry(Reg_EnableFitFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.fit files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TSetProcessOptions.GetKnownPath(ModelIndex, 0), SubKey), #10]);
+                    TModelConv.GetKnownPath(ModelIndex, 0), SubKey), #10]);
 
         if GetRegistry(Reg_EnableGpxFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.gpx files:%s %s%s',    [#9, GetRegistry(Reg_PrefDevGpxFolder_Key,
-                      TSetProcessOptions.GetKnownPath(ModelIndex, 1), SubKey), #10]);
+                      TModelConv.GetKnownPath(ModelIndex, 1), SubKey), #10]);
 
         if (GetRegistry(Reg_EnableGpiFuncs, false)) and
            (GetRegistry(Reg_EnableFitFuncs, false) = false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.gpi files:%s %s',    [#9,  GetRegistry(Reg_PrefDevPoiFolder_Key,
-                    TSetProcessOptions.GetKnownPath(ModelIndex, 2), SubKey), #10]);
+                    TModelConv.GetKnownPath(ModelIndex, 2), SubKey), #10]);
       end;
     1:begin
         SendToDest := TSendToDest.stWindows;
