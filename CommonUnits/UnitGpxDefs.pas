@@ -6,11 +6,11 @@ uses
   UnitVerySimpleXml, System.Generics.Collections;
 
 const
-  EarthRadiusKm: Double = 6371.009;
-  EarthRadiusMi: Double = 3958.761;
+  EarthRadiusKm: Double       = 6371.009;
+  EarthRadiusMi: Double       = 3958.761;
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
-  LatLonFormat = '%1.5f';
-
+  LatLonFormat                = '%1.5f';
+  RecalcMapSegAndRoad         = 'FFFFFFFFFFFFFFFF';  // Mapseg and RoadId forcing a recalc
 type
   TDistanceUnit = (duKm, duMi);
   TProcessCategory = (pcSymbol, pcGPX);
@@ -27,8 +27,8 @@ type
               CreateCompleteRoutes);
   TGPXFuncArray = Array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
-  // Note: The first elements should be the same as UnitTripObjects.TTripModel
-  TGarminModel  = (XT, XT2, Tread2, Zumo595, Drive51, Zumo3x0, GarminEdge, GarminGeneric, Unknown);
+  // Note: See TModelConv for mapping to TripModel
+  TGarminModel  = (XT, XT2, Tread2, Zumo59x, Drive51, Zumo3x0, GarminEdge, GarminGeneric, Unknown);
 
   // Trip Info to CSV
   TTripInfo = class(TObject)
@@ -49,6 +49,7 @@ function Float2Coord(ACoord: Double): LongInt;
 function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
 function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function RecalcSubClass(ASubClass: string): string;
 
 implementation
 
@@ -159,6 +160,20 @@ end;
 function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 begin
   result := GetExtensionsNode(ARtePt, true);
+end;
+
+function RecalcSubClass(ASubClass: string): string;
+begin
+  result := ASubClass;
+  if (Length(result) < Length(RecalcMapSegAndRoad)) then
+    result := RecalcMapSegAndRoad +   // Unknown MapSeg and Road
+              '2116' +                // Leave Route point
+              '000000000000'
+  else
+  begin
+    Delete(result, 1 ,Length(RecalcMapSegAndRoad));
+    Insert(RecalcMapSegAndRoad, result, 1);
+  end;
 end;
 
 initialization

@@ -24,15 +24,19 @@ const
   Tread2_VehicleProfileHash         = '61578528'; // Not used
   Tread2_TmScPosnSize               = 16;
   Zumo595Name                       = 'zumo 595';
+  Zumo590Name                       = 'zumo 590';
+  Zumo59xName                       = 'zumo 59x';
   Drive51Name                       = 'Drive 51';
   Zumo3x0Name                       = 'zūmo 3x0';
+  Nuvi2595Name                      = 'nüvi 2595';
+  UnknownName                       = 'Unknown';
   Zumo340_TmScPosnSize              = 8;
   TurnMagic: array[0..3] of byte    = ($47, $4E, $00, $00);
   TripFileName                      = '0:/.System/Trips/%s.trip';
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
-  TTripModel        = (XT, XT2, Tread2, Zumo595, Drive51, Zumo3x0, Nuvi2595, Unknown);
+  TTripModel        = (XT, XT2, Tread2, Zumo59x, Drive51, Zumo3x0, Nuvi2595, Unknown);
   //Drive 51 = 595
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
@@ -123,11 +127,7 @@ const
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 3x0  Nuvi 2595 Unknown
-{$IFDEF UNSAFEMODELS}
-  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     true,     true,    false,    false);
-{$ELSE}
   SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false);
-{$ENDIF}
   RefreshTripsNeeded: array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    true);
   UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
@@ -318,6 +318,8 @@ type
     function GetEditMode: TEditMode; override;
     function GetOffSetValue: integer; override;
     function GetLenValue: Cardinal; override;
+    function GetLat: double;
+    function GetLon: double;
     function GetMapCoords: string;
     function CoordsAsPosnValue(const LatLon: string): TPosnValue;
     procedure SetMapCoords(ACoords: string);
@@ -327,6 +329,8 @@ type
     destructor Destroy; override;
     property Unknown1: Cardinal read FValue.Unknown1;
     property MapCoords: string read GetMapCoords write SetMapCoords;
+    property Lat: double read GetLat;
+    property Lon: double read GetLon;
   end;
 
   // Type 14
@@ -729,7 +733,6 @@ type
     RoadId:           Cardinal;
     PointType:        byte;
     procedure Init(const GPXSubClass: string);
-    procedure InitRec(const GPXSubClass: string);
     case integer of
     0: (Direction:        byte;
         Unknown1:         array[0..5] of byte);
@@ -759,12 +762,18 @@ type
     FUdbDirStatus:     TUdbDirStatus;
     FRoadClass:        string;
     constructor Create(AModel: TTripModel;
+                       ATripOption:TTripOption;
                        AName: WideString;
                        ALat: double = 0;
                        ALon: double = 0;
                        APointType: byte = $03); reintroduce; overload;
-    constructor Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: integer); reintroduce; overload;
-    constructor Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon: double); reintroduce; overload;
+    constructor Create(AModel: TTripModel;
+                       ATripOption:TTripOption;
+                       ALocation: TLocation); reintroduce; overload;
+    constructor Create(AModel: TTripModel;
+                       ATripOption:TTripOption;
+                       GPXSubClass, RoadClass: string;
+                       Lat, Lon: double); reintroduce; overload;
     procedure WriteValue(AStream: TMemoryStream); override;
     function SubLength: Cardinal; override;
     function GetName: string;
@@ -918,7 +927,7 @@ type
                              Lat, Lon: double;
                              DepartureDate: TDateTime;
                              Name, Address: string);
-    procedure AddLocation_Zumo595(Locations: TmLocations;
+    procedure AddLocation_Zumo59x(Locations: TmLocations;
                                   ProcessOptions: TObject;
                                   RoutePoint: TRoutePoint;
                                   Lat, Lon: double;
@@ -939,7 +948,7 @@ type
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
-    procedure CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo59x(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
@@ -1763,6 +1772,30 @@ begin
       result := SizeOf(FValue.Lat_16) + SizeOf(FValue.Lon_16);
     else
       result := SizeOf(FValue.Lat) + SizeOf(FValue.Lon);
+  end;
+end;
+
+function TmScPosn.GetLat: double;
+begin
+  case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      result := CoordAsDec(FValue.Lat_8);
+    Tread2_TmScPosnSize:
+      result := CoordAsDec(FValue.Lat_16);
+    else
+      result := CoordAsDec(FValue.Lat);
+  end;
+end;
+
+function TmScPosn.GetLon: double;
+begin
+  case FValue.ScnSize of
+    Zumo340_TmScPosnSize:
+      result := CoordAsDec(FValue.Lon_8);
+    Tread2_TmScPosnSize:
+      result := CoordAsDec(FValue.Lon_16);
+    else
+      result := CoordAsDec(FValue.Lon);
   end;
 end;
 
@@ -2989,14 +3022,6 @@ begin
     ComprLatLon[Indx] := StrToUInt('$' + Copy(GPXSubClass, 19 + (Indx * 2), 2));
 end;
 
-procedure TSubClass.InitRec(const GPXSubClass: string);
-begin
-  MapSegment  := Swap32(StrToUInt('$12345678'));
-  RoadId      := Swap32(StrToUInt('$12345678'));
-  PointType   := StrToUInt('$' + Copy(GPXSubClass, 17, 2));
-  Direction   := StrToUInt('$' + Copy(GPXSubClass, 19, 2));
-end;
-
 procedure TUdbDirFixedValue.SwapCardinals;
 begin
   Lat := Swap32(Lat);
@@ -3004,6 +3029,7 @@ begin
 end;
 
 constructor TUdbDir.Create(AModel: TTripModel;
+                           ATripOption: TTripOption;
                            AName: WideString;
                            ALat: double = 0;
                            ALon: double = 0;
@@ -3029,17 +3055,19 @@ begin
 end;
 
 // UdbDir Create for <rtept>
-constructor TUdbDir.Create(AModel: TTripModel; ALocation: TLocation; RouteCnt: integer);
+constructor TUdbDir.Create(AModel: TTripModel;
+                           ATripOption: TTripOption;
+                           ALocation: TLocation);
 var
   AmScPosn: TmScPosn;
 begin
   if not Assigned(ALocation) then
   begin
-    Create(AModel, '');
+    Create(AModel, ATripOption, '');
     exit;
   end;
 
-  Create(AModel, ALocation.LocationTmName.AsString);
+  Create(AModel, ATripOption, ALocation.LocationTmName.AsString);
 
   AmScPosn := ALocation.LocationTmScPosn;
   case AmScPosn.FValue.ScnSize of
@@ -3069,16 +3097,20 @@ begin
 end;
 
 // UdbDir Create for <gpxx:rpt>
-constructor TUdbDir.Create(AModel: TTripModel; GPXSubClass, RoadClass: string; Lat, Lon: Double);
+constructor TUdbDir.Create(AModel: TTripModel;
+                           ATripOption: TTripOption;
+                           GPXSubClass, RoadClass: string;
+                           Lat, Lon: Double);
 begin
-  Create(AModel, Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass, 9, 8)]));
+  Create(AModel, ATripOption, Format('%s %s %s', [RoadClass, Copy(GPXSubClass, 1, 8), Copy(GPXSubClass, 9, 8)]));
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
-  if (RoadClass = '00') then
-    FValue.SubClass.InitRec(GPXSubClass)
+  if (CalculationMagic[AModel] = $00000000) and
+     (ATripOption = TTripOption.ttCalc) then
+    FValue.SubClass.Init(RecalcSubClass(GPXSubClass))
   else
-  FValue.SubClass.Init(GPXSubClass);
+    FValue.SubClass.Init(GPXSubClass);
   FValue.Unknown1 := Swap32(UdbDirMagic);
 
   FRoadClass := RoadClass; // Not saved in Trip File
@@ -3846,7 +3878,8 @@ procedure TTripList.SaveToFile(AFile: string);
 var
   AStream: TMemoryStream;
 begin
-  if not (SafeToSave[TripModel]) then
+  if (TProcessOptions.UnsafeModels = false) and
+     (SafeToSave[TripModel] = false) then
     raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
 
   AStream := TMemoryStream.Create;
@@ -4302,7 +4335,7 @@ begin
   end;
 end;
 
-procedure TTripList.AddLocation_Zumo595(Locations: TmLocations;
+procedure TTripList.AddLocation_Zumo59x(Locations: TmLocations;
                                         ProcessOptions: TObject;
                                         RoutePoint: TRoutePoint;
                                         Lat, Lon: double;
@@ -4369,8 +4402,8 @@ begin
       AddLocation_XT2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Tread2:
       AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
-    TTripModel.Zumo595:
-      AddLocation_Zumo595(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+    TTripModel.Zumo59x:
+      AddLocation_Zumo59x(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Drive51:
       AddLocation_Drive51(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo3x0:
@@ -4391,6 +4424,7 @@ var
   Locations: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
   ProcessOptions: TProcessOptions;
+  NeedsDummy: boolean;
 begin
   // If the model is not supplied, try to get it from the data
   FTripModel := GetCalculationModel(AModel);
@@ -4416,6 +4450,7 @@ begin
 
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
+  NeedsDummy := (CalculationMagic[TripModel] = $00000000);
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
     // The XT(2) recalculates all.
@@ -4429,7 +4464,18 @@ begin
       begin
         TmLocations(Locations).GetSegmentPoints(Index, RoutePointList);
         for ALocation in RoutePointList do
-          AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
+        begin
+          AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
+          if (NeedsDummy) then
+          begin
+            AnUdbHandle.Add(TUdbDir.Create(TripModel,
+                                           TTripOption.ttCalc,
+                                           'Dummy',     // Dummy SubClass with unlikely MapSegment/RoadId
+                                           '00',        // RoadClass
+                                           ALocation.LocationTmScPosn.Lat, ALocation.LocationTmScPosn.Lon));
+            NeedsDummy := false;
+          end;
+        end;
       end;
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
     end;
@@ -4521,7 +4567,7 @@ begin
     // Add begin
     TmLocations(Locations).GetSegmentPoints(1, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
+    AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
 
     TotalTime := 0;
     TotalDist := 0;
@@ -4532,6 +4578,7 @@ begin
       GpxRptNode := TXmlVSNode(SubClasses.Objects[Index]);
       Coords.FromAttributes(GpxRptNode.AttributeList);
       AnUdbDir := TUdbDir.Create(TripModel,
+                                 ProcessOptions.TripOption,
                                  Copy(SubClasses[Index], 5),    // SubClass to use in UdbDir
                                  Copy(SubClasses[Index], 1, 2), // RoadClass
                                  Coords.Lat, Coords.Lon);
@@ -4554,7 +4601,7 @@ begin
     // Add End
     TmLocations(Locations).GetSegmentPoints(2, RoutePointList);
     ALocation := RoutePointList[0];
-    AnUdbHandle.Add(TUdbDir.Create(TripModel, ALocation, RouteCnt));
+    AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
 
     // Update Time and Dist
     AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, TotalTime);
@@ -4600,7 +4647,7 @@ var
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir, PrevUdbDir, RtePtUdbDir: TUdbDir;
   FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
-  CMapSegRoad, RoadClass: string;
+  CMapSegRoad: string;
   PrevCoords, Coords: TCoords;
   TotalDist, UdbDist, CurDist: double;
   TotalTime, UdbTime: cardinal;
@@ -4647,7 +4694,7 @@ begin
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
-        RtePtUdbDir := TUdbDir.Create(TripModel, ALocation, RouteCnt);
+        RtePtUdbDir := TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation);
         AnUdbHandle.Add(RtePtUdbDir);
 
         // Lookup the location <rtept> in the GPX
@@ -4684,13 +4731,10 @@ begin
           CMapSegRoad := FindSubNodeValue(ScanGpxxRptNode, 'gpxx:Subclass');
           if (CMapSegRoad <> '') then
           begin
-            if (ProcessOptions.TripOption = TTripOption.ttCalc) then
-              RoadClass := '00'
-            else
-              RoadClass := Copy(CMapSegRoad, 1, 2);
             AnUdbDir := TUdbDir.Create(TripModel,
+                                       ProcessOptions.TripOption,
                                        Copy(CMapSegRoad, 5),    // SubClass to use in UdbDir
-                                       RoadClass,               // RoadClass
+                                       Copy(CMapSegRoad, 1, 2), // RoadClass
                                        Coords.Lat, Coords.Lon);
             AnUdbHandle.Add(AnUdbDir);
 
@@ -4725,7 +4769,7 @@ begin
 
       // Add end route point. Of this segment
       ALocation := RoutePointList[RoutePointList.Count -1];
-      RtePtUdbDir := TUdbDir.Create(TripModel, ALocation, RouteCnt);
+      RtePtUdbDir := TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation);
       AnUdbHandle.Add(RtePtUdbDir);
 
       TotalDist := TotalDist + UdbDist; // Totals for the Trip
@@ -4788,7 +4832,7 @@ begin
   result := AnUdbHandle.GetModel;
 
   // 595 and drive5 share the same UDBHandle size, but the drive 51 has no mIsRoundTrip
-  if (result = TTripModel.Zumo595) and
+  if (result = TTripModel.Zumo59x) and
      (GetItem('mIsRoundTrip') = nil) then
     result := TTripModel.Drive51;
 end;
@@ -4991,7 +5035,7 @@ begin
 end;
 
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
-procedure TTripList.CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+procedure TTripList.CreateTemplate_Zumo59x(const TripName, CalculationMode, TransportMode: string);
 begin
   AddHeader(THeader.Create);
   Add(TmTotalTripDistance.Create);
@@ -5014,7 +5058,7 @@ begin
   Add(TmOptimized.Create);
 
   // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Zumo595, 2);
+  ForceRecalc(TTripModel.Zumo59x, 2);
 end;
 
 procedure TTripList.CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
@@ -5070,8 +5114,8 @@ begin
       CreateTemplate_XT2(TripName, CalculationMode, TransportMode);
     TTripModel.Tread2:
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
-    TTripModel.Zumo595:
-      CreateTemplate_Zumo595(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo59x:
+      CreateTemplate_Zumo59x(TripName, CalculationMode, TransportMode);
     TTripModel.Drive51:
       CreateTemplate_Drive51(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo3x0:

@@ -117,7 +117,7 @@ implementation
 uses
   System.SysUtils, System.Math,
   Vcl.Clipbrd,
-  UDmRoutePoints, UnitStringUtils;
+  UDmRoutePoints, UnitStringUtils, UnitRegistryKeys;
 
 {$R *.dfm}
 
@@ -326,6 +326,7 @@ begin
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
   DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
+  TModelConv.GetTripModels(CmbModel.Items);
   CmbModel.ItemIndex := Ord(CurTripList.TripModel);
 end;
 

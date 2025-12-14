@@ -364,7 +364,6 @@ type
     procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
     function CopyDeviceFile(const APath, AFile: string): boolean;
-    function ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     function GetDbPath: string;
@@ -507,14 +506,6 @@ begin
   result := true;
 end;
 
-function TFrmTripManager.ModelFromGarminDevice(const ModelDescription: string): TGarminModel;
-begin
-  if (ContainsText(ModelDescription, 'Edge')) then
-    result := TGarminModel.GarminEdge
-  else
-    result := TGarminModel.GarminGeneric;
-end;
-
 function TFrmTripManager.GetDbPath: string;
 var
   ModelIndex: integer;
@@ -540,7 +531,7 @@ var
   DefAdvLevel: integer;
 begin
   // Check the connected Device needs reading SQlite
-  if not (TModelConv.Cmb2Garmin(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
+  if not (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
     exit;
   if not CheckDevice(false) then
     exit;
@@ -562,7 +553,7 @@ begin
     OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
     OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
 
-    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(TModelConv.Cmb2Garmin(CmbModel.ItemIndex)));
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(TModelConv.Display2Garmin(CmbModel.ItemIndex)));
     if (NewVehicle_Profile.Valid) and
        (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
     begin
@@ -680,13 +671,13 @@ begin
       result.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
       result.GarminModel := TModelConv.GetModelFromDescription(result.ModelDescription);
       case result.GarminModel of
-        TGarminModel.Zumo595,
+        TGarminModel.Zumo59x,
         TGarminModel.Drive51,
         TGarminModel.Zumo3x0:
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
             result.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         TGarminModel.Unknown:
-          result.GarminModel := ModelFromGarminDevice(result.ModelDescription);
+          result.GarminModel := TModelConv.GetModelFromGarminDevice(result.ModelDescription);
       end;
 
       // Get default paths
@@ -711,13 +702,13 @@ var
 begin
   ModelDisplayed := DisplayedDevice;
   GarminDevice := ReadGarminDevice(ModelDisplayed);
-  ModelIndex := TModelConv.Garmin2Cmb(GarminDevice.GarminModel);
+  ModelIndex := TModelConv.Garmin2Display(GarminDevice.GarminModel);
 
   // Change description for 'old' Garmin units and Edge
-  CmbModel.items[TModelConv.Garmin2Cmb(TGarminModel.GarminEdge)] := Edge_Name;
-  CmbModel.items[TModelConv.Garmin2Cmb(TGarminModel.GarminGeneric)] := Garmin_Name;
-  if (ModelIndex = TModelConv.Garmin2Cmb(TGarminModel.GarminEdge)) or
-     (ModelIndex = TModelConv.Garmin2Cmb(TGarminModel.GarminGeneric)) then
+  CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminEdge)] := Edge_Name;
+  CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminGeneric)] := Garmin_Name;
+  if (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminEdge)) or
+     (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminGeneric)) then
   begin
       if (ModelDisplayed <> CmbModel.Items[ModelIndex]) and
          (GarminDevice.ModelDescription <> '') then
@@ -968,13 +959,13 @@ end;
 
 procedure TFrmTripManager.BgDeviceItemsTripsClick(Sender: TObject);
 begin
-  if (TModelConv.Cmb2Garmin(CmbModel.ItemIndex) in [TGarminModel.GarminGeneric, TGarminModel.Unknown]) then
+  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.GarminGeneric, TGarminModel.Unknown]) then
     Abort;
 end;
 
 procedure TFrmTripManager.BgDeviceItemsGpxPoiClick(Sender: TObject);
 begin
-  if (TModelConv.Cmb2Garmin(CmbModel.ItemIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]) then
+  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.Zumo59x, TGarminModel.Drive51]) then
     Abort;
 end;
 
@@ -1407,7 +1398,7 @@ begin
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
   if (NewFile) then
-    ATripList.CreateTemplate(TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0))), FrmNewTrip.EdNewTrip.Text);
+    ATripList.CreateTemplate(TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))), FrmNewTrip.EdNewTrip.Text);
 
 // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
@@ -2061,7 +2052,7 @@ begin
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
 
   TModelConv.GetDefaultDevices(CmbModel.Items);
-  CmbModel.Items.Add('Unknown');
+  CmbModel.Items.Add(UnknownName);
   ReadSettings;
 
   ATripList := TTripList.Create;
@@ -2194,7 +2185,7 @@ begin
   GuessModel(CurrentDevice.DisplayedDevice);
 
   // Refresh Trips folder? (Zumo 3x0)
-  if (RefreshTripsNeeded[TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0)))]) then
+  if (RefreshTripsNeeded[TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)))]) then
     RefreshTrips;
 
   // Need to set the folder?
@@ -2283,14 +2274,14 @@ var
   GarminModel: TGarminModel;
 begin
   ModelIndex := CmbModel.ItemIndex;
-  GarminModel := TModelConv.Cmb2Garmin(ModelIndex);
+  GarminModel := TModelConv.Display2Garmin(ModelIndex);
   BgDevice.ItemIndex := 0; // Default to trips
   BgDevice.Items[0].Caption := 'Trips';
   BgDevice.Items[1].Caption := 'Gpx';
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
 
   case GarminModel of
-    TGarminModel.Zumo595,
+    TGarminModel.Zumo59x,
     TGarminModel.Drive51:
       begin
         BgDevice.Items[1].Caption := 'Unused';
@@ -2311,9 +2302,9 @@ begin
   end;
 
   SetRegistry(Reg_EnableTripFuncs, (GarminModel in
-     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
-  SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
+     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo59x, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
+  SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo59x, TGarminModel.Drive51]));
+  SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo59x, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableFitFuncs, (GarminModel in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_CurrentModel, ModelIndex);
 
@@ -5004,7 +4995,7 @@ end;
 
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
-  KnownIndex, Index: integer;
+  KnownIndex, Index, Retries: integer;
   SelectedDevice: string;
   KnownDevices: TStringList;
 begin
@@ -5041,14 +5032,30 @@ begin
     if (Inserted) and
        (SelectedDevice = '') then
     begin
-      Index := DeviceIdInList(DeviceName); // List after insert
+      Retries := 5;
+      Index := -1;
+      while (Retries > 0) do
+      begin
+        Index := DeviceIdInList(DeviceName); // List after insert
+        if (Index > -1) then
+            break;
+
+        // Device is not (yet) available in DeviceList. Retry a few times
+        SbPostProcess.Panels[0].Text := DeviceName;
+        SbPostProcess.Panels[1].Text := 'Waiting for device to appear';
+        SbPostProcess.Update;
+
+        Dec(Retries);
+        Sleep(500);
+        GetDeviceList;  // Rescan devices
+      end;
       if (Index > -1) then
       begin
         for KnownIndex := 0 to KnownDevices.Count -1 do
         begin
           if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[Index]).DisplayedDevice)) then
           begin
-            ConnectedDeviceChanged(Format('%d=%s', [Index, TMTP_Device(DeviceList[Index]).DisplayedDevice]), 'Connected');
+            ConnectedDeviceChanged(Format('%s', [TMTP_Device(DeviceList[Index]).DisplayedDevice]), 'Connected');
 
             CmbDevices.ItemIndex := Index;
             SelectDevice(Index);

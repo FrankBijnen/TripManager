@@ -150,7 +150,7 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  TripModel := TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0)));
+  TripModel := TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)));
   LblModel.Caption := GetEnumName(TypeInfo(TTripModel), Ord(TripModel));
   CmbTripOption.Items.Text := TripOptions;
 

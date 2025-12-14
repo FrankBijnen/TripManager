@@ -155,6 +155,7 @@ type
     function GetDistOKKms: double;
     function GetMinShapeDistKms: double;
     function TripTrackColor: string;
+    class function UnsafeModels: boolean;
     property DistOKKms: double read GetDistOKKms;
     property MinShapeDistKms: double read GetMinShapeDistKms;
   end;
@@ -327,6 +328,11 @@ begin
   result := DefTrackColor;
   if (TrackColor <> '') then
     result := TrackColor;
+end;
+
+class function TProcessOptions.UnsafeModels: boolean;
+begin
+  result := GetRegistry(Reg_UnsafeModels, false);
 end;
 
 end.

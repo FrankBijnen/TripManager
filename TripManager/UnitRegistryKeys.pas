@@ -17,6 +17,7 @@ const
   SettingsDb                      = 'settings.db';
   ProfileDb                       = 'vehicle_profile.db';
   GarminDeviceXML                 = 'GarminDevice.xml';
+  Reg_UnsafeModels                = 'UnsafeModels';
 
   Reg_GPISymbolSize               = 'GPISymbolsSize';
   Reg_GPIProximity                = 'GPIProximity';
@@ -146,15 +147,19 @@ type
     class procedure CheckSymbolsDir;
   end;
   TModelConv = class
+  public
     class function GetKnownDevices: TStringList;
     class function GetKnownDevice(DevIndex: integer): string;
     class procedure GetDefaultDevices(Devices: TStrings);
+    class procedure GetTripModels(TripModels: TStrings);
     class function GetDefaultDevice(DevIndex: integer): string;
     class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
+    class function GetModelFromGarminDevice(const GarminDevice: string): TGarminModel;
+
     class function GetKnownPath(DevIndex, PathId: integer): string;
-    class function Cmb2Garmin(CmbIndex: integer): TGarminModel;
-    class function Cmb2Trip(CmbIndex: integer): integer;
-    class function Garmin2Cmb(Garmin: TGarminModel): integer;
+    class function Display2Garmin(CmbIndex: integer): TGarminModel;
+    class function Display2Trip(CmbIndex: integer): integer;
+    class function Garmin2Display(Garmin: TGarminModel): integer;
   end;
 
 var
@@ -181,7 +186,7 @@ begin
     MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
-    TripModel := TTripModel(TModelConv.Cmb2Trip(GetRegistry(Reg_CurrentModel, 0)));
+    TripModel := TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)));
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
@@ -449,13 +454,27 @@ begin
   Devices.Add(XT_Name);
   Devices.Add(XT2_Name);
   Devices.Add(Tread2_Name);
-{$IFDEF UNSAFEMODELS}
-  Devices.Add(Zumo595Name);
-  Devices.Add(Drive51Name);
-  Devices.Add(Zumo3x0Name);
-{$ENDIF}
+  if (TProcessOptions.UnsafeModels) then
+  begin
+    Devices.Add(Zumo59xName);
+    Devices.Add(Drive51Name);
+    Devices.Add(Zumo3x0Name);
+  end;
   Devices.Add(Edge_Name);
   Devices.Add(Garmin_Name);
+end;
+
+class procedure TModelConv.GetTripModels(TripModels: TStrings);
+begin
+  TripModels.Clear;
+  TripModels.Add(XT_Name);
+  TripModels.Add(XT2_Name);
+  TripModels.Add(Tread2_Name);
+  TripModels.Add(Zumo59xName);
+  TripModels.Add(Drive51Name);
+  TripModels.Add(Zumo3x0Name);
+  TripModels.Add(Nuvi2595Name);
+  TripModels.Add(UnknownName);
 end;
 
 class function TModelConv.GetKnownDevice(DevIndex: integer): string;
@@ -464,7 +483,7 @@ var
   GarminIndex: integer;
 begin
   result := '';
-  GarminIndex := Ord(Cmb2Garmin(DevIndex));
+  GarminIndex := Ord(Display2Garmin(DevIndex));
   Devices := GetKnownDevices;
   try
     if (GarminIndex >= 0) and
@@ -504,7 +523,9 @@ begin
   else if (ContainsText(ModelDescription, XT_Name)) then
     exit(TGarminModel.XT)
   else if (ContainsText(ModelDescription, Zumo595Name)) then
-    exit(TGarminModel.Zumo595)
+    exit(TGarminModel.Zumo59x)
+  else if (ContainsText(ModelDescription, Zumo590Name)) then
+    exit(TGarminModel.Zumo59x)
   else if (ContainsText(ModelDescription, Drive51Name)) then
     exit(TGarminModel.Drive51)
   else if (ContainsText(ModelDescription, Zumo3x0Name)) then
@@ -524,10 +545,17 @@ begin
   end;
 end;
 
+class function TModelConv.GetModelFromGarminDevice(const GarminDevice: string): TGarminModel;
+begin
+  result := TGarminModel.GarminGeneric;
+  if (ContainsText(GarminDevice, Edge_Name)) then
+    exit(TGarminModel.GarminEdge);
+end;
+
 class function TModelConv.GetKnownPath(DevIndex, PathId: integer): string;
 begin
   result := '';
-  case Cmb2Garmin(DevIndex) of
+  case Display2Garmin(DevIndex) of
     TGarminModel.XT,
     TGarminModel.XT2,
     TGarminModel.Tread2:
@@ -536,7 +564,7 @@ begin
         1: result := Reg_PrefDevGpxFolder_Val;
         2: result := Reg_PrefDevPoiFolder_Val;
       end;
-    TGarminModel.Zumo595,
+    TGarminModel.Zumo59x,
     TGarminModel.Drive51:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
@@ -561,38 +589,48 @@ begin
   end;
 end;
 
-class function TModelConv.Cmb2Garmin(CmbIndex: integer): TGarminModel;
+class function TModelConv.Display2Garmin(CmbIndex: integer): TGarminModel;
 begin
-  case CmbIndex of
-    0: result := TGarminModel.XT;
-    1: result := TGarminModel.XT2;
-    2: result := TGarminModel.Tread2;
-{$IFDEF UNSAFEMODELS}
-    3: result := TGarminModel.Zumo595;
-    4: result := TGarminModel.Drive51;
-    5: result := TGarminModel.Zumo3x0;
-    6: result := TGarminModel.GarminEdge;
-    7: result := TGarminModel.GarminGeneric;
-{$ELSE}
-    3: result := TGarminModel.GarminEdge;
-    4: result := TGarminModel.GarminGeneric;
-{$ENDIF}
-    else
-      result := TGarminModel.Unknown;
+  if (TProcessOptions.UnsafeModels) then
+  begin
+    case CmbIndex of
+      0: result := TGarminModel.XT;
+      1: result := TGarminModel.XT2;
+      2: result := TGarminModel.Tread2;
+      3: result := TGarminModel.Zumo59x;
+      4: result := TGarminModel.Drive51;
+      5: result := TGarminModel.Zumo3x0;
+      6: result := TGarminModel.GarminEdge;
+      7: result := TGarminModel.GarminGeneric;
+      else
+        result := TGarminModel.Unknown;
+    end;
+  end
+  else
+  begin
+    case CmbIndex of
+      0: result := TGarminModel.XT;
+      1: result := TGarminModel.XT2;
+      2: result := TGarminModel.Tread2;
+      3: result := TGarminModel.GarminEdge;
+      4: result := TGarminModel.GarminGeneric;
+      else
+        result := TGarminModel.Unknown;
+    end;
   end;
 end;
 
-class function TModelConv.Cmb2Trip(CmbIndex: integer): integer;
+class function TModelConv.Display2Trip(CmbIndex: integer): integer;
 begin
-  case TGarminModel(Cmb2Garmin(CmbIndex)) of
+  case TGarminModel(Display2Garmin(CmbIndex)) of
     TGarminModel.XT:
       result := Ord(TTripModel.XT);
     TGarminModel.XT2:
       result := Ord(TTripModel.XT2);
     TGarminModel.Tread2:
       result := Ord(TTripModel.Tread2);
-    TGarminModel.Zumo595:
-      result := Ord(TTripModel.Zumo595);
+    TGarminModel.Zumo59x:
+      result := Ord(TTripModel.Zumo59x);
     TGarminModel.Drive51:
       result := Ord(TTripModel.Drive51);
     TGarminModel.Zumo3x0:
@@ -602,39 +640,50 @@ begin
   end;
 end;
 
-class function TModelConv.Garmin2Cmb(Garmin: TGarminModel): integer;
+class function TModelConv.Garmin2Display(Garmin: TGarminModel): integer;
 begin
-  case Garmin of
-    TGarminModel.XT:
-      result := 0;
-    TGarminModel.XT2:
-      result := 1;
-    TGarminModel.Tread2:
-      result := 2;
-{$IFDEF UNSAFEMODELS}
-    TGarminModel.Zumo595:
-      result := 3;
-    TGarminModel.Drive51:
-      result := 4;
-    TGarminModel.Zumo3x0:
-      result := 5;
-    TGarminModel.GarminEdge:
-      result := 6;
-    TGarminModel.GarminGeneric:
-      result := 7;
-    else
-      result := 8;
-{$ELSE}
-    TGarminModel.GarminEdge:
-      result := 3;
-    TGarminModel.Zumo595,
-    TGarminModel.Drive51,
-    TGarminModel.Zumo3x0,
-    TGarminModel.GarminGeneric:
-      result := 4;
-    else
-      result := 5;
-{$ENDIF}
+  if (TProcessOptions.UnsafeModels) then
+  begin
+    case Garmin of
+      TGarminModel.XT:
+        result := 0;
+      TGarminModel.XT2:
+        result := 1;
+      TGarminModel.Tread2:
+        result := 2;
+      TGarminModel.Zumo59x:
+        result := 3;
+      TGarminModel.Drive51:
+        result := 4;
+      TGarminModel.Zumo3x0:
+        result := 5;
+      TGarminModel.GarminEdge:
+        result := 6;
+      TGarminModel.GarminGeneric:
+        result := 7;
+      else
+        result := 8;
+    end;
+  end
+  else
+  begin
+    case Garmin of
+      TGarminModel.XT:
+        result := 0;
+      TGarminModel.XT2:
+        result := 1;
+      TGarminModel.Tread2:
+        result := 2;
+      TGarminModel.GarminEdge:
+        result := 3;
+      TGarminModel.Zumo59x,
+      TGarminModel.Drive51,
+      TGarminModel.Zumo3x0,
+      TGarminModel.GarminGeneric:
+        result := 4;
+      else
+        result := 5;
+    end;
   end;
 end;
 

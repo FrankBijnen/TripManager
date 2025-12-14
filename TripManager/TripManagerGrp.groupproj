@@ -3,13 +3,13 @@
         <ProjectGuid>{FA021510-8F2E-4C31-82F0-7E17E8625D64}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="hhcfix.dproj">
-            <Dependencies/>
-        </Projects>
         <Projects Include="TripManager.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="FixHtml.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="hhcfix.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -20,15 +20,6 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="hhcfix">
-        <MSBuild Projects="hhcfix.dproj"/>
-    </Target>
-    <Target Name="hhcfix:Clean">
-        <MSBuild Projects="hhcfix.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="hhcfix:Make">
-        <MSBuild Projects="hhcfix.dproj" Targets="Make"/>
-    </Target>
     <Target Name="TripManager">
         <MSBuild Projects="TripManager.dproj"/>
     </Target>
@@ -47,21 +38,30 @@
     <Target Name="FixHtml:Make">
         <MSBuild Projects="FixHtml.dproj" Targets="Make"/>
     </Target>
+    <Target Name="hhcfix">
+        <MSBuild Projects="hhcfix.dproj"/>
+    </Target>
+    <Target Name="hhcfix:Clean">
+        <MSBuild Projects="hhcfix.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="hhcfix:Make">
+        <MSBuild Projects="hhcfix.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="hhcfix;TripManager;FixHtml"/>
+        <CallTarget Targets="TripManager;FixHtml;hhcfix"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="hhcfix:Clean;TripManager:Clean;FixHtml:Clean"/>
+        <CallTarget Targets="TripManager:Clean;FixHtml:Clean;hhcfix:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="hhcfix:Make;TripManager:Make;FixHtml:Make"/>
+        <CallTarget Targets="TripManager:Make;FixHtml:Make;hhcfix:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
     <ItemGroup Condition="'$(BuildGroup)'=='Release'">
-        <BuildGroupProject Include="FixHtml.dproj">
-            <ProjectGuid>{8D3F4E56-5C1D-4D41-9659-DFAD705D032B}</ProjectGuid>
+        <BuildGroupProject Include="TripManager.dproj">
+            <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA5}</ProjectGuid>
             <Configurations>Release</Configurations>
-            <Platforms>Win32</Platforms>
+            <Platforms>Win32;Win64</Platforms>
             <Enabled>True</Enabled>
         </BuildGroupProject>
         <BuildGroupProject Include="hhcfix.dproj">
@@ -70,10 +70,10 @@
             <Platforms>Win32</Platforms>
             <Enabled>True</Enabled>
         </BuildGroupProject>
-        <BuildGroupProject Include="TripManager.dproj">
-            <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA5}</ProjectGuid>
+        <BuildGroupProject Include="FixHtml.dproj">
+            <ProjectGuid>{8D3F4E56-5C1D-4D41-9659-DFAD705D032B}</ProjectGuid>
             <Configurations>Release</Configurations>
-            <Platforms>Win32;Win64</Platforms>
+            <Platforms>Win32</Platforms>
             <Enabled>True</Enabled>
         </BuildGroupProject>
     </ItemGroup>
