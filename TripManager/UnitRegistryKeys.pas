@@ -441,11 +441,19 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, XT_Name,      '0'));
   result.Add(GetRegistry(Reg_PrefDev_Key, XT2_Name,     '1'));
   result.Add(GetRegistry(Reg_PrefDev_Key, Tread2_Name,  '2'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Drive51Name,  '4'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '5'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '6'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '7'));
+  if (TProcessOptions.UnsafeModels) then
+  begin
+    result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Drive51Name,  '4'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '5'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '6'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '7'));
+  end
+  else
+  begin
+    result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '3'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '4'));
+  end;
 end;
 
 class procedure TModelConv.GetDefaultDevices(Devices: TStrings);
