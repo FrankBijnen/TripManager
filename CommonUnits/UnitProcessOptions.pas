@@ -141,7 +141,10 @@ type
     AvoidancesChangedTimeAtSave: Cardinal;    // XT2
     AllowGrouping: boolean;                   // XT1. (Not used anymore for XT2)
     TripOption: TTripOption;                  // XT1 and XT2
+    EnableTripOverview: boolean;              // XT1 and XT2
     DefAdvLevel: TAdvlevel;                   // XT2
+    DefRoadSpeed: integer;
+    RoadSpeedMap: array[0..11] of TIdentMapEntry;
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -154,8 +157,11 @@ type
     function DistanceStr: string;
     function GetDistOKKms: double;
     function GetMinShapeDistKms: double;
+    function SpeedFromRoadClass(const RoadClass: string): integer; overload;
+    function ComputeTime(const RoadClass: string; const Dist: Double): double; overload;
     function TripTrackColor: string;
     class function UnsafeModels: boolean;
+    class function DescriptionFromRoadClass(const RoadClass: byte): string;
     property DistOKKms: double read GetDistOKKms;
     property MinShapeDistKms: double read GetMinShapeDistKms;
   end;
@@ -255,6 +261,20 @@ begin
   AvoidancesChangedTimeAtSave := 0;
   AllowGrouping := true;
   TripOption := TTripOption.ttCalc;
+  EnableTripOverview := false;
+  RoadSpeedMap[0].Value  := 108; RoadSpeedMap[0].Name  := '01';
+  RoadSpeedMap[1].Value  := 72;  RoadSpeedMap[1].Name  := '02';
+  RoadSpeedMap[2].Value  := 56;  RoadSpeedMap[2].Name  := '03';
+  RoadSpeedMap[3].Value  := 50;  RoadSpeedMap[3].Name  := '04';
+  RoadSpeedMap[4].Value  := 48;  RoadSpeedMap[4].Name  := '05';
+  RoadSpeedMap[5].Value  := 30;  RoadSpeedMap[5].Name  := '06';
+  RoadSpeedMap[6].Value  := 15;  RoadSpeedMap[6].Name  := '07';
+  RoadSpeedMap[7].Value  := 50;  RoadSpeedMap[7].Name  := '08';
+  RoadSpeedMap[8].Value  := 80;  RoadSpeedMap[8].Name  := '09';
+  RoadSpeedMap[9].Value  := 15;  RoadSpeedMap[9].Name  := '0A';
+  RoadSpeedMap[10].Value := 25;  RoadSpeedMap[10].Name := '0B';
+  RoadSpeedMap[11].Value := 15;  RoadSpeedMap[11].Name := '0C';
+  DefRoadSpeed := 25;
   DefAdvLevel := TAdvlevel.advLevel1;
 {$ENDIF}
 
@@ -328,6 +348,38 @@ begin
   result := DefTrackColor;
   if (TrackColor <> '') then
     result := TrackColor;
+end;
+
+function TProcessOptions.SpeedFromRoadClass(const RoadClass: string): integer;
+begin
+  if not (IdentToInt(RoadClass, result, RoadSpeedMap)) then
+    result := DefRoadSpeed;
+end;
+
+function TProcessOptions.ComputeTime(const RoadClass: string; const Dist: Double): double;
+begin
+  result := (3600 * Dist) / SpeedFromRoadClass(RoadClass);
+end;
+
+class function TProcessOptions.DescriptionFromRoadClass(const RoadClass: byte): string;
+begin
+  case RoadClass of
+    0:  result := '';
+    1:  result := 'Interstate highway';
+    2:  result := 'Major highway';
+    3:  result := 'Other highway';
+    4:  result := 'Arterial road';
+    5:  result := 'Collector road';
+    6:  result := 'Residential Street';
+    7:  result := 'Private';
+    8:  result := 'Highway ramp. Low speed';
+    9:  result := 'Highway ramp. High speed';
+    10: result := 'Unpaved';
+    11: result := 'Major higway connector';
+    12: result := 'Round about';
+    else
+        result := Format('RoadClass: %s', [IntToHex(RoadClass, 2)]);
+  end;
 end;
 
 class function TProcessOptions.UnsafeModels: boolean;

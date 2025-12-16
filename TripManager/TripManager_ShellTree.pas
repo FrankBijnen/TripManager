@@ -4,11 +4,11 @@ interface
 
 uses
   System.Classes, System.Types,
-  Winapi.ShlObj,
+  Winapi.ShlObj, Winapi.CommCtrl,
   Vcl.Shell.ShellCtrls, Vcl.ComCtrls;
 
 const
-  sfsNeedsCheck = -2;
+  sfsNeedsCheck = TVIS_USERMASK;
 
 type
   TShellTreeView = class(Vcl.Shell.ShellCtrls.TShellTreeView)
@@ -25,7 +25,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, Winapi.CommCtrl;
+  Winapi.Windows;
 
 function GetIShellFolder(IFolder: IShellFolder; PIDL: PItemIDList): IShellFolder;
 begin
@@ -109,19 +109,20 @@ begin
   if not (otNonFolders in ObjectTypes) and // Performance optimization only for directories.
      (Stage = TCustomDrawStage.cdPrePaint) and
      (Node.Data <> nil) and
-     (Node.StateIndex = sfsNeedsCheck) then
+     ((Node.StateIndex and sfsNeedsCheck) = sfsNeedsCheck) then
   begin
-    if TreeView_GetItemRect(Handle, Node.ItemId, prc, false) then // Only check items in view
+    if (TreeView_GetItemRect(Handle, Node.ItemId, prc, false)) and
+       ((prc.Top + prc.Height) >= Self.Top) and
+       ((Prc.Bottom - Prc.Height) <= (Self.Top + Self.Height)) then // Only check items in view
     begin
       // Only do the check 1 time.
-      Node.StateIndex := Node.StateIndex + 1;
+      Node.StateIndex := Node.StateIndex xor sfsNeedsCheck;
 
       // Get Folder
       AFolder := TShellFolder(Node.Data);
 
       // Has subfoldere?
-      if (otFolders in ObjectTypes) then
-        Node.HasChildren := AFolder.SubFolders;
+      Node.HasChildren := AFolder.SubFolders;
 
       // Dont care if the folder is shared, or has non folder subitems
     end;

@@ -22,7 +22,7 @@ const
   Reg_GPISymbolSize               = 'GPISymbolsSize';
   Reg_GPIProximity                = 'GPIProximity';
   Reg_TrackColor                  = 'TrackColor';         // User preferred track color
-  Reg_MinDistTrackPoints_Key      = 'MinDistTrackPoints'; // Use to filter trackpoints
+  Reg_MinDistTrackPoints_Key      = 'MinDistTrackPoints'; // Used to filter trackpoints
 
   // XT1 and XT2 and Tread 2
   Reg_ScPosn_Unknown1             = 'ScPosn_Unknown1';
@@ -66,8 +66,8 @@ const
   Reg_CompareDistOK_Val           = 500;
   Reg_MinShapeDist_Key            = 'MinShapeDist';
   Reg_MinShapeDist_Val            = 2500;
-  Reg_RoadSpeeds_Key              = 'RoadSpeeds';
-  Reg_RoadSpeeds_Val              = '1=108;2=93;3=72;4=52;5=36;12=15;=25';
+  Reg_EnableTripOverview          = 'EnableTripOverview';
+  Reg_RoadSpeed_Key               = 'RoadSpeed'; // Multiple
 
   Reg_PrefFileSysFolder_Key       = 'PrefFileSysFolder';
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
@@ -155,7 +155,6 @@ type
     class function GetDefaultDevice(DevIndex: integer): string;
     class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
     class function GetModelFromGarminDevice(const GarminDevice: string): TGarminModel;
-
     class function GetKnownPath(DevIndex, PathId: integer): string;
     class function Display2Garmin(CmbIndex: integer): TGarminModel;
     class function Display2Trip(CmbIndex: integer): integer;
@@ -187,6 +186,14 @@ begin
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
     TripModel := TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)));
+    EnableTripOverview := GetRegistry(Reg_EnableTripOverview, false);
+    DefRoadSpeed := GetRegistry(Reg_RoadSpeed_Key, 25);
+    RoadSpeedMap[0].Value := GetRegistry(Reg_RoadSpeed_Key + '_01', 108);
+    RoadSpeedMap[1].Value := GetRegistry(Reg_RoadSpeed_Key + '_02',  72);
+    RoadSpeedMap[2].Value := GetRegistry(Reg_RoadSpeed_Key + '_03',  56);
+    RoadSpeedMap[3].Value := GetRegistry(Reg_RoadSpeed_Key + '_04',  50);
+    RoadSpeedMap[4].Value := GetRegistry(Reg_RoadSpeed_Key + '_05',  48);
+    RoadSpeedMap[5].Value := GetRegistry(Reg_RoadSpeed_Key + '_0C',  15);
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
@@ -441,18 +448,18 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, XT_Name,      '0'));
   result.Add(GetRegistry(Reg_PrefDev_Key, XT2_Name,     '1'));
   result.Add(GetRegistry(Reg_PrefDev_Key, Tread2_Name,  '2'));
+  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo59xName,  '3'));
   if (TProcessOptions.UnsafeModels) then
   begin
-    result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
-    result.Add(GetRegistry(Reg_PrefDev_Key, Drive51Name,  '4'));
-    result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '5'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '4'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Drive51Name,  '5'));
     result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '6'));
     result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '7'));
   end
   else
   begin
-    result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '3'));
-    result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '4'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '4'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '5'));
   end;
 end;
 
@@ -462,11 +469,11 @@ begin
   Devices.Add(XT_Name);
   Devices.Add(XT2_Name);
   Devices.Add(Tread2_Name);
+  Devices.Add(Zumo59xName);
   if (TProcessOptions.UnsafeModels) then
   begin
-    Devices.Add(Zumo59xName);
-    Devices.Add(Drive51Name);
     Devices.Add(Zumo3x0Name);
+    Devices.Add(Drive51Name);
   end;
   Devices.Add(Edge_Name);
   Devices.Add(Garmin_Name);
@@ -488,15 +495,13 @@ end;
 class function TModelConv.GetKnownDevice(DevIndex: integer): string;
 var
   Devices: TStringList;
-  GarminIndex: integer;
 begin
   result := '';
-  GarminIndex := Ord(Display2Garmin(DevIndex));
   Devices := GetKnownDevices;
   try
-    if (GarminIndex >= 0) and
-       (GarminIndex < Devices.Count) then
-      result := Devices[GarminIndex];
+    if (DevIndex >= 0) and
+       (DevIndex < Devices.Count) then
+      result := Devices[DevIndex];
   finally
     Devices.Free;
   end;
@@ -534,10 +539,10 @@ begin
     exit(TGarminModel.Zumo59x)
   else if (ContainsText(ModelDescription, Zumo590Name)) then
     exit(TGarminModel.Zumo59x)
-  else if (ContainsText(ModelDescription, Drive51Name)) then
-    exit(TGarminModel.Drive51)
   else if (ContainsText(ModelDescription, Zumo3x0Name)) then
     exit(TGarminModel.Zumo3x0)
+  else if (ContainsText(ModelDescription, Drive51Name)) then
+    exit(TGarminModel.Drive51)
   else if (ContainsText(ModelDescription, Garmin_Name)) then
     exit(TGarminModel.GarminGeneric)
   else if (ContainsText(ModelDescription, Edge_Name)) then
@@ -606,8 +611,8 @@ begin
       1: result := TGarminModel.XT2;
       2: result := TGarminModel.Tread2;
       3: result := TGarminModel.Zumo59x;
-      4: result := TGarminModel.Drive51;
-      5: result := TGarminModel.Zumo3x0;
+      4: result := TGarminModel.Zumo3x0;
+      5: result := TGarminModel.Drive51;
       6: result := TGarminModel.GarminEdge;
       7: result := TGarminModel.GarminGeneric;
       else
@@ -620,8 +625,9 @@ begin
       0: result := TGarminModel.XT;
       1: result := TGarminModel.XT2;
       2: result := TGarminModel.Tread2;
-      3: result := TGarminModel.GarminEdge;
-      4: result := TGarminModel.GarminGeneric;
+      3: result := TGarminModel.Zumo59x;
+      4: result := TGarminModel.GarminEdge;
+      5: result := TGarminModel.GarminGeneric;
       else
         result := TGarminModel.Unknown;
     end;
@@ -661,9 +667,9 @@ begin
         result := 2;
       TGarminModel.Zumo59x:
         result := 3;
-      TGarminModel.Drive51:
-        result := 4;
       TGarminModel.Zumo3x0:
+        result := 4;
+      TGarminModel.Drive51:
         result := 5;
       TGarminModel.GarminEdge:
         result := 6;
@@ -682,15 +688,16 @@ begin
         result := 1;
       TGarminModel.Tread2:
         result := 2;
-      TGarminModel.GarminEdge:
+      TGarminModel.Zumo59x:
         result := 3;
-      TGarminModel.Zumo59x,
-      TGarminModel.Drive51,
-      TGarminModel.Zumo3x0,
-      TGarminModel.GarminGeneric:
+      TGarminModel.GarminEdge:
         result := 4;
-      else
+      TGarminModel.Zumo3x0,
+      TGarminModel.Drive51,
+      TGarminModel.GarminGeneric:
         result := 5;
+      else
+        result := 6;
     end;
   end;
 end;

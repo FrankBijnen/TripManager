@@ -38,6 +38,7 @@ type
     RoadClass: byte;
     MapSegRoadId: string;
     Description: string;
+    Coords: string;
     Speed: integer;
     Distance: double;
     Time: double;

@@ -127,7 +127,7 @@ const
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 3x0  Nuvi 2595 Unknown
-  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false);
+  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false);
   RefreshTripsNeeded: array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    true);
   UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
@@ -4588,7 +4588,7 @@ begin
       begin
         // Distance and time from Previous UdbDir
         CurDist := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
-        PrevUdbDir.FValue.Time := Min( $fffe, Round(ComputeTime( StrToIntDef('$' + PrevUdbDir.RoadClass, 0), CurDist)));
+        PrevUdbDir.FValue.Time := Min($fffe, Round(ProcessOptions.ComputeTime(PrevUdbDir.RoadClass, CurDist)));
 
         // Totals for the UdbHdandle
         TotalTime := TotalTime + PrevUdbDir.FValue.Time;
@@ -4744,7 +4744,9 @@ begin
               Inc(UdbId);
               PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, UdbId,
                                                       RtePtUdbDir.GetName, PrevUdbDir.RoadClass,
-                                                      PrevUdbDir, CurDist);
+                                                      PrevUdbDir, CurDist,
+                                                      ProcessOptions.ComputeTime(PrevUdbDir.RoadClass, CurDist),
+                                                      ProcessOptions.SpeedFromRoadClass(PrevUdbDir.RoadClass));
 
               // Totals for the UdbHdandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;

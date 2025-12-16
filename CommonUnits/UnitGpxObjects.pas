@@ -127,7 +127,7 @@ type
                               const Symbol: string);
     procedure AddWayPoint(const RtePtNode: TXmlVsNode;
                           const WayPointName: string);
-    procedure AddTrackPoint(const RptNode: TXmlVsNode);
+    procedure AddTrackPoint(const RptNode: TXmlVsNode; const ExtensionNode: TXmlVsNode = nil);
     procedure ProcessRtePt(const RtePtNode: TXmlVsNode;
                            const RouteName: string;
                            const Cnt, LastCnt: integer);
@@ -879,9 +879,9 @@ begin
   CloneNode(ExtensionsNode, NewNode.AddChild('extensions'));
 end;
 
-procedure TGPXFile.AddTrackPoint(const RptNode: TXmlVsNode);
+procedure TGPXFile.AddTrackPoint(const RptNode: TXmlVsNode; const ExtensionNode: TXmlVsNode = nil);
 var
-  TrackPoint: TXmlVsNode;
+  TrackPoint, RtePtViaPoint: TXmlVsNode;
   CurCoords: TCoords;
   CurDist: Double;
   SubNodeValue: string;
@@ -903,10 +903,20 @@ begin
   SubNodeValue := FindSubNodeValue(RptNode, 'ele');
   if (SubNodeValue <> '') then
     TrackPoint.AddChild('ele').NodeValue := SubNodeValue;
-  SubNodeValue := FindSubNodeValue(RptNode, 'time');
+
+  SubNodeValue := '';
+  if (ExtensionNode <> nil) then
+  begin
+    // Use Departure from (Start) point as time
+    RtePtViaPoint := ExtensionNode.Find('trp:ViaPoint');
+    if (RtePtViaPoint <> nil) then
+      SubNodeValue := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
+  end
+  else
+    SubNodeValue := FindSubNodeValue(RptNode, 'time');
+
   if (SubNodeValue <> '') then
     TrackPoint.AddChild('time').NodeValue := SubNodeValue;
-
 end;
 
 procedure TGPXFile.ProcessRtePt(const RtePtNode: TXmlVsNode;
@@ -1117,7 +1127,7 @@ begin
   if (ProcessOptions.ProcessTracks) and
      (ExtensionNode <> nil) then
   begin
-    AddTrackPoint(RtePtNode);  // Add the <rtept> as a trackpoint. Will draw straight lines. In line with BC
+    AddTrackPoint(RtePtNode, ExtensionNode);  // Add the <rtept> as a trackpoint. Will draw straight lines. In line with BC
     for RptNode in ExtensionNode.ChildNodes do
     begin
       if (RptNode.Name = 'gpxx:rpt') then
@@ -1962,9 +1972,7 @@ var
   GpxTime: string;
   Ele: string;
   CurrentDist: double;
-
-const
-  BikeSpeed = 694.5; // * 100 meter/sec
+  BikeSpeed: double; // in 100 meters / sec
 
   function CoordAsInt(CoordDec: double): integer;
   begin
@@ -1973,6 +1981,7 @@ const
 {$ENDIF}
 begin
 {$IFDEF TRIPOBJECTS}
+  BikeSpeed := (FProcessOptions.DefRoadSpeed * 100000) / 3600;
   TrackStringList.Clear;
   UnixTime := 0;
 
@@ -2450,8 +2459,10 @@ begin
     // Write to File
     FTripList.SaveToFile(OutFile);
 
-//TODO parm
-    FTripList.ExportTripInfo(ChangeFileExt(OutFile, '.csv'));
+    // Create CSV
+    if (ProcessOptions.TripOption <> TTripOption.ttTripTrack) and
+       (ProcessOptions.EnableTripOverview) then
+      FTripList.ExportTripInfo(ChangeFileExt(OutFile, '.csv'));
 
   finally
     RtePts.Free;

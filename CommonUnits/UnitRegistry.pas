@@ -13,10 +13,12 @@ function GetRegistry(const Name: string; const Default: string = ''; const SubKe
 function GetRegistry(const Name: string; const Default: boolean): boolean; overload;
 function GetRegistry(const Name: string; const Default: integer): integer; overload;
 function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo): integer; overload;
+function GetRegistry(const Name: string; const Default: TArray<string>): TArray<string>; overload;
 
 procedure SetRegistry(const Name, Value: string; const SubKey: string = ''); overload;
 procedure SetRegistry(const Name: string; Value: boolean); overload;
 procedure SetRegistry(const Name: string; Value: integer); overload;
+procedure SetRegistry(const Name: string; Value: TArray<string>); overload;
 
 implementation
 
@@ -30,9 +32,11 @@ begin
   result := 'Software\TDBware\' + Application.Title;
 end;
 
-function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string=''): string;
-var Registry: TRegistry;
+function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
+var
+  Registry: TRegistry;
 begin
+  result := '';
   Registry := TRegistry.Create(KEY_READ);
   try
     Registry.RootKey := ARootKey;
@@ -71,6 +75,26 @@ begin
   result := GetEnumValue(AType, GetRegistry(Name, GetEnumName(AType, Default)));
 end;
 
+function GetRegistry(const Name: string; const Default: TArray<string>): TArray<string>; overload;
+var
+  Registry: TRegistry;
+  KeyName: string;
+begin
+  SetLength(result, 0);
+  KeyName := ApplicationKey;
+
+  Registry := TRegistry.Create(KEY_READ);
+  try
+    Registry.RootKey := HKEY_CURRENT_USER;
+    if (Registry.OpenKey(KeyName, False)) then
+      result := Registry.ReadMultiString(Name);
+  finally
+    Registry.Free;
+  end;
+  if (Length(Result) = 0) then
+    result := Default;
+end;
+
 procedure SetRegistryValue(const ARootKey: HKEY; const KeyName, Name, Value: string);
 var
   Registry: TRegistry;
@@ -103,6 +127,23 @@ end;
 procedure SetRegistry(const Name: string; Value: integer);
 begin
   SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, IntToStr(Value));
+end;
+
+procedure SetRegistry(const Name: string; Value: TArray<string>);
+var
+  Registry: TRegistry;
+  KeyName: string;
+begin
+  KeyName := ApplicationKey;
+
+  Registry := TRegistry.Create(KEY_WRITE);
+  try
+    Registry.RootKey := HKEY_CURRENT_USER;
+    Registry.OpenKey(KeyName, True);
+    Registry.WriteMultiString(Name, Value);
+  finally
+    Registry.Free;
+  end;
 end;
 
 end.

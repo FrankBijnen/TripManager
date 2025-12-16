@@ -54,7 +54,7 @@ object FrmAdvSettings: TFrmAdvSettings
     Top = 0
     Width = 621
     Height = 627
-    ActivePage = TabDevice
+    ActivePage = TabGeneral
     Align = alClient
     TabHeight = 25
     TabOrder = 1
@@ -143,6 +143,7 @@ object FrmAdvSettings: TFrmAdvSettings
         Height = 33
         Align = alTop
         TabOrder = 1
+        ExplicitTop = -6
         object BtnCurrent: TButton
           Left = 2
           Top = 2
@@ -152,6 +153,37 @@ object FrmAdvSettings: TFrmAdvSettings
           TabOrder = 0
           OnClick = BtnCurrentClick
         end
+      end
+    end
+    object TabTripOverview: TTabSheet
+      Caption = 'Trip Overview'
+      ImageIndex = 3
+      object GridTripOverview: TStringGrid
+        Left = 0
+        Top = 0
+        Width = 613
+        Height = 592
+        Align = alClient
+        ColCount = 3
+        DefaultColWidth = 230
+        DrawingStyle = gdsGradient
+        FixedCols = 2
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        GradientEndColor = clMoneyGreen
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+        ParentFont = False
+        TabOrder = 0
+        StyleElements = []
+        RowHeights = (
+          24
+          24
+          24
+          23
+          24)
       end
     end
     object TabGeoCode: TTabSheet

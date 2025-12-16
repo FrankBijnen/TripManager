@@ -710,9 +710,9 @@ begin
   if (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminEdge)) or
      (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminGeneric)) then
   begin
-      if (ModelDisplayed <> CmbModel.Items[ModelIndex]) and
-         (GarminDevice.ModelDescription <> '') then
-        CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
+    if (ModelDisplayed <> CmbModel.Items[ModelIndex]) and
+       (GarminDevice.ModelDescription <> '') then
+      CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
   end;
 
   // Model changed?

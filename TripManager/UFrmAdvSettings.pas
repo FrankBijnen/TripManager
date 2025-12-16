@@ -34,6 +34,8 @@ type
     GridDeviceSettings: TStringGrid;
     PnlZumoFuncs: TPanel;
     BtnCurrent: TButton;
+    TabTripOverview: TTabSheet;
+    GridTripOverview: TStringGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -60,6 +62,7 @@ type
     procedure LoadSettings_General;
     procedure LoadSettings_Device;
     procedure LoadSettings_XT2;
+    procedure LoadSettings_TripOverview;
     procedure LoadSettings_GeoCode;
     procedure LoadSettings;
     procedure SaveGrid(AGrid: TStringGrid);
@@ -81,8 +84,6 @@ uses
   UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects, UnitGeoCode, UnitOSMMap, UnitGpi;
 
 {$R *.dfm}
-
-
 
 procedure TFrmAdvSettings.Smallestplace1Click(Sender: TObject);
 begin
@@ -323,6 +324,71 @@ begin
   end;
 end;
 
+procedure TFrmAdvSettings.LoadSettings_TripOverview;
+var
+  CurRow: integer;
+begin
+  GridTripOverview.OnModified := GridModified;
+  GridTripOverview.RowCount := GridTripOverview.FixedRows +1;
+  GridTripOverview.BeginUpdate;
+  try
+
+    CurRow := 1;
+    AddGridLine(GridTripOverview, CurRow,  '', '', '-Trip Overview-');
+    AddGridLine(GridTripOverview, CurRow,  Reg_EnableTripOverview,
+                                              'False',
+                                              'Create detailed CSV (Only for BC calculated GPX)');
+    AddGridLine(GridTripOverview, CurRow,  '');
+    AddGridLine(GridTripOverview, CurRow,  '', '', '-Road Speeds (kmh)-');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_01',
+                                              '108',
+                                              'Interstate highway');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_02',
+                                              '72',
+                                              'Major highway');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_03',
+                                              '56',
+                                              'Other highway');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_04',
+                                              '50',
+                                              'Arterial road');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_05',
+                                              '48',
+                                              'Collector road');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_06',
+                                              '30',
+                                              'Residential Street');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_07',
+                                              '15',
+                                              'Private');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_08',
+                                              '50',
+                                              'Highway ramp. Low speed');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_09',
+                                              '80',
+                                              'Highway ramp. High speed');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_0A',
+                                              '15',
+                                              'Unpaved');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_0B',
+                                              '25',
+                                              'Major higway connector');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_0C',
+                                              '15',
+                                              'Round about');
+    AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key,
+                                              '25',
+                                              'All others');
+    AddGridLine(GridTripOverview, CurRow,  '');
+
+    GridTripOverview.RowCount := CurRow;
+    AddGridHeader(GridTripOverview);
+
+  finally
+    GridTripOverview.EndUpdate;
+  end;
+end;
+
 procedure TFrmAdvSettings.LoadSettings_GeoCode;
 var
   CurRow: integer;
@@ -361,6 +427,7 @@ begin
   LoadSettings_General;
   LoadSettings_Device;
   LoadSettings_XT2;
+  LoadSettings_TripOverview;
   LoadSettings_GeoCode;
 end;
 
@@ -489,6 +556,7 @@ begin
   AlignGrid(GridGeneralSettings);
   AlignGrid(GridDeviceSettings);
   AlignGrid(GridZumoSettings);
+  AlignGrid(GridTripOverview);
   AlignGrid(GridGeoCodeSettings);
 end;
 
@@ -516,6 +584,7 @@ begin
   SaveGrid(GridGeneralSettings);
   SaveGrid(GridDeviceSettings);
   SaveGrid(GridZumoSettings);
+  SaveGrid(GridTripOverview);
   SaveGrid(GridGeoCodeSettings);
 
   TSetProcessOptions.CheckSymbolsDir;

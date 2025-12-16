@@ -6,66 +6,27 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections,
   UnitGpxDefs;
 
-function ComputeTime(const RoadClass: byte; const Dist: Double): double;
 function TripTimeAsHrMin(AValue: cardinal): string;
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
                        const SegmentId, RoutePointId, UdbId: integer;
                        const RoutePoint, RoadClass: string;
                        const UdbDir: TObject;
-                       const Dist: double): word; overload;
+                       const Dist: double;
+                       const Time: double;
+                       const Speed: integer): word; overload;
 procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
                         const SegmentId, RoutePointId, UdbId: integer;
                         const RoutePoint: string;
                         const UdbDir: TObject;
-                        const Dist: double; const Time: word); overload;
+                        const Dist: double;
+                        const Time: word); overload;
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);
 
 implementation
 
 uses
   System.Math,
-  UnitTripObjects;
-
-function DescriptionFromRoadClass(const RoadClass: byte): string;
-begin
-  case RoadClass of
-    0:  result := '';
-    1:  result := 'Interstate highway';
-    2:  result := 'Major highway';
-    3:  result := 'Other highway';
-    4:  result := 'Arterial road';
-    5:  result := 'Collector road';
-    6:  result := 'Residential Street';
-    7:  result := 'Private';
-    8:  result := 'Highway ramp. Low speed';
-    9:  result := 'Highway ramp. High speed';
-    10: result := 'Unpaved';
-    11: result := 'Major higway connector';
-    12: result := 'Round about';
-    else
-        result := Format('RoadClass: %s', [IntToHex(RoadClass, 2)]);
-  end;
-end;
-
-// Table from default Basecamp Motorcycle profile.
-function SpeedFromRoadClass(const RoadClass: byte): integer;
-begin
-  case RoadClass of
-    1:  result := 108;
-    2:  result := 72;
-    3:  result := 56;
-    4:  result := 50;
-    5:  result := 48;
-    12: result := 15;
-    else
-        result := 20;
-  end;
-end;
-
-function ComputeTime(const RoadClass: byte; const Dist: Double): double;
-begin
-  result := (3600 * Dist) / SpeedFromRoadClass(RoadClass);
-end;
+  UnitTripObjects, UnitProcessOptions;
 
 function TripTimeAsHrMin(AValue: cardinal): string;
 var
@@ -95,7 +56,9 @@ function AddToTripInfo(const ATripInfoList: TTripInfoList;
                        const SegmentId, RoutePointId, UdbId: integer;
                        const RoutePoint, RoadClass: string;
                        const UdbDir: TObject;
-                       const Dist: double): word;
+                       const Dist: double;
+                       const Time: double;
+                       const Speed: integer): word;
 var
   ATripInfo: TTripInfo;
   DistTime: double;
@@ -112,11 +75,12 @@ begin
     ATripInfo.RoutePoint := RoutePoint;
     ATripInfo.RoadClass := StrToIntDef('$' + RoadClass, 0);
     ATripInfo.MapSegRoadId := TUdbDir(UdbDir).MapSegRoadDisplay;
-    ATripInfo.Description := DescriptionFromRoadClass(ATripInfo.RoadClass);
-    ATripInfo.Speed := SpeedFromRoadClass(ATripInfo.RoadClass);
+    ATripInfo.Description := TProcessOptions.DescriptionFromRoadClass(ATripInfo.RoadClass);
+    ATripInfo.Coords := TUdbDir(UdbDir).MapCoords;
+    ATripInfo.Speed := Speed;
     ATripInfoList.Add(TripInfoKey, ATripInfo);
   end;
-  DistTime := ComputeTime(ATripInfo.RoadClass, Dist);
+  DistTime := Time;
   ATripInfo.Distance := ATripInfo.Distance + Dist;
   ATripInfo.Time := ATripInfo.Time + DistTime;
   result := Min($fffe, Round(DistTime));
@@ -126,7 +90,8 @@ procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
                         const SegmentId, RoutePointId, UdbId: integer;
                         const RoutePoint: string;
                         const UdbDir: TObject;
-                        const Dist: double; const Time: word);
+                        const Dist: double;
+                        const Time: word);
 var
   ATripInfo: TTripInfo;
   TripInfoKey: string;
@@ -141,7 +106,8 @@ begin
     ATripInfo.RoutePointId := RoutePointId;
     ATripInfo.RoutePoint := RoutePoint;
     ATripInfo.MapSegRoadId := TUdbDir(UdbDir).MapSegRoadDisplay;
-    ATripInfo.Description := DescriptionFromRoadClass(ATripInfo.RoadClass);
+    ATripInfo.Description := TProcessOptions.DescriptionFromRoadClass(ATripInfo.RoadClass);
+    ATripInfo.Coords := TUdbDir(UdbDir).MapCoords;
     ATripInfo.Speed := 0;
     ATripInfoList.Add(TripInfoKey, ATripInfo);
   end;
@@ -176,7 +142,7 @@ begin
         Lst.Delimiter := ';';
         Lst.StrictDelimiter := true;
 
-        Lst.AddStrings(['Route point', 'Road ID', 'Road Class', 'Description', 'Speed (Kmh)',
+        Lst.AddStrings(['Route point', 'Road ID', 'Road Class', 'Description', 'Coordinates', 'Speed (Kmh)',
                         'Distance (Km)', 'Time (Sec)', 'Trip Distance (Km)', 'Trip Time (Sec)', 'Trip time']);
         Writer.WriteLine(Lst.DelimitedText);
 
@@ -201,6 +167,7 @@ begin
               Lst.Clear;
               Lst.AddStrings([CurRoutePoint,
                               'Total',
+                              '',
                               '',
                               '',
                               '',
@@ -229,6 +196,7 @@ begin
                           ATripInfo.MapSegRoadId,
                           Format('(0x%s)', [IntToHex(ATripInfo.RoadClass, 2)]),
                           ATripInfo.Description,
+                          ATripInfo.Coords,
                           DisplaySpeed(ATripInfo),
                           Format('%f', [ATripInfo.Distance]),
                           Format('%f', [ATripInfo.Time])]);
@@ -242,6 +210,7 @@ begin
           Lst.Clear;
           Lst.AddStrings([CurRoutePoint,
                           'Total',
+                          '',
                           '',
                           '',
                           '',
@@ -264,4 +233,3 @@ begin
 end;
 
 end.
-
