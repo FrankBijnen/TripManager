@@ -395,7 +395,7 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckTrips;
-    procedure RefreshTrips;
+    procedure RecreateTrips;
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
@@ -2185,8 +2185,8 @@ begin
   GuessModel(CurrentDevice.DisplayedDevice);
 
   // Refresh Trips folder? (Zumo 3x0)
-  if (RefreshTripsNeeded[TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)))]) then
-    RefreshTrips;
+  if (NeedRecreateTrips[TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)))]) then
+    RecreateTrips;
 
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
@@ -2730,7 +2730,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.RefreshTrips;
+procedure TFrmTripManager.RecreateTrips;
 var
   FriendlyPath, TempFile, SystemPath, SystemTripsPath, LastRefreshFile: string;
   Rc: integer;
@@ -2765,6 +2765,10 @@ begin
     LastRefreshFile := Format('%10d.tmp', [TUnixDate.DateTimeAsCardinal(File_Info.ObjDate)]);
     if (GetIdForFile(CurrentDevice.PortableDev, SystemTripsId, LastRefreshFile) <> '') then
       exit;
+
+    SbPostProcess.Panels[0].Text := 'Recreating directory';
+    SbPostProcess.Panels[1].Text := DeviceFolder[0];
+    SbPostProcess.Update;
 
     // Need to recreate trips
     ReadFilesFromDevice(CurrentDevice.PortableDev, LstFiles.Items, SystemTripsId, CompletePath);
@@ -2816,8 +2820,11 @@ begin
     end;
 
     FindClose(Fs);
+    SbPostProcess.Panels[0].Text := 'Directory recreated succesfully';
   finally
     SetCursor(CrNormal);
+    StatusTimer.Enabled := false;
+    StatusTimer.Enabled := true;
   end;
 end;
 

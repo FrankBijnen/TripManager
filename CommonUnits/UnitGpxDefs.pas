@@ -11,6 +11,7 @@ const
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
   LatLonFormat                = '%1.5f';
   RecalcMapSegAndRoad         = 'FFFFFFFFFFFFFFFF';  // Mapseg and RoadId forcing a recalc
+
 type
   TDistanceUnit = (duKm, duMi);
   TProcessCategory = (pcSymbol, pcGPX);
@@ -44,6 +45,7 @@ type
     Time: double;
   end;
   TTripInfoList = TObjectDictionary<string, TTripInfo>;
+  TTagsToShow = (WptRteTrk = 1, RteTrk = 10, Rte = 20, Trk = 30);
 
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;

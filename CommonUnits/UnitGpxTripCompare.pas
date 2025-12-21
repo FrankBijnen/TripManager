@@ -11,7 +11,8 @@ uses
 type
   TGPXTripCompare = class(TGPXFile)
   private
-    FDistOKMeters: double;
+    FDistOKKms: double;
+    FMinShapeDistKms: double;
     FAllRoutes: TmAllRoutes;
     FUdbHandle: TmUdbDataHndl;
     FUdbDir: TUdbDir;
@@ -61,8 +62,9 @@ type
     // Track Checks
     procedure NoMatchRoutePointTrk(const Messages: TStrings;
                                    CoordTrip: TCoords; BestToTrkpt: TXmlVSNode; ThisDist: double);
-    procedure NoMatchUdbDirTrk(const Messages: TStrings;
-                               CoordTrip: TCoords; BestTrkpt: TXmlVSNode);
+    function NoMatchUdbDirTrk(const Messages: TStrings;
+                              CoordTrip: TCoords; BestTrkpt: TXmlVSNode;
+                              SkipTrkPts: integer): TXmlVSNode;
   public
     constructor Create(const AGPXFile: string; ATripList: TTripList; AGpxRptList: Tlist);
     destructor Destroy; override;
@@ -96,7 +98,8 @@ constructor TGPXTripCompare.Create(const AGPXFile: string; ATripList: TTripList;
 begin
   inherited Create(AGPXFile, nil, nil); // Default processOptions are OK
 
-  FDistOKMeters := ProcessOptions.GetDistOKKms;
+  FDistOKKms := ProcessOptions.GetDistOKKms;
+  FMinShapeDistKms := ProcessOptions.GetMinShapeDistKms;
   FAllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
   FGpxRptList := AGpxRptList;
 end;
@@ -543,7 +546,7 @@ begin
           CoordGpx.FromAttributes(FRtePt.AttributeList);
           ThisDist := CoordDistance(CoordTrip, CoordGpx, TDistanceUnit.duKm);
 
-          if (ThisDist > FDistOKMeters) or
+          if (ThisDist > FDistOKKms) or
              (FUdbDir.DisplayName <> FindSubNodeValue(FRtePt, 'name')) then
             NoMatchRoutePoint(Messages, CoordTrip, FRtePt, ThisDist);
 
@@ -551,7 +554,7 @@ begin
           GpxxRptNode := GetFirstExtensionsNode(FRtePt);
 
           // Build known subclasses for this <rtept>
-          BuildSubClasses(FRtePt, FDistOKMeters);
+          BuildSubClasses(FRtePt, FDistOKKms, [scCompare]);
 
           // Point to next segment
           if (FUdbDir <> FUdbHandle.Items[FUdbHandle.Items.Count -1]) then
@@ -590,7 +593,7 @@ begin
 
         // Any errors?
         if (SubClassOK) and
-           (MinDist > FDistOKMeters) then
+           (MinDist > FDistOKKms) then
         begin
           FUdbDir.Status := UdsRoadOKCoordsNOK;
           NoMatchUdbDirSubClass(Messages, CoordTrip, BestRpt, BestSubClass);
@@ -604,7 +607,7 @@ begin
           continue;
         end;
 
-        if (MinDist > FDistOKMeters) then
+        if (MinDist > FDistOKKms) then
         begin
           FUdbDir.Status := TUdbDirStatus.udsCoordsNOK;
           NoMatchUdbDirSubClass(Messages, CoordTrip, BestRpt, BestSubClass);
@@ -689,13 +692,15 @@ begin
   Messages.AddObject(MsgTrkPt.NodeValue, MsgTrkPt);
 end;
 
-procedure TGPXTripCompare.NoMatchUdbDirTrk(const Messages: TStrings;
-                                           CoordTrip: TCoords; BestTrkpt: TXmlVSNode);
+function TGPXTripCompare.NoMatchUdbDirTrk(const Messages: TStrings;
+                                          CoordTrip: TCoords; BestTrkpt: TXmlVSNode;
+                                          SkipTrkPts: integer): TXmlVSNode;
 var
-  CoordGpx, NextCoordGpx: TCoords;
+  BestCoords: TCoords;
   TripLat, TripLon: string;
-  NextTrkPt, MsgTrkPt: TXmlVSNode;
+  MsgTrkPt: TXmlVSNode;
   BestDist: double;
+  SkipTrkPtCnt: integer;
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
@@ -703,19 +708,19 @@ begin
 
   CoordTrip.FormatLatLon(TripLat, TripLon);
 
-  // Get the next trkpt. To avoid center of junction
-  NextTrkPt := BestTrkpt;
-  CoordGpx.FromAttributes(NextTrkPt.AttributeList);
-  NextCoordGpx := CoordGpx;
-  while (NextTrkPt.NextSibling <> nil) and
-         (CoordGpx.Lat = NextCoordGpx.Lat) and  // TODO check for distance?
-         (CoordGpx.Lon = NextCoordGpx.Lon) do
+  // Make sure to advance.
+  result := BestTrkpt;
+  SkipTrkPtCnt := SkipTrkPts;
+  while (result.NextSibling <> nil) and
+        (SkipTrkPtCnt > 0) do
   begin
-    NextTrkPt := NextTrkPt.NextSibling;
-    NextCoordGpx.FromAttributes(NextTrkPt.AttributeList);
+    Dec(SkipTrkPtCnt);
+    result := result.NextSibling;
   end;
-  BestDist := CoordDistance(CoordTrip, NextCoordGpx, TDistanceUnit.duKm);
-  MsgTrkPt := GetBestTrkRpt(NextTrkPt, BestDist);
+  BestCoords.FromAttributes(result.AttributeList);
+
+  BestDist := CoordDistance(CoordTrip, BestCoords, TDistanceUnit.duKm);
+  MsgTrkPt := GetBestTrkRpt(result, BestDist);
   //
   Messages.Add('');
   Messages.AddObject(Format('  Coordinates NOT OK: %s',
@@ -743,6 +748,7 @@ var
   TripLat, TripLon: string;
   UdbHandleCount, UdbDirCount, StartSegmentLine,
   AnUdbHandleCnt, ToUdbHandleCnt, AnUdbDirCnt, FromUdbDirCnt, ToUdbDirCnt, LastUdbDirCnt: integer;
+  UdbDirsInSegm, TrkPtsInSegm, AdvanceTrkPts: integer;
 begin
   TrackSelected := PrepareTripForCompare(Messages, OutTrackList, UdbHandleCount, UdbDirCount);
   if (TrackSelected = nil) then
@@ -779,6 +785,7 @@ begin
     if (AnUdbHandleCnt < FAllRoutes.Items.Count -1) then
       Dec(LastUdbDirCnt);
 
+    UdbDirsInSegm := 0;
     for AnUdbDirCnt := 0 to LastUdbDirCnt do
     begin
       FUdbDir := AnUdbHandle.Items[AnUdbDirCnt];
@@ -804,7 +811,7 @@ begin
         ThisDist := ScanForTrkPt(CoordTrip, NextTrkPt, ToTrkPt, BestToTrkpt);
 
         // report route point error
-        if (ThisDist > FDistOKMeters) then
+        if (ThisDist > FDistOKKms) then
           NoMatchRoutePointTrk(Messages, CoordTrip, BestToTrkpt, ThisDist);
 
         // Scan for trkpt of next routepoint.
@@ -812,6 +819,7 @@ begin
         ToTrkPt := LastTrkPt;
 
         // Scan for next RoutePoint UdbDir
+        UdbDirsInSegm := 0;
         ToUdbDir := nil;
         ToUdbHandleCnt := AnUdbHandleCnt;
         while (ToUdbHandleCnt < FAllRoutes.Items.Count) and
@@ -824,6 +832,7 @@ begin
             FromUdbDirCnt := 0;
           for ToUdbDirCnt := FromUdbDirCnt to ToUdbHandle.Items.Count -1 do
           begin
+            Inc(UdbDirsInSegm);
             ToUdbDir := ToUdbHandle.Items[ToUdbDirCnt];
             if (ToUdbDir.UdbDirValue.SubClass.PointType = $03) then
               break;
@@ -835,7 +844,7 @@ begin
         begin
           ToCoordTrip.Lat := ToUdbDir.Lat;
           ToCoordTrip.Lon := ToUdbDir.Lon;
-          if (ScanForTrkPt(ToCoordTrip, NextTrkPt, ToTrkPt, BestToTrkpt) < FDistOKMeters) then
+          if (ScanForTrkPt(ToCoordTrip, NextTrkPt, ToTrkPt, BestToTrkpt) < FDistOKKms) then
             ToTrkPt := BestToTrkPt;
         end;
 
@@ -845,8 +854,13 @@ begin
       // Get minimum distance of this route point in track
       ThisDist := ScanForTrkPt(CoordTrip, NextTrkPt, ToTrkPt, BestTrkpt);
 
-      if (ThisDist > FDistOKMeters) then
-        NoMatchUdbDirTrk(Messages, CoordTrip, BestTrkPt)       // Report coords error.
+      // How many track points to advance
+      TrkPtsInSegm := Max(BestTrkpt.Parent.FindPos(ToTrkPt) - BestTrkpt.Parent.FindPos(BestTrkpt), 1);
+      Dec(UdbDirsInSegm);
+      AdvanceTrkPts := TrkPtsInSegm div Max(UdbDirsInSegm, 1);
+
+      if (ThisDist > FDistOKKms) then
+        NextTrkPt := NoMatchUdbDirTrk(Messages, CoordTrip, BestTrkPt, AdvanceTrkPts) // Report coords error.
       else
         NextTrkPt := BestTrkPt;
     end;

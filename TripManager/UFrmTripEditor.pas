@@ -245,6 +245,10 @@ begin
   if not SaveTrip.Execute then
     exit;
 
+  DmRoutePoints.CdsRoute.Edit;
+  DmRoutePoints.CdsRouteDepartureDate.AsDateTime := DTDepartureDate.DateTime;
+  DmRoutePoints.CdsRoute.Post;
+
   DmRoutePoints.ExportToGPX(SaveTrip.FileName);
 end;
 

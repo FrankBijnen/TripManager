@@ -128,7 +128,7 @@ const
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 3x0  Nuvi 2595 Unknown
   SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false);
-  RefreshTripsNeeded: array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false);
+  NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    true);
   UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       16,       20);
@@ -5217,7 +5217,6 @@ begin
     Xml.Free;
   end;
 end;
-
 
 initialization
 

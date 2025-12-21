@@ -6,11 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls,
-  Vcl.StdCtrls, Vcl.Buttons, Vcl.Menus;
+  Vcl.StdCtrls, Vcl.Buttons, Vcl.Menus,
+  UnitGpxDefs;
 
 type
-  TTagsToShow = (WptRte = 1, RteTrk = 10, Rte = 20, Trk = 30);
-
   TFrmSelectGPX = class(TForm)
     LvTracks: TListView;
     PnlTop: TPanel;
@@ -65,10 +64,10 @@ begin
   FCheckMask := CheckMask;
   FTagsToShow := TagsToShow;
   case FTagsToShow of
-    TTagsToShow.WptRte:
+    TTagsToShow.WptRteTrk:
       begin
         PnlColor.Visible := false;
-        LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte';
+        LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte/Trk';
       end;
     TTagsToShow.RteTrk:
       begin

@@ -37,6 +37,7 @@ Name: ExecutableWin32;                  Description: "Install Executable (Win32)
 Name: ExecutableWin64;                  Description: "Install Executable (Win64)";            types: full;          Check: Win64;
 Name: Symbols;                          Description: "Install Symbols";                       types: full;
 Name: Docs;                             Description: "Install Documentation";                 types: full;
+Name: Trk2RT;                           Description: "Install Trk2TR (SMFollen contributed";  types: full;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
@@ -60,6 +61,8 @@ Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: Executab
 Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db"
 ; Docs
 Source: "..\docs\tripmanager.chm";        DestDir: "{app}\ChmDocs";     Components: Docs;     Flags: ignoreversion;
+; Docs
+Source: "..\Win32\Trk2Rt.exe";            DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
 
 [Registry]
 

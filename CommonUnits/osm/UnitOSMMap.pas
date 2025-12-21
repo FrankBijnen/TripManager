@@ -33,11 +33,12 @@ const
                     =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
 
 
-  MapTilerLayers:  array[0..4] of TMapTilerLayer
+  MapTilerLayers:  array[0..5] of TMapTilerLayer
                     = ( (Resource: 'tiles'; Style: 'satellite-v2';  Description: 'Map Tiler Satellite'),
+                        (Resource: 'maps';  Style: 'base-v4';       Description: 'Map Tiler Base'),
                         (Resource: 'maps';  Style: 'openstreetmap'; Description: 'Map Tiler OpenStreetMap'),
-                        (Resource: 'maps';  Style: 'streets-v2';    Description: 'Map Tiler Streets'),
-                        (Resource: 'maps';  Style: 'topo-v2';       Description: 'Map Tiler Topo'),
+                        (Resource: 'maps';  Style: 'streets-v4';    Description: 'Map Tiler Streets'),
+                        (Resource: 'maps';  Style: 'topo-v4';       Description: 'Map Tiler Topo'),
                         (Resource: 'maps';  Style: 'bright-v2';     Description: 'Map Tiler Bright')
                       );
 
@@ -304,7 +305,7 @@ begin
   Html.Add('     RoutePointsLayer[IdLayer].displayInLayerSwitcher = true;');
   Html.Add('     map.addLayer(RoutePointsLayer[IdLayer]);');
   // routepoints needed for CreateExtent
-  Html.Add('     routepoints[IdLayer] = new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat);');
+  Html.Add('     routepoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
   Html.Add('  }');
 
   Html.Add('  function AddPOI(PoiName, PointLat, PointLon, PngFile, Id){');

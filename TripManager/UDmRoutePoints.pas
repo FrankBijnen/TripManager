@@ -90,7 +90,7 @@ uses
   System.StrUtils, System.Variants, System.DateUtils, System.Math,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
-  UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects, UFrmSelectGPX;
+  UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects, UnitRegistryKeys;
 
 {$R *.dfm}
 
@@ -99,6 +99,7 @@ const
   BooleanFalse = 'False';
   BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
   RtePt = 'RtePt ';
+  MaxDepartureYear = 2037;
 
 var
   RegionalFormatSettings: TFormatSettings;
@@ -632,12 +633,14 @@ procedure TDmRoutePoints.OnSetAnalyzePrefs(Sender: TObject);
 begin
   with TProcessOptions(Sender) do
   begin
-    ProcessTracks := false;
+    ProcessTracks := true; // Needed for Trk2RT
+
     ProcessDistance := false;
     ProcessShape := false;
     ProcessVia := false;
     ProcessBegin := false;
     ProcessEnd := false;
+
     ShapingPointName := TShapingPointName.Unchanged;
   end;
 end;
@@ -692,9 +695,12 @@ end;
 procedure TDmRoutePoints.ImportFromGPX(const GPXFile: string);
 var
   CrNormal,CrWait: HCURSOR;
-  RoutePoints, RoutePoint: TXmlVSNode;
+  RoutePoints, RoutePoint, Track: TXmlVSNode;
   AnItem: TListItem;
-  GPXFileObj: TGPXFile;
+  SelectedItem: Char;
+  GPXFileObj, GpxFileTrkObj: TGPXFile;
+  ResOutput, ResError: string;
+  ResExit: Dword;
 begin
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
@@ -702,10 +708,9 @@ begin
   try
     GPXFileObj.AnalyzeGpx;
     SetCursor(CrNormal);
-
     if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
-                                    'Select Waypoints/Routes',
-                                     TTagsToShow.WptRte, CdsRouteTripName.AsString)) then
+                                    'Select Waypoints/Routes/Tracks',
+                                     TTagsToShow.WptRteTrk, CdsRouteTripName.AsString)) then
     begin
       if (CdsRoute.State in [dsEdit, dsInsert]) then
         CdsRoute.Post;
@@ -714,28 +719,58 @@ begin
 
       CdsRoutePoints.DisableControls;
       try
-        CdsRoutePoints.Last;
+        CdsRoutePoints.Last;  // Add to Route Points at end of list
 
         for AnItem in GPXFileObj.FrmSelectGPX.LvTracks.Items do
         begin
           if not (AnItem.Checked) then
             continue;
 
-          if (AnItem.SubItems[0] = 'Wpt') then
-          begin
-            for RoutePoint in GPXFileObj.WayPointList do
-              AddRoutePoint(RoutePoint, true);
-            continue;
-          end;
+          SelectedItem := UpperCase(AnItem.SubItems[0] + ' ')[1];
+          case SelectedItem of
+          'W':
+            begin
+              for RoutePoint in GPXFileObj.WayPointList do
+                AddRoutePoint(RoutePoint, true);
+            end;
 
-          for RoutePoints in GPXFileObj.RouteViaPointList do
-          begin
-            if (RoutePoints.NodeName <> AnItem.Caption) then
-              continue;
-            for RoutePoint in RoutePoints.ChildNodes do
-              AddRoutePoint(RoutePoint, false);
-          end;
+          'T':
+            begin
+              for Track in GPXFileObj.TrackList do
+              begin
+                if (SameText(FindSubNodeValue(Track, 'desc'), 'Trk') = false) then
+                  continue;
+                if (Track.NodeName <> AnItem.Caption) then
+                  continue;
+                GPXFileObj.CreateTrack(Track, CreatedTempPath + 'Trk2Rt.gpx');
+//TODO Needs Visual C runtime!
+                Sto_RedirectedExecute('trk2rt.exe norelocate NS_ALL exportIdx=1 "' + CreatedTempPath + 'Trk2Rt.gpx"', CreatedTempPath, ResOutput, ResError, ResExit);
+                GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + 'T2R\Trk2Rt_T2R.gpx', OnSetAnalyzePrefs, nil);
+                try
+                  GpxFileTrkObj.AnalyzeGpx;
+                  for RoutePoints in GpxFileTrkObj.RouteViaPointList do
+                  begin
+                    for RoutePoint in RoutePoints.ChildNodes do
+                      AddRoutePoint(RoutePoint, false);
+                    break;
+                  end;
+                finally
+                  GpxFileTrkObj.Free;
+                end;
+              end;
+            end;
 
+          'R':
+            begin
+              for RoutePoints in GPXFileObj.RouteViaPointList do
+              begin
+                if (RoutePoints.NodeName <> AnItem.Caption) then
+                  continue;
+                for RoutePoint in RoutePoints.ChildNodes do
+                  AddRoutePoint(RoutePoint, false);
+              end;
+            end;
+          end;
         end;
       finally
         CdsRoutePoints.EnableControls;
@@ -794,7 +829,8 @@ begin
       if (CdsRoutePointsViaPoint.AsBoolean) then // Includes Begin and End
       begin
         PointType := RtePt.AddChild('extensions').AddChild('trp:ViaPoint');
-        if (CdsRoutePoints.RecNo = 1) then
+        if (CdsRoutePoints.RecNo = 1) and
+           (YearOf(CdsRouteDepartureDate.AsDateTime) <= MaxDepartureYear) then // BC Hack
           PointType.AddChild('trp:DepartureTime').NodeValue :=
             DateToISO8601(TTimezone.Local.ToUniversalTime(CdsRouteDepartureDate.AsDateTime), true);
         PointType.AddChild('trp:CalculationMode').NodeValue := CdsRouteRoutePreference.AsString;

@@ -1,5 +1,5 @@
 unit UnitTripOverview;
-//TODO RoadSpeed  Make the road speeds configurable
+
 interface
 
 uses

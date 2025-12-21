@@ -1,4 +1,5 @@
 ﻿unit mtp_helper;
+{$DEFINE SERIALFROMNAME}
 
 interface
 
@@ -200,6 +201,7 @@ const
   WPD_VIDEO_OBJECT_PROPERTIES_V1 : TGuid = '{346f2163-f998-4146-8b01-d19b4c00de9a}';
 
   WPD_OBJECT_CONTENT_TYPE : PortableDeviceApiLib_TLB._tagpropertykey = (fmtid : '{EF6B490D-5CD8-437A-AFFC-DA8B60EE4A3C}'; pid : 7);
+  WPD_DEVICE_SERIAL_NUMBER : PortableDeviceApiLib_TLB._tagpropertykey = (fmtid : '{26D4979A-E643-4626-9E2B-736DC0C92FDC}'; pid : 9);
 
   WPD_PROPERTY_NULL_FMTID : TGuid = '{00000000-0000-0000-0000-000000000000}';
   WPD_PROPERTY_NULL_PID = 0;
@@ -476,7 +478,9 @@ begin
   Result := Trim(Copy(RawDevice, Pos(WideString('\\?'), RawDevice)));
 end;
 
-function GetSerial(var IDeviceName: string): string;
+{$IFDEF SERIALFROMNAME}
+
+function GetSerial(const IDeviceName: string): string;
 var
   TempDev: string;
   NextVal: string;
@@ -486,14 +490,42 @@ begin
   NextVal := NextField(TempDev, '#');
   while (NextVal <> '') do
   begin
-    if (Pos('{', NextVal) > 0) and
-       (Pos('}', NextVal) > 0) then // A GUID?
+    if (NextVal[1] = '{') and
+       (NextVal[Length(NextVal)] = '}') then // A GUID?
       break;
     result := NextVal;
     NextVal := NextField(TempDev, '#');
   end;
   result := NextField(result, '&');
 end;
+
+{$ELSE}
+
+// Maybe cleaner, but requires opening and closing device
+function GetSerial(const IDeviceName: string): PWideChar; overload;
+var
+  Content: IPortableDeviceContent;
+  DevProps: IPortableDeviceProperties;
+  DevValues: IPortableDeviceValues;
+  PortableDev: IMTPDevice;
+begin
+  result := '';
+  if not (ConnectToDevice(IDeviceName, PortableDev, true) ) then
+    exit;
+  try
+    if (PortableDev.Content(Content) <> S_OK) then
+      exit;
+    if (Content.Properties(DevProps) <> S_OK) then
+      exit;
+    if (DevProps.GetValues('DEVICE', nil, DevValues) <> S_OK) then
+      exit;
+    if (DevValues.GetStringValue(WPD_DEVICE_SERIAL_NUMBER, result) <> S_OK) then
+      exit;
+  finally
+    PortableDev.Close;
+  end;
+end;
+{$ENDIF}
 
 function IsDirectory(Prop_Val: IPortableDeviceValues): Boolean;
 var
@@ -618,7 +650,8 @@ end;
 //https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/setting-properties-for-a-single-object
 // Notes: if 'NewName' already exists, no error is thrown.
 //        For the Zumo XT it is enough to just modify original name. For other device we may need object_name also.
-const BoolFalse = 0;
+const 
+  BoolFalse = 0;
 
 function RenameObject(PortableDev: IMTPDevice; ObjectId, NewName: WideString): boolean;
 var
@@ -900,7 +933,6 @@ begin
       AMTP_Device.Device := GetDevId(PDevs[I]);
       AMTP_Device.Serial := GetSerial(AMTP_Device.Device);
       AMTP_Device.PortableDev := nil;
-
       result.Add(AMTP_Device);
     end;
   end;
@@ -1228,9 +1260,9 @@ begin
 end;
 
 function GetPropForFile(PortableDev: IMTPDevice;
-                      SPath: WideString;
-                      SFile: WideString;
-                      var Prop: IPortableDeviceProperties): string;
+                        SPath: WideString;
+                        SFile: WideString;
+                        var Prop: IPortableDeviceProperties): string;
 var
   Content: IPortableDeviceContent;
   FriendlyName: string;
@@ -1390,7 +1422,7 @@ begin
 end;
 
 procedure GetRequiredPropertiesForContent(Parent: WideString; ObjectName: WideString;
-  ISize: Cardinal; var PPObjectProperties: IPortableDeviceValues);
+                                          ISize: Cardinal; var PPObjectProperties: IPortableDeviceValues);
 var
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
   PropVar: tag_inner_PROPVARIANT;
@@ -1434,7 +1466,7 @@ end;
 
 // Additionally sets the type to folder.
 procedure GetRequiredPropertiesForDir(Parent: WideString; DirName: WideString;
-  var PPObjectProperties: IPortableDeviceValues);
+                                      var PPObjectProperties: IPortableDeviceValues);
 var
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
   Dev_Guid: TGUID;
