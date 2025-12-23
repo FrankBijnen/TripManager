@@ -143,7 +143,7 @@ type
     TripOption: TTripOption;                  // XT1 and XT2
     EnableTripOverview: boolean;              // XT1 and XT2
     DefAdvLevel: TAdvlevel;                   // XT2
-    DefRoadSpeed: integer;
+    DefRoadSpeed: integer;                    // XT1 and XT2
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
     {$ENDIF}
 
@@ -157,11 +157,16 @@ type
     function DistanceStr: string;
     function GetDistOKKms: double;
     function GetMinShapeDistKms: double;
-    function SpeedFromRoadClass(const RoadClass: string): integer; overload;
-    function ComputeTime(const RoadClass: string; const Dist: Double): double; overload;
+    {$IFDEF TRIPOBJECTS}
     function TripTrackColor: string;
-    class function UnsafeModels: boolean;
+    function SpeedFromRoadClass(const RoadClass: string): integer;
+    function ComputeTime(const RoadClass: string; const Dist: Double): double;
+    class function Trk2RtOptions: string;
     class function DescriptionFromRoadClass(const RoadClass: byte): string;
+    class function UnsafeModels: boolean;
+    class function MaxViaPoints: integer;
+    {$ENDIF}
+
     property DistOKKms: double read GetDistOKKms;
     property MinShapeDistKms: double read GetMinShapeDistKms;
   end;
@@ -261,6 +266,7 @@ begin
   AvoidancesChangedTimeAtSave := 0;
   AllowGrouping := true;
   TripOption := TTripOption.ttCalc;
+
   EnableTripOverview := false;
   RoadSpeedMap[0].Value  := 108; RoadSpeedMap[0].Name  := '01';
   RoadSpeedMap[1].Value  := 72;  RoadSpeedMap[1].Name  := '02';
@@ -343,6 +349,7 @@ begin
   result := MinShapeDist / 1000;
 end;
 
+{$IFDEF TRIPOBJECTS}
 function TProcessOptions.TripTrackColor: string;
 begin
   result := DefTrackColor;
@@ -359,6 +366,11 @@ end;
 function TProcessOptions.ComputeTime(const RoadClass: string; const Dist: Double): double;
 begin
   result := (3600 * Dist) / SpeedFromRoadClass(RoadClass);
+end;
+
+class function TProcessOptions.Trk2RtOptions: string;
+begin
+  result := GetRegistry(Reg_Trk2RtOptions_Key, Reg_Trk2RtOptions_Val);
 end;
 
 class function TProcessOptions.DescriptionFromRoadClass(const RoadClass: byte): string;
@@ -386,5 +398,11 @@ class function TProcessOptions.UnsafeModels: boolean;
 begin
   result := GetRegistry(Reg_UnsafeModels, false);
 end;
+
+class function TProcessOptions.MaxViaPoints: integer;
+begin
+  result := GetRegistry(Reg_MaxViaPoints_Key, Reg_MaxViaPoints_Val);
+end;
+{$ENDIF}
 
 end.

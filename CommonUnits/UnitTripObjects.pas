@@ -3877,10 +3877,18 @@ end;
 procedure TTripList.SaveToFile(AFile: string);
 var
   AStream: TMemoryStream;
+  mLocations: TmLocations;
 begin
   if (TProcessOptions.UnsafeModels = false) and
      (SafeToSave[TripModel] = false) then
     raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
+
+  mLocations := GetItem('mLocations') as TmLocations;
+  if (mLocations <> nil) and // No Locations, cant be too many...
+     (mLocations.GetViaPointCount > TProcessOptions.MaxViaPoints) then
+    MessageDlg(Format('Warning: Too many Via points (%d including Begin/End) in: %s',
+                      [mLocations.GetViaPointCount, ExtractFileName(AFile)]),
+               TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
 
   AStream := TMemoryStream.Create;
   try

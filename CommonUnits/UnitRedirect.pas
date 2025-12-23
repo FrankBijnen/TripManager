@@ -8,7 +8,8 @@ unit UnitRedirect;
 
 interface
 
-uses Winapi.Windows, System.Classes;
+uses
+  Winapi.Windows, System.Classes;
 
 /// <summary>
 /// Runs a console application and captures the stdoutput and
@@ -26,6 +27,7 @@ uses Winapi.Windows, System.Classes;
 /// <returns>True if process could be started and did not reach the
 /// timeout.</returns>
 function Sto_RedirectedExecute(CmdLine: string;
+                               CurrentDirectory: string;
                                var Output: string;
                                var Error: string;
                                var ExitCode: DWord;
@@ -71,10 +73,13 @@ function CreateProcessWithLogonW(
 
 implementation
 
-uses MsgLoop, System.Sysutils;
+uses
+  MsgLoop, System.Sysutils;
 
-const LOGON_WITH_PROFILE = 1;
-      LOGON_NETCREDENTIALS_ONLY = 2;
+const
+  LOGON_WITH_PROFILE = 1;
+  LOGON_NETCREDENTIALS_ONLY = 2;
+  BLOCK_SIZE = 4096;
 
 function GetCreationFlags(ShowWindow: boolean): DWord;
 begin
@@ -95,8 +100,9 @@ begin
 end;
 
 function GetCurrentEnvironment: TStringList;
-var PEnvVars: PChar;    // pointer to start of environment block
-    PEnvEntry: PChar;   // pointer to an env string in block
+var
+  PEnvVars: PChar;    // pointer to start of environment block
+  PEnvEntry: PChar;   // pointer to an env string in block
 begin
   // Clear the list
   result :=  TStringList.Create;
@@ -127,7 +133,8 @@ begin
 end;
 
 function GetEnvironment(Environ: TStringList): AnsiString;
-var AVar: string;
+var
+  AVar: string;
 begin
   for AVar in Environ do
     result := result + AnsiString(AVar) + #0;
@@ -173,9 +180,9 @@ begin
 end;
 
 procedure TStoReadPipeThread.Execute;
-const BLOCK_SIZE = 4096;
-var iBytesRead: DWord;
-    myBuffer: array [0 .. BLOCK_SIZE - 1] of Byte;
+var
+  iBytesRead: DWord;
+  myBuffer: array [0 .. BLOCK_SIZE - 1] of Byte;
 begin
   repeat
     // try to read from pipe
@@ -193,8 +200,7 @@ end;
 
 { TStoWritePipeThread }
 
-constructor TStoWritePipeThread.Create(const Pipe: THandle;
-  const Content: String);
+constructor TStoWritePipeThread.Create(const Pipe: THandle; const Content: String);
 begin
   FPipe := Pipe;
   FContent := TStringStream.Create(Content);
@@ -210,10 +216,10 @@ begin
 end;
 
 procedure TStoWritePipeThread.Execute;
-const BLOCK_SIZE = 4096;
-var myBuffer: array [0 .. BLOCK_SIZE - 1] of Byte;
-    iBytesToWrite: DWord;
-    iBytesWritten: DWord;
+var
+  myBuffer: array [0 .. BLOCK_SIZE - 1] of Byte;
+  iBytesToWrite: DWord;
+  iBytesWritten: DWord;
 begin
   iBytesToWrite := FContent.Read(myBuffer, BLOCK_SIZE);
   while (iBytesToWrite > 0) do
@@ -228,6 +234,7 @@ begin
 end;
 
 function Sto_RedirectedExecute(CmdLine: string;
+                               CurrentDirectory: string;
                                var Output: string;
                                var Error: string;
                                var ExitCode: DWord;
@@ -235,17 +242,19 @@ function Sto_RedirectedExecute(CmdLine: string;
                                const Wait: DWord = 3600000;
                                const ShowWindow: boolean = false): boolean;
 
-var mySecurityAttributes: SECURITY_ATTRIBUTES;
-    myStartupInfo: STARTUPINFO;
-    myProcessInfo: PROCESS_INFORMATION;
-    hPipeInputRead, hPipeInputWrite: THandle;
-    hPipeOutputRead, hPipeOutputWrite: THandle;
-    hPipeErrorRead, hPipeErrorWrite: THandle;
-    myWriteInputThread: TStoWritePipeThread;
-    myReadOutputThread: TStoReadPipeThread;
-    myReadErrorThread: TStoReadPipeThread;
-    iWaitRes: integer;
-
+var
+  mySecurityAttributes: SECURITY_ATTRIBUTES;
+  myStartupInfo: STARTUPINFO;
+  myProcessInfo: PROCESS_INFORMATION;
+  hPipeInputRead, hPipeInputWrite: THandle;
+  hPipeOutputRead, hPipeOutputWrite: THandle;
+  hPipeErrorRead, hPipeErrorWrite: THandle;
+  myWriteInputThread: TStoWritePipeThread;
+  myReadOutputThread: TStoReadPipeThread;
+  myReadErrorThread: TStoReadPipeThread;
+  iWaitRes: integer;
+  CurrentDir: string;
+  lpCurrentDir: PChar;
 begin
   // prepare security structure
   ZeroMemory(@mySecurityAttributes, SizeOf(SECURITY_ATTRIBUTES));
@@ -274,15 +283,22 @@ begin
   // since Delphi calls CreateProcessW, literal strings cannot be used anymore
   UniqueString(CmdLine);
 
+  // Pass CurrentDirectory only if not empty
+  CurrentDir := ExcludeTrailingPathDelimiter(CurrentDirectory);
+  if (CurrentDir <> '') then
+    lpCurrentDir := PChar(CurrentDir)
+  else
+    lpCurrentDir := nil;
+
   // start the process
-  result := CreateProcess(nil,              // lpApplicationName
-                          PChar(CmdLine),
-                          nil,              // lpProcessAttributes
-                          nil,              // lpThreadAttributes
-                          true,             // bInheritHandles
+  result := CreateProcess(nil,                // lpApplicationName
+                          PChar(CmdLine),     // CmdLine
+                          nil,                // lpProcessAttributes
+                          nil,                // lpThreadAttributes
+                          true,               // bInheritHandles
                           GetCreationFlags(ShowWindow),
-                          nil,              // lpEnvironment
-                          nil,              // lpCurrentDirectory
+                          nil,                // lpEnvironment
+                          lpCurrentDir,       // lpCurrentDirectory
                           myStartupInfo,
                           myProcessInfo);
 
@@ -335,7 +351,8 @@ begin
 end;
 
 function WaitOnProcess(var AProcess: TProcessInformation; WaitTime: DWORD = 50): DWORD;
-var Rc: Dword;
+var
+  Rc: Dword;
 begin
   result := DWORD(-1);
   Rc := STATUS_ABANDONED_WAIT_0;

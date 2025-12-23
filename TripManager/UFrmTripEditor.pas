@@ -431,21 +431,30 @@ procedure TFrmTripEditor.TbDeletePointClick(Sender: TObject);
 var
   Index: integer;
   SavedRecNo: integer;
+  CrWait, CrNormal: HCURSOR;
 begin
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
   DBGRoutePoints.SelectedRows.CurrentRowSelected := true; // Select at least one row
   SavedRecNo := DmRoutePoints.CdsRoutePoints.RecNo;
+  DmRoutePoints.CdsRoutePoints.DisableControls;
   try
     for Index := 0 to DBGRoutePoints.SelectedRows.Count -1 do
     begin
+      if (Index = DBGRoutePoints.SelectedRows.Count -1) then
+        DmRoutePoints.CdsRoutePoints.EnableControls;
       DmRoutePoints.CdsRoutePoints.GotoBookmark(DBGRoutePoints.SelectedRows[Index]);
       DmRoutePoints.CdsRoutePoints.Delete;
     end;
     DBGRoutePoints.SelectedRows.Clear;
   finally
+    if (DmRoutePoints.CdsRoutePoints.ControlsDisabled) then
+      DmRoutePoints.CdsRoutePoints.EnableControls;
     if (SavedRecNo > DmRoutePoints.CdsRoutePoints.RecordCount) then
       DmRoutePoints.CdsRoutePoints.Last
     else
       DmRoutePoints.CdsRoutePoints.RecNo := SavedRecNo;
+    SetCursor(CrNormal);
   end;
 end;
 

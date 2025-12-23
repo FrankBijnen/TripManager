@@ -5,7 +5,7 @@ program hhcfix;
 uses
   Winapi.ShellAPI, Winapi.Windows,
   System.SysUtils, System.IOUtils,
-  UnitStringUtils;
+  UnitStringUtils, UnitRedirect;
 
 var
   CurDir, Dir2Fix: string;
@@ -22,8 +22,6 @@ begin
   while (Rc = 0) do
   begin
     AHtml := TFile.ReadAllText(Fs.Name, TEncoding.UTF8);
-//    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;&nbsp;&nbsp;<'], ['"', '>&middot;&nbsp;<'], [rfReplaceAll]);
-//    AHtml := ReplaceAll(AHtml, ['?.html"', '>&middot;&nbsp;</span>'], ['"', '>&middot;&nbsp;&nbsp;&nbsp;</span>'], [rfReplaceAll]);
     AHtml := ReplaceAll(AHtml, ['?.html"',
                                 '<font face="Arial" size="2">',
                                 '>&middot;&nbsp;&nbsp;&nbsp;&nbsp;</span>',

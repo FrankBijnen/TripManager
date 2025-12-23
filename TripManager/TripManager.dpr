@@ -47,6 +47,7 @@ uses
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
   UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitTripOverview in '..\CommonUnits\UnitTripOverview.pas',
+  UnitRedirect in '..\CommonUnits\UnitRedirect.pas',
   UnitRegistryKeys;
 
 {$R *.res}

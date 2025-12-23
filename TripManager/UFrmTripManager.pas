@@ -435,7 +435,7 @@ uses
   Winapi.ShellAPI,
   Vcl.Clipbrd,
   MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
-  UnitGpxTripCompare, UnitSqlite,
+  UnitRedirect, UnitGpxTripCompare, UnitSqlite,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
@@ -2809,8 +2809,6 @@ begin
       Rc := FindNext(Fs);
 
       // Transfer
-      EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
-      EdFileSysFolder.Update;
       TempFile := IncludeTrailingPathDelimiter(CreatedTempPath) + TempFile;
 
       // Did the transfer work?
@@ -4453,6 +4451,8 @@ begin
     AFitInfo.Clear;
 
   TvTrip.Items.BeginUpdate;
+  TvTrip.Items.Clear;
+
   VlTripInfo.Strings.BeginUpdate;
   ClearTripInfo;
 
@@ -4495,7 +4495,6 @@ begin
       ParentTripName := Format(', (%s)', [ParentTripName]);
     PnlTripGpiInfo.Caption := Format('%sTrip: %s%s', [TripFileName, TripName, ParentTripName]);
 
-    TvTrip.Items.Clear;
     RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), ATripList);
     TvTrip.Items.AddChildObject(RootNode,
                                 Format('%s (%s)', [ATripList.Header.ClassName, ATripList.ModelDescription]),

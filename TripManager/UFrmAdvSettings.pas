@@ -163,6 +163,10 @@ begin
                                               IntToStr(Reg_MinShapeDist_Val),
                                               'Minimum distance added Shaping points (meters)');
     AddGridLine(GridGeneralSettings, CurRow,  '');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_Trk2RtOptions_Key,
+                                              Reg_Trk2RtOptions_Val,
+                                              'Trk2Rt CMDline Options');
+    AddGridLine(GridGeneralSettings, CurRow,  '');
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Map display-');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MapTilerApi_Key,
                                               '',

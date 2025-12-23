@@ -198,6 +198,7 @@ $(PreBuildEvent)]]></PreBuildEvent>
         </DCCReference>
         <DCCReference Include="..\CommonUnits\UnitUSBEvent.pas"/>
         <DCCReference Include="..\CommonUnits\UnitTripOverview.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitRedirect.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -29,6 +29,8 @@ const
   Reg_AllowGrouping               = 'AllowGrouping';
   Reg_TripOption                  = 'TripOption';
   Reg_DefAdvLevel                 = 'DefAdvLevel';
+  Reg_MaxViaPoints_Key            = 'MaxViaPoints';
+  Reg_MaxViaPoints_Val            = 31;
 
   // XT2 and Tread 2
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
@@ -99,6 +101,9 @@ const
 
   Reg_SavedMapPosition_Key        = 'SavedMapPosition';
   Reg_DefaultCoordinates          = '48.854918, 2.346558'; // Somewhere in Paris
+
+  Reg_Trk2RtOptions_Key           = 'Trk2RtOptions';
+  Reg_Trk2RtOptions_Val           = 'norelocate NS_ALL exportIdx=1';
 
 const
   IdTrip          = 0;

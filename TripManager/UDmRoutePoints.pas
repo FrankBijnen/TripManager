@@ -90,7 +90,7 @@ uses
   System.StrUtils, System.Variants, System.DateUtils, System.Math,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
-  UnitGeoCode, UnitStringUtils, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects, UnitRegistryKeys;
+  UnitGeoCode, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects, UnitRegistryKeys;
 
 {$R *.dfm}
 
@@ -517,8 +517,7 @@ begin
         CdsRoutePoints.Insert; // Id is autoassigned
 
         // TmAttr, tmShaping
-        if (TLocation(Location).IsViaPoint) then
-          CdsRoutePointsViaPoint.AsBoolean := TLocation(Location).IsViaPoint;
+        CdsRoutePointsViaPoint.AsBoolean := TLocation(Location).IsViaPoint;
 
         // TmName
         ANItem := TLocation(Location).LocationTmName;
@@ -693,13 +692,20 @@ begin
 end;
 
 procedure TDmRoutePoints.ImportFromGPX(const GPXFile: string);
+const
+  Trk2Rt    = 'Trk2Rt';
+  T2R       = 'T2R';
+  GPX       = '.gpx';
+  Trk2RtIn  = Trk2Rt + GPX;
+  Trk2RtOut = T2R + '\' + Trk2Rt + '_' + T2R + GPX;
+
 var
   CrNormal,CrWait: HCURSOR;
   RoutePoints, RoutePoint, Track: TXmlVSNode;
   AnItem: TListItem;
   SelectedItem: Char;
   GPXFileObj, GpxFileTrkObj: TGPXFile;
-  ResOutput, ResError: string;
+  Trk2RtCmdLine, ResOutput, ResError: string;
   ResExit: Dword;
 begin
   CrWait := LoadCursor(0,IDC_WAIT);
@@ -742,10 +748,13 @@ begin
                   continue;
                 if (Track.NodeName <> AnItem.Caption) then
                   continue;
-                GPXFileObj.CreateTrack(Track, CreatedTempPath + 'Trk2Rt.gpx');
+                GPXFileObj.CreateTrack(Track, CreatedTempPath + Trk2RtIn);
 //TODO Needs Visual C runtime!
-                Sto_RedirectedExecute('trk2rt.exe norelocate NS_ALL exportIdx=1 "' + CreatedTempPath + 'Trk2Rt.gpx"', CreatedTempPath, ResOutput, ResError, ResExit);
-                GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + 'T2R\Trk2Rt_T2R.gpx', OnSetAnalyzePrefs, nil);
+                Trk2RtCmdLine := Format('trk2rt.exe %s "%s"', [TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
+                if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
+                  raise Exception.Create('Could not start Trk2Rt.exe. Check installation');
+//TODO Output GPX
+                GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
                 try
                   GpxFileTrkObj.AnalyzeGpx;
                   for RoutePoints in GpxFileTrkObj.RouteViaPointList do

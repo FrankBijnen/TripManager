@@ -213,6 +213,7 @@ uses
   UnitRegistryKeys,
   UnitRegistry,
 {$ENDIF}
+  UnitRedirect,
   UnitStringUtils;
 
 // Not configurable
