@@ -40,6 +40,7 @@ type
     FSyncTreeview: TNotifyEvent;
     GpxRptList: Tlist;
     procedure ClearLog;
+    procedure CoordinatesApplied(Sender: TObject; Coords: string);
   end;
 
 var
@@ -51,9 +52,13 @@ uses
   System.Types, System.StrUtils, system.Generics.Collections,
   UnitGpxDefs, UnitTripObjects, UnitGpxObjects, UnitGpxTripCompare,
   UFrmTripEditor,
-  UnitVerySimpleXml, UnitProcessOptions;
+  UnitVerySimpleXml, UnitProcessOptions, UnitStringUtils;
 
 {$R *.dfm}
+
+var
+  FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
+
 
 function CoordsFromData(AnObject: TObject): TCoords;
 begin
@@ -288,6 +293,9 @@ end;
 
 procedure TFrmShowLog.FormCreate(Sender: TObject);
 begin
+  FloatFormatSettings.ThousandSeparator := ',';
+  FloatFormatSettings.DecimalSeparator := '.';
+
   FStyleServices := TStyleManager.Style['Sapphire Kamri'];
   GpxRptList := TList.Create;
 end;
@@ -324,6 +332,36 @@ begin
   BtnGpx.Enabled := BtnTrip.Enabled;
   if Assigned(FSyncTreeview) then
     FSyncTreeview(LbLog.Items.Objects[LbLog.ItemIndex]);
+end;
+
+procedure TFrmShowLog.CoordinatesApplied(Sender: TObject; Coords: string);
+var
+  Index: integer;
+  Lat, Lon: string;
+begin
+  Index := LbLog.ItemIndex;
+  if (Index < 0) and
+     (Index > LbLog.Items.Count -1) then
+    exit;
+  if (LbLog.Header[Index]) then
+    exit;
+
+  LbLog.Checked[Index] := true;
+
+  ParseLatLon(Coords, Lat, Lon);
+
+  if (LbLog.Items.Objects[Index] is TXmlVSNode) then
+  begin
+    TXmlVSNode(LbLog.Items.Objects[Index]).Attributes['lat'] := Lat;
+    TXmlVSNode(LbLog.Items.Objects[Index]).Attributes['lon'] := Lon;
+    LbLog.Items[Index] := Format('     %s: New Coordinates: %s', [GpxFile, Coords]);
+  end
+  else if (LbLog.Items.Objects[Index] is TUdbDir) then
+  begin
+    TUdbDir(LbLog.Items.Objects[Index]).Lat := StrToFloat(Lat, FloatFormatSettings);
+    TUdbDir(LbLog.Items.Objects[Index]).Lon := StrToFloat(Lon, FloatFormatSettings);
+    LbLog.Items[Index] := Format('    %s: New Coordinates: %s', [TripFile, Coords]);
+  end;
 end;
 
 procedure TFrmShowLog.LbLogDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);

@@ -69,8 +69,6 @@ type
 
   TRouteParm = (RoutePref, TransportMode);
 
-  TCoordinatesAppliedEvent = procedure(Sender: Tobject; Coords: string) of object;
-
   TFrmTripManager = class(TForm)
     HSplitterDevFiles_Info: TSplitter;
     ImageList: TImageList;
@@ -331,7 +329,6 @@ type
     ModifiedList: TStringList;
     DirectoryMonitor: TDirectoryMonitor;
 
-    FOnCoordinatesApplied: TCoordinatesAppliedEvent;
     FMapReq: TMapReq;
     EdgeZoom: double;
     RoutePointTimeOut: string;
@@ -422,7 +419,6 @@ type
     procedure TripFileCanceled(Sender: TObject);
     procedure TripFileUpdated(Sender: TObject);
     function GetMapCoords: string;
-    property OnCoordinatesApplied: TCoordinatesAppliedEvent read FOnCoordinatesApplied write FOnCoordinatesApplied;
   end;
 
 var
@@ -1005,10 +1001,16 @@ var
 
 begin
   // Updating location for Trip Editor
-  if (Assigned(FOnCoordinatesApplied)) then
+  if (FrmTripEditor.Showing) then
   begin
-    FOnCoordinatesApplied(Self, EditMapCoords.Text);
+    DmRoutePoints.CoordinatesApplied(Self, EditMapCoords.Text);
+    exit;
+  end;
 
+  // Updating location for Compare
+  if (FrmShowLog.Showing) then
+  begin
+    FrmShowLog.CoordinatesApplied(Self, EditMapCoords.Text);
     exit;
   end;
 
@@ -1427,14 +1429,10 @@ var
   CurSel: integer;
 begin
   if Showing then
-  begin
-    OnCoordinatesApplied := DmRoutePoints.CoordinatesApplied;
-    DmRoutePoints.OnRoutePointUpdated := RoutePointUpdated;
-  end
+    DmRoutePoints.OnRoutePointUpdated := RoutePointUpdated
   else
   begin
     DmRoutePoints.OnRoutePointUpdated := nil;
-    OnCoordinatesApplied := nil;
     if (DeviceFile) and
        (BgDevice.ItemIndex = 0) then
     begin
@@ -1965,9 +1963,11 @@ var
   CoordGpx: TCoords;
   BestLat, BestLon: string;
 begin
+  BtnApplyCoords.Enabled := false;
   if (Assigned(Sender)) and
      (Sender is TXmlVSNode) then
   begin
+    BtnApplyCoords.Enabled := true;
     CoordGpx.FromAttributes(TXmlVSNode(Sender).AttributeList);
     CoordGpx.FormatLatLon(BestLat, BestLon);
     MapRequest(BestLat + ', ' + BestLon, TXmlVSNode(Sender).NodeValue, RoutePointTimeOut);
@@ -1977,6 +1977,7 @@ begin
   if (Assigned(Sender)) and
      (Sender is TUdbDir) then
   begin
+    BtnApplyCoords.Enabled := true;
     TvTrip.Selected := TvTrip.Items[0];
     ANode := TvTrip.Items[0];
     while (ANode <> nil) do
@@ -2869,6 +2870,7 @@ end;
 procedure TFrmTripManager.EnableApplyCoords;
 begin
   BtnApplyCoords.Enabled := FrmTripEditor.Showing or
+                            FrmShowLog.Showing or
                             (SelectedLocation <> nil) or
                             (SelectedScPosn <> nil);
 end;

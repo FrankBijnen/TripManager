@@ -789,9 +789,11 @@ type
     function GetDirection: string;
     procedure FillCompressedLatLon;
     function GetComprLatLon: string;
+    procedure SetLat(ALat: Double);
+    procedure SetLon(ALon: Double);
   public
-    function Lat: Double;
-    function Lon: Double;
+    function GetLat: Double;
+    function GetLon: Double;
     function IsTurn: boolean;
     property DisplayName: string read GetName;
     property DisplayLength: integer read GetDisplayLength;
@@ -808,6 +810,8 @@ type
     property ComprLatLon: string read GetComprLatLon;
     property Status: TUdbDirStatus read FUdbDirStatus write FUdbDirStatus;
     property RoadClass: string read FRoadClass write FRoadClass; // Only valid in SaveCalculated
+    property Lat: Double read GetLat write SetLat;
+    property Lon: Double read GetLon write SetLon;
   end;
   TUdbDirList = Tlist<TUdbDir>;
 
@@ -3130,14 +3134,24 @@ begin
   result := SizeOf(FValue) + Length(FUnknown2) + Length(FName);
 end;
 
-function TUdbDir.Lat: Double;
+function TUdbDir.GetLat: Double;
 begin
   result := CoordAsDec(Swap32(FValue.Lat));
 end;
 
-function TUdbDir.Lon: Double;
+procedure TUdbDir.SetLat(ALat: Double);
+begin
+  FValue.Lat := Swap32(CoordAsInt(ALat));
+end;
+
+function TUdbDir.GetLon: Double;
 begin
   result := CoordAsDec(Swap32(FValue.Lon));
+end;
+
+procedure TUdbDir.SetLon(ALon: Double);
+begin
+  FValue.Lon := Swap32(CoordAsInt(ALon));
 end;
 
 function TUdbDir.GetName: string;
