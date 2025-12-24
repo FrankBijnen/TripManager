@@ -42,11 +42,17 @@ type
     function PrepareTripForCompare(const Messages, OutTrackList: TStrings;
                                    var UdbHandleCount: integer;
                                    var UdbDirCount: integer): TXmlVSNode;
-    function GetBestTrkRpt(const BestTrk: TXmlVSNode; const BestDist: double): TXmlVSNode;
+    function GetBestTrkRpt(const BestTrkpt: TXmlVSNode; const BestDist: double;
+                           const PropTrkpt: TXmlVSNode = nil; const PropDist: double = 0): TXmlVSNode;
     function ScanForTrkPt(const FromCoords: TCoords;
                           const ScanFromTrkPt: TXmlVSNode;
                           const ScanToTrkPt: TXmlVSNode;
-                          var BestScanTrkPt: TXmlVSNode): double;
+                          var BestScanTrkPt: TXmlVSNode): double; overload;
+    function ScanForTrkPt(const FromCoords: TCoords;
+                          const ScanFromTrkPt: TXmlVSNode;
+                          const ScanToTrkPt: TXmlVSNode;
+                          var BestScanTrkPt: TXmlVSNode;
+                          var WorstScanTrkpt: TXmlVSNode): double; overload;
     // (BC) Route Checks
     procedure NoMatchRoutePoints(const Messages: TStrings);
     procedure NoMatchRoutePoint(const Messages: TStrings;
@@ -63,8 +69,8 @@ type
     procedure NoMatchRoutePointTrk(const Messages: TStrings;
                                    CoordTrip: TCoords; BestToTrkpt: TXmlVSNode; ThisDist: double);
     function NoMatchUdbDirTrk(const Messages: TStrings;
-                              CoordTrip: TCoords; BestTrkpt: TXmlVSNode;
-                              SkipTrkPts: integer): TXmlVSNode;
+                              CoordTrip: TCoords;
+                              BestTrkpt, PropTrkpt: TXmlVSNode): TXmlVSNode;
   public
     constructor Create(const AGPXFile: string; ATripList: TTripList; AGpxRptList: Tlist);
     destructor Destroy; override;
@@ -639,7 +645,6 @@ var
 begin
   result := MaxDouble;
   BestScanTrkPt := ScanToTrkPt;
-
   ScanTrkPt := ScanFromTrkPt;
   while (ScanTrkPt <> nil) do     // TrkPt loop
   begin
@@ -654,20 +659,69 @@ begin
       end;
 
       if (ScanTrkPt = ScanToTrkPt) then
-        exit;
+        break;
     end;
     ScanTrkPt := ScanTrkPt.NextSibling;
   end;
 end;
 
-function TGPXTripCompare.GetBestTrkRpt(const BestTrk: TXmlVSNode; const BestDist: double): TXmlVSNode;
+// Also scan backwards to find the worst trkpt. To use as proposal
+function TGPXTripCompare.ScanForTrkPt(const FromCoords: TCoords;
+                                      const ScanFromTrkPt: TXmlVSNode;
+                                      const ScanToTrkPt: TXmlVSNode;
+                                      var BestScanTrkPt: TXmlVSNode;
+                                      var WorstScanTrkpt: TXmlVSNode): double;
+var
+  ScanTrkPt: TXmlVSNode;
+  ScanCoords: TCoords;
+  ScanDist, WorstScanDist: Double;
+begin
+  result := ScanForTrkPt(FromCoords, ScanFromTrkPt, ScanToTrkPt, BestScanTrkPt);
+  WorstScanTrkpt := BestScanTrkPt;
+
+  if (result < FDistOKKms) then
+        exit;
+
+  WorstScanDist := 0;
+  ScanTrkPt := BestScanTrkPt;
+  while (ScanTrkPt <> nil) do     // TrkPt loop
+  begin
+    if (ScanTrkPt.Name = 'trkpt') then
+    begin
+      ScanCoords.FromAttributes(ScanTrkPt.AttributeList);
+      ScanDist := CoordDistance(FromCoords, ScanCoords, TDistanceUnit.duKm);
+      if (ScanDist > WorstScanDist) then
+      begin
+        WorstScanDist := ScanDist;
+        WorstScanTrkpt := ScanTrkPt;
+    end;
+    end;
+    if (ScanTrkPt = ScanFromTrkPt) then
+      break;
+    ScanTrkPt := ScanTrkPt.PreviousSibling;
+  end;
+end;
+
+function TGPXTripCompare.GetBestTrkRpt(const BestTrkpt: TXmlVSNode; const BestDist: double;
+                                       const PropTrkpt: TXmlVSNode = nil; const PropDist: double = 0): TXmlVSNode;
 var
   CoordGpx: TCoords;
-  BestLat, BestLon: string;
+  BestLat, BestLon, PropLat, PropLon: string;
 begin
-  CoordGpx.FromAttributes(BestTrk.AttributeList);
+  CoordGpx.FromAttributes(BestTrkpt.AttributeList);
   CoordGpx.FormatLatLon(BestLat, BestLon);
-  result := AddGpxRptPt(BestTrk, Format('     %s: Lat: %s, Lon: %s, Distance: %1.0f Mtr',
+  if (PropTrkpt <> nil) and
+     (BestTrkpt <> PropTrkpt) then
+  begin
+    CoordGpx.FromAttributes(PropTrkpt.AttributeList);
+    CoordGpx.FormatLatLon(PropLat, PropLon);
+
+    result := AddGpxRptPt(PropTrkpt, Format('     %s: Lat: %s, Lon: %s, Distance: %1.0f Mtr. Proposal: Lat: %s, Lon: %s, Distance: %1.0f ',
+                                             [GpxFile, BestLat, BestLon, BestDist * 1000,
+                                                       PropLat, PropLon, PropDist * 1000]));
+  end
+  else
+    result := AddGpxRptPt(BestTrkpt, Format('     %s: Lat: %s, Lon: %s, Distance: %1.0f Mtr',
                                         [GpxFile, BestLat, BestLon, BestDist * 1000]));
 end;
 
@@ -693,41 +747,45 @@ begin
 end;
 
 function TGPXTripCompare.NoMatchUdbDirTrk(const Messages: TStrings;
-                                          CoordTrip: TCoords; BestTrkpt: TXmlVSNode;
-                                          SkipTrkPts: integer): TXmlVSNode;
+                                          CoordTrip: TCoords;
+                                          BestTrkpt, PropTrkpt: TXmlVSNode): TXmlVSNode;
 var
-  BestCoords: TCoords;
+  BestCoords, PropCoords, NextPropCoords: TCoords;
   TripLat, TripLon: string;
   MsgTrkPt: TXmlVSNode;
-  BestDist: double;
-  SkipTrkPtCnt: integer;
+  BestDist, PropDist: double;
 begin
   FCheckSegmentOK := false;
   FCheckRouteOK := false;
   FUdbDir.Status := TUdbDirStatus.udsCoordsNOK;
-
   CoordTrip.FormatLatLon(TripLat, TripLon);
 
-  // Make sure to advance.
-  result := BestTrkpt;
-  SkipTrkPtCnt := SkipTrkPts;
-  while (result.NextSibling <> nil) and
-        (SkipTrkPtCnt > 0) do
+  BestCoords.FromAttributes(BestTrkpt.AttributeList);
+  BestDist := CoordDistance(CoordTrip, BestCoords, TDistanceUnit.duKm);
+
+  // Make sure to advance. But not past BestTrkpt
+  result := PropTrkpt;
+  PropCoords.FromAttributes(PropTrkpt.AttributeList);
+  NextPropCoords := PropCoords;
+  while (result <> nil) and
+        (result <> BestTrkpt) and
+        (result.NextSibling <> nil) do
   begin
-    Dec(SkipTrkPtCnt);
+    NextPropCoords.FromAttributes(result.AttributeList);
+    if (CoordDistance(NextPropCoords, PropCoords, TDistanceUnit.duKm) > FDistOKKms) then
+      break;
     result := result.NextSibling;
   end;
-  BestCoords.FromAttributes(result.AttributeList);
 
-  BestDist := CoordDistance(CoordTrip, BestCoords, TDistanceUnit.duKm);
-  MsgTrkPt := GetBestTrkRpt(result, BestDist);
-  //
+  PropDist := CoordDistance(NextPropCoords, CoordTrip, TDistanceUnit.duKm);
+  MsgTrkPt := GetBestTrkRpt(BestTrkpt, BestDist, PropTrkpt, PropDist);
   Messages.Add('');
   Messages.AddObject(Format('  Coordinates NOT OK: %s',
                             [FUdbDir.DisplayName]), FUdbDir);
   Messages.AddObject(Format('    %s: Lat: %s, Lon: %s, MapSeg + Road: %s, ',
                             [TripFile, TripLat, TripLon, FUdbDir.MapSegRoadDisplay]), FUdbDir);
   Messages.AddObject(MsgTrkPt.NodeValue, MsgTrkPt);
+
 end;
 
 procedure TGPXTripCompare.CompareGpxTrack(const Messages, OutTrackList: TStrings);
@@ -737,6 +795,7 @@ var
   ToUdbDir: TUdbDir;
 
   BestTrkPt,  // Best matching <trkpt>
+  PropTrkpt,  // Proposed matching <trkpt>
   NextTrkPt,  // Current <trkpt> Pointer
   LastTrkPt,  // Last <trkpt> in track
   ToTrkPt,    // Limit scan to <trkpt>
@@ -748,7 +807,6 @@ var
   TripLat, TripLon: string;
   UdbHandleCount, UdbDirCount, StartSegmentLine,
   AnUdbHandleCnt, ToUdbHandleCnt, AnUdbDirCnt, FromUdbDirCnt, ToUdbDirCnt, LastUdbDirCnt: integer;
-  UdbDirsInSegm, TrkPtsInSegm, AdvanceTrkPts: integer;
 begin
   TrackSelected := PrepareTripForCompare(Messages, OutTrackList, UdbHandleCount, UdbDirCount);
   if (TrackSelected = nil) then
@@ -785,7 +843,6 @@ begin
     if (AnUdbHandleCnt < FAllRoutes.Items.Count -1) then
       Dec(LastUdbDirCnt);
 
-    UdbDirsInSegm := 0;
     for AnUdbDirCnt := 0 to LastUdbDirCnt do
     begin
       FUdbDir := AnUdbHandle.Items[AnUdbDirCnt];
@@ -819,7 +876,6 @@ begin
         ToTrkPt := LastTrkPt;
 
         // Scan for next RoutePoint UdbDir
-        UdbDirsInSegm := 0;
         ToUdbDir := nil;
         ToUdbHandleCnt := AnUdbHandleCnt;
         while (ToUdbHandleCnt < FAllRoutes.Items.Count) and
@@ -832,7 +888,6 @@ begin
             FromUdbDirCnt := 0;
           for ToUdbDirCnt := FromUdbDirCnt to ToUdbHandle.Items.Count -1 do
           begin
-            Inc(UdbDirsInSegm);
             ToUdbDir := ToUdbHandle.Items[ToUdbDirCnt];
             if (ToUdbDir.UdbDirValue.SubClass.PointType = $03) then
               break;
@@ -852,15 +907,10 @@ begin
       end;
 
       // Get minimum distance of this route point in track
-      ThisDist := ScanForTrkPt(CoordTrip, NextTrkPt, ToTrkPt, BestTrkpt);
-
-      // How many track points to advance
-      TrkPtsInSegm := Max(BestTrkpt.Parent.FindPos(ToTrkPt) - BestTrkpt.Parent.FindPos(BestTrkpt), 1);
-      Dec(UdbDirsInSegm);
-      AdvanceTrkPts := TrkPtsInSegm div Max(UdbDirsInSegm, 1);
+      ThisDist := ScanForTrkPt(CoordTrip, NextTrkPt, ToTrkPt, BestTrkpt, PropTrkpt);
 
       if (ThisDist > FDistOKKms) then
-        NextTrkPt := NoMatchUdbDirTrk(Messages, CoordTrip, BestTrkPt, AdvanceTrkPts) // Report coords error.
+        NextTrkPt := NoMatchUdbDirTrk(Messages, CoordTrip, BestTrkpt, PropTrkpt) // Report coords error.
       else
         NextTrkPt := BestTrkPt;
     end;

@@ -49,7 +49,7 @@ var
 implementation
 
 uses
-  System.Types, System.StrUtils, system.Generics.Collections,
+  System.Types, System.StrUtils, system.Generics.Collections, System.UITypes,
   UnitGpxDefs, UnitTripObjects, UnitGpxObjects, UnitGpxTripCompare,
   UFrmTripEditor,
   UnitVerySimpleXml, UnitProcessOptions, UnitStringUtils;
@@ -79,30 +79,67 @@ end;
 
 procedure TFrmShowLog.SetCheck(const FileType: string);
 var
-  Index: integer;
-  LastCoords, NewCoords: TCoords;
+  Index, NextIndex: integer;
+  PrevCoords, NextCoords, NewCoords: TCoords;
   SegmentOnly: boolean;
   ProcessOptions: TProcessOptions;
   AnUdbDir: TUdbDir;
 begin
+  if (LbLog.Items.Count < 2) then
+    exit;
+
+  PrevCoords := CoordsFromData(LbLog.Items.Objects[0]);
+  for Index := LbLog.ItemIndex +1 downto 0 do
+  begin
+    if (ContainsText(LbLog.Items[Index], CheckSeg)) then
+    begin
+      PrevCoords := CoordsFromData(LbLog.Items.Objects[Index]);
+      break;
+    end;
+  end;
+
+  NextCoords := CoordsFromData(LbLog.Items.Objects[LbLog.Items.Count -1]);
+  for Index := LbLog.ItemIndex +1 to LbLog.Items.Count -1 do
+  begin
+    if (ContainsText(LbLog.Items[Index], CheckSeg)) then
+    begin
+      NextCoords := CoordsFromData(LbLog.Items.Objects[Index]);
+      break;
+    end;
+  end;
+
   ProcessOptions := TProcessOptions.Create;
   try
     SegmentOnly := (LbLog.ItemIndex > 1);
     for Index := LbLog.ItemIndex +1 to LbLog.Items.Count -1 do
     begin
-      if (SegmentOnly) and
-         (ContainsText(LbLog.Items[Index], CheckSeg)) then
-        break;
 
-      if (Index < 0) then
-        continue;
+      // A new segment
+      if (ContainsText(LbLog.Items[Index], CheckSeg)) then
+      begin
+        if (SegmentOnly) then
+          break;
+
+        PrevCoords := CoordsFromData(LbLog.Items.Objects[Index]);
+        NextCoords := CoordsFromData(LbLog.Items.Objects[LbLog.Items.Count -1]);
+        for NextIndex := Index +1 to LbLog.Items.Count -1 do
+        begin
+          if (ContainsText(LbLog.Items[NextIndex], CheckSeg)) then
+          begin
+            NextCoords := CoordsFromData(LbLog.Items.Objects[NextIndex]);
+        break;
+          end;
+        end;
+      end;
+
+      // Check Trip or GPX
       if not (ContainsText(LbLog.Items[Index], FileType)) then
       begin
         LbLog.Checked[Index] := false;
         continue;
       end;
 
-      // Only Continue
+      // Only want continue UDBDirs
       if (FileType = TripFile) then
       begin
         AnUdbDir := TUdbDir(LbLog.Items.Objects[Index]);
@@ -110,11 +147,13 @@ begin
           continue;
       end;
 
+      // Distance Check
       NewCoords := CoordsFromData(LbLog.Items.Objects[Index]);
-      if (CoordDistance(NewCoords, LastCoords, TDistanceUnit.duKm) < ProcessOptions.MinShapeDistKms) then
+      if (CoordDistance(NewCoords, PrevCoords, TDistanceUnit.duKm) < ProcessOptions.MinShapeDistKms) or
+         (CoordDistance(NewCoords, NextCoords, TDistanceUnit.duKm) < ProcessOptions.MinShapeDistKms) then
         continue;
 
-      LastCoords := NewCoords;
+      PrevCoords := NewCoords;
       LbLog.Checked[Index] := true;
     end;
   finally
@@ -330,8 +369,12 @@ begin
   BtnTrip.Enabled := (LbLog.ItemIndex = 0) or
                      ContainsText(LbLog.Items[LbLog.ItemIndex], CheckSeg);
   BtnGpx.Enabled := BtnTrip.Enabled;
+  try
   if Assigned(FSyncTreeview) then
     FSyncTreeview(LbLog.Items.Objects[LbLog.ItemIndex]);
+  except
+    MessageDlg('Could not reposition in Trip file.', TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
+  end;
 end;
 
 procedure TFrmShowLog.CoordinatesApplied(Sender: TObject; Coords: string);

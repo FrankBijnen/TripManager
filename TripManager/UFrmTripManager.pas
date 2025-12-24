@@ -4440,6 +4440,15 @@ var
   end;
 
 begin
+  // Prevent AV's in Compare when a new trip file is loaded.
+  if (FrmShowLog.Showing) then
+  begin
+    if (MessageDlg('Loading a new trip file will close the Compare. Continue?',
+                   TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) = mrCancel) then
+      exit;
+    FrmShowLog.Close;
+  end;
+
   CrWait := LoadCursor(0, IDC_WAIT);
   CRNormal := SetCursor(CrWait);
 
