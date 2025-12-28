@@ -160,7 +160,7 @@ object FrmSendTo: TFrmSendTo
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 3
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -179,6 +179,7 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
+      ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
@@ -224,7 +225,7 @@ object FrmSendTo: TFrmSendTo
         Left = 200
         Top = 1
         Width = 387
-        Height = 39
+        Height = 23
         Align = alRight
         Style = csDropDownList
         TabOrder = 0
@@ -291,7 +292,7 @@ object FrmSendTo: TFrmSendTo
       00011347006F006F0067006C006500200045006100720074006800200028002E
       006B006D006C00290000003F0000000000000000000000FFFFFFFFFFFFFFFF00
       00000001000000000000000001104F0053004D0020006D006100700073002000
-      28002E0068006D0074006C00290000003B0000000000000000000000FFFFFFFF
+      28002E00680074006D006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
   end
