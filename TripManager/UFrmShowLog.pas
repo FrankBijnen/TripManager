@@ -494,8 +494,8 @@ begin
                         ContainsText(LbLog.Items[LbLog.ItemIndex], CheckSeg);
   PreferGpx.Enabled := PreferTrip.Enabled;
 
-  NextSegment.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
-  PreviousSegment.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
+  PreviousSegment.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
+  NextSegment.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
 end;
 
 procedure TFrmShowLog.PreferGpxClick(Sender: TObject);
