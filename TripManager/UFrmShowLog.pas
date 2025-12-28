@@ -5,29 +5,40 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.CheckLst,
-  Vcl.Themes;
+  Vcl.Themes, Vcl.Menus;
 
 type
   TFrmShowLog = class(TForm)
     PnlBot: TPanel;
     BtnClose: TBitBtn;
     LbLog: TCheckListBox;
-    BtnTrip: TButton;
-    BtnGpx: TButton;
-    BtnFixedTrip: TButton;
     SaveTrip: TSaveDialog;
-    BtnFixedGpx: TButton;
+    PopupListBox: TPopupMenu;
+    PreferTrip: TMenuItem;
+    PreferGpx: TMenuItem;
+    N1: TMenuItem;
+    OpenFixedTrip: TMenuItem;
+    SavefixedGPX: TMenuItem;
+    BtnFixTrip: TButton;
+    N2: TMenuItem;
+    NextSegment: TMenuItem;
+    PreviousSegment: TMenuItem;
     procedure BtnCloseClick(Sender: TObject);
     procedure LbLogClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure LbLogDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
-    procedure BtnTripClick(Sender: TObject);
-    procedure BtnGpxClick(Sender: TObject);
-    procedure BtnFixedTripClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure BtnFixedGpxClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure PreferTripClick(Sender: TObject);
+    procedure PreferGpxClick(Sender: TObject);
+    procedure OpenFixedTripClick(Sender: TObject);
+    procedure SavefixedGPXClick(Sender: TObject);
+    procedure BtnFixTripMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure NextSegmentClick(Sender: TObject);
+    procedure PreviousSegmentClick(Sender: TObject);
+    procedure PopupListBoxPopup(Sender: TObject);
   private
     { Private declarations }
     FstyleServices: TCustomStyleServices;
@@ -75,6 +86,20 @@ begin
 
   if (AnObject is TXmlVSNode) then
     result.FromAttributes(TXmlVSNode(AnObject).AttributeList);
+end;
+
+procedure TFrmShowLog.SavefixedGPXClick(Sender: TObject);
+begin
+  FixTripList;
+
+  SaveTrip.Filter := '*.gpx|*.gpx';
+  SaveTrip.InitialDir := ExtractFilePath(CompareGpx);
+  SaveTrip.FileName := TmTripName(FrmTripEditor.CurTripList.GetItem('mTripName')).AsString +  '.gpx';
+  if not SaveTrip.Execute then
+    exit;
+
+  FrmTripEditor.CurTripList.SaveAsGPX(SaveTrip.FileName, false);
+  Close;
 end;
 
 procedure TFrmShowLog.SetCheck(const FileType: string);
@@ -159,11 +184,6 @@ begin
   finally
     ProcessOptions.Free;
   end;
-end;
-
-procedure TFrmShowLog.BtnTripClick(Sender: TObject);
-begin
-  SetCheck(TripFile);
 end;
 
 procedure TFrmShowLog.FixTripList;
@@ -280,30 +300,14 @@ begin
   end;
 end;
 
-procedure TFrmShowLog.BtnFixedGpxClick(Sender: TObject);
+procedure TFrmShowLog.BtnFixTripMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Pt: TPoint;
 begin
-  FixTripList;
-
-  SaveTrip.Filter := '*.gpx|*.gpx';
-  SaveTrip.InitialDir := ExtractFilePath(CompareGpx);
-  SaveTrip.FileName := TmTripName(FrmTripEditor.CurTripList.GetItem('mTripName')).AsString +  '.gpx';
-  if not SaveTrip.Execute then
-    exit;
-
-  FrmTripEditor.CurTripList.SaveAsGPX(SaveTrip.FileName, false);
-  Close;
-end;
-
-procedure TFrmShowLog.BtnFixedTripClick(Sender: TObject);
-begin
-  FixTripList;
-  FrmTripEditor.Show;
-  Close;
-end;
-
-procedure TFrmShowLog.BtnGpxClick(Sender: TObject);
-begin
-  SetCheck(GpxFile);
+  Pt.X := X;
+  Pt.Y := Y;
+  Pt := TButton(Sender).ClientToScreen(Pt);
+  PopupListBox.Popup(Pt.X, Pt.Y);
 end;
 
 procedure TFrmShowLog.ClearGpxRptList;
@@ -345,6 +349,25 @@ begin
   GpxRptList.Free;
 end;
 
+procedure TFrmShowLog.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (ssAlt in Shift) then
+  begin
+    case Key of
+      VK_DOWN:
+        begin
+          Key := 0;
+          NextSegmentClick(NextSegment);
+        end;
+      VK_UP:
+        begin
+          Key := 0;
+          PreviousSegmentClick(PreviousSegment);
+        end;
+    end;
+  end;
+end;
+
 procedure TFrmShowLog.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if (Key = Chr(VK_ESCAPE)) then
@@ -366,12 +389,9 @@ end;
 
 procedure TFrmShowLog.LbLogClick(Sender: TObject);
 begin
-  BtnTrip.Enabled := (LbLog.ItemIndex = 0) or
-                     ContainsText(LbLog.Items[LbLog.ItemIndex], CheckSeg);
-  BtnGpx.Enabled := BtnTrip.Enabled;
   try
-  if Assigned(FSyncTreeview) then
-    FSyncTreeview(LbLog.Items.Objects[LbLog.ItemIndex]);
+    if Assigned(FSyncTreeview) then
+      FSyncTreeview(LbLog.Items.Objects[LbLog.ItemIndex]);
   except
     MessageDlg('Could not reposition in Trip file.', TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
   end;
@@ -407,6 +427,13 @@ begin
   end;
 end;
 
+procedure TFrmShowLog.OpenFixedTripClick(Sender: TObject);
+begin
+  FixTripList;
+  FrmTripEditor.Show;
+  Close;
+end;
+
 procedure TFrmShowLog.LbLogDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
   ACanvas: TCanvas;
@@ -431,6 +458,54 @@ begin
   Flags := DrawTextBiDiModeFlags(DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX);
   with TCheckListBox(Control) do
     DrawText(ACanvas.Handle, Items[Index], Length(Items[Index]), Rect, Flags);
+end;
+
+procedure TFrmShowLog.NextSegmentClick(Sender: TObject);
+var
+  Index: integer;
+begin
+  Index := LbLog.ItemIndex + 1;
+  if (Index > LbLog.Items.Count -1) then
+    exit;
+  while (Index < LbLog.Items.Count -1) and
+        (not ContainsText(LbLog.Items[Index], CheckSeg)) do
+    Inc(Index);
+  LbLog.ItemIndex := Index;
+  LbLogClick(LbLog);
+end;
+
+procedure TFrmShowLog.PreviousSegmentClick(Sender: TObject);
+var
+  Index: integer;
+begin
+  Index := LbLog.ItemIndex - 1;
+  if (Index < 0) then
+    exit;
+  while (Index > 0) and
+        (not ContainsText(LbLog.Items[Index], CheckSeg)) do
+    Dec(Index);
+  LbLog.ItemIndex := Index;
+  LbLogClick(LbLog);
+end;
+
+procedure TFrmShowLog.PopupListBoxPopup(Sender: TObject);
+begin
+  PreferTrip.Enabled := (LbLog.ItemIndex = 0) or
+                        ContainsText(LbLog.Items[LbLog.ItemIndex], CheckSeg);
+  PreferGpx.Enabled := PreferTrip.Enabled;
+
+  NextSegment.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
+  PreviousSegment.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
+end;
+
+procedure TFrmShowLog.PreferGpxClick(Sender: TObject);
+begin
+  SetCheck(GpxFile);
+end;
+
+procedure TFrmShowLog.PreferTripClick(Sender: TObject);
+begin
+  SetCheck(TripFile);
 end;
 
 end.

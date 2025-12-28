@@ -2531,6 +2531,8 @@ procedure TFrmTripManager.ShellListView1KeyUp(Sender: TObject; var Key: Word; Sh
 begin
   if ShellListView1.IsEditing then
     exit;
+  if (ssAlt in Shift) then
+    exit;
 
   case Key of
     VK_HOME,

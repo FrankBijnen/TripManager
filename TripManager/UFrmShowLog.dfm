@@ -14,6 +14,7 @@ object FrmShowLog: TFrmShowLog
   KeyPreview = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   TextHeight = 15
@@ -27,8 +28,17 @@ object FrmShowLog: TFrmShowLog
     DesignSize = (
       624
       33)
+    object BtnFixTrip: TButton
+      Left = 10
+      Top = 3
+      Width = 75
+      Height = 25
+      Caption = 'Fix Trip'
+      TabOrder = 1
+      OnMouseUp = BtnFixTripMouseUp
+    end
     object BtnClose: TBitBtn
-      Left = 530
+      Left = 538
       Top = 3
       Width = 75
       Height = 25
@@ -37,42 +47,6 @@ object FrmShowLog: TFrmShowLog
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnCloseClick
-    end
-    object BtnTrip: TButton
-      Left = 0
-      Top = 3
-      Width = 75
-      Height = 25
-      Caption = 'Prefer Trip'
-      TabOrder = 1
-      OnClick = BtnTripClick
-    end
-    object BtnGpx: TButton
-      Left = 77
-      Top = 3
-      Width = 75
-      Height = 25
-      Caption = 'Prefer Gpx'
-      TabOrder = 2
-      OnClick = BtnGpxClick
-    end
-    object BtnFixedTrip: TButton
-      Left = 176
-      Top = 3
-      Width = 75
-      Height = 25
-      Caption = 'Fixed Trip'
-      TabOrder = 3
-      OnClick = BtnFixedTripClick
-    end
-    object BtnFixedGpx: TButton
-      Left = 257
-      Top = 3
-      Width = 75
-      Height = 25
-      Caption = 'Fixed Gpx'
-      TabOrder = 4
-      OnClick = BtnFixedGpxClick
     end
   end
   object LbLog: TCheckListBox
@@ -88,6 +62,7 @@ object FrmShowLog: TFrmShowLog
     Font.Style = []
     ItemHeight = 15
     ParentFont = False
+    PopupMenu = PopupListBox
     Style = lbOwnerDrawVariable
     TabOrder = 1
     OnClick = LbLogClick
@@ -95,7 +70,48 @@ object FrmShowLog: TFrmShowLog
   end
   object SaveTrip: TSaveDialog
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
-    Left = 370
-    Top = 393
+    Left = 394
+    Top = 161
+  end
+  object PopupListBox: TPopupMenu
+    OnPopup = PopupListBoxPopup
+    Left = 216
+    Top = 160
+    object PreferTrip: TMenuItem
+      Caption = 'Prefer Trip'
+      ShortCut = 16468
+      OnClick = PreferTripClick
+    end
+    object PreferGpx: TMenuItem
+      Caption = 'Prefer Gpx'
+      ShortCut = 16455
+      OnClick = PreferGpxClick
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object OpenFixedTrip: TMenuItem
+      Caption = 'Open fixed trip'
+      ShortCut = 16463
+      OnClick = OpenFixedTripClick
+    end
+    object SavefixedGPX: TMenuItem
+      Caption = 'Save fixed GPX'
+      ShortCut = 16467
+      OnClick = SavefixedGPXClick
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object NextSegment: TMenuItem
+      Caption = 'Next Segment'
+      ShortCut = 16452
+      OnClick = NextSegmentClick
+    end
+    object PreviousSegment: TMenuItem
+      Caption = 'Previous Segment'
+      ShortCut = 16469
+      OnClick = PreviousSegmentClick
+    end
   end
 end

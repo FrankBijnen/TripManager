@@ -37,7 +37,7 @@ Name: ExecutableWin32;                  Description: "Install Executable (Win32)
 Name: ExecutableWin64;                  Description: "Install Executable (Win64)";            types: full;          Check: Win64;
 Name: Symbols;                          Description: "Install Symbols";                       types: full;
 Name: Docs;                             Description: "Install Documentation";                 types: full;
-Name: Trk2RT;                           Description: "Install Trk2TR (SMFollen contributed";  types: full;
+Name: Trk2RT;                           Description: "Install Trk2Rt (SMFollen contributed)"; types: full;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
