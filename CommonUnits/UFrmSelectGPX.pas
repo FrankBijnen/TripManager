@@ -63,6 +63,10 @@ var
 begin
   FCheckMask := CheckMask;
   FTagsToShow := TagsToShow;
+
+//TODO check
+//  TTagsToShow = (WptRte = 1, WptTrk = 2, WptRteTrk = 3, RteTrk = 10, Rte = 20, Trk = 30);
+
   case FTagsToShow of
     TTagsToShow.WptRte:
       begin
@@ -88,7 +92,8 @@ begin
     LVItem.Caption := Name;
     if (CanCheck) then
     begin
-      LVItem.Checked := MatchesMask(Name, CheckMask);
+      LVItem.Checked := (AllTracks.Count = 1) or
+                         MatchesMask(Name, CheckMask);
       if (LVItem.Checked) then
         CanCheck := SameText(CheckMask, '*');
     end;

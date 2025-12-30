@@ -149,12 +149,14 @@ type
                               const SCType: TSubClassType);
     procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
     procedure CloneSubNodes(FromNodes, ToNodes: TXmlVsNodeList);
+    procedure CloneNode(FromNode, ToNode: TXmlVsNode);
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);
     procedure Track2FITTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);
+    property XmlDocument: TXmlVSDocument read FXmlDocument;
   public
     var FrmSelectGpx: TFrmSelectGPX;
     constructor Create(const GPXFile:string;
@@ -168,7 +170,7 @@ type
     function ShowSelectTracks(const Caption, SubCaption: string; TagsToShow: TTagsToShow; CheckMask: string): boolean;
     procedure DoPostProcess;
     procedure WriteTrack2XML(TracksRoot, Track: TXmlVSNode; DisplayColor: string);
-    procedure CloneNode(FromNode, ToNode: TXmlVsNode);
+    procedure SaveSelectionAsXML(const OutFile: string);
     procedure DoCreateTracks;
     procedure DoCreateWayPoints;
     procedure DoCreatePOI;
@@ -189,7 +191,6 @@ type
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
     property TrackList: TXmlVSNodeList read FTrackList;
-    property XmlDocument: TXmlVSDocument read FXmlDocument;
     property ProcessOptions: TProcessOptions read FProcessOptions write FProcessOptions;
     class procedure PerformFunctions(const AllFuncs: array of TGPXFunc;
                                      const GPXFile:string;
@@ -1606,6 +1607,59 @@ begin
     if (TrackPoint.Name <> 'trkpt') then
       continue;
     CloneAttributes(TrackPoint, WptTrack.AddChild('trkpt'));
+  end;
+end;
+
+procedure TGPXfile.SaveSelectionAsXML(const OutFile: string);
+var
+  GPXNode, GpxSubNode, XMLRoot: TXmlVSNode;
+  XML: TXmlVSDocument;
+  AnItem: TListItem;
+  SelectedItem: Char;
+begin
+  GpxNode := XmlDocument.ChildNodes.Find('gpx');
+  if (GpxNode = nil) then
+    exit;
+  XML := TXmlVSDocument.Create;
+  try
+    XMLRoot := InitGarminGpx(XML);
+    for AnItem in FrmSelectGPX.LvTracks.Items do
+    begin
+      if not (AnItem.Checked) then
+        continue;
+      SelectedItem := UpperCase(AnItem.SubItems[0] + ' ')[1];
+      case SelectedItem of
+      'W':
+        begin
+          for GpxSubNode in GPXNode.ChildNodes do
+          begin
+            if (GpxSubNode.Name = 'wpt') then
+              CloneNode(GpxSubNode, XMLRoot.AddChild('wpt'));
+          end;
+        end;
+      'R':
+        begin
+          for GpxSubNode in GPXNode.ChildNodes do
+          begin
+            if (GpxSubNode.Name = 'rte') and
+               (FindSubNodeValue(GpxSubNode, 'name') = AnItem.Caption) then
+              CloneNode(GpxSubNode, XMLRoot.AddChild('rte'));
+          end;
+        end;
+      'T':
+        begin
+          for GpxSubNode in GPXNode.ChildNodes do
+          begin
+            if (GpxSubNode.Name = 'trk') and
+               (FindSubNodeValue(GpxSubNode, 'name') = AnItem.Caption) then
+              CloneNode(GpxSubNode, XMLRoot.AddChild('trk'));
+          end;
+        end;
+      end;
+    end;
+    Xml.SaveToFile(OutFile);
+  finally
+    XML.Free;
   end;
 end;
 
