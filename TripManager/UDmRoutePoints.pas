@@ -69,6 +69,7 @@ type
     procedure LookUpAddress;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure ImportFromGPX(const GPXFile: string);
+    procedure Trk2RtImportFromGPX(const GPXFile: string);
     procedure ExportToGPX(const GPXFile: string);
     procedure ImportFromCSV(const CSVFile: string);
     procedure ExportToCSV(const CSVFile: string);
@@ -692,16 +693,82 @@ begin
 end;
 
 procedure TDmRoutePoints.ImportFromGPX(const GPXFile: string);
+var
+  CrNormal,CrWait: HCURSOR;
+  RoutePoints, RoutePoint: TXmlVSNode;
+  AnItem: TListItem;
+  SelectedItem: Char;
+  GPXFileObj: TGPXFile;
+begin
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  GPXFileObj := TGPXFile.Create(GPXFile, OnSetAnalyzePrefs, nil);
+  try
+    GPXFileObj.AnalyzeGpx;
+    SetCursor(CrNormal);
+    if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
+                                    'Select Waypoints/Routes',
+                                     TTagsToShow.WptRte, CdsRouteTripName.AsString)) then
+    begin
+      if (CdsRoute.State in [dsEdit, dsInsert]) then
+        CdsRoute.Post;
+      if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+        CdsRoutePoints.Post;
+
+      CdsRoutePoints.DisableControls;
+      try
+        CdsRoutePoints.Last;  // Add to Route Points at end of list
+
+        for AnItem in GPXFileObj.FrmSelectGPX.LvTracks.Items do
+        begin
+          if not (AnItem.Checked) then
+            continue;
+
+          SelectedItem := UpperCase(AnItem.SubItems[0] + ' ')[1];
+          case SelectedItem of
+          'W':
+            begin
+              for RoutePoint in GPXFileObj.WayPointList do
+                AddRoutePoint(RoutePoint, true);
+            end;
+
+          'R':
+            begin
+              for RoutePoints in GPXFileObj.RouteViaPointList do
+              begin
+                if (RoutePoints.NodeName <> AnItem.Caption) then
+                  continue;
+                if (RoutePoints.ChildNodes.Count <= 2) then // Only Begin and End?
+                  continue;
+                for RoutePoint in RoutePoints.ChildNodes do
+                  AddRoutePoint(RoutePoint, false);
+              end;
+            end;
+          end;
+        end;
+      finally
+        CdsRoutePoints.EnableControls;
+        if Assigned(OnRouteUpdated) then
+          OnRouteUpdated(Self);
+      end;
+    end;
+  finally
+    GPXFileObj.Free;
+    SetCursor(CrNormal);
+  end;
+end;
+
+procedure TDmRoutePoints.Trk2RtImportFromGPX(const GPXFile: string);
 const
   Trk2Rt    = 'Trk2Rt';
   T2R       = 'T2R';
   GPX       = '.gpx';
   Trk2RtIn  = Trk2Rt + GPX;
   Trk2RtOut = T2R + '\' + Trk2Rt + '_' + T2R + GPX;
-
 var
   CrNormal,CrWait: HCURSOR;
-  RoutePoints, RoutePoint, Track: TXmlVSNode;
+  GPXNode, GpxSubNode, RoutePoints, RoutePoint, XMLRoot: TXmlVSNode;
+  XML: TXmlVSDocument;
   AnItem: TListItem;
   SelectedItem: Char;
   GPXFileObj, GpxFileTrkObj: TGPXFile;
@@ -726,60 +793,65 @@ begin
       CdsRoutePoints.DisableControls;
       try
         CdsRoutePoints.Last;  // Add to Route Points at end of list
-
-        for AnItem in GPXFileObj.FrmSelectGPX.LvTracks.Items do
-        begin
-          if not (AnItem.Checked) then
-            continue;
-
-          SelectedItem := UpperCase(AnItem.SubItems[0] + ' ')[1];
-          case SelectedItem of
-          'W':
-            begin
-              for RoutePoint in GPXFileObj.WayPointList do
-                AddRoutePoint(RoutePoint, true);
-            end;
-
-          'T':
-            begin
-              for Track in GPXFileObj.TrackList do
+        GpxNode := GPXFileObj.XmlDocument.ChildNodes.Find('gpx');
+        XML := TXmlVSDocument.Create;
+        try
+          XMLRoot := InitGarminGpx(XML);
+          for AnItem in GPXFileObj.FrmSelectGPX.LvTracks.Items do
+          begin
+            if not (AnItem.Checked) then
+              continue;
+            SelectedItem := UpperCase(AnItem.SubItems[0] + ' ')[1];
+            case SelectedItem of
+            'W':
               begin
-                if (SameText(FindSubNodeValue(Track, 'desc'), 'Trk') = false) then
-                  continue;
-                if (Track.NodeName <> AnItem.Caption) then
-                  continue;
-                GPXFileObj.CreateTrack(Track, CreatedTempPath + Trk2RtIn);
-//TODO Needs Visual C runtime!
-                Trk2RtCmdLine := Format('trk2rt.exe %s "%s"', [TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
-                if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
-                  raise Exception.Create('Could not start Trk2Rt.exe. Check installation');
-//TODO Output GPX
-                GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
-                try
-                  GpxFileTrkObj.AnalyzeGpx;
-                  for RoutePoints in GpxFileTrkObj.RouteViaPointList do
-                  begin
-                    for RoutePoint in RoutePoints.ChildNodes do
-                      AddRoutePoint(RoutePoint, false);
-                    break;
-                  end;
-                finally
-                  GpxFileTrkObj.Free;
+                for GpxSubNode in GPXNode.ChildNodes do
+                begin
+                  if (GpxSubNode.Name = 'wpt') then
+                    GPXFileObj.CloneNode(GpxSubNode, XMLRoot.AddChild('wpt'));
+                end;
+              end;
+            'R':
+              begin
+                for GpxSubNode in GPXNode.ChildNodes do
+                begin
+                  if (GpxSubNode.Name = 'rte') and
+                     (FindSubNodeValue(GpxSubNode, 'name') = AnItem.Caption) then
+                    GPXFileObj.CloneNode(GpxSubNode, XMLRoot.AddChild('rte'));
+                end;
+              end;
+            'T':
+              begin
+                for GpxSubNode in GPXNode.ChildNodes do
+                begin
+                  if (GpxSubNode.Name = 'trk') and
+                     (FindSubNodeValue(GpxSubNode, 'name') = AnItem.Caption) then
+                    GPXFileObj.CloneNode(GpxSubNode, XMLRoot.AddChild('trk'));
                 end;
               end;
             end;
-
-          'R':
-            begin
-              for RoutePoints in GPXFileObj.RouteViaPointList do
-              begin
-                if (RoutePoints.NodeName <> AnItem.Caption) then
-                  continue;
-                for RoutePoint in RoutePoints.ChildNodes do
-                  AddRoutePoint(RoutePoint, false);
-              end;
-            end;
           end;
+          Xml.SaveToFile(CreatedTempPath + Trk2RtIn);
+        finally
+          XML.Free;
+        end;
+//TODO ExportPercent=
+//TODO Needs Visual C runtime!
+        Trk2RtCmdLine := Format('trk2rt.exe %s "%s"', [TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
+        if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
+          raise Exception.Create('Could not start Trk2Rt.exe. Check installation');
+//TODO Output GPX
+        GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
+        try
+          GpxFileTrkObj.AnalyzeGpx;
+          for RoutePoints in GpxFileTrkObj.RouteViaPointList do
+          begin
+            for RoutePoint in RoutePoints.ChildNodes do
+              AddRoutePoint(RoutePoint, false);
+            break;
+          end;
+        finally
+          GpxFileTrkObj.Free;
         end;
       finally
         CdsRoutePoints.EnableControls;

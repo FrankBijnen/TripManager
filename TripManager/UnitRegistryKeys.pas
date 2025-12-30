@@ -103,7 +103,7 @@ const
   Reg_DefaultCoordinates          = '48.854918, 2.346558'; // Somewhere in Paris
 
   Reg_Trk2RtOptions_Key           = 'Trk2RtOptions';
-  Reg_Trk2RtOptions_Val           = 'norelocate NS_ALL exportIdx=1';
+  Reg_Trk2RtOptions_Val           = 'norelocate NS_ALL exportPercent=1.00';
 
 const
   IdTrip          = 0;

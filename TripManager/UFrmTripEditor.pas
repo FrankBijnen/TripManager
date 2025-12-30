@@ -63,6 +63,7 @@ type
     PopupCSV: TPopupMenu;
     ImportCSV: TMenuItem;
     ExportCSV: TMenuItem;
+    rk2RtImport1: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -87,6 +88,7 @@ type
     procedure PnlRouteResize(Sender: TObject);
     procedure ImportCSVClick(Sender: TObject);
     procedure ExportCSVClick(Sender: TObject);
+    procedure rk2RtImport1Click(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -404,6 +406,16 @@ begin
     DBGRoutePoints.Columns[DBGRoutePoints.Columns.Count -1].Width :=
       DBGRoutePoints.ClientWidth - W - GetSystemMetrics(SM_CXVSCROLL) -4;
   end;
+end;
+
+procedure TFrmTripEditor.rk2RtImport1Click(Sender: TObject);
+begin
+  OpenTrip.Filter := '*.gpx|*.gpx';
+  OpenTrip.InitialDir := CurPath;
+  if not OpenTrip.Execute then
+    exit;
+
+  DmRoutePoints.Trk2RtImportFromGPX(OpenTrip.FileName);
 end;
 
 procedure TFrmTripEditor.Selectall1Click(Sender: TObject);

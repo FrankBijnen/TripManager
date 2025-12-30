@@ -1166,7 +1166,7 @@ var
   Lat, Lon: string;
   Place: TPlace;
 begin
-  if (CreateOSMMapHtml(GetRegistry(Reg_SavedMapPosition_Key, Reg_DefaultCoordinates))) then
+  if (CreateOSMMapHtml) then
     EdgeBrowser1.Navigate(GetHtmlTmp);
 
   GetCoordsOfPlace('', Lat, Lon);

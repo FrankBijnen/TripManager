@@ -37,7 +37,8 @@ Name: ExecutableWin32;                  Description: "Install Executable (Win32)
 Name: ExecutableWin64;                  Description: "Install Executable (Win64)";            types: full;          Check: Win64;
 Name: Symbols;                          Description: "Install Symbols";                       types: full;
 Name: Docs;                             Description: "Install Documentation";                 types: full;
-Name: Trk2RT;                           Description: "Install Trk2Rt (SMFollen contributed)"; types: full;
+Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; \
+                                                                                              types: full;          Check: Win64;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
@@ -57,14 +58,49 @@ Source: "..\Win64\Fit2Gpx.exe";           DestDir: "{app}"; Components: Executab
 Source: "..\Win64\FitInfo.exe";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\WebView2Loader.dll";    DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
 Source: "..\Win64\sqlite3.dll";           DestDir: "{app}"; Components: ExecutableWin64;      Flags: ignoreversion
+
 ; Images
 Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Components: Symbols;  Flags: ignoreversion recursesubdirs; Excludes: "*.png,*.jbf,*.db"
+
 ; Docs
 Source: "..\docs\tripmanager.chm";        DestDir: "{app}\ChmDocs";     Components: Docs;     Flags: ignoreversion;
-; Docs
-Source: "..\Win32\Trk2Rt.exe";            DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
+
+; Trk2Rt
+Source: "Trk2Rt\Trk2Rt.cmd";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
+Source: "Trk2Rt\Trk2Rt.exe";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
+Source: "Trk2Rt\vc_redist.x64.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion
 
 [Registry]
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx"; \
+            Flags: uninsdeletekey; Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell"; \
+            Flags: uninsdeletekey; Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction"; \
+            Flags: uninsdeletekey; Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction"; \
+            ValueName: "MUIVerb"; ValueType: string; ValueData: "Trk2RT"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction"; \
+            ValueName: "subcommands"; ValueType: string; ValueData: ""; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell";  \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\a_routefromtrack"; \
+            ValueType: string; ValueData: "Create route from track"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\a_routefromtrack\command"; \
+            ValueType: string; ValueData: """{app}\Trk2Rt.cmd"" ""%L""";  \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\b_openintrk2rt"; \
+            ValueType: string; ValueData: "Open in TRk2RT"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\b_openintrk2rt\command"; \
+            ValueType: string; ValueData: """{app}\Trk2Rt.exe"" ""%L""";  \
+            Flags: uninsdeletekey;  Components: Trk2RT;
 
 [InstallDelete]
 
@@ -73,6 +109,8 @@ Name: "{group}\{#MyAppName}";         Filename: "{app}\TripManager.exe"
 Name: "{autodesktop}\{#MyAppName}";   Filename: "{app}\TripManager.exe";              tasks: desktopicon;
 
 [Run]
+Filename: "{tmp}\vc_redist.x64.exe";  Parameters: "/passive /norestart";  \
+            Components: Trk2RT; Flags: runascurrentuser skipifdoesntexist
 
 [Code]
 

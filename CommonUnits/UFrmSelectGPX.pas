@@ -64,10 +64,10 @@ begin
   FCheckMask := CheckMask;
   FTagsToShow := TagsToShow;
   case FTagsToShow of
-    TTagsToShow.WptRteTrk:
+    TTagsToShow.WptRte:
       begin
         PnlColor.Visible := false;
-        LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte/Trk';
+        LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte';
       end;
     TTagsToShow.RteTrk:
       begin

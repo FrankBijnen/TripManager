@@ -45,7 +45,7 @@ type
     Time: double;
   end;
   TTripInfoList = TObjectDictionary<string, TTripInfo>;
-  TTagsToShow = (WptRteTrk = 1, RteTrk = 10, Rte = 20, Trk = 30);
+  TTagsToShow = (WptRte = 1, WptTrk = 2, WptRteTrk = 3, RteTrk = 10, Rte = 20, Trk = 30);
 
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;
