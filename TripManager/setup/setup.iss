@@ -33,12 +33,13 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Components]
-Name: ExecutableWin32;                  Description: "Install Executable (Win32)";            types: full;          Check: Win32;
-Name: ExecutableWin64;                  Description: "Install Executable (Win64)";            types: full;          Check: Win64;
-Name: Symbols;                          Description: "Install Symbols";                       types: full;
-Name: Docs;                             Description: "Install Documentation";                 types: full;
-Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; \
-                                                                                              types: full;          Check: Win64;
+Name: ExecutableWin32;                  Description: "Install Executable (Win32)";                  types: full;          Check: Win32;
+Name: ExecutableWin64;                  Description: "Install Executable (Win64)";                  types: full;          Check: Win64;
+Name: Symbols;                          Description: "Install Symbols";                             types: full;
+Name: Docs;                             Description: "Install Documentation";                       types: full;
+; 
+Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Never;
+;Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Win64;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
@@ -169,6 +170,11 @@ end;
 function Win64: boolean;
 begin
   result := not Win32;
+end;
+
+function Never: boolean;
+begin
+  result := false;
 end;
 
 function DefaultDir(Param: string): string;

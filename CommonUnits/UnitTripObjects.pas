@@ -29,7 +29,7 @@ const
   Zumo3x0Name                       = 'zūmo 3x0';
   Nuvi2595Name                      = 'nüvi 2595';
   UnknownName                       = 'Unknown';
-  Zumo340_TmScPosnSize              = 8;
+  Zumo3x0_590_TmScPosnSize          = 8; // Also Zumo 590
   TurnMagic: array[0..3] of byte    = ($47, $4E, $00, $00);
   TripFileName                      = '0:/.System/Trips/%s.trip';
 
@@ -135,7 +135,7 @@ const
   Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      294,      254,      130,      134,      512);
   UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    true,     false);
   CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$0170feff,$00000000,$00000000,$00300030,$ffffffff);
-  Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $8e,      $8e,      $66,      $66,      $90);
+  Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $8e,      $66,      $66,      $00,      $00);
   Unknown3DistOffset: array[TTripModel] of integer  =($14,      $14,      $14,      $12,      $12,      $12,      $12,      $12,      $14);
   Unknown3TimeOffset: array[TTripModel] of integer  =($18,      $18,      $18,      $16,      $16,      $16,      $16,      $16,      $18);
   VersionSize:        array[TTripModel] of integer  =($08,      $08,      $08,      $05,      $05,      $05,      $05,      $05,      $08);
@@ -291,7 +291,7 @@ type
   TPosnValue = packed record
     procedure SwapCardinals;
     case ScnSize: Cardinal of
-    Zumo340_TmScPosnSize:         // Zum340
+    Zumo3x0_590_TmScPosnSize:     // Zumo 340 and 590
       (
         Lat_8:                    integer;
         Lon_8:                    integer;
@@ -1632,7 +1632,7 @@ end;
 constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal = TmScPosnSize);
 begin
   case ASize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       begin
         inherited Create('mScPosn',
                          SizeOf(FValue.ScnSize) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
@@ -1671,7 +1671,7 @@ begin
   FValue.SwapCardinals; // Unknown1, Lat and Lon are not swapped
 
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       begin
         AStream.Read(FValue.Lat_8, SizeOf(FValue.Lat_8));
         AStream.Read(FValue.Lon_8, SizeOf(FValue.Lon_8));
@@ -1699,7 +1699,7 @@ end;
 procedure TmScPosn.WriteValue(AStream: TMemoryStream);
 begin
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       begin
         FValue.SwapCardinals;
         AStream.Write(FValue.ScnSize, SizeOf(FValue.ScnSize));
@@ -1731,7 +1731,7 @@ end;
 function TmScPosn.GetValue: string;
 begin
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       begin
         result := Format('Lat, Lon: %s',
                         [MapCoords]);
@@ -1757,7 +1757,7 @@ begin
   result := inherited GetOffSetValue + SizeOf(FValue.ScnSize);
 
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       ; // Do nothing
     Tread2_TmScPosnSize:
       result := result + SizeOf(FValue.Unknown1_16);
@@ -1769,7 +1769,7 @@ end;
 function TmScPosn.GetLenValue: Cardinal;
 begin
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       result := SizeOf(FValue.Lat_8) + SizeOf(FValue.Lon_8);
     Tread2_TmScPosnSize:
       result := SizeOf(FValue.Lat_16) + SizeOf(FValue.Lon_16);
@@ -1781,7 +1781,7 @@ end;
 function TmScPosn.GetLat: double;
 begin
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       result := CoordAsDec(FValue.Lat_8);
     Tread2_TmScPosnSize:
       result := CoordAsDec(FValue.Lat_16);
@@ -1793,7 +1793,7 @@ end;
 function TmScPosn.GetLon: double;
 begin
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       result := CoordAsDec(FValue.Lon_8);
     Tread2_TmScPosnSize:
       result := CoordAsDec(FValue.Lon_16);
@@ -1805,7 +1805,7 @@ end;
 function TmScPosn.GetMapCoords: string;
 begin
   case FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_8), CoordAsDec(FValue.Lon_8));
     Tread2_TmScPosnSize:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_16), CoordAsDec(FValue.Lon_16));
@@ -1823,7 +1823,7 @@ begin
 
   ParseLatLon(LatLon, Lat, Lon);
   case result.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       begin
         result.Lat_8 := CoordAsInt(CoordAsDec(Lat));
         result.Lon_8 := CoordAsInt(CoordAsDec(Lon));
@@ -3075,7 +3075,7 @@ begin
 
   AmScPosn := ALocation.LocationTmScPosn;
   case AmScPosn.FValue.ScnSize of
-    Zumo340_TmScPosnSize:
+    Zumo3x0_590_TmScPosnSize:
       begin
         FValue.Lat := Swap32(AmScPosn.FValue.Lat_8);
         FValue.Lon := Swap32(AmScPosn.FValue.Lon_8);
@@ -4408,7 +4408,7 @@ begin
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Zumo340_TmScPosnSize));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Zumo3x0_590_TmScPosnSize));
   Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
 end;
 
@@ -4714,7 +4714,8 @@ begin
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
       TmLocations(Locations).GetSegmentPoints(Index, RoutePointList);
-      GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[AnUdbHandle.ShapeOffset]);
+      if (AnUdbHandle.ShapeOffset <> 0) then
+        GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[AnUdbHandle.ShapeOffset]);
       for RoutePtCount := 0 to RoutePointList.Count -2 do
       begin
         ALocation := RoutePointList[RoutePtCount];
