@@ -176,7 +176,7 @@ begin
         else if GetRegistry(Reg_EnableFitFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.fit files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TModelConv.GetKnownPath(ModelIndex, 0), SubKey), #10]);
+                    TModelConv.GetKnownPath(ModelIndex, 1), SubKey), #10]);
 
         if GetRegistry(Reg_EnableGpxFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +

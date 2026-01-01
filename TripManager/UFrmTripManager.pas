@@ -1242,10 +1242,10 @@ begin
               // Make sure we read the next, so we can use Continue in the loop
               Rc := FindNext(Fs);
 
-              if (ContainsText(TempExt, TripExtension)) or
-                 (ContainsText(TempExt, FitExtension)) then
+              if (ContainsText(TempExt, TripExtension)) then
                 SetCurrentPath(DeviceFolder[0])
-              else if (ContainsText(TempExt, GpxExtension)) then
+              else if (ContainsText(TempExt, GpxExtension)) or
+                      (ContainsText(TempExt, FitExtension)) then
                 SetCurrentPath(DeviceFolder[1])
               else if (ContainsText(TempExt, GPIExtension)) then
                 SetCurrentPath(DeviceFolder[2])
