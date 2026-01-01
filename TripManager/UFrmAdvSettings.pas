@@ -152,7 +152,7 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Tracks-');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MinDistTrackPoints_Key,
                                               '0',
-                                              'Minimum distance between track points (meters)');
+                                              'Minimum distance track points (meters)');
     AddGridLine(GridGeneralSettings, CurRow,  '');
 
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Compare-');

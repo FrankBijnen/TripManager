@@ -3,9 +3,10 @@ object FrmSelectGPX: TFrmSelectGPX
   Top = 0
   Caption = 'Select from GPX'
   ClientHeight = 307
-  ClientWidth = 515
+  ClientWidth = 524
   Color = clBtnFace
   CustomTitleBar.CaptionAlignment = taCenter
+  Constraints.MinWidth = 531
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -18,9 +19,9 @@ object FrmSelectGPX: TFrmSelectGPX
   TextHeight = 13
   object LvTracks: TListView
     Left = 0
-    Top = 83
-    Width = 515
-    Height = 195
+    Top = 72
+    Width = 524
+    Height = 206
     Align = alClient
     Checkboxes = True
     Columns = <
@@ -53,8 +54,8 @@ object FrmSelectGPX: TFrmSelectGPX
   object PnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 515
-    Height = 29
+    Width = 524
+    Height = 23
     Align = alTop
     Caption = 'Select Routes/Tracks'
     TabOrder = 1
@@ -62,15 +63,15 @@ object FrmSelectGPX: TFrmSelectGPX
   object PnlBot: TPanel
     Left = 0
     Top = 278
-    Width = 515
+    Width = 524
     Height = 29
     Align = alBottom
     TabOrder = 2
     DesignSize = (
-      515
+      524
       29)
     object BitBtnOK: TBitBtn
-      Left = 322
+      Left = 358
       Top = 2
       Width = 75
       Height = 25
@@ -80,7 +81,7 @@ object FrmSelectGPX: TFrmSelectGPX
       TabOrder = 0
     end
     object BitBtnCan: TBitBtn
-      Left = 403
+      Left = 439
       Top = 2
       Width = 75
       Height = 25
@@ -92,9 +93,9 @@ object FrmSelectGPX: TFrmSelectGPX
   end
   object PnlColor: TPanel
     Left = 0
-    Top = 29
-    Width = 515
-    Height = 32
+    Top = 23
+    Width = 524
+    Height = 27
     Align = alTop
     TabOrder = 3
     object lblChangeColor: TLabel
@@ -104,13 +105,25 @@ object FrmSelectGPX: TFrmSelectGPX
       Height = 13
       Caption = 'Change color'
     end
+    object LblMinTrackDist: TLabel
+      Left = 312
+      Top = 1
+      Width = 157
+      Height = 25
+      Align = alRight
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Min distance track points (mtr)'
+      Layout = tlCenter
+      ExplicitLeft = 297
+      ExplicitHeight = 30
+    end
     object CmbOverruleColor: TComboBox
       Left = 94
       Top = 4
       Width = 197
       Height = 21
       TabOrder = 0
-      Text = 'CmbOverruleColor'
       OnClick = CmbOverruleColorClick
       Items.Strings = (
         'No Change'
@@ -132,18 +145,32 @@ object FrmSelectGPX: TFrmSelectGPX
         'White'
         'Yellow')
     end
+    object SpinMinTrackPtDist: TSpinEdit
+      Left = 469
+      Top = 1
+      Width = 54
+      Height = 25
+      Align = alRight
+      AutoSize = False
+      MaxValue = 2500
+      MinValue = 0
+      TabOrder = 1
+      Value = 1
+      OnChange = SpinMinTrackPtDistChange
+      OnKeyUp = SpinKeyUp
+    end
   end
   object PnlPreview: TPanel
     Left = 0
-    Top = 61
-    Width = 515
+    Top = 50
+    Width = 524
     Height = 22
     Align = alTop
     TabOrder = 4
     object LblPreview: TLabel
       Left = 173
       Top = 1
-      Width = 341
+      Width = 350
       Height = 20
       Align = alClient
       Alignment = taCenter
@@ -176,7 +203,7 @@ object FrmSelectGPX: TFrmSelectGPX
       TabOrder = 0
       Value = 1
       OnChange = SpinPercentChange
-      OnKeyUp = SpinPercentKeyUp
+      OnKeyUp = SpinKeyUp
     end
   end
   object PopupMenu: TPopupMenu
@@ -192,9 +219,17 @@ object FrmSelectGPX: TFrmSelectGPX
     end
   end
   object PercTimer: TTimer
-    Interval = 250
+    Enabled = False
+    Interval = 500
     OnTimer = PercTimerTimer
     Left = 120
+    Top = 120
+  end
+  object TrackDistTimer: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = TrackDistTimerTimer
+    Left = 184
     Top = 120
   end
 end

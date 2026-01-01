@@ -29,6 +29,9 @@ type
     SpinPercent: TSpinEdit;
     LblPercent: TLabel;
     PercTimer: TTimer;
+    LblMinTrackDist: TLabel;
+    SpinMinTrackPtDist: TSpinEdit;
+    TrackDistTimer: TTimer;
     procedure CheckAll1Click(Sender: TObject);
     procedure CheckNone1Click(Sender: TObject);
     procedure CmbOverruleColorClick(Sender: TObject);
@@ -38,7 +41,9 @@ type
     procedure LvTracksClick(Sender: TObject);
     procedure SpinPercentChange(Sender: TObject);
     procedure PercTimerTimer(Sender: TObject);
-    procedure SpinPercentKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure SpinKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure SpinMinTrackPtDistChange(Sender: TObject);
+    procedure TrackDistTimerTimer(Sender: TObject);
   private
     { Private declarations }
     FOnGetPreviewInfo: TOnGetPreviewInfo;
@@ -152,10 +157,25 @@ begin
   else
     CmbOverruleColor.Text := DisplayColor;
 
+  SpinMinTrackPtDist.Tag := 1;
+  try
+    if (Assigned(FGPXObject)) then
+      SpinMinTrackPtDist.Value := TGPXFile(FGPXObject).ProcessOptions.MinDistTrackPoint
+    else
+      SpinMinTrackPtDist.Value := TProcessOptions.GetMinDistTrackPoints;
+  finally
+    SpinMinTrackPtDist.Tag := 0;
+  end;
+
   // Init Percentage
   if (PnlPreview.Visible) then
   begin
-    SpinPercent.Value := TProcessOptions.GetTrk2RtExportPerc;
+    SpinPercent.Tag := 1;
+    try
+      SpinPercent.Value := TProcessOptions.GetTrk2RtExportPerc;
+    finally
+      SpinPercent.Tag := 0;
+    end;
     SpinPercentChange(SpinPercent);
   end;
 end;
@@ -180,13 +200,23 @@ begin
   end;
 end;
 
+procedure TFrmSelectGPX.SpinMinTrackPtDistChange(Sender: TObject);
+begin
+  if (SpinMinTrackPtDist.Tag <> 0) then
+    exit;
+  TrackDistTimer.Enabled := false;
+  TrackDistTimer.Enabled := true;
+end;
+
 procedure TFrmSelectGPX.SpinPercentChange(Sender: TObject);
 begin
+  if (SpinPercent.Tag <> 0) then
+    exit;
   PercTimer.Enabled := false;
   PercTimer.Enabled := true;
 end;
 
-procedure TFrmSelectGPX.SpinPercentKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TFrmSelectGPX.SpinKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key = VK_NEXT) then
     with TSpinEdit(Sender) do
@@ -204,7 +234,8 @@ begin
 end;
 
 procedure TFrmSelectGPX.CheckNone1Click(Sender: TObject);
-var LVItem: TListItem;
+var
+  LVItem: TListItem;
 begin
   for LVItem in LvTracks.Items do
     LVItem.Checked := false;
@@ -240,6 +271,31 @@ procedure TFrmSelectGPX.FormShow(Sender: TObject);
 begin
   if (LvTracks.Items.Count > 0) then
     LvTracks.Items[0].Selected := true;
+end;
+
+procedure TFrmSelectGPX.TrackDistTimerTimer(Sender: TObject);
+var
+  CrWait, CrNormal: HCURSOR;
+begin
+  TrackDistTimer.Enabled := false;
+
+  if not Assigned(FGPXObject) then
+    exit;
+
+  CrWait := LoadCursor(0,IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  try
+    with TGPXFile(FGPXObject) do
+    begin
+      ProcessOptions.MinDistTrackPoint := SpinMinTrackPtDist.Value;
+      AnalyzeGpx;
+      AddSelectTracks(FTagsToShow);
+      LoadTracks(FTagsToShow, '', FCheckMask, FGPXObject, FOnGetPreviewInfo)
+    end;
+  finally
+    SpinMinTrackPtDist.SetFocus;
+    SetCursor(CrNormal);
+  end;
 end;
 
 function TFrmSelectGPX.TrackSelectedColor(const TrackName, RteTrk: string): string;

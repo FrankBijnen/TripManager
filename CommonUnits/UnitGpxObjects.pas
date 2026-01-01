@@ -168,6 +168,7 @@ type
                        const OutStringList: TStringList = nil;
                        const SeqNo: cardinal = 0); overload;
     destructor Destroy; override;
+    procedure AddSelectTracks(const TagsToShow: TTagsToShow);
     function ShowSelectTracks(const TagsToShow: TTagsToShow;
                               const Caption, SubCaption, CheckMask: string;
                               const AGetPreviewInfo: TOnGetPreviewInfo): boolean;
@@ -1357,6 +1358,7 @@ procedure TGPXfile.ProcessGPX;
 var
   GpxNode: TXmlVSNode;
 begin
+  MinTrackDistKms := FProcessOptions.GetMinTrackDistKms;
   ClearGlobals;
   try
     FXmlDocument.LoadFromFile(FGPXFile);
@@ -1520,14 +1522,15 @@ begin
   ProcessGPX;
 end;
 
-function TGPXfile.ShowSelectTracks(const TagsToShow: TTagsToShow;
-                                   const Caption, SubCaption, CheckMask: string;
-                                   const AGetPreviewInfo: TOnGetPreviewInfo): boolean;
+// Add AllTracks to FrmSelectGpx
+procedure TGPXfile.AddSelectTracks(const TagsToShow: TTagsToShow);
 var
   Track, RoutePoints: TXmlVSNode;
   DisplayColor, RteTrk: string;
   ChildNodeCount: string;
 begin
+  FrmSelectGPX.AllTracks.Clear;
+  // Add Wpt line
   case TagsToShow of
     TTagsToShow.WptRte,
     TTagsToShow.WptTrk,
@@ -1540,6 +1543,8 @@ begin
                                      'Wpt');
       end;
   end;
+
+  // Add Rte or Trk lines
   for Track in FTrackList do
   begin
     RteTrk := FindSubNodeValue(Track, 'desc');
@@ -1572,6 +1577,15 @@ begin
                                Track.Name + #9 +
                                RteTrk);
   end;
+end;
+
+// Display the Track selection dialog
+function TGPXfile.ShowSelectTracks(const TagsToShow: TTagsToShow;
+                                   const Caption, SubCaption, CheckMask: string;
+                                   const AGetPreviewInfo: TOnGetPreviewInfo): boolean;
+begin
+  AddSelectTracks(TagsToShow);
+
   FrmSelectGPX.LoadTracks(TagsToShow, ProcessOptions.TrackColor, CheckMask, Self, AGetPreviewInfo);
   FrmSelectGPX.Caption := Caption;
   FrmSelectGPX.PnlTop.Caption := SubCaption;
