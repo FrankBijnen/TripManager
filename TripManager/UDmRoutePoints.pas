@@ -525,6 +525,8 @@ begin
         ANItem := TLocation(Location).LocationTmName;
         if (Assigned(ANItem)) then
           CdsRoutePointsName.AsString := TmName(ANItem).AsString;
+        if (CdsRoutePointsName.AsString = '') then
+          SetDefaultName(IdToInsert);
 
         // TmAddress
         ANItem := TLocation(Location).LocationTmAddress;

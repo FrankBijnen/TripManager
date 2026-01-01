@@ -2760,6 +2760,7 @@ var
   ViaShapeObject: TObject;
 begin
   case (TripList.TripModel) of
+    TTripModel.Zumo590,
     TTripModel.Zumo3x0:
       begin
         ViaShapeObject := LocationTmShaping;

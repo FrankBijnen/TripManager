@@ -495,8 +495,8 @@ begin
   TripModels.Add(XT2_Name);
   TripModels.Add(Tread2_Name);
   TripModels.Add(Zumo595Name);
-  TripModels.Add(Zumo590Name);
   TripModels.Add(Drive51Name);
+  TripModels.Add(Zumo590Name);
   TripModels.Add(Zumo3x0Name);
   TripModels.Add(Nuvi2595Name);
   TripModels.Add(UnknownName);
