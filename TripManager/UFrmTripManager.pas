@@ -667,7 +667,7 @@ begin
       result.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
       result.GarminModel := TModelConv.GetModelFromDescription(result.ModelDescription);
       case result.GarminModel of
-        TGarminModel.Zumo59x,
+        TGarminModel.Zumo595,
         TGarminModel.Drive51,
         TGarminModel.Zumo3x0:
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
@@ -961,7 +961,7 @@ end;
 
 procedure TFrmTripManager.BgDeviceItemsGpxPoiClick(Sender: TObject);
 begin
-  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.Zumo59x, TGarminModel.Drive51]) then
+  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]) then
     Abort;
 end;
 
@@ -2283,7 +2283,7 @@ begin
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
 
   case GarminModel of
-    TGarminModel.Zumo59x,
+    TGarminModel.Zumo595,
     TGarminModel.Drive51:
       begin
         BgDevice.Items[1].Caption := 'Unused';
@@ -2304,9 +2304,9 @@ begin
   end;
 
   SetRegistry(Reg_EnableTripFuncs, (GarminModel in
-     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo59x, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
-  SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo59x, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo59x, TGarminModel.Drive51]));
+     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
+  SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
+  SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableFitFuncs, (GarminModel in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_CurrentModel, ModelIndex);
 
