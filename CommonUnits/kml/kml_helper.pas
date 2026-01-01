@@ -16,17 +16,18 @@ type
   end;
 
   TKMLHelper = class
-    Coordinates : TStringList;
+    FCoordinates : string;
     FPathName : string;
     FTrackName : string;
     FColor: string;
-    FNewDoc : IXMLDocumentType;
-    function NewKMLDocument: IXMLDocumentType;
+    FUseFolder: boolean;
+    FKmlNode: IXMLDocumentType;
+    FDocumentNode: IXMLNode;
+    procedure NewKMLDocument;
     procedure WriteLineStyle(AStyle: IXMLNode; AColor: string = 'Magenta');
     procedure WriteStyle(AStyle: TStyleMap);
     procedure WriteStyleMap(Styles: array of TStyleMap);
-    function WriteFolder(AName:string; ACoordinates:string): IXMLNode;
-
+    function WriteFolder(AName: string; ACoordinates: string): IXMLNode;
     procedure WriteHeader(ARing:boolean = false);
     procedure WritePointsStart(const ATrackName, AColor: string);
     procedure WritePoint(const ALon, ALat, AEle: string);
@@ -44,6 +45,7 @@ type
     var FormatSettings: TFormatSettings;
     constructor Create(APathName: string);
     destructor Destroy; override;
+    property UseFolder: boolean read FUseFolder write FUseFolder;
   end;
 
 const KML_StyleUrl = 'm_ylw-pushpin';
@@ -52,7 +54,8 @@ const KML_StyleUrl = 'm_ylw-pushpin';
 implementation
 
 uses
-  Winapi.ShellAPI, WinApi.Windows, UnitStringUtils;
+  Winapi.ShellAPI, WinApi.Windows,
+  UnitStringUtils;
 
 function KMLColor(GPXColor: string): string;
 var
@@ -62,9 +65,9 @@ begin
   result := Format('ff%s%s%s', [Copy(HTMLColor, 5,2), Copy(HTMLColor, 3, 2), Copy(HTMLColor, 1, 2)]);
 end;
 
-function GetNodeAsType(ANewDoc: IXMLNode; Aname: string; SomeType: TXMLNodeClass): IXMLNode;
+function AddTypedNode(AParent: IXMLNode; AName: string; SomeType: TXMLNodeClass): IXMLNode;
 begin
-  result := (ANewDoc as IXMLNodeAccess).AddChild(AName, TargetNamespace, SomeType);
+  result := (AParent as IXMLNodeAccess).AddChild(AName, TargetNamespace, SomeType);
 end;
 
 constructor TStyleMap.Create(Akey, AStyle: string; AScale: double);
@@ -87,7 +90,7 @@ end;
 procedure TKMLHelper.WriteStyle(AStyle: TStyleMap);
 var Style: IXMLNode;
 begin
-  Style := GetNodeAsType(FNewDoc, 'Style', TXMLStyleType);
+  Style := AddTypedNode(FDocumentNode, 'Style', TXMLStyleType);
   with Style as IXMLStyleType do
   begin
     Id := Astyle.Style;
@@ -111,7 +114,7 @@ procedure TKMLHelper.WriteStyleMap(Styles:array of TStyleMap);
 var StyleMap  : IXMLNode;
     Style     : TStyleMap;
 begin
-  StyleMap := GetNodeAsType(FNewDoc, 'StyleMap', TXMLStyleMapType);
+  StyleMap := AddTypedNode(FDocumentNode, 'StyleMap', TXMLStyleMapType);
   with StyleMap as IXMLStyleMapType do
   begin
     Id := KML_StyleUrl;
@@ -130,53 +133,49 @@ procedure TKMLHelper.WritePointsStart(const ATrackName, AColor: string);
 begin
   FTrackName := ATrackName;
   FColor := AColor;
-  Coordinates.Clear;
+  SetLength(FCoordinates, 0);
 end;
 
 procedure TKMLHelper.WritePoint(const ALon, ALat, AEle: string);
 begin
-  Coordinates.Add(Format('%s,%s,%s ',
-                          [ALon, ALat, AEle]));
+  FCoordinates := FCoordinates + Format('%s,%s,%s ', [ALon, ALat, AEle]);
 end;
 
-function TKMLHelper.WriteFolder(AName:string; ACoordinates:string): IXMLNode;
+function TKMLHelper.WriteFolder(AName: string; ACoordinates: string): IXMLNode;
 var
   PlaceMark     : IXMLNode;
-  MultiGeometry : IXMLNode;
   LineString    : IXMLNode;
 begin
-  result := GetNodeAsType(FNewDoc, 'Folder', TXMLFolderType);
-  with result as IXMLFolderType do
+  result := FDocumentNode;
+  if (FUseFolder) then
   begin
-    Name := AName;
-    PlaceMark := GetNodeAsType(result, 'Placemark', TXMLPlacemarkType);
-    with PlaceMark as IXMLPlacemarkType do
-    begin
-      Name := Format('Track %s', [AName]);
-// Doesn't work with Google Maps
-//      StyleUrl := '#'+ KML_StyleUrl;
-      WriteLineStyle(GetNodeAsType(PlaceMark, 'Style', TXMLStyleType), FColor);
-      MultiGeometry := GetNodeAsType(PlaceMark, 'MultiGeometry', TXMLMultiGeometryType);
-      LineString := GetNodeAsType(MultiGeometry, 'LineString', TXMLLineStringType);
-      with LineString as IXMLLineStringType do
-        Coordinates := ACoordinates;
-    end;
+    result := AddTypedNode(FDocumentNode, 'Folder', TXMLFolderType);
+    with result as IXMLFolderType do
+      Name := AName;
+  end;
+
+  PlaceMark := AddTypedNode(result, 'Placemark', TXMLPlacemarkType);
+  with PlaceMark as IXMLPlacemarkType do
+  begin
+    Name := Format('Track %s', [AName]);
+    WriteLineStyle(AddTypedNode(PlaceMark, 'Style', TXMLStyleType), FColor);
+    LineString := AddTypedNode(PlaceMark, 'LineString', TXMLLineStringType);
+    with LineString as IXMLLineStringType do
+      Coordinates := ACoordinates;
   end;
 end;
 
 function TKMLHelper.WritePointsEnd: IXMLNode;
 begin
-  Result := WriteFolder(FTrackName, Coordinates.Text);
-  Coordinates.Clear;
+  Result := WriteFolder(FTrackName, FCoordinates);
+  SetLength(FCoordinates, 0)
 end;
 
 function TKMLHelper.WritePlacesStart(AName: string): IXMLNode;
 begin
-  Result := GetNodeAsType(FNewDoc, 'Folder', TXMLFolderType);
+  Result := AddTypedNode(FDocumentNode, 'Folder', TXMLFolderType);
   with Result as IXMLFolderType do
-  begin
     Name := AName;
-  end;
 end;
 
 procedure TKMLHelper.WritePlace(AFolder: IXMLNode;
@@ -187,16 +186,14 @@ var
   PlaceMark : IXMLNode;
   Point     : IXMLNode;
 begin
-  PlaceMark := GetNodeAsType(AFolder, 'Placemark', TXMLPlacemarkType);
+  PlaceMark := AddTypedNode(AFolder, 'Placemark', TXMLPlacemarkType);
   with PlaceMark as IXMLPlacemarkType do
   begin
     Name := AName;
     Description := ADescription;
-    Point := GetNodeAsType(PlaceMark, 'Point', TXMLPointType);
+    Point := AddTypedNode(PlaceMark, 'Point', TXMLPointType);
     with Point as IXMLPointType do
-    begin
       Coordinates := ACoordinates
-    end;
   end;
 end;
 
@@ -225,26 +222,27 @@ begin
 
 end;
 
-function TKMLHelper.NewKMLDocument: IXMLDocumentType;
+procedure TKMLHelper.NewKMLDocument;
 begin
-  result := NewDocument;
-  result.Name := ChangeFileExt(ExtractFileName(FPathName), '');
+  FKmlNode := NewXMLDocument.GetDocBinding('kml', TXMLDocumentType, TargetNamespace) as IXMLDocumentType;
+  FDocumentNode := FKmlNode.AddChild('Document');
+  FDocumentNode.AddChild('name').NodeValue := ChangeFileExt(ExtractFileName(FPathName), '');
 end;
 
 constructor TKMLHelper.Create(APathName: string);
 begin
   inherited Create;
-  Coordinates := TStringList.Create;
 
+  FUseFolder := true;
   FPathName := APathName;
-  FNewDoc := NewKMLDocument;
+  NewKMLDocument;
 end;
 
 destructor TKMLHelper.Destroy;
 begin
-  FNewDoc := nil;
+  FKmlNode := nil;
+  FDocumentNode := nil;
   FPathName := '';
-  Coordinates.Free;
 
   inherited Destroy;
 end;
@@ -252,10 +250,25 @@ end;
 procedure TKMLHelper.WriteKml;
 var
   XmL: IXMLDocument;
+  Kml: IXMLNode;
 begin
-  XmL := TXMLDocument.Create(nil);
-  Xml.XML.Add(FNewDoc.XML);
-  Xml.Active:=true;
+  // Create a Document. UTF-8 and formatted.
+  XML := NewXMLDocument;
+
+  // Add Kml node
+  Kml := LoadXMLData(FKmlNode.XML).Node;
+  if (Kml.ChildNodes.Count > 0) then
+    XML.ChildNodes.Add(Kml.ChildNodes[0]);
+
+  // Format XML. Option?
+  Xml.Xml.Text := FormatXMLData(Xml.XML.Text);
+  Xml.Active := true;
+
+  XML.Encoding := 'utf-8';
+  XML.Options := [doNodeAutoIndent];
+  XML.ParseOptions := [poPreserveWhiteSpace];
+
+  // Save
   Xml.SaveToFile(FPathName);
 end;
 

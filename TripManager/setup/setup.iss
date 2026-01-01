@@ -71,6 +71,7 @@ Source: "Trk2Rt\Trk2Rt.exe";              DestDir: "{app}";             Componen
 Source: "Trk2Rt\vc_redist.x64.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion
 
 [Registry]
+// .GPX associations
 Root: HKCR; Subkey: "SystemFileAssociations\.gpx"; \
             Flags: uninsdeletekey; Components: Trk2RT;
 Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell"; \
@@ -101,6 +102,38 @@ Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\b_open
 Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\b_openintrk2rt\command"; \
             ValueType: string; ValueData: """{app}\Trk2Rt.exe"" ""%L""";  \
             Flags: uninsdeletekey;  Components: Trk2RT;
+            
+// .KML associations
+Root: HKCR; Subkey: "SystemFileAssociations\.kml"; \
+            Flags: uninsdeletekey; Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell"; \
+            Flags: uninsdeletekey; Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction"; \
+            Flags: uninsdeletekey; Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction"; \
+            ValueName: "MUIVerb"; ValueType: string; ValueData: "Trk2RT"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction"; \
+            ValueName: "subcommands"; ValueType: string; ValueData: ""; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell";  \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\a_routefromtrack"; \
+            ValueType: string; ValueData: "Create route from track"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\a_routefromtrack\command"; \
+            ValueType: string; ValueData: """{app}\Trk2Rt.cmd"" ""%L""";  \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\b_openintrk2rt"; \
+            ValueType: string; ValueData: "Open in TRk2RT"; \
+            Flags: uninsdeletekey;  Components: Trk2RT;
+Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\b_openintrk2rt\command"; \
+            ValueType: string; ValueData: """{app}\Trk2Rt.exe"" ""%L""";  \
+            Flags: uninsdeletekey;  Components: Trk2RT;            
 
 [InstallDelete]
 

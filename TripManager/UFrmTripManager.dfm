@@ -964,7 +964,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1264
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -972,7 +971,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

@@ -4169,9 +4169,9 @@ object FrmTripEditor: TFrmTripEditor
       Caption = 'Import'
       OnClick = ImportGPXClick
     end
-    object rk2RtImport1: TMenuItem
+    object Trk2RtImport1: TMenuItem
       Caption = 'Trk2Rt + Import'
-      OnClick = rk2RtImport1Click
+      OnClick = Trk2RtImport1Click
     end
     object ExportGpx: TMenuItem
       Caption = 'Export'

@@ -3,7 +3,7 @@ object FrmSelectGPX: TFrmSelectGPX
   Top = 0
   Caption = 'Select from GPX'
   ClientHeight = 307
-  ClientWidth = 489
+  ClientWidth = 515
   Color = clBtnFace
   CustomTitleBar.CaptionAlignment = taCenter
   Font.Charset = DEFAULT_CHARSET
@@ -18,9 +18,9 @@ object FrmSelectGPX: TFrmSelectGPX
   TextHeight = 13
   object LvTracks: TListView
     Left = 0
-    Top = 61
-    Width = 489
-    Height = 217
+    Top = 83
+    Width = 515
+    Height = 195
     Align = alClient
     Checkboxes = True
     Columns = <
@@ -29,8 +29,8 @@ object FrmSelectGPX: TFrmSelectGPX
         Width = 255
       end
       item
-        Caption = 'Rte/Trk'
-        Width = 55
+        Caption = 'Wpt/Rte/Trk'
+        Width = 75
       end
       item
         Caption = 'Color'
@@ -44,15 +44,16 @@ object FrmSelectGPX: TFrmSelectGPX
     MultiSelect = True
     ReadOnly = True
     RowSelect = True
-    PopupMenu = PopupMenu1
+    PopupMenu = PopupMenu
     ShowWorkAreas = True
     TabOrder = 0
     ViewStyle = vsReport
+    OnClick = LvTracksClick
   end
   object PnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 489
+    Width = 515
     Height = 29
     Align = alTop
     Caption = 'Select Routes/Tracks'
@@ -61,15 +62,15 @@ object FrmSelectGPX: TFrmSelectGPX
   object PnlBot: TPanel
     Left = 0
     Top = 278
-    Width = 489
+    Width = 515
     Height = 29
     Align = alBottom
     TabOrder = 2
     DesignSize = (
-      489
+      515
       29)
     object BitBtnOK: TBitBtn
-      Left = 296
+      Left = 322
       Top = 2
       Width = 75
       Height = 25
@@ -79,7 +80,7 @@ object FrmSelectGPX: TFrmSelectGPX
       TabOrder = 0
     end
     object BitBtnCan: TBitBtn
-      Left = 377
+      Left = 403
       Top = 2
       Width = 75
       Height = 25
@@ -92,7 +93,7 @@ object FrmSelectGPX: TFrmSelectGPX
   object PnlColor: TPanel
     Left = 0
     Top = 29
-    Width = 489
+    Width = 515
     Height = 32
     Align = alTop
     TabOrder = 3
@@ -132,7 +133,53 @@ object FrmSelectGPX: TFrmSelectGPX
         'Yellow')
     end
   end
-  object PopupMenu1: TPopupMenu
+  object PnlPreview: TPanel
+    Left = 0
+    Top = 61
+    Width = 515
+    Height = 22
+    Align = alTop
+    TabOrder = 4
+    object LblPreview: TLabel
+      Left = 173
+      Top = 1
+      Width = 341
+      Height = 20
+      Align = alClient
+      Alignment = taCenter
+      Caption = 'LblPreview'
+      Layout = tlCenter
+      WordWrap = True
+      ExplicitWidth = 51
+      ExplicitHeight = 13
+    end
+    object LblPercent: TLabel
+      Left = 1
+      Top = 1
+      Width = 112
+      Height = 20
+      Align = alLeft
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'exportPercent ('#8240') '
+      Layout = tlCenter
+    end
+    object SpinPercent: TSpinEdit
+      Left = 113
+      Top = 1
+      Width = 60
+      Height = 22
+      Align = alLeft
+      AutoSize = False
+      MaxValue = 1000
+      MinValue = 1
+      TabOrder = 0
+      Value = 1
+      OnChange = SpinPercentChange
+      OnKeyUp = SpinPercentKeyUp
+    end
+  end
+  object PopupMenu: TPopupMenu
     Left = 32
     Top = 112
     object CheckAll1: TMenuItem
@@ -143,5 +190,11 @@ object FrmSelectGPX: TFrmSelectGPX
       Caption = 'Check None'
       OnClick = CheckNone1Click
     end
+  end
+  object PercTimer: TTimer
+    Interval = 250
+    OnTimer = PercTimerTimer
+    Left = 120
+    Top = 120
   end
 end

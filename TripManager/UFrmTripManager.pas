@@ -1569,9 +1569,10 @@ begin
   GPXFileObj := TGPXTripCompare.Create(OpenTrip.FileName, ATripList, FrmShowLog.GpxRptList);
   try
     GPXFileObj.AnalyzeGpx;
-    GpxSelected := GPXFileObj.ShowSelectTracks('Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
+    GpxSelected := GPXFileObj.ShowSelectTracks(TagsToShow,
+                                              'Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
                                                'Select 1 Route or Track',
-                                               TagsToShow, ATripList.GetValue('mTripName'));
+                                               ATripList.GetValue('mTripName'), nil);
     if (GpXSelected) then
     begin
       SetCursor(CrWait);

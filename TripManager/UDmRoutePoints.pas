@@ -69,7 +69,8 @@ type
     procedure LookUpAddress;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure ImportFromGPX(const GPXFile: string);
-    procedure Trk2RtImportFromGPX(const GPXFile: string);
+    function Trk2RtPreview(GPXFileObj: TObject; UpdateDb: boolean): integer;
+    function Trk2RtImportFromGPX(const GPXFile: string; const UpdateDB: boolean = false): integer;
     procedure ExportToGPX(const GPXFile: string);
     procedure ImportFromCSV(const CSVFile: string);
     procedure ExportToCSV(const CSVFile: string);
@@ -706,9 +707,9 @@ begin
   try
     GPXFileObj.AnalyzeGpx;
     SetCursor(CrNormal);
-    if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
-                                    'Select Waypoints/Routes',
-                                     TTagsToShow.WptRte, CdsRouteTripName.AsString)) then
+    if (GPXFileObj.ShowSelectTracks(TTagsToShow.WptRte,
+                                    'Import route points from: ' + ExtractFileName(GPXFile),
+                                    'Select Waypoints/Routes', CdsRouteTripName.AsString, nil)) then
     begin
       if (CdsRoute.State in [dsEdit, dsInsert]) then
         CdsRoute.Post;
@@ -758,7 +759,7 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.Trk2RtImportFromGPX(const GPXFile: string);
+function TDmRoutePoints.Trk2RtPreview(GPXFileObj: TObject; UpdateDb: boolean): integer;
 const
   Trk2Rt    = 'Trk2Rt';
   T2R       = 'T2R';
@@ -768,55 +769,70 @@ const
 var
   CrNormal,CrWait: HCURSOR;
   RoutePoints, RoutePoint: TXmlVSNode;
-  GPXFileObj, GpxFileTrkObj: TGPXFile;
+  GpxFileTrkObj: TGPXFile;
   Trk2RtCmdLine, ResOutput, ResError: string;
   ResExit: Dword;
 begin
+  result := 0;
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+  try
+    if (TGPXFile(GPXFileObj).SaveSelectionAsXML(CreatedTempPath + Trk2RtIn) = 0) then
+      exit;
+
+    Trk2RtCmdLine := Format('trk2rt.exe %s "%s"', [TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
+    if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
+      raise Exception.Create('Could not start Trk2Rt.exe. Check installation');
+
+    GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
+    try
+      GpxFileTrkObj.AnalyzeGpx;
+      RoutePoints := GpxFileTrkObj.RouteViaPointList.FirstChild;
+      if (RoutePoints = nil) then
+        exit;
+      result := RoutePoints.ChildNodes.Count;
+      if (UpdateDB) then
+      begin
+        for RoutePoint in RoutePoints.ChildNodes do
+          AddRoutePoint(RoutePoint, false);
+      end;
+    finally
+      GpxFileTrkObj.Free;
+    end;
+  finally
+    SetCursor(CrNormal);
+  end;
+end;
+
+function TDmRoutePoints.Trk2RtImportFromGPX(const GPXFile: string; const UpdateDB: boolean = false): integer;
+var
+  GPXFileObj: TGPXFile;
+begin
+  result := 0;
   GPXFileObj := TGPXFile.Create(GPXFile, OnSetAnalyzePrefs, nil);
   try
-    GPXFileObj.AnalyzeGpx;
-    SetCursor(CrNormal);
-    if (GPXFileObj.ShowSelectTracks('Import route points from: ' + ExtractFileName(GPXFile),
-                                    'Select Waypoints/Routes/Tracks',
-                                     TTagsToShow.WptRteTrk, CdsRouteTripName.AsString)) then
-    begin
-      if (CdsRoute.State in [dsEdit, dsInsert]) then
-        CdsRoute.Post;
-      if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-        CdsRoutePoints.Post;
+    if (CdsRoute.State in [dsEdit, dsInsert]) then
+      CdsRoute.Post;
+    if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+      CdsRoutePoints.Post;
 
-      CdsRoutePoints.DisableControls;
-      try
-        CdsRoutePoints.Last;  // Add to Route Points at end of list
-        GPXFileObj.SaveSelectionAsXML(CreatedTempPath + Trk2RtIn);
-//TODO ExportPercent=
-//TODO Needs Visual C runtime!
-        Trk2RtCmdLine := Format('trk2rt.exe %s "%s"', [TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
-        if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
-          raise Exception.Create('Could not start Trk2Rt.exe. Check installation');
-//TODO Output GPX
-        GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
-        try
-          GpxFileTrkObj.AnalyzeGpx;
-          RoutePoints := GpxFileTrkObj.RouteViaPointList.FirstChild;
-          if (RoutePoints = nil) then
-            exit;
-          for RoutePoint in RoutePoints.ChildNodes do
-            AddRoutePoint(RoutePoint, false);
-        finally
-          GpxFileTrkObj.Free;
-        end;
-      finally
-        CdsRoutePoints.EnableControls;
-        if Assigned(OnRouteUpdated) then
-          OnRouteUpdated(Self);
-      end;
+    CdsRoutePoints.DisableControls;
+    CdsRoutePoints.Last;  // Add to Route Points at end of list
+    try
+      GPXFileObj.AnalyzeGpx;
+      if (GPXFileObj.ShowSelectTracks(TTagsToShow.WptRteTrk,
+                                      'Import route points from: ' + ExtractFileName(GPXFile),
+                                      'Select Waypoints/Routes/Tracks',
+                                       CdsRouteTripName.AsString, Trk2RtPreview)) then
+        Trk2RtPreview(GPXFileObj, true);
+
+    finally
+      CdsRoutePoints.EnableControls;
+      if Assigned(OnRouteUpdated) then
+        OnRouteUpdated(Self);
     end;
   finally
     GPXFileObj.Free;
-    SetCursor(CrNormal);
   end;
 end;
 

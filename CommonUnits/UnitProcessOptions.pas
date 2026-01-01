@@ -157,11 +157,14 @@ type
     function DistanceStr: string;
     function GetDistOKKms: double;
     function GetMinShapeDistKms: double;
+    function GetMinTrackDistKms: double;
     {$IFDEF TRIPOBJECTS}
     function TripTrackColor: string;
     function SpeedFromRoadClass(const RoadClass: string): integer;
     function ComputeTime(const RoadClass: string; const Dist: Double): double;
     class function Trk2RtOptions: string;
+    class procedure SetTrk2RtExportPerc(AValue: integer);
+    class function GetTrk2RtExportPerc: integer;
     class function DescriptionFromRoadClass(const RoadClass: byte): string;
     class function UnsafeModels: boolean;
     class function MaxViaPoints: integer;
@@ -180,6 +183,9 @@ uses
   UnitRegistryKeys,
 {$ENDIF}
   UnitStringUtils;
+
+var
+  FormatSettings: TFormatSettings;
 
 constructor TProcessOptions.Create(OnSetFuncPrefs: TNotifyEvent = nil; OnSavePrefs: TNotifyEvent = nil);
 begin
@@ -349,6 +355,11 @@ begin
   result := MinShapeDist / 1000;
 end;
 
+function TProcessOptions.GetMinTrackDistKms: double;
+begin
+  result := MinDistTrackPoint / 1000;
+end;
+
 {$IFDEF TRIPOBJECTS}
 function TProcessOptions.TripTrackColor: string;
 begin
@@ -370,7 +381,19 @@ end;
 
 class function TProcessOptions.Trk2RtOptions: string;
 begin
-  result := GetRegistry(Reg_Trk2RtOptions_Key, Reg_Trk2RtOptions_Val);
+  result := Format('%s exportPercent=%1.2f',
+                   [GetRegistry(Reg_Trk2RtOptions_Key, Reg_Trk2RtOptions_Val),
+                    TProcessOptions.GetTrk2RtExportPerc / 10], FormatSettings);
+end;
+
+class procedure TProcessOptions.SetTrk2RtExportPerc(AValue: integer);
+begin
+  SetRegistry(Reg_Trk2RtExportPerc_Key, AValue);
+end;
+
+class function TProcessOptions.GetTrk2RtExportPerc: integer;
+begin
+  result := GetRegistry(Reg_Trk2RtExportPerc_Key, Reg_Trk2RtExportPerc_Val);
 end;
 
 class function TProcessOptions.DescriptionFromRoadClass(const RoadClass: byte): string;
@@ -404,5 +427,10 @@ begin
   result := GetRegistry(Reg_MaxViaPoints_Key, Reg_MaxViaPoints_Val);
 end;
 {$ENDIF}
+
+initialization
+begin
+  FormatSettings := GetLocaleSetting;
+end;
 
 end.
