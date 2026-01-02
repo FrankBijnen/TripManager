@@ -43,6 +43,8 @@ function GetColumns(const Db: TSQLiteDatabase;
 procedure ExecSqlQuery(const DbName: string;
                        const Query: string;
                        const Results: TSqlResults);
+function ExecUpdateSql(const DbName: string;
+                       const Query: string): int64;
 function GetAvoidancesChanged(const DbName: string): string;
 function GetVehicleProfile(const DbName: string;
                            const Model: TGarminModel): TVehicleProfile;
@@ -153,7 +155,7 @@ begin
   if not SQLite3Loaded then
     exit(nil);
 
-  Db := TSQLiteDatabase.Create(DbName);
+  Db := TSQLiteDatabase.Create(DbName, true);
   try
     result := GetColumns(Db, TabName);
   finally
@@ -168,7 +170,7 @@ begin
   if not SQLite3Loaded then
     exit;
 
-  DB := TSqliteDatabase.Create(DBName);
+  DB := TSqliteDatabase.Create(DBName, true);
   try
     TableNames(DB, TabList);
   finally
@@ -188,7 +190,7 @@ begin
   if not SQLite3Loaded then
     exit;
 
-  DB := TSqliteDatabase.Create(DBName);
+  DB := TSqliteDatabase.Create(DBName, true);
   try
     QTab := Db.GetTable(Query);
     try
@@ -203,6 +205,24 @@ begin
     finally
       QTab.Free
     end;
+  finally
+    DB.Free;
+  end;
+end;
+
+function ExecUpdateSql(const DbName: string;
+                       const Query: string): int64;
+var
+  DB: TSQLiteDatabase;
+begin
+  result := 0;
+  if not SQLite3Loaded then
+    exit;
+
+  DB := TSqliteDatabase.Create(DBName, false);
+  try
+    DB.ExecSQL(Query);
+    result := DB.TotalChanges;
   finally
     DB.Free;
   end;
@@ -249,7 +269,7 @@ begin
     exit;
 
   AddedFields := TStringList.Create;
-  DB := TSqliteDatabase.Create(DBName);
+  DB := TSqliteDatabase.Create(DBName, true);
   try
     QTab := Db.GetTable(Query);
     ACds.Close;

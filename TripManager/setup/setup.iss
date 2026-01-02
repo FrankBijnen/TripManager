@@ -38,8 +38,8 @@ Name: ExecutableWin64;                  Description: "Install Executable (Win64)
 Name: Symbols;                          Description: "Install Symbols";                             types: full;
 Name: Docs;                             Description: "Install Documentation";                       types: full;
 ; 
-Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Never;
-;Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Win64;
+;Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Never;
+Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Win64;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";

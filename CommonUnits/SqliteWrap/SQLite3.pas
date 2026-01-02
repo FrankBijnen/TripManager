@@ -125,6 +125,9 @@ const
   SQLITE_STATIC    {: TSQLite3Destructor} = Pointer(0);
   SQLITE_TRANSIENT {: TSQLite3Destructor} = Pointer(-1);
 
+  SQLITE_OPEN_READONLY  = $00000001;
+  SQLITE_OPEN_READWRITE = $00000002;
+
 type
   TSQLiteDB = Pointer;
   TSQLiteResult = ^PAnsiChar;
@@ -148,6 +151,7 @@ var SQLite3_Initialize: function(): integer; cdecl;
 var SQLite3_ShutDown: function(): integer; cdecl;
 
 var SQLite3_Open: function(filename: PAnsiChar; var db: TSQLiteDB): integer; cdecl;
+var SQLite3_Open_V2: function(filename: PAnsiChar; var db: TSQLiteDB; flags:integer; zVfs: PAnsiChar): integer; cdecl;
 var SQLite3_Close: function(db: TSQLiteDB): integer; cdecl;
 var SQLite3_Exec: function(db: TSQLiteDB; SQLStatement: PAnsiChar; CallbackPtr: TSQLiteExecCallback; UserData: Pointer; var ErrMsg: PAnsiChar): integer; cdecl;
 var SQLite3_Version: function(): PAnsiChar; cdecl;
@@ -352,6 +356,7 @@ begin
   SQLite3_ShutDown := GetProcAddress(SqlLib, 'sqlite3_shutdown');
 
   SQLite3_Open := GetProcAddress(SqlLib, 'sqlite3_open');
+  SQLite3_Open_V2 := GetProcAddress(SqlLib, 'sqlite3_open_v2');
   SQLite3_Close := GetProcAddress(SqlLib, 'sqlite3_close');
   SQLite3_Exec := GetProcAddress(SqlLib, 'sqlite3_exec');
   SQLite3_Version := GetProcAddress(SqlLib, 'sqlite3_libversion');

@@ -21,6 +21,7 @@ const
   CLIENT_MAJOR_VER = 1;
   CLIENT_MINOR_VER = 1;
   CLIENT_REVISION  = 0;
+  DEF_BUFFERSIZE   = 512 * 1024;
 
 const
   CLSID_WPD_NAMESPACE_EXTENSION: TGUID = '{35786D3C-B075-49B9-88DD-029876E11C01}';
@@ -1370,8 +1371,8 @@ begin
     Res_Prop.pid := WPD_RESOURCE_DEFAULT_PID;
 
     //request stream
-    ITransferSize := 0;
-    if Resources.GetStream(PWideChar(SFile), Res_Prop, 0, ITransferSize, FDevStream) = S_OK then
+    ITransferSize := DEF_BUFFERSIZE;
+    if Resources.GetStream(PWideChar(SFile), Res_Prop, STGM_READ, ITransferSize, FDevStream) = S_OK then
     begin
       SetLength(Buf, ITransferSize);
       FFileStream := TFileStream.Create(IncludeTrailingPathDelimiter(SSaveTo) + NFile, fmCreate);

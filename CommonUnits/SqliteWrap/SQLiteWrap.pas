@@ -143,7 +143,7 @@ type
       Pass FileName as AnsiString (if you are not using Unicode Delphi version)
       or as UnicodeString (on Delphi 2009 and higher)!
     }
-    constructor Create(const FileName: String);
+    constructor Create(const FileName: String; const ReadOnly: boolean);
     {: Class descructor. Call Free instead.}
     destructor Destroy; override;
     {: Run SQL command without result.
@@ -338,7 +338,7 @@ end;
 
 { TSQLiteDatabase }
 
-constructor TSQLiteDatabase.Create(const FileName: String);
+constructor TSQLiteDatabase.Create(const FileName: String; const ReadOnly: boolean);
 var
   Msg: PAnsiChar;
   iResult: integer;
@@ -348,7 +348,11 @@ begin
   fParams := TList.Create;
   fDb := nil;
   {$IFDEF SQUNI}
-  iResult := SQLite3_Open(PAnsiChar(UTF8String(FileName)), Fdb);
+//    iResult := SQLite3_Open(PAnsiChar(UTF8String(FileName)), Fdb);
+  if (ReadOnly) then
+    iResult := SQLite3_Open_V2(PAnsiChar(UTF8String(FileName)), Fdb, SQLITE_OPEN_READONLY, nil)
+  else
+    iResult := SQLite3_Open_V2(PAnsiChar(UTF8String(FileName)), Fdb, SQLITE_OPEN_READWRITE, nil);
   {$ELSE}
   iResult := SQLite3_Open(PAnsiChar(AnsiToUtf8(FileName)), Fdb);
   {$ENDIF}

@@ -976,10 +976,16 @@ begin
   LblSqlResults.Update;
   try
     DBMemo.Lines.Clear;
-    LblSqlResults.Caption := Format('Records selected: %d',
-                                    [CDSFromQuery(ShellListView1.SelectedFolder.PathName,
-                                                  MemoSQL.Lines.Text,
-                                                  CdsDeviceDb)
+    if not StartsText('select', MemoSQL.Lines.Text) then
+      LblSqlResults.Caption := Format('Records affected: %d',
+                                      [ExecUpdateSql(ShellListView1.SelectedFolder.PathName,
+                                                    MemoSQL.Lines.Text)
+                                      ])
+    else
+      LblSqlResults.Caption := Format('Records selected: %d',
+                                      [CDSFromQuery(ShellListView1.SelectedFolder.PathName,
+                                                    MemoSQL.Lines.Text,
+                                                    CdsDeviceDb)
                                     ]);
   finally
     SetCursor(CrNormal);
@@ -2320,7 +2326,7 @@ end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);
 begin
-  MemoSQL.Lines.Text := Format('Select * from %s limit 100;', [CmbSQliteTabs.Text]);
+  MemoSQL.Lines.Text := Format('Select * from %s limit 1000;', [CmbSQliteTabs.Text]);
   BitBtnSQLGoClick(BitBtnSQLGo);
 end;
 
