@@ -3,6 +3,7 @@
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
 {$ENDIF}
+{.$DEFINE DBG_PROFILE}
 
 interface
 
@@ -510,14 +511,35 @@ var
 begin
   // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+
   SubKey := IntToStr(ModelIndex);
+{$IFDEF DBG_PROFILE}
+DebugMsg(['GetDbPath subkey', SubKey]);
+{$ENDIF}
+
   DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
                                          TModelConv.GetKnownPath(ModelIndex, 0),
                                          SubKey));
+{$IFDEF DBG_PROFILE}
+DebugMsg(['GetDbPath DbPath', DbPath]);
+{$ENDIF}
+
   LDelim := LastDelimiter('\', DbPath) -1;
   DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
   if (GetIdForPath(CurrentDevice.PortableDev, DbPath, result) = '') then
+begin
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['GetDbPath GetIdForPath does not exist.', DbPath]);
+{$ENDIF}
+
     result := '';
+end;
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['GetDbPath result', result]);
+{$ENDIF}
+
 end;
 
 procedure TFrmTripManager.ReadDeviceDB;
@@ -529,19 +551,56 @@ begin
   // Check the connected Device needs reading SQlite
   if not (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
     exit;
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['ReadDeviceDB called']);
+{$ENDIF}
+
   if not CheckDevice(false) then
     exit;
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Device Ready']);
+{$ENDIF}
 
   // SQLite path
   DBPath := GetDbPath;
 
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Looking in Device Path', DBPath, 'File', SettingsDb]);
+{$ENDIF}
+
+  if (DBPath = '') then
+  begin
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Device Path does not exist. Exiting.', DBPath]);
+{$ENDIF}
+    exit;
+  end;
+
   // Copy settings.db, Update Avoidances changed
   if (CopyDeviceFile(DBPath, SettingsDb)) then
+  begin
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Copy Device file OK', DBPath, 'File', SettingsDb]);
+{$ENDIF}
+
     SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Reg_AvoidancesChangedTimeAtSave', GetRegistry(Reg_AvoidancesChangedTimeAtSave, 0)]);
+{$ENDIF}
+
+  end;
   // Copy vehicle_profile.db
   if (CopyDeviceFile(DBPath, ProfileDb)) then
   begin
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Copy Device file OK', DBPath, 'File', ProfileDb]);
+{$ENDIF}
+
     OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
     OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
     OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
@@ -549,7 +608,15 @@ begin
     OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
     OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
 
-    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TGarminModel(TModelConv.Display2Garmin(CmbModel.ItemIndex)));
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(CmbModel.ItemIndex));
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Vehicle_Profile Read', 'Valid:', NewVehicle_Profile.Valid,
+          'Changed:', NewVehicle_Profile.Changed(OldVehicle_Profile),
+          'New Guid:', NewVehicle_Profile.GUID,
+          'New Profile:', NewVehicle_Profile.Name]);
+{$ENDIF}
+
     if (NewVehicle_Profile.Valid) and
        (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
     begin
@@ -568,6 +635,11 @@ begin
       DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
       if not (DefAdvLevel in [1..4]) then
         SetRegistry(Reg_DefAdvLevel,            NewVehicle_Profile.AdventurousLevel +1);
+
+{$IFDEF DBG_PROFILE}
+DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfileGuid, '')]);
+{$ENDIF}
+
     end;
   end;
 end;

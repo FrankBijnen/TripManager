@@ -19,9 +19,6 @@ const
   XT2_VehicleProfileName            = 'z' + #0363 + 'mo Motorcycle';
   // Tread 2 is almost an XT2
   Tread2_Name                       = 'Tread 2';
-  Tread2_VehicleProfileName         = 'Tread Profile';
-  Tread2_VehicleProfileGuid         = 'c21c922c-553f-4783-85f8-c0a13f52d960';
-  Tread2_VehicleProfileHash         = '61578528'; // Not used
   Tread2_TmScPosnSize               = 16;
   Zumo595Name                       = 'zumo 595';
   Zumo590Name                       = 'zumo 590';
@@ -5048,7 +5045,8 @@ begin
     Add(TmRoutePreferences.Create);
     Add(TBooleanItem.Create('mIsDeviceRoute', true));
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
-    Add(TStringItem.Create('mVehicleProfileGuid', Tread2_VehicleProfileGuid));
+    Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
+
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmVersionNumber.Create(4, $10));
