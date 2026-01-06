@@ -130,7 +130,7 @@ const
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       16,       20);
   Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       76,       72,       72,       72,       80);
   Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      294,      254,      130,      134,      512);
-  UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    true,     false);
+  UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     true,     false);
   CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$0170feff,$00000000,$00000000,$00300030,$ffffffff);
   Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $8e,      $66,      $66,      $00,      $00);
   Unknown3DistOffset: array[TTripModel] of integer  =($14,      $14,      $14,      $12,      $12,      $12,      $12,      $12,      $14);
