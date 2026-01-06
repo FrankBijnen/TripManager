@@ -8,25 +8,36 @@ uses
   UnitGpxDefs;
 
 const
-  XT_Name                           = 'zūmo XT';
-  XT2_Name                          = 'zūmo XT2';
-  XT2_VehicleProfileGuid            = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
-  XT2_VehicleProfileHash            = '135656608'; // Not used
+  Zumo_Name                         = 'zūmo';
+
+  // XT
+  XT_Name                           = Zumo_Name + ' XT';
   TmScPosnSize                      = 12;
+
+  // XT2
+  XT2_Name                          = Zumo_Name + ' XT2';
+  XT2_VehicleProfileGuid            = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
   XT2_VehicleId                     = '1';
   XT2_VehicleProfileTruckType       = '7';
   XT2_AvoidancesChangedTimeAtSave   = '';
-  XT2_VehicleProfileName            = 'z' + #0363 + 'mo Motorcycle';
+  XT2_VehicleProfileHash            = '135656608'; // Not used, keep for reference
+  XT2_VehicleProfileName            = Zumo_Name + ' Motorcycle';
+
   // Tread 2 is almost an XT2
   Tread2_Name                       = 'Tread 2';
-  Tread2_TmScPosnSize               = 16;
+  Large_TmScPosnSize                = 16;
+
+  // Older models
   Zumo595Name                       = 'zumo 595';
   Zumo590Name                       = 'zumo 590';
   Drive51Name                       = 'Drive 51';
-  Zumo3x0Name                       = 'zūmo 3x0';
+  Zumo3x0Name                       = Zumo_Name + ' 3x0';
   Nuvi2595Name                      = 'nüvi 2595';
+  Small_TmScPosnSize                = 8; // Also Zumo 590
+
+  // Unknown
   UnknownName                       = 'Unknown';
-  Zumo3x0_590_TmScPosnSize          = 8; // Also Zumo 590
+
   TurnMagic: array[0..3] of byte    = ($47, $4E, $00, $00);
   TripFileName                      = '0:/.System/Trips/%s.trip';
 
@@ -288,18 +299,18 @@ type
   TPosnValue = packed record
     procedure SwapCardinals;
     case ScnSize: Cardinal of
-    Zumo3x0_590_TmScPosnSize:     // Zumo 340 and 590
+    Small_TmScPosnSize:           // Zumo 340, 350 and 590
       (
         Lat_8:                    integer;
         Lon_8:                    integer;
       );
-    TmScPosnSize:                 // XT, XT2, 595, 590, drive 51
+    TmScPosnSize:                 // XT, XT2, 595, drive 51
       (
         Unknown1:                 Cardinal;
         Lat:                      integer;
         Lon:                      integer;
       );
-    Tread2_TmScPosnSize:          // Tread 2
+    Large_TmScPosnSize:           // Tread 2
       (
         Unknown1_16: array[0..1] of Cardinal;
         Lat_16:                     integer;
@@ -1629,7 +1640,7 @@ end;
 constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal = TmScPosnSize);
 begin
   case ASize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       begin
         inherited Create('mScPosn',
                          SizeOf(FValue.ScnSize) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
@@ -1638,7 +1649,7 @@ begin
         FValue.Lat_8 := (CoordAsInt(ALat));
         FValue.Lon_8 := (CoordAsInt(ALon));
       end;
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       begin
         inherited Create('mScPosn', SizeOf(FValue), dtPosn);
         FValue.ScnSize := SizeOf(FValue.Unknown1_16) + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
@@ -1668,12 +1679,12 @@ begin
   FValue.SwapCardinals; // Unknown1, Lat and Lon are not swapped
 
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       begin
         AStream.Read(FValue.Lat_8, SizeOf(FValue.Lat_8));
         AStream.Read(FValue.Lon_8, SizeOf(FValue.Lon_8));
       end;
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       begin
         AStream.Read(FValue.Unknown1_16, SizeOf(FValue.Unknown1_16));
         AStream.Read(FValue.Lat_16, SizeOf(FValue.Lat_16));
@@ -1696,14 +1707,14 @@ end;
 procedure TmScPosn.WriteValue(AStream: TMemoryStream);
 begin
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       begin
         FValue.SwapCardinals;
         AStream.Write(FValue.ScnSize, SizeOf(FValue.ScnSize));
         AStream.Write(FValue.Lat_8, SizeOf(FValue.Lat_8));
         AStream.Write(FValue.Lon_8, SizeOf(FValue.Lon_8));
       end;
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       begin
         FValue.SwapCardinals;
         AStream.Write(FValue, SizeOf(FValue));
@@ -1728,12 +1739,12 @@ end;
 function TmScPosn.GetValue: string;
 begin
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       begin
         result := Format('Lat, Lon: %s',
                         [MapCoords]);
       end;
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       begin
         result := Format('Unknown1: 0x%s, Unknown2: 0x%s, Lat, Lon: %s',
                         [IntToHex(FValue.Unknown1_16[0], 8),
@@ -1754,9 +1765,9 @@ begin
   result := inherited GetOffSetValue + SizeOf(FValue.ScnSize);
 
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       ; // Do nothing
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       result := result + SizeOf(FValue.Unknown1_16);
     else
       result := result + SizeOf(FValue.Unknown1);
@@ -1766,9 +1777,9 @@ end;
 function TmScPosn.GetLenValue: Cardinal;
 begin
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       result := SizeOf(FValue.Lat_8) + SizeOf(FValue.Lon_8);
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       result := SizeOf(FValue.Lat_16) + SizeOf(FValue.Lon_16);
     else
       result := SizeOf(FValue.Lat) + SizeOf(FValue.Lon);
@@ -1778,9 +1789,9 @@ end;
 function TmScPosn.GetLat: double;
 begin
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       result := CoordAsDec(FValue.Lat_8);
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       result := CoordAsDec(FValue.Lat_16);
     else
       result := CoordAsDec(FValue.Lat);
@@ -1790,9 +1801,9 @@ end;
 function TmScPosn.GetLon: double;
 begin
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       result := CoordAsDec(FValue.Lon_8);
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       result := CoordAsDec(FValue.Lon_16);
     else
       result := CoordAsDec(FValue.Lon);
@@ -1802,9 +1813,9 @@ end;
 function TmScPosn.GetMapCoords: string;
 begin
   case FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_8), CoordAsDec(FValue.Lon_8));
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_16), CoordAsDec(FValue.Lon_16));
     else
       result := FormatMapCoords(CoordAsDec(FValue.Lat), CoordAsDec(FValue.Lon));
@@ -1820,12 +1831,12 @@ begin
 
   ParseLatLon(LatLon, Lat, Lon);
   case result.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       begin
         result.Lat_8 := CoordAsInt(CoordAsDec(Lat));
         result.Lon_8 := CoordAsInt(CoordAsDec(Lon));
       end;
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       begin
         result.Lat_16 := CoordAsInt(CoordAsDec(Lat));
         result.Lon_16 := CoordAsInt(CoordAsDec(Lon));
@@ -2116,7 +2127,7 @@ begin
   SavePos := AStream.Position;
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
 
-  // Zumo 340?
+  // Zumo 3x0?
   if (FDataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, FLenValue);
@@ -2739,7 +2750,7 @@ begin
   end;
 end;
 
-// Zumo 340
+// Zumo 3x0, 590
 function TLocation.LocationTmShaping: TmShaping;
 var
   AnItem: TBaseItem;
@@ -3072,12 +3083,12 @@ begin
 
   AmScPosn := ALocation.LocationTmScPosn;
   case AmScPosn.FValue.ScnSize of
-    Zumo3x0_590_TmScPosnSize:
+    Small_TmScPosnSize:
       begin
         FValue.Lat := Swap32(AmScPosn.FValue.Lat_8);
         FValue.Lon := Swap32(AmScPosn.FValue.Lon_8);
       end;
-    Tread2_TmScPosnSize:
+    Large_TmScPosnSize:
       begin
         FValue.Lat := Swap32(AmScPosn.FValue.Lat_16);
         FValue.Lon := Swap32(AmScPosn.FValue.Lon_16);
@@ -3360,7 +3371,7 @@ begin
   FUdbPrefValue.PrefId := FUdbHandleId;
 
   if not (ForceRecalc) then
-    FValue.CalcStatus := CalculationMagic[AModel]; // Leave it to Zeroes, to force recalculation. Note: the 340 has zeroes
+    FValue.CalcStatus := CalculationMagic[AModel]; // Leave it to Zeroes, to force recalculation. Note: the 3x0 has zeroes
   FValue.AllocUnknown(AModel);
   SetLength(FTrailer, 0);
   FUdbDirList := TUdbDirList.Create;
@@ -3589,7 +3600,7 @@ begin
     // Alloc Unknown2 and unknown3 blocks
     // Check for known calculation magic
     SelModel := TTripModel.Unknown;               // Default to Unknown
-    if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 340 has 0, even if calculated.
+    if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 3x0 has 0, even if calculated.
     begin
       for AModel := Low(TTripModel) to High(TTripModel) do
       begin
@@ -3662,7 +3673,7 @@ begin
     AddUdbHandle(AnUdbHandle);
     Diff := (SavePos + ValueLen - SizeOf(Initiator)) - AStream.Position;
     if (Diff > 0) and
-       (UdbHandleTrailer[SelModel]) then // The Zumo 340 and Nuvi 2595 can have trailer bytes.
+       (UdbHandleTrailer[SelModel]) then // The Zumo 3x0, 590 and Nuvi 2595 can have trailer bytes.
     begin
       SetLength(AnUdbHandle.FTrailer, Diff);
       AStream.Read(AnUdbHandle.FTrailer[0], Length(AnUdbHandle.FTrailer));
@@ -4347,7 +4358,7 @@ begin
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Tread2_TmScPosnSize));
+    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Large_TmScPosnSize));
     Locations.Add(TmAttr.Create(RoutePoint));
     Locations.Add(TmAddress.Create(Address));
     Locations.Add(TmName.Create(Name));
@@ -4405,7 +4416,7 @@ begin
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Zumo3x0_590_TmScPosnSize));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Small_TmScPosnSize));
   Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
 end;
 
@@ -5274,7 +5285,7 @@ begin
     TmRoutePreferencesAdventurousMode,
     TmRoutePreferencesAdventurousPopularPaths,
     TmTrackToRouteInfoMap,
-  // Zumo340
+  // Zumo3x0, 590
     TmShaping, TmPhoneNumber
     ]);
 end;
