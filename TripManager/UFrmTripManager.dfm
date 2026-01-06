@@ -303,6 +303,8 @@ object FrmTripManager: TFrmTripManager
         Height = 184
         Align = alLeft
         TabOrder = 2
+        ExplicitLeft = 0
+        ExplicitTop = 31
         object BtnFromDev: TButton
           AlignWithMargins = True
           Left = 4
@@ -1403,6 +1405,7 @@ object FrmTripManager: TFrmTripManager
     end
     object MnuTripOverview: TMenuItem
       Caption = 'Trip overview '
+      Visible = False
       OnClick = MnuTripOverviewClick
     end
   end
