@@ -19,6 +19,68 @@ Due to the Copyright statement I can't distribute that source, but the Community
 
     property FoldersList: TList read FFolders;
 
+Memory Leak fixes
+
+5) In 'function StrRetToString', after 'if Assigned(StrRet.pOleStr) then' replace
+
+     Result := StrRet.pOleStr
+
+with this block
+
+//        Result := StrRet.pOleStr
+      begin
+        Result := StrRet.pOleStr;
+        CoTaskMemFree(StrRet.pOleStr);
+      end
+
+6) In 'procedure TCustomShellListView.Populate;', after 'AFolder := TShellFolder.Create(FRootFolder, ID, NewFolder);'
+
+add this line
+
+        CoTaskMemFree(ID);
+
+Performance fixes
+7) In procedure TCustomShellTreeView.Refresh(Node: TTreeNode);    
+
+After these lines:
+    ThisLevel := Node.Level;
+    OldNode := Node;
+
+Before these lines:
+   if Assigned(Node.Data) then
+   begin
+
+
+You find this repeat until:
+    repeat
+      Temp := FolderExists(TShellFolder(OldNode.Data).AbsoluteID, NewNode);
+      if (Temp <> nil) and OldNode.Expanded then
+        Temp.Expand(False);
+      OldNode := OldNode.GetNext;
+    until (OldNode = nil) or (OldNode.Level = ThisLevel);
+
+
+Replace it with:
+//Performance
+// Refreshing folder with many folder takes very long.
+// Check OldNode.Expanded first before calling expensive FolderExists
+(*
+    repeat
+      Temp := FolderExists(TShellFolder(OldNode.Data).AbsoluteID, NewNode);
+      if (Temp <> nil) and OldNode.Expanded then
+        Temp.Expand(False);
+      OldNode := OldNode.GetNext;
+    until (OldNode = nil) or (OldNode.Level = ThisLevel);
+*)
+    repeat
+      if (OldNode.Expanded) then
+      begin
+        Temp := FolderExists(TShellFolder(OldNode.Data).AbsoluteID, NewNode);
+        if (Temp <> nil) then
+          Temp.Expand(False);
+      end;
+      OldNode := OldNode.GetNext;
+    until (OldNode = nil) or (OldNode.Level = ThisLevel);
 
 - Open the ShellControls.groupproj in Delphi (Or CBuilder), Compile and Install the 32 Bits version. The 64 Bits also works, but is not needed.
 

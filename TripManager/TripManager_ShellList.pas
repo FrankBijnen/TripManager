@@ -452,7 +452,7 @@ end;
 
 procedure TShellListView.MouseMove(Shift: TShiftState; X, Y: Integer);
 const
-  Threshold = 3;
+  Threshold = 2;
 var
   HR: HResult;
   ItemIDListArray: array of PItemIDList;

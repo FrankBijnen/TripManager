@@ -4953,7 +4953,9 @@ var
   FName: string;
   FNames: TStringList;
   Index: integer;
+  HasGpx: boolean;
 begin
+  HasGpx := false;
   FNames := TStringList.Create;
   try
     NumFiles := DragQueryFile(Msg.Drop, UINT(-1), nil, 0);
@@ -4967,6 +4969,7 @@ begin
       if (DirectoryExists(FName)) then
       begin
         ShellTreeView1.Path := FName;
+        HasGpx := false;
         break;
       end;
 
@@ -4977,6 +4980,8 @@ begin
         break;
       // Add to selection
       FNames.Add(FName);
+      HasGpx := HasGpx or
+        ContainsText(ExtractFileExt(FName), GpxExtension);
     end;
 
     ShellListView1.ClearSelection;
@@ -4989,8 +4994,8 @@ begin
     FNames.Free;
     DragFinish(Msg.Drop);
   end;
-
-  PostProcessClick(Self);
+  if (HasGpx) then
+    PostProcessClick(Self);
 end;
 
 procedure TFrmTripManager.WMDirChanged(var Msg: TMessage);
