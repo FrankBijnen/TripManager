@@ -13,6 +13,8 @@ const
 type
   TShellTreeView = class(Vcl.Shell.ShellCtrls.TShellTreeView)
   private
+    function GetPath: string;
+    procedure SetPath(APath: string);
   protected
     procedure InitNode(NewNode: TTreeNode; ID: PItemIDList; ParentNode: TTreeNode); override;
     function CustomDrawItem(Node: TTreeNode; State: TCustomDrawState;
@@ -20,6 +22,7 @@ type
     procedure DoContextPopup(MousePos: TPoint; var Handled: Boolean); override;
   public
     property OnCustomDrawItem;
+    property Path: string read GetPath write SetPath;
   end;
 
 implementation
@@ -148,6 +151,20 @@ begin
   finally
     RightClickSelect := RightClickSave;
   end;
+end;
+
+function TShellTreeView.GetPath: string;
+begin
+  result := inherited Path;
+end;
+
+procedure TShellTreeView.SetPath(APath: string);
+begin
+  inherited Path := APath;
+
+  // Scroll in view.
+  if (Selected <> nil) then
+    Selected.MakeVisible;
 end;
 
 end.

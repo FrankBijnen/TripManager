@@ -43,8 +43,8 @@ const
 
 type
   TEditMode         = (emNone, emEdit, emPickList, emButton);
-  TTripModel        = (XT, XT2, Tread2, Zumo595, Drive51, Zumo590, Zumo3x0, Nuvi2595, Unknown);
-  //Drive 51 = 595
+  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, Unknown);
+
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmOffRoad          = $02,
@@ -133,17 +133,17 @@ const
   UdbDirMagic:  Cardinal  = $51590469;
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
-// Model specific values                              XT        XT2       Tread 2   Zumo 595  Drive 51  Zumo 590  Zumo 3x0  Nuvi 2595 Unknown
+// Model specific values                              XT        XT2       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  nuvi 2595 Unknown
   SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false,    false);
-  NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    false,    true,     false,    false);
+  NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false,    true);
-  UdbDirAddressSize:  array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   32 * 2,   66 * 2,   21 * 2,   64 * 2);
+  UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       16,       20);
-  Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       76,       72,       72,       72,       80);
-  Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      294,      254,      130,      134,      512);
-  UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     true,     false);
-  CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$0170feff,$00000000,$00000000,$00300030,$ffffffff);
-  Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $8e,      $66,      $66,      $00,      $00);
+  Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       72,       72,       76,       72,       80);
+  Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      254,      130,      294,      134,      512);
+  UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    true,     true,     false,    true,     false);
+  CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$00000000,$00000000,$0170feff,$00300030,$ffffffff);
+  Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $66,      $66,      $8e,      $00,      $00);
   Unknown3DistOffset: array[TTripModel] of integer  =($14,      $14,      $14,      $12,      $12,      $12,      $12,      $12,      $14);
   Unknown3TimeOffset: array[TTripModel] of integer  =($18,      $18,      $18,      $16,      $16,      $16,      $16,      $16,      $18);
   VersionSize:        array[TTripModel] of integer  =($08,      $08,      $08,      $05,      $05,      $05,      $05,      $05,      $08);
@@ -735,6 +735,62 @@ type
 
 {*** All routes ***}
 
+(*
+
+ Memory layout UdbDataHndl              Size   Pascal constant
++----------------------------------------------------------------------------+
+|Fixed part UdbHandle                 |     |                                |
+|                                     |     |                                |
+|    Prefix                           |   13|                                |
+|      unknown         Cardinal       |    4|                                |
+|      Size            Cardinal       |    4|                                |
+|      DataType        Byte           |    1| 0x0a                           |
+|      HandleId        Cardinal       |    4|                                |
+|    Initiator         Char           |    1| Tab 0x09                       |
+|    NameLen           Cardinal       |    4|                                |
+|    Name              string         |   12| 'mUdbDataHndl'                 |
+|    Datatype          byte           |    1| 0x0b                           |
+|    UdbHandleSize:    Cardinal       |    4|                                |
+|    CalcStatus:       Cardinal       |    4| CalculationMagic[TTripModel]   |
+|----------------------------------------------------------------------------|
+|    Unknown2:         TBytes         |     | Unknown2Size[TTripModel]       |
+|----------------------------------------------------------------------------|
+|    UDbDirCount:      WORD           |    2|                                |
+|    Unknown3:         TBytes         |  var| Unknown3Size[TTripModel]       |
+|----------------------------------------------------------------------------|
+|Identified fields of Unknown3        |     |                                |
+|       Unknown3Dist:  Cardinal       |    4| Unknown3DistOffset[TTripModel] |
+|       Unknown3Time:  Cardinal       |    4| Unknown3TimeOffset[TTripModel] |
+|       Unknown3Shape: TBytes         |  var| Unknown3ShapeOffset[TTripModel]|
+|----------------------------------------------------------------------------|
+|Variable part UdbHandle              |     |                                |
+|    UdbDir 1                         |     |                                |
+|    UdbDir ..                        |     |                                |
+|    UdbDir UdbDirCount               |     |                                |
++----------------------------------------------------------------------------+
+|Trailer                TBytes        |  var| Zumo 3x0, 590 and Nuvi2595 can |
+|                                     |     | have a trailer. 4..12 bytes    |
+|                                     |     | Must be < size UdbDir          |
++----------------------------------------------------------------------------+
+
++----------------------------------------------------------------------------+
+|Fixed part UdbDir                    |     |                                |
+|                                     |     |                                |
+|   TUdbDirFixedValue = packed record |     |                                |
+|     SubClass:         TSubClass     |   30|                                |
+|     Lat:              integer       |    4|                                |
+|     Lon:              integer       |    4|                                |
+|     Unknown1:         Cardinal      |    4| UdbDirMagic ($51590469)        |
+|     Time:             WORD          |    2|                                |
+|----------------------------------------------------------------------------|
+|Variable part UdbDir                 |     |                                |
+|                                     |     |                                |
+|     FUnknown2:         TBytes       |  var| UdbDirUnknown2Size[TTripModel] |
+|     FName:             TBytes       |  var| UdbDirAddressSize[TTripModel]  |
++----------------------------------------------------------------------------+
+
+*)
+
   TSubClass = packed record
     MapSegment:       Cardinal;
     RoadId:           Cardinal;
@@ -757,7 +813,7 @@ type
     SubClass:         TSubClass;
     Lat:              integer;
     Lon:              integer;
-    Unknown1:         Cardinal;
+    Unknown1:         Cardinal; // Contains UdbDirMagic = $51590469;
     Time:             word;
     procedure SwapCardinals;
   end;
@@ -944,6 +1000,12 @@ type
                                   Lat, Lon: double;
                                   DepartureDate: TDateTime;
                                   Name, Address: string);
+    procedure AddLocation_Zumo590(Locations: TmLocations;
+                                  ProcessOptions: TObject;
+                                  RoutePoint: TRoutePoint;
+                                  Lat, Lon: double;
+                                  DepartureDate: TDateTime;
+                                  Name, Address: string);
     procedure AddLocation_Drive51(Locations: TmLocations;
                                   ProcessOptions: TObject;
                                   RoutePoint: TRoutePoint;
@@ -960,6 +1022,7 @@ type
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
@@ -3040,6 +3103,7 @@ begin
   Lon := Swap32(Lon);
 end;
 
+// Common create for UdbDir
 constructor TUdbDir.Create(AModel: TTripModel;
                            ATripOption: TTripOption;
                            AName: WideString;
@@ -3052,7 +3116,8 @@ begin
 
   FillChar(FValue, SizeOf(FValue), 0);
   SetLength(FUnknown2, UdbDirUnknown2Size[AModel]);
-  SetLength(FName, UdbDirAddressSize[AModel]);
+  SetLength(FName, UdbDirNameSize[AModel]);
+
   // Copy Name
   case Ucs4Model[AModel] of
     true:
@@ -3060,10 +3125,14 @@ begin
     false:
       WideStringToWideArray(AName, FName);
   end;
-  FValue.Lat := Swap32(CoordAsInt(ALat));
-  FValue.Lon := Swap32(CoordAsInt(ALon));
+
+  // Init FValue
+  FValue.Lat      := Swap32(CoordAsInt(ALat));
+  FValue.Lon      := Swap32(CoordAsInt(ALon));
+  FValue.Unknown1 := Swap32(UdbDirMagic);
   FValue.SubClass.PointType := APointType;
-  FUdbDirStatus := TUdbDirStatus.udsUnchecked;
+
+  FUdbDirStatus   := TUdbDirStatus.udsUnchecked;
 end;
 
 // UdbDir Create for <rtept>
@@ -3099,13 +3168,12 @@ begin
       FValue.Lon := Swap32(AmScPosn.FValue.Lon);
     end;
   end;
-  FValue.SubClass.MapSegment := Swap32($00000180);
-  FValue.SubClass.RoadId := Swap32($00f0ffff);
+  FValue.SubClass.MapSegment  := Swap32($00000180);
+  FValue.SubClass.RoadId      := Swap32($00f0ffff);
   FillCompressedLatLon;
-  FValue.Unknown1     := Swap32(UdbDirMagic);
-  FValue.Time         := $ffff;
-  FUnknown2[4]        := $80;
-  FUnknown2[5]        := $01;
+  FValue.Time                 := $ffff;
+  FUnknown2[4]                := $80;
+  FUnknown2[5]                := $01;
 end;
 
 // UdbDir Create for <gpxx:rpt>
@@ -3118,12 +3186,11 @@ begin
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
-  if (CalculationMagic[AModel] = $00000000) and
+  if (CalculationMagic[AModel] = $00000000) and // Zumo 3x0, 590
      (ATripOption = TTripOption.ttCalc) then
     FValue.SubClass.Init(RecalcSubClass(GPXSubClass))
   else
     FValue.SubClass.Init(GPXSubClass);
-  FValue.Unknown1 := Swap32(UdbDirMagic);
 
   FRoadClass := RoadClass; // Not saved in Trip File
 end;
@@ -3397,6 +3464,11 @@ begin
   FUdbDirList.Add(AnUdbDir);
 end;
 
+// Compute size of Unknown3
+// Take the UdbHandleSize
+// Substract the fixed part (CalcStatus + Unknown2 + UdbDirCounr)
+// Substract the UdbDirSize * UdbDirCount
+// Must be the length of Unknown3
 function TmUdbDataHndl.ComputeUnknown3Size(AModel: TTripModel): integer;
 var
   TotalHandleSize: integer;
@@ -3404,7 +3476,7 @@ var
 begin
   TotalHandleSize := Swap32(integer(FValue.UdbHandleSize)) -
                      (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount));
-  UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + (UdbDirUnknown2Size[AModel]) + UdbDirAddressSize[AModel]));
+  UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + (UdbDirUnknown2Size[AModel]) + UdbDirNameSize[AModel]));
   result := TotalHandleSize - UdbDirSize;
 end;
 
@@ -3508,6 +3580,9 @@ begin
   FUdBList := TUdbHandleList.Create;
 end;
 
+// This method allocates and reads the data according to the known sizes for the model to check
+// The Size of the unknown3 block should match AnUdbHandle.ComputeUnknown3Size, possibly allowing a trailer
+// Anyway we should find the UdbDirMagic $51590469
 function TmAllRoutes.ModelFromUnknown3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
 var
   Diff: integer;
@@ -3515,37 +3590,34 @@ var
   FirstUdbDir: TUdbDirFixedValue;
 begin
   result := AModel;
-  AnUdbHandle.FValue.AllocUnknown2(Unknown2Size[AModel]); // Alloc the correct unknown2 size.
+  AnUdbHandle.FValue.AllocUnknown2(Unknown2Size[AModel]);                               // Read the unknown2 size for this model
   AStream.Read(AnUdbHandle.FValue.Unknown2[0], Length(AnUdbHandle.FValue.Unknown2));
   AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount)); // Need the UdbDirCount to calculate
-  AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[AModel]);
+  AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[AModel]);                               // Read the unknown3 size for this model
   AStream.Read(AnUdbHandle.FValue.Unknown3[0], Length(AnUdbHandle.FValue.Unknown3));
 
   Diff := AnUdbHandle.ComputeUnknown3Size(AModel) - Unknown3Size[AModel];
 
-  if (UdbHandleTrailer[AModel] = false) then
-  begin
-    if (Diff <> 0) then
-      result := TTripModel.Unknown;
-  end
-  else
-  begin
-    if (Diff < 0) or
-       (Diff > SizeOf(TUdbDirFixedValue)) then
-      exit(TTripModel.Unknown);
+  // Diff must be 0, if no trailer allowed.
+  if (UdbHandleTrailer[AModel] = false) and
+     (Diff <> 0) then
+    exit(TTripModel.Unknown);
 
-    SavePos := AStream.Position;
-    try
-      if (AnUdbHandle.FValue.UDbDirCount > 0) then
-      begin
-        // Allow a trailer for the nuvi 2595 and the 590
-        AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir));
-        if (Swap32(FirstUdbDir.Unknown1) <> UdbDirMagic) then
-          exit(TTripModel.Unknown);
-      end;
-    finally
-      AStream.Seek(SavePos, TSeekOrigin.soBeginning);
-    end;
+  // Allow a trailer for the Zumo 3x0, 590 and nuvi 2595 a
+  if (UdbHandleTrailer[AModel] = true) and
+     ( (Diff < 0) or
+       (Diff > SizeOf(TUdbDirFixedValue))) then
+    exit(TTripModel.Unknown);
+
+  // Check for UdbDirMagic in First UdbDir
+  SavePos := AStream.Position;
+  try
+    if (AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir)) <> SizeOf(FirstUdbDir)) then
+      exit(TTripModel.Unknown);
+    if (Swap32(FirstUdbDir.Unknown1) <> UdbDirMagic) then
+      exit(TTripModel.Unknown);
+  finally
+    AStream.Seek(SavePos, TSeekOrigin.soBeginning);
   end;
 end;
 
@@ -3557,7 +3629,7 @@ var
   BytesRead: integer;
   KeyLen: Cardinal;
   KeyName: ShortString;
-  SavePosUdb, SavePos: Cardinal;
+  SavePosCalcMagic, SavePos: Cardinal;
   ValueLen: Cardinal;
   DataType: Byte;
   Initiator: AnsiChar;
@@ -3598,9 +3670,9 @@ begin
     AStream.Read(AnUdbHandle.FValue.CalcStatus, SizeOf(AnUdbHandle.FValue.CalcStatus));
 
     // Alloc Unknown2 and unknown3 blocks
-    // Check for known calculation magic
+    // Try to get the model from a known calculation magic
     SelModel := TTripModel.Unknown;               // Default to Unknown
-    if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 3x0 has 0, even if calculated.
+    if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 590, 3x0 have 0, even if calculated.
     begin
       for AModel := Low(TTripModel) to High(TTripModel) do
       begin
@@ -3613,12 +3685,13 @@ begin
     end;
 
     // Check for known unknown3 size
+    // Need to compute.
     if (SelModel = TTripModel.Unknown) then
     begin
-      SavePosUdb :=  AStream.Position;
+      SavePosCalcMagic :=  AStream.Position;
       for AModel := Low(TTripModel) to High(TTripModel) do
       begin
-        AStream.Seek(SavePosUdb, TSeekOrigin.soBeginning);              // reposition to start of UDBDir
+        AStream.Seek(SavePosCalcMagic, TSeekOrigin.soBeginning);         // reposition after CalculationMagic
         SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream); // Now we have the UdbDirCount, we can compute the size.
         if (SelModel = AModel) then
           break;
@@ -3640,7 +3713,7 @@ begin
       AStream.Read(AnUdbDir.FValue, SizeOf(AnUdbDir.FValue));
       SetLength(AnUdbDir.FUnknown2, UdbDirUnknown2Size[SelModel]);
       AStream.Read(AnUdbDir.FUnknown2[0], Length(AnUdbDir.FUnknown2));
-      SetLength(AnUdbDir.FName, UdbDirAddressSize[SelModel]);
+      SetLength(AnUdbDir.FName, UdbDirNameSize[SelModel]);
       AStream.Read(AnUdbDir.FName[0], Length(AnUdbDir.FName));
       AnUdbDir.FValue.SwapCardinals;
       AnUdbHandle.FTripList := TripList;
@@ -4385,6 +4458,24 @@ begin
   Locations.Add(TmShapingRadius.Create);
 end;
 
+procedure TTripList.AddLocation_Zumo590(Locations: TmLocations;
+                                        ProcessOptions: TObject;
+                                        RoutePoint: TRoutePoint;
+                                        Lat, Lon: double;
+                                        DepartureDate: TDateTime;
+                                        Name, Address: string);
+begin
+  Locations.AddLocation(TLocation.Create);
+  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmIsDFSPoint.Create);
+  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmPhoneNumber.Create(''));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Small_TmScPosnSize));
+  Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
+end;
+
 procedure TTripList.AddLocation_Drive51(Locations: TmLocations;
                                         ProcessOptions: TObject;
                                         RoutePoint: TRoutePoint;
@@ -4436,6 +4527,8 @@ begin
       AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo595:
       AddLocation_Zumo595(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+    TTripModel.Zumo590:
+      AddLocation_Zumo590(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Drive51:
       AddLocation_Drive51(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo3x0:
@@ -5097,6 +5190,24 @@ begin
   ForceRecalc(TTripModel.Zumo595, 2);
 end;
 
+// The order of the items may be changed. EG Move mTripName after Theader does also work.
+procedure TTripList.CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
+begin
+  AddHeader(THeader.Create);
+  Add(TmAllRoutes.Create);
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmIsRoundTrip.Create);
+  Add(TmLocations.Create);
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5));
+  Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+  Add(TmTripName.Create(TripName));
+  Add(TmVersionNumber.Create(1, 3));
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Zumo590, 2);
+end;
+
 procedure TTripList.CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
 begin
   AddHeader(THeader.Create);
@@ -5152,6 +5263,8 @@ begin
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo595:
       CreateTemplate_Zumo595(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo590:
+      CreateTemplate_Zumo590(TripName, CalculationMode, TransportMode);
     TTripModel.Drive51:
       CreateTemplate_Drive51(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo3x0:

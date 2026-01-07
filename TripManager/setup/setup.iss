@@ -38,8 +38,7 @@ Name: ExecutableWin64;                  Description: "Install Executable (Win64)
 Name: Symbols;                          Description: "Install Symbols";                             types: full;
 Name: Docs;                             Description: "Install Documentation";                       types: full;
 ; 
-;Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Never;
-Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;          Check: Win64;
+Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
@@ -69,7 +68,7 @@ Source: "..\docs\tripmanager.chm";        DestDir: "{app}\ChmDocs";     Componen
 ; Trk2Rt
 Source: "Trk2Rt\Trk2Rt.cmd";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
 Source: "Trk2Rt\Trk2Rt.exe";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
-Source: "Trk2Rt\vc_redist.x64.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion
+Source: "Trk2Rt\vc_redist.x86.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion
 
 [Registry]
 // .GPX associations
@@ -143,7 +142,7 @@ Name: "{group}\{#MyAppName}";         Filename: "{app}\TripManager.exe"
 Name: "{autodesktop}\{#MyAppName}";   Filename: "{app}\TripManager.exe";              tasks: desktopicon;
 
 [Run]
-Filename: "{tmp}\vc_redist.x64.exe";  Parameters: "/passive /norestart";  \
+Filename: "{tmp}\vc_redist.x86.exe";  Parameters: "/passive /norestart";  \
             Components: Trk2RT; Flags: runascurrentuser skipifdoesntexist
 
 [Code]

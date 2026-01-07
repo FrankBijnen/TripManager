@@ -455,9 +455,9 @@ begin
   result.Add(GetRegistry(Reg_PrefDev_Key, XT_Name,      '0'));
   result.Add(GetRegistry(Reg_PrefDev_Key, XT2_Name,     '1'));
   result.Add(GetRegistry(Reg_PrefDev_Key, Tread2_Name,  '2'));
-  result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
   if (TProcessOptions.UnsafeModels) then
   begin
+    result.Add(GetRegistry(Reg_PrefDev_Key, Zumo595Name,  '3'));
     result.Add(GetRegistry(Reg_PrefDev_Key, Zumo590Name,  '4'));
     result.Add(GetRegistry(Reg_PrefDev_Key, Zumo3x0Name,  '5'));
     result.Add(GetRegistry(Reg_PrefDev_Key, Drive51Name,  '6'));
@@ -466,8 +466,8 @@ begin
   end
   else
   begin
-    result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '4'));
-    result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '5'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Edge_Name,    '3'));
+    result.Add(GetRegistry(Reg_PrefDev_Key, Garmin_Name,  '4'));
   end;
 end;
 
@@ -477,9 +477,9 @@ begin
   Devices.Add(XT_Name);
   Devices.Add(XT2_Name);
   Devices.Add(Tread2_Name);
-  Devices.Add(Zumo595Name);
   if (TProcessOptions.UnsafeModels) then
   begin
+    Devices.Add(Zumo595Name);
     Devices.Add(Zumo590Name);
     Devices.Add(Zumo3x0Name);
     Devices.Add(Drive51Name);
@@ -495,9 +495,9 @@ begin
   TripModels.Add(XT2_Name);
   TripModels.Add(Tread2_Name);
   TripModels.Add(Zumo595Name);
-  TripModels.Add(Drive51Name);
   TripModels.Add(Zumo590Name);
   TripModels.Add(Zumo3x0Name);
+  TripModels.Add(Drive51Name);
   TripModels.Add(Nuvi2595Name);
   TripModels.Add(UnknownName);
 end;
@@ -592,6 +592,7 @@ begin
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
       end;
+    TGarminModel.Zumo590,
     TGarminModel.Zumo3x0:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
@@ -636,9 +637,8 @@ begin
       0: result := TGarminModel.XT;
       1: result := TGarminModel.XT2;
       2: result := TGarminModel.Tread2;
-      3: result := TGarminModel.Zumo595;
-      4: result := TGarminModel.GarminEdge;
-      5: result := TGarminModel.GarminGeneric;
+      3: result := TGarminModel.GarminEdge;
+      4: result := TGarminModel.GarminGeneric;
       else
         result := TGarminModel.Unknown;
     end;
@@ -703,17 +703,16 @@ begin
         result := 1;
       TGarminModel.Tread2:
         result := 2;
-      TGarminModel.Zumo595:
-        result := 3;
       TGarminModel.GarminEdge:
-        result := 4;
+        result := 3;
+      TGarminModel.Zumo595,
       TGarminModel.Zumo590,
       TGarminModel.Zumo3x0,
       TGarminModel.Drive51,
       TGarminModel.GarminGeneric:
-        result := 5;
+        result := 4;
       else
-        result := 6;
+        result := 5;
     end;
   end;
 end;

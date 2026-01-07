@@ -2,8 +2,8 @@
 
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
-{$ENDIF}
 {.$DEFINE DBG_PROFILE}
+{$ENDIF}
 
 interface
 
@@ -17,7 +17,7 @@ uses
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
-  Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit,
+  Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
   UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent,
   UnitRegistryKeys;
 
@@ -114,7 +114,7 @@ type
     EdDeviceFolder: TEdit;
     PnlDeviceTop: TPanel;
     BtnRefresh: TButton;
-    EdFileSysFolder: TEdit;
+    EdFileSysFolder: TripManager_ComboBox.TComboBox;
     BgDevice: TButtonGroup;
     BtnSetDeviceDefault: TButton;
     DeviceMenu: TPopupMenu;
@@ -308,6 +308,7 @@ type
     procedure ActInstalledDocUpdate(Sender: TObject);
     procedure BgDeviceItemsGpxPoiClick(Sender: TObject);
     procedure MnuTripOverviewClick(Sender: TObject);
+    procedure EdFileSysFolderCloseUp(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -335,6 +336,7 @@ type
     RoutePointTimeOut: string;
     GeoSearchTimeOut: string;
     USBEvent: TUSBEvent;
+
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
     procedure USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
@@ -740,6 +742,7 @@ begin
       result.GarminModel := TModelConv.GetModelFromDescription(result.ModelDescription);
       case result.GarminModel of
         TGarminModel.Zumo595,
+        TGarminModel.Zumo590,
         TGarminModel.Drive51,
         TGarminModel.Zumo3x0:
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
@@ -1865,12 +1868,22 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.EdFileSysFolderCloseUp(Sender: TObject);
+begin
+  if (EdFileSysFolder.ItemIndex > -1) then
+  begin
+    EdFileSysFolder.Text := EdFileSysFolder.Items[EdFileSysFolder.ItemIndex];
+    ShellTreeView1.Path := TPath.GetFullPath(EdFileSysFolder.Text);
+  end;
+end;
+
 procedure TFrmTripManager.EdFileSysFolderKeyPress(Sender: TObject; var Key: Char);
 begin
   if (Key = #13) then
   begin
     ShellTreeView1.Path := TPath.GetFullPath(EdFileSysFolder.Text);
-    Key := #0;
+    if not (EdFileSysFolder.DroppedDown) then
+      Key := #0;
   end;
 end;
 
@@ -2382,7 +2395,7 @@ begin
   end;
 
   SetRegistry(Reg_EnableTripFuncs, (GarminModel in
-     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Drive51, TGarminModel.Zumo3x0]));
+     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Zumo590, TGarminModel.Zumo3x0, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
   SetRegistry(Reg_EnableFitFuncs, (GarminModel in [TGarminModel.GarminEdge]));
@@ -2415,10 +2428,13 @@ begin
 end;
 
 procedure TFrmTripManager.SetDeviceDisplayPath;
+var
+  DevPath: string;
 begin
-  EdDeviceFolder.Text := DeviceFolder[BgDevice.ItemIndex];
-  if (Pos(':', EdDeviceFolder.Text) <> 2) then
-    EdDeviceFolder.Text := IncludeTrailingPathDelimiter(CurrentDevice.FriendlyName) + EdDeviceFolder.Text;
+  DevPath := DeviceFolder[BgDevice.ItemIndex];
+  if (Pos(':', DevPath) <> 2) then
+    DevPath := IncludeTrailingPathDelimiter(CurrentDevice.FriendlyName) + DevPath;
+  EdDeviceFolder.Text := DevPath;
 end;
 
 procedure TFrmTripManager.SetCurrentPath(const APath: string);
@@ -2630,7 +2646,9 @@ procedure TFrmTripManager.ShellTreeView1Change(Sender: TObject; Node: TTreeNode)
 begin
   if (Self.Showing) then
     SetRegistry(Reg_PrefFileSysFolder_Key, ShellTreeView1.Path);
-  EdFileSysFolder.Text := ShellTreeView1.Path;
+
+  EdFileSysFolder.AddFullTextSearch(ShellTreeView1.Path);
+
   ShellListView1Click(ShellListView1);
   ChkWatch.Checked := false;
   if (DirectoryMonitor <> nil) then
