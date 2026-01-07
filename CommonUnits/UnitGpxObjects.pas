@@ -2371,12 +2371,18 @@ begin
     RtePtName := FindSubNodeValue(RtePtNode, 'name');
     // Coords
     Coords.FromAttributes(RtePtNode.AttributeList);
+
     // Via/Shape
-    RoutePoint := TRoutePoint.rpShaping;
+    if (PointCnt = 1) or
+       (PointCnt = RtePts.Count) then
+      RoutePoint := TRoutePoint.rpVia
+    else
+      RoutePoint := TRoutePoint.rpShaping;
+
+    RtePtViaPoint := nil;
     RtePtExtensions := RtePtNode.Find('extensions');
-    if (RtePtExtensions = nil) then
-      continue;
-    RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
+    if (RtePtExtensions <> nil) then
+      RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
     if (RtePtViaPoint <> nil) then
     begin
       Inc(result);
