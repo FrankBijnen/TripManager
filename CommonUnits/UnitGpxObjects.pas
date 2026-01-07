@@ -2385,7 +2385,6 @@ begin
       RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
     if (RtePtViaPoint <> nil) then
     begin
-      Inc(result);
       RoutePoint := TRoutePoint.rpVia;
 
       // RoutePref
@@ -2425,6 +2424,8 @@ begin
       DepartureDate := 0;
 
     // Have all we need. Create location
+    if (RoutePoint = TRoutePoint.rpVia) then
+      Inc(result);
     FTripList.AddLocation(Locations,
                           ProcessOptions,
                           RoutePoint,
