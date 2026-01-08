@@ -1652,7 +1652,7 @@ begin
     GPXFileObj.AnalyzeGpx;
     GpxSelected := GPXFileObj.ShowSelectTracks(TagsToShow,
                                               'Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
-                                               'Select 1 Route or Track',
+                                              'Use the Checkboxes to select 1 Route or Track',
                                                ATripList.GetValue('mTripName'), nil);
     if (GpXSelected) then
     begin

@@ -2644,7 +2644,8 @@ begin
     begin
       if (not GpxFileObj.ShowSelectTracks(TTagsToShow.RteTrk,
                                           ExtractFileName(GPXFile),
-                                          Format('Select Rte/Trk to add to %s', [SubCaption]), '*', nil)) then
+                                          Format('Use the Checkboxes to select Routes/Tracks to add to %s', [SubCaption]),
+                                          '*', nil)) then
         exit;
       SetCursor(CrWait);
     end;

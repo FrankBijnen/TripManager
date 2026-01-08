@@ -711,7 +711,7 @@ begin
     SetCursor(CrNormal);
     if (GPXFileObj.ShowSelectTracks(TTagsToShow.WptRte,
                                     'Import route points from: ' + ExtractFileName(GPXFile),
-                                    'Select Waypoints/Routes', CdsRouteTripName.AsString, nil)) then
+                                    'Use the Checkboxes to select Waypoints/Routes', CdsRouteTripName.AsString, nil)) then
     begin
       if (CdsRoute.State in [dsEdit, dsInsert]) then
         CdsRoute.Post;
@@ -824,7 +824,7 @@ begin
       GPXFileObj.AnalyzeGpx;
       if (GPXFileObj.ShowSelectTracks(TTagsToShow.WptRteTrk,
                                       'Import route points from: ' + ExtractFileName(GPXFile),
-                                      'Select Waypoints/Routes/Tracks',
+                                      'Use the Checkboxes to telect Waypoints/Routes/Tracks',
                                        CdsRouteTripName.AsString, Trk2RtPreview)) then
         Trk2RtPreview(GPXFileObj, true);
 

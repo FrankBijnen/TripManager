@@ -42,7 +42,6 @@ object FrmSelectGPX: TFrmSelectGPX
         Width = 55
       end>
     GridLines = True
-    MultiSelect = True
     ReadOnly = True
     RowSelect = True
     PopupMenu = PopupMenu
@@ -50,6 +49,8 @@ object FrmSelectGPX: TFrmSelectGPX
     TabOrder = 0
     ViewStyle = vsReport
     OnClick = LvTracksClick
+    ExplicitLeft = 8
+    ExplicitTop = 66
   end
   object PnlTop: TPanel
     Left = 0
@@ -57,7 +58,7 @@ object FrmSelectGPX: TFrmSelectGPX
     Width = 524
     Height = 23
     Align = alTop
-    Caption = 'Select Routes/Tracks'
+    Caption = 'Use the Checkboxes to select Routes/Tracks'
     TabOrder = 1
   end
   object PnlBot: TPanel
@@ -150,10 +151,14 @@ object FrmSelectGPX: TFrmSelectGPX
       Top = 1
       Width = 54
       Height = 25
+      Hint = 'Can be used to filter the number of trackpoints'
       Align = alRight
       AutoSize = False
+      EditorEnabled = False
       MaxValue = 2500
       MinValue = 0
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 1
       Value = 1
       OnChange = SpinMinTrackPtDistChange
@@ -211,10 +216,12 @@ object FrmSelectGPX: TFrmSelectGPX
     Top = 112
     object CheckAll1: TMenuItem
       Caption = 'Check All'
+      ShortCut = 16449
       OnClick = CheckAll1Click
     end
     object CheckNone1: TMenuItem
       Caption = 'Check None'
+      ShortCut = 49217
       OnClick = CheckNone1Click
     end
   end
@@ -223,13 +230,13 @@ object FrmSelectGPX: TFrmSelectGPX
     Interval = 500
     OnTimer = PercTimerTimer
     Left = 120
-    Top = 120
+    Top = 112
   end
   object TrackDistTimer: TTimer
     Enabled = False
     Interval = 500
     OnTimer = TrackDistTimerTimer
-    Left = 184
+    Left = 208
     Top = 120
   end
 end
