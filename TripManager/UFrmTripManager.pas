@@ -18,7 +18,7 @@ uses
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
-  UnitListViewSort, UnitMtpDevice, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent,
+  UnitListViewSort, UnitMtpDevice, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent,
   UnitRegistryKeys;
 
 const
@@ -697,8 +697,8 @@ begin
   CurDevId := CurrentDevice.Id;
   DeleteFile(GetDeviceTmp + NFile);
   try
-    if not (CopyDeviceFile(NonMTPRoot + Garmin, NFile)) and
-       not (CopyDeviceFile(InternalStorage + Garmin, NFile)) then
+    if not (CopyDeviceFile(NonMTPRoot + GarminPath, NFile)) and
+       not (CopyDeviceFile(InternalStorage + GarminPath, NFile)) then
     begin
       // There is no garmindevice in ?:\Garmin, or Internal Storage\Garmin
       // Check other devices with the same serialId.
@@ -712,8 +712,8 @@ begin
           CurrentDevice := DeviceList[DevId];
           if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev, true)) then
           begin
-            if (CopyDeviceFile(NonMTPRoot + Garmin, NFile)) or
-               (CopyDeviceFile(InternalStorage + Garmin, NFile)) then
+            if (CopyDeviceFile(NonMTPRoot + GarminPath, NFile)) or
+               (CopyDeviceFile(InternalStorage + GarminPath, NFile)) then
              break;
           end;
         end;
@@ -1030,8 +1030,11 @@ end;
 
 procedure TFrmTripManager.BgDeviceItemsTripsClick(Sender: TObject);
 begin
-  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.GarminGeneric, TGarminModel.Unknown]) then
+  if (GetRegistry(Reg_EnableTripFuncs, false) = false) and
+     (GetRegistry(Reg_EnableFitFuncs, false) = false)  then
     Abort;
+//  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.GarminGeneric, TGarminModel.Unknown]) then
+//    Abort;
 end;
 
 procedure TFrmTripManager.BgDeviceItemsGpxPoiClick(Sender: TObject);
@@ -1481,7 +1484,7 @@ begin
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
   if (NewFile) then
-    ATripList.CreateTemplate(TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))), FrmNewTrip.EdNewTrip.Text);
+    ATripList.CreateTemplate(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)), FrmNewTrip.EdNewTrip.Text);
 
 // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
@@ -1499,10 +1502,13 @@ begin
 end;
 
 procedure TFrmTripManager.ReloadTripOnMap(Sender: TObject);
+var
+  ATripList: TTripList;
 begin
   DmRoutePoints.SaveTrip;
-  FrmTripEditor.CurTripList.ForceRecalc;
-  LoadTripOnMap(FrmTripEditor.CurTripList, CurrentMapItem);
+  ATripList := TTripList(FrmTripEditor.CurTripList);
+  ATripList.ForceRecalc;
+  LoadTripOnMap(ATripList, CurrentMapItem);
 end;
 
 procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
@@ -2144,8 +2150,8 @@ begin
   ShellListView1.ColumnSorted := true;
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
 
-  TModelConv.GetDefaultDevices(CmbModel.Items);
-  CmbModel.Items.Add(UnknownName);
+  TModelConv.CmbModelDevices(CmbModel.Items);
+
   ReadSettings;
 
   ATripList := TTripList.Create;
@@ -2278,7 +2284,7 @@ begin
   GuessModel(CurrentDevice.DisplayedDevice);
 
   // Refresh Trips folder? (Zumo 3x0)
-  if (NeedRecreateTrips[TTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)))]) then
+  if (NeedRecreateTrips[TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))]) then
     RecreateTrips;
 
   // Need to set the folder?
@@ -2394,12 +2400,11 @@ begin
       end;
   end;
 
-  SetRegistry(Reg_EnableTripFuncs, (GarminModel in
-     [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2, TGarminModel.Zumo595, TGarminModel.Zumo590, TGarminModel.Zumo3x0, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableGpxFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableGpiFuncs, not (GarminModel in [TGarminModel.Zumo595, TGarminModel.Drive51]));
-  SetRegistry(Reg_EnableFitFuncs, (GarminModel in [TGarminModel.GarminEdge]));
   SetRegistry(Reg_CurrentModel, ModelIndex);
+  SetRegistry(Reg_EnableTripFuncs, TModelConv.Display2Trip(ModelIndex) <> TTripModel.Unknown);
+  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(ModelIndex, 1) <> '');
+  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(ModelIndex, 2) <> '');
+  SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
 
   ReadDefaultFolders;
   if (CheckDevice(false)) then
@@ -2456,7 +2461,7 @@ var
   ABase_Data: TBASE_Data;
   TmpTripList: TTripList;
   LocalFile: string;
-    CrNormal,CrWait: HCURSOR;
+  CrNormal,CrWait: HCURSOR;
 begin
   if (LstFiles.Selected = nil) then
     exit;
@@ -3683,14 +3688,14 @@ begin
         continue;
       end;
 
-      case AnItem.EditMode of
-        TEditMode.emNone:
+      case AnItem.ItemEditMode of
+        TItemEditMode.emNone:
           VlTripInfo.ItemProps[Index].ReadOnly := true;
-        TEditMode.emEdit: // Default
+        TItemEditMode.emEdit: // Default
           VlTripInfo.ItemProps[Index].EditStyle := TEditStyle.esSimple;
-        TEditMode.emButton:
+        TItemEditMode.emButton:
           VlTripInfo.ItemProps[Index].EditStyle := TEditStyle.esEllipsis;
-        TEditMode.emPickList:
+        TItemEditMode.emPickList:
           begin
             VlTripInfo.ItemProps[Index].ReadOnly := true;
             VlTripInfo.ItemProps[Index].EditStyle := TEditStyle.esPickList;

@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
   Data.DB, Datasnap.DBClient,
-  UnitTripObjects, UnitVerySimpleXml;
+  UnitVerySimpleXml;
 
 type
   TOnGetMapCoords = function: string of object;
@@ -42,7 +42,7 @@ type
     { Private declarations }
     FRoutePickList: string;
     FTransportPickList: string;
-    FTripList: TTripList;
+    FTripList: TObject;
     IdToInsert: integer;
     FOnRouteUpdated: TNotifyEvent;
     FOnRoutePointUpdated: TNotifyEvent;
@@ -57,7 +57,7 @@ type
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
     function NameExists(Name: string): boolean;
-    procedure LoadTrip(ATripList: TTripList);
+    procedure LoadTrip(ATripList: TObject);
     procedure SaveTrip;
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
@@ -92,7 +92,8 @@ uses
   System.StrUtils, System.Variants, System.DateUtils, System.Math,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
-  UnitGeoCode, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects, UnitRegistryKeys;
+  UnitGeoCode, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects,
+  UnitTripDefs, UnitTripObjects, UnitRegistryKeys;
 
 {$R *.dfm}
 
@@ -390,9 +391,9 @@ begin
   CdsRoutePoints.DisableControls;
   TmpStream := TMemoryStream.Create;
   ProcessOptions := TProcessOptions.Create;
-  ProcessOptions.TripModel := FTripList.TripModel;
+  ProcessOptions.TripModel := TTripList(FTripList).TripModel;
   try
-    Locations := TmLocations(FTripList.GetItem('mLocations'));
+    Locations := TmLocations(TTripList(FTripList).GetItem('mLocations'));
     if not (Assigned(Locations)) then
       exit;
 
@@ -407,34 +408,34 @@ begin
       else
         RoutePoint := TRoutePoint.rpShaping;
 
-      FTripList.AddLocation(Locations,
-                            ProcessOptions,
-                            RoutePoint,
-                            TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger)),
-                            TAdvlevel(Lo(CdsRoutePointsRoutePref.AsInteger)),
-                            StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
-                            StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
-                            0,
-                            CdsRoutePointsName.AsString,
-                            CdsRoutePointsAddress.AsString);
+      TTripList(FTripList).AddLocation(Locations,
+                                       ProcessOptions,
+                                       RoutePoint,
+                                       TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger)),
+                                       TAdvlevel(Lo(CdsRoutePointsRoutePref.AsInteger)),
+                                       StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
+                                       StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
+                                       0,
+                                       CdsRoutePointsName.AsString,
+                                       CdsRoutePointsAddress.AsString);
       CdsRoutePoints.Next;
     end;
 
     if (CdsRoute.State = dsBrowse) then
     begin
-      ANItem := FTripList.GetItem('mTripName');
+      ANItem := TTripList(FTripList).GetItem('mTripName');
       if (ANItem <> nil) then
         TmTripName(ANItem).AsString := CdsRouteTripName.AsString;
 
-      ANItem := FTripList.GetItem('mRoutePreference');
+      ANItem := TTripList(FTripList).GetItem('mRoutePreference');
       if (ANItem <> nil) then
         TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
 
-      ANItem := FTripList.GetItem('mTransportationMode');
+      ANItem := TTripList(FTripList).GetItem('mTransportationMode');
       if (ANItem <> nil) then
         TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
 
-      ANItem := FTripList.GetArrival;
+      ANItem := TTripList(FTripList).GetArrival;
       if (ANItem <> nil) then
         TmArrival(ANItem).AsUnixDateTime := TmArrival(ANItem).DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
     end;
@@ -459,7 +460,7 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.LoadTrip(ATripList: TTripList);
+procedure TDmRoutePoints.LoadTrip(ATripList: TObject);
 var
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
@@ -480,25 +481,25 @@ begin
     CdsRoute.LogChanges := false;
 
     CdsRoute.Insert;
-    ANItem := FTripList.GetItem('mTripName');
+    ANItem := TTripList(FTripList).GetItem('mTripName');
     if (ANItem <> nil) then
       CdsRouteTripName.AsString := TmTripName(ANItem).AsString;
 
-    ANItem := FTripList.GetItem('mRoutePreference');
+    ANItem := TTripList(FTripList).GetItem('mRoutePreference');
     if (ANItem <> nil) then
     begin
       FRoutePickList := TmRoutePreference(ANItem).PickList;
       CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
     end;
 
-    ANItem := FTripList.GetItem('mTransportationMode');
+    ANItem := TTripList(FTripList).GetItem('mTransportationMode');
     if (ANItem <> nil) then
     begin
       FTransportPickList := TmTransportationMode(ANItem).PickList;
       CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
     end;
 
-    ANItem := FTripList.GetArrival;
+    ANItem := TTripList(FTripList).GetArrival;
     if (ANItem <> nil) then
       CdsRouteDepartureDate.AsDateTime := TmArrival(ANItem).CardinalAsDateTime(TmArrival(ANItem).AsUnixDateTime);
     CdsRoute.Post;
@@ -507,7 +508,7 @@ begin
     CdsRoutePoints.CreateDataSet;
     CdsRoutePoints.LogChanges := false;
 
-    Locations := TmLocations(FTripList.GetItem('mLocations'));
+    Locations := TmLocations(TTripList(FTripList).GetItem('mLocations'));
     if not (Assigned(Locations)) or
        (Locations.LocationCount = 0) then
       exit;

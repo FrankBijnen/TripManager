@@ -9,7 +9,8 @@ uses
   Vcl.Mask, Vcl.Menus, Vcl.ToolWin, Vcl.BaseImageCollection, Vcl.ImageCollection, System.ImageList, Vcl.ImgList,
   Vcl.VirtualImageList, Vcl.Dialogs, Vcl.Grids, Vcl.DBGrids,
   Data.DB,
-  UnitTripObjects, TripManager_DBGrid;
+  UnitTripDefs,
+  TripManager_DBGrid;
 
 type
 
@@ -100,7 +101,7 @@ type
   public
     { Public declarations }
     CurPath: string;
-    CurTripList: TTripList;
+    CurTripList: TOBject;
     CurFile: string;
     CurNewFile: boolean;
     CurDevice: boolean;
@@ -119,7 +120,7 @@ implementation
 uses
   System.SysUtils, System.Math,
   Vcl.Clipbrd,
-  UDmRoutePoints, UnitStringUtils, UnitRegistryKeys;
+  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitRegistryKeys;
 
 {$R *.dfm}
 
@@ -333,7 +334,7 @@ begin
   DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
   TModelConv.GetTripModels(CmbModel.Items);
-  CmbModel.ItemIndex := Ord(CurTripList.TripModel);
+  CmbModel.ItemIndex := Ord(TTripList(CurTripList).TripModel);
 end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);

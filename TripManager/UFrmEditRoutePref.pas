@@ -4,8 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.ValEdit, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls,
-  UnitTripObjects;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.ValEdit, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls;
 
 type
   TFrmEditRoutePref = class(TForm)
@@ -25,7 +24,7 @@ type
   public
     { Public declarations }
     VlModified: boolean;
-    CurTripList: TTripList;
+    CurTripList: TObject;
   end;
 
 var
@@ -35,7 +34,7 @@ implementation
 
 uses
   System.Generics.Collections,
-  UnitProcessOptions;
+  UnitProcessOptions, UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -55,7 +54,7 @@ begin
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
-    Locations := CurTripList.GetItem('mLocations') as TmLocations;
+    Locations := TTripList(CurTripList).GetItem('mLocations') as TmLocations;
     for ViaPt := 1 to Locations.ViaPointCount -1 do
     begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);
@@ -74,7 +73,7 @@ begin
           Location.AdvLevel := TAdvlevel.advNA;
       end;
     end;
-    CurTripList.SetRoutePrefs_XT2_Tread2(Locations, ProcessOptions);
+    TTripList(CurTripList).SetRoutePrefs_XT2_Tread2(Locations, ProcessOptions);
   finally
     RoutePointList.Free;
     ProcessOptions.Free;
@@ -117,7 +116,7 @@ begin
 
   try
     VlRoutePrefs.Strings.Clear;
-    Locations := CurTripList.GetItem('mLocations') as TmLocations;
+    Locations := TTripList(CurTripList).GetItem('mLocations') as TmLocations;
     for ViaPt := 1 to Locations.ViaPointCount do
     begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);

@@ -4,9 +4,9 @@
 #define MyAppName "TripManager"
 #define MyAppVersion GetVersionNumbersString('..\Win32\TripManager.exe')
 #define MyAppPublisher "TDBware"
-#define ExeName "TripManager.exe" 
-#define DefaultDirName "{code:DefaultDir}\TripManager" 
-#define MyAppId "{{33018F95-765A-49CA-B6FC-0B3AB06701BD}" 
+#define ExeName "TripManager.exe"
+#define DefaultDirName "{code:DefaultDir}\TripManager"
+#define MyAppId "{{33018F95-765A-49CA-B6FC-0B3AB06701BD}"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -37,8 +37,9 @@ Name: ExecutableWin32;                  Description: "Install Executable (Win32)
 Name: ExecutableWin64;                  Description: "Install Executable (Win64)";                  types: full;          Check: Win64;
 Name: Symbols;                          Description: "Install Symbols";                             types: full;
 Name: Docs;                             Description: "Install Documentation";                       types: full;
-; 
-Name: Trk2RT;                           Description: "Install Trk2Rt (contributed by S.M. Follen)"; types: full;
+;
+Name: Trk2RT;                           Description: "Install Trk2Rt (Contributed by S.M. Follen) Installs VC Runtime if needed!";  \
+                                                                                                    types: full;
 
 [Tasks]
 Name: "desktopicon";                    Description: "{cm:CreateDesktopIcon}";                GroupDescription: "{cm:AdditionalIcons}";
@@ -68,7 +69,7 @@ Source: "..\docs\tripmanager.chm";        DestDir: "{app}\ChmDocs";     Componen
 ; Trk2Rt
 Source: "Trk2Rt\Trk2Rt.cmd";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
 Source: "Trk2Rt\Trk2Rt.exe";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
-Source: "Trk2Rt\vc_redist.x86.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion
+Source: "Trk2Rt\vc_redist.x86.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion; Check: VC_RTL_IsNeeded(false);
 
 [Registry]
 // .GPX associations
@@ -102,7 +103,7 @@ Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\b_open
 Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\b_openintrk2rt\command"; \
             ValueType: string; ValueData: """{app}\Trk2Rt.exe"" ""%L""";  \
             Flags: uninsdeletekey;  Components: Trk2RT;
-            
+
 // .KML associations
 Root: HKCR; Subkey: "SystemFileAssociations\.kml"; \
             Flags: uninsdeletekey; Components: Trk2RT;
@@ -133,7 +134,7 @@ Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\b_open
             Flags: uninsdeletekey;  Components: Trk2RT;
 Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\b_openintrk2rt\command"; \
             ValueType: string; ValueData: """{app}\Trk2Rt.exe"" ""%L""";  \
-            Flags: uninsdeletekey;  Components: Trk2RT;            
+            Flags: uninsdeletekey;  Components: Trk2RT;
 
 [InstallDelete]
 
@@ -176,6 +177,60 @@ begin
   result := false;
 end;
 
+// check if the needed RTL 32/64 bits is installed (by looking the registry)
+
+// minimal RTL version required (default: 14.23.27820.0)
+// minimal VC2019 RTL version: 14.29.30133.0
+// minimal VC2022 RTL version: 14.32.31326.0
+const VCRTL_MIN_V1 = 14;
+      VCRTL_MIN_V2 = 23;
+      VCRTL_MIN_V3 = 27820;
+      VCRTL_MIN_V4 = 0;
+
+function VC_RTL_IsNeeded (bUse64BitsRTL: Boolean): Boolean;
+
+var
+  sRegKey: string;
+  v1: Cardinal;
+  v2: Cardinal;
+  v3: Cardinal;
+  v4: Cardinal;
+begin
+  // is it running on 64 bits OS?
+  if IsWin64 then
+  begin
+    sRegKey := 'SOFTWARE\WOW6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\';
+    // need 64 bits RTL?
+    if bUse64BitsRTL then
+      sRegKey := sRegKey + 'x64'
+    else
+      sRegKey := sRegKey + 'x86'
+  end
+  // else we have only 32 bits RTL on 32 bits OS...
+  else if not bUse64BitsRTL then
+    sRegKey := 'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X86';
+  // if we have a key, let's check it
+  if ((sRegKey <> '') and
+      RegQueryDWordValue (HKEY_LOCAL_MACHINE, sRegKey, 'Major', v1) and
+      RegQueryDWordValue (HKEY_LOCAL_MACHINE, sRegKey, 'Minor', v2) and
+      RegQueryDWordValue (HKEY_LOCAL_MACHINE, sRegKey, 'Bld',   v3) and
+      RegQueryDWordValue (HKEY_LOCAL_MACHINE, sRegKey, 'RBld',  v4)) then
+  begin
+    Log ('VC 2015-2022 Redist version: ' + IntToStr (v1) +
+        '.' + IntToStr (v2) + '.' + IntToStr (v3) +
+        '.' + IntToStr (v4));
+    { Version info was found. Return true if later or equal to our
+       minimal required version RTL_MIN_Vx }
+    Result := not (
+        (v1 > VCRTL_MIN_V1) or ((v1 = VCRTL_MIN_V1) and
+         ((v2 > VCRTL_MIN_V2) or ((v2 = VCRTL_MIN_V2) and
+          ((v3 > VCRTL_MIN_V3) or ((v3 = VCRTL_MIN_V3) and
+           (v4 >= VCRTL_MIN_V4)))))));
+  end
+  else
+    Result := TRUE;
+end;
+
 function DefaultDir(Param: string): string;
 begin
   result := ExpandConstant('{autopf}');
@@ -185,7 +240,7 @@ begin
 end;
 
 procedure MoveRegKey(RegKey, RegName: string);
-var   
+var
   RegValue: string;
 begin
   if RegQueryStringValue(HKCU, RegKey, RegName, RegValue) then
@@ -207,25 +262,25 @@ begin
   RegKey := 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + ExpandConstant('{#MyAppId}') + '_is1';
   if RegQueryStringValue(HKLM, RegKey, 'UninstallString', UninstallString) and
      (Is64BitInstallMode) then
-  begin   
-    result := MsgBox('The current TripManager version needs to be uninstalled before continuing. Uninstall now?' + #10 + 
+  begin
+    result := MsgBox('The current TripManager version needs to be uninstalled before continuing. Uninstall now?' + #10 +
                      UninstallString, mbConfirmation, MB_YESNO) = IDYES;
     if (result) then
       ShellExec('', UninstallString, '/SILENT', '', SW_SHOWNORMAL, ewWaitUntilTerminated, ErrorCode);
-  end; 
-  
+  end;
+
   // Clean old registry keys
   RegKey := 'SOFTWARE\TDBware\' + ExpandConstant('{#MyAppName}');
-  
+
   MoveRegKey(RegKey, 'PrefDeviceGpxFolder');
   MoveRegKey(RegKey, 'PrefDevicePoiFolder');
-  
+
   RegDeleteValue(HKCU, RegKey, 'CurrentDevice');
   RegDeleteValue(HKCU, RegKey, 'ZumoModel');
   RegDeleteValue(HKCU, RegKey, 'EnableSendTo');
   RegDeleteValue(HKCU, RegKey, 'TripNameInList');
   RegDeleteValue(HKCU, RegKey, 'ExploreUuid');
-  RegDeleteValue(HKCU, RegKey, 'ForceRecalc');     
-  RegDeleteValue(HKCU, RegKey, 'AddSubClasses');    
-  RegDeleteValue(HKCU, RegKey, 'WarnModel');  
+  RegDeleteValue(HKCU, RegKey, 'ForceRecalc');
+  RegDeleteValue(HKCU, RegKey, 'AddSubClasses');
+  RegDeleteValue(HKCU, RegKey, 'WarnModel');
 end;

@@ -6,7 +6,7 @@ interface
 uses
   System.Classes, System.SysUtils,
   UnitVerySimpleXml,
-  UnitGpxDefs, UnitGpxObjects, UnitTripObjects;
+  UnitGpxDefs, UnitGpxObjects, UnitTripDefs, UnitTripObjects;
 
 type
   TGPXTripCompare = class(TGPXFile)

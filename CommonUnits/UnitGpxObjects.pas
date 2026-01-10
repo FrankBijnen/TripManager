@@ -15,7 +15,7 @@ uses
   UnitMapUtils,
 {$ENDIF}
 {$IFDEF TRIPOBJECTS}
-  UnitTripObjects,
+  UnitTripDefs, UnitTripObjects,
 {$ENDIF}
 {$IFDEF GEOCODE}
   UnitGeoCode,
@@ -151,6 +151,7 @@ type
     procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
     procedure CloneSubNodes(FromNodes, ToNodes: TXmlVsNodeList);
     procedure CloneNode(FromNode, ToNode: TXmlVsNode);
+    function GetSelectedTracks: TXmlVSNodeList;
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);
@@ -1699,26 +1700,16 @@ var
   TracksRoot: TXmlVSNode;
   Track : TXmlVSNode;
   OutFile, DisplayColor: string;
-  TracksProcessed: TStringList;
+  TracksProcessed: TXmlVSNodeList;
 begin
-  TracksProcessed := TStringList.Create;
+  TracksProcessed := GetSelectedTracks;
   TracksXml := TXmlVSDocument.Create;
   try
     TracksRoot := InitGarminGpx(TracksXml);
 
-    for Track in FTrackList do
+    for Track in TracksProcessed do
     begin
       DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
-      if (DisplayColor = '') then
-        continue;
-
-      if (UniqueTracks) then
-      begin
-        if (TracksProcessed.IndexOf(Track.NodeValue) > -1) then
-          continue;
-        TracksProcessed.Add(Track.NodeValue);
-      end;
-
       WriteTrack2XML(TracksRoot, Track, DisplayColor);
     end;
 
@@ -1878,6 +1869,7 @@ procedure TGPXFile.DoCreateKML;
 {$IFDEF KML}
 var
   OutFile, Lat, Lon, DisplayColor, Description: string;
+  TracksProcessed: TXmlVSNodeList;
   RouteWayPoint, WayPoint: TXmlVSNode;
   Track : TXmlVSNode;
   Folder: IXMLNode;
@@ -1897,58 +1889,92 @@ begin
     if (ProcessOptions.ProcessTracks) then
     begin
       Helper.UseFolder := (FrmSelectGpx.CheckedCount > 1); // Trk2RT compatibility
-
-      for Track in FTrackList do
-      begin
-        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
-        if (DisplayColor = '') then
-          continue;
-
-        Helper.WritePointsStart(Track.NodeValue, DisplayColor);
-        for TrackPoint in Track.ChildNodes do
+      TracksProcessed := GetSelectedTracks;
+      try
+        for Track in TracksProcessed do
         begin
-          if (TrackPoint.Name <> 'trkpt') then
-            continue;
-
-          TrackCoords.FromAttributes(TrackPoint.AttributeList);
-          TrackCoords.FormatLatLon(Lat, Lon);
-          Helper.WritePoint(Lon, Lat, '0');
-        end;
-        Folder := Helper.WritePointsEnd;
-
-        if (ProcessOptions.ProcessCreateRoutePoints) then
-        begin
-          for RouteWayPoint in FRouteViaPointList do
+          DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+          Helper.WritePointsStart(Track.NodeValue, DisplayColor);
+          for TrackPoint in Track.ChildNodes do
           begin
-            if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+            if (TrackPoint.Name <> 'trkpt') then
               continue;
-            for WayPoint in RouteWayPoint.ChildNodes do
-            begin
-              TrackCoords.FromAttributes(WayPoint.AttributeList);
-              TrackCoords.FormatLatLon(Lat, Lon);
 
-              Description := ReplaceAll(FindSubNodeValue(WayPoint, 'cmt'), [#13#10, #13, #10], [', ', ', ', ', ']);
-              if (Description <> '') then
-                Description := Description + ', ';
-              Description := Description + FindSubNodeValue(WayPoint, 'desc');
-
-              Helper.WritePlace( Folder,
-                                 Format('%s,%s,%s ', [lon, lat, '0']),
-                                 FindSubNodeValue(WayPoint, 'name'),
-                                 Description);
-            end;
+            TrackCoords.FromAttributes(TrackPoint.AttributeList);
+            TrackCoords.FormatLatLon(Lat, Lon);
+            Helper.WritePoint(Lon, Lat, '0');
           end;
-          Helper.WritePlacesEnd;
+          Folder := Helper.WritePointsEnd;
+
+          if (ProcessOptions.ProcessCreateRoutePoints) then
+          begin
+            for RouteWayPoint in FRouteViaPointList do
+            begin
+              if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+                continue;
+              for WayPoint in RouteWayPoint.ChildNodes do
+              begin
+                TrackCoords.FromAttributes(WayPoint.AttributeList);
+                TrackCoords.FormatLatLon(Lat, Lon);
+
+                Description := ReplaceAll(FindSubNodeValue(WayPoint, 'cmt'), [#13#10, #13, #10], [', ', ', ', ', ']);
+                if (Description <> '') then
+                  Description := Description + ', ';
+                Description := Description + FindSubNodeValue(WayPoint, 'desc');
+
+                Helper.WritePlace( Folder,
+                                   Format('%s,%s,%s ', [lon, lat, '0']),
+                                   FindSubNodeValue(WayPoint, 'name'),
+                                   Description);
+              end;
+            end;
+            Helper.WritePlacesEnd;
+          end;
         end;
+      finally
+        TracksProcessed.Free;
       end;
     end;
     Helper.WriteFooter;
     Helper.WriteKml;
-
   finally
     Helper.Free;
   end;
 {$ENDIF}
+end;
+
+// Get unique list of selected tracks.
+// Prefer origin <trk>
+function TGPXFile.GetSelectedTracks: TXmlVSNodeList;
+var
+  Track: TXmlVSNode;
+  DisplayColor: string;
+begin
+  result := TXmlVSNodeList.Create(false);
+
+  for Track in FTrackList do
+  begin
+    DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+    if (DisplayColor = '') then
+      continue;
+    if (FindSubNodeValue(Track, 'desc') <> 'Trk') then
+      continue;
+
+    result.Add(Track);
+  end;
+
+  for Track in FTrackList do
+  begin
+    DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+    if (DisplayColor = '') then
+      continue;
+
+    if (UniqueTracks) and
+       (result.FindPos(Track.NodeValue, Track.NodeValue) > -1) then
+        continue;
+
+     result.Add(Track);
+  end;
 end;
 
 procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
@@ -2117,6 +2143,7 @@ end;
 procedure TGPXFile.DoCreateHTML;
 {$IFDEF OSMMAP}
 var
+  TracksProcessed: TXmlVSNodeList;
   OutFile: string;
   Track : TXmlVSNode;
   TrackId: integer;
@@ -2125,11 +2152,10 @@ var
 begin
 {$IFDEF OSMMAP}
   TrackPointList := TStringList.Create;
+  TracksProcessed := GetSelectedTracks;
   try
-    for Track in FTrackList do
+    for Track in TracksProcessed do
     begin
-      if (FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc')) = '') then
-        continue;
       TrackId := 0; // We get a new HTML file for every track/route
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       OutFile := FOutDir + ChangeFileExt(EscapeFileName(Track.NodeValue), '.html');
@@ -2137,27 +2163,31 @@ begin
     end;
   finally
     TrackPointList.Free;
+    TracksProcessed.Free;
   end;
 {$ENDIF}
 end;
 
 procedure TGPXFile.DoCreateOSMPoints;
 var
+  TracksProcessed: TXmlVSNodeList;
   Track : TXmlVSNode;
   TrackId: integer;
   TrackPointList: TStringList;
 begin
   FOutStringList.Clear;
+  TracksProcessed := GetSelectedTracks;
   TrackPointList := TStringList.Create;
   try
     TrackId := 0;
-    for Track in FTrackList do
+    for Track in TracksProcessed do
     begin
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       FOutStringList.AddStrings(TrackPointList);
     end;
   finally
     TrackPointList.Free;
+    TracksProcessed.Free;
   end;
 end;
 
@@ -2194,22 +2224,19 @@ end;
 
 procedure TGPXFile.DoCreateFITPoints;
 var
+  TracksProcessed: TXmlVSNodeList;
   Track : TXmlVSNode;
   TrackId: integer;
   TrackPointList: TStringList;
-  DisplayColor: string;
   ResOut, ResErr: string;
   ResExit: DWord;
 begin
+  TracksProcessed := GetSelectedTracks;
   TrackPointList := TStringList.Create;
   try
     TrackId := 0;
-    for Track in FTrackList do
+    for Track in TracksProcessed do
     begin
-      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
-      if (DisplayColor = '') then
-        continue;
-
       Track2FITTrackPoints(Track, TrackId, TrackPointList);
       Inc(TrackId);
       Sto_RedirectedExecute('trk2fit.exe', FOutDir, ResOut, ResErr, ResExit, TrackPointList.Text);
@@ -2218,6 +2245,7 @@ begin
     end;
   finally
     TrackPointList.Free;
+    TracksProcessed.Free;
   end;
 end;
 

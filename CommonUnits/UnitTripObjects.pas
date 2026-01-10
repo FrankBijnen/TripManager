@@ -5,73 +5,16 @@ interface
 uses
   System.SysUtils, System.Variants, System.Classes, System.Generics.Collections,
   Winapi.Windows,
-  UnitGpxDefs;
+  UnitTripDefs, UnitGpxDefs;
 
 const
-  Zumo_Name                         = 'zūmo';
-
-  // XT
-  XT_Name                           = Zumo_Name + ' XT';
-  TmScPosnSize                      = 12;
-
-  // XT2
-  XT2_Name                          = Zumo_Name + ' XT2';
-  XT2_VehicleProfileGuid            = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
-  XT2_VehicleId                     = '1';
-  XT2_VehicleProfileTruckType       = '7';
-  XT2_AvoidancesChangedTimeAtSave   = '';
-  XT2_VehicleProfileHash            = '135656608'; // Not used, keep for reference
-  XT2_VehicleProfileName            = Zumo_Name + ' Motorcycle';
-
-  // Tread 2 is almost an XT2
-  Tread2_Name                       = 'Tread 2';
-  Large_TmScPosnSize                = 16;
-
-  // Older models
-  Zumo595Name                       = 'zumo 595';
-  Zumo590Name                       = 'zumo 590';
-  Drive51Name                       = 'Drive 51';
-  Zumo3x0Name                       = Zumo_Name + ' 3x0';
-  Nuvi2595Name                      = 'nüvi 2595';
   Small_TmScPosnSize                = 8; // Also Zumo 590
-
-  // Unknown
-  UnknownName                       = 'Unknown';
-
+  TmScPosnSize                      = 12;
+  Large_TmScPosnSize                = 16;
   TurnMagic: array[0..3] of byte    = ($47, $4E, $00, $00);
   TripFileName                      = '0:/.System/Trips/%s.trip';
 
-type
-  TEditMode         = (emNone, emEdit, emPickList, emButton);
-  TTripModel        = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, Unknown);
-
-  TRoutePreference  = (rmFasterTime       = $00,
-                       rmShorterDistance  = $01,
-                       rmOffRoad          = $02,
-                       rmDirect           = $04,
-                       rmCurvyRoads       = $07,
-                       rmTripTrack        = $09,
-                       rmHills            = $1a,
-                       rmNoShape          = $58,
-                       rmScenic           = $be,
-                       rmPopular          = $ef,
-                       rmNA               = $ff);
-  TAdvlevel         = (advLevel1          = $00,
-                       advLevel2          = $01,
-                       advLevel3          = $02,
-                       advLevel4          = $03,
-                       advNA              = $ff);
-  TTransportMode    = (tmAutoMotive       = 1,
-                       tmMotorcycling     = 9,
-                       tmOffRoad          = 10);
-  TRoutePoint       = (rpVia              = 0,
-                       rpShaping          = 1,
-                       rpShapingXT2       = 2);
-  TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
-  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
-
 { Elementary data types }
-const
   dtByte          = 1;
   dtCardinal      = 3;
   dtSingle        = 4;
@@ -134,7 +77,6 @@ const
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  nuvi 2595 Unknown
-  SafeToSave:         array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false,    false);
   NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false,    false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false,    true);
   UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   21 * 2,   64 * 2);
@@ -170,13 +112,13 @@ type
     procedure Write(AStream: TMemoryStream); virtual;
     function SubLength: Cardinal; virtual;
     function GetPickList: string; virtual;
-    function GetEditMode: TEditMode; virtual;
+    function GetItemEditMode: TItemEditMode; virtual;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); virtual;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); virtual;
     property SelStart: Cardinal read FStartPos;
     property SelEnd: Cardinal read FEndPos;
-    property EditMode: TEditMode read GetEditMode;
+    property ItemEditMode: TItemEditMode read GetItemEditMode;
     property PickList: string read GetPickList;
     property TripList: TTripList read FTripList;
   end;
@@ -219,7 +161,7 @@ type
     FValue:            byte;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
   public
     constructor Create(AName: ShortString; AValue: byte); reintroduce;
@@ -234,7 +176,7 @@ type
     FValue:            Cardinal;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
   public
     constructor Create(AName: ShortString; AValue: Cardinal); reintroduce;
@@ -249,7 +191,7 @@ type
     FValue:            single;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
   public
     constructor Create(AName: ShortString; AValue: Single); reintroduce;
@@ -265,7 +207,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     function GetPickList: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
   public
     constructor Create(AName: ShortString; AValue: boolean); reintroduce;
@@ -322,7 +264,7 @@ type
     FValue:            TPosnValue;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     function GetOffSetValue: integer; override;
     function GetLenValue: Cardinal; override;
     function GetLat: double;
@@ -349,7 +291,7 @@ type
     FValue:            string;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
     function AsUCS4: UCS4String;
     procedure ToUCS4RawBytes(AString: string);
@@ -365,7 +307,7 @@ type
 {*** Specialized Classes ***}
   TUnixDate = class(TCardinalItem)
   private
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     function GetValue: string; override;
     function GetAsUnixDateTime: Cardinal;
     procedure SetAsUnixDateTime(AValue: Cardinal);
@@ -463,7 +405,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     procedure SetValue(AValue: string); override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
   public
     constructor Create(AValue: TRoutePreference = rmFasterTime; ALenValue: Cardinal = 1; ADataType: byte = dtByte);
@@ -476,7 +418,7 @@ type
   private
     function GetValue: string; override;
     procedure SetValue(AValue: string); override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
   public
     constructor Create(AValue: TTransportMode = tmMotorcycling);
@@ -509,7 +451,7 @@ type
   private
     function GetValue: string; override;
     procedure SetValue(AValue: string); override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
     function GetRoutePoint: TRoutePoint;
   public
@@ -546,7 +488,7 @@ type
   TmShapingRadius = class(TCardinalItem)
   private
     function GetValue: string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
   public
     constructor Create(AValue: Cardinal = $80000000);
   end;
@@ -582,7 +524,7 @@ type
   TmRoutePreferences = class(TBaseRoutePreferences)
   private
     function GetIntToIdent(const Value: word): string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     function GetRoutePref(ViaPt: cardinal): TRoutePreference;
@@ -598,7 +540,7 @@ type
   TmRoutePreferencesAdventurousMode = class(TBaseRoutePreferences)
   private
     function GetIntToIdent(const Value: word): string; override;
-    function GetEditMode: TEditMode; override;
+    function GetItemEditMode: TItemEditMode; override;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     function GetRoutePref(ViaPt: cardinal): TAdvlevel;
@@ -1336,9 +1278,9 @@ begin
   FCalculated := false;
 end;
 
-function TBaseItem.GetEditMode: TEditMode;
+function TBaseItem.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emNone;
+  result := TItemEditMode.emNone;
 end;
 
 function TBaseItem.GetPickList: string;
@@ -1493,9 +1435,9 @@ begin
   result := Format('%d', [FValue]);
 end;
 
-function TByteItem.GetEditMode: TEditMode;
+function TByteItem.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emEdit;
+  result := TItemEditMode.emEdit;
 end;
 
 procedure TByteItem.SetValue(NewValue: string);
@@ -1537,9 +1479,9 @@ begin
   result := Format('%d', [FValue]);
 end;
 
-function TCardinalItem.GetEditMode: TEditMode;
+function TCardinalItem.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emEdit;
+  result := TItemEditMode.emEdit;
 end;
 
 procedure TCardinalItem.SetValue(NewValue: string);
@@ -1579,9 +1521,9 @@ begin
   result := Format('%f', [FValue]);
 end;
 
-function TSingleItem.GetEditMode: TEditMode;
+function TSingleItem.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emEdit;
+  result := TItemEditMode.emEdit;
 end;
 
 procedure TSingleItem.SetValue(NewValue: string);
@@ -1631,9 +1573,9 @@ begin
      IntToIdent(Ord(false), result, BooleanMap);
 end;
 
-function TBooleanItem.GetEditMode: TEditMode;
+function TBooleanItem.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emPickList;
+  result := TItemEditMode.emPickList;
 end;
 
 function TBooleanItem.GetPickList: string;
@@ -1794,9 +1736,9 @@ begin
   FValue.SwapCardinals;
 end;
 
-function TmScPosn.GetEditMode: TEditMode;
+function TmScPosn.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emButton;
+  result := TItemEditMode.emButton;
 end;
 
 function TmScPosn.GetValue: string;
@@ -2005,9 +1947,9 @@ begin
     result := PWideChar(@FRawBytes[0]);
 end;
 
-function TStringItem.GetEditMode: TEditMode;
+function TStringItem.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emEdit;
+  result := TItemEditMode.emEdit;
 end;
 
 procedure TStringItem.SetValue(NewValue: string);
@@ -2024,9 +1966,9 @@ begin
   inherited Create(AName, TUnixDate.DateTimeAsCardinal(AValue));
 end;
 
-function TUnixDate.GetEditMode: TEditMode;
+function TUnixDate.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emButton;
+  result := TItemEditMode.emButton;
 end;
 
 function TUnixDate.GetValue: string;
@@ -2251,9 +2193,9 @@ begin
   end;
 end;
 
-function TmRoutePreference.GetEditMode: TEditMode;
+function TmRoutePreference.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emPickList;
+  result := TItemEditMode.emPickList;
 end;
 
 function TmRoutePreference.GetPickList: string;
@@ -2291,9 +2233,9 @@ begin
   FValue := Ord(TmTransportationMode.TransPortMethod(AValue));
 end;
 
-function TmTransportationMode.GetEditMode: TEditMode;
+function TmTransportationMode.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emPickList;
+  result := TItemEditMode.emPickList;
 end;
 
 function TmTransportationMode.GetPickList: string;
@@ -2359,9 +2301,9 @@ begin
   FValue := Ord(TmAttr.RoutePoint(AValue));
 end;
 
-function TmAttr.GetEditMode: TEditMode;
+function TmAttr.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emPickList;
+  result := TItemEditMode.emPickList;
 end;
 
 function TmAttr.GetPickList: string;
@@ -2418,9 +2360,9 @@ begin
   result := '0x' + IntTohex(FValue, 8);
 end;
 
-function TmShapingRadius.GetEditMode: TEditMode;
+function TmShapingRadius.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emNone;
+  result := TItemEditMode.emNone;
 end;
 
 { TmName }
@@ -2533,9 +2475,9 @@ begin
     result := inherited GetIntToIdent(Value);
 end;
 
-function TmRoutePreferences.GetEditMode: TEditMode;
+function TmRoutePreferences.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emButton;
+  result := TItemEditMode.emButton;
 end;
 
 function TmRoutePreferences.GetRoutePref(ViaPt: cardinal): TRoutePreference;
@@ -2566,9 +2508,9 @@ begin
     result := inherited GetIntToIdent(Value);
 end;
 
-function TmRoutePreferencesAdventurousMode.GetEditMode: TEditMode;
+function TmRoutePreferencesAdventurousMode.GetItemEditMode: TItemEditMode;
 begin
-  result := TEditMode.emButton;
+  result := TItemEditMode.emButton;
 end;
 
 function TmRoutePreferencesAdventurousMode.GetRoutePref(ViaPt: cardinal): TAdvlevel;
@@ -3976,8 +3918,7 @@ var
   AStream: TMemoryStream;
   mLocations: TmLocations;
 begin
-  if (TProcessOptions.UnsafeModels = false) and
-     (SafeToSave[TripModel] = false) then
+  if not TProcessOptions.SafeModel2Write(TripModel) then
     raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
 
   mLocations := GetItem('mLocations') as TmLocations;

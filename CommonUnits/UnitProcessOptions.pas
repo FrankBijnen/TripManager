@@ -6,7 +6,7 @@ uses
   System.Classes,
   Winapi.Windows,
 {$IFDEF TRIPOBJECTS}
-  UnitTripObjects,
+  UnitTripDefs,
 {$ENDIF}
 {$IFDEF GPI}
   UnitGpi,
@@ -169,6 +169,7 @@ type
     class function GetTrk2RtExportPerc: integer;
     class function DescriptionFromRoadClass(const RoadClass: byte): string;
     class function UnsafeModels: boolean;
+    class function SafeModel2Write(ATripModel: TTripModel): boolean;
     class function MaxViaPoints: integer;
     {$ENDIF}
 
@@ -432,6 +433,11 @@ end;
 class function TProcessOptions.UnsafeModels: boolean;
 begin
   result := GetRegistry(Reg_UnsafeModels, false);
+end;
+
+class function TProcessOptions.SafeModel2Write(ATripModel: TTripModel): boolean;
+begin
+  result := UnsafeModels or TModelConv.SafeModel2Write(ATripModel);
 end;
 
 class function TProcessOptions.MaxViaPoints: integer;

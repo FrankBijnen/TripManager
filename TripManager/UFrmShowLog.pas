@@ -61,7 +61,7 @@ implementation
 
 uses
   System.Types, System.StrUtils, system.Generics.Collections, System.UITypes,
-  UnitGpxDefs, UnitTripObjects, UnitGpxObjects, UnitGpxTripCompare,
+  UnitGpxDefs, UnitGpxObjects, UnitTripDefs, UnitTripObjects, UnitGpxTripCompare,
   UFrmTripEditor,
   UnitVerySimpleXml, UnitProcessOptions, UnitStringUtils;
 
@@ -89,16 +89,19 @@ begin
 end;
 
 procedure TFrmShowLog.SavefixedGPXClick(Sender: TObject);
+var
+  ATripList: TTripList;
 begin
+  ATripList := TTripList(FrmTripEditor.CurTripList);
   FixTripList;
 
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ExtractFilePath(CompareGpx);
-  SaveTrip.FileName := TmTripName(FrmTripEditor.CurTripList.GetItem('mTripName')).AsString +  '.gpx';
+  SaveTrip.FileName := TmTripName(ATripList.GetItem('mTripName')).AsString +  '.gpx';
   if not SaveTrip.Execute then
     exit;
 
-  FrmTripEditor.CurTripList.SaveAsGPX(SaveTrip.FileName, false);
+  ATripList.SaveAsGPX(SaveTrip.FileName, false);
   Close;
 end;
 
@@ -200,7 +203,7 @@ var
   RoutePoint: TRoutePoint;
   ShapeName, ShapeCmt: string;
 begin
-  FixedTripList := FrmTripEditor.CurTripList;
+  FixedTripList := TTripList(FrmTripEditor.CurTripList);
 
   // Save locations and calculation info from current trip
   OldTripList := TTripList.Create;

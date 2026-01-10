@@ -81,7 +81,8 @@ implementation
 
 uses
   System.UITypes, System.StrUtils, System.Math,
-  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripObjects, UnitGeoCode, UnitOSMMap, UnitGpi;
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
+  UnitGeoCode, UnitOSMMap;
 
 {$R *.dfm}
 
@@ -304,7 +305,7 @@ begin
     AddGridLine(GridZumoSettings, CurRow,   '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
-                                            XT2_AvoidancesChangedTimeAtSave,
+                                            '',
                                             'Date: ');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileGuid,
                                             XT2_VehicleProfileGuid);
