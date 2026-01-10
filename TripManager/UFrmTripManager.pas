@@ -306,9 +306,10 @@ type
     procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ActInstalledDocExecute(Sender: TObject);
     procedure ActInstalledDocUpdate(Sender: TObject);
-    procedure BgDeviceItemsGpxPoiClick(Sender: TObject);
+    procedure BgDeviceItemsPoiClick(Sender: TObject);
     procedure MnuTripOverviewClick(Sender: TObject);
     procedure EdFileSysFolderCloseUp(Sender: TObject);
+    procedure BgDeviceItemsGpxClick(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -748,7 +749,7 @@ begin
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
             result.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         TGarminModel.Unknown:
-          result.GarminModel := TModelConv.GetModelFromGarminDevice(result.ModelDescription);
+          result.GarminModel := TModelConv.GuessGarminOrEdge(result.ModelDescription);
       end;
 
       // Get default paths
@@ -768,11 +769,9 @@ end;
 
 procedure TFrmTripManager.GuessModel(const DisplayedDevice: string);
 var
-  ModelDisplayed: string;
   ModelIndex: integer;
 begin
-  ModelDisplayed := DisplayedDevice;
-  GarminDevice := ReadGarminDevice(ModelDisplayed);
+  GarminDevice := ReadGarminDevice(DisplayedDevice);
   ModelIndex := TModelConv.Garmin2Display(GarminDevice.GarminModel);
 
   // Change description for 'old' Garmin units and Edge
@@ -781,7 +780,7 @@ begin
   if (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminEdge)) or
      (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminGeneric)) then
   begin
-    if (ModelDisplayed <> CmbModel.Items[ModelIndex]) and
+    if (DisplayedDevice <> CmbModel.Items[ModelIndex]) and
        (GarminDevice.ModelDescription <> '') then
       CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
   end;
@@ -1033,13 +1032,17 @@ begin
   if (GetRegistry(Reg_EnableTripFuncs, false) = false) and
      (GetRegistry(Reg_EnableFitFuncs, false) = false)  then
     Abort;
-//  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.GarminGeneric, TGarminModel.Unknown]) then
-//    Abort;
 end;
 
-procedure TFrmTripManager.BgDeviceItemsGpxPoiClick(Sender: TObject);
+procedure TFrmTripManager.BgDeviceItemsGpxClick(Sender: TObject);
 begin
-  if (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.Zumo595, TGarminModel.Drive51]) then
+  if (GetRegistry(Reg_EnableGpxFuncs, false) = false) then
+    Abort;
+end;
+
+procedure TFrmTripManager.BgDeviceItemsPoiClick(Sender: TObject);
+begin
+  if (GetRegistry(Reg_EnableGpiFuncs, false) = false) then
     Abort;
 end;
 

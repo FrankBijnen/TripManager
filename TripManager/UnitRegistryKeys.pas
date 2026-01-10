@@ -183,7 +183,6 @@ type
   TModelConv = class
   private
     class function GetDevices(const Default: boolean): TStringList;
-    class function GetDevice(const Default: boolean; const DevIndex: integer): string;
   public
     class function GetKnownDevices: TStringList;
     class procedure CmbModelDevices(const Devices: TStrings);
@@ -191,7 +190,7 @@ type
     class function GetDefaultDevice(const DevIndex: integer): string;
     class procedure GetTripModels(TripModels: TStrings);
     class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
-    class function GetModelFromGarminDevice(const GarminDevice: string): TGarminModel;
+    class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
     class function GetKnownPath(const DevIndex, PathId: integer): string;
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
     class function Display2Trip(const CmbIndex: integer): TTripModel;
@@ -234,6 +233,9 @@ const
     (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true)
   );
+
+var
+  DefaultDevices: TStringList;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
 begin
@@ -535,40 +537,32 @@ begin
 end;
 
 class procedure TModelConv.CmbModelDevices(const Devices: TStrings);
-var
-  TempDev: TStringList;
 begin
-  TempDev := GetDevices(true);
-  try
-    Devices.Assign(TempDev);
-  finally
-    TempDev.Free;
-  end;
+  Devices.Assign(DefaultDevices);
 end;
 
-class function TModelConv.GetDevice(const Default: boolean; const DevIndex: integer): string;
+class function TModelConv.GetKnownDevice(const DevIndex: integer): string;
 var
   Devices: TStringList;
 begin
-  result := '';
-  Devices := GetDevices(Default);
+  Devices := GetKnownDevices;
   try
-    if (DevIndex >= 0) and
-       (DevIndex < Devices.Count) then
-      result := Devices[DevIndex];
+    if (DevIndex < 0) or
+       (DevIndex > Devices.Count -1) then
+      exit('');
+
+    result := Devices[DevIndex];
   finally
     Devices.Free;
   end;
 end;
 
-class function TModelConv.GetKnownDevice(const DevIndex: integer): string;
-begin
-  result := GetDevice(false, DevIndex);
-end;
-
 class function TModelConv.GetDefaultDevice(const DevIndex: integer): string;
 begin
-  result := GetDevice(true, DevIndex);
+  if (DevIndex < 0) or
+     (DevIndex > DefaultDevices.Count -1) then
+    exit('');
+  result := DefaultDevices[DevIndex];
 end;
 
 class procedure TModelConv.GetTripModels(TripModels: TStrings);
@@ -576,7 +570,6 @@ var
   AGarminModel: TGarminModel;
 begin
   TripModels.Clear;
-
   for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
   begin
     if (Model_Tab[AGarminModel].TripModel <> TTripModel.Unknown) then
@@ -614,7 +607,7 @@ begin
 
 end;
 
-class function TModelConv.GetModelFromGarminDevice(const GarminDevice: string): TGarminModel;
+class function TModelConv.GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
 begin
   result := TGarminModel.GarminGeneric;
   if (ContainsText(GarminDevice, Edge_Name)) then
@@ -660,23 +653,11 @@ begin
 end;
 
 class function TModelConv.Display2Garmin(const CmbIndex: integer): TGarminModel;
-var
-  UnsafeModels: boolean;
-  ModelIndex: integer;
-  AGarminModel: TGarminModel;
 begin
-  result := TGarminModel.Unknown;
-  UnsafeModels := TProcessOptions.UnsafeModels;
-  ModelIndex := -1;
-  for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
-  begin
-    if (Model_Tab[AGarminModel].Displayable) and
-       ( (Model_Tab[AGarminModel].Safe) or
-         (UnsafeModels)) then
-      Inc(ModelIndex);
-    if (ModelIndex = CmbIndex) then
-      exit(AGarminModel);
-  end;
+  if (CmbIndex < 0) or
+     (CmbIndex > DefaultDevices.Count -1) then
+    exit(TGarminModel.Unknown);
+  result := TGarminModel(DefaultDevices.Objects[CmbIndex]);
 end;
 
 class function TModelConv.Display2Trip(const CmbIndex: integer): TTripModel;
@@ -734,8 +715,10 @@ end;
 initialization
   SetProcessOptions := TSetProcessOptions.Create;
   GarminDevice.Init;
+  DefaultDevices := TModelConv.GetDevices(true);
 
 finalization
   SetProcessOptions.Free;
+  DefaultDevices.Free;
 
 end.
