@@ -9,8 +9,8 @@ uses
   Vcl.Mask, Vcl.Menus, Vcl.ToolWin, Vcl.BaseImageCollection, Vcl.ImageCollection, System.ImageList, Vcl.ImgList,
   Vcl.VirtualImageList, Vcl.Dialogs, Vcl.Grids, Vcl.DBGrids,
   Data.DB,
-  UnitTripDefs,
-  TripManager_DBGrid;
+  TripManager_DBGrid,
+  UnitTripDefs;
 
 type
 
@@ -120,7 +120,7 @@ implementation
 uses
   System.SysUtils, System.Math,
   Vcl.Clipbrd,
-  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitRegistryKeys;
+  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv;
 
 {$R *.dfm}
 
@@ -333,7 +333,7 @@ begin
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
   DmRoutePoints.LoadTrip(CurTripList);
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
-  TModelConv.GetTripModels(CmbModel.Items);
+  TModelConv.CmbTripDevices(CmbModel.Items);
   CmbModel.ItemIndex := Ord(TTripList(CurTripList).TripModel);
 end;
 
@@ -411,7 +411,7 @@ end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);
 begin
-  OpenTrip.Filter := '*.gpx|*.gpx';
+  OpenTrip.Filter := '*.gpx|*.gpx|*.kml|*.kml';
   OpenTrip.InitialDir := CurPath;
   if not OpenTrip.Execute then
     exit;

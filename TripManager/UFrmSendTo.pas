@@ -66,7 +66,8 @@ implementation
 
 uses
   System.TypInfo, System.Math,
-  UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitTripDefs;
+  UnitStringUtils,
+  UnitRegistry, UnitRegistryKeys, UnitTripDefs, UnitModelConv;
 
 {$R *.dfm}
 
@@ -149,7 +150,7 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  LblModel.Caption := TModelConv.GetDefaultDevice(Ord(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))));
+  LblModel.Caption := TModelConv.GetTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)));
   CmbTripOption.Items.Text := TripOptions;
 
 {$IFDEF ALLTRIPTRACKS}

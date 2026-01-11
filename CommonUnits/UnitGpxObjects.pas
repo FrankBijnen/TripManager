@@ -217,6 +217,7 @@ uses
 {$IFDEF REGISTRYKEYS}
   UnitRegistryKeys,
   UnitRegistry,
+  UnitModelConv,
 {$ENDIF}
   UnitRedirect,
   UnitStringUtils;

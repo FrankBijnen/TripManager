@@ -18,8 +18,7 @@ uses
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
-  UnitListViewSort, UnitMtpDevice, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent,
-  UnitRegistryKeys;
+  UnitListViewSort, UnitMtpDevice, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -337,7 +336,6 @@ type
     RoutePointTimeOut: string;
     GeoSearchTimeOut: string;
     USBEvent: TUSBEvent;
-
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
     procedure USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
@@ -369,12 +367,11 @@ type
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     function GetDbPath: string;
     procedure ReadDeviceDB;
-    function ReadGarminDevice(const ModelDescription: string): TGarminDevice;
+    procedure ReadGarminDevice(const ModelDescription: string);
     procedure GuessModel(const DisplayedDevice: string);
     function DeviceIdInList(const DeviceName: string): integer;
-    function KnownDeviceIndex(KnownDevices: TStringList): integer;
     procedure SelectDevice(const Indx: integer); overload;
-    procedure SelectDeviceByName(const Device: string = '');
+    procedure SelectKnownDevice;
     procedure SelectDeviceById(const Device: string);
     function GetItemType(const AListview: TListView): TDirType;
     procedure CloseDevice;
@@ -434,8 +431,8 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
-  MsgLoop, UnitProcessOptions, UnitRegistry, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
-  UnitRedirect, UnitGpxTripCompare, UnitSqlite,
+  MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
+  UnitRedirect, UnitGpxTripCompare, UnitSqlite, UnitModelConv,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
@@ -549,10 +546,11 @@ procedure TFrmTripManager.ReadDeviceDB;
 var
   DBPath: string;
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
-  DefAdvLevel: integer;
+  ModelIndex, DefAdvLevel: integer;
 begin
   // Check the connected Device needs reading SQlite
-  if not (TModelConv.Display2Garmin(CmbModel.ItemIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  if not (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
     exit;
 
 {$IFDEF DBG_PROFILE}
@@ -611,7 +609,7 @@ DebugMsg(['Copy Device file OK', DBPath, 'File', ProfileDb]);
     OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
     OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
 
-    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(CmbModel.ItemIndex));
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
 
 {$IFDEF DBG_PROFILE}
 DebugMsg(['Vehicle_Profile Read', 'Valid:', NewVehicle_Profile.Valid,
@@ -647,7 +645,7 @@ DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfil
   end;
 end;
 
-function TFrmTripManager.ReadGarminDevice(const ModelDescription: string): TGarminDevice;
+procedure TFrmTripManager.ReadGarminDevice(const ModelDescription: string);
 var
   CurDevId, DevId: integer;
   NFile, FriendlyPath: string;
@@ -684,8 +682,9 @@ var
   end;
 
 begin
-  result.Init;
-  result.GarminModel := TModelConv.GetModelFromDescription(ModelDescription);
+
+  GarminDevice.Init;
+  GarminDevice.GarminModel := TModelConv.GetModelFromDescription(ModelDescription);
 
   // Need a device to check better
   if not CheckDevice(false) then
@@ -739,39 +738,41 @@ begin
       MassStorageNode := DeviceNode.Find('MassStorageMode');
 
       // Update model from GarminDevice.xml
-      result.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
-      result.GarminModel := TModelConv.GetModelFromDescription(result.ModelDescription);
-      case result.GarminModel of
+      GarminDevice.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
+      GarminDevice.GarminModel := TModelConv.GetModelFromDescription(GarminDevice.ModelDescription);
+      case GarminDevice.GarminModel of
         TGarminModel.Zumo595,
         TGarminModel.Zumo590,
         TGarminModel.Drive51,
         TGarminModel.Zumo3x0:
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
-            result.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
+            GarminDevice.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         TGarminModel.Unknown:
-          result.GarminModel := TModelConv.GuessGarminOrEdge(result.ModelDescription);
+          GarminDevice.GarminModel := TModelConv.GuessGarminOrEdge(GarminDevice.ModelDescription);
       end;
 
       // Get default paths
       if (Assigned(MassStorageNode)) then
       begin
-        result.GpxPath := GetPath(MassStorageNode, 'GPSData', 'InputToUnit', 'gpx');
-        result.GpiPath := GetPath(MassStorageNode, 'CustomPOI', 'InputToUnit', 'gpi');
-        result.CoursePath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'OutputFromUnit', 'fit');
-        result.NewFilesPath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'InputToUnit', 'fit');
-        result.ActivitiesPath := GetPath(MassStorageNode, 'FIT_TYPE_4', 'OutputFromUnit', 'fit');
+        GarminDevice.GpxPath := GetPath(MassStorageNode, 'GPSData', 'InputToUnit', 'gpx');
+        GarminDevice.GpiPath := GetPath(MassStorageNode, 'CustomPOI', 'InputToUnit', 'gpi');
+        GarminDevice.CoursePath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'OutputFromUnit', 'fit');
+        GarminDevice.NewFilesPath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'InputToUnit', 'fit');
+        GarminDevice.ActivitiesPath := GetPath(MassStorageNode, 'FIT_TYPE_4', 'OutputFromUnit', 'fit');
       end;
     finally
       XmlDoc.Free;
     end;
   end;
+
 end;
 
 procedure TFrmTripManager.GuessModel(const DisplayedDevice: string);
 var
   ModelIndex: integer;
 begin
-  GarminDevice := ReadGarminDevice(DisplayedDevice);
+  ReadGarminDevice(DisplayedDevice);
+
   ModelIndex := TModelConv.Garmin2Display(GarminDevice.GarminModel);
 
   // Change description for 'old' Garmin units and Edge
@@ -983,7 +984,6 @@ begin
   FrmAdvSettings.SampleTrip := ATripList;
   if FrmAdvSettings.ShowModal = mrOk then
     ReadSettings;
-
   BgDeviceClick(BgDevice);
 end;
 
@@ -2170,7 +2170,7 @@ begin
     ShellTreeView1.Root := Reg_PrefFileSysFolder_Val;
   end;
   GetDeviceList;
-  SelectDeviceByName;
+  SelectKnownDevice;
   ReadDeviceDB;
   BgDeviceClick(BgDevice);
 end;
@@ -2296,41 +2296,12 @@ begin
 
 end;
 
-function TFrmTripManager.KnownDeviceIndex(KnownDevices: TStringList): integer;
-var
-  KnownIndex, DevIndex: integer;
+procedure TFrmTripManager.SelectKnownDevice;
 begin
-  result := -1;
-  for KnownIndex := 0 to KnownDevices.Count -1 do
-  begin
-    for DevIndex := 0 to DeviceList.Count -1 do
-    begin
-      if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[DevIndex]).DisplayedDevice)) then
-        exit(DevIndex);
-    end;
-  end;
-end;
-
-procedure TFrmTripManager.SelectDeviceByName(const Device: string = '');
-var
-  KnownDevices: TStringList;
-begin
-  if (Device <> '') then
-  begin
-    KnownDevices := TStringList.Create;
-    KnownDevices.Add(Device);
-  end
-  else
-    KnownDevices := TModelConv.GetKnownDevices;
-
-  try
-    CmbDevices.ItemIndex := -1;
-    CmbDevices.Text := SelectMTPDevice;
-    CmbDevices.ItemIndex := KnownDeviceIndex(KnownDevices);
-    SelectDevice(CmbDevices.ItemIndex);
-  finally
-    KnownDevices.Free;
-  end;
+  CmbDevices.ItemIndex := -1;
+  CmbDevices.Text := SelectMTPDevice;
+  CmbDevices.ItemIndex := TModelConv.KnownDeviceIndex(DeviceList);
+  SelectDevice(CmbDevices.ItemIndex);
 end;
 
 procedure TFrmTripManager.SelectDeviceById(const Device: string);
@@ -2339,7 +2310,7 @@ var
 begin
   if (Device = '') then
   begin
-    SelectDeviceByName;
+    SelectKnownDevice;
     exit;
   end;
 
@@ -4927,6 +4898,8 @@ var
   ModelIndex: integer;
 begin
   TSetProcessOptions.CheckSymbolsDir;
+
+  TModelConv.SetupKnownDevices;
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   if (Assigned(CurrentDevice)) then
     GuessModel(CurrentDevice.DisplayedDevice)
@@ -5125,78 +5098,72 @@ end;
 
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
-  KnownIndex, Index, Retries: integer;
+  Index, Retries: integer;
   SelectedDevice: string;
-  KnownDevices: TStringList;
 begin
-  KnownDevices := TModelConv.GetKnownDevices;
-  try
-    // Save currently selected device Id
-    if Assigned(CurrentDevice) then
-      SelectedDevice := CurrentDevice.Device
-    else
-      SelectedDevice := '';
+  // Save currently selected device Id
+  if Assigned(CurrentDevice) then
+    SelectedDevice := CurrentDevice.Device
+  else
+    SelectedDevice := '';
 
-    // Removed USB device is our connected device?
-    if (Inserted = false) and
-       (Assigned(CurrentDevice)) and
-       (SameText(CurrentDevice.Device, DeviceName)) then
+  // Removed USB device is our connected device?
+  if (Inserted = false) and
+     (Assigned(CurrentDevice)) and
+     (SameText(CurrentDevice.Device, DeviceName)) then
+  begin
+    Index := DeviceIdInList(DeviceName);  // List before remove
+    if (Index > -1) then
+      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Disconnected');
+  end;
+
+  // rebuild device list
+  GetDeviceList;
+
+  // Select the previously selected device and reload the file list
+  if (SelectedDevice <> '') then
+  begin
+    SelectDeviceById(SelectedDevice);
+    // No need to reread DeviceDb
+    if CheckDevice(false) then
+      ReloadFileList;
+  end;
+
+  // No Device was connected and now it is.
+  if (Inserted) and
+     (SelectedDevice = '') then
+  begin
+    // Wait until the DeviceName appears in the Devicelist
+    // EG. Edge in VirtualBox
+    Retries := 5;
+    Index := -1;
+    while (Retries > 0) do
     begin
-      Index := DeviceIdInList(DeviceName);  // List before remove
+      Index := DeviceIdInList(DeviceName); // List after insert
       if (Index > -1) then
-        ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Disconnected');
+          break;
+
+      // Device is not (yet) available in DeviceList. Retry a few times
+      SbPostProcess.Panels[0].Text := DeviceName;
+      SbPostProcess.Panels[1].Text := 'Waiting for device to appear';
+      SbPostProcess.Update;
+
+      Dec(Retries);
+      Sleep(500);
+      GetDeviceList;  // Rescan devices
     end;
 
-    // rebuild device list
-    GetDeviceList;
-
-    // Select the previously selected device and reload the file list
-    if (SelectedDevice <> '') then
+    // Inserted Device is in the DeviceList and a known device.
+    if (Index > -1) and
+       (TModelConv.IsKnownDevice(TMTP_Device(DeviceList[Index]).DisplayedDevice)) then
     begin
-      SelectDeviceById(SelectedDevice);
-      if CheckDevice(false) then
-        ReloadFileList;
+      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Connected');
+
+      CmbDevices.ItemIndex := Index;
+      SelectDevice(Index);
+      ReadDeviceDB;
+      BgDeviceClick(BgDevice);
     end;
-
-    // No Device connected and inserted USB device is our preferred device?
-    if (Inserted) and
-       (SelectedDevice = '') then
-    begin
-      Retries := 5;
-      Index := -1;
-      while (Retries > 0) do
-      begin
-        Index := DeviceIdInList(DeviceName); // List after insert
-        if (Index > -1) then
-            break;
-
-        // Device is not (yet) available in DeviceList. Retry a few times
-        SbPostProcess.Panels[0].Text := DeviceName;
-        SbPostProcess.Panels[1].Text := 'Waiting for device to appear';
-        SbPostProcess.Update;
-
-        Dec(Retries);
-        Sleep(500);
-        GetDeviceList;  // Rescan devices
-      end;
-      if (Index > -1) then
-      begin
-        for KnownIndex := 0 to KnownDevices.Count -1 do
-        begin
-          if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[Index]).DisplayedDevice)) then
-          begin
-            ConnectedDeviceChanged(Format('%s', [TMTP_Device(DeviceList[Index]).DisplayedDevice]), 'Connected');
-
-            CmbDevices.ItemIndex := Index;
-            SelectDevice(Index);
-            ReadDeviceDB;
-            BgDeviceClick(BgDevice);
-          end;
-        end;
-      end;
-    end;
-  finally
-    KnownDevices.Free;
   end;
 end;
 
@@ -5204,12 +5171,12 @@ procedure TFrmTripManager.ConnectedDeviceChanged(const Device, Status: string);
 begin
   SbPostProcess.Panels[0].Text := Device;
   SbPostProcess.Panels[1].Text := Status;
+  SbPostProcess.Update;
+
+  CmbDevices.ItemIndex := -1;
+  CmbDevices.Text := SelectMTPDevice;
 
   CurrentDevice := nil;
-  CmbModel.ItemIndex := GetRegistry(Reg_CurrentModel, 0);
-  GuessModel(GetRegistry(Reg_PrefDev_Key, TModelConv.GetKnownDevice(CmbModel.ItemIndex), IntToStr(CmbModel.ItemIndex)));
-
-  ReadDefaultFolders;
   TvTrip.Items.Clear;
   ClearTripInfo;
 

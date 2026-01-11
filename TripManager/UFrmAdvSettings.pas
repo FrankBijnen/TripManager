@@ -81,7 +81,7 @@ implementation
 
 uses
   System.UITypes, System.StrUtils, System.Math,
-  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UNitModelConv, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
   UnitGeoCode, UnitOSMMap;
 
 {$R *.dfm}

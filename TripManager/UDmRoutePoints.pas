@@ -70,7 +70,7 @@ type
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
     procedure ImportFromGPX(const GPXFile: string);
     function Trk2RtPreview(GPXFileObj: TObject; UpdateDb: boolean): integer;
-    function Trk2RtImportFromGPX(const GPXFile: string; const UpdateDB: boolean = false): integer;
+    function Trk2RtImportFromGPX(const GPXOrKmlFile: string; const UpdateDB: boolean = false): integer;
     procedure ExportToGPX(const GPXFile: string);
     procedure ImportFromCSV(const CSVFile: string);
     procedure ExportToCSV(const CSVFile: string);
@@ -93,16 +93,22 @@ uses
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
   UnitGeoCode, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects,
-  UnitTripDefs, UnitTripObjects, UnitRegistryKeys;
+  UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
 
 const
-  BooleanTrue = 'True';
-  BooleanFalse = 'False';
+  BooleanTrue       = 'True';
+  BooleanFalse      = 'False';
   BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
-  RtePt = 'RtePt ';
-  MaxDepartureYear = 2037;
+  RtePt             = 'RtePt ';
+  MaxDepartureYear  = 2037;
+  KmlExtension      = '.kml';
+  Trk2Rt            = 'Trk2Rt';
+  T2R               = 'T2R';
+  GPXExtension      = '.gpx';
+  Trk2RtIn          = Trk2Rt + GPXExtension;
+  Trk2RtOut         = T2R + '\' + Trk2Rt + '_' + T2R + GPXExtension;
 
 var
   RegionalFormatSettings: TFormatSettings;
@@ -763,12 +769,6 @@ begin
 end;
 
 function TDmRoutePoints.Trk2RtPreview(GPXFileObj: TObject; UpdateDb: boolean): integer;
-const
-  Trk2Rt    = 'Trk2Rt';
-  T2R       = 'T2R';
-  GPX       = '.gpx';
-  Trk2RtIn  = Trk2Rt + GPX;
-  Trk2RtOut = T2R + '\' + Trk2Rt + '_' + T2R + GPX;
 var
   CrNormal,CrWait: HCURSOR;
   RoutePoints, RoutePoint: TXmlVSNode;
@@ -783,9 +783,9 @@ begin
     if (TGPXFile(GPXFileObj).SaveSelectionAsXML(CreatedTempPath + Trk2RtIn) = 0) then
       exit;
 
-    Trk2RtCmdLine := Format('trk2rt.exe %s "%s"', [TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
+    Trk2RtCmdLine := Format('%s.exe %s "%s"', [Trk2Rt, TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
     if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
-      raise Exception.Create('Could not start Trk2Rt.exe. Check installation');
+      raise Exception.Create(Format('Could not start %s.exe. Check installation', [Trk2Rt]));
 
     GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
     try
@@ -807,11 +807,29 @@ begin
   end;
 end;
 
-function TDmRoutePoints.Trk2RtImportFromGPX(const GPXFile: string; const UpdateDB: boolean = false): integer;
+function TDmRoutePoints.Trk2RtImportFromGPX(const GPXOrKmlFile: string; const UpdateDB: boolean = false): integer;
 var
   GPXFileObj: TGPXFile;
+  GpxFile: string;
+  Trk2RtCmdLine, ResOutput, ResError: string;
+  ResExit: Dword;
 begin
   result := 0;
+  GpxFile := GPXOrKmlFile;
+
+  // Use Trk2Rt to convert from KML to GPX first?
+  if (ContainsText(ExtractFileExt(GPXOrKmlFile), KmlExtension)) then
+  begin
+    Trk2RtCmdLine := Format('%s.exe %s exportPath="%s" "%s"',
+                            [Trk2Rt, TProcessOptions.Trk2RtOptions, ExcludeTrailingPathDelimiter(CreatedTempPath), GPXOrKmlFile]);
+    if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
+      raise Exception.Create(Format('Could not start %s.exe. Check installation', [Trk2Rt]));
+    GpxFile := Format('%s%s_%s%s', [IncludeTrailingPathDelimiter(CreatedTempPath),
+                                    ExtractFileName(ChangeFileExt(GPXOrKmlFile, '')),
+                                    T2R,
+                                    GPXExtension]);
+  end;
+
   GPXFileObj := TGPXFile.Create(GPXFile, OnSetAnalyzePrefs, nil);
   try
     if (CdsRoute.State in [dsEdit, dsInsert]) then

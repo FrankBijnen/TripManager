@@ -184,6 +184,7 @@ uses
 {$IFDEF REGISTRYKEYS}
   UnitRegistry,
   UnitRegistryKeys,
+  UnitModelConv,
 {$ENDIF}
   UnitStringUtils;
 

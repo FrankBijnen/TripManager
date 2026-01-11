@@ -22,6 +22,7 @@ uses
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
   UFrmShowLog in 'UFrmShowLog.pas' {FrmShowLog},
   UFrmEditRoutePref in 'UFrmEditRoutePref.pas' {FrmEditRoutePref},
+  UnitRegistryKeys,
   UnitRegistry in '..\CommonUnits\UnitRegistry.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',
   Monitor in '..\CommonUnits\DirMon\Monitor.pas',
@@ -48,8 +49,7 @@ uses
   UFrmPlaces in '..\CommonUnits\UFrmPlaces.pas' {FrmPlaces},
   UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitTripOverview in '..\CommonUnits\UnitTripOverview.pas',
-  UnitRedirect in '..\CommonUnits\UnitRedirect.pas',
-  UnitRegistryKeys;
+  UnitRedirect in '..\CommonUnits\UnitRedirect.pas';
 
 {$R *.res}
 

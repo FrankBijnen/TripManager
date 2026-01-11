@@ -160,7 +160,7 @@ object FrmSendTo: TFrmSendTo
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 3
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -179,6 +179,7 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
+      ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
@@ -193,19 +194,22 @@ object FrmSendTo: TFrmSendTo
       Left = 2
       Top = 17
       Width = 588
-      Height = 41
-      Align = alTop
+      Height = 21
+      Align = alClient
       TabOrder = 0
       object LblModel: TLabel
-        Left = 1
-        Top = 1
-        Width = 199
-        Height = 39
+        AlignWithMargins = True
+        Left = 6
+        Top = 5
+        Width = 189
+        Height = 13
         Margins.Left = 5
-        Margins.Top = 2
+        Margins.Top = 4
         Margins.Right = 5
         Margins.Bottom = 2
         Align = alClient
+        Alignment = taCenter
+        AutoSize = False
         Color = clWindow
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -215,16 +219,18 @@ object FrmSendTo: TFrmSendTo
         ParentColor = False
         ParentFont = False
         Transparent = False
-        WordWrap = True
+        Layout = tlCenter
         StyleElements = [seBorder]
-        ExplicitWidth = 3
-        ExplicitHeight = 15
+        ExplicitLeft = 4
+        ExplicitTop = 4
+        ExplicitWidth = 193
+        ExplicitHeight = 20
       end
       object CmbTripOption: TComboBox
         Left = 200
         Top = 1
         Width = 387
-        Height = 39
+        Height = 23
         Align = alRight
         Style = csDropDownList
         TabOrder = 0
