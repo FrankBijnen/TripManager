@@ -273,13 +273,25 @@ end;
 function CreateTempPath(const Prefix: string): string;
 begin
   App_Prefix := Prefix;
+
+  // Get a temp file name to use for temp path
   result := TempFilename(App_Prefix);
   if FileExists(result) then
     System.Sysutils.DeleteFile(result);
-  MkDir(result);
+
+  // Strip .tmp from directory name, and create
+  result := ChangeFileExt(result, '');
+  if not ForceDirectories(result) then
+    raise Exception.Create(Format('Error creating: %s', [result]));
+
+  // Save path name
   CreatedTempPath := IncludeTrailingPathDelimiter(result);
-  MkDir(GetOSMTemp);
-  MKDir(GetRoutesTmp);
+
+  if not ForceDirectories(GetOSMTemp) then
+    raise Exception.Create(Format('Error creating: %s', [GetOSMTemp]));
+
+  if not ForceDirectories(GetRoutesTmp) then
+    raise Exception.Create(Format('Error creating: %s', [GetRoutesTmp]));
 end;
 
 function GetHtmlTmp: string;
