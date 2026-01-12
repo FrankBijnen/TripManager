@@ -67,7 +67,6 @@ Source: "..\Win32\Symbols\*";             DestDir: "{app}\Symbols";     Componen
 Source: "..\docs\tripmanager.chm";        DestDir: "{app}\ChmDocs";     Components: Docs;     Flags: ignoreversion;
 
 ; Trk2Rt
-Source: "Trk2Rt\Trk2Rt.cmd";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
 Source: "Trk2Rt\Trk2Rt.exe";              DestDir: "{app}";             Components: Trk2RT;   Flags: ignoreversion;
 Source: "Trk2Rt\vc_redist.x86.exe";       DestDir: "{tmp}";             Components: Trk2RT;   Flags: ignoreversion; Check: VC_RTL_IsNeeded(false);
 
@@ -92,7 +91,7 @@ Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\a_rout
             ValueType: string; ValueData: "Create route from track"; \
             Flags: uninsdeletekey;  Components: Trk2RT;
 Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell\a_routefromtrack\command"; \
-            ValueType: string; ValueData: """{app}\Trk2Rt.cmd"" ""%L""";  \
+            ValueType: string; ValueData: """{app}\Trk2Rt.exe"" exportPath=""%L"" ""%L""";  \
             Flags: uninsdeletekey;  Components: Trk2RT;
 
 Root: HKCR; Subkey: "SystemFileAssociations\.gpx\shell\Trk2RTAction\shell"; \
@@ -124,7 +123,7 @@ Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\a_rout
             ValueType: string; ValueData: "Create route from track"; \
             Flags: uninsdeletekey;  Components: Trk2RT;
 Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell\a_routefromtrack\command"; \
-            ValueType: string; ValueData: """{app}\Trk2Rt.cmd"" ""%L""";  \
+            ValueType: string; ValueData: """{app}\Trk2Rt.exe"" exportPath=""%L"" ""%L""";  \
             Flags: uninsdeletekey;  Components: Trk2RT;
 
 Root: HKCR; Subkey: "SystemFileAssociations\.kml\shell\Trk2RTAction\shell"; \
