@@ -74,6 +74,7 @@ type
     procedure ExportToGPX(const GPXFile: string);
     procedure ImportFromCSV(const CSVFile: string);
     procedure ExportToCSV(const CSVFile: string);
+    function KurvigerURL: string;
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
@@ -1051,6 +1052,36 @@ begin
     end;
   finally
     Writer.Free;
+    CdsRoutePoints.EnableControls;
+  end;
+end;
+
+function TDmRoutePoints.KurvigerURL: string;
+var
+  NParm: string;
+begin
+  if (CdsRoute.State in [dsEdit, dsInsert]) then
+    CdsRoute.Post;
+  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+    CdsRoutePoints.Post;
+
+  CdsRoutePoints.DisableControls;
+  try
+    result := 'https://kurviger.com/plan';
+    NParm := '?';
+    CdsRoutePoints.First;
+    while not CdsRoutePoints.Eof do
+    begin
+      result := result + Format('%spoint=%s,%s', [NParm, CdsRoutePointsLat.AsString, CdsRoutePointsLon.AsString]);
+      NParm := '&';
+      result := result + Format('%spname.%d=%s', [NParm, CdsRoutePoints.RecNo -1, EscapeUrl(CdsRoutePointsName.AsString)]);
+      if (SameText(CdsRoutePointsViaPoint.AsString, BooleanTrue) = false) then
+        result := result + Format('%sshaping.%d=true', [NParm, CdsRoutePoints.RecNo -1]);
+
+      CdsRoutePoints.Next;
+    end;
+    result := result + Format('%sdocument_title=%s', [NParm, EscapeUrl(CdsRouteTripName.AsString)]);
+  finally
     CdsRoutePoints.EnableControls;
   end;
 end;

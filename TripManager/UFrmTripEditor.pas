@@ -65,6 +65,7 @@ type
     ImportCSV: TMenuItem;
     ExportCSV: TMenuItem;
     Trk2RtImport1: TMenuItem;
+    TbBrowser: TToolButton;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -90,6 +91,7 @@ type
     procedure ImportCSVClick(Sender: TObject);
     procedure ExportCSVClick(Sender: TObject);
     procedure Trk2RtImport1Click(Sender: TObject);
+    procedure TbBrowserClick(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -119,6 +121,7 @@ implementation
 
 uses
   System.SysUtils, System.Math,
+  Winapi.ShellAPI,
   Vcl.Clipbrd,
   UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv;
 
@@ -438,6 +441,15 @@ procedure TFrmTripEditor.TbMoveUpClick(Sender: TObject);
 begin
   DBGRoutePoints.SelectedRows.Clear;
   DmRoutePoints.MoveUp(DmRoutePoints.CdsRoutePoints);
+end;
+
+procedure TFrmTripEditor.TbBrowserClick(Sender: TObject);
+var
+  Url: string;
+begin
+  Url := DmRoutePoints.KurvigerURL;
+  ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
+  Clipboard.AsText := Url;
 end;
 
 procedure TFrmTripEditor.TbDeletePointClick(Sender: TObject);

@@ -33,6 +33,7 @@ procedure DebugMsg(const Msg: array of variant);
 function TempFilename(const Prefix: string): string;
 function GetAppData: string;
 function EscapeHtml(const HTML: string): string;
+function EscapeUrl(const URL: string): string;
 function EscapeDQuote(const HTML: string): string;
 function EscapeFileName(InFile: string): string;
 function CreateTempPath(const Prefix: string): string;
@@ -339,6 +340,14 @@ begin
   result := ReplaceAll(HTML,
                        ['&',     '<',    '>',    '"',      '''',    ' ',      '-'],
                        ['&amp;', '&lt;', '&gt;', '&quot;', '&#39;', '&nbsp;', '&#8209;']
+                      );
+end;
+
+function EscapeURL(const URL: string): string;
+begin
+  result := ReplaceAll(URL,
+                       ['&',   '<',   '>',   ':',   '"',   '''',  ' ',   '-'],
+                       ['%26', '%3C', '%3E', '%3A', '%22', '%27', '%20', '%2D']
                       );
 end;
 

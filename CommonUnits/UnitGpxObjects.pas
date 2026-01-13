@@ -2228,12 +2228,12 @@ begin
 
           KurvUrl := KurvUrl + Format('%spoint=%s,%s', [NParm, lat, lon]);
           NParm := '&';
-          KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, FindSubNodeValue(rtept, 'name')]);
+          KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
           if (IsVia = false) then
             KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
           Inc(Cnt);
         end;
-        KurvUrl := KurvUrl + Format('%sdocument_title=%s', [NParm, Route.Name]);
+        KurvUrl := KurvUrl + Format('%sdocument_title=%s', [NParm, EscapeUrl(Route.Name)]);
         if (Assigned(FOutStringList)) then
           FOutStringList.Add(KurvUrl)
         else
