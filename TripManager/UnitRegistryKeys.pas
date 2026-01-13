@@ -380,7 +380,7 @@ begin
     begin
       SetRegistry(Reg_FuncHtml, Items[IdHtml].Checked);
       if (Items[IdHtml].Checked) then
-        result := result + [TGPXFunc.CreateHTML];
+        result := result + [TGPXFunc.CreateHTML, TGPXFunc.CreateKurviger] ;
     end;
 
     if (Items[IdFit].Enabled) then

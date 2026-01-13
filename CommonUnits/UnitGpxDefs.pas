@@ -24,7 +24,7 @@ type
     procedure FromAttributes(Attributes: TObject);
   end;
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
-              CreateHTML, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints,
+              CreateHTML, CreateKurviger, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints,
               CreateCompleteRoutes);
   TGPXFuncArray = Array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);

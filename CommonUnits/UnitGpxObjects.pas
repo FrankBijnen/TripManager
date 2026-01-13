@@ -151,7 +151,9 @@ type
     procedure CloneAttributes(FromNode, ToNode: TXmlVsNode);
     procedure CloneSubNodes(FromNodes, ToNodes: TXmlVsNodeList);
     procedure CloneNode(FromNode, ToNode: TXmlVsNode);
+    function GetSelected(const Preferred: string): TXmlVSNodeList;
     function GetSelectedTracks: TXmlVSNodeList;
+    function GetSelectedRoutes: TXmlVSNodeList;
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);
@@ -181,6 +183,7 @@ type
     procedure DoCreatePOI;
     procedure DoCreateKML;
     procedure DoCreateHTML;
+    procedure DoCreateKurviger;
     procedure DoCreateOSMPoints;
     procedure DoCreatePOLY;
     procedure DoCreateFITPoints;
@@ -230,6 +233,8 @@ const
   DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
   DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
   UnglitchTreshold: double = 0.0005;      // In Km. ==> 50 Cm
+  TrkOrigin = 'Trk';
+  RteOrigin = 'Rte';
 
 var
   FormatSettings: TFormatSettings;
@@ -1178,7 +1183,8 @@ begin
     FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
-    CurrentTrack.AddChild('desc').NodeValue := 'Rte';
+    CurrentTrack.AddChild('desc').NodeValue := RteOrigin;
+
     NumberNode := CurrentTrack.AddChild('number');
     if (ExtensionsNode <> nil) then
     begin
@@ -1240,7 +1246,7 @@ begin
     FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
-    CurrentTrack.AddChild('desc').NodeValue := 'Trk';
+    CurrentTrack.AddChild('desc').NodeValue := TrkOrigin;
     if (ExtensionsNode <> nil) then
     begin
       TrackExtension := ExtensionsNode.Find('gpxx:TrackExtension');
@@ -1944,26 +1950,26 @@ begin
 {$ENDIF}
 end;
 
-// Get unique list of selected tracks.
-// Prefer origin <trk>
-function TGPXFile.GetSelectedTracks: TXmlVSNodeList;
+function TGPXFile.GetSelected(const Preferred: string): TXmlVSNodeList;
 var
   Track: TXmlVSNode;
   DisplayColor: string;
 begin
   result := TXmlVSNodeList.Create(false);
 
+  // First add the rreferred (trk, or rte)
   for Track in FTrackList do
   begin
     DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
     if (DisplayColor = '') then
       continue;
-    if (FindSubNodeValue(Track, 'desc') <> 'Trk') then
+    if (FindSubNodeValue(Track, 'desc') <> Preferred) then
       continue;
 
     result.Add(Track);
   end;
 
+  // Now add not preferred only if not exists
   for Track in FTrackList do
   begin
     DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
@@ -1976,6 +1982,20 @@ begin
 
      result.Add(Track);
   end;
+
+end;
+
+// Get unique list of selected tracks.
+// Prefer origin <trk>
+function TGPXFile.GetSelectedTracks: TXmlVSNodeList;
+begin
+  result := GetSelected(TrkOrigin);
+end;
+
+// Prefer origin <trk>
+function TGPXFile.GetSelectedRoutes: TXmlVSNodeList;
+begin
+  result := GetSelected(RteOrigin);
 end;
 
 procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
@@ -2146,7 +2166,7 @@ procedure TGPXFile.DoCreateHTML;
 var
   TracksProcessed: TXmlVSNodeList;
   OutFile: string;
-  Track : TXmlVSNode;
+  Track: TXmlVSNode;
   TrackId: integer;
   TrackPointList: TStringList;
 {$ENDIF}
@@ -2165,6 +2185,72 @@ begin
   finally
     TrackPointList.Free;
     TracksProcessed.Free;
+  end;
+{$ENDIF}
+end;
+
+procedure TGPXFile.DoCreateKurviger;
+{$IFDEF OSMMAP}
+var
+  RoutesProcessed: TXmlVSNodeList;
+  Route, Rte, RtePt, RtePtExtensions: TXmlVSNode;
+  Coords: TCoords;
+  Cnt: integer;
+  NParm, Lat, Lon, KurvUrl: string;
+  IsVia: boolean;
+  OutFile: string;
+  F: TextFile;
+{$ENDIF}
+begin
+{$IFDEF OSMMAP}
+  RoutesProcessed := GetSelectedRoutes;
+  try
+    for Route in RoutesProcessed do
+    begin
+      for Rte in RouteViaPointList do
+      begin
+        if (Rte.ChildNodes.Count < 3) or
+           (Rte.NodeName <> Route.Name) then
+          continue;
+        KurvUrl := 'https://kurviger.com/plan';
+        Cnt := 0;
+        NParm := '?';
+        for RtePt in Rte.ChildNodes do
+        begin
+          Coords.FromAttributes(RtePt.AttributeList);
+          Coords.FormatLatLon(Lat, Lon);
+
+          IsVia := false;
+          RtePtExtensions := RtePt.Find('extensions');
+          if (RtePtExtensions <> nil) and
+             (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
+            IsVia := true;
+
+          KurvUrl := KurvUrl + Format('%spoint=%s,%s', [NParm, lat, lon]);
+          NParm := '&';
+          if (IsVia) then
+            KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, FindSubNodeValue(rtept, 'name')])
+          else
+            KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
+          Inc(Cnt);
+        end;
+        KurvUrl := KurvUrl + Format('%sdocument_title=%s', [NParm, Route.Name]);
+        if (Assigned(FOutStringList)) then
+          FOutStringList.Add(KurvUrl)
+        else
+        begin
+          OutFile := FOutDir + ChangeFileExt(EscapeFileName(Route.Name), '_kurviger.html');
+          AssignFile(F, OutFile);
+          Rewrite(F);
+          Writeln(F, '<html><head>');
+          Writeln(F, '<meta http-equiv="refresh" content="0;url=', KurvUrl,  '" />');
+          Writeln(F, '</head><body/></html');
+          CloseFile(F);
+        end;
+      end;
+    end;
+  finally
+    RoutesProcessed.Free;
   end;
 {$ENDIF}
 end;
@@ -2634,6 +2720,7 @@ begin
         CreatePOI,
         CreateKML,
         CreateHTML,
+        CreateKurviger,
         CreatePOLY,
         CreateRoutes,
         CreateCompleteRoutes,
@@ -2660,6 +2747,8 @@ begin
           SubCaption := AddSubCaption(SubCaption, 'Kml');
         CreateHTML:
           SubCaption := AddSubCaption(SubCaption, 'Html');
+        CreateKurviger:
+          SubCaption := AddSubCaption(SubCaption, 'Kurviger');
         CreateOSMPoints:
           SubCaption := AddSubCaption(SubCaption, 'Map');
         CreateFITPoints:
@@ -2695,6 +2784,8 @@ begin
           GpxFileObj.DoCreateKML;
         CreateHTML:
           GpxFileObj.DoCreateHTML;
+        CreateKurviger:
+          GpxFileObj.DoCreateKurviger;
         CreateOSMPoints:
           GpxFileObj.DoCreateOSMPoints;
         CreateFITPoints:
@@ -2750,6 +2841,7 @@ var
       Writeln(#9, '/Poi or /Gpi        = Create Points Of Interest');
       Writeln(#9, '/Kml                = Create KML Google Earth');
       Writeln(#9, '/Html               = Create HTML');
+      Writeln(#9, '/Kurviger           = Create Kurviger');
       Writeln(#9, '/Poly               = Create POLY');
       Writeln;
       Writeln('Example: ', paramstr(0), ' /PP /Tracks /Trips *.gpx');
@@ -2783,6 +2875,8 @@ begin
       Funcs := Funcs + [TGPXFunc.CreateKML];
     if FindCmdLineSwitch('HTML', true) then
       Funcs := Funcs + [TGPXFunc.CreateHTML];
+    if FindCmdLineSwitch('KURVIGER', true) then
+      Funcs := Funcs + [TGPXFunc.CreateKurviger];
     if FindCmdLineSwitch('POLY', true) then
       Funcs := Funcs + [TGPXFunc.CreatePoly];
     if FindCmdLineSwitch('ROUTES', true) then

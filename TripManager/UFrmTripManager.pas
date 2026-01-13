@@ -232,7 +232,6 @@ type
     procedure ShellTreeView1Change(Sender: TObject; Node: TTreeNode);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure ShellListView1Click(Sender: TObject);
-    procedure BtnAddToMapClick(Sender: TObject);
     procedure SpeedBtn_MapClearClick(Sender: TObject);
     procedure VlTripInfoStringsChange(Sender: TObject);
     procedure VlTripInfoEditButtonClick(Sender: TObject);
@@ -309,6 +308,7 @@ type
     procedure MnuTripOverviewClick(Sender: TObject);
     procedure EdFileSysFolderCloseUp(Sender: TObject);
     procedure BgDeviceItemsGpxClick(Sender: TObject);
+    procedure BtnAddToMapMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -353,6 +353,7 @@ type
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     procedure AddToMap(FileName: string);
+    procedure OpenInKurviger(FileName: string);
     procedure MapRequest(const Coords, Desc, TimeOut: string;
                          const ZoomLevel: string = '');
     procedure SaveTripGpiFile;
@@ -2684,8 +2685,8 @@ begin
       end;
 
       TGPXFile.PerformFunctions([CreateOSMPoints], ActGpxFile,
-                                nil, SetProcessOptions.SavePrefs,
-                                '', OsmTrack);
+                                 nil, SetProcessOptions.SavePrefs,
+                                 '', OsmTrack);
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
                                               FileSysTrip,
@@ -2701,12 +2702,36 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.BtnAddToMapClick(Sender: TObject);
+procedure TFrmTripManager.OpenInKurviger(FileName: string);
+var
+  OsmTrack: TStringList;
+  Url: string;
+begin
+  OsmTrack := TStringList.Create;
+  try
+    TGPXFile.PerformFunctions([CreateKurviger], FileName,
+                               nil, SetProcessOptions.SavePrefs,
+                               '', OsmTrack);
+    for Url in OsmTrack do
+      ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
+
+    if (OsmTrack.Count > 0) then
+      EdgeBrowser1.Navigate(OsmTrack[0]);
+
+  finally
+    OsmTrack.Free;
+  end;
+end;
+
+procedure TFrmTripManager.BtnAddToMapMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if ShellListView1.SelectedFolder = nil then
     exit;
 
-  AddToMap(ShellListView1.SelectedFolder.PathName);
+  if (ssCtrl in Shift) then
+    OpenInKurviger(ShellListView1.SelectedFolder.PathName)
+  else
+    AddToMap(ShellListView1.SelectedFolder.PathName);
 end;
 
 procedure TFrmTripManager.LoadTripOnMap(CurrentTrip: TTripList; Id: string);
