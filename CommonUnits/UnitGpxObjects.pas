@@ -2228,9 +2228,8 @@ begin
 
           KurvUrl := KurvUrl + Format('%spoint=%s,%s', [NParm, lat, lon]);
           NParm := '&';
-          if (IsVia) then
-            KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, FindSubNodeValue(rtept, 'name')])
-          else
+          KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, FindSubNodeValue(rtept, 'name')]);
+          if (IsVia = false) then
             KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
           Inc(Cnt);
         end;
@@ -2242,9 +2241,7 @@ begin
           OutFile := FOutDir + ChangeFileExt(EscapeFileName(Route.Name), '_kurviger.html');
           AssignFile(F, OutFile);
           Rewrite(F);
-          Writeln(F, '<html><head>');
-          Writeln(F, '<meta http-equiv="refresh" content="0;url=', KurvUrl,  '" />');
-          Writeln(F, '</head><body/></html');
+          Writeln(F, '<html><head><meta http-equiv="refresh" content="0;url=', KurvUrl,  '" /></head><body/></html');
           CloseFile(F);
         end;
       end;
