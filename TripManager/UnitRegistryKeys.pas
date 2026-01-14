@@ -58,6 +58,8 @@ const
   Reg_MinShapeDist_Val            = 2500;
   Reg_EnableTripOverview          = 'EnableTripOverview';
   Reg_RoadSpeed_Key               = 'RoadSpeed'; // Multiple
+  Reg_KurvigerUrl_Key             = 'KurvigerUrl';
+  Reg_KurvigerUrl_Val             = 'https://kurviger.com/en/plan';
 
   Reg_PrefFileSysFolder_Key       = 'PrefFileSysFolder';
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
@@ -152,6 +154,9 @@ begin
     RoadSpeedMap[3].Value := GetRegistry(Reg_RoadSpeed_Key + '_04',  50);
     RoadSpeedMap[4].Value := GetRegistry(Reg_RoadSpeed_Key + '_05',  48);
     RoadSpeedMap[5].Value := GetRegistry(Reg_RoadSpeed_Key + '_0C',  15);
+
+    // Kurviger
+    KurvigerUrl := GetRegistry(Reg_KurvigerUrl_Key, Reg_KurvigerUrl_Val);
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);

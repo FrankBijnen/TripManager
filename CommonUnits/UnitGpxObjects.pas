@@ -1,5 +1,6 @@
 unit UnitGPXObjects;
 {$WARN SYMBOL_PLATFORM OFF}
+{$DEFINE KURVSHAPENAMES}
 
 interface
 
@@ -1062,18 +1063,7 @@ begin
       ComputeDistance(RtePtNode);
     inc(ShapingPointCnt);
 
-    case ProcessOptions.ShapingPointName of
-      TShapingPointName.Unchanged:
-        ShapePtName := FindSubNodeValue(RtePtNode, 'name');
-      TShapingPointName.Route_Sequence:
-        ShapePtName := Format('%s_%3.3d', [RouteName, ShapingPointCnt]);
-      TShapingPointName.Route_Distance:
-        ShapePtName := Format('%s_%3.3d %s', [RouteName, Round(TotalDistance), Processoptions.DistanceStr]);
-      TShapingPointName.Sequence_Route:
-        ShapePtName := Format('%3.3d_%s', [ShapingPointCnt, RouteName]);
-      TShapingPointName.Distance_Route:
-        ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), Processoptions.DistanceStr, RouteName]);
-    end;
+    ShapePtName := FindSubNodeValue(RtePtNode, 'name');
 
     if (Symbol = '') or
        (Symbol = ProcessOptions.DefShapePtSymbol) then
@@ -1084,7 +1074,18 @@ begin
 
     if (ProcessOptions.ProcessShape) then
     begin
-      Symbol := ProcessOptions.DefShapePtSymbol;
+
+      case ProcessOptions.ShapingPointName of
+        TShapingPointName.Route_Sequence:
+          ShapePtName := Format('%s_%3.3d', [RouteName, ShapingPointCnt]);
+        TShapingPointName.Route_Distance:
+          ShapePtName := Format('%s_%3.3d %s', [RouteName, Round(TotalDistance), Processoptions.DistanceStr]);
+        TShapingPointName.Sequence_Route:
+          ShapePtName := Format('%3.3d_%s', [ShapingPointCnt, RouteName]);
+        TShapingPointName.Distance_Route:
+          ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), Processoptions.DistanceStr, RouteName]);
+      end;
+
       UnglitchNode(RtePtNode, ExtensionNode, UTF8String(ShapePtName));
 
       RenameNode(RtePtNode, ShapePtName);
@@ -1092,6 +1093,7 @@ begin
       if (ProcessOptions.ProcessAddrShape) then
         LookUpAddrRtePt(RtePtNode);
 
+      Symbol := ProcessOptions.DefShapePtSymbol;
       if (ProcessOptions.ProcessFlags) then
         RenameSubNode(RtePtNode, 'sym', Symbol); // Symbol for shaping and via points.
 
@@ -2196,13 +2198,15 @@ var
   Route, Rte, RtePt, RtePtExtensions: TXmlVSNode;
   Coords: TCoords;
   Cnt: integer;
-  NParm, Lat, Lon, KurvUrl: string;
+  NParm, Lat, Lon, KurvUrl, HTML: string;
   IsVia: boolean;
   OutFile: string;
-  F: TextFile;
 {$ENDIF}
 begin
 {$IFDEF OSMMAP}
+  if (ProcessOptions.KurvigerUrl = '') then
+    exit;
+
   RoutesProcessed := GetSelectedRoutes;
   try
     for Route in RoutesProcessed do
@@ -2212,9 +2216,19 @@ begin
         if (Rte.ChildNodes.Count < 3) or
            (Rte.NodeName <> Route.Name) then
           continue;
-        KurvUrl := 'https://kurviger.com/plan';
+
+        KurvUrl := ProcessOptions.KurvigerUrl + '?id=1';
+        case ProcessOptions.DefAdvLevel of
+          TAdvlevel.advLevel1:
+            KurvUrl := KurvUrl + '&weighting=fastest';
+          TAdvlevel.advLevel2:
+            KurvUrl := KurvUrl + '&weighting=curvaturefastest';
+          TAdvlevel.advLevel3: ;// Nothing
+          TAdvlevel.advLevel4:
+            KurvUrl := KurvUrl + '&weighting=curvaturebooster';
+        end;
         Cnt := 0;
-        NParm := '?';
+        NParm := '&';
         for RtePt in Rte.ChildNodes do
         begin
           Coords.FromAttributes(RtePt.AttributeList);
@@ -2226,11 +2240,17 @@ begin
              (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
             IsVia := true;
 
-          KurvUrl := KurvUrl + Format('%spoint=%s,%s', [NParm, lat, lon]);
-          NParm := '&';
+          KurvUrl := KurvUrl + Format('%spoint=%s%s%s', [NParm, lat, '%2C', lon]);
+{$IFDEF KURVSHAPENAMES}
           KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
           if (IsVia = false) then
             KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
+{$ELSE}
+          if (IsVia) then
+            KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))])
+          else
+            KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
+{$ENDIF}
           Inc(Cnt);
         end;
         KurvUrl := KurvUrl + Format('%sdocument_title=%s', [NParm, EscapeUrl(Route.Name)]);
@@ -2239,10 +2259,10 @@ begin
         else
         begin
           OutFile := FOutDir + ChangeFileExt(EscapeFileName(Route.Name), '_kurviger.html');
-          AssignFile(F, OutFile);
-          Rewrite(F);
-          Writeln(F, '<html><head><meta http-equiv="refresh" content="0;url=', KurvUrl,  '" /></head><body/></html');
-          CloseFile(F);
+          HTML := Format('<html><head><meta http-equiv="refresh" content="3;url=%s" /></head><body>', [KurvUrl]);
+          HTML := HTML + '<h1>If not redirected in 3 Seconds.<br><br>';
+          HTML := HTML + Format('<a href="%s">Click here to open %s in <b>Kurviger</b></a></h1></body></html>', [KurvUrl, Route.Name]);
+          TFile.WriteAllText(OutFile, HTML);
         end;
       end;
     end;
@@ -2556,6 +2576,7 @@ var
   mParentTripName:  TmParentTripName;
   RouteNode:        TXmlVSNode;
   GpxDistance:      double;
+  mExploreUuid:     TmExploreUuid;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel = TTripModel.XT) then
@@ -2567,6 +2588,13 @@ begin
 
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
+
+  if (Assigned(ProcessOptions.GUIDList)) then
+  begin
+    mExploreUuid := FTripList.GetItem('mExploreUuid') as TmExploreUuid;
+    if (Assigned(mExploreUuid)) then
+      mExploreUuid.AsString := ProcessOptions.GUIDList.Values[TripName];
+  end;
 
   HasSubClasses := BuildSubClassesList(RtePts);
 

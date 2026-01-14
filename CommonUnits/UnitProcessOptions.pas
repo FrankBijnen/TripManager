@@ -129,6 +129,7 @@ type
     CatSymbol: string;                        // Symbol:, used in created Waypoints/GPI
     CatGPX: string;                           // GPX:, used in created Waypoints/GPI from Original Way points
     CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
+    KurvigerUrl: string;
 
     {$IFDEF TRIPOBJECTS}
     TripModel: TTripModel;                    // XT1 and XT2
@@ -145,6 +146,7 @@ type
     DefAdvLevel: TAdvlevel;                   // XT2
     DefRoadSpeed: integer;                    // XT1 and XT2
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
+    GUIDList: TStrings;                       // XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -264,6 +266,7 @@ begin
   SkipTrackDialog := false;
   LookUpWindow := 0;
   LookUpMessage := 0;
+  KurvigerUrl := '';
 
 {$IFDEF TRIPOBJECTS}
   TripModel := TTripModel.XT;
@@ -292,6 +295,7 @@ begin
   RoadSpeedMap[11].Value := 15;  RoadSpeedMap[11].Name := '0C';
   DefRoadSpeed := 25;
   DefAdvLevel := TAdvlevel.advLevel1;
+  GUIDList := nil;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}

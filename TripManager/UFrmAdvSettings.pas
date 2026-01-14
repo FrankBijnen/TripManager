@@ -173,6 +173,10 @@ begin
                                               '',
                                               'Api-Key for enabling Map Tiler. https://www.maptiler.com');
 
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_KurvigerUrl_Key,
+                                              Reg_KurvigerUrl_Val,
+                                              'Kurviger URL');
+
     AddGridLine(GridGeneralSettings, CurRow,  Reg_GeoSearchTimeOut_Key,
                                               Reg_GeoSearchTimeOut_Val,
                                               'Time (ms) to show Found place balloon');

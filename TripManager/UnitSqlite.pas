@@ -48,18 +48,31 @@ function ExecUpdateSql(const DbName: string;
 function GetAvoidancesChanged(const DbName: string): string;
 function GetVehicleProfile(const DbName: string;
                            const Model: TGarminModel): TVehicleProfile;
+procedure GetExploreList(const DBName: string;
+                         const ExploreList: TStrings);
 function CDSFromQuery(const DbName: string;
                       const Query: string;
                       const ACds: TClientDataSet): integer;
+
 implementation
 
 uses
   System.Variants, System.SysUtils, System.StrUtils,
   Winapi.Windows,
-  SQLite3;
+  SQLite3,
+  UnitStringUtils;
 
 const
   CRLF = #13#10;
+
+function MkGuid(const HexGuid: string): string;
+begin
+  result := LowerCase(HexGuid);
+  insert('-', result, 9);
+  insert('-', result, 14);
+  insert('-', result, 19);
+  insert('-', result, 24);
+end;
 
 function TVehicleProfile.Changed(IName, IGUID: UTF8String;
                                  IVehicle_Id, ITruckType, ITransportMode: integer): boolean;
@@ -252,6 +265,24 @@ begin
     result := 0;
 end;
 
+procedure GetExploreList(const DbName: string; const ExploreList: TStrings);
+var
+  SqlResults: TSqlResults;
+  SqlResult: TSqlResult;
+begin
+  ExploreList.Clear;
+  SqlResults := TSqlResults.Create;
+  try
+    ExecSqlQuery(DbName,
+                 'Select Name, hex(UUID) from items where type = 4',
+                 SqlResults);
+    for SqlResult in SqlResults do
+      ExploreList.AddPair(SqlResult[0], MkGuid(SqlResult[1]));
+  finally
+    SqlResults.Free;
+  end;
+end;
+
 function CDSFromQuery(const DbName: string;
                       const Query: string;
                       const ACds: TClientDataSet): integer;
@@ -358,15 +389,6 @@ begin
   finally
     SqlResults.Free;
   end;
-end;
-
-function MkGuid(const HexGuid: string): string;
-begin
-  result := LowerCase(HexGuid);
-  insert('-', result, 9);
-  insert('-', result, 14);
-  insert('-', result, 19);
-  insert('-', result, 24);
 end;
 
 function GetVehicleProfile(const DbName: string;

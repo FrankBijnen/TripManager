@@ -5020,8 +5020,7 @@ begin
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
 
     CheckHRGuid(CreateGUID(Uid));
-    Add(TStringItem.Create('mExploreUuid',
-                            ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
+    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
     Add(TmVersionNumber.Create(4, $10));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
@@ -5062,8 +5061,7 @@ begin
     Add(TmIsDisplayable.Create);
 
     CheckHRGuid(CreateGUID(Uid));
-    Add(TStringItem.Create('mExploreUuid',
-                            ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
+    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
     Add(TmOptimized.Create);
     Add(TmDayNumber.Create);
     Add(TmParentTripName.Create(TripName));

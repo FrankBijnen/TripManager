@@ -296,8 +296,6 @@ object FrmTripManager: TFrmTripManager
         ViewStyle = vsReport
         OnKeyDown = ShellListView1KeyDown
         OnKeyUp = ShellListView1KeyUp
-        ExplicitLeft = 284
-        ExplicitTop = 31
       end
       object PnlXt2FileSys: TPanel
         Left = 1
@@ -346,7 +344,6 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Add to map'
           TabOrder = 1
           OnMouseUp = BtnAddToMapMouseUp
-          ExplicitTop = 2
         end
         object PnlTopFiller: TPanel
           Left = 1
@@ -1273,6 +1270,24 @@ object FrmTripManager: TFrmTripManager
         Caption = 'Curvy roads'
         OnClick = RoutePreferenceClick
       end
+    end
+    object N13: TMenuItem
+      Caption = '-'
+      GroupIndex = 2
+    end
+    object Explore1: TMenuItem
+      Break = mbBarBreak
+      Caption = 'Explore functions'
+      GroupIndex = 3
+    end
+    object N14: TMenuItem
+      Caption = '-'
+      GroupIndex = 3
+    end
+    object QueryExploredb1: TMenuItem
+      Caption = 'Query Explore.db'
+      GroupIndex = 3
+      OnClick = QueryExploredb1Click
     end
   end
   object TripGpiTimer: TTimer

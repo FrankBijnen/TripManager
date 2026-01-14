@@ -18,7 +18,8 @@ uses
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
-  UnitListViewSort, UnitMtpDevice, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi, UnitUSBEvent;
+  UnitListViewSort, UnitMtpDevice, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi,
+  UnitUSBEvent;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -209,6 +210,10 @@ type
     ActInstalledDoc: TAction;
     N12: TMenuItem;
     MnuTripOverview: TMenuItem;
+    N13: TMenuItem;
+    Explore1: TMenuItem;
+    QueryExploredb1: TMenuItem;
+    N14: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -309,10 +314,13 @@ type
     procedure EdFileSysFolderCloseUp(Sender: TObject);
     procedure BgDeviceItemsGpxClick(Sender: TObject);
     procedure BtnAddToMapMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure QueryExploredb1Click(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
     HexEditFile: string;
+    SqlFile: string;
+    ExploreList: TStringList;
 
     CurrentDevice: TMTP_Device;
     FSavedParent: WideString;
@@ -353,7 +361,7 @@ type
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     procedure AddToMap(FileName: string);
-    procedure OpenInKurviger(FileName: string);
+    procedure OpenInKurviger(const FileName: string; Embedded: boolean);
     procedure MapRequest(const Coords, Desc, TimeOut: string;
                          const ZoomLevel: string = '');
     procedure SaveTripGpiFile;
@@ -401,6 +409,7 @@ type
     procedure ReadColumnSettings;
     procedure WriteColumnSettings;
     procedure OnSetPostProcessPrefs(Sender: TObject);
+    procedure OnSetSendToPrefs(Sender: TObject);
     procedure ReadSettings;
     procedure ClearTripInfo;
     procedure InstallTripEdit;
@@ -432,8 +441,8 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
-  MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitOSMMap, UnitGeoCode, UnitVerySimpleXml,
-  UnitRedirect, UnitGpxTripCompare, UnitSqlite, UnitModelConv,
+  MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
+  UnitOSMMap, UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
@@ -549,6 +558,8 @@ var
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   ModelIndex, DefAdvLevel: integer;
 begin
+  DeleteTempFiles(GetDeviceTmp, '*.*');
+
   // Check the connected Device needs reading SQlite
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   if not (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
@@ -644,6 +655,11 @@ DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfil
 
     end;
   end;
+
+  // Copy explore.db
+  if (CopyDeviceFile(DBPath, ExploreDb)) then
+    GetExploreList(IncludeTrailingPathDelimiter(DBPath) + ExploreDb, ExploreList);
+
 end;
 
 procedure TFrmTripManager.ReadGarminDevice(const ModelDescription: string);
@@ -1060,15 +1076,10 @@ begin
     DBMemo.Lines.Clear;
     if not StartsText('select', MemoSQL.Lines.Text) then
       LblSqlResults.Caption := Format('Records affected: %d',
-                                      [ExecUpdateSql(ShellListView1.SelectedFolder.PathName,
-                                                    MemoSQL.Lines.Text)
-                                      ])
+                                      [ExecUpdateSql(SqlFile, MemoSQL.Lines.Text)])
     else
       LblSqlResults.Caption := Format('Records selected: %d',
-                                      [CDSFromQuery(ShellListView1.SelectedFolder.PathName,
-                                                    MemoSQL.Lines.Text,
-                                                    CdsDeviceDb)
-                                    ]);
+                                      [CDSFromQuery(SqlFile, MemoSQL.Lines.Text, CdsDeviceDb)]);
   finally
     SetCursor(CrNormal);
   end;
@@ -1314,7 +1325,7 @@ begin
             // Clean up 'Routes' Temp directory.
             DeleteTempFiles(GetRoutesTmp, '*.*');
             TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
-                                      SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
+                                      OnSetSendToPrefs, SetProcessOptions.SavePrefs,
                                       GetRoutesTmp, nil, AnItem.Index);
 
             {$IFNDEF DEBUG_TRANSFER}
@@ -1367,7 +1378,7 @@ begin
         TSendToDest.stWindows:
           begin
             TGPXFile.PerformFunctions(FrmSendTo.Funcs, GPXFile,
-                                      SetProcessOptions.SetSendToPrefs, SetProcessOptions.SavePrefs,
+                                      OnSetSendToPrefs, SetProcessOptions.SavePrefs,
                                       '', nil, AnItem.Index);
           end;
       end;
@@ -1480,6 +1491,7 @@ begin
 // Set DmRoutePoints events
   DmRoutePoints.OnGetMapCoords := GetMapCoords;
   DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
+  DmRoutePoints.GuidList := ExploreList;
 end;
 
 procedure TFrmTripManager.EditTrip(NewFile: boolean);
@@ -1824,6 +1836,11 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.QueryExploredb1Click(Sender: TObject);
+begin
+  LoadSqlFile(GetDeviceTmp + ExploreDb, false);
+end;
+
 procedure TFrmTripManager.BtnSaveTripGpiFileClick(Sender: TObject);
 begin
   HexEdit.SaveToFile(HexEditFile);
@@ -2156,6 +2173,11 @@ begin
 
   TModelConv.CmbModelDevices(CmbModel.Items);
 
+  ExploreList := TStringList.Create;
+  ExploreList.NameValueSeparator := #9;
+  ExploreList.Sorted := true;
+  ExploreList.Duplicates := TDuplicates.dupIgnore;
+
   ReadSettings;
 
   ATripList := TTripList.Create;
@@ -2180,6 +2202,8 @@ procedure TFrmTripManager.FormDestroy(Sender: TObject);
 begin
   DirectoryMonitor.Free;
   ModifiedList.Free;
+  ExploreList.Free;
+
   if not USBEvent.UnRegisterUSBHandler then
     ShowMessage('Failed to unregister USB Events');
   USBEvent.Free;
@@ -2702,7 +2726,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.OpenInKurviger(FileName: string);
+procedure TFrmTripManager.OpenInKurviger(const FileName: string; Embedded: boolean);
 var
   OsmTrack: TStringList;
   Url: string;
@@ -2712,11 +2736,16 @@ begin
     TGPXFile.PerformFunctions([CreateKurviger], FileName,
                                nil, SetProcessOptions.SavePrefs,
                                '', OsmTrack);
-    for Url in OsmTrack do
-      ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
-
-    if (OsmTrack.Count > 0) then
-      EdgeBrowser1.Navigate(OsmTrack[0]);
+    if (Embedded) then
+    begin
+      if (OsmTrack.Count > 0) then
+       EdgeBrowser1.Navigate(OsmTrack[0]);
+    end
+    else
+    begin
+      for Url in OsmTrack do
+        ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
+    end;
 
   finally
     OsmTrack.Free;
@@ -2728,8 +2757,8 @@ begin
   if ShellListView1.SelectedFolder = nil then
     exit;
 
-  if (ssCtrl in Shift) then
-    OpenInKurviger(ShellListView1.SelectedFolder.PathName)
+  if ([ssCtrl, ssShift] * Shift <> []) then
+    OpenInKurviger(ShellListView1.SelectedFolder.PathName, (ssShift in Shift))
   else
     AddToMap(ShellListView1.SelectedFolder.PathName);
 end;
@@ -3934,7 +3963,8 @@ begin
   for AMenuItem in TPopupMenu(Sender).Items do
   begin
     AMenuItem.Enabled := ((AMenuItem.GroupIndex = 1) and (AMenuItem.Enabled)) or
-                         ((AMenuItem.GroupIndex = 2) and DeviceFile and (BgDevice.ItemIndex = 0));
+                         ((AMenuItem.GroupIndex = 2) and DeviceFile and (BgDevice.ItemIndex = 0)) or
+                         ((AMenuItem.GroupIndex = 3) and (FileExists(GetDeviceTmp + ExploreDb)));
   end;
 end;
 
@@ -4762,7 +4792,8 @@ end;
 
 procedure TFrmTripManager.LoadSqlFile(const FileName: string; const FromDevice: boolean);
 begin
-  GetTables(FileName, CmbSQliteTabs.Items);
+  SqlFile := FileName;
+  GetTables(SqlFile, CmbSQliteTabs.Items);
   CmbSQliteTabs.ItemIndex := Min(0, CmbSQliteTabs.Items.Count -1);
   CmbSQliteTabsChange(CmbSQliteTabs);
   TsSQlite.TabVisible := true;
@@ -4916,6 +4947,17 @@ begin
     LookUpWindow := FrmTripManager.Handle;
     LookUpMessage := UFrmTripManager.WM_ADDRLOOKUP;
   end;
+end;
+
+procedure TFrmTripManager.OnSetSendToPrefs(Sender: TObject);
+begin
+  SetProcessOptions.SetSendToPrefs(Sender);
+
+  with Sender as TProcessOptions do
+  begin
+    GUIDList := ExploreList;
+  end;
+
 end;
 
 procedure TFrmTripManager.ReadSettings;
@@ -5204,6 +5246,7 @@ begin
   CurrentDevice := nil;
   TvTrip.Items.Clear;
   ClearTripInfo;
+  ExploreList.Clear;
 
   StatusTimer.Enabled := false;
   StatusTimer.Enabled := true;
