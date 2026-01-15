@@ -658,7 +658,7 @@ DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfil
 
   // Copy explore.db
   if (CopyDeviceFile(DBPath, ExploreDb)) then
-    GetExploreList(IncludeTrailingPathDelimiter(DBPath) + ExploreDb, ExploreList);
+    GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 
 end;
 
