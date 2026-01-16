@@ -97,7 +97,7 @@ begin
 
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ExtractFilePath(CompareGpx);
-  SaveTrip.FileName := TmTripName(ATripList.GetItem('mTripName')).AsString +  '.gpx';
+  SaveTrip.FileName := Format('%s.gpx', [ATripList.TripName]);
   if not SaveTrip.Execute then
     exit;
 

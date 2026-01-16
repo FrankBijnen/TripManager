@@ -60,6 +60,8 @@ const
   Reg_RoadSpeed_Key               = 'RoadSpeed'; // Multiple
   Reg_KurvigerUrl_Key             = 'KurvigerUrl';
   Reg_KurvigerUrl_Val             = 'https://kurviger.com/en/plan';
+  Reg_HtmlOutput_Key              = 'HtmlOutput';
+  Reg_HtmlOutput_Val              = '2';  // Both
 
   Reg_PrefFileSysFolder_Key       = 'PrefFileSysFolder';
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
@@ -68,6 +70,7 @@ const
   Reg_EnableTripFuncs             = 'EnableTripFuncs';
   Reg_EnableGpxFuncs              = 'EnableGpxFuncs';
   Reg_EnableGpiFuncs              = 'EnableGpiFuncs';
+  Reg_EnableExploreFuncs          = 'EnableExploreFuncs';
   Reg_ValidGpiSymbols             = 'ValidGpiSymbols';
   Reg_TripColor_Key               = 'TripColor';
   Reg_TripColor_Val               = 'Magenta';
@@ -157,6 +160,7 @@ begin
 
     // Kurviger
     KurvigerUrl := GetRegistry(Reg_KurvigerUrl_Key, Reg_KurvigerUrl_Val);
+    HtmlOutput := THtmlOutput(GetRegistry(Reg_HtmlOutput_Key, Ord(THtmlOutput.Both)));
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);

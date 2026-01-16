@@ -2174,6 +2174,9 @@ var
 {$ENDIF}
 begin
 {$IFDEF OSMMAP}
+  if (ProcessOptions.HtmlOutput = THtmlOutput.Kurviger) then
+    exit;
+
   TrackPointList := TStringList.Create;
   TracksProcessed := GetSelectedTracks;
   try
@@ -2234,7 +2237,8 @@ begin
           Coords.FromAttributes(RtePt.AttributeList);
           Coords.FormatLatLon(Lat, Lon);
 
-          IsVia := false;
+          IsVia := (Cnt = 0) or
+                   (Cnt = Rte.ChildNodes.Count -1);
           RtePtExtensions := RtePt.Find('extensions');
           if (RtePtExtensions <> nil) and
              (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
@@ -2258,11 +2262,14 @@ begin
           FOutStringList.Add(KurvUrl)
         else
         begin
-          OutFile := FOutDir + ChangeFileExt(EscapeFileName(Route.Name), '_kurviger.html');
-          HTML := Format('<html><head><meta http-equiv="refresh" content="3;url=%s" /></head><body>', [KurvUrl]);
-          HTML := HTML + '<h1>If not redirected in 3 Seconds.<br><br>';
-          HTML := HTML + Format('<a href="%s">Click here to open %s in <b>Kurviger</b></a></h1></body></html>', [KurvUrl, Route.Name]);
-          TFile.WriteAllText(OutFile, HTML);
+          if (ProcessOptions.HtmlOutput <> THtmlOutput.OSM) then
+          begin
+            OutFile := FOutDir + ChangeFileExt(EscapeFileName(Route.Name), '_kurviger.html');
+            HTML := Format('<html><head><meta http-equiv="refresh" content="3;url=%s" /></head><body>', [KurvUrl]);
+            HTML := HTML + '<h1>If not redirected in 3 Seconds.<br><br>';
+            HTML := HTML + Format('<a href="%s">Click here to open %s in <b>Kurviger</b></a></h1></body></html>', [KurvUrl, Route.Name]);
+            TFile.WriteAllText(OutFile, HTML);
+          end;
         end;
       end;
     end;
@@ -2577,6 +2584,7 @@ var
   RouteNode:        TXmlVSNode;
   GpxDistance:      double;
   mExploreUuid:     TmExploreUuid;
+  KnownExploreGuid: string;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel = TTripModel.XT) then
@@ -2589,11 +2597,16 @@ begin
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
 
-  if (Assigned(ProcessOptions.GUIDList)) then
+  if (Assigned(ProcessOptions.GUIDList)) and
+     (ProcessOptions.GUIDList.Count > 0) then
   begin
-    mExploreUuid := FTripList.GetItem('mExploreUuid') as TmExploreUuid;
-    if (Assigned(mExploreUuid)) then
-      mExploreUuid.AsString := ProcessOptions.GUIDList.Values[TripName];
+    KnownExploreGuid := ProcessOptions.GUIDList.Values[TripName];
+    if (KnownExploreGuid <> '') then
+    begin
+      mExploreUuid := FTripList.GetItem('mExploreUuid') as TmExploreUuid;
+      if (Assigned(mExploreUuid)) then
+        mExploreUuid.AsString := KnownExploreGuid;
+    end;
   end;
 
   HasSubClasses := BuildSubClassesList(RtePts);

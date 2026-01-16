@@ -907,7 +907,9 @@ type
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
+    function GetTripName: string;
     function GetIsCalculated: boolean;
+    function GetExploreUUID: string;
     function GetTripModel: TTripModel;
     function GetCalculationModel(AModel: TTripModel): TTripModel;
     procedure GetModel;
@@ -1014,6 +1016,8 @@ type
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
     property IsCalculated: boolean read GetIsCalculated;
+    property TripName: string read GetTripName;
+    property ExploreUUID: string read GetExploreUUID;
     property TripModel: TTripModel read FTripModel;
     property ModelDescription: string read FModelDescription;
     property IsUcs4: boolean read FIsUcs4;
@@ -4147,8 +4151,8 @@ end;
 procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
 var
   Coords, Color, LayerName, RoutePointName: string;
+  EscapedTripName: string;
   LayerId: integer;
-  TripName: TmTripName;
   AllRoutes: TmAllRoutes;
   UdbDataHndl: TmUdbDataHndl;
   UdbDir: TUdbDir;
@@ -4158,11 +4162,9 @@ var
   HasUdbs: boolean;
 begin
   OutStringList.Clear;
-  TripName := TmTripName(GetItem('mTripName'));
-  if (not Assigned(TripName)) then
-    exit;
-
+  EscapedTripName := EscapeDQuote(TripName);
   HasUdbs := false;
+
   AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
   if (Assigned(AllRoutes)) then
   begin
@@ -4184,7 +4186,7 @@ begin
         Coords := '';
         RoutePointName := '';
         LayerId := 0;
-        LayerName := Format('Shape: %s', [EscapeDQuote(TripName.AsString)]);
+        LayerName := Format('Shape: %s', [EscapedTripName]);
         Color := 'blue';
 
         for ANItem in TLocation(Location).LocationItems do
@@ -4193,7 +4195,7 @@ begin
           begin
             if (Pos('Via', TmAttr(ANItem).AsString) = 1) then
             begin
-              LayerName := Format('Via: %s', [EscapeDQuote(TripName.AsString)]);
+              LayerName := Format('Via: %s', [EscapedTripName]);
               LayerId := 1;
               Color := 'red';
             end;
@@ -4216,7 +4218,7 @@ begin
                                   Color]));
       end;
     end;
-    OutStringList.Add(Format('    CreateTrack("%s", ''%s'');', [EscapeDQuote(TripName.AsString), HTMLColor]));
+    OutStringList.Add(Format('    CreateTrack("%s", ''%s'');', [EscapedTripName, HTMLColor]));
 
   end;
 end;
@@ -4883,6 +4885,11 @@ begin
   result := AllRoutes.Items[0];
 end;
 
+function TTripList.GetTripName: string;
+begin
+  result := GetValue('mTripName');
+end;
+
 // Get the model by checking the magic number, or the size.
 // This function reports the model even if not calculated.
 function TTripList.GetTripModel: TTripModel;
@@ -4920,6 +4927,11 @@ begin
     exit;
 
   result := true;
+end;
+
+function TTripList.GetExploreUUID: string;
+begin
+  result := GetValue('mExploreUuid');
 end;
 
 function TTripList.GetCalculationModel(AModel: TTripModel): TTripModel;
@@ -5229,7 +5241,7 @@ begin
   try
     XMLRoot := InitGarminGpx(XML);
     Rte := XMLRoot.AddChild('rte');
-    Rte.AddChild('name').NodeValue := TBaseDataItem(GetItem('mTripName')).AsString;
+    Rte.AddChild('name').NodeValue := TripName;
 
     Locations := TmLocations(GetItem('mLocations'));
     if not (Assigned(Locations)) then
@@ -5281,7 +5293,7 @@ begin
       if Assigned(AllRoutes) then
       begin
         Trk := XMLRoot.AddChild('trk');
-        Trk.AddChild('name').NodeValue := TBaseDataItem(GetItem('mTripName')).AsString;
+        Trk.AddChild('name').NodeValue := TripName;
         for AnUdbHandle in AllRoutes.Items do
         begin
           TrkSeg := Trk.AddChild('trkseg');

@@ -19,7 +19,7 @@ uses
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
   UnitListViewSort, UnitMtpDevice, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi,
-  UnitUSBEvent;
+  UnitUSBEvent, Vcl.BaseImageCollection, Vcl.ImageCollection, Vcl.VirtualImageList;
 
 const
   SelectMTPDevice         = 'Select an MTP device';
@@ -150,7 +150,6 @@ type
     PnlTopFiller: TPanel;
     BtnRefreshFileSys: TButton;
     PnlBotFileSys: TPanel;
-    Panel1: TPanel;
     BtnOpenTemp: TButton;
     MapTimer: TTimer;
     PnlTripGpiInfo: TPanel;
@@ -214,6 +213,18 @@ type
     Explore1: TMenuItem;
     QueryExploredb1: TMenuItem;
     N14: TMenuItem;
+    PopupAddToMap: TPopupMenu;
+    MnuAddtoMap: TMenuItem;
+    MnuOpenInKurviger: TMenuItem;
+    N15: TMenuItem;
+    TsExplore: TTabSheet;
+    CompareEploredbwithTrips1: TMenuItem;
+    LvExplore: TListView;
+    PnlExploreTop: TPanel;
+    VirtualImageListExplore: TVirtualImageList;
+    ImageCollectionExplore: TImageCollection;
+    SpbRefreshExplore: TSpeedButton;
+    SpbCorrectGuid: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -315,6 +326,11 @@ type
     procedure BgDeviceItemsGpxClick(Sender: TObject);
     procedure BtnAddToMapMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure QueryExploredb1Click(Sender: TObject);
+    procedure MnuAddtoMapClick(Sender: TObject);
+    procedure MnuOpenInKurvigerClick(Sender: TObject);
+    procedure CompareEploredbwithTrips1Click(Sender: TObject);
+    procedure SpbRefreshExploreClick(Sender: TObject);
+    procedure SpbCorrectGuidClick(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -361,7 +377,7 @@ type
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     procedure AddToMap(FileName: string);
-    procedure OpenInKurviger(const FileName: string; Embedded: boolean);
+    procedure OpenInKurviger(const FileName: string);
     procedure MapRequest(const Coords, Desc, TimeOut: string;
                          const ZoomLevel: string = '');
     procedure SaveTripGpiFile;
@@ -397,10 +413,11 @@ type
     procedure DeleteObjects(const AllowRecurse: boolean);
     procedure ReloadFileList;
     procedure SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
-    procedure CheckFile(const AListItem: TListItem);
+    procedure CheckFile(const AListItem: TListItem; const ALocalFile: string = '');
     procedure SetImported(const AListItem: TListItem; const NewValue: boolean);
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
+    procedure CheckExploreDb;
     procedure CheckTrips;
     procedure RecreateTrips;
     procedure ShowWarnRecalc;
@@ -657,7 +674,8 @@ DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfil
   end;
 
   // Copy explore.db
-  if (CopyDeviceFile(DBPath, ExploreDb)) then
+  if (GetRegistry(Reg_EnableExploreFuncs, false)) and
+     (CopyDeviceFile(DBPath, ExploreDb)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 
 end;
@@ -1026,6 +1044,12 @@ procedure TFrmTripManager.BgDeviceClick(Sender: TObject);
 begin
   LstFiles.Tag := 1;
   try
+    if (BgDevice.ItemIndex <> 0) then
+    begin
+      LvExplore.Items.Clear;
+      TsExplore.TabVisible := false;
+    end;
+
     LstFiles.Checkboxes := (BgDevice.ItemIndex = 0);
     if (LstFiles.Columns.Count > TripNameCol) then
     begin
@@ -1629,6 +1653,78 @@ begin
   ATripList.SaveAsGPX(SaveTrip.FileName);
 end;
 
+procedure TFrmTripManager.CompareEploredbwithTrips1Click(Sender: TObject);
+begin
+  CheckExploreDb;
+  TsExplore.TabVisible := true;
+  PctHexOsm.ActivePage := TsExplore;
+end;
+
+procedure TFrmTripManager.CheckExploreDb;
+var
+  AnITem: TListItem;
+  GroupId, ExploreIndex, TripIndex: integer;
+  CrNormal, CrWait: HCURSOR;
+begin
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  LvExplore.Items.BeginUpdate;
+  try
+    SpbCorrectGuid.Enabled := false;
+    LvExplore.Items.Clear;
+    for ExploreIndex := 0 to ExploreList.Count -1 do
+    begin
+      AnITem := LvExplore.Items.Add;
+      AnITem.Caption := ExploreList.KeyNames[ExploreIndex];
+      AnITem.SubItems.Add(ExploreList.ValueFromIndex[ExploreIndex]);
+      GroupID := 0;
+      for TripIndex := 0 to LstFiles.Items.Count -1 do
+      begin
+        if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
+          continue;
+
+        if (Sametext(LstFiles.Items[TripIndex].SubItems[TripNameCol -1], ExploreList.KeyNames[ExploreIndex])) then
+        begin
+          AnITem.Data := LstFiles.Items[TripIndex];
+          AnITem.SubItems.Add(LstFiles.Items[TripIndex].Caption);
+          AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
+          if (TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID <> ExploreList.ValueFromIndex[ExploreIndex]) then
+            GroupID := 1
+          else
+            GroupID := 3;
+          break;
+        end;
+      end;
+      SpbCorrectGuid.Enabled := SpbCorrectGuid.Enabled or (GroupId = 1);
+      AnITem.GroupId := GroupId;
+      AnITem.ImageIndex := GroupId;
+    end;
+
+    for TripIndex := 0 to LstFiles.Items.Count -1 do
+    begin
+      if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
+        continue;
+
+      if (ExploreList.IndexOf(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]) < 0) then
+      begin
+        AnITem := LvExplore.Items.Add;
+        AnITem.Data := LstFiles.Items[TripIndex];
+        AnITem.Caption := '';
+        AnITem.SubItems.Add('');
+        AnITem.SubItems.Add(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]);
+        AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
+        AnITem.GroupId := 2;
+        AnITem.ImageIndex := AnITem.GroupId;
+      end;
+    end;
+    if (LvExplore.Items.Count > 0) then
+      LvExplore.Items[0].Selected := true;
+  finally
+    LvExplore.Items.EndUpdate;
+    SetCursor(CrNormal);
+  end;
+end;
+
 procedure TFrmTripManager.CompareWithGpx(Sender: TObject);
 var
   GPXFileObj: TGPXTripCompare;
@@ -1675,7 +1771,7 @@ begin
     GpxSelected := GPXFileObj.ShowSelectTracks(TagsToShow,
                                               'Compare with GPX: ' + ExtractFileName(OpenTrip.FileName),
                                               'Use the Checkboxes to select 1 Route or Track',
-                                               ATripList.GetValue('mTripName'), nil);
+                                               ATripList.TripName, nil);
     if (GpXSelected) then
     begin
       SetCursor(CrWait);
@@ -2177,6 +2273,7 @@ begin
   ExploreList.NameValueSeparator := #9;
   ExploreList.Sorted := true;
   ExploreList.Duplicates := TDuplicates.dupIgnore;
+  TsExplore.TabVisible := false;
 
   ReadSettings;
 
@@ -2666,6 +2763,46 @@ begin
     Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
 end;
 
+procedure TFrmTripManager.SpbCorrectGuidClick(Sender: TObject);
+var
+  AnITem: TListItem;
+  LocalFile: string;
+  TmpTriplist: TTripList;
+  mExploreUuid: TmExploreUuid;
+  CrNormal, CrWait: HCURSOR;
+begin
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  TmpTriplist := TTripList.Create;
+  try
+    for AnITem in LvExplore.Items do
+    begin
+      if (AnITem.GroupID <> 1) then
+        continue;
+
+      LocalFile := IncludeTrailingPathDelimiter(CreatedTempPath) + AnITem.SubItems[1];
+      TmpTriplist.LoadFromFile(LocalFile);
+      mExploreUuid := TmpTriplist.GetItem('mExploreUuid') as TmExploreUuid;
+      if (mExploreUuid = nil) then
+        continue;
+
+      mExploreUuid.AsString := AnITem.SubItems[0];
+      TmpTriplist.SaveToFile(LocalFile);
+
+      CopyFileFromTmp(LocalFile, TListItem(AnITem.Data));
+    end;
+    CheckExploreDb;
+  finally
+    TmpTriplist.Free;
+    SetCursor(CrNormal);
+  end;
+end;
+
+procedure TFrmTripManager.SpbRefreshExploreClick(Sender: TObject);
+begin
+  CheckExploreDb;
+end;
+
 procedure TFrmTripManager.SpeedBtn_MapClearClick(Sender: TObject);
 begin
   DeleteTempFiles(GetOSMTemp, GetTracksMask);
@@ -2726,7 +2863,12 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.OpenInKurviger(const FileName: string; Embedded: boolean);
+procedure TFrmTripManager.MnuAddtoMapClick(Sender: TObject);
+begin
+  AddToMap(ShellListView1.SelectedFolder.PathName);
+end;
+
+procedure TFrmTripManager.OpenInKurviger(const FileName: string);
 var
   OsmTrack: TStringList;
   Url: string;
@@ -2736,20 +2878,17 @@ begin
     TGPXFile.PerformFunctions([CreateKurviger], FileName,
                                nil, SetProcessOptions.SavePrefs,
                                '', OsmTrack);
-    if (Embedded) then
-    begin
-      if (OsmTrack.Count > 0) then
-       EdgeBrowser1.Navigate(OsmTrack[0]);
-    end
-    else
-    begin
-      for Url in OsmTrack do
-        ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
-    end;
+    for Url in OsmTrack do
+      ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
 
   finally
     OsmTrack.Free;
   end;
+end;
+
+procedure TFrmTripManager.MnuOpenInKurvigerClick(Sender: TObject);
+begin
+  OpenInKurviger(ShellListView1.SelectedFolder.PathName);
 end;
 
 procedure TFrmTripManager.BtnAddToMapMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -2757,8 +2896,8 @@ begin
   if ShellListView1.SelectedFolder = nil then
     exit;
 
-  if ([ssCtrl, ssShift] * Shift <> []) then
-    OpenInKurviger(ShellListView1.SelectedFolder.PathName, (ssShift in Shift))
+  if (ssCtrl in Shift) then
+    OpenInKurviger(ShellListView1.SelectedFolder.PathName)
   else
     AddToMap(ShellListView1.SelectedFolder.PathName);
 end;
@@ -3958,13 +4097,19 @@ begin
 end;
 
 procedure TFrmTripManager.DeviceMenuPopup(Sender: TObject);
-var AMenuItem: TMenuItem;
+var
+  AMenuItem: TMenuItem;
+  ExploreEnabled: boolean;
 begin
+  ExploreEnabled := GetRegistry(Reg_EnableExploreFuncs, false);
   for AMenuItem in TPopupMenu(Sender).Items do
   begin
     AMenuItem.Enabled := ((AMenuItem.GroupIndex = 1) and (AMenuItem.Enabled)) or
                          ((AMenuItem.GroupIndex = 2) and DeviceFile and (BgDevice.ItemIndex = 0)) or
-                         ((AMenuItem.GroupIndex = 3) and (FileExists(GetDeviceTmp + ExploreDb)));
+                         ((AMenuItem.GroupIndex = 3) and
+                          (ExploreEnabled) and
+                          (BgDevice.ItemIndex = 0) and
+                          (FileExists(GetDeviceTmp + ExploreDb)));
   end;
 end;
 
@@ -4106,7 +4251,7 @@ begin
   NewName := OldName;
   if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) and
      (Assigned(ATripList)) then
-    NewName := ATripList.GetValue('mTripName') + TripExtension;
+    NewName := ATripList.TripName + TripExtension;
 
   if not (InputQuery('Rename file.', Format('Type a new name for %s', [OldName]), NewName)) then
     exit;
@@ -4154,7 +4299,7 @@ begin
         // Get current trip name
         TripFileName := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
         TmpTripList.LoadFromFile(TripFileName);
-        TripName := TmTripName(TmpTripList.GetItem('mTripName')).AsString;
+        TripName := TmpTripList.TripName;
         TripFilename := TripName + TripExtension;
 
         // Check already exists
@@ -4201,7 +4346,8 @@ procedure TFrmTripManager.GroupTrips(Group: Boolean);
 var
   ParentName: string;
   ParentId: Cardinal;
-
+  mParentTripName: TmParentTripName;
+  mParentTripId: TmParentTripId;
   TripFileName: string;
   AnItem: TListItem;
   ABase_Data: TBASE_Data;
@@ -4238,13 +4384,25 @@ begin
         // Get current trip name
         TripFileName := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
 
-        // reload trip, and change mFilename
+        // reload trip, and change mParentTripName
         TmpTripList.LoadFromFile(TripFilename);
+
+        // Set mParentTripName
+        mParentTripName := TmpTripList.GetItem('mParentTripName') as TmParentTripName;
+        if not Assigned(mParentTripName) then
+          continue;
         if (Group) then
-          TmParentTripName(TmpTripList.GetItem('mParentTripName')).AsString := ParentName
+          mParentTripName.AsString := ParentName
         else
-          TmParentTripName(TmpTripList.GetItem('mParentTripName')).AsString := TmTripName(TmpTripList.GetItem('mTripName')).AsString;
-        TmParentTripId(TmpTripList.GetItem('mParentTripId')).AsCardinal := ParentId;
+          mParentTripName.AsString := TmpTripList.TripName;
+
+        // Set mParentTripId
+        mParentTripId := TmpTripList.GetItem('mParentTripId') as TmParentTripId;
+        if not Assigned(mParentTripId) then
+          continue;
+        mParentTripId.AsCardinal := ParentId;
+
+        // Save to tmp
         TmpTripList.SaveToFile(TripFilename);
 
         // Write to dev
@@ -4342,6 +4500,8 @@ begin
 
   if not TransferExistingFileToDevice(CurrentDevice.PortableDev, LocalFile, FSavedFolderId, AListItem) then
     raise Exception.Create(Format('TransferExistingFileToDevice %s to %s failed', [LocalFile, CurrentDevice.Device]));
+
+  CheckFile(AListItem, LocalFile);
 end;
 
 procedure TFrmTripManager.ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
@@ -4611,7 +4771,7 @@ begin
     if (DeviceFile) and
        (ATripList.IsCalculated = false) then
     begin
-      SbPostProcess.Panels[0].Text := 'Not calculated trip. Marked with !';
+      SbPostProcess.Panels[0].Text := 'Not a calculated trip. Marked with !';
       SbPostProcess.Panels[1].Text := 'BaseCamp may have problems reading current.gpx';
       StatusTimer.Enabled := false;
       StatusTimer.Enabled := true;
@@ -4626,7 +4786,7 @@ begin
     else
       PnlTripGpiInfo.Color := clAqua;
 
-    TripName := ATripList.GetValue('mTripName');
+    TripName := ATripList.TripName;
     ParentTripName := ATripList.GetValue('mParentTripName');
 
     TripFileName := ExtractFileName(FileName);
@@ -4811,10 +4971,11 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.CheckFile(const AListItem: TListItem);
-var TmpTripList: TTripList;
-    LocalFile: string;
-    Imported: TBooleanItem;
+procedure TFrmTripManager.CheckFile(const AListItem: TListItem; const ALocalFile: string = '');
+var
+  TmpTripList: TTripList;
+  LocalFile: string;
+  Imported: TBooleanItem;
 begin
   if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
     exit;
@@ -4822,33 +4983,47 @@ begin
   TmpTripList := TTripList.Create;
   try
 
-    // Copy File to Local directory
-    LocalFile := CopyFileToTmp(AListItem);
+    if (ALocalFile <> '') then
+      // Local file already current
+      LocalFile := ALocalFile
+    else
+      // Copy File to Local directory
+      LocalFile := CopyFileToTmp(AListItem);
+
     if (LocalFile = '') then
       exit;
 
-    // Check mImported by loading tmp file
+    // Check mImported, calculation and Explore UUID by loading tmp file
     TmpTripList.LoadFromFile(LocalFile);
 
-    // Set Check mark and calculated status
     if (AListItem.Data <> nil) and
        (TObject(AListItem.Data) is TMTP_Data) then
     with TMTP_Data(AListItem.Data) do
     begin
+      // Check Imported/Saved
       Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
       if (Imported = nil) then
         IsNotSavedTrip := false
       else
         IsNotSavedTrip := Imported.AsBoolean;
       SetCheckMark(AListItem, not IsNotSavedTrip);
+
+      // Check Calculated
       IsCalculated := TmpTripList.IsCalculated;
       if (IsCalculated = false) then
         AListItem.ImageIndex := 2;
+
+      // Save Explore UUID
+      ExploreUUID := TmpTripList.ExploreUUID;
     end;
 
     // Show trip name
     if (LstFiles.Columns.Count > TripNameCol) then
-      AListItem.SubItems[TripNameCol -1] := TBaseDataItem(TmpTripList.GetItem('mTripName')).AsString;
+    begin
+      while (AListItem.SubItems.Count < TripNameCol) do
+        AListItem.SubItems.Add('');
+      AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
+    end;
   finally
     TmpTripList.Free;
   end;
@@ -5247,6 +5422,7 @@ begin
   TvTrip.Items.Clear;
   ClearTripInfo;
   ExploreList.Clear;
+  TsExplore.TabVisible := false;
 
   StatusTimer.Enabled := false;
   StatusTimer.Enabled := true;

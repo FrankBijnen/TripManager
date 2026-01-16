@@ -103,7 +103,7 @@ uses
 const
   BooleanTrue       = 'True';
   BooleanFalse      = 'False';
-  BooleanValues: array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
+  BooleanValues:    array[0..2, 0..1] of string = (('Via','Shape'), ('True','False'), ('Yes','No'));
   RtePt             = 'RtePt ';
   MaxDepartureYear  = 2037;
   KmlExtension      = '.kml';
@@ -503,9 +503,7 @@ begin
     CdsRoute.LogChanges := false;
 
     CdsRoute.Insert;
-    ANItem := TTripList(FTripList).GetItem('mTripName');
-    if (ANItem <> nil) then
-      CdsRouteTripName.AsString := TmTripName(ANItem).AsString;
+    CdsRouteTripName.AsString := TTripList(FTripList).TripName;
 
     ANItem := TTripList(FTripList).GetItem('mRoutePreference');
     if (ANItem <> nil) then

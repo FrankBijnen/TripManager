@@ -130,6 +130,7 @@ type
     CatGPX: string;                           // GPX:, used in created Waypoints/GPI from Original Way points
     CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
     KurvigerUrl: string;
+    HtmlOutput: THtmlOutput;                  // OSM, Kurviger, Both
 
     {$IFDEF TRIPOBJECTS}
     TripModel: TTripModel;                    // XT1 and XT2
@@ -267,6 +268,7 @@ begin
   LookUpWindow := 0;
   LookUpMessage := 0;
   KurvigerUrl := '';
+  HtmlOutput := THtmlOutput.Both;
 
 {$IFDEF TRIPOBJECTS}
   TripModel := TTripModel.XT;

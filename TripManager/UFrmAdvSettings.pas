@@ -176,6 +176,9 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  Reg_KurvigerUrl_Key,
                                               Reg_KurvigerUrl_Val,
                                               'Kurviger URL');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_HtmlOutput_Key,
+                                              Reg_HtmlOutput_Val,
+                                              '(0=OSM, 1=Kurviger, 2=Both)');
 
     AddGridLine(GridGeneralSettings, CurRow,  Reg_GeoSearchTimeOut_Key,
                                               Reg_GeoSearchTimeOut_Val,
@@ -218,6 +221,11 @@ begin
     AddGridLine(GridDeviceSettings,   CurRow, Reg_EnableDirFuncs,
                                       'False',
                                       'Enable creating and deleting folders');
+
+    AddGridLine(GridDeviceSettings,   CurRow, Reg_EnableExploreFuncs,
+                                      'False',
+                                      'Enable Explore');
+
     AddGridLine(GridDeviceSettings,   CurRow, '');
 
     ModelIndex := GetRegistry(Reg_CurrentModel, 0);

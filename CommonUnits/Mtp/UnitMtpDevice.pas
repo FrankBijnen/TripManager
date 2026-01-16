@@ -16,6 +16,7 @@ type
     Created: TDateTime;
     IsNotSavedTrip: boolean;
     IsCalculated: boolean;
+    ExploreUUID: string;
   public
     constructor Create(const AIsFolder: boolean;
                        const ASortValue: int64;
