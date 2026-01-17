@@ -211,7 +211,7 @@ type
     MnuTripOverview: TMenuItem;
     N13: TMenuItem;
     Explore1: TMenuItem;
-    QueryExploredb1: TMenuItem;
+    MnuQueryDeviceDb: TMenuItem;
     N14: TMenuItem;
     PopupAddToMap: TPopupMenu;
     MnuAddtoMap: TMenuItem;
@@ -224,7 +224,9 @@ type
     VirtualImageListExplore: TVirtualImageList;
     ImageCollectionExplore: TImageCollection;
     SpbRefreshExplore: TSpeedButton;
-    SpbCorrectGuid: TSpeedButton;
+    SpbCorrectUuid: TSpeedButton;
+    Exploredb1: TMenuItem;
+    N16: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -325,12 +327,12 @@ type
     procedure EdFileSysFolderCloseUp(Sender: TObject);
     procedure BgDeviceItemsGpxClick(Sender: TObject);
     procedure BtnAddToMapMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure QueryExploredb1Click(Sender: TObject);
     procedure MnuAddtoMapClick(Sender: TObject);
     procedure MnuOpenInKurvigerClick(Sender: TObject);
     procedure CompareEploredbwithTrips1Click(Sender: TObject);
     procedure SpbRefreshExploreClick(Sender: TObject);
-    procedure SpbCorrectGuidClick(Sender: TObject);
+    procedure SpbCorrectUuidClick(Sender: TObject);
+    procedure QueryDeviceClick(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -391,6 +393,8 @@ type
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     function GetDbPath: string;
+    procedure ClearDeviceDbFiles;
+    procedure RebuildDeviceDbMenu;
     procedure ReadDeviceDB;
     procedure ReadGarminDevice(const ModelDescription: string);
     procedure GuessModel(const DisplayedDevice: string);
@@ -575,7 +579,7 @@ var
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   ModelIndex, DefAdvLevel: integer;
 begin
-  DeleteTempFiles(GetDeviceTmp, '*.*');
+  ClearDeviceDbFiles;
 
   // Check the connected Device needs reading SQlite
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
@@ -678,6 +682,7 @@ DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfil
      (CopyDeviceFile(DBPath, ExploreDb)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 
+  RebuildDeviceDbMenu;
 end;
 
 procedure TFrmTripManager.ReadGarminDevice(const ModelDescription: string);
@@ -1515,7 +1520,7 @@ begin
 // Set DmRoutePoints events
   DmRoutePoints.OnGetMapCoords := GetMapCoords;
   DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
-  DmRoutePoints.GuidList := ExploreList;
+  DmRoutePoints.UuidList := ExploreList;
 end;
 
 procedure TFrmTripManager.EditTrip(NewFile: boolean);
@@ -1670,7 +1675,7 @@ begin
   CrNormal := SetCursor(CrWait);
   LvExplore.Items.BeginUpdate;
   try
-    SpbCorrectGuid.Enabled := false;
+    SpbCorrectUuid.Enabled := false;
     LvExplore.Items.Clear;
     for ExploreIndex := 0 to ExploreList.Count -1 do
     begin
@@ -1695,7 +1700,7 @@ begin
           break;
         end;
       end;
-      SpbCorrectGuid.Enabled := SpbCorrectGuid.Enabled or (GroupId = 1);
+      SpbCorrectUuid.Enabled := SpbCorrectUuid.Enabled or (GroupId = 1);
       AnITem.GroupId := GroupId;
       AnITem.ImageIndex := GroupId;
     end;
@@ -1930,11 +1935,6 @@ begin
   finally
     DirectoryMonitor.Active := ChkWatch.Checked;
   end;
-end;
-
-procedure TFrmTripManager.QueryExploredb1Click(Sender: TObject);
-begin
-  LoadSqlFile(GetDeviceTmp + ExploreDb, false);
 end;
 
 procedure TFrmTripManager.BtnSaveTripGpiFileClick(Sender: TObject);
@@ -2291,6 +2291,7 @@ begin
   end;
   GetDeviceList;
   SelectKnownDevice;
+  ClearDeviceDbFiles;
   ReadDeviceDB;
   BgDeviceClick(BgDevice);
 end;
@@ -2763,7 +2764,7 @@ begin
     Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
 end;
 
-procedure TFrmTripManager.SpbCorrectGuidClick(Sender: TObject);
+procedure TFrmTripManager.SpbCorrectUuidClick(Sender: TObject);
 var
   AnITem: TListItem;
   LocalFile: string;
@@ -3028,7 +3029,7 @@ begin
     if not SameText(TripsPath, SystemTripsPath) then      // And the sub folder should be Trips
       exit;
 
-    // DateTime of system,db
+    // DateTime of system.db
     SystemSqlId := GetIdForPath(CurrentDevice.PortableDev, GetDbPath, FriendlyPath);
     if (GetIdForFile(CurrentDevice.PortableDev, SystemSqlId, SystemDb, File_Info) = '') then
       exit;
@@ -3144,6 +3145,39 @@ begin
                             FrmShowLog.Showing or
                             (SelectedLocation <> nil) or
                             (SelectedScPosn <> nil);
+end;
+
+procedure TFrmTripManager.QueryDeviceClick(Sender: TObject);
+begin
+  LoadSqlFile(GetDeviceTmp + StripHotkey(TMenuItem(Sender).Caption), false);
+end;
+
+procedure TFrmTripManager.ClearDeviceDbFiles;
+begin
+  ExploreList.Clear;
+  DeleteTempFiles(GetDeviceTmp, '*.db');
+  RebuildDeviceDbMenu;
+end;
+
+procedure TFrmTripManager.RebuildDeviceDbMenu;
+var
+  Rc: integer;
+  Fs: TSearchRec;
+  ASubMenuItem: TMenuItem;
+begin
+  MnuQueryDeviceDb.Clear;
+
+  Rc := FindFirst(IncludeTrailingPathDelimiter(GetDeviceTmp) + '*.db', faAnyFile - faDirectory, Fs);
+  while (Rc = 0) do
+  begin
+    ASubMenuItem := TMenuItem.Create(MnuQueryDeviceDb);
+    ASubMenuItem.Caption := Fs.Name;
+    ASubMenuItem.OnClick := QueryDeviceClick;
+    MnuQueryDeviceDb.Add(ASubMenuItem);
+
+    Rc := FindNext(Fs);
+  end;
+  FindClose(Fs);
 end;
 
 procedure TFrmTripManager.ClearSelHexEdit;
@@ -5130,7 +5164,7 @@ begin
 
   with Sender as TProcessOptions do
   begin
-    GUIDList := ExploreList;
+    ExploreUUIDList := ExploreList;
   end;
 
 end;
@@ -5421,7 +5455,7 @@ begin
   CurrentDevice := nil;
   TvTrip.Items.Clear;
   ClearTripInfo;
-  ExploreList.Clear;
+  ClearDeviceDbFiles;
   TsExplore.TabVisible := false;
 
   StatusTimer.Enabled := false;

@@ -566,8 +566,6 @@ object FrmTripManager: TFrmTripManager
           Enabled = False
           TabOrder = 1
           OnClick = BtnApplyCoordsClick
-          ExplicitLeft = 114
-          ExplicitTop = -6
         end
         object LblRoutePoint: TEdit
           AlignWithMargins = True
@@ -850,7 +848,7 @@ object FrmTripManager: TFrmTripManager
             Width = 250
           end
           item
-            Caption = 'Guid Explore'
+            Caption = 'Uuid Explore'
             Width = 175
           end
           item
@@ -858,7 +856,7 @@ object FrmTripManager: TFrmTripManager
             Width = 250
           end
           item
-            Caption = 'Guid Trips'
+            Caption = 'Uuid Trips'
             Width = 175
           end>
         Groups = <
@@ -873,7 +871,7 @@ object FrmTripManager: TFrmTripManager
             TitleImage = -1
           end
           item
-            Header = 'In Explore and Trips, but different GUID'
+            Header = 'In Explore and Trips, but different Uuid'
             Footer = '--'
             GroupID = 1
             State = [lgsNormal]
@@ -893,7 +891,7 @@ object FrmTripManager: TFrmTripManager
             TitleImage = -1
           end
           item
-            Header = 'In Explore, in Trip, Same GUID'
+            Header = 'In Explore, in Trip, Same Uuid'
             Footer = '--'
             GroupID = 3
             State = [lgsNormal, lgsCollapsed, lgsCollapsible]
@@ -906,8 +904,6 @@ object FrmTripManager: TFrmTripManager
         SmallImages = VirtualImageListExplore
         TabOrder = 0
         ViewStyle = vsReport
-        ExplicitLeft = 2
-        ExplicitTop = 30
       end
       object PnlExploreTop: TPanel
         Left = 0
@@ -930,7 +926,7 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Refresh'
           OnClick = SpbRefreshExploreClick
         end
-        object SpbCorrectGuid: TSpeedButton
+        object SpbCorrectUuid: TSpeedButton
           AlignWithMargins = True
           Left = 61
           Top = 2
@@ -941,8 +937,10 @@ object FrmTripManager: TFrmTripManager
           Margins.Right = 0
           Margins.Bottom = 1
           Align = alLeft
-          Caption = 'Correct GUID'
-          OnClick = SpbCorrectGuidClick
+          Caption = 'Correct Uuid'
+          OnClick = SpbCorrectUuidClick
+          ExplicitLeft = 63
+          ExplicitTop = 0
         end
       end
     end
@@ -1391,10 +1389,18 @@ object FrmTripManager: TFrmTripManager
       Caption = '-'
       GroupIndex = 3
     end
-    object QueryExploredb1: TMenuItem
-      Caption = 'Query Explore.db'
+    object MnuQueryDeviceDb: TMenuItem
+      Caption = 'Query'
       GroupIndex = 3
-      OnClick = QueryExploredb1Click
+      object N16: TMenuItem
+        Caption = '-'
+        GroupIndex = 4
+      end
+      object Exploredb1: TMenuItem
+        Caption = 'Explore.db'
+        GroupIndex = 4
+        OnClick = QueryDeviceClick
+      end
     end
     object CompareEploredbwithTrips1: TMenuItem
       Caption = 'Compare Eplore.db with Trips'
@@ -1612,8 +1618,8 @@ object FrmTripManager: TFrmTripManager
       end
       item
         CollectionIndex = 1
-        CollectionName = 'WarningGuid'
-        Name = 'WarningGuid'
+        CollectionName = 'WarningUuid'
+        Name = 'WarningUuid'
       end
       item
         CollectionIndex = 2
@@ -1781,7 +1787,7 @@ object FrmTripManager: TFrmTripManager
           end>
       end
       item
-        Name = 'WarningGuid'
+        Name = 'WarningUuid'
         SourceImages = <
           item
             Image.Data = {

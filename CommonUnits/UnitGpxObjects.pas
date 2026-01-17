@@ -2584,7 +2584,7 @@ var
   RouteNode:        TXmlVSNode;
   GpxDistance:      double;
   mExploreUuid:     TmExploreUuid;
-  KnownExploreGuid: string;
+  KnownExploreUuid: string;
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel = TTripModel.XT) then
@@ -2597,15 +2597,15 @@ begin
   Locations := FTripList.GetItem('mLocations') as TmLocations;
   ViaPointCount := CreateLocations(Locations, RtePts);
 
-  if (Assigned(ProcessOptions.GUIDList)) and
-     (ProcessOptions.GUIDList.Count > 0) then
+  if (Assigned(ProcessOptions.ExploreUUIDList)) and
+     (ProcessOptions.ExploreUUIDList.Count > 0) then
   begin
-    KnownExploreGuid := ProcessOptions.GUIDList.Values[TripName];
-    if (KnownExploreGuid <> '') then
+    KnownExploreUuid := ProcessOptions.ExploreUUIDList.Values[TripName];
+    if (KnownExploreUuid <> '') then
     begin
       mExploreUuid := FTripList.GetItem('mExploreUuid') as TmExploreUuid;
       if (Assigned(mExploreUuid)) then
-        mExploreUuid.AsString := KnownExploreGuid;
+        mExploreUuid.AsString := KnownExploreUuid;
     end;
   end;
 

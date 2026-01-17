@@ -147,7 +147,7 @@ type
     DefAdvLevel: TAdvlevel;                   // XT2
     DefRoadSpeed: integer;                    // XT1 and XT2
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
-    GUIDList: TStrings;                       // XT2
+    ExploreUUIDList: TStrings;                // XT2
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -297,7 +297,7 @@ begin
   RoadSpeedMap[11].Value := 15;  RoadSpeedMap[11].Name := '0C';
   DefRoadSpeed := 25;
   DefAdvLevel := TAdvlevel.advLevel1;
-  GUIDList := nil;
+  ExploreUUIDList := nil;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}

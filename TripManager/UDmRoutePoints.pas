@@ -47,7 +47,7 @@ type
     FOnRouteUpdated: TNotifyEvent;
     FOnRoutePointUpdated: TNotifyEvent;
     FOnGetMapCoords: TOnGetMapCoords;
-    FGuidList: TStringList;
+    FUuidList: TStringList;
     procedure DoRouteUpdated;
     procedure DoRoutePointUpdated;
     function CheckEmptyField(Sender: TField): boolean;
@@ -81,7 +81,7 @@ type
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
     property RoutePickList: string read FRoutePickList;
     property TransportPickList: string read FTransportPickList;
-    property GuidList: TStringList read FGuidList write FGuidList;
+    property UuidList: TStringList read FUuidList write FUuidList;
   end;
 
 var
@@ -449,14 +449,14 @@ begin
       if (ANItem <> nil) then
         TmArrival(ANItem).AsUnixDateTime := TmArrival(ANItem).DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
 
-      if (Assigned(FGuidList)) then
+      if (Assigned(FUuidList)) then
       begin
-        P := FGuidList.IndexOfName(CdsRouteTripName.AsString);
+        P := FUuidList.IndexOfName(CdsRouteTripName.AsString);
         if (P > -1) then
         begin
           ANItem := TTripList(FTripList).GetItem('mExploreUuid');
           if (ANItem <> nil) then
-            TmExploreUuid(ANItem).AsString := FGuidList.ValueFromIndex[P];
+            TmExploreUuid(ANItem).AsString := FUuidList.ValueFromIndex[P];
         end;
       end;
 

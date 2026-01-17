@@ -5000,7 +5000,7 @@ end;
 procedure TTripList.CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
 var
   TmpStream: TMemoryStream;
-  Uid: TGuid;
+  Uuid: TGuid;
   ProcessOptions: TProcessOptions;
 begin
   ProcessOptions := TProcessOptions.Create;
@@ -5031,8 +5031,8 @@ begin
     Add(TmImported.Create);
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
 
-    CheckHRGuid(CreateGUID(Uid));
-    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
+    CheckHRGuid(CreateGUID(Uuid));
+    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
     Add(TmVersionNumber.Create(4, $10));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
@@ -5058,7 +5058,7 @@ end;
 procedure TTripList.CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
 var
   TmpStream: TMemoryStream;
-  Uid: TGuid;
+  Uuid: TGuid;
   ProcessOptions: TProcessOptions;
 begin
   ProcessOptions := TProcessOptions.Create;
@@ -5072,8 +5072,8 @@ begin
     Add(TmTrackToRouteInfoMap.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, dtRaw, TmpStream);
     Add(TmIsDisplayable.Create);
 
-    CheckHRGuid(CreateGUID(Uid));
-    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uid)), ['{','}'], ['',''], [rfReplaceAll])));
+    CheckHRGuid(CreateGUID(Uuid));
+    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
     Add(TmOptimized.Create);
     Add(TmDayNumber.Create);
     Add(TmParentTripName.Create(TripName));
