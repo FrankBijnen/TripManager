@@ -447,6 +447,7 @@ procedure TFrmTripEditor.TbBrowserClick(Sender: TObject);
 var
   Url: string;
 begin
+  DmRoutePoints.SaveTrip;
   Url := DmRoutePoints.KurvigerURL;
   ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
   Clipboard.AsText := Url;

@@ -916,6 +916,8 @@ type
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
+    procedure Trip2XmlRte(Rte: TObject);
+    procedure Trip2XmlTrk(Trk: TObject);
     procedure AddLocation_XT(Locations: TmLocations;
                              ProcessOptions: TObject;
                              RoutePoint: TRoutePoint;
@@ -1013,6 +1015,7 @@ type
                              const CalculationMode: string = '';
                              const TransportMode: string = '');
     procedure SaveAsGPX(const GPXFile: string; IncludeTrack: boolean = true);
+    function KurvigerUrl: string;
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
     property IsCalculated: boolean read GetIsCalculated;
@@ -5225,94 +5228,123 @@ begin
   end;
 end;
 
+procedure TTripList.Trip2XmlRte(Rte: TObject);
+var
+  RtePt: TXmlVSNode;
+  Locations: TmLocations;
+  Location, ANItem: TBaseItem;
+  ViaPointType, PointName, Lat, Lon, Address: string;
+begin
+  TXmlVSNode(Rte).AddChild('name').NodeValue := TripName;
+
+  Locations := TmLocations(GetItem('mLocations'));
+  if not (Assigned(Locations)) then
+    exit;
+
+  for Location in Locations.Locations do
+  begin
+    if (Location is TLocation) then
+    begin
+      RtePt := TXmlVSNode(Rte).AddChild('rtept');
+      // Point Type
+      ViaPointType := 'trp:ShapingPoint';
+      if (TLocation(Location).IsViaPoint) then
+        ViaPointType := 'trp:ViaPoint';
+      // Point Name
+      PointName := '';
+      ANItem := TLocation(Location).LocationTmName;
+      if (Assigned(ANItem)) then
+         PointName := TmName(ANItem).AsString;
+      // Lat Lon
+      Lat := '';
+      Lon := '';
+      ANItem := TLocation(Location).LocationTmScPosn;
+      if (Assigned(ANItem)) then
+      begin
+        Lon := TmScPosn(ANItem).MapCoords;
+        Lat := Trim(NextField(Lon, ','));
+        Lon := Trim(Lon);
+      end;
+      // Address
+      Address := '';
+      ANItem := TLocation(Location).LocationTmAddress;
+      if (Assigned(ANItem)) then
+        Address := TmAddress(ANItem).AsString;
+
+      // Write to XML
+      RtePt.Attributes['lat'] := Lat;
+      RtePt.Attributes['lon'] := Lon;
+      RtePt.AddChild('name').NodeValue := PointName;
+      RtePt.AddChild('cmt').NodeValue := Address;
+      RtePt.AddChild('desc').NodeValue := Address;
+      RtePt.AddChild('extensions').AddChild(ViaPointType);
+    end;
+  end;
+end;
+
+procedure TTripList.Trip2XmlTrk(Trk: TObject);
+var
+  TrkSeg, TrkPt: TXmlVSNode;
+  AllRoutes: TmAllRoutes;
+  AnUdbHandle: TmUdbDataHndl;
+  ANUdbDir: TUdbDir;
+  Coords: TCoords;
+  Lat, Lon: string;
+begin
+  TXmlVSNode(Trk).AddChild('name').NodeValue := TripName;
+
+  AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
+  if not Assigned(AllRoutes) then
+    exit;
+
+  begin
+    for AnUdbHandle in AllRoutes.Items do
+    begin
+      TrkSeg := TXmlVSNode(Trk).AddChild('trkseg');
+      for ANUdbDir in AnUdbHandle.Items do
+      begin
+        TrkPt := TrkSeg.AddChild('trkpt');
+        Coords := ANUdbDir.Coords;
+        Coords.FormatLatLon(Lat, Lon);
+        TrkPt.Attributes['lat'] := Lat;
+        TrkPt.Attributes['lon'] := Lon;
+      end;
+    end;
+  end;
+end;
+
 procedure TTripList.SaveAsGPX(const GPXFile: string; IncludeTrack: boolean = true);
 var
   Xml: TXmlVSDocument;
   XMLRoot: TXmlVSNode;
-  Rte, RtePt, Trk, TrkSeg, TrkPt: TXmlVSNode;
-  Locations: TmLocations;
-  AllRoutes: TmAllRoutes;
-  AnUdbHandle: TmUdbDataHndl;
-  ANUdbDir: TUdbDir;
-  Location, ANItem: TBaseItem;
-  ViaPointType, PointName, Lat, Lon, Address: string;
 begin
   XML := TXmlVSDocument.Create;
   try
     XMLRoot := InitGarminGpx(XML);
-    Rte := XMLRoot.AddChild('rte');
-    Rte.AddChild('name').NodeValue := TripName;
-
-    Locations := TmLocations(GetItem('mLocations'));
-    if not (Assigned(Locations)) then
-      exit;
-
-    for Location in Locations.Locations do
-    begin
-      if (Location is TLocation) then
-      begin
-        RtePt := Rte.AddChild('rtept');
-        // Point Type
-        ViaPointType := 'trp:ShapingPoint';
-        if (TLocation(Location).IsViaPoint) then
-          ViaPointType := 'trp:ViaPoint';
-        // Point Name
-        PointName := '';
-        ANItem := TLocation(Location).LocationTmName;
-        if (Assigned(ANItem)) then
-           PointName := TmName(ANItem).AsString;
-        // Lat Lon
-        Lat := '';
-        Lon := '';
-        ANItem := TLocation(Location).LocationTmScPosn;
-        if (Assigned(ANItem)) then
-        begin
-          Lon := TmScPosn(ANItem).MapCoords;
-          Lat := Trim(NextField(Lon, ','));
-          Lon := Trim(Lon);
-        end;
-        // Address
-        Address := '';
-        ANItem := TLocation(Location).LocationTmAddress;
-        if (Assigned(ANItem)) then
-          Address := TmAddress(ANItem).AsString;
-
-        // Write to XML
-        RtePt.Attributes['lat'] := Lat;
-        RtePt.Attributes['lon'] := Lon;
-        RtePt.AddChild('name').NodeValue := PointName;
-        RtePt.AddChild('cmt').NodeValue := Address;
-        RtePt.AddChild('desc').NodeValue := Address;
-        RtePt.AddChild('extensions').AddChild(ViaPointType);
-      end;
-    end;
+    Trip2XmlRte(XMLRoot.AddChild('rte'));
 
     if IncludeTrack then
-    begin
-      AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
-      if Assigned(AllRoutes) then
-      begin
-        Trk := XMLRoot.AddChild('trk');
-        Trk.AddChild('name').NodeValue := TripName;
-        for AnUdbHandle in AllRoutes.Items do
-        begin
-          TrkSeg := Trk.AddChild('trkseg');
-          for ANUdbDir in AnUdbHandle.Items do
-          begin
-            TrkPt := TrkSeg.AddChild('trkpt');
-            Lon := ANUdbDir.MapCoords;
-            Lat := Trim(NextField(Lon, ','));
-            Lon := Trim(Lon);
-            TrkPt.Attributes['lat'] := Lat;
-            TrkPt.Attributes['lon'] := Lon;
-          end;
-        end;
-      end;
-    end;
+      Trip2XmlTrk(XMLRoot.AddChild('trk'));
 
     XML.SaveToFile(GPXFile);
   finally
     Xml.Free;
+  end;
+end;
+
+function TTripList.KurvigerUrl: string;
+var
+  Rte: TXmlVSNode;
+  ProcessOptions: TProcessOptions;
+begin
+  ProcessOptions := TProcessOptions.Create;
+  Rte := TXmlVSNode.Create;
+  Trip2XmlRte(Rte);
+  try
+    result := ProcessOptions.GetKurvigerUrl(Rte);
+  finally
+    Rte.Free;
+    ProcessOptions.Free;
   end;
 end;
 

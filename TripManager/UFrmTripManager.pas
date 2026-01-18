@@ -227,6 +227,9 @@ type
     SpbCorrectUuid: TSpeedButton;
     Exploredb1: TMenuItem;
     N16: TMenuItem;
+    N17: TMenuItem;
+    OpeninKurviger1: TMenuItem;
+    Addtomap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -333,6 +336,7 @@ type
     procedure SpbRefreshExploreClick(Sender: TObject);
     procedure SpbCorrectUuidClick(Sender: TObject);
     procedure QueryDeviceClick(Sender: TObject);
+    procedure ShowDeviceFilesOnMap(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -379,6 +383,8 @@ type
     procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     procedure AddToMap(FileName: string);
+    procedure DeviceFilesOnMap(Tag: integer);
+
     procedure OpenInKurviger(const FileName: string);
     procedure MapRequest(const Coords, Desc, TimeOut: string;
                          const ZoomLevel: string = '');
@@ -583,8 +589,6 @@ begin
 
   // Check the connected Device needs reading SQlite
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-  if not (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
-    exit;
 
 {$IFDEF DBG_PROFILE}
 DebugMsg(['ReadDeviceDB called']);
@@ -620,7 +624,8 @@ DebugMsg(['Device Path does not exist. Exiting.', DBPath]);
 DebugMsg(['Copy Device file OK', DBPath, 'File', SettingsDb]);
 {$ENDIF}
 
-    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
+    if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
+      SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
 {$IFDEF DBG_PROFILE}
 DebugMsg(['Reg_AvoidancesChangedTimeAtSave', GetRegistry(Reg_AvoidancesChangedTimeAtSave, 0)]);
@@ -628,7 +633,8 @@ DebugMsg(['Reg_AvoidancesChangedTimeAtSave', GetRegistry(Reg_AvoidancesChangedTi
 
   end;
   // Copy vehicle_profile.db
-  if (CopyDeviceFile(DBPath, ProfileDb)) then
+  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
+     (CopyDeviceFile(DBPath, ProfileDb)) then
   begin
 
 {$IFDEF DBG_PROFILE}
@@ -679,6 +685,7 @@ DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfil
 
   // Copy explore.db
   if (GetRegistry(Reg_EnableExploreFuncs, false)) and
+     (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) and
      (CopyDeviceFile(DBPath, ExploreDb)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 
@@ -2872,19 +2879,67 @@ end;
 procedure TFrmTripManager.OpenInKurviger(const FileName: string);
 var
   OsmTrack: TStringList;
-  Url: string;
+  TmpTripList: TTripList;
+  Url, Ext: string;
 begin
-  OsmTrack := TStringList.Create;
-  try
-    TGPXFile.PerformFunctions([CreateKurviger], FileName,
-                               nil, SetProcessOptions.SavePrefs,
-                               '', OsmTrack);
-    for Url in OsmTrack do
-      ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
+  Ext := ExtractFileExt(FileName);
+  if (ContainsText(Ext, TripExtension)) then
+  begin
+    TmpTripList := TTripList.Create;
+    try
+      TmpTripList.LoadFromFile(FileName);
+      ShellExecute(0, 'Open', PChar(TmpTripList.KurvigerUrl), '','', SW_SHOWNORMAL);
+    finally
+      TmpTripList.Free;
+    end;
+  end
+  else if (ContainsText(Ext, GPXExtension)) then
+  begin
+    OsmTrack := TStringList.Create;
+    try
+      TGPXFile.PerformFunctions([CreateKurviger], FileName,
+                                 nil, SetProcessOptions.SavePrefs,
+                                 '', OsmTrack);
+      for Url in OsmTrack do
+        ShellExecute(0, 'OPEN', PWideChar(Url), '', '', SW_SHOWNORMAL);
 
-  finally
-    OsmTrack.Free;
+    finally
+      OsmTrack.Free;
+    end;
   end;
+end;
+
+procedure TFrmTripManager.DeviceFilesOnMap(Tag: integer);
+var
+  AnItem: TlistItem;
+  TempFile: string;
+begin
+  for AnItem in LstFiles.Items do
+  begin
+    if (AnItem.Selected = false) then
+      continue;
+    if (TMTP_Data(AnItem.Data).IsFolder) then
+      continue;
+
+    if (SameText(TripExtension, AnItem.SubItems[2])) or
+       (SameText(GPXExtension, AnItem.SubItems[2])) then
+    begin
+      TempFile := CopyFileToTmp(AnItem);
+      if (TempFile = '') then
+        continue;
+      case (Tag) of
+        1:
+          AddToMap(TempFile);
+        2:
+          OpenInKurviger(TempFile);
+      end;
+    end;
+  end;
+end;
+
+procedure TFrmTripManager.ShowDeviceFilesOnMap(Sender: TObject);
+begin
+  DeviceFilesOnMap(TMenuItem(Sender).Tag);
 end;
 
 procedure TFrmTripManager.MnuOpenInKurvigerClick(Sender: TObject);

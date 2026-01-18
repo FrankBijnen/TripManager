@@ -26,7 +26,7 @@ type
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
               CreateHTML, CreateKurviger, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints,
               CreateCompleteRoutes);
-  TGPXFuncArray = Array of TGPXFunc;
+  TGPXFuncArray = array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: See TModelConv for mapping to TripModel
   TGarminModel  = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, GarminEdge, GarminGeneric, Unknown);

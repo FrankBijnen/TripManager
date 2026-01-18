@@ -1074,7 +1074,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1334
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1082,7 +1081,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -1278,6 +1277,22 @@ object FrmTripManager: TFrmTripManager
       OnClick = CheckandFixcurrentgpx1Click
     end
     object N10: TMenuItem
+      Caption = '-'
+      GroupIndex = 1
+    end
+    object Addtomap1: TMenuItem
+      Tag = 1
+      Caption = 'Add to map'
+      GroupIndex = 1
+      OnClick = ShowDeviceFilesOnMap
+    end
+    object OpeninKurviger1: TMenuItem
+      Tag = 2
+      Caption = 'Open in Kurviger'
+      GroupIndex = 1
+      OnClick = ShowDeviceFilesOnMap
+    end
+    object N17: TMenuItem
       Caption = '-'
       GroupIndex = 1
     end
@@ -1595,8 +1610,8 @@ object FrmTripManager: TFrmTripManager
     Top = 427
   end
   object PopupAddToMap: TPopupMenu
-    Left = 1026
-    Top = 122
+    Left = 826
+    Top = 82
     object MnuAddtoMap: TMenuItem
       Caption = 'Add to Map'
       OnClick = MnuAddtoMapClick

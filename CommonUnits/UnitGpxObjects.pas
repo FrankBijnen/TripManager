@@ -1,6 +1,5 @@
 unit UnitGPXObjects;
 {$WARN SYMBOL_PLATFORM OFF}
-{$DEFINE KURVSHAPENAMES}
 
 interface
 
@@ -2198,11 +2197,8 @@ procedure TGPXFile.DoCreateKurviger;
 {$IFDEF OSMMAP}
 var
   RoutesProcessed: TXmlVSNodeList;
-  Route, Rte, RtePt, RtePtExtensions: TXmlVSNode;
-  Coords: TCoords;
-  Cnt: integer;
-  NParm, Lat, Lon, KurvUrl, HTML: string;
-  IsVia: boolean;
+  Route, Rte: TXmlVSNode;
+  KurvUrl, HTML: string;
   OutFile: string;
 {$ENDIF}
 begin
@@ -2216,48 +2212,11 @@ begin
     begin
       for Rte in RouteViaPointList do
       begin
-        if (Rte.ChildNodes.Count < 3) or
+        if (Rte.ChildNodes.Count < 3) or // Probably route from a track. Need route points
            (Rte.NodeName <> Route.Name) then
           continue;
 
-        KurvUrl := ProcessOptions.KurvigerUrl + '?id=1';
-        case ProcessOptions.DefAdvLevel of
-          TAdvlevel.advLevel1:
-            KurvUrl := KurvUrl + '&weighting=fastest';
-          TAdvlevel.advLevel2:
-            KurvUrl := KurvUrl + '&weighting=curvaturefastest';
-          TAdvlevel.advLevel3: ;// Nothing
-          TAdvlevel.advLevel4:
-            KurvUrl := KurvUrl + '&weighting=curvaturebooster';
-        end;
-        Cnt := 0;
-        NParm := '&';
-        for RtePt in Rte.ChildNodes do
-        begin
-          Coords.FromAttributes(RtePt.AttributeList);
-          Coords.FormatLatLon(Lat, Lon);
-
-          IsVia := (Cnt = 0) or
-                   (Cnt = Rte.ChildNodes.Count -1);
-          RtePtExtensions := RtePt.Find('extensions');
-          if (RtePtExtensions <> nil) and
-             (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
-            IsVia := true;
-
-          KurvUrl := KurvUrl + Format('%spoint=%s%s%s', [NParm, lat, '%2C', lon]);
-{$IFDEF KURVSHAPENAMES}
-          KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
-          if (IsVia = false) then
-            KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
-{$ELSE}
-          if (IsVia) then
-            KurvUrl := KurvUrl + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))])
-          else
-            KurvUrl := KurvUrl + Format('%sshaping.%d=true', [NParm, Cnt]);
-{$ENDIF}
-          Inc(Cnt);
-        end;
-        KurvUrl := KurvUrl + Format('%sdocument_title=%s', [NParm, EscapeUrl(Route.Name)]);
+        KurvUrl := ProcessOptions.GetKurvigerUrl(Rte);
         if (Assigned(FOutStringList)) then
           FOutStringList.Add(KurvUrl)
         else

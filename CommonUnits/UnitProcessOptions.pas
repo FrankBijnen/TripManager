@@ -174,6 +174,7 @@ type
     class function UnsafeModels: boolean;
     class function SafeModel2Write(ATripModel: TTripModel): boolean;
     class function MaxViaPoints: integer;
+    function GetKurvigerUrl(Rte: TObject): string;
     {$ENDIF}
 
     property DistOKKms: double read GetDistOKKms;
@@ -189,6 +190,7 @@ uses
   UnitRegistryKeys,
   UnitModelConv,
 {$ENDIF}
+  UnitVerySimpleXml,
   UnitStringUtils;
 
 var
@@ -451,6 +453,55 @@ class function TProcessOptions.MaxViaPoints: integer;
 begin
   result := GetRegistry(Reg_MaxViaPoints_Key, Reg_MaxViaPoints_Val);
 end;
+
+function TProcessOptions.GetKurvigerUrl(Rte: TObject): string;
+var
+  RtePt, RtePtExtensions: TXmlVSNode;
+  RouteName: string;
+  Coords: TCoords;
+  Cnt: integer;
+  NParm, Lat, Lon: string;
+  IsVia: boolean;
+begin
+  result := KurvigerUrl + '?id=1';
+  case DefAdvLevel of
+    TAdvlevel.advLevel1:
+      result := result + '&weighting=fastest';
+    TAdvlevel.advLevel2:
+      result := result + '&weighting=curvaturefastest';
+    TAdvlevel.advLevel3: ;// Nothing
+    TAdvlevel.advLevel4:
+      result := result + '&weighting=curvaturebooster';
+  end;
+  Cnt := 0;
+  NParm := '&';
+  RouteName := 'Route';
+  for RtePt in TXmlVSNode(Rte).ChildNodes do
+  begin
+    if (RtePt.Name = 'name') then
+    begin
+      RouteName := RtePt.NodeValue;
+      continue;
+    end;
+    Coords.FromAttributes(RtePt.AttributeList);
+    Coords.FormatLatLon(Lat, Lon);
+
+    IsVia := (Cnt = 0) or
+             (Cnt = TXmlVSNode(Rte).ChildNodes.Count -1);
+    RtePtExtensions := RtePt.Find('extensions');
+    if (RtePtExtensions <> nil) and
+       (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
+      IsVia := true;
+
+    result := result + Format('%spoint=%s%s%s', [NParm, lat, '%2C', lon]);
+    result := result + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
+    if (IsVia = false) then
+      result := result + Format('%sshaping.%d=true', [NParm, Cnt]);
+    Inc(Cnt);
+  end;
+  result := result + Format('%sdocument_title=%s', [NParm, EscapeUrl(RouteName)]);
+end;
+
 {$ENDIF}
 
 initialization
