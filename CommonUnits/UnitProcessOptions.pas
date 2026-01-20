@@ -460,10 +460,13 @@ var
   RouteName: string;
   Coords: TCoords;
   Cnt: integer;
-  NParm, Lat, Lon: string;
+  Lat, Lon: string;
   IsVia: boolean;
 begin
-  result := KurvigerUrl + '?id=1';
+  if (Pos('?', KurvigerUrl) = 0) then
+    result := KurvigerUrl + '?id=1'
+  else
+    result := KurvigerUrl + '&id=1';
   case DefAdvLevel of
     TAdvlevel.advLevel1:
       result := result + '&weighting=fastest';
@@ -474,7 +477,6 @@ begin
       result := result + '&weighting=curvaturebooster';
   end;
   Cnt := 0;
-  NParm := '&';
   RouteName := 'Route';
   for RtePt in TXmlVSNode(Rte).ChildNodes do
   begin
@@ -486,20 +488,26 @@ begin
     Coords.FromAttributes(RtePt.AttributeList);
     Coords.FormatLatLon(Lat, Lon);
 
+    // Start and End always Via
     IsVia := (Cnt = 0) or
              (Cnt = TXmlVSNode(Rte).ChildNodes.Count -1);
-    RtePtExtensions := RtePt.Find('extensions');
-    if (RtePtExtensions <> nil) and
-       (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
-      IsVia := true;
 
-    result := result + Format('%spoint=%s%s%s', [NParm, lat, '%2C', lon]);
-    result := result + Format('%spname.%d=%s', [NParm, Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
+    // Look in the extensions
     if (IsVia = false) then
-      result := result + Format('%sshaping.%d=true', [NParm, Cnt]);
+    begin
+      RtePtExtensions := RtePt.Find('extensions');
+      if (RtePtExtensions <> nil) and
+         (RtePtExtensions.Find('trp:ViaPoint') <> nil) then
+        IsVia := true;
+    end;
+
+    result := result + Format('&point=%s%2C%s', [lat, lon]);
+    result := result + Format('&pname.%d=%s', [Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
+    if (IsVia = false) then
+      result := result + Format('&shaping.%d=true', [Cnt]);
     Inc(Cnt);
   end;
-  result := result + Format('%sdocument_title=%s', [NParm, EscapeUrl(RouteName)]);
+  result := result + Format('&document_title=%s', [EscapeUrl(RouteName)]);
 end;
 
 {$ENDIF}
