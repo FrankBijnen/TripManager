@@ -1716,14 +1716,13 @@ begin
     begin
       if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
         continue;
-
-      if (ExploreList.IndexOf(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]) < 0) then
+      if (ExploreList.IndexOfName(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]) < 0) then
       begin
         AnITem := LvExplore.Items.Add;
         AnITem.Data := LstFiles.Items[TripIndex];
-        AnITem.Caption := '';
+        AnITem.Caption := LstFiles.Items[TripIndex].SubItems[TripNameCol -1];
         AnITem.SubItems.Add('');
-        AnITem.SubItems.Add(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]);
+        AnITem.SubItems.Add(LstFiles.Items[TripIndex].Caption);
         AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
         AnITem.GroupId := 2;
         AnITem.ImageIndex := AnITem.GroupId;

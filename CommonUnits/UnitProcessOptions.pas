@@ -501,7 +501,7 @@ begin
         IsVia := true;
     end;
 
-    result := result + Format('&point=%s%2C%s', [lat, lon]);
+    result := result + Format('&point=%s%%2C%s', [lat, lon]);
     result := result + Format('&pname.%d=%s', [Cnt, EscapeUrl(FindSubNodeValue(rtept, 'name'))]);
     if (IsVia = false) then
       result := result + Format('&shaping.%d=true', [Cnt]);

@@ -13,12 +13,15 @@ function GetRegistry(const Name: string; const Default: string = ''; const SubKe
 function GetRegistry(const Name: string; const Default: boolean): boolean; overload;
 function GetRegistry(const Name: string; const Default: integer): integer; overload;
 function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo): integer; overload;
+{$IFNDEF VER350}
 function GetRegistry(const Name: string; const Default: TArray<string>): TArray<string>; overload;
-
+{$ENDIF}
 procedure SetRegistry(const Name, Value: string; const SubKey: string = ''); overload;
 procedure SetRegistry(const Name: string; Value: boolean); overload;
 procedure SetRegistry(const Name: string; Value: integer); overload;
+{$IFNDEF VER350}
 procedure SetRegistry(const Name: string; Value: TArray<string>); overload;
+{$ENDIF}
 
 implementation
 
@@ -75,6 +78,7 @@ begin
   result := GetEnumValue(AType, GetRegistry(Name, GetEnumName(AType, Default)));
 end;
 
+{$IFNDEF VER350}
 function GetRegistry(const Name: string; const Default: TArray<string>): TArray<string>; overload;
 var
   Registry: TRegistry;
@@ -94,6 +98,7 @@ begin
   if (Length(Result) = 0) then
     result := Default;
 end;
+{$ENDIF}
 
 procedure SetRegistryValue(const ARootKey: HKEY; const KeyName, Name, Value: string);
 var
@@ -129,6 +134,7 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, IntToStr(Value));
 end;
 
+{$IFNDEF VER350}
 procedure SetRegistry(const Name: string; Value: TArray<string>);
 var
   Registry: TRegistry;
@@ -145,5 +151,6 @@ begin
     Registry.Free;
   end;
 end;
+{$ENDIF}
 
 end.

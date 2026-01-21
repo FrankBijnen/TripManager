@@ -2443,8 +2443,10 @@ begin
   FHexLowerCase := True;
   SetHexLowerCase(False);
   DoubleBuffered := True;
+{$IFNDEF VER350}
   // Try to reduce flicker
   DoubleBufferedMode := TDoubleBufferedMode.dbmRequested;
+{$ENDIF}
 
   FBookmarkBitmap := TBitmap.Create;
   FCursorList := nil;
