@@ -465,7 +465,7 @@ var
 implementation
 
 uses
-  System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils,
+  System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils, System.Generics.Collections,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
   MsgLoop, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
@@ -1674,22 +1674,35 @@ end;
 
 procedure TFrmTripManager.CheckExploreDb;
 var
-  AnITem: TListItem;
-  GroupId, ExploreIndex, TripIndex: integer;
+  AnITem, OrgItem, DupItem: TListItem;
+  ExploreIndex, TripIndex, DupIndex: integer;
+  TmpExploreList: TStringList;
+  PerfectList: Tlist<TlistItem>;
   CrNormal, CrWait: HCURSOR;
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   LvExplore.Items.BeginUpdate;
+  PerfectList := TList<TListItem>.Create;
+  TmpExploreList := TStringList.Create;
   try
     SpbCorrectUuid.Enabled := false;
     LvExplore.Items.Clear;
+
+    // GroupId
+    // 0: In Explore, not in Trips
+    // 1: In Trips, in Explore, but multiple trips with same trip name
+    // 2: In Explore, in Trip, but Uuid is different
+    // 3: In Trips, not in Explore
+    // 4: In Explore, in Trip, Uuid is Equal
+
     for ExploreIndex := 0 to ExploreList.Count -1 do
     begin
       AnITem := LvExplore.Items.Add;
       AnITem.Caption := ExploreList.KeyNames[ExploreIndex];
       AnITem.SubItems.Add(ExploreList.ValueFromIndex[ExploreIndex]);
-      GroupID := 0;
+
+      AnITem.GroupID := 0;
       for TripIndex := 0 to LstFiles.Items.Count -1 do
       begin
         if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
@@ -1697,40 +1710,80 @@ begin
 
         if (Sametext(LstFiles.Items[TripIndex].SubItems[TripNameCol -1], ExploreList.KeyNames[ExploreIndex])) then
         begin
-          AnITem.Data := LstFiles.Items[TripIndex];
           AnITem.SubItems.Add(LstFiles.Items[TripIndex].Caption);
           AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
-          if (TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID <> ExploreList.ValueFromIndex[ExploreIndex]) then
-            GroupID := 1
+          if (TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID = ExploreList.ValueFromIndex[ExploreIndex]) then
+          begin
+            PerfectList.Add(AnITem);
+            AnITem.GroupID := 4;
+          end
           else
-            GroupID := 3;
+            AnITem.GroupID := 2;
           break;
         end;
       end;
-      SpbCorrectUuid.Enabled := SpbCorrectUuid.Enabled or (GroupId = 1);
-      AnITem.GroupId := GroupId;
-      AnITem.ImageIndex := GroupId;
+      SpbCorrectUuid.Enabled := SpbCorrectUuid.Enabled or
+                                (AnITem.GroupId = 2);
+      AnITem.ImageIndex := AnITem.GroupId;
     end;
+
+    // Use TmpExploreList to match tripname only once.
+    // A matched trip is deleted from the list, to prevent that
+    TmpExploreList.NameValueSeparator := #9;
+    TmpExploreList.Sorted := true;
+    TmpExploreList.Duplicates := TDuplicates.dupIgnore;
+    TmpExploreList.Text := ExploreList.Text;
 
     for TripIndex := 0 to LstFiles.Items.Count -1 do
     begin
       if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
         continue;
-      if (ExploreList.IndexOfName(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]) < 0) then
+      ExploreIndex := TmpExploreList.IndexOfName(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]);
+      if (ExploreIndex < 0) then
       begin
+        // Trip not in Explore
         AnITem := LvExplore.Items.Add;
-        AnITem.Data := LstFiles.Items[TripIndex];
         AnITem.Caption := LstFiles.Items[TripIndex].SubItems[TripNameCol -1];
         AnITem.SubItems.Add('');
         AnITem.SubItems.Add(LstFiles.Items[TripIndex].Caption);
         AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
-        AnITem.GroupId := 2;
+
+        // Check in complete Explore List.
+        // If found, that means multiple trips with same trip name exist.
+        DupIndex := ExploreList.IndexOfName(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]);
+        if (DupIndex > -1) then
+        begin
+          AnITem.SubItems[0] := ExploreList.ValueFromIndex[DupIndex];
+          AnITem.GroupId := 1;
+        end
+        else
+          AnITem.GroupId := 3;
         AnITem.ImageIndex := AnITem.GroupId;
+      end
+      else
+        TmpExploreList.Delete(ExploreIndex);
+    end;
+
+    // Add the item from the correct(matching) to the duplicates group.
+    for OrgItem in PerfectList do
+    begin
+      for AnITem in LvExplore.Items do
+      begin
+        if (AnITem.GroupID <> 1) or
+           (AnITem.Caption <> OrgItem.Caption) then
+          continue;
+        DupItem := LvExplore.Items.Add;
+        DupItem.Assign(AnITem);
+        DupItem.SubItems[1] := OrgItem.SubItems[1];
+        break;
       end;
     end;
+
     if (LvExplore.Items.Count > 0) then
       LvExplore.Items[0].Selected := true;
   finally
+    TmpExploreList.Free;
+    PerfectList.Free;
     LvExplore.Items.EndUpdate;
     SetCursor(CrNormal);
   end;
@@ -5112,6 +5165,7 @@ begin
         AListItem.SubItems.Add('');
       AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
     end;
+
   finally
     TmpTripList.Free;
   end;

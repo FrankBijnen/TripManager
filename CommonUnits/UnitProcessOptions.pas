@@ -477,7 +477,7 @@ begin
       result := result + '&weighting=curvaturebooster';
   end;
   Cnt := 0;
-  RouteName := 'Route';
+  RouteName := TXmlVSNode(Rte).NodeName;
   for RtePt in TXmlVSNode(Rte).ChildNodes do
   begin
     if (RtePt.Name = 'name') then

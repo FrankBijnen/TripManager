@@ -4,6 +4,9 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
+  {$IFDEF VER350}
+  Winapi.WebView2,
+  {$ENDIF}
   Vcl.Edge;
 
 function CreateOSMMapHtml(Home: string = ''; UseOl2Local: boolean = true): boolean; overload;
@@ -71,6 +74,14 @@ type
     constructor Create(const APathName: string; ATrackPoints: TStringList); overload;
     destructor Destroy; override;
   end;
+
+  {$IFDEF VER350}
+  ICoreWebView2Settings2 = interface(ICoreWebView2Settings)
+    ['{EE9A0F68-F46C-4E32-AC23-EF8CAC224D2A}']
+    function Get_UserAgent(out UserAgent: PWideChar): HResult; stdcall;
+    function Set_UserAgent(UserAgent: PWideChar): HResult; stdcall;
+  end;
+ {$ENDIF}
 
 implementation
 
