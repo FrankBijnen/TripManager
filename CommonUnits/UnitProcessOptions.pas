@@ -131,6 +131,14 @@ type
     CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
     KurvigerUrl: string;
     HtmlOutput: THtmlOutput;                  // OSM, Kurviger, Both
+    KurvigerCurvature: integer;               // Curvy level Kurviger
+    KurvigerAvoidSame: boolean;               // Curvy Avoidances
+    KurvigerAvoidToll: boolean;
+    KurvigerAvoidFerries: boolean;
+    KurvigerAvoidMotorWays: boolean;
+    KurvigerAvoidMain: boolean;
+    KurvigerAvoidNarrow: boolean;
+    KurvigerAvoidUnpaved: boolean;
 
     {$IFDEF TRIPOBJECTS}
     TripModel: TTripModel;                    // XT1 and XT2
@@ -271,6 +279,14 @@ begin
   LookUpMessage := 0;
   KurvigerUrl := '';
   HtmlOutput := THtmlOutput.Both;
+  KurvigerCurvature := 3;
+  KurvigerAvoidSame := false;
+  KurvigerAvoidToll := false;
+  KurvigerAvoidFerries := false;
+  KurvigerAvoidMotorWays := false;
+  KurvigerAvoidMain := false;
+  KurvigerAvoidNarrow := false;
+  KurvigerAvoidUnpaved := false;
 
 {$IFDEF TRIPOBJECTS}
   TripModel := TTripModel.XT;
@@ -463,19 +479,41 @@ var
   Lat, Lon: string;
   IsVia: boolean;
 begin
+  // Set Id. What's it for?
+  // So we can be sure the other parameters start with an &
   if (Pos('?', KurvigerUrl) = 0) then
     result := KurvigerUrl + '?id=1'
   else
     result := KurvigerUrl + '&id=1';
-  case DefAdvLevel of
-    TAdvlevel.advLevel1:
+
+  // Curvy level
+  case KurvigerCurvature of
+    1:
       result := result + '&weighting=fastest';
-    TAdvlevel.advLevel2:
+    2:
       result := result + '&weighting=curvaturefastest';
-    TAdvlevel.advLevel3: ;// Nothing
-    TAdvlevel.advLevel4:
+    3:// Nothing, is default
+      ;
+    4:
       result := result + '&weighting=curvaturebooster';
   end;
+
+  // Avoidances
+  if (KurvigerAvoidSame) then
+    result := result + '&additional_weighting=avoid_edges';
+  if (KurvigerAvoidToll) then
+    result := result + '&avoid_toll_roads=true';
+  if (KurvigerAvoidFerries) then
+    result := result + '&avoid_ferries=true';
+  if (KurvigerAvoidMotorWays) then
+    result := result + '&avoid_motorways=true';
+  if (KurvigerAvoidMain) then
+    result := result + '&avoid_main_roads=true';
+  if (KurvigerAvoidNarrow) then
+    result := result + '&avoid_small_roads=true';
+  if (KurvigerAvoidUnpaved) then
+    result := result + '&avoid_unpaved_roads=true';
+
   Cnt := 0;
   RouteName := TXmlVSNode(Rte).NodeName;
   for RtePt in TXmlVSNode(Rte).ChildNodes do

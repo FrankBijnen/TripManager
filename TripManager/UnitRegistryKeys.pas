@@ -62,6 +62,14 @@ const
   Reg_KurvigerUrl_Val             = 'https://kurviger.com/en/plan';
   Reg_HtmlOutput_Key              = 'HtmlOutput';
   Reg_HtmlOutput_Val              = '2';  // Both
+  Reg_KurvigerCurvature           = 'KurvigerCurvature';
+  Reg_KurvigerAvoidSame           = 'KurvigerAvoidSame';
+  Reg_KurvigerAvoidToll           = 'KurvigerAvoidToll';
+  Reg_KurvigerAvoidFerries        = 'KurvigerAvoidFerries';
+  Reg_KurvigerAvoidMotorways      = 'KurvigerAvoidMotorways';
+  Reg_KurvigerAvoidMain           = 'KurvigerAvoidMain';
+  Reg_KurvigerAvoidNarrow         = 'KurvigerAvoidNarrow';
+  Reg_KurvigerAvoidUnpaved        = 'KurvigerAvoidUnpaved';
 
   Reg_PrefFileSysFolder_Key       = 'PrefFileSysFolder';
   Reg_PrefFileSysFolder_Val       = 'rfDesktop';
@@ -91,6 +99,7 @@ const
   Reg_Trk2RtOptions_Val           = 'noRelocate NS_ALL';
   Reg_Trk2RtExportPerc_Key        = 'Trk2RtExportPerc';
   Reg_Trk2RtExportPerc_Val        = 10;
+
 
 const
   IdTrip          = 0;
@@ -161,6 +170,14 @@ begin
     // Kurviger
     KurvigerUrl := GetRegistry(Reg_KurvigerUrl_Key, Reg_KurvigerUrl_Val);
     HtmlOutput := THtmlOutput(GetRegistry(Reg_HtmlOutput_Key, Ord(THtmlOutput.Both)));
+    KurvigerCurvature := GetRegistry(Reg_KurvigerCurvature, 3);
+    KurvigerAvoidSame := GetRegistry(Reg_KurvigerAvoidSame, false);
+    KurvigerAvoidToll := GetRegistry(Reg_KurvigerAvoidToll, false);
+    KurvigerAvoidFerries := GetRegistry(Reg_KurvigerAvoidFerries, false);
+    KurvigerAvoidMotorWays := GetRegistry(Reg_KurvigerAvoidMotorways, false);
+    KurvigerAvoidMain := GetRegistry(Reg_KurvigerAvoidMain, false);
+    KurvigerAvoidNarrow := GetRegistry(Reg_KurvigerAvoidNarrow, false);
+    KurvigerAvoidUnpaved := GetRegistry(Reg_KurvigerAvoidUnpaved, false);
 
     // XT1 and XT2 Defaults
     ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);

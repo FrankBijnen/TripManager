@@ -36,6 +36,8 @@ type
     BtnCurrent: TButton;
     TabTripOverview: TTabSheet;
     GridTripOverview: TStringGrid;
+    TabKurviger: TTabSheet;
+    GridKurviger: TStringGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -62,6 +64,7 @@ type
     procedure LoadSettings_General;
     procedure LoadSettings_Device;
     procedure LoadSettings_XT2;
+    procedure LoadSettings_Kurviger;
     procedure LoadSettings_TripOverview;
     procedure LoadSettings_GeoCode;
     procedure LoadSettings;
@@ -173,12 +176,9 @@ begin
                                               '',
                                               'Api-Key for enabling Map Tiler. https://www.maptiler.com');
 
-    AddGridLine(GridGeneralSettings, CurRow,  Reg_KurvigerUrl_Key,
-                                              Reg_KurvigerUrl_Val,
-                                              'Kurviger URL');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_HtmlOutput_Key,
                                               Reg_HtmlOutput_Val,
-                                              '(0=OSM, 1=Kurviger, 2=Both)');
+                                              '0=OSM, 1=Kurviger, 2=Both');
 
     AddGridLine(GridGeneralSettings, CurRow,  Reg_GeoSearchTimeOut_Key,
                                               Reg_GeoSearchTimeOut_Val,
@@ -341,6 +341,60 @@ begin
   end;
 end;
 
+procedure TFrmAdvSettings.LoadSettings_Kurviger;
+var
+  CurRow: integer;
+begin
+  GridKurviger.OnModified := GridModified;
+  GridKurviger.RowCount := GridTripOverview.FixedRows +1;
+  GridKurviger.BeginUpdate;
+  try
+
+    CurRow := 1;
+    AddGridLine(GridKurviger, CurRow,  '', '', '-Kurviger parameters-');
+    AddGridLine(GridKurviger, CurRow,  '');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerUrl_Key,
+                                       Reg_KurvigerUrl_Val,
+                                       'Kurviger URL');
+    AddGridLine(GridKurviger, CurRow,  '', '', 'en=English, de=Deutsch, nl=Nederlands');
+    AddGridLine(GridKurviger, CurRow,  '', '', 'fr=Français, es=Español, it=Italiano');
+    AddGridLine(GridKurviger, CurRow,  '');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerCurvature,
+                                       IntToStr(3),
+                                       'Default Curvature Level (1-4)');
+    AddGridLine(GridKurviger, CurRow,  '', '', '1=Fastest, 2=Fast and curvy, 3=Curvy, 4=Extra curvy');
+    AddGridLine(GridKurviger, CurRow,  '', '', '5=All curvy route modes (Not implemented)');
+    AddGridLine(GridKurviger, CurRow,  '');
+
+    AddGridLine(GridKurviger, CurRow,  '', '', '-Avoidances-');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidSame,
+                                       'False',
+                                       'Same road twice');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidToll,
+                                       'False',
+                                       'Toll');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidMotorways,
+                                       'False',
+                                       'Motorways');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidMain,
+                                       'False',
+                                       'Main roads');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidNarrow,
+                                       'False',
+                                       'Narrow roads');
+    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidUnpaved,
+                                       'False',
+                                       'Unpaved roads');
+
+    AddGridLine(GridKurviger, CurRow,  '');
+    GridKurviger.RowCount := CurRow;
+    AddGridHeader(GridKurviger);
+
+  finally
+    GridKurviger.EndUpdate;
+  end;
+end;
+
 procedure TFrmAdvSettings.LoadSettings_TripOverview;
 var
   CurRow: integer;
@@ -444,6 +498,7 @@ begin
   LoadSettings_General;
   LoadSettings_Device;
   LoadSettings_XT2;
+  LoadSettings_Kurviger;
   LoadSettings_TripOverview;
   LoadSettings_GeoCode;
 end;
@@ -501,7 +556,9 @@ end;
 
 procedure TFrmAdvSettings.GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
 begin
-  if (Copy(TStringGrid(Sender).Cells[0, Arow], 1, 1) <> '*') then
+  if (TStringGrid(Sender).Cells[0, Arow] = '') then
+    TStringGrid(Sender).Cells[2, Arow] := ''
+  else if (Copy(TStringGrid(Sender).Cells[0, Arow], 1, 1) <> '*') then
     TStringGrid(Sender).Cells[0, Arow] := '*' + TStringGrid(Sender).Cells[0, Arow];
 end;
 
@@ -573,6 +630,7 @@ begin
   AlignGrid(GridGeneralSettings);
   AlignGrid(GridDeviceSettings);
   AlignGrid(GridZumoSettings);
+  AlignGrid(GridKurviger);
   AlignGrid(GridTripOverview);
   AlignGrid(GridGeoCodeSettings);
 end;
@@ -601,6 +659,7 @@ begin
   SaveGrid(GridGeneralSettings);
   SaveGrid(GridDeviceSettings);
   SaveGrid(GridZumoSettings);
+  SaveGrid(GridKurviger);
   SaveGrid(GridTripOverview);
   SaveGrid(GridGeoCodeSettings);
 

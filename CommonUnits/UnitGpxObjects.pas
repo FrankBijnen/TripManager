@@ -2197,7 +2197,7 @@ procedure TGPXFile.DoCreateKurviger;
 {$IFDEF OSMMAP}
 var
   RoutesProcessed: TXmlVSNodeList;
-  Route, Rte: TXmlVSNode;
+  Route, Rte, Track: TXmlVSNode;
   KurvUrl, HTML: string;
   OutFile: string;
 {$ENDIF}
@@ -2212,8 +2212,15 @@ begin
     begin
       for Rte in RouteViaPointList do
       begin
-        if (Rte.ChildNodes.Count < 3) or // Probably route from a track. Need route points
-           (Rte.NodeName <> Route.Name) then
+        // Get Route Via points of this route
+        if (Rte.NodeName <> Route.Name) then
+          continue;
+
+        // Dont want Dummy route points from tracks
+        Track := FTrackList.Find(Rte.NodeName);
+        if (Track = nil) then
+          continue;
+        if (FindSubNodeValue(Track, 'desc') <> RteOrigin) then
           continue;
 
         KurvUrl := ProcessOptions.GetKurvigerUrl(Rte);

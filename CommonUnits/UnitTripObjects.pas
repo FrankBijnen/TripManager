@@ -5076,7 +5076,7 @@ begin
     Add(TmIsDisplayable.Create);
 
     CheckHRGuid(CreateGUID(Uuid));
-    Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
+    Add(TmExploreUuid.Create(ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
     Add(TmOptimized.Create);
     Add(TmDayNumber.Create);
     Add(TmParentTripName.Create(TripName));
@@ -5230,12 +5230,23 @@ end;
 
 procedure TTripList.Trip2XmlRte(Rte: TObject);
 var
-  RtePt: TXmlVSNode;
+  RtePt, RoutePt: TXmlVSNode;
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
-  ViaPointType, PointName, Lat, Lon, Address: string;
+  ViaPointType, Arrival, TransportMode, CalucalationMode, PointName, Lat, Lon, Address: string;
 begin
+  IntToIdent(Ord(TTransportMode.tmMotorcycling), TransportMode, TransportModeMap);
+  ANItem := GetItem('mTransportationMode');
+  if (Assigned(ANItem)) then
+    TransportMode := TmTransportationMode(ANItem).AsString;
+
+  IntToIdent(Ord(TRoutePreference.rmFasterTime), CalucalationMode, RoutePreferenceMap);
+  ANItem := GetItem('mRoutePreference');
+  if (Assigned(ANItem)) then
+    CalucalationMode := TmRoutePreference(ANItem).AsString;
+
   TXmlVSNode(Rte).AddChild('name').NodeValue := TripName;
+  TXmlVSNode(Rte).AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
 
   Locations := TmLocations(GetItem('mLocations'));
   if not (Assigned(Locations)) then
@@ -5246,15 +5257,27 @@ begin
     if (Location is TLocation) then
     begin
       RtePt := TXmlVSNode(Rte).AddChild('rtept');
+
       // Point Type
+      Arrival := '';
       ViaPointType := 'trp:ShapingPoint';
       if (TLocation(Location).IsViaPoint) then
+      begin
         ViaPointType := 'trp:ViaPoint';
+
+        // Arrival
+        ANItem := TLocation(Location).LocationTmArrival;
+        if (Assigned(ANItem)) and
+           (TmArrival(ANItem).AsCardinal <> 0) then
+          Arrival := DateToISO8601(TmArrival.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
+      end;
+
       // Point Name
       PointName := '';
       ANItem := TLocation(Location).LocationTmName;
       if (Assigned(ANItem)) then
          PointName := TmName(ANItem).AsString;
+
       // Lat Lon
       Lat := '';
       Lon := '';
@@ -5265,6 +5288,7 @@ begin
         Lat := Trim(NextField(Lon, ','));
         Lon := Trim(Lon);
       end;
+
       // Address
       Address := '';
       ANItem := TLocation(Location).LocationTmAddress;
@@ -5277,7 +5301,14 @@ begin
       RtePt.AddChild('name').NodeValue := PointName;
       RtePt.AddChild('cmt').NodeValue := Address;
       RtePt.AddChild('desc').NodeValue := Address;
-      RtePt.AddChild('extensions').AddChild(ViaPointType);
+      RoutePt := RtePt.AddChild('extensions').AddChild(ViaPointType);
+      if (Assigned(RoutePt)) and
+         (ViaPointType = 'trp:ViaPoint') then
+      begin
+        if (Arrival <> '') then
+          RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
+        RoutePt.AddChild('trp:CalculationMode').NodeValue := CalucalationMode;
+      end;
     end;
   end;
 end;
