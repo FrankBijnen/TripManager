@@ -301,6 +301,7 @@ procedure TFrmSelectGPX.TrackDistTimerTimer(Sender: TObject);
 {$IFDEF TRIPOBJECTS}
 var
   CrWait, CrNormal: HCURSOR;
+  TrackColor: string;
 {$ENDIF}
 begin
   TrackDistTimer.Enabled := false;
@@ -316,7 +317,11 @@ begin
       ProcessOptions.MinDistTrackPoint := SpinMinTrackPtDist.Value;
       AnalyzeGpx;
       AddSelectTracks(FTagsToShow);
-      LoadTracks(FTagsToShow, '', FCheckMask, FGPXObject, FOnGetPreviewInfo)
+      if (CmbOverruleColor.ItemIndex = 0) then
+        TrackColor := ''
+      else
+        TrackColor := CmbOverruleColor.Text;
+      LoadTracks(FTagsToShow, TrackColor, FCheckMask, FGPXObject, FOnGetPreviewInfo)
     end;
   finally
     SpinMinTrackPtDist.SetFocus;
