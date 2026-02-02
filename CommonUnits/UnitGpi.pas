@@ -324,6 +324,7 @@ type
     function CreatePOIGroup(Category: TGPXString): TPOIGroup;
     procedure WriteEnd(S: TBufferedFileStream);
     procedure Read(S: TBufferedFileStream; APOIList: TPOIList; ImageDir: string = '');
+    procedure SaveGpx(const GPXFile: string; const APOIList: TPOIList; const SymbolCat: string);
   end;
 
 const HasPhone:   Word = $0001;
@@ -342,6 +343,7 @@ uses
   System.WideStrUtils,
   Winapi.Windows,
   Vcl.Imaging.pngimage,
+  UnitVerySimpleXml,
   UnitStringUtils;
 
 const
@@ -1600,6 +1602,7 @@ begin
             GPXWayPoint.State := ConvertToUtf8(Address.State, Header2.CodePage);
             GPXWayPoint.PostalCode := ConvertToUtf8(Address.PostalCode, Header2.CodePage);
             GPXWayPoint.City := ConvertToUtf8(Address.City, Header2.CodePage);
+            GPXWayPoint.Street := ConvertToUtf8(Address.Street, Header2.CodePage);
             GPXWayPoint.HouseNbr := ConvertToUtf8(Address.HouseNbr, Header2.CodePage);
             continue;
           end;
@@ -1633,6 +1636,52 @@ begin
   finally
     CategoryList.Free;
     BitMapList.Free;
+  end;
+end;
+
+procedure TGPI.SaveGpx(const GPXFile: string; const APOIList: TPOIList; const SymbolCat: string);
+var
+  Xml: TXmlVSDocument;
+  XMLRoot, AWpt, AExtensions, AAddress: TXmlVSNode;
+  AWayPt: TGPXWayPoint;
+  Symbol, Category: string;
+begin
+  XML := TXmlVSDocument.Create;
+  try
+    XMLRoot := InitGarminGpx(XML);
+    for AWayPt in APOIList do
+    begin
+      AWpt := XMLRoot.AddChild('wpt');
+      Awpt.AttributeList.Add('lat').Value := string(AWayPt.Lat);
+      Awpt.AttributeList.Add('lon').Value := string(AWayPt.Lon);
+      AWpt.AddChild('time').NodeValue := DateToISO8601(TTimezone.Local.ToUniversalTime(Now), true);
+      AWpt.AddChild('name').NodeValue := string(AWayPt.Name);
+      AWpt.AddChild('cmt').NodeValue := string(AWayPt.Comment);
+      AWpt.AddChild('desc').NodeValue := string(AWayPt.Comment);
+      Category := string(AWayPt.Category);
+      Symbol := NextField(Category, ':');
+      if (SameText(Symbol, SymbolCat)) then
+        AWpt.AddChild('sym').NodeValue := Category
+      else
+        AWpt.AddChild('sym').NodeValue := string(AWayPt.Symbol);
+      AWpt.AddChild('type').NodeValue := 'user';
+      AExtensions := AWpt.AddChild('extensions').AddChild('gpxx:WaypointExtension');
+      if (AWayPt.Proximity <> 0) then
+        AExtensions.AddChild('gpxx:Proximity').NodeValue := IntToStr(AWayPt.Proximity);
+      AExtensions.AddChild('gpxx:DisplayMode').NodeValue := 'SymbolAndName';
+      AExtensions.AddChild('gpxx:Categories').AddChild('gpxx:Category').NodeValue := string(AWayPt.Category);
+      AAddress := AExtensions.AddChild('gpxx:Address');
+      AAddress.AddChild('gpxx:StreetAddress').NodeValue := string(AWayPt.Street);
+      AAddress.AddChild('gpxx:City').NodeValue := string(AWayPt.City);
+      AAddress.AddChild('gpxx:State').NodeValue := string(AWayPt.State);
+      AAddress.AddChild('gpxx:Country').NodeValue := string(AWayPt.Country);
+      AAddress.AddChild('gpxx:PostalCode').NodeValue := string(AWayPt.PostalCode);
+      AExtensions.AddChild('gpxx:PhoneNumber').NodeValue := string(AWayPt.Phone);
+    end;
+
+    XML.SaveToFile(GPXFile);
+  finally
+    Xml.Free;
   end;
 end;
 

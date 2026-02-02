@@ -8,6 +8,7 @@ type
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,
                        rmOffRoad          = $02,
+                       rmEco              = $03,
                        rmDirect           = $04,
                        rmCurvyRoads       = $07,
                        rmTripTrack        = $09,
@@ -21,7 +22,9 @@ type
                        advLevel3          = $02,
                        advLevel4          = $03,
                        advNA              = $ff);
-  TTransportMode    = (tmAutoMotive       = 1,
+  TTransportMode    = (tmDriving          = 0,
+                       tmAutoMotive       = 1,
+                       tmPedestrian       = 2,
                        tmMotorcycling     = 9,
                        tmOffRoad          = 10);
   TRoutePoint       = (rpVia              = 0,

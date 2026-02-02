@@ -791,7 +791,8 @@ begin
         TGarminModel.Zumo595,
         TGarminModel.Zumo590,
         TGarminModel.Drive51,
-        TGarminModel.Zumo3x0:
+        TGarminModel.Zumo3x0,
+        TGarminModel.Nuvi2595:
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
             GarminDevice.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         TGarminModel.Unknown:
@@ -1651,18 +1652,21 @@ begin
 end;
 
 procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
+var
+  GPIRec: TGPI;
 begin
-  if not Assigned(ATripList) or
-     (ATripList.ItemList.Count = 0) then
-    exit;
-
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
   SaveTrip.FileName := ChangeFileExt(ExtractFileName(HexEditFile), '.gpx');
   if not SaveTrip.Execute then
     exit;
 
-  ATripList.SaveAsGPX(SaveTrip.FileName);
+  if (APOIList <> nil) and
+     (APOIList.Count > 0) then
+    GPIRec.SaveGpx(SaveTrip.FileName, APOIList, TProcessOptions.GetCatSymbol)
+  else if (Assigned(ATripList) and
+          (ATripList.ItemList.Count > 0)) then
+    ATripList.SaveAsGPX(SaveTrip.FileName);
 end;
 
 procedure TFrmTripManager.CompareEploredbwithTrips1Click(Sender: TObject);
@@ -1945,8 +1949,8 @@ end;
 
 procedure TFrmTripManager.PopupTripInfoPopup(Sender: TObject);
 begin
-  SaveGPX1.Enabled := (ATripList <> nil) and
-                      (ATripList.ItemList.Count > 0);
+  SaveGPX1.Enabled := ( (ATripList <> nil) and (ATripList.ItemList.Count > 0)) or
+                      ( (APOIList <> nil)  and (APOIList.Count > 0));
 
   MnuCompareGpxRoute.Enabled := SaveGPX1.Enabled;
   MnuCompareGpxTrack.Enabled := SaveGPX1.Enabled;
@@ -3475,6 +3479,52 @@ var
     end;
   end;
 
+  procedure AddLink(ANode: TTreeNode; ALink: TLink);
+  var
+    ANitem: TBaseItem;
+  begin
+    if not Assigned(ANode) then
+      exit;
+
+    with ALink do
+      VlTripInfo.Strings.AddPair('*** Link', ANode.Text,
+                                 TGridSelItem.Create(ALink) );
+    for ANitem in ALink.Items do
+    begin
+      if (ANitem is TBaseDataItem) then
+        AddBaseData(TBaseDataItem(ANitem));
+    end;
+
+    with ALink do
+      VlTripInfo.Strings.AddPair('*** End Link', DupeString('-', DupeCount),
+                                 TGridSelItem.Create(ALink, 1,
+                                                     (ALink.SelEnd - ALink.SelStart) -1) );
+  end;
+
+  procedure AddAllLinks(ANode: TTreeNode; AAllLinks: TmAllLinks);
+  var
+    ANitem: TBaseItem;
+    ChildNode: TTreeNode;
+  begin
+
+    VlTripInfo.Strings.AddPair('*** AllLinks header', '',
+                               TGridSelItem.Create(AAllLinks));
+    ChildNode := Anode.getFirstChild;
+    for ANitem in AAllLinks.Links do
+    begin
+      if (ChildNode = nil) then
+        break;
+      if (ANitem is TLink) then
+      begin
+        AddLink(ChildNode, TLink(ANitem));
+        ChildNode := Anode.GetNextChild(ChildNode);
+      end;
+    end;
+
+    VlTripInfo.Strings.AddPair('*** End AllLinks', DupeString('-', DupeCount),
+                               TGridSelItem.Create(AAllLinks, 1, AAllLinks.SelEnd - AAllLinks.SelStart -1));
+  end;
+
   procedure AddLocation(ALocation: TLocation; ZoomToPoint: boolean);
   var
     ANitem: TBaseItem;
@@ -3959,6 +4009,12 @@ begin
 
     else if (TObject(Node.Data) is TUdbDir) then
       AddUdbDir(TUdbDir(Node.Data), true)
+
+    else if (TObject(Node.Data) is TmAllLinks) then
+      AddAllLinks(Node, TmAllLinks(Node.Data))
+
+    else if (TObject(Node.Data) is TLink) then
+      AddLink(Node, TLink(Node.Data))
 
     else if (TObject(Node.Data) is TmLocations) then
       AddLocations(TmLocations(Node.Data))
@@ -4572,6 +4628,7 @@ procedure TFrmTripManager.SetRouteParm(ARouteParm: TRouteParm; Value: byte);
 var
   TripFileName: string;
   AnItem: TListItem;
+  ARouteParmItem: TByteItem;
   ABase_Data: TBASE_Data;
   TmpTripList: TTripList;
   CrWait, CrNormal: HCURSOR;
@@ -4600,18 +4657,24 @@ begin
         // Get current trip name
         TripFileName := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
 
-        // reload trip, and change mFilename
+        // reload trip, and change RouteParm
         TmpTripList.LoadFromFile(TripFilename);
-        case ArouteParm of
+        case ARouteParm of
           TRouteParm.TransportMode:
-            TmTransportationMode(TmpTripList.GetItem('mTransportationMode')).AsByte := Value;
+            ARouteParmItem := TByteItem(TmpTripList.GetItem('mTransportationMode'));
           TRouteParm.RoutePref:
-            TmRoutePreference(TmpTripList.GetItem('mRoutePreference')).AsByte := Value;
+            ARouteParmItem := TByteItem(TmpTripList.GetItem('mRoutePreference'));
+          else
+            continue;
         end;
+        if not (Assigned(ARouteParmItem)) then
+          continue;
+
+        TmTransportationMode(ARouteParmItem).AsByte := Value;
         TmpTripList.ForceRecalc;
         TmpTripList.SaveToFile(TripFilename);
 
-        // Write to dev
+        // Write to device
         CopyFileFromTmp(TripFilename, AnItem);
       end;
     finally
@@ -4826,6 +4889,37 @@ var
   TripName: string;
   ParentTripName: string;
 
+  procedure AddLinks(AParentNode: TTreeNode; ALinkList: TmAllLinks);
+  var
+    ANItem: TBaseItem;
+    LinkCnt: integer;
+    LinkName: string;
+    RoutePoints: TList<TLocation>;
+    mLocations: TmLocations;
+  begin
+    RoutePoints := Tlist<TLocation>.Create;
+    mLocations := TmLocations(ALinkList.TripList.GetItem('mLocations'));
+    if (Assigned(mLocations)) then
+      mLocations.GetRoutePoints(RoutePoints);
+    try
+      LinkCnt := 0;
+      for ANItem in ALinkList.Links do
+      begin
+        if ANItem is Tlink then
+        begin
+          LinkName := Format('Link: %d', [LinkCnt]);
+          if (LinkCnt < RoutePoints.Count) then
+            LinkName := RoutePoints[LinkCnt].LocationTmName.AsString;
+          TvTrip.Items.AddChildObject(AParentNode, LinkName, ANItem);
+        end;
+        Inc(LinkCnt);
+      end;
+      AParentNode.Expand(false);
+    finally
+      RoutePoints.Free;
+    end;
+  end;
+
   procedure AddLocations(AParentNode: TTreeNode; ALocationList: TmLocations);
   var
     ANItem: TBaseItem;
@@ -4953,6 +5047,8 @@ begin
         with TBaseDataItem(ANItem) do
         begin
           CurrentNode := TvTrip.Items.AddChildObject(RootNode, DisplayName + '=' + AsString, ANItem);
+          if (ANItem is TmAllLinks) then
+            AddLinks(CurrentNode, TmAllLinks(AnItem));
           if (ANItem is TmLocations) then
             AddLocations(CurrentNode, TmLocations(AnItem));
           if (ANItem is TmAllRoutes) then

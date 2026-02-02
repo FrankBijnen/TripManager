@@ -23,6 +23,7 @@ const
   dtPosn          = 8;
   dt3x0RoutePref  = 8;
   dtLctnPref      = 10;
+  dtLinkPref      = 10;
   dtUdbPref       = 10;
   dtUdbHandle     = 11;
   dtRaw           = 12;
@@ -40,11 +41,13 @@ const
   MinRoutePreferenceUserConfig = 0; // Only these are available to the user.
   MaxRoutePreferenceUserConfig = 3;
   RoutePreferenceAdventurous = 3;
-  RoutePreferenceMap : array[0..10] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
+  RoutePreferenceMap : array[0..12] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
                                                           (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),
                                                           (Value: Ord(rmDirect);            Name: 'Direct'),
                                                           (Value: Ord(rmCurvyRoads);        Name: 'Adventurous'),
                                                           (Value: Ord(rmCurvyRoads);        Name: 'CurvyRoads'),
+                                                          (Value: Ord(rmOffRoad);           Name: 'OffRoad'),
+                                                          (Value: Ord(rmEco);               Name: 'Eco'),
                                                           (Value: Ord(rmTripTrack);         Name: 'TripTrack'),
                                                           (Value: Ord(rmHills);             Name: 'Hills'),
                                                           (Value: Ord(rmPopular);           Name: 'Popular'),
@@ -62,7 +65,9 @@ const
                                                           (Value: Ord(advLevel4);           Name: 'ExtraAdventurous')
                                                         );
 
-  TransportModeMap : array[0..2] of TIdentMapEntry =    ( (Value: Ord(tmAutoMotive);        Name: 'Automotive'),
+  TransportModeMap : array[0..4] of TIdentMapEntry =    ( (Value: Ord(tmDriving);           Name: 'Driving'),
+                                                          (Value: Ord(tmAutoMotive);        Name: 'Automotive'),
+                                                          (Value: Ord(tmPedestrian);        Name: 'Pedestrian'),
                                                           (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
                                                           (Value: Ord(tmOffRoad);           Name: 'OffRoad')
                                                         );
@@ -77,7 +82,8 @@ const
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  nuvi 2595 Unknown
-  NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    false,    false);
+  NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    true,     false);
+  NeedDummySubclass:  array[TTripModel] of boolean  =(false,    false,    false,    false,    true,     true,     false,    true,     false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false,    true);
   UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       16,       20);
@@ -116,6 +122,7 @@ type
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); virtual;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); virtual;
+    procedure SetTripList(const ATripList: TTripList);
     property SelStart: Cardinal read FStartPos;
     property SelEnd: Cardinal read FEndPos;
     property ItemEditMode: TItemEditMode read GetItemEditMode;
@@ -619,6 +626,51 @@ type
     property HeaderValue: THeaderValue read FValue;
   end;
 
+{*** AllLinks (nuvi2595 ***}
+  TLinkValue = packed record
+    Id:               array[0..3] of AnsiChar;  // 'Link'
+    Size:             Cardinal;
+    DataType:         byte;
+    Unknown1:         Word;
+    Count:            Word;
+    procedure SwapCardinals;
+  end;
+  Tlink = class(TBaseItem)
+  private
+    FValue:           TLinkValue;
+    FItemList: TItemList;
+    procedure WriteValue(AStream: TMemoryStream); override;
+  public
+    constructor Create; reintroduce; overload;
+    constructor Create(ARoutePref: TRoutePreference;
+                       ATransportMode: TTransportMode); reintroduce; overload;
+    destructor Destroy; override;
+    procedure Add(ANitem: TBaseItem);
+    procedure Clear;
+    property Value: TLinkValue read FValue;
+    property Items: TItemList read FItemList;
+  end;
+  TmAllLinks = class(TBaseDataItem)
+  private
+    FItemCount: Cardinal;
+    FItemList: TItemList;
+    FLink: Tlink;
+    FDefRoutePref: TRoutePreference;
+    FDefTransportMode: TTransportMode;
+    procedure Calculate(AStream: TMemoryStream); override;
+    procedure WriteValue(AStream: TMemoryStream); override;
+  public
+    constructor Create; reintroduce;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    destructor Destroy; override;
+    procedure Clear;
+    procedure AddLink(ALink: Tlink);
+    function Add(ANItem: TBaseItem): TBaseItem;
+    property Links: TItemList read FItemList;
+    property DefRoutePref: TRoutePreference read FDefRoutePref write FDefRoutePref;
+    property DefTransportMode: TTransportMode read FDefTransportMode write FDefTransportMode;
+  end;
+
 {*** Locations ***}
   TLocationValue = packed record
     Id:               array[0..3] of AnsiChar;  // 'LCTN'
@@ -632,6 +684,7 @@ type
   private
     FValue:           TLocationValue;
     FItems: TItemList;
+    FTransPortMode: TTransportMode;
     FRoutePref: TRoutePreference; // Not used for XT
     FAdvLevel: TAdvlevel;         // Not used for XT
     procedure WriteValue(AStream: TMemoryStream); override;
@@ -649,6 +702,7 @@ type
     function LocationTmArrival: TmArrival;
     property LocationValue: TLocationValue read FValue;
     property LocationItems: TItemList read FItems;
+    property TransportMode: TTransportMode read FTransPortMode write FTransPortMode;
     property RoutePref: TRoutePreference read FRoutePref write FRoutePref;
     property AdvLevel: TAdvlevel read FAdvLevel write FAdvLevel;
   end;
@@ -763,7 +817,7 @@ type
   private
     FValue:            TUdbDirFixedValue;
     FUnknown2:         TBytes;
-    FName:             TBytes;
+    FUdbDirName:       TBytes;
     FUdbDirStatus:     TUdbDirStatus;
     FRoadClass:        string;
     constructor Create(AModel: TTripModel;
@@ -913,6 +967,7 @@ type
     function GetTripModel: TTripModel;
     function GetCalculationModel(AModel: TTripModel): TTripModel;
     procedure GetModel;
+    function InitAllLinks: TBaseItem;
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
@@ -964,6 +1019,13 @@ type
                                   Lat, Lon: double;
                                   DepartureDate: TDateTime;
                                   Name, Address: string);
+    procedure AddLocation_nuvi2595(Locations: TmLocations;
+                                  ProcessOptions: TObject;
+                                  RoutePoint: TRoutePoint;
+                                  RoutePref: TRoutePreference;
+                                  Lat, Lon: double;
+                                  DepartureDate: TDateTime;
+                                  Name, Address: string);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
@@ -971,8 +1033,10 @@ type
     procedure CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_nuvi2595(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
     procedure UpdLocsFromRoutePrefs;
+    procedure UpdLocsFromAllLinks;
   public
     constructor Create;
     destructor Destroy; override;
@@ -1149,7 +1213,7 @@ procedure WideStringToWideArray(AWideString: WideString; AWideArray: TBytes);
 var
   MaxLen: Cardinal;
 begin
-  MaxLen := Min(Length(AWideString) * SizeOf(WideChar), High(AWideArray));
+  MaxLen := Min(Length(AWideString) * SizeOf(WideChar), High(AWideArray) +1);
   Move(AWideString[1], AWideArray[0], MaxLen);
 end;
 
@@ -1223,7 +1287,7 @@ begin
   if (Assigned(APersistentClass)) then
   begin
     result := TBaseItem(APersistentClass.Create);
-    result.FTripList := ATripList;
+    result.SetTripList(ATripList);
     result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
   end
   else
@@ -1234,37 +1298,37 @@ begin
         begin
           AStream.Read(AByte, SizeOf(AByte));
           result := TByteItem.Create(AKeyName, AByte);
-          result.FTripList := ATripList;
+          result.SetTripList(ATripList);
         end;
       dtCardinal:
         begin;
           AStream.Read(ACardinal, SizeOf(ACardinal));
           result := TCardinalItem.Create(AKeyName, Swap32(ACardinal));
-          result.FTripList := ATripList;
+          result.SetTripList(ATripList);
         end;
       dtSingle:
         begin;
           AStream.Read(ASingle, SizeOf(ASingle));
           result := TSingleItem.Create(AKeyName, Swap32(ASingle));
-          result.FTripList := ATripList;
+          result.SetTripList(ATripList);
         end;
       dtBoolean:
         begin;
           AStream.Read(ABoolean, SizeOf(ABoolean));
           result := TBooleanItem.Create(AKeyName, ABoolean);
-          result.FTripList := ATripList;
+          result.SetTripList(ATripList);
         end;
       dtString:
         begin;
           result := TStringItem.Create(AKeyName);
-          result.FTripList := ATripList;
+          result.SetTripList(ATripList);
           TStringItem(result).InitFromStream(AKeyName, AValueLen, dtString, AStream);
         end;
       else
       begin
         // Create a Raw data item. Only holds bytes
         result := TRawDataItem.Create;
-        result.FTripList := ATripList;
+        result.SetTripList(ATripList);
         result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
       end;
     end;
@@ -1283,6 +1347,11 @@ procedure TBaseItem.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADat
 begin
   FInitiator := biInitiator;
   FCalculated := false;
+end;
+
+procedure TBaseItem.SetTripList(const ATripList: TTripList);
+begin
+  FTripList := ATripList;
 end;
 
 function TBaseItem.GetItemEditMode: TItemEditMode;
@@ -1951,7 +2020,7 @@ begin
   if (TripList.IsUcs4) then
     result := UCS4StringToUnicodeString(FromPrivate(AsUCS4))
   else
-    result := PWideChar(@FRawBytes[0]);
+    result := PWideChar(FRawBytes);
 end;
 
 function TStringItem.GetItemEditMode: TItemEditMode;
@@ -2121,7 +2190,7 @@ constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; AL
 begin
   inherited Create('mRoutePreference', Ord(AValue));
 
-  // Zumo 3x0
+  // Zumo 3x0, nuvi2595
   if (ADataType <> dtByte) then
   begin
     FDataType := ADataType;
@@ -2139,7 +2208,7 @@ begin
   SavePos := AStream.Position;
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
 
-  // Zumo 3x0?
+  // Zumo 3x0, nuvi2595
   if (FDataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, FLenValue);
@@ -2189,6 +2258,7 @@ end;
 procedure TmRoutePreference.SetValue(AValue: string);
 begin
   FValue := Ord(TmRoutePreference.RoutePreference(AValue));
+
   if (FDataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, 5);
@@ -2201,17 +2271,41 @@ begin
 end;
 
 function TmRoutePreference.GetItemEditMode: TItemEditMode;
+var
+  CurModel: TTripModel;
 begin
-  result := TItemEditMode.emPickList;
+  if (Assigned(TripList)) then
+    CurModel := Triplist.TripModel
+  else
+    CurModel := TTripModel.Unknown;
+  case CurModel of
+    TTripModel.Nuvi2595:
+      result := TItemEditMode.emNone;
+    else
+      result := TItemEditMode.emPickList;
+  end;
 end;
 
 function TmRoutePreference.GetPickList: string;
 var
   Index: integer;
+  CurModel: TTripModel;
 begin
   result := '';
-  for Index := MinRoutePreferenceUserConfig to MaxRoutePreferenceUserConfig do
-    result := result + RoutePreferenceMap[index].Name + #10;
+  if (Assigned(TripList)) then
+    CurModel := Triplist.TripModel
+  else
+    CurModel := TTripModel.Unknown;
+  case CurModel of
+    TTripModel.Nuvi2595:
+        result := RoutePreferenceMap[0].Name + #10 +
+                  RoutePreferenceMap[1].Name + #10 +
+                  RoutePreferenceMap[5].Name + #10 +
+                  RoutePreferenceMap[6].Name;
+    else
+      for Index := MinRoutePreferenceUserConfig to MaxRoutePreferenceUserConfig do
+        result := result + RoutePreferenceMap[Index].Name + #10;
+  end;
 end;
 
 constructor TmTransportationMode.Create(AValue: TTransportMode = tmMotorcycling);
@@ -2241,17 +2335,39 @@ begin
 end;
 
 function TmTransportationMode.GetItemEditMode: TItemEditMode;
+var
+  CurModel: TTripModel;
 begin
-  result := TItemEditMode.emPickList;
+  if (Assigned(TripList)) then
+    CurModel := Triplist.TripModel
+  else
+    CurModel := TTripModel.Unknown;
+  case CurModel of
+    TTripModel.Nuvi2595:
+      result := TItemEditMode.emNone;
+    else
+      result := TItemEditMode.emPickList;
+  end;
 end;
 
 function TmTransportationMode.GetPickList: string;
 var
-  Index: integer;
+  CurModel: TTripModel;
 begin
   result := '';
-  for Index := 0 to High(TransportModeMap) do
-    result := result + TransportModeMap[Index].Name + #10;
+  if (Assigned(TripList)) then
+    CurModel := Triplist.TripModel
+  else
+    CurModel := TTripModel.Unknown;
+  case CurModel of
+    TTripModel.Nuvi2595:
+      result := TransportModeMap[1].Name + #10 +
+                TransportModeMap[2].Name + #10;
+    else
+      result := TransportModeMap[1].Name + #10 +
+                TransportModeMap[3].Name + #10 +
+                TransportModeMap[4].Name + #10;
+  end;
 end;
 
 constructor TmTotalTripDistance.Create(AValue: single = 0);
@@ -2717,6 +2833,204 @@ begin
   FValue.SwapCardinals;
 end;
 
+{*** AllLinks ***}
+procedure TLinkValue.SwapCardinals;
+begin
+  Count := Swap(Count);
+  Size := Swap32(Size);
+end;
+
+constructor TLink.Create;
+begin
+  inherited Create;
+  FValue.Id := 'Link';
+  FValue.DataType := dtLinkPref;
+  FValue.Size := SizeOf(FValue) - SizeOf(FValue.Id) - SizeOf(FValue.Size);
+  FItemList := TItemList.Create;
+end;
+
+constructor TLink.Create(ARoutePref: TRoutePreference;
+                         ATransportMode: TTransportMode);
+begin
+  Create;
+  Add(TmRoutePreference.Create(ARoutePref, 5, dt3x0RoutePref));
+  Add(TmTransportationMode.Create(ATransportMode));
+end;
+
+destructor TLink.Destroy;
+begin
+  Clear;
+  FItemList.Free;
+  inherited Destroy;
+end;
+
+procedure TLink.Clear;
+var
+  AnItem: TBaseItem;
+begin
+  if (Assigned(FItemList)) then
+  begin
+    for ANitem in FItemList do
+      FreeAndNil(ANitem);
+    FItemList.Clear;
+  end;
+  FValue.Count := 0;
+end;
+
+procedure TLink.Add(ANitem: TBaseItem);
+begin
+  Inc(FValue.Count);
+  FValue.Size := FValue.Size + ANitem.SubLength;
+  ANitem.SetTripList(TripList);
+  FItemList.Add(ANitem);
+end;
+
+procedure Tlink.WriteValue(AStream: TMemoryStream);
+var
+  AnItem: TBaseItem;
+begin
+  FValue.SwapCardinals; // Swap Cardinals
+  AStream.Write(FValue, SizeOf(FValue));
+  FValue.SwapCardinals; // Swap Cardinals back
+  for AnItem in FItemList do
+    AnItem.Write(AStream);
+end;
+
+constructor TmAllLinks.Create;
+begin
+  inherited Create('mAllLinks', SizeOf(FItemCount), dtList); // Will get Length later, Via Calculate
+  FItemList := TItemList.Create;
+  FItemCount := 0;
+  FDefRoutePref := TRoutePreference.rmFasterTime;
+  FDefTransportMode := TTransportMode.tmAutoMotive;
+end;
+
+procedure TmAllLinks.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
+var
+  LinkCnt: integer;
+  LinkItems: integer;
+  TmpItemCount: integer;
+  ALink: Tlink;
+  ALinkValue: TLinkValue;
+  ABaseItem: TBaseItem;
+  BytesRead: integer;
+  KeyLen: Cardinal;
+  KeyName: ShortString;
+  SavePos: Cardinal;
+  ValueLen: Cardinal;
+  DataType: Byte;
+  Initiator: AnsiChar;
+begin
+  inherited InitFromStream(AName, SizeOf(FItemCount), ADataType, AStream);
+  FItemList := TItemList.Create;
+  FItemCount := 0;
+
+  // Count of links
+  AStream.Read(TmpItemCount, SizeOf(TmpItemCount));
+  TmpItemCount := Swap32(TmpItemCount);
+
+  for LinkCnt := 0 to TmpItemCount -1 do
+  begin
+    ALink := Tlink.Create;
+
+    // To get the count of items for this Link
+    AStream.Read(ALinkValue, SizeOf(ALinkValue));
+    ALinkValue.SwapCardinals;
+
+    for LinkItems := 0 to ALinkValue.Count -1 do
+    begin
+      BytesRead := ReadKeyVAlues(AStream,
+                                 Initiator,
+                                 KeyLen,
+                                 KeyName,
+                                 ValueLen,
+                                 DataType);
+      if (BytesRead = 0) then
+        break;
+      SavePos := AStream.Position;
+      ABaseItem := CreateBaseItemByName(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      ALink.Add(ABaseItem);
+      ABaseItem.SetTripList(TripList);
+
+      // Should not occur
+      if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
+      begin
+        BreakPoint;
+        AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
+      end;
+
+    end;
+    AddLink(ALink);
+  end;
+end;
+
+destructor TmAllLinks.Destroy;
+begin
+  Clear;
+  FreeAndNil(FItemList);
+
+  inherited Destroy;
+end;
+
+procedure TmAllLinks.Clear;
+var
+  AnItem: TBaseItem;
+begin
+  if (Assigned(FItemList)) then
+  begin
+    for ANitem in FItemList do
+      FreeAndNil(ANitem);
+    FItemList.Clear;
+  end;
+  FItemCount := 0;
+end;
+
+procedure TmAllLinks.AddLink(ALink: Tlink);
+begin
+  ALink.SetTripList(TripList);
+  FLink := ALink;
+  FItemList.Add(ALink);
+  FItemCount := FItemCount +1;
+end;
+
+function TmAllLinks.Add(ANItem: TBaseItem): TBaseItem;
+begin
+  ANItem.SetTripList(TripList);
+  FItemList.Add(ANItem);
+  Flink.Add(ANItem);
+  result := ANItem;
+end;
+
+procedure TmAllLinks.Calculate(AStream: TMemoryStream);
+var
+  ANitem, AlinkItem: TBaseItem;
+  CurLink: Tlink;
+begin
+  inherited Calculate(AStream);
+
+  FLenValue := SizeOf(FItemCount);
+  for ANitem in FItemList do
+  begin
+    FLenValue := FLenValue + ANitem.SubLength;
+    if (ANitem is TLink) then
+    begin
+      CurLink := Tlink(ANitem);
+      CurLink.FValue.Size := SizeOf(CurLink.FValue) - SizeOf(CurLink.FValue.Id) - SizeOf(CurLink.FValue.Size);
+      for AlinkItem in CurLink.FItemList do
+        CurLink.FValue.Size := CurLink.FValue.Size + AlinkItem.SubLength;
+    end;
+  end;
+end;
+
+procedure TmAllLinks.WriteValue(AStream: TMemoryStream);
+var
+  ANitem: TBaseItem;
+begin
+  WriteSwap32(AStream, FItemCount);
+  for ANitem in FItemList do
+    ANitem.Write(AStream);
+end;
+
 {*** Location ***}
 procedure TLocationValue.SwapCardinals;
 begin
@@ -2746,7 +3060,7 @@ procedure TLocation.Add(ANitem: TBaseItem);
 begin
   Inc(FValue.Count);
   FValue.Size := FValue.Size + ANitem.SubLength;
-  ANitem.FTripList := TripList;
+  ANitem.SetTripList(TripList);
   FItems.Add(ANitem);
 end;
 
@@ -2780,6 +3094,8 @@ var
   ViaShapeObject: TObject;
 begin
   case (TripList.TripModel) of
+    TTripModel.Nuvi2595:
+      result := true;
     TTripModel.Zumo590,
     TTripModel.Zumo3x0:
       begin
@@ -2902,7 +3218,7 @@ begin
       SavePos := AStream.Position;
       ABaseItem := CreateBaseItemByName(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
       Add(ABaseItem);
-      ABaseItem.FTripList := TripList;
+      ABaseItem.SetTripList(TripList);
 
       // Should not occur
       if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
@@ -2938,7 +3254,7 @@ end;
 
 procedure TmLocations.AddLocation(ALocation: TLocation);
 begin
-  ALocation.FTripList := TripList;
+  ALocation.SetTripList(TripList);
   FLocation := ALocation;
   FItemList.Add(ALocation);
   FItemCount := FItemCount +1;
@@ -2946,7 +3262,7 @@ end;
 
 function TmLocations.Add(ANItem: TBaseItem): TBaseItem;
 begin
-  ANItem.FTripList := TripList;
+  ANItem.SetTripList(TripList);
   FItemList.Add(ANItem);
   FLocation.Add(ANItem);
   result := ANItem;
@@ -3065,14 +3381,14 @@ begin
 
   FillChar(FValue, SizeOf(FValue), 0);
   SetLength(FUnknown2, UdbDirUnknown2Size[AModel]);
-  SetLength(FName, UdbDirNameSize[AModel]);
+  SetLength(FUdbDirName, UdbDirNameSize[AModel]);
 
   // Copy Name
   case Ucs4Model[AModel] of
     true:
-      WideStringToUCS4Array(AName, UCS4String(FName));
+      WideStringToUCS4Array(AName, UCS4String(FUdbDirName));
     false:
-      WideStringToWideArray(AName, FName);
+      WideStringToWideArray(AName, FUdbDirName);
   end;
 
   // Init FValue
@@ -3135,7 +3451,7 @@ begin
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
-  if (CalculationMagic[AModel] = $00000000) and // Zumo 3x0, 590
+  if (NeedDummySubclass[AModel]) and // Zumo 3x0, 590, nuvi 2595
      (ATripOption = TTripOption.ttCalc) then
     FValue.SubClass.Init(RecalcSubClass(GPXSubClass))
   else
@@ -3149,13 +3465,13 @@ begin
   FValue.SwapCardinals;
   AStream.Write(FValue, SizeOf(FValue));
   Astream.Write(FUnknown2[0], Length(FUnknown2));
-  AStream.Write(FName, Length(FName));
+  AStream.Write(FUdbDirName, Length(FUdbDirName));
   FValue.SwapCardinals;
 end;
 
 function TUdbDir.SubLength: Cardinal;
 begin
-  result := SizeOf(FValue) + Length(FUnknown2) + Length(FName);
+  result := SizeOf(FValue) + Length(FUnknown2) + Length(FUdbDirName);
 end;
 
 function TUdbDir.GetLat: Double;
@@ -3179,6 +3495,8 @@ begin
 end;
 
 function TUdbDir.GetName: string;
+const
+  WideNullTerminator: TBytes = [0, 0];
 begin
   if (IsTurn) then
     result := UdbDirTurn
@@ -3186,9 +3504,9 @@ begin
   begin
     case TripList.IsUcs4 of
       true:
-        result := UCS4ByteArrayToString(FName);
+        result := UCS4ByteArrayToString(FUdbDirName);
       false:
-        result := PWideChar(FName);
+        result := PWideChar(Concat(FUdbDirName, WideNullTerminator)); // Make sure there ia a null terminator.
     end;
   end;
 end;
@@ -3202,7 +3520,7 @@ end;
 
 function TUdbDir.GetNameLength: integer;
 begin
-  result := Length(FName);
+  result := Length(FUdbDirName);
 end;
 
 function TUdbDir.GetMapCoords: string;
@@ -3321,7 +3639,7 @@ end;
 
 function TUdbDir.IsTurn: boolean;
 begin
-  result := CompareMem(@TurnMagic[0], @FName[4], SizeOf(TurnMagic));
+  result := CompareMem(@TurnMagic[0], @FUdbDirName[4], SizeOf(TurnMagic));
 end;
 
 
@@ -3409,7 +3727,7 @@ end;
 
 procedure TmUdbDataHndl.Add(AnUdbDir: TUdbDir);
 begin
-  AnUdbDir.FTripList := TripList;
+  AnUdbDir.SetTripList(TripList);
   FUdbDirList.Add(AnUdbDir);
 end;
 
@@ -3662,10 +3980,10 @@ begin
       AStream.Read(AnUdbDir.FValue, SizeOf(AnUdbDir.FValue));
       SetLength(AnUdbDir.FUnknown2, UdbDirUnknown2Size[SelModel]);
       AStream.Read(AnUdbDir.FUnknown2[0], Length(AnUdbDir.FUnknown2));
-      SetLength(AnUdbDir.FName, UdbDirNameSize[SelModel]);
-      AStream.Read(AnUdbDir.FName[0], Length(AnUdbDir.FName));
+      SetLength(AnUdbDir.FUdbDirName, UdbDirNameSize[SelModel]);
+      AStream.Read(AnUdbDir.FUdbDirName[0], Length(AnUdbDir.FUdbDirName));
       AnUdbDir.FValue.SwapCardinals;
-      AnUdbHandle.FTripList := TripList;
+      AnUdbHandle.SetTripList(TripList);
       AnUdbHandle.Add(AnUdbDir);
 
       if (PrevUdbDir <> nil) then
@@ -3727,7 +4045,7 @@ end;
 
 procedure TmAllRoutes.AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
 begin
-  AnUdbHandle.FTripList := TripList;
+  AnUdbHandle.SetTripList(TripList);
   FUdBList.Add(AnUdbHandle);
 end;
 
@@ -3799,7 +4117,7 @@ end;
 
 function TTripList.Add(ANItem: TBaseItem): TBaseItem;
 begin
-  ANItem.FTripList := Self;
+  ANItem.SetTripList(Self);
   ItemList.Add(ANItem);
   result := ANItem;
 end;
@@ -3907,6 +4225,49 @@ begin
   end;
 end;
 
+procedure TTripList.UpdLocsFromAllLinks;
+var
+  MAllLinks: TmAllLinks;
+  Link: Tlink;
+  AnItem: TBaseItem;
+  Locations: TmLocations;
+  ViaPt: integer;
+  RoutePointList: TList<TLocation>;
+  Location: TLocation;
+begin
+  MAllLinks := GetItem('mAllLinks') as TmAllLinks;
+  if (MAllLinks = nil) then
+    exit;
+
+  Locations := GetItem('mLocations') as TmLocations;
+  if (Locations = nil) then
+    exit;
+
+  RoutePointList := TList<TLocation>.Create;
+  try
+    for ViaPt := 1 to Locations.ViaPointCount do
+    begin
+      if (ViaPt > MAllLinks.FItemList.Count) then
+        break;
+      Link := Tlink(MAllLinks.FItemList[ViaPt -1]);
+
+      Locations.GetSegmentPoints(ViaPt, RoutePointList);
+      Location := RoutePointList[0];
+      if (Location = nil) then
+        break;
+      for AnItem in Link.Items do
+      begin
+        if (AnItem is TmRoutePreference) then
+          Location.RoutePref := TmRoutePreference.RoutePreference(TmRoutePreference(AnItem).AsString);
+        if (AnItem is TmTransportationMode) then
+          Location.TransportMode := TmTransportationMode.TransPortMethod(TmTransportationMode(AnItem).AsString);
+      end;
+    end;
+  finally
+    RoutePointList.Free;
+  end;
+end;
+
 procedure TTripList.SaveToStream(AStream: TMemoryStream);
 var
   ANitem: TBaseItem;
@@ -3930,6 +4291,7 @@ begin
 
   mLocations := GetItem('mLocations') as TmLocations;
   if (mLocations <> nil) and // No Locations, cant be too many...
+     (TProcessOptions.MaxViaPoints > 0) and
      (mLocations.GetViaPointCount > TProcessOptions.MaxViaPoints) then
     MessageDlg(Format('Warning: Too many Via points (%d including Begin/End) in: %s',
                       [mLocations.GetViaPointCount, ExtractFileName(AFile)]),
@@ -3991,7 +4353,7 @@ begin
     SavePos := AStream.Position;
     ABaseItem := CreateBaseItemByName(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
     Add(ABaseItem);
-    ABaseItem.FTripList := Self;
+    ABaseItem.SetTripList(Self);
 
     // Should not occur
     if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
@@ -4002,6 +4364,7 @@ begin
 
   end;
   UpdLocsFromRoutePrefs;
+  UpdLocsFromAllLinks;
   Recalculate;
   result := true;
 end;
@@ -4457,6 +4820,23 @@ begin
   Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
 end;
 
+procedure TTripList.AddLocation_nuvi2595(Locations: TmLocations;
+                                        ProcessOptions: TObject;
+                                        RoutePoint: TRoutePoint;
+                                        RoutePref: TRoutePreference;
+                                        Lat, Lon: double;
+                                        DepartureDate: TDateTime;
+                                        Name, Address: string);
+begin
+  Locations.AddLocation(TLocation.Create(RoutePref));
+  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmPhoneNumber.Create(''));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Small_TmScPosnSize));
+end;
+
 procedure TTripList.AddLocation(Locations: TmLocations;
                                 ProcessOptions: TObject;
                                 RoutePoint: TRoutePoint;
@@ -4479,6 +4859,8 @@ begin
       AddLocation_Drive51(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo3x0:
       AddLocation_Zumo3x0(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+    TTripModel.Nuvi2595:
+      AddLocation_nuvi2595(Locations, ProcessOptions, RoutePoint, RoutePref, Lat, Lon, DepartureDate, Name, Address);
     else
       // No RoutePref for XT
       AddLocation_XT(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
@@ -4488,6 +4870,7 @@ end;
 procedure TTripList.ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
 var
   AllRoutes: TBaseItem;
+  AllLinks: TBaseItem;
   Index: integer;
   ViaCount: integer;
   RoutePointList: TList<TLocation>;
@@ -4500,6 +4883,9 @@ begin
   // If the model is not supplied, try to get it from the data
   FTripModel := GetCalculationModel(AModel);
   FIsUcs4 := Ucs4Model[FTripModel];
+
+  // All Links
+  AllLinks := InitAllLinks;
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4521,19 +4907,24 @@ begin
 
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
-  NeedsDummy := (CalculationMagic[TripModel] = $00000000);
+  NeedsDummy := NeedDummySubclass[TripModel];
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
     // The XT(2) recalculates all.
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, TripModel);
-      AnUdbHandle.FTripList := Self;
+      AnUdbHandle.SetTripList(Self);
       // Add udb's for all Via and Shaping found in Locations.
       // Will be discarded when recalculated on the Zumo.
       if (Assigned(Locations)) then
       begin
         TmLocations(Locations).GetSegmentPoints(Index, RoutePointList);
+
+        // AllLinks
+        if (Assigned(AllLinks)) then
+          TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
+
         for ALocation in RoutePointList do
         begin
           AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
@@ -4549,6 +4940,7 @@ begin
         end;
       end;
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
+
     end;
 
     // Recreate RoutePreferences
@@ -4609,6 +5001,7 @@ var
   Locations: TBaseItem;
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
+  AllLinks: TBaseItem;
   AllRoutes: TBaseItem;
   Index: integer;
   AnUdbHandle: TmUdbDataHndl;
@@ -4628,17 +5021,27 @@ begin
   FTripModel := GetCalculationModel(AModel);
   FIsUcs4 := Ucs4Model[FTripModel];
 
+  // All Links
+  AllLinks := InitAllLinks;
+
   // All Routes
   AllRoutes := InitAllRoutes;
   AnUdbHandle := TmUdbDataHndl.Create(1, TripModel, false);
-  AnUdbHandle.FTripList := Self;
+  AnUdbHandle.SetTripList(Self);
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
     // Add begin
     TmLocations(Locations).GetSegmentPoints(1, RoutePointList);
+    if (RoutePointList.Count = 0) then
+      exit;
+
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
+
+    // AllLinks
+    if (Assigned(AllLinks)) then
+      TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
 
     TotalTime := 0;
     TotalDist := 0;
@@ -4671,6 +5074,9 @@ begin
 
     // Add End
     TmLocations(Locations).GetSegmentPoints(2, RoutePointList);
+    if (RoutePointList.Count = 0) then
+      exit;
+
     ALocation := RoutePointList[0];
     AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
 
@@ -4709,6 +5115,7 @@ end;
 procedure TTripList.SaveCalculated(const AModel: TTripModel;
                                    const RtePts: TObject);
 var
+  AllLinks: TBaseItem;
   AllRoutes: TBaseItem;
   Index, UdbId: integer;
   ViaCount, RoutePtCount: integer;
@@ -4729,6 +5136,9 @@ begin
   // If the model is not supplied, try to get it from the data
   FTripModel := GetCalculationModel(AModel);
   FIsUcs4 := Ucs4Model[FTripModel];
+
+  // All Routes
+  AllLinks := InitAllLinks;
 
   // All Routes
   AllRoutes := InitAllRoutes;
@@ -4753,7 +5163,7 @@ begin
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, TripModel, ProcessOptions.TripOption = TTripOption.ttCalc);
-      AnUdbHandle.FTripList := Self;
+      AnUdbHandle.SetTripList(Self);
       UdbDist := 0;
       UdbTime := 0;
       ScanRtePt := FirstRtePt;
@@ -4761,6 +5171,16 @@ begin
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
       TmLocations(Locations).GetSegmentPoints(Index, RoutePointList);
+
+      // AllLinks
+      if (Assigned(AllLinks)) then
+      begin
+        if (RoutePointList.Count > 0) then
+          TmAllLinks(AllLinks).AddLink(Tlink.Create(RoutePointList[0].FRoutePref, TmAllLinks(AllLinks).DefTransportMode))
+        else
+          TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
+      end;
+
       if (AnUdbHandle.ShapeOffset <> 0) then
         GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[AnUdbHandle.ShapeOffset]);
       for RoutePtCount := 0 to RoutePointList.Count -2 do
@@ -4950,6 +5370,16 @@ begin
   FTripModel := GetTripModel;
   FIsUcs4 := Ucs4Model[FTripModel];
   FModelDescription := GetEnumName(TypeInfo(TTripModel), Ord(FTripModel));
+end;
+
+function TTripList.InitAllLinks: TBaseItem;
+begin
+  if (FTripModel <> TTripModel.Nuvi2595) then
+    exit(nil);
+
+  result := GetItem('mAllLinks');
+  if Assigned(result) then
+    TmAllLinks(result).Clear;
 end;
 
 function TTripList.InitAllRoutes: TBaseItem;
@@ -5203,6 +5633,20 @@ begin
   ForceRecalc(TTripModel.Zumo3x0, 2);
 end;
 
+procedure TTripList.CreateTemplate_nuvi2595(const TripName, CalculationMode, TransportMode: string);
+begin
+  AddHeader(THeader.Create);
+  Add(TmAllLinks.Create);
+  Add(TmAllRoutes.Create);
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmLocations.Create);
+  Add(TmTripName.Create(TripName));
+  Add(TmVersionNumber.Create(1, 1));
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Nuvi2595, 2);
+end;
+
 procedure TTripList.CreateTemplate(const AModel: TTripModel;
                                    const TripName: string;
                                    const CalculationMode: string = '';
@@ -5223,6 +5667,8 @@ begin
       CreateTemplate_Drive51(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo3x0:
       CreateTemplate_Zumo3x0(TripName, CalculationMode, TransportMode);
+    TTripModel.Nuvi2595:
+      CreateTemplate_nuvi2595(TripName, CalculationMode, TransportMode);
     else
       CreateTemplate_XT(TripName, CalculationMode, TransportMode);
   end;
@@ -5413,8 +5859,10 @@ begin
     TmRoutePreferencesAdventurousPopularPaths,
     TmTrackToRouteInfoMap,
   // Zumo3x0, 590
-    TmShaping, TmPhoneNumber
-    ]);
+    TmShaping, TmPhoneNumber,
+  // Nuvi2595
+    TmAllLinks
+  ]);
 end;
 
 end.

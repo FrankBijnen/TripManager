@@ -332,10 +332,14 @@ begin
   if (CurDevice) then
     GrpRoute.Caption := 'Device ';
   GrpRoute.Caption := GrpRoute.Caption + ExtractFileName(CurFile);
+
+  DmRoutePoints.SetPickLists(CurTripList);
   DBCRoutePreference.Items.Text := DmRoutePoints.RoutePickList;
   DBCTransportationMode.Items.Text := DmRoutePoints.TransportPickList;
   DmRoutePoints.LoadTrip(CurTripList);
+
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
+
   TModelConv.CmbTripDevices(CmbModel.Items);
   CmbModel.ItemIndex := Ord(TTripList(CurTripList).TripModel);
 end;

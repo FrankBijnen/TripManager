@@ -58,6 +58,7 @@ type
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
     function NameExists(Name: string): boolean;
+    procedure SetPickLists(ATripList: TObject);
     procedure LoadTrip(ATripList: TObject);
     procedure SaveTrip;
     procedure MoveUp(Dataset: TDataset);
@@ -129,16 +130,7 @@ begin
   RegionalFormatSettings := TFormatSettings.Create(GetThreadLocale);
   FloatFormatSettings.ThousandSeparator := ',';
   FloatFormatSettings.DecimalSeparator := '.';
-  with TmRoutePreference.Create(TRoutePreference.rmFasterTime) do
-  begin
-    FRoutePickList := PickList;
-    Free;
-  end;
-  with TmTransportationMode.Create(TTransportMode.tmMotorcycling) do
-  begin
-    FTransportPickList := PickList;
-    Free;
-  end;
+  SetPickLists(nil);
 end;
 
 procedure TDmRoutePoints.DoRoutePointUpdated;
@@ -385,6 +377,7 @@ procedure TDmRoutePoints.SaveTrip;
 var
   SaveRecNo: integer;
   Locations: TmLocations;
+  Links: TmAllLinks;
   TmpStream: TMemoryStream;
   ANItem: TBaseItem;
   ProcessOptions: TProcessOptions;
@@ -437,14 +430,24 @@ begin
       if (ANItem <> nil) then
         TmTripName(ANItem).AsString := CdsRouteTripName.AsString;
 
-      ANItem := TTripList(FTripList).GetItem('mRoutePreference');
-      if (ANItem <> nil) then
-        TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
+      case TTripList(FTripList).TripModel of
+        TTripModel.Nuvi2595:
+        begin
+          Links := TmAllLinks(TTripList(FTripList).GetItem('mAllLinks'));
+          Links.DefRoutePref := TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString);
+          Links.DefTransportMode := TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString);
+        end
+        else
+        begin
+          ANItem := TTripList(FTripList).GetItem('mRoutePreference');
+          if (ANItem <> nil) then
+            TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
 
-      ANItem := TTripList(FTripList).GetItem('mTransportationMode');
-      if (ANItem <> nil) then
-        TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
-
+          ANItem := TTripList(FTripList).GetItem('mTransportationMode');
+          if (ANItem <> nil) then
+            TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
+        end;
+      end;
       ANItem := TTripList(FTripList).GetArrival;
       if (ANItem <> nil) then
         TmArrival(ANItem).AsUnixDateTime := TmArrival(ANItem).DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
@@ -482,13 +485,32 @@ begin
   end;
 end;
 
+procedure TDmRoutePoints.SetPickLists(ATripList: TObject);
+begin
+  with TmRoutePreference.Create(TRoutePreference.rmFasterTime) do
+  begin
+    SetTripList(TTripList(ATripList));
+    FRoutePickList := PickList;
+    Free;
+  end;
+  with TmTransportationMode.Create(TTransportMode.tmMotorcycling) do
+  begin
+    SetTripList(TTripList(ATripList));
+    FTransportPickList := PickList;
+    Free;
+  end;
+end;
+
 procedure TDmRoutePoints.LoadTrip(ATripList: TObject);
 var
   Locations: TmLocations;
+  Links: TmAllLinks;
+  Link: TBaseItem;
   Location, ANItem: TBaseItem;
   LatLon: string;
 begin
   FTripList := ATripList;
+
   CdsRoute.Close;
   CdsRoute.DisableControls;
   CdsRoute.ReadOnly := false;
@@ -505,18 +527,32 @@ begin
     CdsRoute.Insert;
     CdsRouteTripName.AsString := TTripList(FTripList).TripName;
 
-    ANItem := TTripList(FTripList).GetItem('mRoutePreference');
-    if (ANItem <> nil) then
-    begin
-      FRoutePickList := TmRoutePreference(ANItem).PickList;
-      CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
-    end;
+    case TTripList(FTripList).TripModel of
+      TTripModel.Nuvi2595:
+      begin
+        Links := TmAllLinks(TTripList(FTripList).GetItem('mAllLinks'));
+        for Link in Links.Links do
+        begin
+          for ANItem in Tlink(Link).Items do
+          begin
+            if (ANItem is TmRoutePreference) then
+              CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
+            if (ANItem is TmTransportationMode) then
+              CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
+          end;
+          break;
+        end;
+      end
+      else
+      begin
+        ANItem := TTripList(FTripList).GetItem('mRoutePreference');
+        if (ANItem <> nil) then
+          CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
 
-    ANItem := TTripList(FTripList).GetItem('mTransportationMode');
-    if (ANItem <> nil) then
-    begin
-      FTransportPickList := TmTransportationMode(ANItem).PickList;
-      CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
+        ANItem := TTripList(FTripList).GetItem('mTransportationMode');
+        if (ANItem <> nil) then
+          CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
+      end;
     end;
 
     ANItem := TTripList(FTripList).GetArrival;

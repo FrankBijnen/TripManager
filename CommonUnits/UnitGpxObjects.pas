@@ -2588,7 +2588,7 @@ begin
     // Create TripTrack from BC calculation
     FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList, GpxDistance);
   end
-  else if ((ViaPointCount >= 2)and HasSubClasses) then
+  else if ((ViaPointCount >= 2) and HasSubClasses) then
     // Create AllRoutes from BC calculation
     FTripList.SaveCalculated(FTripList.TripModel, RtePts)
   else

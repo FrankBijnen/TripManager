@@ -173,6 +173,7 @@ type
     function TripTrackColor: string;
     function SpeedFromRoadClass(const RoadClass: string): integer;
     function ComputeTime(const RoadClass: string; const Dist: Double): double;
+    class function GetCatSymbol: string;
     class function GetMinDistTrackPoints: integer;
     class procedure SetMinDistTrackPoints(AValue: integer);
     class function Trk2RtOptions: string;
@@ -269,7 +270,7 @@ begin
   TrackColor := '';
 
   DefWaypointSymbol := 'Flag, Green';
-  CatSymbol := 'Symbol:';
+  CatSymbol := TProcessOptions.GetCatSymbol + ':';
   CatGPX := 'GPX:';
   CatRoute := 'Route:';
 
@@ -405,6 +406,11 @@ end;
 function TProcessOptions.ComputeTime(const RoadClass: string; const Dist: Double): double;
 begin
   result := (3600 * Dist) / SpeedFromRoadClass(RoadClass);
+end;
+
+class function TProcessOptions.GetCatSymbol: string;
+begin
+  result := 'Symbol';
 end;
 
 class function TProcessOptions.GetMinDistTrackPoints: integer;

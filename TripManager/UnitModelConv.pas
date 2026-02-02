@@ -121,7 +121,7 @@ const
     (DeviceName: Zumo590_Name;  TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true),
     (DeviceName: Zumo3x0_Name;  TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true),
     (DeviceName: Drive51_Name;  TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true),
-    (DeviceName: Nuvi2595_Name; TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: false),
+    (DeviceName: Nuvi2595_Name; TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true),
     (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true)
@@ -260,6 +260,12 @@ begin
       end;
     TGarminModel.Zumo590,
     TGarminModel.Zumo3x0:
+      case PathId of
+        0: result := NonMTPRoot + SystemTripsPath;
+        1: result := GarminDevice.GpxPath;
+        2: result := GarminDevice.GpiPath;
+      end;
+    TGarminModel.Nuvi2595:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
         1: result := GarminDevice.GpxPath;
