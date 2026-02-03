@@ -4888,7 +4888,6 @@ begin
     TTripModel.Nuvi2595:
       AddLocation_nuvi2595(Locations, ProcessOptions, RoutePoint, RoutePref, Lat, Lon, DepartureDate, Name, Address);
     else
-      // No RoutePref for XT
       AddLocation_XT(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
   end;
 end;

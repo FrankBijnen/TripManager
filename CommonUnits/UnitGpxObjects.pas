@@ -140,7 +140,7 @@ type
     procedure StripRte(const RteNode: TXmlVSNode);
 {$IFDEF TRIPOBJECTS}
     function BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
-    function CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList): integer;
+    procedure CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList);
     procedure UpdateTemplate(const TripName: string; RouteCnt, ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 {$ENDIF}
   protected
@@ -2442,7 +2442,7 @@ begin
   result := (SubClassList.Count > 2); // Need more than a start and end
 end;
 
-function TGPXFile.CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList): integer;
+procedure TGPXFile.CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList);
 var
   RtePtNode: TXmlVSNode;
   RtePtName: string;
@@ -2459,7 +2459,6 @@ var
   RoutePref: TRoutePreference;
   AdvLevel: TAdvlevel;
 begin
-  result := 0;
   PointCnt := 0;
   RoutePref := TRoutePreference.rmFasterTime;  // If the GPX has no trp:CalculationMode at all
   for RtePtNode in RtePts do
@@ -2529,8 +2528,6 @@ begin
       DepartureDate := 0;
 
     // Have all we need. Create location
-    if (RoutePoint = TRoutePoint.rpVia) then
-      Inc(result);
     FTripList.AddLocation(Locations,
                           ProcessOptions,
                           RoutePoint,
@@ -2543,7 +2540,6 @@ end;
 
 procedure TGPXFile.UpdateTemplate(const TripName: string; RouteCnt, ParentTripId: cardinal; RtePts: TXmlVSNodeList);
 var
-  ViaPointCount:    integer;
   HasSubClasses:    boolean;
   Locations:        TmLocations;
   mParentTripName:  TmParentTripName;
@@ -2561,7 +2557,7 @@ begin
     mParentTripName.AsString := FBaseFile;
 
   Locations := FTripList.GetItem('mLocations') as TmLocations;
-  ViaPointCount := CreateLocations(Locations, RtePts);
+  CreateLocations(Locations, RtePts);
 
   if (Assigned(ProcessOptions.ExploreUUIDList)) and
      (ProcessOptions.ExploreUUIDList.Count > 0) then
@@ -2577,23 +2573,26 @@ begin
 
   HasSubClasses := BuildSubClassesList(RtePts);
 
-  if ((ProcessOptions.TripOption in [TTripOption.ttTripTrack]) and HasSubClasses) then
-  begin
-    // Get distance from GPX, the subclasses are not accurate enough
-    GpxDistance := 0;
-    RouteNode := FTrackList.Find(TripName);
-    if (Assigned(RouteNode)) then
-      TryStrToFloat(FindSubNodeValue(RouteNode, 'number'), GpxDistance);
-
-    // Create TripTrack from BC calculation
-    FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList, GpxDistance);
-  end
-  else if ((ViaPointCount >= 2) and HasSubClasses) then
-    // Create AllRoutes from BC calculation
-    FTripList.SaveCalculated(FTripList.TripModel, RtePts)
-  else
+  if (HasSubClasses = false) then
     // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-    FTripList.ForceRecalc(FTripList.TripModel, ViaPointCount);
+    FTripList.ForceRecalc(FTripList.TripModel)
+  else
+  begin
+    if (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
+    begin
+      // Get distance from GPX, the subclasses are not accurate enough
+      GpxDistance := 0;
+      RouteNode := FTrackList.Find(TripName);
+      if (Assigned(RouteNode)) then
+        TryStrToFloat(FindSubNodeValue(RouteNode, 'number'), GpxDistance);
+
+      // Create TripTrack from BC calculation
+      FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList, GpxDistance);
+    end
+    else
+      // Create AllRoutes from BC calculation
+      FTripList.SaveCalculated(FTripList.TripModel, RtePts)
+  end;
 end;
 
 procedure TGPXFile.ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
