@@ -69,7 +69,7 @@ const
   Kb = ' Kb';
   Mb = ' Mb';
   HtmlTempFileName  = '.html';
-  TrackFileExt    = '.track';
+  TrackFileExt      = '.track';
   OSMDir            = 'OSM\';
   RoutesDir         = 'Routes\';
   DeviceDir         = 'Device\';

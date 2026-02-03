@@ -136,11 +136,11 @@ type
     Groupselectedtrips1: TMenuItem;
     Ungroupselectedtrips1: TMenuItem;
     N6: TMenuItem;
-    Settransportationmodeofselectedtrips1: TMenuItem;
+    MnuSetTransportMode: TMenuItem;
     Automotive1: TMenuItem;
     MotorCycling1: TMenuItem;
     OffRoad1: TMenuItem;
-    Setroutepreferenceofselectedtrips1: TMenuItem;
+    MnuSetRoutePref: TMenuItem;
     Fastertime1: TMenuItem;
     Shorterdistance1: TMenuItem;
     Directrouting1: TMenuItem;
@@ -400,12 +400,13 @@ type
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     function GetDbPath: string;
     procedure ClearDeviceDbFiles;
+    procedure RebuildTransportAndRoutePrefMenu;
     procedure RebuildDeviceDbMenu;
     procedure ReadDeviceDB;
     procedure ReadGarminDevice(const ModelDescription: string);
     procedure GuessModel(const DisplayedDevice: string);
     function DeviceIdInList(const DeviceName: string): integer;
-    procedure SelectDevice(const Indx: integer); overload;
+    procedure SelectDevice(const Indx: integer);
     procedure SelectKnownDevice;
     procedure SelectDeviceById(const Device: string);
     function GetItemType(const AListview: TListView): TDirType;
@@ -2472,6 +2473,8 @@ begin
   // Guess model from DisplayedDevice
   GuessModel(CurrentDevice.DisplayedDevice);
 
+  RebuildTransportAndRoutePrefMenu;
+
   // Refresh Trips folder? (Zumo 3x0)
   if (NeedRecreateTrips[TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))]) then
     RecreateTrips;
@@ -3268,6 +3271,46 @@ begin
   ExploreList.Clear;
   DeleteTempFiles(GetDeviceTmp, '*.db');
   RebuildDeviceDbMenu;
+end;
+
+procedure TFrmTripManager.RebuildTransportAndRoutePrefMenu;
+var
+  ATripModel: TTripModel;
+  ASubMenuItem: TMenuItem;
+  PickList: TStringList;
+  ALine: string;
+begin
+  PickList := TStringList.Create;
+  try
+    ATripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
+
+    MnuSetTransportMode.Clear;
+    PickList.Text := TmTransportationMode.ModelPickList(ATripModel);
+    for ALine in PickList do
+    begin
+      ASubMenuItem := TMenuItem.Create(MnuSetTransportMode);
+      ASubMenuItem.Caption  := ALine;
+      ASubMenuItem.Tag      := Ord(TmTransportationMode.TransPortMethod(ALine));
+//      ASubMenuItem.Enabled  := (TmTransportationMode.ModelEditMode(ATripModel) <> TItemEditMode.emNone);
+      ASubMenuItem.OnClick  := TransportModeClick;
+      MnuSetTransportMode.Add(ASubMenuItem);
+    end;
+
+    MnuSetRoutePref.Clear;
+    PickList.Text := TmRoutePreference.ModelPickList(ATripModel);
+    for ALine in PickList do
+    begin
+      ASubMenuItem := TMenuItem.Create(MnuSetRoutePref);
+      ASubMenuItem.Caption  := ALine;
+      ASubMenuItem.Tag      := Ord(TmRoutePreference.RoutePreference(ALine));
+//      ASubMenuItem.Enabled  := (TmRoutePreference.ModelEditMode(ATripModel) <> TItemEditMode.emNone);
+      ASubMenuItem.OnClick  := RoutePreferenceClick;
+      MnuSetRoutePref.Add(ASubMenuItem);
+    end;
+  finally
+    PickList.Free;
+  end;
+  //TODO
 end;
 
 procedure TFrmTripManager.RebuildDeviceDbMenu;
@@ -4629,6 +4672,7 @@ var
   TripFileName: string;
   AnItem: TListItem;
   ARouteParmItem: TByteItem;
+  AllLinks: TmAllLinks;
   ABase_Data: TBASE_Data;
   TmpTripList: TTripList;
   CrWait, CrNormal: HCURSOR;
@@ -4659,18 +4703,33 @@ begin
 
         // reload trip, and change RouteParm
         TmpTripList.LoadFromFile(TripFilename);
-        case ARouteParm of
-          TRouteParm.TransportMode:
-            ARouteParmItem := TByteItem(TmpTripList.GetItem('mTransportationMode'));
-          TRouteParm.RoutePref:
-            ARouteParmItem := TByteItem(TmpTripList.GetItem('mRoutePreference'));
-          else
-            continue;
-        end;
-        if not (Assigned(ARouteParmItem)) then
-          continue;
 
-        TmTransportationMode(ARouteParmItem).AsByte := Value;
+        // AllLinks (nuvi2595)
+        AllLinks := TmAllLinks(TmpTripList.GetItem('mAllLinks'));
+        if (Assigned(AllLinks)) then
+        begin
+          case ARouteParm of
+            TRouteParm.TransportMode:
+              AllLinks.DefTransportMode := TTransportMode(Value);
+            TRouteParm.RoutePref:
+              AllLinks.DefRoutePref := TRoutePreference(Value);
+          end;
+        end
+        else
+        begin
+          // Others
+          ARouteParmItem := nil;
+          case ARouteParm of
+            TRouteParm.TransportMode:
+              ARouteParmItem := TByteItem(TmpTripList.GetItem('mTransportationMode'));
+            TRouteParm.RoutePref:
+              ARouteParmItem := TByteItem(TmpTripList.GetItem('mRoutePreference'));
+          end;
+          if (Assigned(ARouteParmItem)) then
+            ARouteParmItem.AsByte := Value;
+        end;
+
+        // Set to recalc and save
         TmpTripList.ForceRecalc;
         TmpTripList.SaveToFile(TripFilename);
 

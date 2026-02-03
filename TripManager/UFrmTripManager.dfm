@@ -632,11 +632,12 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 13
+          Height = 24
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -1361,7 +1362,7 @@ object FrmTripManager: TFrmTripManager
       Caption = '-'
       GroupIndex = 2
     end
-    object Settransportationmodeofselectedtrips1: TMenuItem
+    object MnuSetTransportMode: TMenuItem
       Caption = 'Set transportation mode of selected trips'
       GroupIndex = 2
       object Automotive1: TMenuItem
@@ -1380,7 +1381,7 @@ object FrmTripManager: TFrmTripManager
         OnClick = TransportModeClick
       end
     end
-    object Setroutepreferenceofselectedtrips1: TMenuItem
+    object MnuSetRoutePref: TMenuItem
       Caption = 'Set route preference of selected trips'
       GroupIndex = 2
       object Fastertime1: TMenuItem

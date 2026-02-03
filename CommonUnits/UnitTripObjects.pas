@@ -56,7 +56,7 @@ const
                                                           (Value: Ord(rmNA);                Name: 'N/A')
                                                         );
 
-  MinAdvLevelUserConfig = 1; // Only theses are available to the user.
+  MinAdvLevelUserConfig = 1; // Only these are available to the user.
   MaxAdvLevelUserConfig = 4;
   AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: 'N/A'),
                                                           (Value: Ord(advLevel1);           Name: 'Faster'),
@@ -169,12 +169,13 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     function GetItemEditMode: TItemEditMode; override;
+    procedure SetByte(AByte: byte); virtual;
     procedure SetValue(NewValue: string); override;
   public
     constructor Create(AName: ShortString; AValue: byte); reintroduce;
     destructor Destroy; override;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
-    property AsByte: byte read FValue write FValue;
+    property AsByte: byte read FValue write SetByte;
   end;
 
   // Type 03
@@ -411,6 +412,7 @@ type
     FBytes:            TBytes;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
+    procedure SetByte(AByte: byte); override;
     procedure SetValue(AValue: string); override;
     function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
@@ -419,6 +421,8 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     class function RoutePreference(AValue: string): TRoutePreference;
     class function AdvLevel(AValue: string): TAdvlevel;
+    class function ModelEditMode(AModel: TTripmodel): TItemEditMode;
+    class function ModelPickList(AModel: TTripmodel): string;
   end;
 
   TmTransportationMode = class(TByteItem)
@@ -430,6 +434,8 @@ type
   public
     constructor Create(AValue: TTransportMode = tmMotorcycling);
     class function TransPortMethod(AValue: string): TTransportMode;
+    class function ModelEditMode(AModel: TTripmodel): TItemEditMode;
+    class function ModelPickList(AModel: TTripmodel): string;
   end;
 
   TmTotalTripDistance = class(TSingleItem)
@@ -1516,6 +1522,11 @@ begin
   result := TItemEditMode.emEdit;
 end;
 
+procedure TByteItem.SetByte(AByte: byte);
+begin
+  FValue := AByte;
+end;
+
 procedure TByteItem.SetValue(NewValue: string);
 var
   NewVal: integer;
@@ -1523,7 +1534,7 @@ begin
   if TryStrToInt(NewValue, NewVal) and
      (NewVal >= 0) and
      (NewVal <= 255) then
-    FValue := NewVal;
+    AsByte := NewVal;
 end;
 
 {*** Cardinal ***}
@@ -2255,30 +2266,26 @@ begin
     result := 'N/A';
 end;
 
-procedure TmRoutePreference.SetValue(AValue: string);
+procedure TmRoutePreference.SetByte(AByte: byte);
 begin
-  FValue := Ord(TmRoutePreference.RoutePreference(AValue));
+  FValue := AByte;
 
   if (FDataType = dt3x0RoutePref) then
   begin
     SetLength(FBytes, 5);
     FillChar(FBytes[0], Length(FBytes), 0);
-    FBytes[3] := $01;
-    if (TRoutePreference(FValue) = rmDirect) then
-      FValue := Ord(TRoutePreference.rmOffRoad);
-    FBytes[4] := FValue;
+    FBytes[3] := $01;    FBytes[4] := FValue;
   end;
 end;
 
-function TmRoutePreference.GetItemEditMode: TItemEditMode;
-var
-  CurModel: TTripModel;
+procedure TmRoutePreference.SetValue(AValue: string);
 begin
-  if (Assigned(TripList)) then
-    CurModel := Triplist.TripModel
-  else
-    CurModel := TTripModel.Unknown;
-  case CurModel of
+  AsByte := Ord(TmRoutePreference.RoutePreference(AValue));
+end;
+
+class function TmRoutePreference.ModelEditMode(AModel: TTripmodel): TItemEditMode;
+begin
+  case (AModel) of
     TTripModel.Nuvi2595:
       result := TItemEditMode.emNone;
     else
@@ -2286,26 +2293,38 @@ begin
   end;
 end;
 
-function TmRoutePreference.GetPickList: string;
+function TmRoutePreference.GetItemEditMode: TItemEditMode;
+begin
+  result := TItemEditMode.emNone;
+  if (Assigned(TripList)) then
+    result := TmRoutePreference.ModelEditMode(TripList.TripModel);
+end;
+
+class function TmRoutePreference.ModelPickList(AModel: TTripmodel): string;
 var
   Index: integer;
-  CurModel: TTripModel;
 begin
-  result := '';
-  if (Assigned(TripList)) then
-    CurModel := Triplist.TripModel
-  else
-    CurModel := TTripModel.Unknown;
-  case CurModel of
+  case AModel of
     TTripModel.Nuvi2595:
         result := RoutePreferenceMap[0].Name + #10 +
                   RoutePreferenceMap[1].Name + #10 +
                   RoutePreferenceMap[5].Name + #10 +
                   RoutePreferenceMap[6].Name;
+    TTripModel.Zumo3x0:
+        result := RoutePreferenceMap[0].Name + #10 +
+                  RoutePreferenceMap[1].Name + #10 +
+                  RoutePreferenceMap[5].Name;
     else
       for Index := MinRoutePreferenceUserConfig to MaxRoutePreferenceUserConfig do
         result := result + RoutePreferenceMap[Index].Name + #10;
   end;
+end;
+
+function TmRoutePreference.GetPickList: string;
+begin
+  result := '';
+  if (Assigned(TripList)) then
+    result := TmRoutePreference.ModelPickList(Triplist.TripModel);
 end;
 
 constructor TmTransportationMode.Create(AValue: TTransportMode = tmMotorcycling);
@@ -2334,15 +2353,9 @@ begin
   FValue := Ord(TmTransportationMode.TransPortMethod(AValue));
 end;
 
-function TmTransportationMode.GetItemEditMode: TItemEditMode;
-var
-  CurModel: TTripModel;
+class function TmTransportationMode.ModelEditMode(AModel: TTripmodel): TItemEditMode;
 begin
-  if (Assigned(TripList)) then
-    CurModel := Triplist.TripModel
-  else
-    CurModel := TTripModel.Unknown;
-  case CurModel of
+  case (AModel) of
     TTripModel.Nuvi2595:
       result := TItemEditMode.emNone;
     else
@@ -2350,16 +2363,17 @@ begin
   end;
 end;
 
-function TmTransportationMode.GetPickList: string;
-var
-  CurModel: TTripModel;
+function TmTransportationMode.GetItemEditMode: TItemEditMode;
 begin
-  result := '';
+  result := TItemEditMode.emNone;
+
   if (Assigned(TripList)) then
-    CurModel := Triplist.TripModel
-  else
-    CurModel := TTripModel.Unknown;
-  case CurModel of
+    result := TmTransportationMode.ModelEditMode(TripList.TripModel);
+end;
+
+class function TmTransportationMode.ModelPickList(AModel: TTripmodel): string;
+begin
+  case AModel of
     TTripModel.Nuvi2595:
       result := TransportModeMap[1].Name + #10 +
                 TransportModeMap[2].Name + #10;
@@ -2368,6 +2382,13 @@ begin
                 TransportModeMap[3].Name + #10 +
                 TransportModeMap[4].Name + #10;
   end;
+end;
+
+function TmTransportationMode.GetPickList: string;
+begin
+  result := '';
+  if (Assigned(TripList)) then
+    result := TmTransportationMode.ModelPickList(Triplist.TripModel);
 end;
 
 constructor TmTotalTripDistance.Create(AValue: single = 0);
@@ -4261,6 +4282,11 @@ begin
           Location.RoutePref := TmRoutePreference.RoutePreference(TmRoutePreference(AnItem).AsString);
         if (AnItem is TmTransportationMode) then
           Location.TransportMode := TmTransportationMode.TransPortMethod(TmTransportationMode(AnItem).AsString);
+      end;
+      if (ViaPt = 1) then
+      begin
+        MAllLinks.DefRoutePref := Location.RoutePref;
+        MAllLinks.DefTransportMode := Location.TransportMode;
       end;
     end;
   finally
