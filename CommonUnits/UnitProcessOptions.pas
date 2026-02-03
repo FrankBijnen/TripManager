@@ -169,11 +169,11 @@ type
     function GetDistOKKms: double;
     function GetMinShapeDistKms: double;
     function GetMinTrackDistKms: double;
+    class function GetCatSymbol: string;
     {$IFDEF TRIPOBJECTS}
     function TripTrackColor: string;
     function SpeedFromRoadClass(const RoadClass: string): integer;
     function ComputeTime(const RoadClass: string; const Dist: Double): double;
-    class function GetCatSymbol: string;
     class function GetMinDistTrackPoints: integer;
     class procedure SetMinDistTrackPoints(AValue: integer);
     class function Trk2RtOptions: string;
@@ -389,6 +389,11 @@ begin
   result := MinDistTrackPoint / 1000;
 end;
 
+class function TProcessOptions.GetCatSymbol: string;
+begin
+  result := 'Symbol';
+end;
+
 {$IFDEF TRIPOBJECTS}
 function TProcessOptions.TripTrackColor: string;
 begin
@@ -406,11 +411,6 @@ end;
 function TProcessOptions.ComputeTime(const RoadClass: string; const Dist: Double): double;
 begin
   result := (3600 * Dist) / SpeedFromRoadClass(RoadClass);
-end;
-
-class function TProcessOptions.GetCatSymbol: string;
-begin
-  result := 'Symbol';
 end;
 
 class function TProcessOptions.GetMinDistTrackPoints: integer;

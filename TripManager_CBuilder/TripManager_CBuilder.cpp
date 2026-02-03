@@ -10,6 +10,7 @@
 #pragma link "vclwinx.bpi"
 #pragma link "vcldb.bpi"
 #pragma link "vclx.bpi"
+#pragma link "vclsmp.bpi"
 #pragma hdrstop
 #include "..\CommonUnits\UnitStringUtils.hpp"
 
