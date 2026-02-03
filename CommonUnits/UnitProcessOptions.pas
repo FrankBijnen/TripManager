@@ -529,6 +529,11 @@ begin
       RouteName := RtePt.NodeValue;
       continue;
     end;
+
+    // Only want route points
+    if (RtePt.Name <> 'rtept') then
+      continue;
+
     Coords.FromAttributes(RtePt.AttributeList);
     Coords.FormatLatLon(Lat, Lon);
 
