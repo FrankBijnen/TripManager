@@ -522,6 +522,7 @@ begin
 
   Cnt := 0;
   RouteName := TXmlVSNode(Rte).NodeName;
+
   for RtePt in TXmlVSNode(Rte).ChildNodes do
   begin
     if (RtePt.Name = 'name') then
@@ -530,8 +531,8 @@ begin
       continue;
     end;
 
-    // Only want route points
-    if (RtePt.Name <> 'rtept') then
+    // Only want route points and way points. No Extensions
+    if (RtePt.Name = 'extensions') then
       continue;
 
     Coords.FromAttributes(RtePt.AttributeList);
@@ -539,7 +540,7 @@ begin
 
     // Start and End always Via
     IsVia := (Cnt = 0) or
-             (Cnt = TXmlVSNode(Rte).ChildNodes.Count -1);
+             (RtePt.NextSibling = nil);
 
     // Look in the extensions
     if (IsVia = false) then
