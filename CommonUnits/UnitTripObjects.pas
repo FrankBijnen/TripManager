@@ -3576,7 +3576,7 @@ begin
   result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8);
   // Reset bits. Is better, but not 100%, see CompareGpxRoute
   // It it still not confirmed that the RoadId is 32 bits.
-  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7fbf, 8); // $11ff7fbf; ?
+  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7f8f, 8); // was $ffff7fbf
 end;
 
 function TUdbDir.GetPointType: string;
