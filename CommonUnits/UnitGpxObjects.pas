@@ -941,6 +941,7 @@ var
   ExtensionNode: TXmlVSNode;
   RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint: TXmlVSNode;
   WptName, Symbol, ViaPtName, ShapePtName: string;
+  IsShapePt: boolean;
 {$IFDEF MAPUTILS}
   DescNode, RteNode: TXmlVSNode;
   CalculatedSubClass, MapName: string;
@@ -954,7 +955,8 @@ begin
   ExtensionNode := RtePtExtensions.Find('gpxx:RoutePointExtension');
   RtePtShapingPoint := RtePtExtensions.Find('trp:ShapingPoint');
   RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
-
+  IsShapePt := (RtePtShapingPoint = nil) or                           // BaseCamp, or other planner using Via and Shaping points
+               ((RtePtShapingPoint = nil) and (RtePtViaPoint = nil)); // Mapsource, or other planner not using Via and Shaping points
   // Begin
   if (ProcessOptions.ProcessDistance) and
      (Cnt = 1) then
@@ -1056,7 +1058,9 @@ begin
   end;
 
   // Shaping point
-  if (RtePtShapingPoint <> nil) then
+  if (Cnt <> 1) and
+     (Cnt <> LastCnt) and
+     (IsShapePt) then
   begin
     if (ProcessOptions.ProcessDistance) then
       ComputeDistance(RtePtNode);
@@ -1107,7 +1111,7 @@ begin
   // Via point
   if (Cnt <> 1) and
      (Cnt <> LastCnt) and
-     (RtePtViaPoint <> nil) then
+     (IsShapePt = false) then
   begin
     if (Symbol = '') then
       Symbol := ProcessOptions.DefViaPointSymbol;
