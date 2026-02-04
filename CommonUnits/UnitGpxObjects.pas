@@ -955,7 +955,7 @@ begin
   ExtensionNode := RtePtExtensions.Find('gpxx:RoutePointExtension');
   RtePtShapingPoint := RtePtExtensions.Find('trp:ShapingPoint');
   RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
-  IsShapePt := (RtePtShapingPoint = nil) or                           // BaseCamp, or other planner using Via and Shaping points
+  IsShapePt := (RtePtShapingPoint <> nil) or                          // BaseCamp, or other planner using Via and Shaping points
                ((RtePtShapingPoint = nil) and (RtePtViaPoint = nil)); // Mapsource, or other planner not using Via and Shaping points
   // Begin
   if (ProcessOptions.ProcessDistance) and
