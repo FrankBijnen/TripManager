@@ -349,7 +349,7 @@ type
     FSavedFolderId: WideString;
 
     FCurrentPath: WideString;
-    DeviceList: Tlist;
+    DeviceList: TList;
     FSortSpecification: TSortSpecification;
     HexEdit: TBCHexEditor;
     ATripList: TTripList;
@@ -405,7 +405,6 @@ type
     procedure ReadDeviceDB;
     procedure ReadGarminDevice(const ModelDescription: string);
     procedure GuessModel(const DisplayedDevice: string);
-    function DeviceIdInList(const DeviceName: string): integer;
     procedure SelectDevice(const Indx: integer);
     procedure SelectKnownDevice;
     procedure SelectDeviceById(const Device: string);
@@ -732,7 +731,8 @@ var
 begin
 
   GarminDevice.Init;
-  GarminDevice.GarminModel := TModelConv.GetModelFromDescription(ModelDescription);
+  GarminDevice.ModelDescription := ModelDescription;
+  GarminDevice.GarminModel := TModelConv.GetModelFromGarminDevice(GarminDevice);
 
   // Need a device to check better
   if not CheckDevice(false) then
@@ -787,7 +787,9 @@ begin
 
       // Update model from GarminDevice.xml
       GarminDevice.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
-      GarminDevice.GarminModel := TModelConv.GetModelFromDescription(GarminDevice.ModelDescription);
+      GarminDevice.PartNumber := FindSubNodeValue(ModelNode, 'PartNumber');
+      GarminDevice.GarminModel := TModelConv.GetModelFromGarminDevice(GarminDevice);
+
       case GarminDevice.GarminModel of
         TGarminModel.Zumo595,
         TGarminModel.Zumo590,
@@ -2526,7 +2528,7 @@ begin
     SelectDevice(CmbDevices.ItemIndex);
     ReadDeviceDB;
 
-    ListFiles;
+    BgDeviceClick(BgDevice);
   end;
 end;
 
@@ -5623,22 +5625,11 @@ begin
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;
 
-function TFrmTripManager.DeviceIdInList(const DeviceName: string): integer;
-var
-  Index: integer;
-begin
-  result := -1;
-  for Index := 0 to DeviceList.Count -1 do
-  begin
-    if (SameText(TMTP_Device(DeviceList[Index]).Device, DeviceName)) then
-      exit(Index);
-  end;
-end;
-
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
   Index, Retries: integer;
   SelectedDevice: string;
+  IsMassStorageRWFS: boolean;
 begin
   // Save currently selected device Id
   if Assigned(CurrentDevice) then
@@ -5651,7 +5642,7 @@ begin
      (Assigned(CurrentDevice)) and
      (SameText(CurrentDevice.Device, DeviceName)) then
   begin
-    Index := DeviceIdInList(DeviceName);  // List before remove
+    Index := TMTP_Device.DeviceIdInList(DeviceName, DeviceList);  // List before remove
     if (Index > -1) then
       ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Disconnected');
   end;
@@ -5668,17 +5659,22 @@ begin
       ReloadFileList;
   end;
 
+  IsMassStorageRWFS := TModelConv.IsMassStorageRWFS(SelectedDevice, DeviceName, DeviceList);
+
   // No Device was connected and now it is.
+  // Or... A Zump590 System partition was connected, and now a System1 is inserted. Prefer that.
   if (Inserted) and
-     (SelectedDevice = '') then
+     (SelectedDevice = '') or
+     (IsMassStorageRWFS) then
   begin
+
     // Wait until the DeviceName appears in the Devicelist
     // EG. Edge in VirtualBox
     Retries := 5;
     Index := -1;
     while (Retries > 0) do
     begin
-      Index := DeviceIdInList(DeviceName); // List after insert
+      Index := TMTP_Device.DeviceIdInList(DeviceName, DeviceList); // List after insert
       if (Index > -1) then
           break;
 

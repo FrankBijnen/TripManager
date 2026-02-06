@@ -49,6 +49,7 @@ type
     Serial: string;
     PortableDev: IMTPDevice;
     function DisplayedDevice: string;
+    class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
   end;
 
 implementation
@@ -98,6 +99,19 @@ function TMTP_Device.DisplayedDevice: string;
 begin
   result := Format('%s (%s)', [FriendlyName, Description]);
 end;
+
+class function TMTP_Device.DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
+var
+  Index: integer;
+begin
+  result := -1;
+  for Index := 0 to DeviceList.Count -1 do
+  begin
+    if (SameText(TMTP_Device(DeviceList[Index]).Device, Device)) then
+      exit(Index);
+  end;
+end;
+
 
 end.
 

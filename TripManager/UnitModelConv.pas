@@ -45,10 +45,18 @@ const
   Tread2_Name                       = 'Tread 2';
 
   // Older models
-  Zumo595_Name                      = 'zumo 595';
-  Zumo590_Name                      = 'zumo 590';
+  Zumo595_Name                      = Zumo_Name + ' 595';
+  Zumo595_PartNumber                = '006-B2436-00';  // I
+
+  Zumo590_Name                      = Zumo_Name + ' 590';
+  Zumo590_PartNumber                = '006-B1796-00';
+  SystemPartition                   = 'zumo System';
+  System1Partition                  = 'zumo System1';
+
   Drive51_Name                      = 'Drive 51';
+
   Zumo3x0_Name                      = Zumo_Name + ' 3x0';
+
   Nuvi2595_Name                     = 'n' + #0252 + 'vi 2595';
 
   // Generic Garmin & Edge
@@ -62,6 +70,7 @@ type
 
   TGarminDevice = class
     GarminModel: TGarminModel;
+    PartNumber: string;
     ModelDescription: string;
     GpxPath: string;
     GpiPath: string;
@@ -82,7 +91,7 @@ type
     class function GetDefaultDevice(const DevIndex: integer): string;
     class function GetTripModel(const TripModel: TTripModel): string;
     class procedure CmbTripDevices(const Devices: TStrings);
-    class function GetModelFromDescription(const ModelDescription: string): TGarminModel;
+    class function GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
     class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
     class function GetKnownPath(const DevIndex, PathId: integer): string;
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
@@ -91,6 +100,8 @@ type
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
     class function KnownDeviceIndex(const DeviceList: Tlist): integer;
     class function IsKnownDevice(const DisplayedDevice: string): boolean;
+    class function IsMassStorageRWFS(const SelectedDevice, InsertedDevice: string;
+                                     const DeviceList: Tlist): boolean;
   end;
 
 var
@@ -125,6 +136,19 @@ const
     (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true)
+  );
+
+type
+  TParts_Rec = record
+    PartNumber:  string;
+    DeviceName:  string;
+  end;
+
+const
+  PartsList: array[0..1] of TParts_Rec =
+  (
+    (PartNumber: Zumo590_PartNumber; DeviceName: Zumo590_Name),
+    (PartNumber: Zumo595_PartNumber; DeviceName: Zumo595_Name)
   );
 
 var
@@ -210,8 +234,9 @@ begin
   Devices.Assign(TripModels);
 end;
 
-class function TModelConv.GetModelFromDescription(const ModelDescription: string): TGarminModel;
+class function TModelConv.GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
 var
+  ZumoId: integer;
   AGarminModel: TGarminModel;
   DevIndex: integer;
 begin
@@ -219,7 +244,7 @@ begin
 
   // Device name overridden?
   for DevIndex := 0 to KnownDevices.Count -1 do
-    if (SameText(ModelDescription, KnownDevices[DevIndex])) then
+    if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
       exit(TGarminModel(KnownDevices.Objects[DevIndex]));
 
 
@@ -228,8 +253,21 @@ begin
   for AGarminModel := High(TGarminModel) downto Low(TGarminModel) do
   begin
     if (Model_Tab[AGarminModel].Displayable) and
-       (ContainsText(ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
+       (ContainsText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
       exit(AGarminModel);
+  end;
+
+  // Upgraded Zumo 590 to 595 has model zumo
+  if (result = TGarminModel.Unknown) then
+  begin
+    for ZumoId := Low(PartsList) to High(PartsList) do
+    begin
+      if (GarminDevice.PartNumber = PartsList[ZumoId].PartNumber) then
+      begin
+        GarminDevice.ModelDescription := PartsList[ZumoId].DeviceName;
+        exit(GetModelFromGarminDevice(GarminDevice));
+      end;
+    end;
   end;
 
 end;
@@ -254,11 +292,11 @@ begin
         2: result := Reg_PrefDevPoiFolder_Val;
       end;
     TGarminModel.Zumo595,
+    TGarminModel.Zumo590,
     TGarminModel.Drive51:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
       end;
-    TGarminModel.Zumo590,
     TGarminModel.Zumo3x0:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
@@ -340,6 +378,18 @@ var
   KnownIndex, DevIndex: integer;
 begin
   result := -1;
+
+  // First look for System1. Partition on 590/595 with trips
+  for KnownIndex := KnownDevices.Count -1 downto 0 do
+  begin
+    for DevIndex := 0 to DeviceList.Count -1 do
+    begin
+      if (SameText(TMTP_Device(DeviceList[DevIndex]).Description, System1Partition)) and
+         (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[DevIndex]).DisplayedDevice)) then
+        exit(DevIndex);
+    end;
+  end;
+
   for KnownIndex := KnownDevices.Count -1 downto 0 do
   begin
     for DevIndex := 0 to DeviceList.Count -1 do
@@ -360,6 +410,30 @@ begin
     if (StartsText(KnownDevices[KnownIndex], DisplayedDevice)) then
       exit(true);
   end;
+end;
+
+// The 590/595 in MassStorage mode and RWFS enabled has 2 partitions:
+// System. No trips
+// System. That has the trips.
+// If the System is connected first, allow connecting the System1 partition
+class function TModelConv.IsMassStorageRWFS(const SelectedDevice, InsertedDevice: string;
+                                            const DeviceList: Tlist): boolean;
+var
+  Index: integer;
+begin
+  Index := TMTP_Device.DeviceIdInList(SelectedDevice, DeviceList);
+  if (Index < 0) then
+    exit(false);
+
+  result := SameText(TMTP_Device(DeviceList[Index]).Description, SystemPartition);
+  if not (result) then
+    exit(false);
+
+  Index := TMTP_Device.DeviceIdInList(InsertedDevice, DeviceList);
+  if (Index < 0) then
+    exit(false);
+
+  result := SameText(TMTP_Device(DeviceList[Index]).Description, System1Partition);
 end;
 
 // Default paths. Will be overruled by GarminDevice.Xml
