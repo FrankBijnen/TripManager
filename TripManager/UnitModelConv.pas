@@ -33,6 +33,7 @@ const
 
   // XT
   XT_Name                           = Zumo_Name + ' XT';
+  XT_PartNumber                     = '006-B3484-00';
 
   // XT2
   XT2_Name                          = Zumo_Name + ' XT2';
@@ -40,24 +41,31 @@ const
   XT2_VehicleId                     = '1';
   XT2_VehicleProfileTruckType       = '7';
   XT2_VehicleProfileName            = Zumo_Name + ' Motorcycle';
+//TODO Get partnumber
+  XT2_PartNumber                    = 'XT2_NOT_EXIST';
 
   // Tread 2 is almost an XT2
   Tread2_Name                       = 'Tread 2';
+//TODO Get partnumber
+  Tread2_PartNumber                 = 'Tread2_NOT_EXIST';
 
   // Older models
   Zumo595_Name                      = Zumo_Name + ' 595';
-  Zumo595_PartNumber                = '006-B2436-00';  // I
+  Zumo595_PartNumber                = '006-B2436-00';
 
   Zumo590_Name                      = Zumo_Name + ' 590';
   Zumo590_PartNumber                = '006-B1796-00';
   SystemPartition                   = 'zumo System';
   System1Partition                  = 'zumo System1';
 
-  Drive51_Name                      = 'Drive 51';
+  Drive51_Name                      = 'Garmin Drive 51';
+  Drive51_PartNumber                = '006-B2586-00';
 
   Zumo3x0_Name                      = Zumo_Name + ' 3x0';
+  Zumo3x0_PartNumber                = '006-B1473-00';
 
   Nuvi2595_Name                     = 'n' + #0252 + 'vi 2595';
+  Nuvi2595_PartNumber               = '006-B1371-00';
 
   // Generic Garmin & Edge
   Garmin_Name                       = 'Garmin';
@@ -120,9 +128,13 @@ type
     Safe:        boolean;
     Displayable: boolean;
   end;
+  TParts_Rec = record
+    PartNumber:  string;
+    DeviceName:  string;
+  end;
 
 const
-//  TGarminModel  = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, GarminEdge, GarminGeneric, Unknown);
+//  TGarminModel = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, GarminEdge, GarminGeneric, Unknown);
   Model_Tab: array[TGarminModel] of TModel_Rec =
   (
     (DeviceName: XT_Name;       TripModel: TTripModel.XT;       Safe: true;   Displayable: true),
@@ -138,17 +150,19 @@ const
     (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true)
   );
 
-type
-  TParts_Rec = record
-    PartNumber:  string;
-    DeviceName:  string;
-  end;
+// Mapping from PartNumber to DeviceName
+// Used as a fallback when the Description in GarminDevice.XML is not as expected. E.G. Zumo 590 upgraded to Zumo 595
 
-const
-  PartsList: array[0..1] of TParts_Rec =
+  PartsList: array[0..7] of TParts_Rec =
   (
-    (PartNumber: Zumo590_PartNumber; DeviceName: Zumo590_Name),
-    (PartNumber: Zumo595_PartNumber; DeviceName: Zumo595_Name)
+    (PartNumber: Nuvi2595_PartNumber; DeviceName: Nuvi2595_Name),
+    (PartNumber: Drive51_PartNumber;  DeviceName: Drive51_Name),
+    (PartNumber: Zumo3x0_PartNumber;  DeviceName: Zumo3x0_Name),
+    (PartNumber: Zumo590_PartNumber;  DeviceName: Zumo590_Name),
+    (PartNumber: Zumo595_PartNumber;  DeviceName: Zumo595_Name),
+    (PartNumber: XT_PartNumber;       DeviceName: XT_Name),
+    (PartNumber: XT2_PartNumber;      DeviceName: XT2_Name),
+    (PartNumber: Tread2_PartNumber;   DeviceName: Tread2_Name)
   );
 
 var
@@ -205,6 +219,7 @@ begin
   if (DevIndex < 0) or
      (DevIndex > DefaultDevices.Count -1) then
     exit('');
+
   result := DefaultDevices[DevIndex];
 end;
 
@@ -213,6 +228,7 @@ begin
   if (Ord(TripModel) < 0) or
      (Ord(TripModel) > TripModels.Count -1) then
     exit(Unknown_Name);
+
   result := TripModels[Ord(TripModel)];
 end;
 
@@ -247,7 +263,6 @@ begin
     if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
       exit(TGarminModel(KnownDevices.Objects[DevIndex]));
 
-
   // Look for default Device names
   // High -> Low, XT Contains XT2
   for AGarminModel := High(TGarminModel) downto Low(TGarminModel) do
@@ -257,7 +272,7 @@ begin
       exit(AGarminModel);
   end;
 
-  // Upgraded Zumo 590 to 595 has model zumo
+  // Check for known partnumbers
   if (result = TGarminModel.Unknown) then
   begin
     for ZumoId := Low(PartsList) to High(PartsList) do
@@ -270,6 +285,7 @@ begin
     end;
   end;
 
+  // Return Unknown
 end;
 
 class function TModelConv.GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
@@ -297,12 +313,7 @@ begin
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;
       end;
-    TGarminModel.Zumo3x0:
-      case PathId of
-        0: result := NonMTPRoot + SystemTripsPath;
-        1: result := GarminDevice.GpxPath;
-        2: result := GarminDevice.GpiPath;
-      end;
+    TGarminModel.Zumo3x0,
     TGarminModel.Nuvi2595:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;

@@ -8,11 +8,12 @@ uses
   UnitTripDefs, UnitGpxDefs;
 
 const
-  Small_TmScPosnSize                = 8; // Also Zumo 590
-  TmScPosnSize                      = 12;
-  Large_TmScPosnSize                = 16;
-  TurnMagic: array[0..3] of byte    = ($47, $4E, $00, $00);
-  TripFileName                      = '0:/.System/Trips/%s.trip';
+  Small_TmScPosnSize                  = 8; // Also Zumo 590
+  TmScPosnSize                        = 12;
+  Large_TmScPosnSize                  = 16;
+  TurnMagicUcs4: array[0..3] of byte  = ($47, $4E, $00, $00);
+  TurnMagicWide: array[0..3] of byte  = ($01, $00, $47, $4e); // Zumo 595 etc.
+  TripFileName                        = '0:/.System/Trips/%s.trip';
 
 { Elementary data types }
   dtByte          = 1;
@@ -3660,9 +3661,9 @@ end;
 
 function TUdbDir.IsTurn: boolean;
 begin
-  result := CompareMem(@TurnMagic[0], @FUdbDirName[4], SizeOf(TurnMagic));
+  result := CompareMem(@TurnMagicUcs4[0], @FUdbDirName[4], SizeOf(TurnMagicUcs4)) or
+            CompareMem(@TurnMagicWide[0], @FUdbDirName[0], SizeOf(TurnMagicWide));
 end;
-
 
 {*** UdbPref *** }
 procedure TUdbPrefValue.SwapCardinals;
