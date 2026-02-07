@@ -9,7 +9,7 @@ uses
   Vcl.Mask, Vcl.Menus, Vcl.ToolWin, Vcl.BaseImageCollection, Vcl.ImageCollection, System.ImageList, Vcl.ImgList,
   Vcl.VirtualImageList, Vcl.Dialogs, Vcl.Grids, Vcl.DBGrids,
   Data.DB,
-  TripManager_DBGrid,
+  TripManager_DBGrid, TripManager_ComboBox,
   UnitTripDefs;
 
 type
@@ -32,7 +32,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
-    CmbModel: TComboBox;
+    CmbModel: TripManager_ComboBox.TComboBox;
     PopupGrid: TPopupMenu;
     MoveUp1: TMenuItem;
     MoveDown1: TMenuItem;
@@ -341,6 +341,7 @@ begin
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
 
   TModelConv.CmbTripDevices(CmbModel.Items);
+  CmbModel.AdjustWidths;
   CmbModel.ItemIndex := Ord(TTripList(CurTripList).TripModel);
 end;
 

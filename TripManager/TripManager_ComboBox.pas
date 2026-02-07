@@ -24,6 +24,8 @@ type
     procedure CreateParams(var Params: TCreateParams); override;
     procedure AddFullTextSearch(ALine: string);
     property FullTextSearch: boolean read FFullTextSearch write SetFullTextSearch;
+    function ItemsWidth: integer;
+    procedure AdjustWidths;
   end;
 
 implementation
@@ -118,6 +120,26 @@ begin
   end
   else
     Text := ALine;
+end;
+
+function TComboBox.ItemsWidth: Integer;
+var
+  ALine: string;
+  LineWidth: integer;
+begin
+  result := 0;
+  for ALine in Items do
+  begin
+    LineWidth := Canvas.TextWidth(ALine);
+    if (LineWidth > result) then
+      result := LineWidth;
+  end;
+end;
+
+procedure TComboBox.AdjustWidths;
+begin
+  Width := ItemsWidth + GetSystemMetrics(SM_CXVSCROLL);
+  DropDownWidth := Width;
 end;
 
 end.

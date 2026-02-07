@@ -69,31 +69,34 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 1
+        OnResize = PnlDeviceTopResize
         object CmbDevices: TComboBox
           AlignWithMargins = True
-          Left = 166
+          Left = 142
           Top = 5
-          Width = 129
+          Width = 165
           Height = 21
           Margins.Left = 1
           Margins.Top = 4
           Margins.Right = 1
           Align = alClient
-          Constraints.MinWidth = 40
+          Constraints.MinWidth = 35
           TabOrder = 2
           Text = 'Select an MTP device'
           OnChange = CmbDevicesChange
           Items.Strings = (
             'Select an MTP device')
+          ExplicitLeft = 162
+          ExplicitWidth = 145
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
-          Left = 84
+          Left = 71
           Top = 4
-          Width = 80
+          Width = 70
           Height = 24
-          Margins.Left = 1
-          Margins.Right = 1
+          Margins.Left = 0
+          Margins.Right = 0
           Align = alLeft
           Caption = 'Refresh'
           TabOrder = 1
@@ -101,10 +104,12 @@ object FrmTripManager: TFrmTripManager
         end
         object BgDevice: TButtonGroup
           AlignWithMargins = True
-          Left = 375
+          Left = 380
           Top = 4
           Width = 157
           Height = 24
+          Margins.Left = 0
+          Margins.Right = 0
           Align = alRight
           ButtonHeight = 20
           ButtonWidth = 50
@@ -128,12 +133,12 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnSetDeviceDefault: TButton
           AlignWithMargins = True
-          Left = 536
+          Left = 537
           Top = 4
           Width = 80
           Height = 24
-          Margins.Left = 1
-          Margins.Right = 1
+          Margins.Left = 0
+          Margins.Right = 0
           Align = alRight
           Caption = 'Set as default'
           TabOrder = 5
@@ -141,12 +146,12 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnFunctions: TButton
           AlignWithMargins = True
-          Left = 2
+          Left = 1
           Top = 4
-          Width = 80
+          Width = 70
           Height = 24
-          Margins.Left = 1
-          Margins.Right = 1
+          Margins.Left = 0
+          Margins.Right = 0
           Align = alLeft
           Caption = 'Functions'
           TabOrder = 0
@@ -154,17 +159,17 @@ object FrmTripManager: TFrmTripManager
         end
         object CmbModel: TComboBox
           AlignWithMargins = True
-          Left = 297
+          Left = 309
           Top = 5
-          Width = 74
+          Width = 70
           Height = 21
           Margins.Left = 1
           Margins.Top = 4
           Margins.Right = 1
           Align = alRight
           Style = csDropDownList
-          Constraints.MinWidth = 40
-          DropDownCount = 12
+          DropDownCount = 15
+          DropDownWidth = 150
           TabOrder = 3
           OnChange = CmbModelChange
           Items.Strings = (
@@ -336,9 +341,9 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 4
         object BtnAddToMap: TButton
           AlignWithMargins = True
-          Left = 170
+          Left = 155
           Top = 4
-          Width = 91
+          Width = 80
           Height = 24
           Align = alLeft
           Caption = 'Add to map'
@@ -369,7 +374,7 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 69
           Top = 4
-          Width = 95
+          Width = 80
           Height = 24
           Align = alLeft
           Caption = 'Refresh'
@@ -378,9 +383,9 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnPostProcess: TButton
           AlignWithMargins = True
-          Left = 372
+          Left = 327
           Top = 4
-          Width = 85
+          Width = 80
           Height = 24
           Align = alLeft
           Caption = 'Post process'
@@ -389,9 +394,9 @@ object FrmTripManager: TFrmTripManager
         end
         object BtnSendTo: TButton
           AlignWithMargins = True
-          Left = 267
+          Left = 241
           Top = 4
-          Width = 99
+          Width = 80
           Height = 24
           Align = alLeft
           Caption = 'Send to'

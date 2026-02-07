@@ -153,7 +153,7 @@ type
     BtnOpenTemp: TButton;
     MapTimer: TTimer;
     PnlTripGpiInfo: TPanel;
-    CmbModel: TComboBox;
+    CmbModel: TripManager_ComboBox.TComboBox;
     BtnPostProcess: TButton;
     ChkWatch: TCheckBox;
     OpenTrip: TOpenDialog;
@@ -337,6 +337,7 @@ type
     procedure SpbCorrectUuidClick(Sender: TObject);
     procedure QueryDeviceClick(Sender: TObject);
     procedure ShowDeviceFilesOnMap(Sender: TObject);
+    procedure PnlDeviceTopResize(Sender: TObject);
   private
     { Private declarations }
     DeviceFile: Boolean;
@@ -835,6 +836,7 @@ begin
     if (DisplayedDevice <> CmbModel.Items[ModelIndex]) and
        (GarminDevice.ModelDescription <> '') then
       CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
+      CmbModel.AdjustWidths;
   end;
 
   // Model changed?
@@ -1050,7 +1052,8 @@ begin
 end;
 
 procedure TFrmTripManager.AdvPanel_MapTopResize(Sender: TObject);
-var SizeLeft: integer;
+var
+  SizeLeft: integer;
 begin
   SizeLeft := AdvPanel_MapTop.Width - (PnlRoutePoint.Left + PnlRoutePoint.Width);
   LblRoute.Width := SizeLeft div 2;
@@ -1945,6 +1948,11 @@ begin
   SbPostProcess.Panels[1].Width := PCTTripInfo.Width div 2;
 end;
 
+procedure TFrmTripManager.PnlDeviceTopResize(Sender: TObject);
+begin
+  CmbDevices.DropDownWidth := Max(CmbDevices.ItemsWidth, CmbDevices.Width);
+end;
+
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
   MnuTripNewMTP.Enabled := CheckDevice(false);
@@ -2334,6 +2342,7 @@ begin
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
 
   TModelConv.CmbModelDevices(CmbModel.Items);
+  CmbModel.AdjustWidths;
 
   ExploreList := TStringList.Create;
   ExploreList.NameValueSeparator := #9;
@@ -5662,7 +5671,7 @@ begin
   IsMassStorageRWFS := TModelConv.IsMassStorageRWFS(SelectedDevice, DeviceName, DeviceList);
 
   // No Device was connected and now it is.
-  // Or... A Zump590 System partition was connected, and now a System1 is inserted. Prefer that.
+  // Or... A Zumo590 System partition was connected, and now a System1 is inserted. Prefer that.
   if (Inserted) and
      (SelectedDevice = '') or
      (IsMassStorageRWFS) then
