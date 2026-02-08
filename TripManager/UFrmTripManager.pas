@@ -2537,8 +2537,8 @@ begin
      (CmbDevices.ItemIndex < CmbDevices.Items.Count) then
   begin
     SelectDevice(CmbDevices.ItemIndex);
-    SetDeviceListColumns;
-    ReadDeviceDB;
+    if (CheckDevice(false)) then
+      ReadDeviceDB;
   end;
 end;
 
@@ -2582,6 +2582,8 @@ begin
   SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
 
   ReadDefaultFolders;
+  SetDeviceListColumns;
+
   if (CheckDevice(false)) then
   begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
