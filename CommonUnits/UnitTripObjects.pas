@@ -3574,10 +3574,9 @@ end;
 
 function TUdbDir.GetMapSegRoadExclBit: string;
 begin
+  // It is believed that the RoadId contains Flags. Mask them out for compare.
   result := IntToHex(Swap32(UdbDirValue.SubClass.MapSegment), 8);
-  // Reset bits. Is better, but not 100%, see CompareGpxRoute
-  // It it still not confirmed that the RoadId is 32 bits.
-  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and $ffff7f8f, 8); // was $ffff7fbf
+  result := result + IntToHex(Swap32(UdbDirValue.SubClass.RoadId) and MapSegRoadMask, 8);
 end;
 
 function TUdbDir.GetPointType: string;

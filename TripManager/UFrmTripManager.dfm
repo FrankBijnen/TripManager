@@ -80,14 +80,13 @@ object FrmTripManager: TFrmTripManager
           Margins.Top = 4
           Margins.Right = 1
           Align = alClient
-          Constraints.MinWidth = 35
+          AutoComplete = False
+          Constraints.MinWidth = 40
           TabOrder = 2
-          Text = 'Select an MTP device'
+          TextHint = 'Select an MTP device'
           OnChange = CmbDevicesChange
           Items.Strings = (
             'Select an MTP device')
-          ExplicitLeft = 162
-          ExplicitWidth = 145
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
@@ -1628,8 +1627,8 @@ object FrmTripManager: TFrmTripManager
     Top = 427
   end
   object PopupAddToMap: TPopupMenu
-    Left = 826
-    Top = 82
+    Left = 1042
+    Top = 98
     object MnuAddtoMap: TMenuItem
       Caption = 'Add to Map'
       OnClick = MnuAddtoMapClick

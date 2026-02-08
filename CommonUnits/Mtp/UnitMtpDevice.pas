@@ -43,10 +43,12 @@ type
 
   TMTP_Device = class(TObject)
     ID: integer;
+    SerialId: integer;
     Device: string;
     Description: string;
     FriendlyName: string;
     Serial: string;
+    Manufacturer: string;
     PortableDev: IMTPDevice;
     function DisplayedDevice: string;
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
@@ -105,6 +107,9 @@ var
   Index: integer;
 begin
   result := -1;
+  if (Device = '') then
+    exit;
+
   for Index := 0 to DeviceList.Count -1 do
   begin
     if (SameText(TMTP_Device(DeviceList[Index]).Device, Device)) then

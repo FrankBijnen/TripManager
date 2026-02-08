@@ -14,6 +14,8 @@ type
     procedure HandleAppException(Sender: TObject; E: Exception);
   end;
 
+function GetCurrentStack: string;
+
 implementation
 
 uses
@@ -22,6 +24,26 @@ uses
 
 var
   Log_StackTrace: TLog_StackTrace;
+
+function GetCurrentStack: string;
+var
+   StackList: TJclStackInfoList; //JclDebug.pas
+   Sl: TStringList;
+begin
+  result := '';
+  StackList := JclCreateStackList(False, 0, Caller(0, False));
+  try
+    Sl := TStringList.Create;
+    try
+      StackList.AddToStrings(sl, True, True, True, True);
+      result := Sl.Text;
+    finally
+      Sl.Free;
+    end;
+  finally
+    Stacklist.Free;
+  end;
+end;
 
 procedure TLog_StackTrace.HandleAppException(Sender: TObject; E: Exception);
 var StackTrace: TStringList;

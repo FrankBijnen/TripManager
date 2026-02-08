@@ -367,7 +367,9 @@ type
     RoutePointTimeOut: string;
     GeoSearchTimeOut: string;
     USBEvent: TUSBEvent;
+
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
+    function WaitForDevice(const DeviceToWaitFor: string): integer;
     procedure USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
@@ -412,7 +414,7 @@ type
     function GetItemType(const AListview: TListView): TDirType;
     procedure CloseDevice;
     function CheckDevice(RaiseException: boolean = true): boolean;
-    procedure GetDeviceList;
+    procedure GetDeviceList(KeepDevice: string = '');
     function GetDevicePath(const CompletePath: string): string;
     procedure SetDeviceDisplayPath;
     function GetSelectedFile: string;
@@ -434,6 +436,7 @@ type
     procedure ShowWarnRecalc;
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
+    procedure SetDeviceListColumns;
     procedure ReadColumnSettings;
     procedure WriteColumnSettings;
     procedure OnSetPostProcessPrefs(Sender: TObject);
@@ -836,8 +839,8 @@ begin
     if (DisplayedDevice <> CmbModel.Items[ModelIndex]) and
        (GarminDevice.ModelDescription <> '') then
       CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
-      CmbModel.AdjustWidths;
   end;
+  CmbModel.AdjustWidths;
 
   // Model changed?
   if (ModelIndex <> CmbModel.ItemIndex) then
@@ -1037,6 +1040,7 @@ begin
   FrmAdvSettings.SampleTrip := ATripList;
   if FrmAdvSettings.ShowModal = mrOk then
     ReadSettings;
+
   BgDeviceClick(BgDevice);
 end;
 
@@ -1061,25 +1065,8 @@ end;
 
 procedure TFrmTripManager.BgDeviceClick(Sender: TObject);
 begin
-  LstFiles.Tag := 1;
-  try
-    if (BgDevice.ItemIndex <> 0) then
-    begin
-      LvExplore.Items.Clear;
-      TsExplore.TabVisible := false;
-    end;
+  SetDeviceListColumns;
 
-    LstFiles.Checkboxes := (BgDevice.ItemIndex = 0);
-    if (LstFiles.Columns.Count > TripNameCol) then
-    begin
-      if (BgDevice.ItemIndex = 0) then
-        LstFiles.Columns[TripNameCol].Width := TripNameColWidth
-      else
-        LstFiles.Columns[TripNameCol].Width := 0;
-    end;
-  finally
-    LstFiles.Tag := 0;
-  end;
   if CheckDevice(false) then
   begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
@@ -1457,12 +1444,12 @@ begin
     SelectDeviceById(DeviceId);
     if CheckDevice(false) then
     begin
-      if not (HasMtpDevice) then // No device was connected, now it is. Read settings.
+      if not (HasMtpDevice) then  // No device was connected, now it is. Read settings.
         ReadDeviceDB;
       ReloadFileList;
     end;
   except
-    CurrentDevice := nil; // Prevent needless tries
+    CloseDevice;  // Prevent needless tries
   end;
 end;
 
@@ -2364,11 +2351,17 @@ begin
   except
     ShellTreeView1.Root := Reg_PrefFileSysFolder_Val;
   end;
+  SetDeviceListColumns;
   GetDeviceList;
   SelectKnownDevice;
-  ClearDeviceDbFiles;
-  ReadDeviceDB;
-  BgDeviceClick(BgDevice);
+
+  // Get files from device
+  ClearDeviceDbFiles;  // Should not be there.
+  if (CheckDevice(false)) then
+  begin
+    ReadDeviceDB;
+    ListFiles;
+  end;
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -2450,20 +2443,30 @@ begin
   CmbDevices.Items.Clear;
 end;
 
-procedure TFrmTripManager.GetDeviceList;
+procedure TFrmTripManager.GetDeviceList(KeepDevice: string = '');
 var
-  Index: integer;
-  ModelDisplayed: string;
+  Index, DevId: integer;
 begin
-  CurrentDevice := nil;
-  FreeDevices;
-  LstFiles.Clear;
+  // Not really needed
+  CloseDevice;
 
+  // Get updated devicelist
+  FreeDevices;
   DeviceList := GetDevices;
+
+  // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
+    CmbDevices.Items.Add(IntToStr(TMTP_Device(DeviceList[Index]).SerialId) + '.' + TMTP_Device(DeviceList[Index]).DisplayedDevice);
+
+  // Reopen Device, and reposition ComboBox to new position
+  DevId := TMTP_Device.DeviceIdInList(KeepDevice, DeviceList);
+  if (DevId < 0) then
+    LstFiles.Clear // Device not found
+  else
   begin
-    ModelDisplayed := TMTP_Device(DeviceList[Index]).DisplayedDevice;
-    CmbDevices.Items.Add(ModelDisplayed);
+    CurrentDevice := DeviceList[DevId];
+    if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev)) then
+      CmbDevices.ItemIndex := DevId;
   end;
 end;
 
@@ -2493,7 +2496,6 @@ begin
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
-
 end;
 
 procedure TFrmTripManager.SelectKnownDevice;
@@ -2535,9 +2537,8 @@ begin
      (CmbDevices.ItemIndex < CmbDevices.Items.Count) then
   begin
     SelectDevice(CmbDevices.ItemIndex);
+    SetDeviceListColumns;
     ReadDeviceDB;
-
-    BgDeviceClick(BgDevice);
   end;
 end;
 
@@ -3302,7 +3303,6 @@ begin
       ASubMenuItem := TMenuItem.Create(MnuSetTransportMode);
       ASubMenuItem.Caption  := ALine;
       ASubMenuItem.Tag      := Ord(TmTransportationMode.TransPortMethod(ALine));
-//      ASubMenuItem.Enabled  := (TmTransportationMode.ModelEditMode(ATripModel) <> TItemEditMode.emNone);
       ASubMenuItem.OnClick  := TransportModeClick;
       MnuSetTransportMode.Add(ASubMenuItem);
     end;
@@ -3314,14 +3314,12 @@ begin
       ASubMenuItem := TMenuItem.Create(MnuSetRoutePref);
       ASubMenuItem.Caption  := ALine;
       ASubMenuItem.Tag      := Ord(TmRoutePreference.RoutePreference(ALine));
-//      ASubMenuItem.Enabled  := (TmRoutePreference.ModelEditMode(ATripModel) <> TItemEditMode.emNone);
       ASubMenuItem.OnClick  := RoutePreferenceClick;
       MnuSetRoutePref.Add(ASubMenuItem);
     end;
   finally
     PickList.Free;
   end;
-  //TODO
 end;
 
 procedure TFrmTripManager.RebuildDeviceDbMenu;
@@ -4786,6 +4784,9 @@ var
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+  if (LstFiles.Tag > 0) then
+    exit;
+  LstFiles.Tag := 1;
   try
     case (ListFilesDir) of
       TListFilesDir.lfUp:
@@ -4803,7 +4804,6 @@ begin
     end;
     FSavedFolderId := SParent;
 
-    LstFiles.Clear;
     VlTripInfo.Strings.BeginUpdate;
     try
       ClearTripInfo;
@@ -4837,6 +4837,7 @@ begin
     DoListViewSort(LstFiles, FSortSpecification.Column, FSortSpecification.Ascending, FSortSpecification);
 
   finally
+    LstFiles.Tag := 0;
     SetCursor(CrNormal);
   end;
 end;
@@ -5382,6 +5383,29 @@ begin
                                  TModelConv.GetKnownPath(ModelIndex, 2), SubKey);
 end;
 
+procedure TFrmTripManager.SetDeviceListColumns;
+begin
+    LstFiles.Tag := 1;
+  try
+    if (BgDevice.ItemIndex <> 0) then
+    begin
+      LvExplore.Items.Clear;
+      TsExplore.TabVisible := false;
+    end;
+
+    LstFiles.Checkboxes := (BgDevice.ItemIndex = 0);
+    if (LstFiles.Columns.Count > TripNameCol) then
+    begin
+      if (BgDevice.ItemIndex = 0) then
+        LstFiles.Columns[TripNameCol].Width := TripNameColWidth
+      else
+        LstFiles.Columns[TripNameCol].Width := 0;
+    end;
+  finally
+    LstFiles.Tag := 0;
+  end;
+end;
+
 procedure TFrmTripManager.ReadColumnSettings;
 var
   ColWidths: string;
@@ -5634,11 +5658,36 @@ begin
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;
 
+// Wait until the DeviceName appears in the Devicelist
+// EG. Edge in VirtualBox
+function TFrmTripManager.WaitForDevice(const DeviceToWaitFor: string): integer;
+var
+  Retries: integer;
+begin
+  Retries := 5;
+  result := -1;
+  while (Retries > 0) do
+  begin
+    result := TMTP_Device.DeviceIdInList(DeviceToWaitFor, DeviceList); // List after insert
+    if (result > -1) then
+        break;
+
+    // Device is not (yet) available in DeviceList. Retry a few times
+    SbPostProcess.Panels[0].Text := DeviceToWaitFor;
+    SbPostProcess.Panels[1].Text := 'Waiting for device to appear';
+    SbPostProcess.Update;
+
+    Dec(Retries);
+    Sleep(500);
+    GetDeviceList;  // Rescan devices
+  end;
+end;
+
 procedure TFrmTripManager.USBChangeEvent(const Inserted : boolean; const DeviceName, VendorId, ProductId: string);
 var
-  Index, Retries: integer;
+  DevIndex : integer;
   SelectedDevice: string;
-  IsMassStorageRWFS: boolean;
+  ConnectPreferred, CanConnectNewDevice: boolean;
 begin
   // Save currently selected device Id
   if Assigned(CurrentDevice) then
@@ -5651,64 +5700,38 @@ begin
      (Assigned(CurrentDevice)) and
      (SameText(CurrentDevice.Device, DeviceName)) then
   begin
-    Index := TMTP_Device.DeviceIdInList(DeviceName, DeviceList);  // List before remove
-    if (Index > -1) then
-      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Disconnected');
+    DevIndex := TMTP_Device.DeviceIdInList(DeviceName, DeviceList);  // List before remove
+    if (DevIndex > -1) then
+      ConnectedDeviceChanged(TMTP_Device(DeviceList[DevIndex]).DisplayedDevice, 'Disconnected');
+    GetDeviceList;
+    exit;
   end;
 
-  // rebuild device list
-  GetDeviceList;
+  // Update the list of devices, keeping SelectedDevice if possible
+  GetDeviceList(SelectedDevice);
 
-  // Select the previously selected device and reload the file list
-  if (SelectedDevice <> '') then
-  begin
-    SelectDeviceById(SelectedDevice);
-    // No need to reread DeviceDb
-    if CheckDevice(false) then
-      ReloadFileList;
-  end;
-
-  IsMassStorageRWFS := TModelConv.IsMassStorageRWFS(SelectedDevice, DeviceName, DeviceList);
+  ConnectPreferred := (Inserted) and
+                      TModelConv.PreferedPartition(SelectedDevice, DeviceName, DeviceList);
+  CanConnectNewDevice := (Inserted) and
+                      (SelectedDevice = '');
 
   // No Device was connected and now it is.
   // Or... A Zumo590 System partition was connected, and now a System1 is inserted. Prefer that.
-  if (Inserted) and
-     (SelectedDevice = '') or
-     (IsMassStorageRWFS) then
+  if (CanConnectNewDevice) or
+     (ConnectPreferred) then
   begin
-
-    // Wait until the DeviceName appears in the Devicelist
-    // EG. Edge in VirtualBox
-    Retries := 5;
-    Index := -1;
-    while (Retries > 0) do
-    begin
-      Index := TMTP_Device.DeviceIdInList(DeviceName, DeviceList); // List after insert
-      if (Index > -1) then
-          break;
-
-      // Device is not (yet) available in DeviceList. Retry a few times
-      SbPostProcess.Panels[0].Text := DeviceName;
-      SbPostProcess.Panels[1].Text := 'Waiting for device to appear';
-      SbPostProcess.Update;
-
-      Dec(Retries);
-      Sleep(500);
-      GetDeviceList;  // Rescan devices
-    end;
+    DevIndex := WaitForDevice(DeviceName);
 
     // Inserted Device is in the DeviceList and a known device.
-    if (Index > -1) and
-       (TModelConv.IsKnownDevice(TMTP_Device(DeviceList[Index]).DisplayedDevice)) then
+    if (DevIndex > -1) and
+       (TModelConv.IsKnownDevice(TMTP_Device(DeviceList[DevIndex]))) then
     begin
-      ConnectedDeviceChanged(TMTP_Device(DeviceList[Index]).DisplayedDevice, 'Connected');
-
-      CmbDevices.ItemIndex := Index;
-      SelectDevice(Index);
-      ReadDeviceDB;
-      BgDeviceClick(BgDevice);
+      ConnectedDeviceChanged(TMTP_Device(DeviceList[DevIndex]).DisplayedDevice, 'Connected');
+      CmbDevices.ItemIndex := DevIndex;
+      CmbDevicesChange(CmbDevices);
     end;
   end;
+
 end;
 
 procedure TFrmTripManager.ConnectedDeviceChanged(const Device, Status: string);
@@ -5720,7 +5743,6 @@ begin
   CmbDevices.ItemIndex := -1;
   CmbDevices.Text := SelectMTPDevice;
 
-  CurrentDevice := nil;
   TvTrip.Items.Clear;
   ClearTripInfo;
   ClearDeviceDbFiles;

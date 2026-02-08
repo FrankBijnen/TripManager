@@ -123,6 +123,8 @@ begin
 end;
 
 function TComboBox.ItemsWidth: Integer;
+const
+  Margin = 8;
 var
   ALine: string;
   LineWidth: integer;
@@ -130,7 +132,7 @@ begin
   result := 0;
   for ALine in Items do
   begin
-    LineWidth := Canvas.TextWidth(ALine);
+    LineWidth := Canvas.TextWidth(ALine) + Margin;
     if (LineWidth > result) then
       result := LineWidth;
   end;

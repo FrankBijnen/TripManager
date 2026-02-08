@@ -55,8 +55,7 @@ const
 
   Zumo590_Name                      = Zumo_Name + ' 590';
   Zumo590_PartNumber                = '006-B1796-00';
-  SystemPartition                   = 'zumo System';
-  System1Partition                  = 'zumo System1';
+  System1Partition                  = 'System1';
 
   Drive51_Name                      = 'Garmin Drive 51';
   Drive51_PartNumber                = '006-B2586-00';
@@ -74,7 +73,11 @@ const
   // Unknown
   Unknown_Name                      = 'Unknown';
 
+  CardPartition                     = 'Card';
+
 type
+
+  TPartitionPrio = (ppLow, ppNorm, ppHigh);
 
   TGarminDevice = class
     GarminModel: TGarminModel;
@@ -106,9 +109,12 @@ type
     class function Display2Trip(const CmbIndex: integer): TTripModel;
     class function Garmin2Display(const Garmin: TGarminModel): integer;
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
-    class function KnownDeviceIndex(const DeviceList: Tlist): integer;
-    class function IsKnownDevice(const DisplayedDevice: string): boolean;
-    class function IsMassStorageRWFS(const SelectedDevice, InsertedDevice: string;
+    class function GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;
+    class function IsKnownDevice(const Device: TObject): boolean;
+    class function GarminDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer;
+    class function KnownDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer; overload;
+    class function KnownDeviceIndex(const DeviceList: Tlist): integer; overload;
+    class function PreferedPartition(const SelectedDevice, InsertedDevice: string;
                                      const DeviceList: Tlist): boolean;
   end;
 
@@ -182,8 +188,7 @@ begin
   for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
   begin
     if (Model_Tab[AGarminModel].Displayable) and
-       ( (Model_Tab[AGarminModel].Safe) or
-          (UnsafeModels) ) then
+       ( (Model_Tab[AGarminModel].Safe) or (UnsafeModels) ) then
     begin
       Inc(ModelIndex);
       if (Default) then
@@ -372,6 +377,21 @@ begin
   end;
 end;
 
+class function TModelConv.GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;
+begin
+  if (ContainsText(PartitionDesc, System1Partition)) then
+  begin
+    if (TProcessOptions.UnsafeModels) then
+      result := TPartitionPrio.ppHigh
+    else
+      result := TPartitionPrio.ppLow;
+  end
+  else if (ContainsText(PartitionDesc, CardPartition)) then
+    result := TPartitionPrio.ppLow
+  else
+    result := TPartitionPrio.ppNorm;
+end;
+
 class function TModelConv.SafeModel2Write(const TripModel: TTripModel): boolean;
 var
   AGarminModel: TGarminModel;
@@ -384,67 +404,100 @@ begin
   end;
 end;
 
-class function TModelConv.KnownDeviceIndex(const DeviceList: Tlist): integer;
+// When a device is inserted, is it known?
+class function TModelConv.IsKnownDevice(const Device: TObject): boolean;
+var
+  KnownIndex: integer;
+begin
+  // Dont want Cards, usually they are part of the real device.
+  if (GetPartitionPrio(TMTP_Device(Device).Description) = TPartitionPrio.ppLow) then
+    exit(false);
+
+  // Look in Known devices
+  for KnownIndex := KnownDevices.Count -1 downto 0  do
+  begin
+    if (StartsText(KnownDevices[KnownIndex], TMTP_Device(Device).DisplayedDevice)) then
+      exit(true);
+  end;
+
+  // Look for manufacturer Garmin
+  result := (SameText(TMTP_Device(Device).Manufacturer, Garmin_Name));
+end;
+
+// Get first known device in connected list, for this prio
+class function TModelConv.KnownDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer;
 var
   KnownIndex, DevIndex: integer;
 begin
   result := -1;
 
-  // First look for System1. Partition on 590/595 with trips
-  for KnownIndex := KnownDevices.Count -1 downto 0 do
+  for DevIndex := 0 to DeviceList.Count -1 do
   begin
-    for DevIndex := 0 to DeviceList.Count -1 do
-    begin
-      if (SameText(TMTP_Device(DeviceList[DevIndex]).Description, System1Partition)) and
-         (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[DevIndex]).DisplayedDevice)) then
-        exit(DevIndex);
-    end;
-  end;
-
-  for KnownIndex := KnownDevices.Count -1 downto 0 do
-  begin
-    for DevIndex := 0 to DeviceList.Count -1 do
+    if (GetPartitionPrio(TMTP_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
+      continue;
+    for KnownIndex := KnownDevices.Count -1 downto 0 do
     begin
       if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[DevIndex]).DisplayedDevice)) then
         exit(DevIndex);
     end;
   end;
+
 end;
 
-class function TModelConv.IsKnownDevice(const DisplayedDevice: string): boolean;
+// Get first Garmin device in connected list, for this prio. used as fallback
+class function TModelConv.GarminDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer;
 var
-  KnownIndex: integer;
+  DevIndex: integer;
 begin
-  result := false;
-  for KnownIndex := KnownDevices.Count -1 downto 0  do
+  result := -1;
+
+  for DevIndex := 0 to DeviceList.Count -1 do
   begin
-    if (StartsText(KnownDevices[KnownIndex], DisplayedDevice)) then
-      exit(true);
+    if (GetPartitionPrio(TMTP_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
+      continue;
+    if (SameText(TMTP_Device(DeviceList[DevIndex]).Manufacturer, Garmin_Name)) then
+      exit(DevIndex);
   end;
+end;
+
+// Device selection order.
+// Note: Cards are not selected
+class function TModelConv.KnownDeviceIndex(const DeviceList: Tlist): integer;
+begin
+  result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppHigh);
+  if (result < 0) then
+    result := GarminDeviceIndex(DeviceList, TPartitionPrio.ppHigh);
+  if (result < 0) then
+    result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppNorm);
+  if (result < 0) then
+    result := GarminDeviceIndex(DeviceList, TPartitionPrio.ppNorm);
 end;
 
 // The 590/595 in MassStorage mode and RWFS enabled has 2 partitions:
 // System. No trips
 // System. That has the trips.
 // If the System is connected first, allow connecting the System1 partition
-class function TModelConv.IsMassStorageRWFS(const SelectedDevice, InsertedDevice: string;
+class function TModelConv.PreferedPartition(const SelectedDevice, InsertedDevice: string;
                                             const DeviceList: Tlist): boolean;
 var
   Index: integer;
+  Selected, Inserted: TMTP_Device;
+  SelectedPrio, InsertedPrio: TPartitionPrio;
 begin
   Index := TMTP_Device.DeviceIdInList(SelectedDevice, DeviceList);
   if (Index < 0) then
     exit(false);
-
-  result := SameText(TMTP_Device(DeviceList[Index]).Description, SystemPartition);
-  if not (result) then
-    exit(false);
+  Selected := TMTP_Device(DeviceList[Index]);
+  SelectedPrio := GetPartitionPrio(Selected.Description);
 
   Index := TMTP_Device.DeviceIdInList(InsertedDevice, DeviceList);
   if (Index < 0) then
     exit(false);
+  Inserted := TMTP_Device(DeviceList[Index]);
+  InsertedPrio := GetPartitionPrio(Inserted.Description);
 
-  result := SameText(TMTP_Device(DeviceList[Index]).Description, System1Partition);
+  result := (Selected.Serial = Inserted.Serial) and
+            (SelectedPrio < InsertedPrio);
 end;
 
 // Default paths. Will be overruled by GarminDevice.Xml

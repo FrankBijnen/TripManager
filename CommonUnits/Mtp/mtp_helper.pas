@@ -473,7 +473,6 @@ begin
   end;
 end;
 
-
 function GetDevId(RawDevice: WideString): WideString;
 begin
   Result := Trim(Copy(RawDevice, Pos(WideString('\\?'), RawDevice)));
@@ -879,6 +878,13 @@ begin
   EnumSupportedCommands(Capabilities);
 end;
 
+function CompareDevice(Item1, Item2: Pointer): Integer;
+begin
+  Result := CompareValue(TMTP_Device(Item1).SerialId, TMTP_Device(Item2).SerialId);
+  if (Result = 0) then
+    Result := CompareText(TMTP_Device(Item1).Description, TMTP_Device(Item2).Description);
+end;
+
 function GetDevices: TList;
 var
   PMan: IPortableDeviceManager;
@@ -887,55 +893,94 @@ var
   I: Integer;
   DevFriendlyName: WideString;
   DevDescription: WideString;
+  DevManufacturer: WideString;
+
   AMTP_Device: TMTP_Device;
+  SerialList: TStringList;
 begin
+
   result := Tlist.Create;
+  SerialList := TStringList.Create;
+  SerialList.Sorted := True;
+  SerialList.Duplicates := TDuplicates.dupIgnore;
 
-  PMan := CoPortableDeviceManager.Create;
-  if (PMan.RefreshDeviceList <> S_OK) then
-    exit;
-
-  // Determine how many WPD devices are connected
-  IDevCount := 0;
-  if PMan.GetDevices(PWideChar(nil^), IDevCount) <> S_OK then
-    exit;
-
-  if (IDevCount > 0) then
-  begin
-    // Retrieve the device id for each connected device
-    SetLength(PDevs, IDevCount);
-    if PMan.GetDevices(PDevs[0], IDevCount) <> S_OK then
+  try
+    PMan := CoPortableDeviceManager.Create;
+    if (PMan.RefreshDeviceList <> S_OK) then
       exit;
 
-    for I := 0 to IDevCount - 1 do //enumerate the devices:
+    // Determine how many WPD devices are connected
+    IDevCount := 0;
+    if PMan.GetDevices(PWideChar(nil^), IDevCount) <> S_OK then
+      exit;
+
+    if (IDevCount > 0) then
     begin
-      DevFriendlyName := '';
-      DevDescription := '';
+      // Retrieve the device id for each connected device
+      SetLength(PDevs, IDevCount);
+      if PMan.GetDevices(PDevs[0], IDevCount) <> S_OK then
+        exit;
 
-      //Get Friendly Name
-      IDevNameLen := 0;
-      if (PMan.GetDeviceFriendlyName(PDevs[I], Word(nil^), IDevNameLen) <> S_OK) then
-        continue;
-      SetLength(DevFriendlyName, IDevNameLen);
-      PMan.GetDeviceFriendlyName(PDevs[I], PWord(PWideChar(DevFriendlyName))^, IDevNameLen);
+      for I := 0 to IDevCount - 1 do //enumerate the devices:
+      begin
+        DevFriendlyName := '';
+        DevDescription := '';
+        DevManufacturer := '';
 
-      //Get Description
-      IDevNameLen := 0;
-      if (PMan.GetDeviceDescription(PDevs[I], Word(nil^), IDevNameLen) <> S_OK) then
-        continue;
-      SetLength(DevDescription, IDevNameLen);
-      PMan.GetDeviceDescription(PDevs[I], PWord(PWideChar(DevDescription))^, IDevNameLen);
+        //Get Friendly Name
+        IDevNameLen := 0;
+        if (PMan.GetDeviceFriendlyName(PDevs[I], Word(nil^), IDevNameLen) = S_OK) then
+        begin
+          SetLength(DevFriendlyName, IDevNameLen);
+          PMan.GetDeviceFriendlyName(PDevs[I], PWord(PWideChar(DevFriendlyName))^, IDevNameLen);
+        end;
 
-      //  Create device object
-      AMTP_Device := TMTP_Device.Create;
-      AMTP_Device.ID := I;
-      AMTP_Device.Description := Trim(DevDescription);
-      AMTP_Device.FriendlyName := Trim(DevFriendlyName);
-      AMTP_Device.Device := GetDevId(PDevs[I]);
-      AMTP_Device.Serial := GetSerial(AMTP_Device.Device);
-      AMTP_Device.PortableDev := nil;
-      result.Add(AMTP_Device);
+        //Get Description
+        IDevNameLen := 0;
+        if (PMan.GetDeviceDescription(PDevs[I], Word(nil^), IDevNameLen) = S_OK) then
+        begin
+          SetLength(DevDescription, IDevNameLen);
+          PMan.GetDeviceDescription(PDevs[I], PWord(PWideChar(DevDescription))^, IDevNameLen);
+        end;
+
+        //Get Manufacturer
+        IDevNameLen := 0;
+        if (PMan.GetDeviceManufacturer(PDevs[I], Word(nil^), IDevNameLen) = S_OK) then
+        begin
+          SetLength(DevManufacturer, IDevNameLen);
+          PMan.GetDeviceManufacturer(PDevs[I], PWord(PWideChar(DevManufacturer))^, IDevNameLen);
+        end;
+
+        //  Create device object
+        AMTP_Device := TMTP_Device.Create;
+        AMTP_Device.Description   := Trim(DevDescription);
+        AMTP_Device.FriendlyName  := Trim(DevFriendlyName);
+        AMTP_Device.Manufacturer  := Trim(DevManufacturer);
+        AMTP_Device.Device        := GetDevId(PDevs[I]);
+        AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
+        SerialList.Add(AMTP_Device.Serial);
+        AMTP_Device.PortableDev   := nil;
+
+        result.Add(AMTP_Device);
+      end;
+
+      for I := 0 to result.Count -1 do
+      begin
+        AMTP_Device := result[I];
+        AMTP_Device.SerialId := SerialList.IndexOf(AMTP_Device.Serial);
+      end;
+
+      result.Sort(@CompareDevice);
+
+      for I := 0 to result.Count -1 do
+      begin
+        AMTP_Device := result[I];
+        AMTP_Device.ID := I;
+      end;
+
     end;
+  finally
+    SerialList.Free;
   end;
 end;
 
@@ -1176,6 +1221,7 @@ begin
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   try
+    Lst.Clear;
     if PortableDev.Content(Content) = S_OK then
     begin
       CompletePath := GetParents(Content, SParent, '');

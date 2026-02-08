@@ -307,7 +307,8 @@ function TGPXfile.MapSegRoadExclBit(const ASubClass: string): string;
 var
   RoadIdHex: Cardinal;
 begin
-  RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and $ffff7fbf; // $11ff7fbf; ?
+  // It is believed that the RoadId contains Flags. Mask them out
+  RoadIdHex := StrToIntDef('$' + Copy(ASubClass, 13, 8), 0) and MapSegRoadMask;
   result := UpperCase(Copy(ASubClass, 5, 8) + IntToHex(RoadIdHex, 8));
 end;
 
