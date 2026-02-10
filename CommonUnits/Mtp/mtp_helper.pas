@@ -374,7 +374,7 @@ function ConnectToDevice(SDev: WideString; var PortableDev: IMTPDevice; Readonly
 implementation
 
 uses
-  System.Math, System.DateUtils, System.Masks, UnitStringUtils;
+  System.Math, System.DateUtils, System.Masks, System.StrUtils, UnitStringUtils;
 
 // For documentation purposes only
 function DisplayFunctionalCategory(Cat_Id: WideString): String;
@@ -894,6 +894,7 @@ var
   DevFriendlyName: WideString;
   DevDescription: WideString;
   DevManufacturer: WideString;
+  Friendly: string;
 
   AMTP_Device: TMTP_Device;
   SerialList: TStringList;
@@ -933,6 +934,7 @@ begin
         begin
           SetLength(DevFriendlyName, IDevNameLen);
           PMan.GetDeviceFriendlyName(PDevs[I], PWord(PWideChar(DevFriendlyName))^, IDevNameLen);
+          DevFriendlyName := Trim(DevFriendlyName);
         end;
 
         //Get Description
@@ -941,6 +943,7 @@ begin
         begin
           SetLength(DevDescription, IDevNameLen);
           PMan.GetDeviceDescription(PDevs[I], PWord(PWideChar(DevDescription))^, IDevNameLen);
+          DevDescription := Trim(DevDescription);
         end;
 
         //Get Manufacturer
@@ -949,17 +952,29 @@ begin
         begin
           SetLength(DevManufacturer, IDevNameLen);
           PMan.GetDeviceManufacturer(PDevs[I], PWord(PWideChar(DevManufacturer))^, IDevNameLen);
+          DevManufacturer := Trim(DevManufacturer);
         end;
 
         //  Create device object
         AMTP_Device := TMTP_Device.Create;
-        AMTP_Device.Description   := Trim(DevDescription);
-        AMTP_Device.FriendlyName  := Trim(DevFriendlyName);
-        AMTP_Device.Manufacturer  := Trim(DevManufacturer);
+        AMTP_Device.FriendlyName  := DevFriendlyName;
+        AMTP_Device.Description   := DevDescription;
+        AMTP_Device.Manufacturer  := DevManufacturer;
         AMTP_Device.Device        := GetDevId(PDevs[I]);
         AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
         SerialList.Add(AMTP_Device.Serial);
         AMTP_Device.PortableDev   := nil;
+        if not (MatchesMask(AMTP_Device.FriendlyName, '?:\')) and
+           ContainsText(AMTP_Device.Device, '#wpdbusenum') then
+        begin
+          // Open RO
+          ConnectToDevice(AMTP_Device.Device, AMTP_Device.PortableDev, true);
+          GetIdForPath(AMTP_Device.PortableDev, '?:\.', Friendly);
+          AMTP_Device.FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(Friendly), AMTP_Device.FriendlyName]);
+          // Close
+          AMTP_Device.PortableDev.Close;
+          AMTP_Device.PortableDev   := nil;
+        end;
 
         result.Add(AMTP_Device);
       end;

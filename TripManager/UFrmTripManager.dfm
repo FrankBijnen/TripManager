@@ -209,6 +209,9 @@ object FrmTripManager: TFrmTripManager
             Caption = 'Size'
             Tag = 1
             Width = 90
+          end
+          item
+            Caption = 'Trip name'
           end>
         DoubleBuffered = True
         HideSelection = False

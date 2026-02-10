@@ -2,7 +2,6 @@
 
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
-{.$DEFINE DBG_PROFILE}
 {$ENDIF}
 
 interface
@@ -92,7 +91,7 @@ type
     AdvPanel_MapBottom: TPanel;
     EditMapBounds: TEdit;
     EdgeBrowser1: TEdgeBrowser;
-    CmbDevices: TComboBox;
+    CmbDevices: TripManager_ComboBox.TComboBox;
     PnlXTLeft: TPanel;
     PnlFileSys: TPanel;
     ShellTreeView1: TripManager_ShellTree.TShellTreeView;
@@ -426,11 +425,11 @@ type
     procedure DeleteObjects(const AllowRecurse: boolean);
     procedure ReloadFileList;
     procedure SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
-    procedure CheckFile(const AListItem: TListItem; const ALocalFile: string = '');
     procedure SetImported(const AListItem: TListItem; const NewValue: boolean);
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckExploreDb;
+    function CheckTrip(const AListItem: TListItem; const ALocalFile: string = ''): boolean;
     procedure CheckTrips;
     procedure RecreateTrips;
     procedure ShowWarnRecalc;
@@ -554,33 +553,13 @@ begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
 
   SubKey := IntToStr(ModelIndex);
-{$IFDEF DBG_PROFILE}
-DebugMsg(['GetDbPath subkey', SubKey]);
-{$ENDIF}
-
   DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
                                          TModelConv.GetKnownPath(ModelIndex, 0),
                                          SubKey));
-{$IFDEF DBG_PROFILE}
-DebugMsg(['GetDbPath DbPath', DbPath]);
-{$ENDIF}
-
   LDelim := LastDelimiter('\', DbPath) -1;
   DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
   if (GetIdForPath(CurrentDevice.PortableDev, DbPath, result) = '') then
-begin
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['GetDbPath GetIdForPath does not exist.', DbPath]);
-{$ENDIF}
-
     result := '';
-end;
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['GetDbPath result', result]);
-{$ENDIF}
-
 end;
 
 procedure TFrmTripManager.ReadDeviceDB;
@@ -590,61 +569,26 @@ var
   ModelIndex, DefAdvLevel: integer;
 begin
   ClearDeviceDbFiles;
-
-  // Check the connected Device needs reading SQlite
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['ReadDeviceDB called']);
-{$ENDIF}
-
   if not CheckDevice(false) then
     exit;
 
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Device Ready']);
-{$ENDIF}
+  // Needed for checking if the connected Device needs reading SQlite
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
 
   // SQLite path
   DBPath := GetDbPath;
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Looking in Device Path', DBPath, 'File', SettingsDb]);
-{$ENDIF}
-
   if (DBPath = '') then
-  begin
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Device Path does not exist. Exiting.', DBPath]);
-{$ENDIF}
     exit;
-  end;
 
   // Copy settings.db, Update Avoidances changed
-  if (CopyDeviceFile(DBPath, SettingsDb)) then
-  begin
+  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
+     (CopyDeviceFile(DBPath, SettingsDb)) then
+    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Copy Device file OK', DBPath, 'File', SettingsDb]);
-{$ENDIF}
-
-    if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) then
-      SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Reg_AvoidancesChangedTimeAtSave', GetRegistry(Reg_AvoidancesChangedTimeAtSave, 0)]);
-{$ENDIF}
-
-  end;
   // Copy vehicle_profile.db
   if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
      (CopyDeviceFile(DBPath, ProfileDb)) then
   begin
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Copy Device file OK', DBPath, 'File', ProfileDb]);
-{$ENDIF}
-
     OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
     OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
     OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
@@ -653,13 +597,6 @@ DebugMsg(['Copy Device file OK', DBPath, 'File', ProfileDb]);
     OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
 
     NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Vehicle_Profile Read', 'Valid:', NewVehicle_Profile.Valid,
-          'Changed:', NewVehicle_Profile.Changed(OldVehicle_Profile),
-          'New Guid:', NewVehicle_Profile.GUID,
-          'New Profile:', NewVehicle_Profile.Name]);
-{$ENDIF}
 
     if (NewVehicle_Profile.Valid) and
        (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
@@ -679,11 +616,6 @@ DebugMsg(['Vehicle_Profile Read', 'Valid:', NewVehicle_Profile.Valid,
       DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
       if not (DefAdvLevel in [1..4]) then
         SetRegistry(Reg_DefAdvLevel,            NewVehicle_Profile.AdventurousLevel +1);
-
-{$IFDEF DBG_PROFILE}
-DebugMsg(['Vehicle_Profile settings saved. GUID:', GetRegistry(Reg_VehicleProfileGuid, '')]);
-{$ENDIF}
-
     end;
   end;
 
@@ -2456,14 +2388,20 @@ begin
 
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
-    CmbDevices.Items.Add(IntToStr(TMTP_Device(DeviceList[Index]).SerialId) + '.' + TMTP_Device(DeviceList[Index]).DisplayedDevice);
+    CmbDevices.Items.AddObject(TMTP_Device(DeviceList[Index]).DisplayedDevice, TMTP_Device(DeviceList[Index]));
 
   // Reopen Device, and reposition ComboBox to new position
   DevId := TMTP_Device.DeviceIdInList(KeepDevice, DeviceList);
   if (DevId < 0) then
-    LstFiles.Clear // Device not found
+  begin
+    // Device not found
+    CmbDevices.ItemIndex := -1;
+    CmbDevices.Text := SelectMTPDevice;
+    LstFiles.Clear;
+  end
   else
   begin
+    // Device is still there. Re-connect and set ComboBox
     CurrentDevice := DeviceList[DevId];
     if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev)) then
       CmbDevices.ItemIndex := DevId;
@@ -2487,15 +2425,17 @@ begin
   // Guess model from DisplayedDevice
   GuessModel(CurrentDevice.DisplayedDevice);
 
-  RebuildTransportAndRoutePrefMenu;
-
   // Refresh Trips folder? (Zumo 3x0)
   if (NeedRecreateTrips[TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))]) then
     RecreateTrips;
 
   // Need to set the folder?
   if (DeviceFolder[BgDevice.ItemIndex] <> '') then
+  begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
+    if (CheckDevice(false)) then
+      ListFiles;
+  end;
 end;
 
 procedure TFrmTripManager.SelectKnownDevice;
@@ -2550,10 +2490,10 @@ begin
   ModelIndex := CmbModel.ItemIndex;
   GarminModel := TModelConv.Display2Garmin(ModelIndex);
   BgDevice.ItemIndex := 0; // Default to trips
+
   BgDevice.Items[0].Caption := 'Trips';
   BgDevice.Items[1].Caption := 'Gpx';
   BgDevice.Items[2].Caption := 'Poi (Gpi)';
-
   case GarminModel of
     TGarminModel.Zumo595,
     TGarminModel.Drive51:
@@ -2584,11 +2524,9 @@ begin
   ReadDefaultFolders;
   SetDeviceListColumns;
 
-  if (CheckDevice(false)) then
-  begin
-    SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
-    ListFiles;
-  end;
+  // Not all models support all transportation and routing preferences
+  // EG: Nuvi does not Motorcycling, but has Economic
+  RebuildTransportAndRoutePrefMenu;
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);
@@ -3116,18 +3054,100 @@ begin
   end;
 end;
 
+function TFrmTripManager.CheckTrip(const AListItem: TListItem; const ALocalFile: string = ''): boolean;
+var
+  TmpTripList: TTripList;
+  LocalFile: string;
+  Imported: TBooleanItem;
+  AMTP_Data: TMTP_Data;
+begin
+  result := false;
+
+  if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
+    exit;
+
+  if (AListItem.Data <> nil) and
+     (TObject(AListItem.Data) is TMTP_Data) then
+    AMTP_Data := TMTP_Data(AListItem.Data)
+  else
+    exit;
+
+  if (AMTP_Data.IsFolder) then
+    exit;
+
+  TmpTripList := TTripList.Create;
+  try
+    if (ALocalFile <> '') then
+      // Local file already current
+      LocalFile := ALocalFile
+    else
+      // Copy File to Local directory
+      LocalFile := CopyFileToTmp(AListItem);
+
+    if (LocalFile = '') then // Copy failed?
+      exit;
+
+    // Check mImported, Calculation and Explore UUID by loading tmp file
+    TmpTripList.LoadFromFile(LocalFile);
+
+    // Check Imported/Saved
+    Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
+    AMTP_Data.IsNotSavedTrip := (Imported <> nil) and
+                                Imported.AsBoolean;
+    SetCheckMark(AListItem, not AMTP_Data.IsNotSavedTrip);
+
+    // Check Calculated
+    AMTP_Data.IsCalculated := TmpTripList.IsCalculated;
+    if (AMTP_Data.IsCalculated = false) then
+      AListItem.ImageIndex := 2;
+
+    // Save Explore UUID
+    AMTP_Data.ExploreUUID := TmpTripList.ExploreUUID;
+
+    // Show trip name
+    AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
+
+    // File Checked
+    result := true;
+
+  finally
+    TmpTripList.Free;
+  end;
+end;
+
 procedure TFrmTripManager.CheckTrips;
 var
   AListItem: TListItem;
-    CrNormal,CrWait: HCURSOR;
+  CrNormal,CrWait: HCURSOR;
+  CanUseStatusBar, TripChecked: boolean;
 begin
+  if (GetRegistry(Reg_EnableTripFuncs, false) = false) then
+    exit;
+  if (GetRegistry(Reg_EnableFitFuncs, false) = true) then
+    exit;
+
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+
+  CanUseStatusBar := (SbPostProcess.Panels[0].Text = '') and
+                     (SbPostProcess.Panels[1].Text = '');
+  if (CanUseStatusBar) then
+    SbPostProcess.Panels[1].Text := 'Trip file checked';
   try
     for AListItem in LstFiles.Items do
-      CheckFile(AListItem);
+    begin
+      TripChecked := CheckTrip(AListItem);
+      if (TripChecked) and
+         (CanUseStatusBar) then
+      begin
+        SbPostProcess.Panels[0].Text := AListItem.Caption;
+        SbPostProcess.Update;
+      end;
+    end;
   finally
     SetCursor(CrNormal);
+    StatusTimer.Enabled := false;
+    StatusTimer.Enabled := true;
   end;
 end;
 
@@ -4775,7 +4795,7 @@ begin
   if not TransferExistingFileToDevice(CurrentDevice.PortableDev, LocalFile, FSavedFolderId, AListItem) then
     raise Exception.Create(Format('TransferExistingFileToDevice %s to %s failed', [LocalFile, CurrentDevice.Device]));
 
-  CheckFile(AListItem, LocalFile);
+  CheckTrip(AListItem, LocalFile);
 end;
 
 procedure TFrmTripManager.ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
@@ -4812,7 +4832,6 @@ begin
     finally
       VlTripInfo.Strings.EndUpdate;
     end;
-
     case BgDevice.ItemIndex of
       0: DeleteTempFiles(CreatedTempPath, TripMask);
       1: DeleteTempFiles(CreatedTempPath, GpxMask);
@@ -5281,65 +5300,6 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.CheckFile(const AListItem: TListItem; const ALocalFile: string = '');
-var
-  TmpTripList: TTripList;
-  LocalFile: string;
-  Imported: TBooleanItem;
-begin
-  if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
-    exit;
-
-  TmpTripList := TTripList.Create;
-  try
-
-    if (ALocalFile <> '') then
-      // Local file already current
-      LocalFile := ALocalFile
-    else
-      // Copy File to Local directory
-      LocalFile := CopyFileToTmp(AListItem);
-
-    if (LocalFile = '') then
-      exit;
-
-    // Check mImported, calculation and Explore UUID by loading tmp file
-    TmpTripList.LoadFromFile(LocalFile);
-
-    if (AListItem.Data <> nil) and
-       (TObject(AListItem.Data) is TMTP_Data) then
-    with TMTP_Data(AListItem.Data) do
-    begin
-      // Check Imported/Saved
-      Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
-      if (Imported = nil) then
-        IsNotSavedTrip := false
-      else
-        IsNotSavedTrip := Imported.AsBoolean;
-      SetCheckMark(AListItem, not IsNotSavedTrip);
-
-      // Check Calculated
-      IsCalculated := TmpTripList.IsCalculated;
-      if (IsCalculated = false) then
-        AListItem.ImageIndex := 2;
-
-      // Save Explore UUID
-      ExploreUUID := TmpTripList.ExploreUUID;
-    end;
-
-    // Show trip name
-    if (LstFiles.Columns.Count > TripNameCol) then
-    begin
-      while (AListItem.SubItems.Count < TripNameCol) do
-        AListItem.SubItems.Add('');
-      AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
-    end;
-
-  finally
-    TmpTripList.Free;
-  end;
-end;
-
 procedure TFrmTripManager.SetImported(const AListItem: TListItem; const NewValue: boolean);
 var
   TmpTripList: TTripList;
@@ -5386,23 +5346,25 @@ begin
 end;
 
 procedure TFrmTripManager.SetDeviceListColumns;
+var
+  ShowTrips: boolean;
 begin
-    LstFiles.Tag := 1;
+  LstFiles.Tag := 1;
   try
-    if (BgDevice.ItemIndex <> 0) then
+    ShowTrips := (BgDevice.ItemIndex = 0) and
+                 (GetRegistry(Reg_EnableFitFuncs, false) = false);  // Not for fit files.
+
+    LstFiles.Checkboxes := ShowTrips;
+
+    if (ShowTrips) then
+      LstFiles.Columns[TripNameCol].Width := TripNameColWidth
+    else
     begin
+      LstFiles.Columns[TripNameCol].Width := 0;
       LvExplore.Items.Clear;
       TsExplore.TabVisible := false;
     end;
 
-    LstFiles.Checkboxes := (BgDevice.ItemIndex = 0);
-    if (LstFiles.Columns.Count > TripNameCol) then
-    begin
-      if (BgDevice.ItemIndex = 0) then
-        LstFiles.Columns[TripNameCol].Width := TripNameColWidth
-      else
-        LstFiles.Columns[TripNameCol].Width := 0;
-    end;
   finally
     LstFiles.Tag := 0;
   end;
@@ -5466,7 +5428,6 @@ begin
   begin
     ExploreUUIDList := ExploreList;
   end;
-
 end;
 
 procedure TFrmTripManager.ReadSettings;
@@ -5495,10 +5456,6 @@ begin
   else
     WindowState := TWindowState.wsNormal;
   ReadColumnSettings;
-
-  while (LstFiles.Columns.Count > TripNameCol) do
-    LstFiles.Columns.Delete(LstFiles.Columns.Count -1);
-  LstFiles.Columns.Add.Caption := 'TripName';
 
   EdgeBrowser1.UserDataFolder := CreatedTempPath;
   if not Assigned(ATripList) then
@@ -5681,7 +5638,7 @@ begin
 
     Dec(Retries);
     Sleep(500);
-    GetDeviceList;  // Rescan devices
+    GetDeviceList;  // Rescan devices. We dont have to keep the current device
   end;
 end;
 
@@ -5725,6 +5682,7 @@ begin
     DevIndex := WaitForDevice(DeviceName);
 
     // Inserted Device is in the DeviceList and a known device.
+    // Note: Sd Cards are not known devices
     if (DevIndex > -1) and
        (TModelConv.IsKnownDevice(TMTP_Device(DeviceList[DevIndex]))) then
     begin
@@ -5741,9 +5699,6 @@ begin
   SbPostProcess.Panels[0].Text := Device;
   SbPostProcess.Panels[1].Text := Status;
   SbPostProcess.Update;
-
-  CmbDevices.ItemIndex := -1;
-  CmbDevices.Text := SelectMTPDevice;
 
   TvTrip.Items.Clear;
   ClearTripInfo;
