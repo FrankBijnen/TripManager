@@ -70,7 +70,6 @@ uses
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
 
-
 function CoordsFromData(AnObject: TObject): TCoords;
 begin
   FillChar(result, SizeOf(result), 0);
@@ -341,8 +340,7 @@ procedure TFrmShowLog.FormCreate(Sender: TObject);
 begin
   FloatFormatSettings.ThousandSeparator := ',';
   FloatFormatSettings.DecimalSeparator := '.';
-
-  FStyleServices := TStyleManager.Style['Sapphire Kamri'];
+  FStyleServices := TStyleManager.ActiveStyle;
   GpxRptList := TList.Create;
 end;
 

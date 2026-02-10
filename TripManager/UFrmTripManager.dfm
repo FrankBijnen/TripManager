@@ -69,7 +69,6 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 1
-        OnResize = PnlDeviceTopResize
         object CmbDevices: TComboBox
           AlignWithMargins = True
           Left = 142
@@ -85,6 +84,8 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 2
           TextHint = 'Select an MTP device'
           OnChange = CmbDevicesChange
+          OnDrawItem = CmbDevicesDrawItem
+          OnDropDown = CmbDevicesDropDown
           Items.Strings = (
             'Select an MTP device')
         end
@@ -639,12 +640,11 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True

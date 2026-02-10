@@ -11,10 +11,13 @@ uses
   Vcl.Controls, Vcl.StdCtrls;
 
 type
+  TColWidths = array of integer;
+
   TComboBox = class(Vcl.StdCtrls.TComboBox)
   private
     FFullTextSearch: boolean;
     FFullTextSearchItems: TStringList;
+    FColWidths: TColWidths;
     procedure FilterItems;
     procedure SetFullTextSearch(AValue: boolean);
     procedure CNCommand(var AMessage: TWMCommand); message CN_COMMAND;
@@ -23,9 +26,12 @@ type
     destructor Destroy; override;
     procedure CreateParams(var Params: TCreateParams); override;
     procedure AddFullTextSearch(ALine: string);
-    property FullTextSearch: boolean read FFullTextSearch write SetFullTextSearch;
     function ItemsWidth: integer;
     procedure AdjustWidths;
+    procedure SetColWidths(ACols: integer);
+    property  ColWidths: TColWidths read FColWidths write FColWidths;
+
+    property FullTextSearch: boolean read FFullTextSearch write SetFullTextSearch;
   end;
 
 implementation
@@ -38,6 +44,7 @@ begin
   inherited;
   FFullTextSearch := false;
   FFullTextSearchItems := TStringList.Create;
+  SetLength(FColWidths, 0); // Init to zeroes
 end;
 
 destructor TComboBox.Destroy;
@@ -130,11 +137,19 @@ var
   LineWidth: integer;
 begin
   result := 0;
-  for ALine in Items do
+  if (Length(FColWidths) > 0) then
   begin
-    LineWidth := Canvas.TextWidth(ALine) + Margin;
-    if (LineWidth > result) then
-      result := LineWidth;
+    for LineWidth  in FColWidths do
+      result := result + LineWidth;
+  end
+  else
+  begin
+    for ALine in Items do
+    begin
+      LineWidth := Canvas.TextWidth(ALine) + Margin;
+      if (LineWidth > result) then
+        result := LineWidth;
+    end;
   end;
 end;
 
@@ -142,6 +157,12 @@ procedure TComboBox.AdjustWidths;
 begin
   Width := ItemsWidth + GetSystemMetrics(SM_CXVSCROLL);
   DropDownWidth := Width;
+end;
+
+procedure TComboBox.SetColWidths(ACols: integer);
+begin
+  SetLength(FColWidths, 0); // Init to zeroes
+  SetLength(FColWidths, ACols);
 end;
 
 end.

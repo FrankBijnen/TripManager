@@ -13,7 +13,7 @@ uses
 
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ImgList,
   Vcl.Grids, Vcl.ValEdit, Vcl.Menus, Vcl.Mask, Vcl.Buttons, Vcl.Edge, Vcl.Shell.ShellCtrls, Vcl.ToolWin,
-  Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls,
+  Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.Themes,
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, mtp_helper, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
@@ -336,9 +336,11 @@ type
     procedure SpbCorrectUuidClick(Sender: TObject);
     procedure QueryDeviceClick(Sender: TObject);
     procedure ShowDeviceFilesOnMap(Sender: TObject);
-    procedure PnlDeviceTopResize(Sender: TObject);
+    procedure CmbDevicesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure CmbDevicesDropDown(Sender: TObject);
   private
     { Private declarations }
+    FStyleServices: TCustomStyleServices;
     DeviceFile: Boolean;
     HexEditFile: string;
     SqlFile: string;
@@ -1867,11 +1869,6 @@ begin
   SbPostProcess.Panels[1].Width := PCTTripInfo.Width div 2;
 end;
 
-procedure TFrmTripManager.PnlDeviceTopResize(Sender: TObject);
-begin
-  CmbDevices.DropDownWidth := Max(CmbDevices.ItemsWidth, CmbDevices.Width);
-end;
-
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
   MnuTripNewMTP.Enabled := CheckDevice(false);
@@ -2232,6 +2229,8 @@ procedure TFrmTripManager.FormCreate(Sender: TObject);
 var
   AFilePath: string;
 begin
+  FStyleServices := TStyleManager.ActiveStyle;
+
   DirectoryMonitor := TDirectoryMonitor.Create;
   DirectoryMonitor.Subdirectories := false;
   DirectoryMonitor.Actions := [awChangeCreation, awChangeLastWrite];
@@ -2376,8 +2375,20 @@ begin
 end;
 
 procedure TFrmTripManager.GetDeviceList(KeepDevice: string = '');
+const
+  Margin = 6;
 var
   Index, DevId: integer;
+
+  procedure SetColWidth(AColumnText: string; AColumn: integer);
+  var
+    TextWidth: integer;
+  begin
+    TextWidth := CmbDevices.Canvas.TextWidth(AColumnText) + Margin;
+    if (TextWidth > CmbDevices.ColWidths[AColumn]) then
+      CmbDevices.ColWidths[AColumn] := TextWidth;
+  end;
+
 begin
   // Not really needed
   CloseDevice;
@@ -2387,8 +2398,16 @@ begin
   DeviceList := GetDevices;
 
   // Add to ComboBox
+  CmbDevices.SetColWidths(4);
   for Index := 0 to DeviceList.Count - 1 do
+  begin
     CmbDevices.Items.AddObject(TMTP_Device(DeviceList[Index]).DisplayedDevice, TMTP_Device(DeviceList[Index]));
+    SetColWidth(TMTP_Device(DeviceList[Index]).FriendlyName,  0);
+    SetColWidth(TMTP_Device(DeviceList[Index]).Description,   1);
+    SetColWidth(TMTP_Device(DeviceList[Index]).Manufacturer,  2);
+    SetColWidth(TMTP_Device(DeviceList[Index]).Serial,        3);
+  end;
+  CmbDevices.AdjustWidths;
 
   // Reopen Device, and reposition ComboBox to new position
   DevId := TMTP_Device.DeviceIdInList(KeepDevice, DeviceList);
@@ -2480,6 +2499,68 @@ begin
     if (CheckDevice(false)) then
       ReadDeviceDB;
   end;
+end;
+
+procedure TFrmTripManager.CmbDevicesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+const
+  Margin = 3;
+var
+  AMTP_Device: TMTP_Device;
+  ACanvas: TCanvas;
+  AComboBox: TComboBox;
+
+  procedure DrawLine(ACol: integer);
+  var
+    Cnt, LinePos: integer;
+  begin
+    LinePos := 0;
+    for Cnt := 0 to ACol do
+      LinePos := LinePos + AComboBox.ColWidths[Cnt];
+
+    ACanvas.Pen.Color := FStyleServices.GetStyleFontColor(TStyleFont.sfListItemTextNormal);
+    ACanvas.MoveTo(LinePos, Rect.Top);
+    ACanvas.LineTo(LinePos, Rect.Bottom);
+  end;
+
+  procedure DrawCol(ACol: integer; AText: string);
+  var
+    TextPos, Cnt: integer;
+    DrawRect: TRect;
+  begin
+    TextPos := 0;
+    for Cnt := 0 to ACol -1 do
+      TextPos := TextPos + AComboBox.ColWidths[Cnt];
+
+    DrawRect := Rect;
+    DrawRect.Left := TextPos + Margin;
+    DrawRect.Width := AComboBox.ColWidths[ACol];
+    ACanvas.TextRect(DrawRect, AText, [TTextFormats.tfLeft, TTextFormats.tfSingleLine]);
+  end;
+
+begin
+  AComboBox := TComboBox(Control);
+  AMTP_Device := TMTP_Device(AComboBox.Items.Objects[Index]);
+  if (AMTP_Device = nil) then
+    exit;
+
+  ACanvas := TComboBox(Control).Canvas;
+  ACanvas.FillRect(Rect);
+
+  DrawCol(0, AMTP_Device.FriendlyName);
+  DrawLine(0);
+
+  DrawCol(1, AMTP_Device.Description);
+  DrawLine(1);
+
+  DrawCol(2, AMTP_Device.Manufacturer);
+  DrawLine(2);
+
+  DrawCol(3, AMTP_Device.Serial);
+end;
+
+procedure TFrmTripManager.CmbDevicesDropDown(Sender: TObject);
+begin
+  CmbDevices.DropDownWidth := Max(CmbDevices.ItemsWidth, CmbDevices.Width);
 end;
 
 procedure TFrmTripManager.CmbModelChange(Sender: TObject);

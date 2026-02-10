@@ -1,5 +1,4 @@
 ﻿unit mtp_helper;
-{$DEFINE SERIALFROMNAME}
 
 interface
 
@@ -203,6 +202,9 @@ const
 
   WPD_OBJECT_CONTENT_TYPE : PortableDeviceApiLib_TLB._tagpropertykey = (fmtid : '{EF6B490D-5CD8-437A-AFFC-DA8B60EE4A3C}'; pid : 7);
   WPD_DEVICE_SERIAL_NUMBER : PortableDeviceApiLib_TLB._tagpropertykey = (fmtid : '{26D4979A-E643-4626-9E2B-736DC0C92FDC}'; pid : 9);
+  WPD_DEVICE_MANUFACTURER: PortableDeviceApiLib_TLB._tagpropertykey = (fmtid: '{26D4979A-E643-4626-9E2B-736DC0C92FDC}'; pid: 7);
+  WPD_DEVICE_MODEL: PortableDeviceApiLib_TLB._tagpropertykey = (fmtid: '{26D4979A-E643-4626-9E2B-736DC0C92FDC}'; pid: 8);
+  WPD_DEVICE_MODEL_UNIQUE_ID: PortableDeviceApiLib_TLB._tagpropertykey = (fmtid: '{463DD662-7FC4-4291-911C-7F4C9CCA9799}'; pid: 3);
 
   WPD_PROPERTY_NULL_FMTID : TGuid = '{00000000-0000-0000-0000-000000000000}';
   WPD_PROPERTY_NULL_PID = 0;
@@ -478,8 +480,6 @@ begin
   Result := Trim(Copy(RawDevice, Pos(WideString('\\?'), RawDevice)));
 end;
 
-{$IFDEF SERIALFROMNAME}
-
 function GetSerial(const IDeviceName: string): string;
 var
   TempDev: string;
@@ -499,18 +499,21 @@ begin
   result := NextField(result, '&');
 end;
 
-{$ELSE}
-
-// Maybe cleaner, but requires opening and closing device
-function GetSerial(const IDeviceName: string): PWideChar; overload;
+// Requires opening and closing device
+procedure GetDeviceInfo(AMTP_Device: TMTP_Device);
 var
   Content: IPortableDeviceContent;
   DevProps: IPortableDeviceProperties;
   DevValues: IPortableDeviceValues;
   PortableDev: IMTPDevice;
+  PManufacturer: PWideChar;
+  Dev_Val: _tagpropertykey;
+  FriendlyPath: string;
 begin
-  result := '';
-  if not (ConnectToDevice(IDeviceName, PortableDev, true) ) then
+  AMTP_Device.Manufacturer := '';
+  AMTP_Device.Serial := GetSerial(AMTP_Device.Device);
+
+  if not (ConnectToDevice(AMTP_Device.Device, PortableDev, true) ) then
     exit;
   try
     if (PortableDev.Content(Content) <> S_OK) then
@@ -519,13 +522,22 @@ begin
       exit;
     if (DevProps.GetValues('DEVICE', nil, DevValues) <> S_OK) then
       exit;
-    if (DevValues.GetStringValue(WPD_DEVICE_SERIAL_NUMBER, result) <> S_OK) then
-      exit;
+    // Get Manufacturer
+    Dev_val := WPD_DEVICE_MANUFACTURER;
+    if (DevValues.GetStringValue(Dev_val, PManufacturer) = S_OK) then
+      AMTP_Device.Manufacturer := PManufacturer;
+    // For wpdbusenum add to the root path to friendlyname
+    // Example Sd Cards of Zumo
+    if not (MatchesMask(AMTP_Device.FriendlyName, '?:\')) and
+       ContainsText(AMTP_Device.Device, '#wpdbusenum') then
+    begin
+      GetIdForPath(PortableDev, '?:\.', FriendlyPath);
+      AMTP_Device.FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath), AMTP_Device.FriendlyName]);
+    end;
   finally
     PortableDev.Close;
   end;
 end;
-{$ENDIF}
 
 function IsDirectory(Prop_Val: IPortableDeviceValues): Boolean;
 var
@@ -894,8 +906,6 @@ var
   DevFriendlyName: WideString;
   DevDescription: WideString;
   DevManufacturer: WideString;
-  Friendly: string;
-
   AMTP_Device: TMTP_Device;
   SerialList: TStringList;
 begin
@@ -961,21 +971,8 @@ begin
         AMTP_Device.Description   := DevDescription;
         AMTP_Device.Manufacturer  := DevManufacturer;
         AMTP_Device.Device        := GetDevId(PDevs[I]);
-        AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
+        GetDeviceInfo(AMTP_Device);
         SerialList.Add(AMTP_Device.Serial);
-        AMTP_Device.PortableDev   := nil;
-        if not (MatchesMask(AMTP_Device.FriendlyName, '?:\')) and
-           ContainsText(AMTP_Device.Device, '#wpdbusenum') then
-        begin
-          // Open RO
-          ConnectToDevice(AMTP_Device.Device, AMTP_Device.PortableDev, true);
-          GetIdForPath(AMTP_Device.PortableDev, '?:\.', Friendly);
-          AMTP_Device.FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(Friendly), AMTP_Device.FriendlyName]);
-          // Close
-          AMTP_Device.PortableDev.Close;
-          AMTP_Device.PortableDev   := nil;
-        end;
-
         result.Add(AMTP_Device);
       end;
 
