@@ -124,7 +124,7 @@ var
 implementation
 
 uses
-  System.StrUtils,
+  System.StrUtils, System.Masks,
   UnitMtpDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
 
 type
@@ -437,7 +437,8 @@ begin
       continue;
     for KnownIndex := KnownDevices.Count -1 downto 0 do
     begin
-      if (StartsText(KnownDevices[KnownIndex], TMTP_Device(DeviceList[DevIndex]).DisplayedDevice)) then
+      // Allow wildcards for mass storage devices. EG ?:\Garmin
+      if (MatchesMask(TMTP_Device(DeviceList[DevIndex]).DisplayedDevice, KnownDevices[KnownIndex])) then
         exit(DevIndex);
     end;
   end;
