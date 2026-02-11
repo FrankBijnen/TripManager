@@ -73,7 +73,7 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 142
           Top = 5
-          Width = 165
+          Width = 157
           Height = 21
           Margins.Left = 1
           Margins.Top = 4
@@ -84,10 +84,10 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 2
           TextHint = 'Select an MTP device'
           OnChange = CmbDevicesChange
-          OnDrawItem = CmbDevicesDrawItem
           OnDropDown = CmbDevicesDropDown
           Items.Strings = (
             'Select an MTP device')
+          ExplicitWidth = 165
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
@@ -104,7 +104,7 @@ object FrmTripManager: TFrmTripManager
         end
         object BgDevice: TButtonGroup
           AlignWithMargins = True
-          Left = 380
+          Left = 372
           Top = 4
           Width = 157
           Height = 24
@@ -130,19 +130,21 @@ object FrmTripManager: TFrmTripManager
           ItemIndex = 0
           TabOrder = 4
           OnClick = BgDeviceClick
+          ExplicitLeft = 380
         end
-        object BtnSetDeviceDefault: TButton
+        object BtnSetDefault: TButton
           AlignWithMargins = True
-          Left = 537
+          Left = 529
           Top = 4
-          Width = 80
+          Width = 88
           Height = 24
           Margins.Left = 0
           Margins.Right = 0
           Align = alRight
           Caption = 'Set as default'
           TabOrder = 5
-          OnClick = BtnSetDeviceDefaultClick
+          OnClick = BtnSetDefaultClick
+          ExplicitTop = 2
         end
         object BtnFunctions: TButton
           AlignWithMargins = True
@@ -159,7 +161,7 @@ object FrmTripManager: TFrmTripManager
         end
         object CmbModel: TComboBox
           AlignWithMargins = True
-          Left = 309
+          Left = 301
           Top = 5
           Width = 70
           Height = 21
@@ -179,6 +181,7 @@ object FrmTripManager: TFrmTripManager
             'Edge'
             'Garmin'
             'Unknown')
+          ExplicitLeft = 309
         end
       end
       object LstFiles: TListView
@@ -640,11 +643,12 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 13
+          Height = 24
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -1093,7 +1097,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1334
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1101,7 +1104,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -3590,5 +3593,18 @@ object FrmTripManager: TFrmTripManager
       end>
     Left = 693
     Top = 427
+  end
+  object PopupSetDeviceDefault: TPopupMenu
+    Left = 536
+    Top = 80
+    object OverrideDeviceName: TMenuItem
+      Caption = 'Override device name'
+      OnClick = SetOverrideDeviceNameClick
+    end
+    object Cleardevicename: TMenuItem
+      Tag = 1
+      Caption = 'Clear overriden device settings'
+      OnClick = SetOverrideDeviceNameClick
+    end
   end
 end

@@ -13,6 +13,7 @@ object FrmAdvSettings: TFrmAdvSettings
   Font.Style = []
   Position = poMainFormCenter
   OnClose = FormClose
+  OnCreate = FormCreate
   OnShow = FormShow
   TextHeight = 15
   object PnlBottom: TPanel

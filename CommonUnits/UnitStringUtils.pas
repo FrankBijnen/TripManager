@@ -32,6 +32,7 @@ procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buff
 procedure DebugMsg(const Msg: array of variant);
 function TempFilename(const Prefix: string): string;
 function GetAppData: string;
+function WildCardDrive(const APath: string): string;
 function EscapeHtml(const HTML: string): string;
 function EscapeUrl(const URL: string): string;
 function EscapeDQuote(const HTML: string): string;
@@ -269,6 +270,17 @@ begin
     if not DirectoryExists(result) then
       CreateDir(result);
   end;
+end;
+
+function WildCardDrive(const APath: string): string;
+var
+  P: integer;
+begin
+  result := APath;
+  // Make drive letter a ?. Allow WildCard.
+  P := Pos(':\', result);
+  if (P > 1) then
+    result[P -1] := '?';
 end;
 
 function CreateTempPath(const Prefix: string): string;

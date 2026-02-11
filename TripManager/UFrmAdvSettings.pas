@@ -52,6 +52,7 @@ type
     procedure BtnClearCoordCacheClick(Sender: TObject);
     procedure BtnCurrentClick(Sender: TObject);
     procedure PctMainResize(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     SamplePlace: TObject;
@@ -724,6 +725,11 @@ begin
     SaveSettings;
 end;
 
+procedure TFrmAdvSettings.FormCreate(Sender: TObject);
+begin
+  PctMain.ActivePage := TabGeneral;
+end;
+
 procedure TFrmAdvSettings.FormShow(Sender: TObject);
 begin
   SamplePlace := nil;
@@ -731,7 +737,6 @@ begin
 
   LoadSettings;
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
-  PctMain.ActivePage := TabGeneral;
   MemoAddressFormatChange(MemoAddressFormat);
 end;
 

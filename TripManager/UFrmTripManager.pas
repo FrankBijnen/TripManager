@@ -115,7 +115,7 @@ type
     BtnRefresh: TButton;
     EdFileSysFolder: TripManager_ComboBox.TComboBox;
     BgDevice: TButtonGroup;
-    BtnSetDeviceDefault: TButton;
+    BtnSetDefault: TButton;
     DeviceMenu: TPopupMenu;
     FileFunctions1: TMenuItem;
     N1: TMenuItem;
@@ -229,6 +229,9 @@ type
     N17: TMenuItem;
     OpeninKurviger1: TMenuItem;
     Addtomap1: TMenuItem;
+    PopupSetDeviceDefault: TPopupMenu;
+    OverrideDeviceName: TMenuItem;
+    Cleardevicename: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -260,7 +263,7 @@ type
     procedure TvTripCustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure BtnFunctionsMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SetSelectedTrips(Sender: TObject);
-    procedure BtnSetDeviceDefaultClick(Sender: TObject);
+    procedure BtnSetDefaultClick(Sender: TObject);
     procedure TripGpiTimerTimer(Sender: TObject);
     procedure DeleteFilesClick(Sender: TObject);
     procedure RenameFile(Sender: TObject);
@@ -338,6 +341,7 @@ type
     procedure ShowDeviceFilesOnMap(Sender: TObject);
     procedure CmbDevicesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure CmbDevicesDropDown(Sender: TObject);
+    procedure SetOverrideDeviceNameClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -972,6 +976,9 @@ procedure TFrmTripManager.ActSettingsExecute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   FrmAdvSettings.SampleTrip := ATripList;
+  if (Sender is TMenuItem) then
+    FrmAdvSettings.PctMain.ActivePage := FrmAdvSettings.TabDevice;
+
   if FrmAdvSettings.ShowModal = mrOk then
     ReadSettings;
 
@@ -1833,28 +1840,21 @@ begin
   SaveTripGpiFile;
 end;
 
-procedure TFrmTripManager.BtnSetDeviceDefaultClick(Sender: TObject);
+procedure TFrmTripManager.BtnSetDefaultClick(Sender: TObject);
 var
   CurrentDevicePath: string;
-  ModelIndex: integer;
-  SubKey: string;
+  ModelIndex: string;
 begin
   // Need a device
   if (not CheckDevice(false)) then
     exit;
 
-  CurrentDevicePath := GetDevicePath(FCurrentPath);
-  // Make drive letter a ?. Allow WildCard.
-  if (Copy(CurrentDevicePath, 2, 2) = ':\') then
-    CurrentDevicePath[1] := '?';
-
-  // Save Device settings
-  ModelIndex := CmbModel.ItemIndex;
-  SubKey := IntToStr(ModelIndex);
+  CurrentDevicePath := WildCardDrive(GetDevicePath(FCurrentPath));
+  ModelIndex := IntToStr(CmbModel.ItemIndex);
   case (BgDevice.ItemIndex) of
-    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, SubKey);
-    1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath, SubKey);
-    2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath, SubKey);
+    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, ModelIndex);
+    1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath, ModelIndex);
+    2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath, ModelIndex);
   end;
 end;
 
@@ -2261,7 +2261,12 @@ begin
 
   TModelConv.CmbModelDevices(CmbModel.Items);
   CmbModel.AdjustWidths;
-
+  if (GetRegistry(Reg_UnsafeModels, false)) then
+  begin
+    CmbDevices.OnDrawItem := CmbDevicesDrawItem;
+    BtnSetDefault.DropDownMenu := PopupSetDeviceDefault;
+    BtnSetDefault.Style := TCustomButton.TButtonStyle.bsSplitButton;
+  end;
   ExploreList := TStringList.Create;
   ExploreList.NameValueSeparator := #9;
   ExploreList.Sorted := true;
@@ -2999,6 +3004,27 @@ begin
       OsmTrack.Free;
     end;
   end;
+end;
+
+procedure TFrmTripManager.SetOverrideDeviceNameClick(Sender: TObject);
+var
+  ModelIndex: string;
+begin
+  // Need a device
+  if (not CheckDevice(false)) then
+    exit;
+
+  ModelIndex := IntToStr(CmbModel.ItemIndex);
+  if (TMenuItem(Sender).Tag = 0) then
+    SetRegistry(Reg_PrefDev_Key, WildCardDrive(CmbDevices.Text), ModelIndex)
+  else
+  begin
+    SetRegistry(Reg_PrefDev_Key,            '', ModelIndex);
+    SetRegistry(Reg_PrefDevTripsFolder_Key, '', ModelIndex);
+    SetRegistry(Reg_PrefDevGpxFolder_Key,   '', ModelIndex);
+    SetRegistry(Reg_PrefDevPoiFolder_Key,   '', ModelIndex);
+  end;
+  ActSettingsExecute(Sender);
 end;
 
 procedure TFrmTripManager.DeviceFilesOnMap(Tag: integer);
