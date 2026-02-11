@@ -2438,7 +2438,7 @@ begin
     exit;
 
   CurrentDevice := DeviceList[Indx];
-  if not ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev, false) then
+  if not ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev) then
     raise exception.Create(Format('Device %s could not be opened.', [CurrentDevice.DisplayedDevice]));
 
   // Guess model from DisplayedDevice

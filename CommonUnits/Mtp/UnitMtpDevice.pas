@@ -23,10 +23,12 @@ type
                        const AObjectId: string;
                        const ACreated: TDateTime);
     procedure UpdateListItem(const AListItem: TListItem;
-                             const ASubItems: array of string);
-    function CreateListItem(const Alist: TListItems;
+                             const ASubItems: array of string;
+                             const AMinSubItems: integer);
+    function CreateListItem(const AList: TListItems;
                             const ACaption: string;
-                            const ASubItems: array of string): TListItem;
+                            const ASubItems: array of string;
+                            const AMinSubItems: integer): TListItem;
   end;
 
   TMTP_Data = class(TBASE_Data)
@@ -73,26 +75,32 @@ begin
 end;
 
 procedure TBASE_Data.UpdateListItem(const AListItem: TListItem;
-                                    const ASubItems: array of string);
-var SubItem: string;
+                                    const ASubItems: array of string;
+                                    const AMinSubItems: integer);
+var
+  SubItem: string;
 begin
   AListItem.SubItems.Clear;
   for SubItem in ASubItems do
     AListItem.SubItems.Add(SubItem);
+
+  while (AListItem.SubItems.Count < AMinSubItems) do
+    AListItem.SubItems.Add('');
 end;
 
-function TBASE_Data.CreateListItem(const Alist: TListItems;
+function TBASE_Data.CreateListItem(const AList: TListItems;
                                    const ACaption: string;
-                                   const ASubItems: array of string): TListItem;
+                                   const ASubItems: array of string;
+                                   const AMinSubItems: integer): TListItem;
 begin
-  result := Alist.Add;
+  result := AList.Add;
 
   if (IsFolder) then
     result.ImageIndex := 1
   else
     result.ImageIndex := 0;
   result.Caption := ACaption;
-  UpdateListItem(result, ASubItems);
+  UpdateListItem(result, ASubItems, AMinSubItems);
 
   result.Data := Self;
 end;

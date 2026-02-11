@@ -16,9 +16,9 @@ uses
 // http://gzune.googlecode.com/svn/trunk/zUnlock/portabledeviceconstants.cs
 
 const
-  CLIENT_NAME : WideString = 'TDbware';
+  CLIENT_NAME : WideString = 'TDBware';
   CLIENT_MAJOR_VER = 1;
-  CLIENT_MINOR_VER = 1;
+  CLIENT_MINOR_VER = 2;
   CLIENT_REVISION  = 0;
   DEF_BUFFERSIZE   = 512 * 1024;
 
@@ -342,6 +342,7 @@ const
 
   PORTABLE_DEVICE_DELETE_NO_RECURSION    = 0;
   PORTABLE_DEVICE_DELETE_WITH_RECURSION  = 1;
+  E_WPD_DEVICE_ALREADY_OPENED            = HRESULT($802A0001);
 
 function FirstStorageIDs(PortableDev: IMTPDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
 function GetFirstStorageID(PortableDev: IMTPDevice): WideString;
@@ -355,7 +356,7 @@ function GetIdForPath(PortableDev: IMTPDevice;
 function GetIdForFile(PortableDev: IMTPDevice;
                       SPath: WideString;
                       SFile: WideString;
-                      AlistItem: TListItem): string; overload;
+                      AListItem: TListItem): string; overload;
 function GetIdForFile(PortableDev: IMTPDevice;
                       SPath: WideString;
                       SFile: WideString;
@@ -371,7 +372,7 @@ function TransferNewFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideSt
                                  NewName: WideString = ''): WideString;
 function TransferExistingFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
 function GetDevices: TList;
-function ConnectToDevice(SDev: WideString; var PortableDev: IMTPDevice; Readonly: boolean = true): Boolean;
+function ConnectToDevice(SDev: WideString; var PortableDev: IMTPDevice; Readonly: boolean = false): Boolean;
 
 implementation
 
@@ -535,7 +536,7 @@ begin
       AMTP_Device.FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath), AMTP_Device.FriendlyName]);
     end;
   finally
-    PortableDev.Close;
+    PortableDev := nil;
   end;
 end;
 
@@ -714,7 +715,7 @@ begin
   result := (Hr = S_OK);
 end;
 
-function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = true): Boolean;
+function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): Boolean;
 var
   PortableDeviceValues: IPortableDeviceValues;
   Hr: HResult;
@@ -764,6 +765,10 @@ begin
 
   //opened ok
   Result := (Hr = S_OK);
+
+  if (result = false) then
+    PortableDev := nil;
+
 end;
 
 procedure EnumFunctionalCategoryObjects(Capabilities: IPortableDeviceCapabilities; SCat: WideString);
@@ -973,6 +978,7 @@ begin
         AMTP_Device.Device        := GetDevId(PDevs[I]);
         GetDeviceInfo(AMTP_Device);
         SerialList.Add(AMTP_Device.Serial);
+        AMTP_Device.PortableDev   := nil;
         result.Add(AMTP_Device);
       end;
 
@@ -1098,7 +1104,8 @@ end;
 
 procedure FillObjectProperties(ObjId: PWideChar;
                                Prop: IPortableDeviceProperties;
-                               AListItem: TListItem); overload;
+                               AListItem: TListItem;
+                               AMinSubItems: integer); overload;
 var
   AMTP_Data: TMTP_Data;
   File_Info: TFile_Info;
@@ -1115,21 +1122,25 @@ begin
   AMTP_Data.UpdateListItem(AListItem, [File_Info.DateOriginal,
                                        File_Info.TimeOriginal,
                                        ExtractFileExt(File_Info.ObjName),
-                                       SenSize(File_Info.ObjSize)]);
+                                       SenSize(File_Info.ObjSize)],
+                                       AMinSubItems);
 end;
 
 procedure FillObjectProperties(ObjId: PWideChar;
                                Prop: IPortableDeviceProperties;
-                               AListItems: TListItems); overload;
+                               AListItems: TListItems;
+                               AMinSubItems: integer); overload;
 var
   AMTP_Data: TMTP_Data;
   File_Info: TFile_Info;
 begin
   if not GetFileInfo(ObjId, Prop, File_Info) then
     exit;
+
   AMTP_Data := TMTP_Data.Create(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
   AMTP_Data.CreateListItem(AListItems, File_Info.ObjName,
-                           [File_Info.DateOriginal, File_Info.TimeOriginal, ExtractFileExt(File_Info.ObjName), SenSize(File_Info.ObjSize), '']);
+                           [File_Info.DateOriginal, File_Info.TimeOriginal, ExtractFileExt(File_Info.ObjName), SenSize(File_Info.ObjSize)],
+                            AMinSubItems);
 end;
 
 function EnumContentsOfFolder(Content: IPortableDeviceContent;
@@ -1145,6 +1156,7 @@ var
   Prop_Val: IPortableDeviceValues;
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
   AMTP_Data: TMTP_Data;
+  MinSubItems: integer;
   CrNormal, CrWait: HCURSOR;
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
@@ -1152,6 +1164,10 @@ begin
   result := '';
 
   try
+    MinSubItems := 0;
+    if (Lst.Owner is TListView) then
+      MinSubItems := TListView(Lst.Owner).Columns.Count -1;
+
     if not VarIsClear(Content) then
     begin
 
@@ -1171,7 +1187,7 @@ begin
 
         // Add .. entry (up)
         AMTP_Data := TMTP_Data.Create(true, 0, ParentId, 0);
-        AMTP_Data.CreateListItem(Lst, '..', ['', '', '', '', '']);
+        AMTP_Data.CreateListItem(Lst, '..', [], MinSubItems);
 
         ObjectIds.Reset;
 
@@ -1181,7 +1197,7 @@ begin
           if (Fetched = 0) then // Does it ever happen?
             break;
 
-          FillObjectProperties(ObjId, Prop, Lst);
+          FillObjectProperties(ObjId, Prop, Lst, MinSubItems);
         end;
       end;
     end;
@@ -1224,7 +1240,7 @@ end;
 function ReadFilesFromDevice(PortableDev: IMTPDevice;
                              Lst: TListItems;
                              SParent: WideString;
-                             var CompletePath: WideString):PWideChar;
+                             var CompletePath: WideString): PWideChar;
 var
   Content: IPortableDeviceContent;
   CrNormal, CrWait: HCURSOR;
@@ -1330,20 +1346,21 @@ begin
   Prop := nil;
   if PortableDev.Content(Content) <> S_OK then
     exit;
+
   result := FindItemInFolder(Content, SPath, SFile, FriendlyName);
-    Content.Properties(Prop);
+  Content.Properties(Prop);
 end;
 
 function GetIdForFile(PortableDev: IMTPDevice;
                       SPath: WideString;
                       SFile: WideString;
-                      AlistItem: TListItem): string;
+                      AListItem: TListItem): string;
 var
   Prop: IPortableDeviceProperties;
 begin
   result := GetPropForFile(PortableDev, SPath, SFile, Prop);
   if (Prop <> nil) then
-    FillObjectProperties(PWideChar(result), Prop, AlistItem);
+    FillObjectProperties(PWideChar(result), Prop, AListItem, AListItem.SubItems.Count);
 end;
 
 function GetIdForFile(PortableDev: IMTPDevice;
@@ -1638,7 +1655,8 @@ end;
 // - Delete the old file
 // - Rename temporary to original name.
 
-const TempExtension = '.tmp';
+const
+  TempExtension = '.tmp';
 
 function TransferExistingFileToDevice(PortableDev: IMTPDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
 var
