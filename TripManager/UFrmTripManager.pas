@@ -403,7 +403,6 @@ type
     procedure LoadSqlFile(const FileName: string; const FromDevice: boolean);
     procedure FreeDeviceData(const ACustomData: pointer);
     procedure FreeDevices;
-    function CopyDeviceFile(const APath, AFile: string): boolean;
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     function GetDbPath: string;
@@ -411,7 +410,6 @@ type
     procedure RebuildTransportAndRoutePrefMenu;
     procedure RebuildDeviceDbMenu;
     procedure ReadDeviceDB;
-    procedure ReadGarminDevice(const ModelDescription: string);
     procedure GuessModel(const DisplayedDevice: string);
     procedure SelectDevice(const Indx: integer);
     procedure SelectKnownDevice;
@@ -419,6 +417,7 @@ type
     function GetItemType(const AListview: TListView): TDirType;
     procedure CloseDevice;
     function CheckDevice(RaiseException: boolean = true): boolean;
+    procedure SetDeviceColumnWidths;
     procedure GetDeviceList(KeepDevice: string = '');
     function GetDevicePath(const CompletePath: string): string;
     procedure SetDeviceDisplayPath;
@@ -524,31 +523,6 @@ begin
   DeleteTempFiles(GetOSMTemp, Format('\%s_%s_track%s', [App_Prefix, CurrentMapItem, GetTracksExt]));
 end;
 
-function TFrmTripManager.CopyDeviceFile(const APath, AFile: string): boolean;
-var
-  CurrentObjectId, FolderId: widestring;
-  FriendlyPath: string;
-begin
-  result := false;
-  if not CheckDevice(false) then
-    exit;
-
-  FolderId := GetIdForPath(CurrentDevice.PortableDev, APath, FriendlyPath);
-  if (FolderId = '') then
-    exit;
-
-  // Get Id of File
-  CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, FolderId, AFile);
-  if (CurrentObjectId = '') then
-    exit;
-
-  ForceDirectories(GetDeviceTmp);
-  if not GetFileFromDevice(CurrentDevice.PortableDev, CurrentObjectId, GetDeviceTmp, AFile) then
-    exit;
-
-  result := true;
-end;
-
 function TFrmTripManager.GetDbPath: string;
 var
   ModelIndex: integer;
@@ -560,7 +534,7 @@ begin
 
   SubKey := IntToStr(ModelIndex);
   DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
-                                         TModelConv.GetKnownPath(ModelIndex, 0),
+                                         TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0),
                                          SubKey));
   LDelim := LastDelimiter('\', DbPath) -1;
   DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
@@ -588,12 +562,12 @@ begin
 
   // Copy settings.db, Update Avoidances changed
   if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
-     (CopyDeviceFile(DBPath, SettingsDb)) then
+     (CurrentDevice.CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
     SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
   // Copy vehicle_profile.db
   if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
-     (CopyDeviceFile(DBPath, ProfileDb)) then
+     (CurrentDevice.CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
     OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
     OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
@@ -621,152 +595,45 @@ begin
       // Only load Default Adventurous level from profile if invalid
       DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
       if not (DefAdvLevel in [1..4]) then
-        SetRegistry(Reg_DefAdvLevel,            NewVehicle_Profile.AdventurousLevel +1);
+        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.AdventurousLevel +1);
     end;
   end;
 
   // Copy explore.db
   if (GetRegistry(Reg_EnableExploreFuncs, false)) and
      (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) and
-     (CopyDeviceFile(DBPath, ExploreDb)) then
+     (CurrentDevice.CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 
   RebuildDeviceDbMenu;
 end;
 
-procedure TFrmTripManager.ReadGarminDevice(const ModelDescription: string);
-var
-  CurDevId, DevId: integer;
-  NFile, FriendlyPath: string;
-  XmlDoc: TXmlVSDocument;
-  DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
-
-  function GetPath(CheckNode: TXmlVSNode; AName, Direction, AExt: string): string;
-  var
-    NewPath, FriendlyPath: string;
-    DataTypeNode, FileNode, LocationNode: TXmlVSNode;
-  begin
-    result := '';
-    for DataTypeNode in CheckNode.ChildNodes do
-    begin
-      if not (SameText(FindSubNodeValue(DataTypeNode, 'Name'), AName)) then
-        continue;
-      for FileNode in DataTypeNode.ChildNodes do
-      begin
-        if (FindSubNodeValue(FileNode, 'TransferDirection') <> Direction) then
-          continue;
-        LocationNode := FileNode.Find('Location');
-        if (Assigned(LocationNode)) and
-           (SameText(FindSubNodeValue(LocationNode, 'FileExtension'), AExt)) then
-        begin
-          NewPath := ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\']);
-          result := Format('%s%s', [NonMTPRoot, NewPath]);
-          if (GetIdForPath(CurrentDevice.PortableDev, result, FriendlyPath) <> '') then
-            exit
-          else
-            exit(Format('%s%s', [InternalStorage, NewPath]));
-        end;
-      end;
-    end;
-  end;
-
-begin
-
-  GarminDevice.Init;
-  GarminDevice.ModelDescription := ModelDescription;
-  GarminDevice.GarminModel := TModelConv.GetModelFromGarminDevice(GarminDevice);
-
-  // Need a device to check better
-  if not CheckDevice(false) then
-    exit;
-
-  // Location of GarminDevice.Xml
-  NFile := GarminDeviceXML;
-
-  // Copy and read GarminDevice.xml
-  CurDevId := CurrentDevice.Id;
-  DeleteFile(GetDeviceTmp + NFile);
-  try
-    if not (CopyDeviceFile(NonMTPRoot + GarminPath, NFile)) and
-       not (CopyDeviceFile(InternalStorage + GarminPath, NFile)) then
-    begin
-      // There is no garmindevice in ?:\Garmin, or Internal Storage\Garmin
-      // Check other devices with the same serialId.
-      // It could be the SD Card, or a hidden MTP partition as found with the 595
-      for DevId := 0 to DeviceList.Count -1 do
-      begin
-        if DevId = CurDevId then
-          continue;
-        if (TMTP_Device(DeviceList[DevId]).Serial = TMTP_Device(DeviceList[CurDevId]).Serial) then
-        begin
-          CurrentDevice := DeviceList[DevId];
-          if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev, true)) then
-          begin
-            if (CopyDeviceFile(NonMTPRoot + GarminPath, NFile)) or
-               (CopyDeviceFile(InternalStorage + GarminPath, NFile)) then
-             break;
-          end;
-        end;
-      end;
-    end;
-  finally
-    CurrentDevice := DeviceList[CurDevId];
-  end;
-
-  // Do we have the XML?
-  if (FileExists(GetDeviceTmp + NFile)) then
-  begin
-    XmlDoc := TXmlVSDocument.Create;
-    try
-      XmlDoc.LoadFromFile(GetDeviceTmp + NFile);
-      DeviceNode := XmlDoc.ChildNodes.Find('Device');
-      if (DeviceNode = nil) then
-        exit;
-      ModelNode := DeviceNode.Find('Model');
-      if (ModelNode = nil) then
-        exit;
-      MassStorageNode := DeviceNode.Find('MassStorageMode');
-
-      // Update model from GarminDevice.xml
-      GarminDevice.ModelDescription := FindSubNodeValue(ModelNode, 'Description');
-      GarminDevice.PartNumber := FindSubNodeValue(ModelNode, 'PartNumber');
-      GarminDevice.GarminModel := TModelConv.GetModelFromGarminDevice(GarminDevice);
-
-      case GarminDevice.GarminModel of
-        TGarminModel.Zumo595,
-        TGarminModel.Zumo590,
-        TGarminModel.Drive51,
-        TGarminModel.Zumo3x0,
-        TGarminModel.Nuvi2595:
-          if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
-            GarminDevice.GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
-        TGarminModel.Unknown:
-          GarminDevice.GarminModel := TModelConv.GuessGarminOrEdge(GarminDevice.ModelDescription);
-      end;
-
-      // Get default paths
-      if (Assigned(MassStorageNode)) then
-      begin
-        GarminDevice.GpxPath := GetPath(MassStorageNode, 'GPSData', 'InputToUnit', 'gpx');
-        GarminDevice.GpiPath := GetPath(MassStorageNode, 'CustomPOI', 'InputToUnit', 'gpi');
-        GarminDevice.CoursePath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'OutputFromUnit', 'fit');
-        GarminDevice.NewFilesPath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'InputToUnit', 'fit');
-        GarminDevice.ActivitiesPath := GetPath(MassStorageNode, 'FIT_TYPE_4', 'OutputFromUnit', 'fit');
-      end;
-    finally
-      XmlDoc.Free;
-    end;
-  end;
-
-end;
-
 procedure TFrmTripManager.GuessModel(const DisplayedDevice: string);
 var
   ModelIndex: integer;
+  ModelDescription: string;
+  TmpGarminDevice: TGarminDevice;
 begin
-  ReadGarminDevice(DisplayedDevice);
-
-  ModelIndex := TModelConv.Garmin2Display(GarminDevice.GarminModel);
+  if CheckDevice(false) then
+  begin
+    // We have device, read GarminDevice.XML
+    CurrentDevice.ReadGarminDevice(DisplayedDevice, DeviceList);
+    ModelIndex := TModelConv.Garmin2Display(CurrentDevice.GarminDevice.GarminModel);
+    ModelDescription := CurrentDevice.GarminDevice.ModelDescription;
+    SetDeviceColumnWidths; // Column widths may have changed;
+  end
+  else
+  begin
+    // Guess, based on the device name
+    TmpGarminDevice := TGarminDevice.Create;
+    try
+      TmpGarminDevice.Init(DisplayedDevice);
+      ModelIndex := TModelConv.Garmin2Display(TmpGarminDevice.GarminModel);
+      ModelDescription := TmpGarminDevice.ModelDescription;
+    finally
+      TmpGarminDevice.Free;
+    end;
+  end;
 
   // Change description for 'old' Garmin units and Edge
   CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminEdge)] := Edge_Name;
@@ -775,20 +642,15 @@ begin
      (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminGeneric)) then
   begin
     if (DisplayedDevice <> CmbModel.Items[ModelIndex]) and
-       (GarminDevice.ModelDescription <> '') then
-      CmbModel.Items[ModelIndex] := GarminDevice.ModelDescription;
+       (ModelDescription <> '') then
+      CmbModel.Items[ModelIndex] := ModelDescription;
   end;
   CmbModel.AdjustWidths;
 
-  // Model changed?
-  if (ModelIndex <> CmbModel.ItemIndex) then
-  begin
-    CmbModel.ItemIndex := ModelIndex;
-    CmbModelChange(CmbModel);
-  end;
+  CmbModel.ItemIndex := ModelIndex;
+  CmbModelChange(CmbModel);
 
   SetRegistry(Reg_CurrentModel, ModelIndex);
-  ReadDefaultFolders;
 end;
 
 // No need to close manually.
@@ -952,11 +814,12 @@ begin
   CrNormal := SetCursor(CrWait);
   try
     result := Assigned(CurrentDevice) and
-              Assigned(CurrentDevice.PortableDev) and
-              (FirstStorageIds(CurrentDevice.PortableDev) <> nil);
+              CurrentDevice.CheckDevice;
+
     if (not result) and
        (RaiseException) then
       raise exception.Create('No MTP Device opened.');
+
   finally
     SetCursor(CrNormal);
   end;
@@ -975,6 +838,7 @@ end;
 procedure TFrmTripManager.ActSettingsExecute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
+  FrmAdvSettings.CurrentDevice := CurrentDevice;
   FrmAdvSettings.SampleTrip := ATripList;
   if (Sender is TMenuItem) then
     FrmAdvSettings.PctMain.ActivePage := FrmAdvSettings.TabDevice;
@@ -1262,9 +1126,10 @@ begin
 
   // Revert to default (startup) locations
   ReadDefaultFolders;
-  FrmSendTo.HasCurrentDevice := CheckDevice(false);
-  if (FrmSendTo.HasCurrentDevice) then
-    FrmSendTo.DisplayedDevice := CurrentDevice.DisplayedDevice;
+  FrmSendTo.CurrentDevice := nil;
+  if CheckDevice(false) then
+    FrmSendTo.CurrentDevice := CurrentDevice;
+
   if (FrmSendTo.ShowModal <> ID_OK) then
     exit;
 
@@ -2379,13 +2244,13 @@ begin
   CmbDevices.Items.Clear;
 end;
 
-procedure TFrmTripManager.GetDeviceList(KeepDevice: string = '');
-const
-  Margin = 6;
+procedure TFrmTripManager.SetDeviceColumnWidths;
 var
-  Index, DevId: integer;
+  Index: integer;
 
   procedure SetColWidth(AColumnText: string; AColumn: integer);
+  const
+    Margin = 6;
   var
     TextWidth: integer;
   begin
@@ -2393,6 +2258,29 @@ var
     if (TextWidth > CmbDevices.ColWidths[AColumn]) then
       CmbDevices.ColWidths[AColumn] := TextWidth;
   end;
+
+begin
+  // Setup Column widths
+  if (GetRegistry(Reg_UnsafeModels, false)) then
+  begin
+    CmbDevices.SetColWidths(7);
+    for Index := 0 to DeviceList.Count - 1 do
+    begin
+      SetColWidth(TMTP_Device(DeviceList[Index]).FriendlyName,                  0);
+      SetColWidth(TMTP_Device(DeviceList[Index]).Description,                   1);
+      SetColWidth(TMTP_Device(DeviceList[Index]).Manufacturer,                  2);
+      SetColWidth(TMTP_Device(DeviceList[Index]).GarminDevice.ModelDescription, 3);
+      SetColWidth(TMTP_Device(DeviceList[Index]).GarminDevice.SoftwareVersion,  4);
+      SetColWidth(TMTP_Device(DeviceList[Index]).GarminDevice.SerialNumber,     5);
+      SetColWidth(TMTP_Device(DeviceList[Index]).MSM,                           6);
+    end;
+  end;
+  CmbDevices.AdjustWidths;
+end;
+
+procedure TFrmTripManager.GetDeviceList(KeepDevice: string = '');
+var
+  Index, DevId: integer;
 
 begin
   // Not really needed
@@ -2403,16 +2291,10 @@ begin
   DeviceList := GetDevices;
 
   // Add to ComboBox
-  CmbDevices.SetColWidths(4);
   for Index := 0 to DeviceList.Count - 1 do
-  begin
     CmbDevices.Items.AddObject(TMTP_Device(DeviceList[Index]).DisplayedDevice, TMTP_Device(DeviceList[Index]));
-    SetColWidth(TMTP_Device(DeviceList[Index]).FriendlyName,  0);
-    SetColWidth(TMTP_Device(DeviceList[Index]).Description,   1);
-    SetColWidth(TMTP_Device(DeviceList[Index]).Manufacturer,  2);
-    SetColWidth(TMTP_Device(DeviceList[Index]).Serial,        3);
-  end;
-  CmbDevices.AdjustWidths;
+
+  SetDeviceColumnWidths;
 
   // Reopen Device, and reposition ComboBox to new position
   DevId := TMTP_Device.DeviceIdInList(KeepDevice, DeviceList);
@@ -2560,7 +2442,16 @@ begin
   DrawCol(2, AMTP_Device.Manufacturer);
   DrawLine(2);
 
-  DrawCol(3, AMTP_Device.Serial);
+  DrawCol(3, AMTP_Device.GarminDevice.ModelDescription);
+  DrawLine(3);
+
+  DrawCol(4, AMTP_Device.GarminDevice.SoftwareVersion);
+  DrawLine(4);
+
+  DrawCol(5, AMTP_Device.GarminDevice.SerialNumber);
+  DrawLine(5);
+
+  DrawCol(6, AMTP_Device.MSM);
 end;
 
 procedure TFrmTripManager.CmbDevicesDropDown(Sender: TObject);
@@ -2603,8 +2494,8 @@ begin
 
   SetRegistry(Reg_CurrentModel, ModelIndex);
   SetRegistry(Reg_EnableTripFuncs, TModelConv.Display2Trip(ModelIndex) <> TTripModel.Unknown);
-  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(ModelIndex, 1) <> '');
-  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(ModelIndex, 2) <> '');
+  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1) <> '');
+  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2) <> '');
   SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
 
   ReadDefaultFolders;
@@ -5445,11 +5336,11 @@ begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := IntToStr(ModelIndex);
   DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key,
-                                 TModelConv.GetKnownPath(ModelIndex, 0), SubKey);
+                                 TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0), SubKey);
   DeviceFolder[1] := GetRegistry(Reg_PrefDevGpxFolder_Key,
-                                 TModelConv.GetKnownPath(ModelIndex, 1), SubKey);
+                                 TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey);
   DeviceFolder[2] := GetRegistry(Reg_PrefDevPoiFolder_Key,
-                                 TModelConv.GetKnownPath(ModelIndex, 2), SubKey);
+                                 TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2), SubKey);
 end;
 
 procedure TFrmTripManager.SetDeviceListColumns;

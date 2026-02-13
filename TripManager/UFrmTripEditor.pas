@@ -66,6 +66,7 @@ type
     ExportCSV: TMenuItem;
     Trk2RtImport1: TMenuItem;
     TbBrowser: TToolButton;
+    BtnRoutePrefs: TButton;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -92,6 +93,7 @@ type
     procedure ExportCSVClick(Sender: TObject);
     procedure Trk2RtImport1Click(Sender: TObject);
     procedure TbBrowserClick(Sender: TObject);
+    procedure BtnRoutePrefsClick(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -123,7 +125,7 @@ uses
   System.SysUtils, System.Math,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
-  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv;
+  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv, UFrmEditRoutePref;
 
 {$R *.dfm}
 
@@ -165,6 +167,16 @@ begin
     FTripFileUpdated(Self);
 
   Close;
+end;
+
+procedure TFrmTripEditor.BtnRoutePrefsClick(Sender: TObject);
+begin
+  SaveChanges;
+
+  FrmEditRoutePref.CurTripList := CurTripList;
+  if (FrmEditRoutePref.ShowModal = IDOK) and
+      (FrmEditRoutePref.VlModified) then
+    DmRoutePoints.LoadTrip(CurTripList);
 end;
 
 procedure TFrmTripEditor.CopyToClipBoard(Cut: boolean);

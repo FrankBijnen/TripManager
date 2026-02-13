@@ -55,8 +55,7 @@ type
     { Public declarations }
     Funcs: TGPXFuncArray;
     SendToDest: TSendToDest;
-    HasCurrentDevice: boolean;
-    DisplayedDevice: string;
+    CurrentDevice: TObject;
   end;
 
 var
@@ -66,7 +65,7 @@ implementation
 
 uses
   System.TypInfo, System.Math,
-  UnitStringUtils,
+  UnitStringUtils, UnitMtpDevice,
   UnitRegistry, UnitRegistryKeys, UnitTripDefs, UnitModelConv;
 
 {$R *.dfm}
@@ -92,12 +91,7 @@ const
   TripOptions: string =
     'Recalculation forced'
      + #10 + 'No recalculation forced (BaseCamp calculated GPX only)'
-     + #10 + 'Preserve track to route (BaseCamp calculated GPX only)'
-{$IFDEF ALLTRIPTRACKS}
-     + #10 + 'Preserve track to route + locations (BaseCamp calculated GPX only)'
-     + #10 + 'Preserve track to route + locations + route prefs (BaseCamp calculated GPX only)'
-{$ENDIF}
-     ;
+     + #10 + 'Preserve track to route (BaseCamp calculated GPX only)';
 
 procedure TFrmSendTo.EnableItems;
 begin
@@ -152,13 +146,6 @@ begin
   // Update texts
   LblModel.Caption := TModelConv.GetTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)));
   CmbTripOption.Items.Text := TripOptions;
-
-{$IFDEF ALLTRIPTRACKS}
-  // Delete Entry not valid for XT
-  if (TripModel = TTripModel.XT) then
-    CmbTripOption.Items.Delete(Ord(TTripOption.ttTripTrackLocPrefs));
-{$ENDIF}
-
   CmbTripOption.ItemIndex := Min(CmbTripOption.Items.Count -1, Ord(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc))));
 
   case PCTDestination.ActivePageIndex of
@@ -167,26 +154,26 @@ begin
         ModelIndex := GetRegistry(Reg_CurrentModel, 0);
         SubKey := IntToStr(ModelIndex);
         LblDestinations.Caption :=
-          Format('Device:%s %s%s',        [#9, DisplayedDevice, #10#10]);
+          Format('Device:%s %s%s',        [#9, TMTP_Device(CurrentDevice).DisplayedDevice, #10#10]);
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TModelConv.GetKnownPath(ModelIndex, 0), SubKey), #10])
+                    TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0), SubKey), #10])
         else if GetRegistry(Reg_EnableFitFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.fit files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TModelConv.GetKnownPath(ModelIndex, 1), SubKey), #10]);
+                    TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey), #10]);
 
         if GetRegistry(Reg_EnableGpxFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.gpx files:%s %s%s',    [#9, GetRegistry(Reg_PrefDevGpxFolder_Key,
-                      TModelConv.GetKnownPath(ModelIndex, 1), SubKey), #10]);
+                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey), #10]);
 
         if (GetRegistry(Reg_EnableGpiFuncs, false)) and
            (GetRegistry(Reg_EnableFitFuncs, false) = false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.gpi files:%s %s',    [#9,  GetRegistry(Reg_PrefDevPoiFolder_Key,
-                    TModelConv.GetKnownPath(ModelIndex, 2), SubKey), #10]);
+                    TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2), SubKey), #10]);
       end;
     1:begin
         SendToDest := TSendToDest.stWindows;
@@ -281,7 +268,7 @@ procedure TFrmSendTo.FormShow(Sender: TObject);
 begin
   TabDevice.Caption := 'No device connected';
   TabDevice.Font.Style := [];
-  TabDevice.Enabled := HasCurrentDevice;
+  TabDevice.Enabled := Assigned(CurrentDevice);
   if (TabDevice.Enabled) then
   begin
     PCTDestination.ActivePage := TabDevice;

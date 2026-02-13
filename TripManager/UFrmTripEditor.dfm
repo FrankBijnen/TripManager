@@ -298,7 +298,7 @@ object FrmTripEditor: TFrmTripEditor
       end
       object DBCRoutePreference: TDBComboBox
         Left = 100
-        Top = 42
+        Top = 38
         Width = 200
         Height = 21
         Style = csDropDownList
@@ -325,6 +325,15 @@ object FrmTripEditor: TFrmTripEditor
         Time = 0.379592627316014800
         Kind = dtkDateTime
         TabOrder = 3
+      end
+      object BtnRoutePrefs: TButton
+        Left = 312
+        Top = 36
+        Width = 75
+        Height = 25
+        Caption = 'Route prefs'
+        TabOrder = 5
+        OnClick = BtnRoutePrefsClick
       end
     end
   end

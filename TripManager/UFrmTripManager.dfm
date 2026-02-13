@@ -87,7 +87,6 @@ object FrmTripManager: TFrmTripManager
           OnDropDown = CmbDevicesDropDown
           Items.Strings = (
             'Select an MTP device')
-          ExplicitWidth = 165
         end
         object BtnRefresh: TButton
           AlignWithMargins = True
@@ -130,7 +129,6 @@ object FrmTripManager: TFrmTripManager
           ItemIndex = 0
           TabOrder = 4
           OnClick = BgDeviceClick
-          ExplicitLeft = 380
         end
         object BtnSetDefault: TButton
           AlignWithMargins = True
@@ -144,7 +142,6 @@ object FrmTripManager: TFrmTripManager
           Caption = 'Set as default'
           TabOrder = 5
           OnClick = BtnSetDefaultClick
-          ExplicitTop = 2
         end
         object BtnFunctions: TButton
           AlignWithMargins = True
@@ -181,7 +178,6 @@ object FrmTripManager: TFrmTripManager
             'Edge'
             'Garmin'
             'Unknown')
-          ExplicitLeft = 309
         end
       end
       object LstFiles: TListView
@@ -1097,6 +1093,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1334
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1104,7 +1101,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

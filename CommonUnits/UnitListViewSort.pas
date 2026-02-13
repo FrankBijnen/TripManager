@@ -35,7 +35,8 @@ procedure ListViewColumnClick(AListView: TlistView;
 
 implementation
 
-uses System.Types, UnitMtpDevice;
+uses
+  System.Types, mtp_helper;
 
 function SafeStrToInt64(const S: string): int64;
 begin

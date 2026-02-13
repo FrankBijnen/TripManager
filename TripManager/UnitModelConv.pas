@@ -4,6 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes,
+  UnitMtpDevice,
   UnitTripDefs, UnitGpxDefs;
 
 const
@@ -46,8 +47,11 @@ const
 
   // Tread 2 is almost an XT2
   Tread2_Name                       = 'Tread 2';
-//TODO Get partnumber
-  Tread2_PartNumber                 = 'Tread2_NOT_EXIST';
+  Tread2_PartNumber                 = '006-B4557-00';
+
+  // Generic Garmin & Edge
+  Garmin_Name                       = 'Garmin';
+  Edge_Name                         = 'Edge';
 
   // Older models
   Zumo595_Name                      = Zumo_Name + ' 595';
@@ -57,7 +61,7 @@ const
   Zumo590_PartNumber                = '006-B1796-00';
   System1Partition                  = 'System1';
 
-  Drive51_Name                      = 'Garmin Drive 51';
+  Drive51_Name                      = Garmin_Name + ' Drive 51';
   Drive51_PartNumber                = '006-B2586-00';
 
   Zumo3x0_Name                      = Zumo_Name + ' 3x0';
@@ -65,10 +69,6 @@ const
 
   Nuvi2595_Name                     = 'n' + #0252 + 'vi 2595';
   Nuvi2595_PartNumber               = '006-B1371-00';
-
-  // Generic Garmin & Edge
-  Garmin_Name                       = 'Garmin';
-  Edge_Name                         = 'Edge';
 
   // Unknown
   Unknown_Name                      = 'Unknown';
@@ -78,18 +78,6 @@ const
 type
 
   TPartitionPrio = (ppLow, ppNorm, ppHigh);
-
-  TGarminDevice = class
-    GarminModel: TGarminModel;
-    PartNumber: string;
-    ModelDescription: string;
-    GpxPath: string;
-    GpiPath: string;
-    CoursePath: string;
-    NewFilesPath: string;
-    ActivitiesPath: string;
-    procedure Init;
-  end;
 
   TModelConv = class
   private
@@ -104,7 +92,7 @@ type
     class procedure CmbTripDevices(const Devices: TStrings);
     class function GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
     class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
-    class function GetKnownPath(const DevIndex, PathId: integer): string;
+    class function GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string;
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
     class function Display2Trip(const CmbIndex: integer): TTripModel;
     class function Garmin2Display(const Garmin: TGarminModel): integer;
@@ -118,14 +106,12 @@ type
                                      const DeviceList: Tlist): boolean;
   end;
 
-var
-  GarminDevice: TGarminDevice;
-
 implementation
 
 uses
   System.StrUtils, System.Masks,
-  UnitMtpDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
+  UnitVerySimpleXml, UnitStringUtils, mtp_helper,
+  UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
 
 type
   TModel_Rec = record
@@ -300,9 +286,16 @@ begin
     exit(TGarminModel.GarminEdge);
 end;
 
-class function TModelConv.GetKnownPath(const DevIndex, PathId: integer): string;
+class function TModelConv.GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string;
+var
+  GarminDevice: TGarminDevice;
 begin
   result := '';
+
+  if not Assigned(CurrentDevice) then
+    exit;
+  GarminDevice := TMTP_Device(CurrentDevice).GarminDevice;
+
   case Display2Garmin(DevIndex) of
     TGarminModel.XT,
     TGarminModel.XT2,
@@ -501,17 +494,6 @@ begin
             (SelectedPrio < InsertedPrio);
 end;
 
-// Default paths. Will be overruled by GarminDevice.Xml
-procedure TGarminDevice.Init;
-begin
-  GarminModel       := TGarminModel.Unknown;
-  ModelDescription  := Unknown_Name;
-  CoursePath        := NonMTPRoot + GarminPath + '\Courses';
-  NewFilesPath      := NonMTPRoot + GarminPath + '\NewFiles';
-  ActivitiesPath    := NonMTPRoot + GarminPath + '\Activities';
-  GpxPath           := NonMTPRoot + GarminPath + '\GPX';
-  GpiPath           := NonMTPRoot + GarminPath + '\POI';
-end;
 
 initialization
   // Load default device names
@@ -524,13 +506,9 @@ initialization
   // Load TripModels
   TripModels := TModelConv.GetTripModels;
 
-  GarminDevice := TGarminDevice.Create;
-
 finalization
   DefaultDevices.Free;
   KnownDevices.Free;
   TripModels.Free;
-
-  GarminDevice.Free;
 
 end.

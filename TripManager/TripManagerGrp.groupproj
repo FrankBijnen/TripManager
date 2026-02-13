@@ -58,6 +58,12 @@
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
     <ItemGroup Condition="'$(BuildGroup)'=='Release'">
+        <BuildGroupProject Include="FixHtml.dproj">
+            <ProjectGuid>{8D3F4E56-5C1D-4D41-9659-DFAD705D032B}</ProjectGuid>
+            <Configurations>Release</Configurations>
+            <Platforms>Win32</Platforms>
+            <Enabled>True</Enabled>
+        </BuildGroupProject>
         <BuildGroupProject Include="TripManager.dproj">
             <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA5}</ProjectGuid>
             <Configurations>Release</Configurations>
@@ -66,12 +72,6 @@
         </BuildGroupProject>
         <BuildGroupProject Include="hhcfix.dproj">
             <ProjectGuid>{ACB9D082-F10D-4FB3-BB5F-BF7F53BAE07A}</ProjectGuid>
-            <Configurations>Release</Configurations>
-            <Platforms>Win32</Platforms>
-            <Enabled>True</Enabled>
-        </BuildGroupProject>
-        <BuildGroupProject Include="FixHtml.dproj">
-            <ProjectGuid>{8D3F4E56-5C1D-4D41-9659-DFAD705D032B}</ProjectGuid>
             <Configurations>Release</Configurations>
             <Platforms>Win32</Platforms>
             <Enabled>True</Enabled>

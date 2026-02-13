@@ -11,9 +11,7 @@ uses
 {$IFDEF KML}
   kml_helper,
 {$ENDIF}
-{$IFDEF MAPUTILS}
   UnitMapUtils,
-{$ENDIF}
 {$IFDEF TRIPOBJECTS}
   UnitTripDefs, UnitTripObjects,
 {$ENDIF}
@@ -66,10 +64,8 @@ type
     function DistanceFormat(Distance: double): string;
     function DebugCoords(Coords: TXmlVSAttributeList): string;
     function GetTrackColor(ANExtension: TXmlVsNode): string;
-{$IFDEF MAPUTILS}
     function GetFirstSubClass(const ExtensionNode: TXmlVSNode): string;
     function MapSegFromSubClass(const CalculatedSubclass: string): integer;
-{$ENDIF}
     function WayPointNotProcessed(WayPoint: TXmlVSNode): boolean;
 {$IFDEF GPI}
     function GPXWayPoint(CatId, BmpId: integer; WayPoint: TXmlVSNode): TGPXWayPoint;
@@ -500,7 +496,6 @@ begin
     result := ProcessOptions.DefTrackColor;
 end;
 
-{$IFDEF MAPUTILS}
 function TGPXfile.GetFirstSubClass(const ExtensionNode: TXmlVSNode): string;
 var
   GpxxRptNode: TXmlVSNode;
@@ -530,7 +525,6 @@ begin
                     Copy(CalculatedSubclass, 1, 2);
   Val(Reversed, result, ErrCode);
 end;
-{$ENDIF}
 
 procedure TGPXfile.ComputeDistance(RptNode: TXmlVSNode);
 begin
@@ -943,11 +937,9 @@ var
   RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint: TXmlVSNode;
   WptName, Symbol, ViaPtName, ShapePtName: string;
   IsShapePt: boolean;
-{$IFDEF MAPUTILS}
   DescNode, RteNode: TXmlVSNode;
   CalculatedSubClass, MapName: string;
   MapSeg, NewDescPos: integer;
-{$ENDIF}
 begin
   Symbol := FindSubNodeValue(RtePtNode, 'sym');
   RtePtExtensions := RtePtNode.Find('extensions');
@@ -988,7 +980,6 @@ begin
         RenameSubNode(RtePtNode, 'sym', Symbol);
 
       // Fill Mapsegment
-{$IFDEF MAPUTILS}
       RteNode := RtePtNode.Parent;
       if (RteNode <> nil) then
       begin
@@ -1007,14 +998,17 @@ begin
         begin
           CalculatedSubClass := GetFirstSubClass(ExtensionNode);
           MapSeg := MapSegFromSubClass(CalculatedSubClass);
-          MapName := LookupMap(IntToStr(MapSeg));
-          if (MapName <> '') then
-            RenameSubNode(RteNode, 'desc', 'Map name: '+ MapName + ' Map segment: ' + IntToStr(MapSeg))
-          else
-            RenameSubNode(RteNode, 'desc', 'Map segment: '+ IntToStr(MapSeg));
+          DescNode.ChildNodes.DeleteRange(0, DescNode.ChildNodes.Count);
+          if (MapSeg <> 0) then
+          begin
+            MapName := LookupMap(IntToStr(MapSeg));
+            if (MapName <> '') then
+              DescNode.AddChild('Map', TXmlVSNodeType.ntComment).NodeValue := 'Map name: '+ MapName + ' Map segment: ' + IntToStr(MapSeg)
+            else
+              DescNode.AddChild('Map', TXmlVSNodeType.ntComment).NodeValue :='Map segment: '+ IntToStr(MapSeg);
+          end;
         end;
       end;
-{$ENDIF}
     end;
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then

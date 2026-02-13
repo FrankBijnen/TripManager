@@ -73,6 +73,7 @@ type
     procedure SaveSettings;
   public
     { Public declarations }
+    CurrentDevice: Tobject;
     SampleTrip: TObject;
     SampleLat: string;
     SampleLon: string;
@@ -237,13 +238,13 @@ begin
                                       '',
                                       'Override device name');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevTripsFolder_Key,
-                                      TModelConv.GetKnownPath(ModelIndex, 0),
+                                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0),
                                       'Default trips folder');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevGpxFolder_Key,
-                                      TModelConv.GetKnownPath(ModelIndex, 1),
+                                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1),
                                       'Default GPX folder');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevPoiFolder_Key,
-                                      TModelConv.GetKnownPath(ModelIndex, 2),
+                                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2),
                                       'Default GPI folder');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_PrefFileSysFolder_Key,
                                       Reg_PrefFileSysFolder_Val,
