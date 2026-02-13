@@ -10,6 +10,7 @@ uses
 
 type
   TMTP_Data = class(TBASE_Data)
+  public
     IsNotSavedTrip: boolean;
     IsCalculated: boolean;
     ExploreUUID: string;
@@ -37,7 +38,8 @@ type
   TMTP_Device = class(TBase_Device)
   public
     GarminDevice: TGarminDevice;
-    constructor Create;
+    constructor Create; virtual;
+    procedure Init; override;
     destructor Destroy; override;
     function CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
     function ReadGarminDevice(const AModelDescription: string;
@@ -214,6 +216,10 @@ end;
 constructor TMTP_Device.Create;
 begin
   inherited Create;
+end;
+
+procedure TMTP_Device.Init;
+begin
   GarminDevice := TGarminDevice.Create;
   GarminDevice.Init;
 end;
@@ -289,6 +295,9 @@ begin
     PortableDev := nil;
   end;
 end;
+
+initialization
+  System.Classes.RegisterClasses([TMTP_Data, TMTP_Device]);
 
 end.
 

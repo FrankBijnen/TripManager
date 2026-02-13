@@ -24,6 +24,8 @@ const
   USB_MSM          = '#wpdbusenum'; // For (Garmin's) in Mass Storage Mode
   MTP              = 'MTP';
   MSM              = 'MSM';
+  MTP_DEVICE_CLASS = 'TMTP_Device';
+  MTP_DATA_CLASS   = 'TMTP_Data';
 
   CLSID_WPD_NAMESPACE_EXTENSION: TGUID = '{35786D3C-B075-49B9-88DD-029876E11C01}';
   CLASS_PortableDeviceValues: TGUID = '{0c15d503-d017-47ce-9016-7b3f978721cc}';
@@ -356,16 +358,17 @@ type
     ObjSize: int64;
   end;
 
-  TBASE_Data = class(TObject)
+  TBASE_Data = class(TPersistent)
+  public
     IsFolder: boolean;
     SortValue: int64;
     ObjectId: string;
     Created: TDateTime;
-  public
-    constructor Create(const AIsFolder: boolean;
+    constructor Create;
+    procedure Init(const AIsFolder: boolean;
                        const ASortValue: int64;
                        const AObjectId: string;
-                       const ACreated: TDateTime);
+                       const ACreated: TDateTime); virtual;
     procedure UpdateListItem(const AListItem: TListItem;
                              const ASubItems: array of string;
                              const AMinSubItems: integer);
@@ -373,9 +376,10 @@ type
                             const ACaption: string;
                             const ASubItems: array of string;
                             const AMinSubItems: integer): TListItem;
+    class function New: TBASE_Data;
   end;
 
-  TBase_Device = class
+  TBase_Device = class(TPersistent)
   public
     ID: integer;
     SerialId: integer;
@@ -386,9 +390,10 @@ type
     Manufacturer: string;
     MSM: string;
     PortableDev: IPortableDevice;
+    procedure Init; virtual;
     function CheckDevice: boolean; virtual;
     function DisplayedDevice: string; virtual;
-    procedure GetInfoFromDevice(DeviceList: Tlist); virtual; abstract;
+    procedure GetInfoFromDevice(DeviceList: Tlist); virtual;
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
   end;
 
@@ -427,17 +432,20 @@ implementation
 
 uses
   System.Math, System.DateUtils, System.Masks, System.StrUtils,
-  UnitStringUtils, UnitMtpDevice;
+  UnitStringUtils;
 
 
 { TBASE_Data }
-constructor TBASE_Data.Create(const AIsFolder: boolean;
-                              const ASortValue: int64;
-                              const AObjectId: string;
-                              const ACreated: TDateTime);
-
+constructor TBASE_Data.Create;
 begin
   inherited Create;
+end;
+
+procedure TBASE_Data.Init(const AIsFolder: boolean;
+                          const ASortValue: int64;
+                          const AObjectId: string;
+                          const ACreated: TDateTime);
+begin
   IsFolder  := AIsFolder;
   SortValue := ASortValue;
   ObjectId  := AObjectId;
@@ -475,7 +483,23 @@ begin
   result.Data := Self;
 end;
 
+class function TBASE_Data.New: TBASE_Data;
+var
+  APersistentClass: TPersistentClass;
+begin
+  APersistentClass := GetClass(MTP_DATA_CLASS);
+  if (Assigned(APersistentClass)) then
+    result := TBASE_Data(APersistentClass.Create)
+  else
+    result := TBASE_Data.Create;
+end;
+
 { TBase_Device }
+procedure TBase_Device.Init;
+begin
+  {}
+end;
+
 function TBase_Device.CheckDevice: boolean;
 begin
   result := Assigned(PortableDev) and
@@ -485,6 +509,11 @@ end;
 function TBase_Device.DisplayedDevice: string;
 begin
   result := Format('%s (%s)', [FriendlyName, Description]);
+end;
+
+procedure TBase_Device.GetInfoFromDevice(DeviceList: Tlist);
+begin
+  {}
 end;
 
 class function TBase_Device.DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
@@ -997,6 +1026,7 @@ var
   DevDescription: WideString;
   DevManufacturer: WideString;
   AMTP_Device: TBase_Device;
+  APersistentClass: TPersistentClass;
   SerialList: TStringList;
 begin
 
@@ -1056,7 +1086,13 @@ begin
         end;
 
         //  Create device object
-        AMTP_Device := TMTP_Device.Create;
+
+        APersistentClass := GetClass(MTP_DEVICE_CLASS);
+        if (Assigned(APersistentClass)) then
+          AMTP_Device := TBase_Device(APersistentClass.Create)
+        else
+          AMTP_Device := TBase_Device.Create;
+
         AMTP_Device.FriendlyName  := DevFriendlyName;
         AMTP_Device.Description   := DevDescription;
         AMTP_Device.Manufacturer  := DevManufacturer;
@@ -1086,7 +1122,7 @@ begin
       begin
         AMTP_Device := result[Index];
         AMTP_Device.ID := Index;
-
+        AMTP_Device.Init;
         AMTP_Device.GetInfoFromDevice(result);
       end;
 
@@ -1201,19 +1237,14 @@ procedure FillObjectProperties(ObjId: PWideChar;
                                AListItem: TListItem;
                                AMinSubItems: integer); overload;
 var
-  AMTP_Data: TMTP_Data;
+  ABASE_Data: TBASE_Data;
   File_Info: TFile_Info;
 begin
-  AMTP_Data := TMTP_Data(AListItem.Data);
+  ABASE_Data := TBASE_Data.New;
   if not GetFileInfo(ObjId, Prop, File_Info) then
     exit;
-
-  AMTP_Data.IsFolder := File_Info.IsFolder;
-  AMTP_Data.ObjectId := ObjId;
-  AMTP_Data.Created := File_Info.ObjDate;
-  AMTP_Data.SortValue := File_Info.ObjSize;
-
-  AMTP_Data.UpdateListItem(AListItem, [File_Info.DateOriginal,
+  ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
+  ABASE_Data.UpdateListItem(AListItem, [File_Info.DateOriginal,
                                        File_Info.TimeOriginal,
                                        ExtractFileExt(File_Info.ObjName),
                                        SenSize(File_Info.ObjSize)],
@@ -1225,14 +1256,14 @@ procedure FillObjectProperties(ObjId: PWideChar;
                                AListItems: TListItems;
                                AMinSubItems: integer); overload;
 var
-  AMTP_Data: TMTP_Data;
+  ABASE_Data: TBASE_Data;
   File_Info: TFile_Info;
 begin
   if not GetFileInfo(ObjId, Prop, File_Info) then
     exit;
-
-  AMTP_Data := TMTP_Data.Create(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
-  AMTP_Data.CreateListItem(AListItems, File_Info.ObjName,
+  ABASE_Data := TBASE_Data.New;
+  ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
+  ABASE_Data.CreateListItem(AListItems, File_Info.ObjName,
                            [File_Info.DateOriginal, File_Info.TimeOriginal, ExtractFileExt(File_Info.ObjName), SenSize(File_Info.ObjSize)],
                             AMinSubItems);
 end;
@@ -1249,7 +1280,7 @@ var
   Prop: IPortableDeviceProperties;
   Prop_Val: IPortableDeviceValues;
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-  AMTP_Data: TMTP_Data;
+  ABASE_Data: TBASE_Data;
   MinSubItems: integer;
   CrNormal, CrWait: HCURSOR;
 begin
@@ -1280,8 +1311,9 @@ begin
         (* until here *)
 
         // Add .. entry (up)
-        AMTP_Data := TMTP_Data.Create(true, 0, ParentId, 0);
-        AMTP_Data.CreateListItem(Lst, '..', [], MinSubItems);
+        ABASE_Data := TBASE_Data.New;
+        ABASE_Data.Init(true, 0, ParentId, 0);
+        ABASE_Data.CreateListItem(Lst, '..', [], MinSubItems);
 
         ObjectIds.Reset;
 
@@ -1754,7 +1786,7 @@ const
 
 function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
 var
-  MTP_Data: TMTP_Data;
+  BASE_Data: TBASE_Data;
   Content: IPortableDeviceContent;
   Prop: IPortableDeviceProperties;
   OriginalName: WideString;
@@ -1767,8 +1799,8 @@ begin
   // Need ListItem
   if (AListItem.Data = nil) then
     exit;
-  MTP_Data := TMTP_Data(AListItem.Data);
-  OldObjectId := MTP_Data.ObjectId;
+  BASE_Data := TBASE_Data(AListItem.Data);
+  OldObjectId := BASE_Data.ObjectId;
 
   // Get interfaces
   if PortableDev.Content(Content) <> S_OK then
