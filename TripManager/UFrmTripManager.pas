@@ -401,7 +401,7 @@ type
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
     procedure LoadFitFile(const FileName: string; const FromDevice: boolean);
     procedure LoadSqlFile(const FileName: string; const FromDevice: boolean);
-    procedure FreeDeviceData(const ACustomData: pointer);
+    procedure FreeDeviceData(const TmpDevice: TBase_Device);
     procedure FreeDevices;
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
@@ -2186,18 +2186,17 @@ begin
   PctHexOsm.ActivePageIndex := 1;
 end;
 
-procedure TFrmTripManager.FreeDeviceData(const ACustomData: pointer);
+procedure TFrmTripManager.FreeDeviceData(const TmpDevice: TBase_Device);
 begin
-  if (Assigned(ACustomData)) then
-  begin
-    CurrentDevice := ACustomData;
-    CurrentDevice.PortableDev := nil;
-    CurrentDevice.Free;
-  end;
+  if not (Assigned(TmpDevice)) then
+    exit;
+  TmpDevice.PortableDev := nil;
+  TmpDevice.Free;
 end;
 
 procedure TFrmTripManager.FreeDevices;
-var Indx: integer;
+var
+  Indx: integer;
 begin
   if (Assigned(DeviceList)) then
   begin

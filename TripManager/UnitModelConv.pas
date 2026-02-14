@@ -411,7 +411,7 @@ begin
   // Look in Known devices
   for KnownIndex := KnownDevices.Count -1 downto 0  do
   begin
-    if (StartsText(KnownDevices[KnownIndex], TBase_Device(Device).DisplayedDevice)) then
+    if (MatchesMask(TBase_Device(Device).DisplayedDevice, KnownDevices[KnownIndex])) then
       exit(true);
   end;
 
