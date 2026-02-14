@@ -29,7 +29,7 @@ type
     DTDepartureDate: TDateTimePicker;
     GrpRoute: TGroupBox;
     Label1: TLabel;
-    Label2: TLabel;
+    LblRoutePref: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     CmbModel: TripManager_ComboBox.TComboBox;
@@ -66,7 +66,6 @@ type
     ExportCSV: TMenuItem;
     Trk2RtImport1: TMenuItem;
     TbBrowser: TToolButton;
-    BtnRoutePrefs: TButton;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -93,7 +92,7 @@ type
     procedure ExportCSVClick(Sender: TObject);
     procedure Trk2RtImport1Click(Sender: TObject);
     procedure TbBrowserClick(Sender: TObject);
-    procedure BtnRoutePrefsClick(Sender: TObject);
+    procedure LblRoutePrefClick(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
@@ -124,7 +123,7 @@ implementation
 uses
   System.SysUtils, System.Math,
   Winapi.ShellAPI,
-  Vcl.Clipbrd,
+  Vcl.Clipbrd, Vcl.Graphics,
   UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv, UFrmEditRoutePref;
 
 {$R *.dfm}
@@ -167,16 +166,6 @@ begin
     FTripFileUpdated(Self);
 
   Close;
-end;
-
-procedure TFrmTripEditor.BtnRoutePrefsClick(Sender: TObject);
-begin
-  SaveChanges;
-
-  FrmEditRoutePref.CurTripList := CurTripList;
-  if (FrmEditRoutePref.ShowModal = IDOK) and
-      (FrmEditRoutePref.VlModified) then
-    DmRoutePoints.LoadTrip(CurTripList);
 end;
 
 procedure TFrmTripEditor.CopyToClipBoard(Cut: boolean);
@@ -353,13 +342,29 @@ begin
   DTDepartureDate.DateTime := DmRoutePoints.CdsRouteDepartureDate.AsDateTime;
 
   TModelConv.CmbTripDevices(CmbModel.Items);
-  CmbModel.AdjustWidths;
   CmbModel.ItemIndex := Ord(TTripList(CurTripList).TripModel);
+
+  if (TTripList(CurTripList).GetItem('mRoutePreferences') = nil) then
+    LblRoutePref.Cursor := TCursor(crDefault)
+  else
+    LblRoutePref.Cursor := TCursor(crHandPoint);
 end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);
 begin
   TbInsertPointClick(Sender);
+end;
+
+procedure TFrmTripEditor.LblRoutePrefClick(Sender: TObject);
+begin
+  if (TLabel(Sender).Cursor <> TCursor(crHandPoint))  then
+    exit;
+  SaveChanges;
+
+  FrmEditRoutePref.CurTripList := CurTripList;
+  if (FrmEditRoutePref.ShowModal = IDOK) and
+      (FrmEditRoutePref.VlModified) then
+    DmRoutePoints.LoadTrip(CurTripList);
 end;
 
 procedure TFrmTripEditor.Delete1Click(Sender: TObject);

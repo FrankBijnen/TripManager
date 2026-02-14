@@ -5,7 +5,7 @@ object FrmTripEditor: TFrmTripEditor
   BorderIcons = [biMinimize, biMaximize]
   Caption = 'Trip Editor'
   ClientHeight = 549
-  ClientWidth = 539
+  ClientWidth = 547
   Color = clBtnFace
   CustomTitleBar.CaptionAlignment = taCenter
   Font.Charset = DEFAULT_CHARSET
@@ -22,15 +22,15 @@ object FrmTripEditor: TFrmTripEditor
   object PnlBottom: TPanel
     Left = 0
     Top = 520
-    Width = 539
+    Width = 547
     Height = 29
     Align = alBottom
     TabOrder = 2
     DesignSize = (
-      539
+      547
       29)
     object BtnCancel: TBitBtn
-      Left = 429
+      Left = 437
       Top = 2
       Width = 75
       Height = 25
@@ -41,7 +41,7 @@ object FrmTripEditor: TFrmTripEditor
       OnClick = BtnCancelClick
     end
     object BtnOK: TBitBtn
-      Left = 343
+      Left = 351
       Top = 2
       Width = 75
       Height = 25
@@ -55,10 +55,10 @@ object FrmTripEditor: TFrmTripEditor
   object DBGRoutePoints: TDBGrid
     Left = 0
     Top = 123
-    Width = 507
+    Width = 515
     Height = 397
     Align = alClient
-    Constraints.MinWidth = 500
+    Constraints.MinWidth = 512
     DataSource = DmRoutePoints.DsRoutePoints
     Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgMultiSelect, dgTitleClick, dgTitleHotTrack]
     TabOrder = 1
@@ -112,7 +112,7 @@ object FrmTripEditor: TFrmTripEditor
       end>
   end
   object PnlRoutePointsButtons: TPanel
-    Left = 507
+    Left = 515
     Top = 123
     Width = 32
     Height = 397
@@ -214,7 +214,7 @@ object FrmTripEditor: TFrmTripEditor
   object PnlRoute: TPanel
     Left = 0
     Top = 0
-    Width = 539
+    Width = 547
     Height = 123
     Align = alTop
     TabOrder = 3
@@ -236,15 +236,17 @@ object FrmTripEditor: TFrmTripEditor
         Caption = 'TripName'
         Layout = tlCenter
       end
-      object Label2: TLabel
+      object LblRoutePref: TLabel
         Left = 0
         Top = 38
         Width = 95
         Height = 21
+        Cursor = crHandPoint
         Alignment = taRightJustify
         AutoSize = False
         Caption = 'RoutePreference'
         Layout = tlCenter
+        OnClick = LblRoutePrefClick
       end
       object Label3: TLabel
         Left = 0
@@ -270,7 +272,7 @@ object FrmTripEditor: TFrmTripEditor
         AlignWithMargins = True
         Left = 417
         Top = 17
-        Width = 80
+        Width = 93
         Height = 21
         Margins.Left = 1
         Margins.Top = 4
@@ -325,15 +327,6 @@ object FrmTripEditor: TFrmTripEditor
         Time = 0.379592627316014800
         Kind = dtkDateTime
         TabOrder = 3
-      end
-      object BtnRoutePrefs: TButton
-        Left = 312
-        Top = 36
-        Width = 75
-        Height = 25
-        Caption = 'Route prefs'
-        TabOrder = 5
-        OnClick = BtnRoutePrefsClick
       end
     end
   end
