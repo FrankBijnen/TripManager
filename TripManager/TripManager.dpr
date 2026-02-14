@@ -29,7 +29,6 @@ uses
   kml_helper in '..\CommonUnits\kml\kml_helper.pas',
   UnitListViewSort in '..\CommonUnits\UnitListViewSort.pas',
   mtp_helper in '..\CommonUnits\Mtp\mtp_helper.pas',
-  UnitMtpDevice in '..\CommonUnits\Mtp\UnitMtpDevice.pas',
   UnitOSMMap in '..\CommonUnits\osm\UnitOSMMap.pas',
   UnitVerySimpleXml in '..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas',
   Xml.VerySimple in '..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas',

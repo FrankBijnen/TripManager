@@ -358,7 +358,7 @@ type
     ObjSize: int64;
   end;
 
-  TBASE_Data = class(TPersistent)
+  TBase_Data = class(TPersistent)
   public
     IsFolder: boolean;
     SortValue: int64;
@@ -376,7 +376,7 @@ type
                             const ACaption: string;
                             const ASubItems: array of string;
                             const AMinSubItems: integer): TListItem;
-    class function New: TBASE_Data;
+    class function New: TBase_Data;
   end;
 
   TBase_Device = class(TPersistent)
@@ -434,14 +434,17 @@ uses
   System.Math, System.DateUtils, System.Masks, System.StrUtils,
   UnitStringUtils;
 
+var
+  PersistentDataClass: TPersistentClass;
+  PersistentDeviceClass: TPersistentClass;
 
 { TBASE_Data }
-constructor TBASE_Data.Create;
+constructor TBase_Data.Create;
 begin
   inherited Create;
 end;
 
-procedure TBASE_Data.Init(const AIsFolder: boolean;
+procedure TBase_Data.Init(const AIsFolder: boolean;
                           const ASortValue: int64;
                           const AObjectId: string;
                           const ACreated: TDateTime);
@@ -452,7 +455,7 @@ begin
   Created   := ACreated;
 end;
 
-procedure TBASE_Data.UpdateListItem(const AListItem: TListItem;
+procedure TBase_Data.UpdateListItem(const AListItem: TListItem;
                                     const ASubItems: array of string;
                                     const AMinSubItems: integer);
 var
@@ -466,7 +469,7 @@ begin
     AListItem.SubItems.Add('');
 end;
 
-function TBASE_Data.CreateListItem(const AList: TListItems;
+function TBase_Data.CreateListItem(const AList: TListItems;
                                    const ACaption: string;
                                    const ASubItems: array of string;
                                    const AMinSubItems: integer): TListItem;
@@ -483,15 +486,12 @@ begin
   result.Data := Self;
 end;
 
-class function TBASE_Data.New: TBASE_Data;
-var
-  APersistentClass: TPersistentClass;
+class function TBase_Data.New: TBase_Data;
 begin
-  APersistentClass := GetClass(MTP_DATA_CLASS);
-  if (Assigned(APersistentClass)) then
-    result := TBASE_Data(APersistentClass.Create)
+  if (Assigned(PersistentDataClass)) then
+    result := TBase_Data(PersistentDataClass.Create)
   else
-    result := TBASE_Data.Create;
+    result := TBase_Data.Create;
 end;
 
 { TBase_Device }
@@ -1026,9 +1026,10 @@ var
   DevDescription: WideString;
   DevManufacturer: WideString;
   AMTP_Device: TBase_Device;
-  APersistentClass: TPersistentClass;
   SerialList: TStringList;
 begin
+  PersistentDataClass := GetClass(MTP_DATA_CLASS);
+  PersistentDeviceClass := GetClass(MTP_DEVICE_CLASS);
 
   result := Tlist.Create;
   SerialList := TStringList.Create;
@@ -1086,10 +1087,8 @@ begin
         end;
 
         //  Create device object
-
-        APersistentClass := GetClass(MTP_DEVICE_CLASS);
-        if (Assigned(APersistentClass)) then
-          AMTP_Device := TBase_Device(APersistentClass.Create)
+        if (Assigned(PersistentDeviceClass)) then
+          AMTP_Device := TBase_Device(PersistentDeviceClass.Create)
         else
           AMTP_Device := TBase_Device.Create;
 
@@ -1237,10 +1236,10 @@ procedure FillObjectProperties(ObjId: PWideChar;
                                AListItem: TListItem;
                                AMinSubItems: integer); overload;
 var
-  ABASE_Data: TBASE_Data;
+  ABASE_Data: TBase_Data;
   File_Info: TFile_Info;
 begin
-  ABASE_Data := TBASE_Data.New;
+  ABASE_Data := TBase_Data.New;
   if not GetFileInfo(ObjId, Prop, File_Info) then
     exit;
   ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
@@ -1256,12 +1255,12 @@ procedure FillObjectProperties(ObjId: PWideChar;
                                AListItems: TListItems;
                                AMinSubItems: integer); overload;
 var
-  ABASE_Data: TBASE_Data;
+  ABASE_Data: TBase_Data;
   File_Info: TFile_Info;
 begin
   if not GetFileInfo(ObjId, Prop, File_Info) then
     exit;
-  ABASE_Data := TBASE_Data.New;
+  ABASE_Data := TBase_Data.New;
   ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
   ABASE_Data.CreateListItem(AListItems, File_Info.ObjName,
                            [File_Info.DateOriginal, File_Info.TimeOriginal, ExtractFileExt(File_Info.ObjName), SenSize(File_Info.ObjSize)],
@@ -1280,7 +1279,7 @@ var
   Prop: IPortableDeviceProperties;
   Prop_Val: IPortableDeviceValues;
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
-  ABASE_Data: TBASE_Data;
+  ABASE_Data: TBase_Data;
   MinSubItems: integer;
   CrNormal, CrWait: HCURSOR;
 begin
@@ -1311,7 +1310,7 @@ begin
         (* until here *)
 
         // Add .. entry (up)
-        ABASE_Data := TBASE_Data.New;
+        ABASE_Data := TBase_Data.New;
         ABASE_Data.Init(true, 0, ParentId, 0);
         ABASE_Data.CreateListItem(Lst, '..', [], MinSubItems);
 
@@ -1786,7 +1785,7 @@ const
 
 function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
 var
-  BASE_Data: TBASE_Data;
+  BASE_Data: TBase_Data;
   Content: IPortableDeviceContent;
   Prop: IPortableDeviceProperties;
   OriginalName: WideString;
@@ -1799,7 +1798,7 @@ begin
   // Need ListItem
   if (AListItem.Data = nil) then
     exit;
-  BASE_Data := TBASE_Data(AListItem.Data);
+  BASE_Data := TBase_Data(AListItem.Data);
   OldObjectId := BASE_Data.ObjectId;
 
   // Get interfaces
@@ -1835,6 +1834,8 @@ end;
 
 initialization
   OleInitialize(nil);
+  PersistentDataClass := nil;
+  PersistentDeviceClass := nil;
 
 finalization
   OleUninitialize;

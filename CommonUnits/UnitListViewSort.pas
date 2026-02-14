@@ -99,8 +99,8 @@ begin
   Index := FSortSpecification.Column.Index;
   if FSortSpecification.UseObject then
   begin
-    Compare := CompareValue(TBASE_Data(Item1.Data).SortValue,
-                            TBASE_Data(Item2.Data).SortValue);
+    Compare := CompareValue(TBase_Data(Item1.Data).SortValue,
+                            TBase_Data(Item2.Data).SortValue);
   end
   else
   begin

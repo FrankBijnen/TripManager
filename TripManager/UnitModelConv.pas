@@ -292,8 +292,10 @@ var
 begin
   result := '';
 
-  if not Assigned(CurrentDevice) then
+  if not (Assigned(CurrentDevice) and
+         (CurrentDevice is TMTP_Device)) then
     exit;
+
   GarminDevice := TMTP_Device(CurrentDevice).GarminDevice;
 
   case Display2Garmin(DevIndex) of
@@ -403,18 +405,18 @@ var
   KnownIndex: integer;
 begin
   // Dont want Cards, usually they are part of the real device.
-  if (GetPartitionPrio(TMTP_Device(Device).Description) = TPartitionPrio.ppLow) then
+  if (GetPartitionPrio(TBase_Device(Device).Description) = TPartitionPrio.ppLow) then
     exit(false);
 
   // Look in Known devices
   for KnownIndex := KnownDevices.Count -1 downto 0  do
   begin
-    if (StartsText(KnownDevices[KnownIndex], TMTP_Device(Device).DisplayedDevice)) then
+    if (StartsText(KnownDevices[KnownIndex], TBase_Device(Device).DisplayedDevice)) then
       exit(true);
   end;
 
   // Look for manufacturer Garmin
-  result := (SameText(TMTP_Device(Device).Manufacturer, Garmin_Name));
+  result := (SameText(TBase_Device(Device).Manufacturer, Garmin_Name));
 end;
 
 // Get first known device in connected list, for this prio
@@ -426,12 +428,12 @@ begin
 
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
-    if (GetPartitionPrio(TMTP_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
+    if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
       continue;
     for KnownIndex := KnownDevices.Count -1 downto 0 do
     begin
       // Allow wildcards for mass storage devices. EG ?:\Garmin
-      if (MatchesMask(TMTP_Device(DeviceList[DevIndex]).DisplayedDevice, KnownDevices[KnownIndex])) then
+      if (MatchesMask(TBase_Device(DeviceList[DevIndex]).DisplayedDevice, KnownDevices[KnownIndex])) then
         exit(DevIndex);
     end;
   end;
@@ -447,9 +449,9 @@ begin
 
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
-    if (GetPartitionPrio(TMTP_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
+    if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
       continue;
-    if (SameText(TMTP_Device(DeviceList[DevIndex]).Manufacturer, Garmin_Name)) then
+    if (SameText(TBase_Device(DeviceList[DevIndex]).Manufacturer, Garmin_Name)) then
       exit(DevIndex);
   end;
 end;
@@ -475,19 +477,19 @@ class function TModelConv.PreferedPartition(const SelectedDevice, InsertedDevice
                                             const DeviceList: Tlist): boolean;
 var
   Index: integer;
-  Selected, Inserted: TMTP_Device;
+  Selected, Inserted: TBase_Device;
   SelectedPrio, InsertedPrio: TPartitionPrio;
 begin
-  Index := TMTP_Device.DeviceIdInList(SelectedDevice, DeviceList);
+  Index := TBase_Device.DeviceIdInList(SelectedDevice, DeviceList);
   if (Index < 0) then
     exit(false);
-  Selected := TMTP_Device(DeviceList[Index]);
+  Selected := TBase_Device(DeviceList[Index]);
   SelectedPrio := GetPartitionPrio(Selected.Description);
 
-  Index := TMTP_Device.DeviceIdInList(InsertedDevice, DeviceList);
+  Index := TBase_Device.DeviceIdInList(InsertedDevice, DeviceList);
   if (Index < 0) then
     exit(false);
-  Inserted := TMTP_Device(DeviceList[Index]);
+  Inserted := TBase_Device(DeviceList[Index]);
   InsertedPrio := GetPartitionPrio(Inserted.Description);
 
   result := (Selected.Serial = Inserted.Serial) and

@@ -4,8 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ComCtrls,
-  UnitMtpDevice;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ComCtrls;
 
 type
   TFrmNewTrip = class(TForm)
@@ -27,7 +26,7 @@ type
   public
     { Public declarations }
     SavedFolderId: string;
-    CurrentDevice: TMTP_Device;
+    CurrentDevice: TObject;
     DevicePath: string;
     CurPath: string;
   end;
@@ -59,7 +58,7 @@ begin
   if (CurrentDevice <> nil) then
   begin
     NFile := ExtractFileName(EdResultFile.Text);
-    CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, SavedFolderId, NFile);
+    CurrentObjectId := GetIdForFile(TBase_Device(CurrentDevice).PortableDev, SavedFolderId, NFile);
     if (CurrentObjectId <> '') then
       exit(true);
   end
@@ -91,6 +90,7 @@ end;
 procedure TFrmNewTrip.FormShow(Sender: TObject);
 begin
   ShowResultFile;
+  EdNewTrip.SetFocus;
 end;
 
 end.

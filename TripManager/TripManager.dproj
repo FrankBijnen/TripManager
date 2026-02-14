@@ -173,7 +173,6 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="..\CommonUnits\kml\kml_helper.pas"/>
         <DCCReference Include="..\CommonUnits\UnitListViewSort.pas"/>
         <DCCReference Include="..\CommonUnits\Mtp\mtp_helper.pas"/>
-        <DCCReference Include="..\CommonUnits\Mtp\UnitMtpDevice.pas"/>
         <DCCReference Include="..\CommonUnits\osm\UnitOSMMap.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\UnitVerySimpleXml.pas"/>
         <DCCReference Include="..\CommonUnits\VerySimpleXml\Xml.VerySimple.pas"/>

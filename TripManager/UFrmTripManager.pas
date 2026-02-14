@@ -350,7 +350,7 @@ type
     SqlFile: string;
     ExploreList: TStringList;
 
-    CurrentDevice: TMTP_Device;
+    CurrentDevice: TBase_Device;
     FSavedParent: WideString;
     FSavedFolderId: WideString;
 
@@ -409,7 +409,6 @@ type
     procedure ClearDeviceDbFiles;
     procedure RebuildTransportAndRoutePrefMenu;
     procedure RebuildDeviceDbMenu;
-    procedure ReadDeviceDB;
     procedure GuessModel(const DisplayedDevice: string);
     procedure SelectDevice(const Indx: integer);
     procedure SelectKnownDevice;
@@ -417,6 +416,7 @@ type
     function GetItemType(const AListview: TListView): TDirType;
     procedure CloseDevice;
     function CheckDevice(RaiseException: boolean = true): boolean;
+    function HasTMTPDevice(const ADevice: TObject = nil): boolean;
     procedure SetDeviceColumnWidths;
     procedure GetDeviceList(KeepDevice: string = '');
     function GetDevicePath(const CompletePath: string): string;
@@ -542,84 +542,20 @@ begin
     result := '';
 end;
 
-procedure TFrmTripManager.ReadDeviceDB;
-var
-  DBPath: string;
-  NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
-  ModelIndex, DefAdvLevel: integer;
-begin
-  ClearDeviceDbFiles;
-  if not CheckDevice(false) then
-    exit;
-
-  // Needed for checking if the connected Device needs reading SQlite
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-
-  // SQLite path
-  DBPath := GetDbPath;
-  if (DBPath = '') then
-    exit;
-
-  // Copy settings.db, Update Avoidances changed
-  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
-     (CurrentDevice.CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
-    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
-
-  // Copy vehicle_profile.db
-  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
-     (CurrentDevice.CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
-  begin
-    OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
-    OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
-    OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
-    OldVehicle_Profile.Name             := UTF8String(GetRegistry(Reg_VehicleProfileName, ''));
-    OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
-    OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
-
-    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
-
-    if (NewVehicle_Profile.Valid) and
-       (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
-    begin
-      // Update Vehicle profile
-      SetRegistry(Reg_VehicleProfileGuid,       string(NewVehicle_Profile.GUID));
-      SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id);
-      SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType);
-      SetRegistry(Reg_VehicleProfileName,       string(NewVehicle_Profile.Name));
-      SetRegistry(Reg_VehicleType,              NewVehicle_Profile.VehicleType);
-      SetRegistry(Reg_VehicleTransportMode,     NewVehicle_Profile.TransportMode);
-
-      // Changed Vehicle profile. Set hash to 0
-      SetRegistry(Reg_VehicleProfileHash, 0);
-
-      // Only load Default Adventurous level from profile if invalid
-      DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
-      if not (DefAdvLevel in [1..4]) then
-        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.AdventurousLevel +1);
-    end;
-  end;
-
-  // Copy explore.db
-  if (GetRegistry(Reg_EnableExploreFuncs, false)) and
-     (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) and
-     (CurrentDevice.CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
-    GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
-
-  RebuildDeviceDbMenu;
-end;
-
 procedure TFrmTripManager.GuessModel(const DisplayedDevice: string);
 var
   ModelIndex: integer;
   ModelDescription: string;
   TmpGarminDevice: TGarminDevice;
+  CurrentMTPDevice: TMTP_Device;
 begin
-  if CheckDevice(false) then
+  if (HasTMTPDevice) then
   begin
-    // We have device, read GarminDevice.XML
-    CurrentDevice.ReadGarminDevice(DisplayedDevice, DeviceList);
-    ModelIndex := TModelConv.Garmin2Display(CurrentDevice.GarminDevice.GarminModel);
-    ModelDescription := CurrentDevice.GarminDevice.ModelDescription;
+    // We have a TMTP device, read GarminDevice.XML
+    CurrentMTPDevice := TMTP_Device(CurrentDevice);
+    CurrentMTPDevice.ReadGarminDevice(DisplayedDevice, DeviceList);
+    ModelIndex := TModelConv.Garmin2Display(CurrentMTPDevice.GarminDevice.GarminModel);
+    ModelDescription := CurrentMTPDevice.GarminDevice.ModelDescription;
     SetDeviceColumnWidths; // Column widths may have changed;
   end
   else
@@ -825,6 +761,15 @@ begin
   end;
 end;
 
+function TFrmTripManager.HasTMTPDevice(const ADevice: TObject = nil): boolean;
+begin
+  if (ADevice = nil) then
+    result := CheckDevice(false) and
+              (CurrentDevice is TMTP_Device)
+  else
+    result := (ADevice is TMTP_Device);
+end;
+
 procedure TFrmTripManager.ActAboutExecute(Sender: TObject);
 begin
   ShowMessage(VerInfo);
@@ -982,7 +927,7 @@ end;
 procedure TFrmTripManager.BtnFromDevClick(Sender: TObject);
 var
   AnItem: TListItem;
-  ABase_Data: TBASE_Data;
+  ABase_Data: TBase_Data;
   CrWait, CrNormal: HCURSOR;
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
@@ -996,7 +941,7 @@ begin
     begin
       if (AnItem.Selected = false) then
         continue;
-      ABase_Data := TBASE_Data(AnItem.Data);
+      ABase_Data := TBase_Data(AnItem.Data);
       if (ABase_Data.IsFolder) then
         continue;
 
@@ -1236,11 +1181,11 @@ end;
 
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
 var
-  HasMtpDevice: boolean;
+  HadMtpDevice: boolean;
   DeviceId: string;
 begin
-  HasMtpDevice := Assigned(CurrentDevice);
-  if HasMtpDevice then
+  HadMtpDevice := Assigned(CurrentDevice);
+  if HadMtpDevice then
     DeviceId := CurrentDevice.Device
   else
     DeviceId := '';
@@ -1250,8 +1195,11 @@ begin
     SelectDeviceById(DeviceId);
     if CheckDevice(false) then
     begin
-      if not (HasMtpDevice) then  // No device was connected, now it is. Read settings.
-        ReadDeviceDB;
+      if not (HadMtpDevice) and
+         (HasTMTPDevice(CurrentDevice)) then  // No device was connected, now it is. Read settings.
+        TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
+
+      RebuildDeviceDbMenu;
       ReloadFileList;
     end;
   except
@@ -1482,6 +1430,7 @@ var
   TmpExploreList: TStringList;
   PerfectList: Tlist<TlistItem>;
   CrNormal, CrWait: HCURSOR;
+  Base_Data: TBase_Data;
 begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
@@ -1508,14 +1457,19 @@ begin
       AnITem.GroupID := 0;
       for TripIndex := 0 to LstFiles.Items.Count -1 do
       begin
-        if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
+        Base_Data := LstFiles.Items[TripIndex].Data;
+        if (Base_Data = nil) then
+          continue;
+        if (Base_Data.IsFolder) then
+          continue;
+        if not (Base_Data is TMTP_Data) then
           continue;
 
         if (Sametext(LstFiles.Items[TripIndex].SubItems[TripNameCol -1], ExploreList.KeyNames[ExploreIndex])) then
         begin
           AnITem.SubItems.Add(LstFiles.Items[TripIndex].Caption);
-          AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
-          if (TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID = ExploreList.ValueFromIndex[ExploreIndex]) then
+          AnITem.SubItems.Add(TMTP_Data(Base_Data).ExploreUUID);
+          if (TMTP_Data(Base_Data).ExploreUUID = ExploreList.ValueFromIndex[ExploreIndex]) then
           begin
             PerfectList.Add(AnITem);
             AnITem.GroupID := 4;
@@ -1539,8 +1493,14 @@ begin
 
     for TripIndex := 0 to LstFiles.Items.Count -1 do
     begin
-      if (TMTP_Data(LstFiles.Items[TripIndex].Data).IsFolder) then
+      Base_Data := LstFiles.Items[TripIndex].Data;
+      if (Base_Data = nil) then
         continue;
+      if (Base_Data.IsFolder) then
+        continue;
+      if not (Base_Data is TMTP_Data) then
+        continue;
+
       ExploreIndex := TmpExploreList.IndexOfName(LstFiles.Items[TripIndex].SubItems[TripNameCol -1]);
       if (ExploreIndex < 0) then
       begin
@@ -1549,7 +1509,7 @@ begin
         AnITem.Caption := LstFiles.Items[TripIndex].SubItems[TripNameCol -1];
         AnITem.SubItems.Add('');
         AnITem.SubItems.Add(LstFiles.Items[TripIndex].Caption);
-        AnITem.SubItems.Add(TMTP_Data(LstFiles.Items[TripIndex].Data).ExploreUUID);
+        AnITem.SubItems.Add(TMTP_Data(Base_Data).ExploreUUID);
 
         // Check in complete Explore List.
         // If found, that means multiple trips with same trip name exist.
@@ -1584,6 +1544,7 @@ begin
 
     if (LvExplore.Items.Count > 0) then
       LvExplore.Items[0].Selected := true;
+
   finally
     TmpExploreList.Free;
     PerfectList.Free;
@@ -2160,9 +2121,11 @@ begin
   ClearDeviceDbFiles;  // Should not be there.
   if (CheckDevice(false)) then
   begin
-    ReadDeviceDB;
+    if (HasTMTPDevice(CurrentDevice)) then
+      TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
     ListFiles;
   end;
+  RebuildDeviceDbMenu;
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -2227,8 +2190,9 @@ procedure TFrmTripManager.FreeDeviceData(const ACustomData: pointer);
 begin
   if (Assigned(ACustomData)) then
   begin
-    TMTP_Device(ACustomData).PortableDev := nil;
-    TMTP_Device(ACustomData).Free;
+    CurrentDevice := ACustomData;
+    CurrentDevice.PortableDev := nil;
+    CurrentDevice.Free;
   end;
 end;
 
@@ -2247,6 +2211,7 @@ end;
 procedure TFrmTripManager.SetDeviceColumnWidths;
 var
   Index: integer;
+  CurrentMTPDevice: TMTP_Device;
 
   procedure SetColWidth(AColumnText: string; AColumn: integer);
   const
@@ -2266,13 +2231,17 @@ begin
     CmbDevices.SetColWidths(7);
     for Index := 0 to DeviceList.Count - 1 do
     begin
-      SetColWidth(TMTP_Device(DeviceList[Index]).FriendlyName,                  0);
-      SetColWidth(TMTP_Device(DeviceList[Index]).Description,                   1);
-      SetColWidth(TMTP_Device(DeviceList[Index]).Manufacturer,                  2);
-      SetColWidth(TMTP_Device(DeviceList[Index]).GarminDevice.ModelDescription, 3);
-      SetColWidth(TMTP_Device(DeviceList[Index]).GarminDevice.SoftwareVersion,  4);
-      SetColWidth(TMTP_Device(DeviceList[Index]).GarminDevice.SerialNumber,     5);
-      SetColWidth(TMTP_Device(DeviceList[Index]).MSM,                           6);
+      if (HasTMTPDevice(DeviceList[Index])) then
+        CurrentMTPDevice := TMTP_Device(DeviceList[Index])
+      else
+        break;
+      SetColWidth(CurrentMTPDevice.FriendlyName,                  0);
+      SetColWidth(CurrentMTPDevice.Description,                   1);
+      SetColWidth(CurrentMTPDevice.Manufacturer,                  2);
+      SetColWidth(CurrentMTPDevice.GarminDevice.ModelDescription, 3);
+      SetColWidth(CurrentMTPDevice.GarminDevice.SoftwareVersion,  4);
+      SetColWidth(CurrentMTPDevice.GarminDevice.SerialNumber,     5);
+      SetColWidth(CurrentMTPDevice.MSM,                           6);
     end;
   end;
   CmbDevices.AdjustWidths;
@@ -2292,12 +2261,12 @@ begin
 
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
-    CmbDevices.Items.AddObject(TMTP_Device(DeviceList[Index]).DisplayedDevice, TMTP_Device(DeviceList[Index]));
+    CmbDevices.Items.AddObject(TBase_Device(DeviceList[Index]).DisplayedDevice, TBase_Device(DeviceList[Index]));
 
   SetDeviceColumnWidths;
 
   // Reopen Device, and reposition ComboBox to new position
-  DevId := TMTP_Device.DeviceIdInList(KeepDevice, DeviceList);
+  DevId := TBase_Device.DeviceIdInList(KeepDevice, DeviceList);
   if (DevId < 0) then
   begin
     // Device not found
@@ -2368,7 +2337,7 @@ begin
   for Index := 0 to DeviceList.Count - 1 do
   begin
     // Does this device match our registry setting? Select right away
-    if (TMTP_Device(DeviceList[Index]).Device = Device) then
+    if (TBase_Device(DeviceList[Index]).Device = Device) then
     begin
       CmbDevices.ItemIndex := Index;
       SelectDevice(Index);
@@ -2383,8 +2352,10 @@ begin
      (CmbDevices.ItemIndex < CmbDevices.Items.Count) then
   begin
     SelectDevice(CmbDevices.ItemIndex);
-    if (CheckDevice(false)) then
-      ReadDeviceDB;
+    ClearDeviceDbFiles;
+    if (HasTMTPDevice(CurrentDevice)) then
+      TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
+    RebuildDeviceDbMenu;
   end;
 end;
 
@@ -2426,32 +2397,35 @@ var
 
 begin
   AComboBox := TComboBox(Control);
-  AMTP_Device := TMTP_Device(AComboBox.Items.Objects[Index]);
-  if (AMTP_Device = nil) then
-    exit;
-
-  ACanvas := TComboBox(Control).Canvas;
+  ACanvas := AComboBox.Canvas;
   ACanvas.FillRect(Rect);
 
-  DrawCol(0, AMTP_Device.FriendlyName);
-  DrawLine(0);
+  if not HasTMTPDevice(AComboBox.Items.Objects[Index]) then
+    ACanvas.TextOut(Rect.Left + 2, Rect.Top, AComboBox.Items[Index])
+  else
+  begin
+    AMTP_Device := TMTP_Device(AComboBox.Items.Objects[Index]);
 
-  DrawCol(1, AMTP_Device.Description);
-  DrawLine(1);
+    DrawCol(0, AMTP_Device.FriendlyName);
+    DrawLine(0);
 
-  DrawCol(2, AMTP_Device.Manufacturer);
-  DrawLine(2);
+    DrawCol(1, AMTP_Device.Description);
+    DrawLine(1);
 
-  DrawCol(3, AMTP_Device.GarminDevice.ModelDescription);
-  DrawLine(3);
+    DrawCol(2, AMTP_Device.Manufacturer);
+    DrawLine(2);
 
-  DrawCol(4, AMTP_Device.GarminDevice.SoftwareVersion);
-  DrawLine(4);
+    DrawCol(3, AMTP_Device.GarminDevice.ModelDescription);
+    DrawLine(3);
 
-  DrawCol(5, AMTP_Device.GarminDevice.SerialNumber);
-  DrawLine(5);
+    DrawCol(4, AMTP_Device.GarminDevice.SoftwareVersion);
+    DrawLine(4);
 
-  DrawCol(6, AMTP_Device.MSM);
+    DrawCol(5, AMTP_Device.GarminDevice.SerialNumber);
+    DrawLine(5);
+
+    DrawCol(6, AMTP_Device.MSM);
+  end;
 end;
 
 procedure TFrmTripManager.CmbDevicesDropDown(Sender: TObject);
@@ -2550,7 +2524,7 @@ var
   IncrementDay: boolean;
   Rc: integer;
   AnItem: TListItem;
-  ABase_Data: TBASE_Data;
+  ABase_Data: TBase_Data;
   TmpTripList: TTripList;
   LocalFile: string;
   CrNormal,CrWait: HCURSOR;
@@ -2586,7 +2560,7 @@ begin
       begin
         if (AnItem.Selected = false) then
           continue;
-        ABase_Data := TBASE_Data(AnItem.Data);
+        ABase_Data := TBase_Data(AnItem.Data);
         if (ABase_Data.IsFolder) then
           continue;
 
@@ -2927,7 +2901,7 @@ begin
   begin
     if (AnItem.Selected = false) then
       continue;
-    if (TMTP_Data(AnItem.Data).IsFolder) then
+    if (TBase_Data(AnItem.Data).IsFolder) then
       continue;
 
     if (SameText(TripExtension, AnItem.SubItems[2])) or
@@ -3302,7 +3276,6 @@ procedure TFrmTripManager.ClearDeviceDbFiles;
 begin
   ExploreList.Clear;
   DeleteTempFiles(GetDeviceTmp, '*.db');
-  RebuildDeviceDbMenu;
 end;
 
 procedure TFrmTripManager.RebuildTransportAndRoutePrefMenu;
@@ -3443,7 +3416,7 @@ begin
 
   if (LstFiles.Selected = nil) then
     exit;
-  if TBASE_Data(LstFiles.Selected.Data).IsFolder then
+  if TBase_Data(LstFiles.Selected.Data).IsFolder then
     exit;
 
   if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) or
@@ -4308,14 +4281,14 @@ end;
 
 function TFrmTripManager.CopyFileToTmp(const AListItem: TListItem): string;
 var
-  ABASE_Data_File: TBASE_Data;
+  ABASE_Data_File: TBase_Data;
   NFile: string;
 begin
   result := '';
   CheckDevice;
 
   // Get Id of File
-  ABASE_Data_File := TBASE_Data(TBASE_Data(AListItem.Data));
+  ABASE_Data_File := TBase_Data(TBase_Data(AListItem.Data));
   if (ABASE_Data_File.IsFolder) then
     exit;
 
@@ -4387,7 +4360,7 @@ const
   ObjectName: array[boolean] of string = ('Files', 'Folders + Sub folders');
 var
   ANitem: TlistItem;
-  ABase_Data: TBASE_Data;
+  ABase_Data: TBase_Data;
   SelCount: integer;
   UnSafeExt: boolean;
   UnlockFiles: boolean;
@@ -4403,7 +4376,7 @@ begin
     if not (ANitem.Selected) then
       continue;
     // Check file, or dir
-    ABase_Data := TBASE_Data(ANitem.Data);
+    ABase_Data := TBase_Data(ANitem.Data);
     if (ABase_Data.IsFolder <> AllowRecurse) then
       continue;
 
@@ -4463,7 +4436,7 @@ begin
     begin
       if not (ANitem.Selected) then
         continue;
-      ABase_Data := TBASE_Data(ANitem.Data);
+      ABase_Data := TBase_Data(ANitem.Data);
       if (ABase_Data.IsFolder <> AllowRecurse) then
         continue;
 
@@ -4531,7 +4504,7 @@ begin
     if (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, NewName) <> '') then
       raise exception.Create(Format('File %s exists!', [NewName]));
 
-    if not RenameObject(CurrentDevice.PortableDev, TBASE_Data(LstFiles.Selected.Data).ObjectId, NewName) then
+    if not RenameObject(CurrentDevice.PortableDev, TBase_Data(LstFiles.Selected.Data).ObjectId, NewName) then
       raise exception.Create('Rename failed on device');
 
     ReloadFileList;
@@ -4545,7 +4518,7 @@ var
   TripName: string;
   TripFileName: string;
   AnItem: TListItem;
-  ABase_Data: TBASE_Data;
+  ABase_Data: TBase_Data;
   TmpTripList: TTripList;
   CrWait, CrNormal: HCURSOR;
 begin
@@ -4561,7 +4534,7 @@ begin
       begin
         if (AnItem.Selected = false) then
           continue;
-        ABase_Data := TBASE_Data(AnItem.Data);
+        ABase_Data := TBase_Data(AnItem.Data);
         if (ABase_Data.IsFolder) then
           continue;
 
@@ -4619,7 +4592,7 @@ var
   mParentTripId: TmParentTripId;
   TripFileName: string;
   AnItem: TListItem;
-  ABase_Data: TBASE_Data;
+  ABase_Data: TBase_Data;
   TmpTripList: TTripList;
   CrWait, CrNormal: HCURSOR;
 begin
@@ -4646,7 +4619,7 @@ begin
       begin
         if (AnItem.Selected = false) then
           continue;
-        ABase_Data := TBASE_Data(AnItem.Data);
+        ABase_Data := TBase_Data(AnItem.Data);
         if (ABase_Data.IsFolder) then
           continue;
 
@@ -4702,7 +4675,7 @@ var
   AnItem: TListItem;
   ARouteParmItem: TByteItem;
   AllLinks: TmAllLinks;
-  ABase_Data: TBASE_Data;
+  ABase_Data: TBase_Data;
   TmpTripList: TTripList;
   CrWait, CrNormal: HCURSOR;
 begin
@@ -4723,7 +4696,7 @@ begin
       begin
         if (AnItem.Selected = false) then
           continue;
-        ABase_Data := TBASE_Data(AnItem.Data);
+        ABase_Data := TBase_Data(AnItem.Data);
         if (ABase_Data.IsFolder) then
           continue;
 
@@ -4798,7 +4771,7 @@ end;
 
 procedure TFrmTripManager.ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
 var
-  ABASE_Data: TBASE_Data;
+  ABASE_Data: TBase_Data;
   SParent: Widestring;
   CrWait, CrNormal: HCURSOR;
 begin
@@ -4815,7 +4788,7 @@ begin
         begin
           if (LstFiles.ItemIndex >= 0) then
           begin
-            ABASE_Data := TBASE_Data(LstFiles.Items.Item[LstFiles.ItemIndex].Data);
+            ABASE_Data := TBase_Data(LstFiles.Items.Item[LstFiles.ItemIndex].Data);
             SParent := ABASE_Data.ObjectId;
           end;
         end;
@@ -4872,7 +4845,7 @@ begin
 
   // maybe file is double clicked
   if (AListview.ItemIndex >= 0) and
-    (TBASE_Data(AListview.Items.Item[AListview.ItemIndex].Data).IsFolder = false) then
+    (TBase_Data(AListview.Items.Item[AListview.ItemIndex].Data).IsFolder = false) then
     exit;
 
   if ((AListview.ItemIndex > -1) and
@@ -4904,9 +4877,14 @@ begin
 end;
 
 procedure TFrmTripManager.LstFilesDeletion(Sender: TObject; Item: TListItem);
+var
+  ABase_Data: TBase_Data;
 begin
   if Assigned(Item.Data) then
-    FreeAndNil(TMTP_Data(Item.Data));
+  begin
+    ABase_Data := Item.Data;
+    FreeAndNil(ABase_Data);
+  end;
 end;
 
 procedure TFrmTripManager.LstFilesItemChecked(Sender: TObject; Item: TListItem);
@@ -4916,7 +4894,7 @@ begin
   if (Item.Data = nil) then
     exit;
 
-  if TBASE_Data(Item.Data).IsFolder then
+  if TBase_Data(Item.Data).IsFolder then
     exit;
 
   SetImported(Item, not Item.Checked);
@@ -5625,7 +5603,7 @@ begin
   result := -1;
   while (Retries > 0) do
   begin
-    result := TMTP_Device.DeviceIdInList(DeviceToWaitFor, DeviceList); // List after insert
+    result := TBase_Device.DeviceIdInList(DeviceToWaitFor, DeviceList); // List after insert
     if (result > -1) then
         break;
 
@@ -5657,9 +5635,9 @@ begin
      (Assigned(CurrentDevice)) and
      (SameText(CurrentDevice.Device, DeviceName)) then
   begin
-    DevIndex := TMTP_Device.DeviceIdInList(DeviceName, DeviceList);  // List before remove
+    DevIndex := TBase_Device.DeviceIdInList(DeviceName, DeviceList);  // List before remove
     if (DevIndex > -1) then
-      ConnectedDeviceChanged(TMTP_Device(DeviceList[DevIndex]).DisplayedDevice, 'Disconnected');
+      ConnectedDeviceChanged(TBase_Device(DeviceList[DevIndex]).DisplayedDevice, 'Disconnected');
     GetDeviceList;
     exit;
   end;
@@ -5682,9 +5660,9 @@ begin
     // Inserted Device is in the DeviceList and a known device.
     // Note: Sd Cards are not known devices
     if (DevIndex > -1) and
-       (TModelConv.IsKnownDevice(TMTP_Device(DeviceList[DevIndex]))) then
+       (TModelConv.IsKnownDevice(TBase_Device(DeviceList[DevIndex]))) then
     begin
-      ConnectedDeviceChanged(TMTP_Device(DeviceList[DevIndex]).DisplayedDevice, 'Connected');
+      ConnectedDeviceChanged(TBase_Device(DeviceList[DevIndex]).DisplayedDevice, 'Connected');
       CmbDevices.ItemIndex := DevIndex;
       CmbDevicesChange(CmbDevices);
     end;
@@ -5701,6 +5679,7 @@ begin
   TvTrip.Items.Clear;
   ClearTripInfo;
   ClearDeviceDbFiles;
+  RebuildDeviceDbMenu;
   TsExplore.TabVisible := false;
 
   StatusTimer.Enabled := false;

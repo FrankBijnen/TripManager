@@ -160,7 +160,7 @@ object FrmSendTo: TFrmSendTo
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 3
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -179,6 +179,7 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
+      ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
@@ -229,7 +230,7 @@ object FrmSendTo: TFrmSendTo
         Left = 200
         Top = 1
         Width = 387
-        Height = 19
+        Height = 23
         Align = alRight
         Style = csDropDownList
         TabOrder = 0

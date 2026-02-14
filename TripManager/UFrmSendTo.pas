@@ -65,7 +65,7 @@ implementation
 
 uses
   System.TypInfo, System.Math,
-  UnitStringUtils, UnitMtpDevice,
+  UnitStringUtils, mtp_helper,
   UnitRegistry, UnitRegistryKeys, UnitTripDefs, UnitModelConv;
 
 {$R *.dfm}
@@ -154,7 +154,7 @@ begin
         ModelIndex := GetRegistry(Reg_CurrentModel, 0);
         SubKey := IntToStr(ModelIndex);
         LblDestinations.Caption :=
-          Format('Device:%s %s%s',        [#9, TMTP_Device(CurrentDevice).DisplayedDevice, #10#10]);
+          Format('Device:%s %s%s',        [#9, TBase_Device(CurrentDevice).DisplayedDevice, #10#10]);
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,

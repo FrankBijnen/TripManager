@@ -9,7 +9,7 @@ uses
   mtp_helper;
 
 type
-  TMTP_Data = class(TBASE_Data)
+  TMTP_Data = class(TBase_Data)
   public
     IsNotSavedTrip: boolean;
     IsCalculated: boolean;
@@ -46,13 +46,15 @@ type
                               const ADeviceList: Tlist;
                               const AManufacturer: string = ''): boolean;
     procedure GetInfoFromDevice(DeviceList: Tlist); override;
+    procedure ReadDeviceDB(const DBPath: string; const ExploreList: TStringList);
   end;
 
 implementation
 
 uses
   System.SysUtils, System.Masks,
-  UnitModelConv, UnitStringUtils, UnitVerySimpleXml;
+  UnitRegistry, UnitRegistryKeys,
+  UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite;
 
 // Default paths. Will be overruled by reading GarminDevice.Xml
 procedure TGarminDevice.Init(const AModelDescription: string = '');
@@ -119,7 +121,9 @@ var
 begin
   result := false;
 
-  // Set defaulst based on device description
+  if not (ACurrentDevice is TMTP_Device) then
+    exit;
+  // Set defaults based on device description
   Init(AModelDescription);
 
   // Need a device to check better
@@ -294,6 +298,64 @@ begin
   finally
     PortableDev := nil;
   end;
+end;
+
+procedure TMTP_Device.ReadDeviceDB(const DBpath: string; const ExploreList: TStringList);
+var
+  NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
+  ModelIndex, DefAdvLevel: integer;
+begin
+  // SQLite path
+  if (DBPath = '') then
+    exit;
+
+  // Needed for checking if the connected Device needs reading SQlite
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+
+  // Copy settings.db, Update Avoidances changed
+  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
+     (CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
+    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
+
+  // Copy vehicle_profile.db
+  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
+     (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
+  begin
+    OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
+    OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
+    OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
+    OldVehicle_Profile.Name             := UTF8String(GetRegistry(Reg_VehicleProfileName, ''));
+    OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
+    OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
+
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
+
+    if (NewVehicle_Profile.Valid) and
+       (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
+    begin
+      // Update Vehicle profile
+      SetRegistry(Reg_VehicleProfileGuid,       string(NewVehicle_Profile.GUID));
+      SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id);
+      SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType);
+      SetRegistry(Reg_VehicleProfileName,       string(NewVehicle_Profile.Name));
+      SetRegistry(Reg_VehicleType,              NewVehicle_Profile.VehicleType);
+      SetRegistry(Reg_VehicleTransportMode,     NewVehicle_Profile.TransportMode);
+
+      // Changed Vehicle profile. Set hash to 0
+      SetRegistry(Reg_VehicleProfileHash, 0);
+
+      // Only load Default Adventurous level from profile if invalid
+      DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
+      if not (DefAdvLevel in [1..4]) then
+        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.AdventurousLevel +1);
+    end;
+  end;
+
+  // Copy explore.db
+  if (GetRegistry(Reg_EnableExploreFuncs, false)) and
+     (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) and
+     (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
+    GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 end;
 
 initialization
