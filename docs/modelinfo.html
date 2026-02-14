@@ -25,7 +25,9 @@ time and usually a lot of testing.</span></font><font color="#010101" ></font></
 the <b>XT2 </b>and the <b>Tread 2</b>. </span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Nearly every model has its own </span></font><a href="tripfile.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>trip file format</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" > 
 and it is important to 
 identify the model when reading and writing trip files. </span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Identification methods used are:</span></font><font color="#010101" ></font></div><ul><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  font-weight= bold;  " ><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Device name </b>as reported by Windows.</span></font><font color="#010101" ></font></div></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Reading <b>GarminDevice.xml, </b>usually located in the <b>Garmin </b>folder, to 
-get a better device name and the path locations.</span></font><font color="#010101" ></font></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >To get additional information needed to properly create the trip files 
+get the <b>device name</b>, the <b>part number</b>, and the <b>path locations. </b>The 
+device name and part number can be used if the model could not be 
+identified by the device name as reported by Windows.</span></font><font color="#010101" ></font></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >To get additional information needed to properly create the trip files 
 TripManager can read the <b>Settings.db </b>and <b>Vehicle_profile.db </b>in <b>.System\SQlite</b></span></font><font color="#010101" ></font></li></ul></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Note: Required files are first copied to the <b>Temp </b>directory. Use the <b>Temp path </b>button and look in the Device sub directory to see the files.</span></font><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >In addition to the trip file format TripManager can also read/write </span></font><a href="poifilesgpi.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>POI 
 files (.gpi)</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >&nbsp; that are used to mark </span></font><a href="10usingpoifiles.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Points of interest</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >. And has 
 experimental support for </span></font><a href="https://developer.garmin.com/fit/protocol/" target="blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>.fit files</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" > used on for example </span></font><a href="https://www.garmin.com/en-US/p/567991/?" target="blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Edge models</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >. </span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >For many Garmin models it is supported to transfer GPX files to the unit. 
@@ -219,15 +221,56 @@ supported in TripManager.</span></font><font color="#010101" ><br clear="all"  s
     </td>
     <td valign="top"  width="495"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Can be identified, but writing trip files is not considered safe.</span></font><font color="#010101" ></font></div>
+    <div align="left" ><br>
+    </div>
+    <font color="#010101" >
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
+    <table border="1"  bordercolor="#000000"  width="496"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+        <tr>
+        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >MTP</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Trips</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GPX\POI</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Auto Detect</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Internal storage</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="189"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="69"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="79"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+    </table>
     <div align="left" ><font color="#010101" ></font></div>
     </td></tr>
     <tr>
     <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 595</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 590 + 595</span></font><font color="#010101" ></font></div>
     </td>
     <td valign="top"  width="147"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
@@ -247,30 +290,84 @@ supported in TripManager.</span></font><font color="#010101" ><br clear="all"  s
     </td>
     <td valign="top"  width="495"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Can be identified, but writing trip files is not considered safe.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >When set to Mass Storage Mode the trips files reside on a 
-    different Windows device.</span></font><font color="#010101" ></font></div>
-    </td></tr>
-    <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 590</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RO</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="495"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Identification needs testing.</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >In the Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
+    <div align="left" ><br>
+    </div>
+    <font color="#010101" >
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
+    <table border="1"  bordercolor="#000000"  width="496"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+        <tr>
+        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >MTP</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="57"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RWFS </span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="135"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="63"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Trips</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="73"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GPX\POI</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Auto Detect</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="57"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hide</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="135"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Internal storage</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="63"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="73"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="57"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hide</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="135"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="63"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="73"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage </span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="57"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Show</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="135"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="63"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="73"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+    </table>
+    <div align="left" ><br>
+    </div>
+    <font color="#010101" >
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >So: Trips are only visible in Mass Storage&nbsp; Mode with RWFS 
+    enabled.&nbsp; In that mode the trip files are only visible on <b>System1, 
+    </b>the GPX\POI are only visible on an other device/ drive letter: 
+    <b>System</b></span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
     <td valign="top"  width="123"  style="border: solid #010101 1px;" >
@@ -297,29 +394,75 @@ supported in TripManager.</span></font><font color="#010101" ><br clear="all"  s
     only difference is that it has no <b>mIsRoundTrip </b>item.</span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="123"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Nuvi 2595</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="147"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="39"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RO</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="39"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="39"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="45"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
     </td>
-    <td valign="top"  width="495"  style="border: solid #010101 1px;" >
+    <td valign="top"  width="495"  height="161"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Can be identified, but writing trip files is not considered safe.</span></font><font color="#010101" ></font></div>
+    <div align="left" ><br>
+    </div>
+    <font color="#010101" >
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
+    <table border="1"  bordercolor="#000000"  width="496"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+        <tr>
+        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >MTP</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Trips</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GPX\POI</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Auto Detect</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Internal storage</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+        <tr>
+        <td valign="top"  width="189"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="69"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td>
+        <td valign="top"  width="79"  style="border: solid #000000 1px;" >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
+        </td></tr>
+    </table>
+    <div align="left" ><font color="#010101" ></font></div>
     </td></tr>
     <tr>
-    <td colspan="7"  valign="top"  width="981"  style="border: solid #010101 1px;" >
+    <td colspan="7"  valign="top"  width="981"  height="29"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW=Read/Write, RO=ReadOnly, N/A=Not Applicable</span></font><font color="#010101" ></font></div>
     </td><br clear="all"  style="page-break-before:always" >
     </tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font><font color="#010101" ></font></div><table width="991"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
@@ -364,13 +507,13 @@ supported in TripManager.</span></font><font color="#010101" ><br clear="all"  s
     <div align="left" ><br>
     </div>
     <font color="#010101" >
-    <div align="left" ><br>
-    </font></div>
-    <font color="#010101" >
     <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Tested:</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 220</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 660</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 340 + 350</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 590 + 595</span></font><font color="#010101" ></font></div>
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Dakota 20</span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Nuvi 2595</span></font><font color="#010101" ></font></div>
     </td>
     <td valign="top"  width="147"  style="border: solid #010101 1px;" >
     <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
@@ -395,9 +538,9 @@ supported in TripManager.</span></font><font color="#010101" ><br clear="all"  s
     <div align="left" ><br>
     </div>
     <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >The TM fixes (RUT, Location changes) are not applicable. Using 
-    TM could still be useful for Post processing GPX files, creating 
-    GPX files with tracks and waypoint, and POI files. </span></font><font color="#010101" ></font></div>
+    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >The TM fixes (RUT, Location changes) are not applicable. </span></font><font color="#010101" ></font></div>
+    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Using TM could still be useful for Post processing GPX files, 
+    creating GPX files with tracks and waypoint, and POI files. </span></font><font color="#010101" ></font></div>
     </td></tr>
     <tr>
     <td valign="top"  width="123"  style="border: solid #010101 1px;" >
