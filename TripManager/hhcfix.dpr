@@ -24,20 +24,24 @@ begin
     AHtml := TFile.ReadAllText(Fs.Name, TEncoding.UTF8);
     AHtml := ReplaceAll(AHtml, ['?.html"',
                                 '<font face="Arial" size="2">',
+                                '>&middot;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;</span>',
                                 '>&Oslash;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&Oslash;&nbsp;&nbsp;</span>',
-                                '>&Oslash;&nbsp;</span>'],
+                                '>&Oslash;&nbsp;</span>',
+                                ' name="#'],
                                ['"',
                                 '<font face="Calibri" size="3">',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',
+                                '>&middot;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&Oslash;</span>',
                                 '>&Oslash;</span>',
-                                '>&Oslash;</span>'],
+                                '>&Oslash;</span>',
+                                ' name="'],
                                [rfReplaceAll]);
     TFile.WriteAllText(Fs.Name, AHtml);
     Rc := FindNext(Fs);
