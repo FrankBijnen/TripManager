@@ -71,14 +71,14 @@
         <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
         <SanitizedProjectName>TripManager</SanitizedProjectName>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.7.0.376;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.7;Comments=Use at your own risk</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=TDBware;FileDescription=Manages trips on the Zumo;FileVersion=1.7.0.377;InternalName=TripManager.exe;LegalCopyright=GPL-3.0 license;LegalTrademarks=;OriginalFilename=TripManager.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=Trip Manager;ProductVersion=1.7;Comments=Use at your own risk</VerInfo_Keys>
         <DCC_Define>NOMIDL;TRIPOBJECTS;GEOCODE;REGISTRYKEYS;OSMMAP;KML;GPI;$(DCC_Define)</DCC_Define>
         <Custom_Styles>&quot;Sapphire Kamri|VCLSTYLE|$(BDSCOMMONDIR)\Styles\SapphireKamri.vsf&quot;</Custom_Styles>
         <VerInfo_MinorVer>7</VerInfo_MinorVer>
         <DCC_MapFile>3</DCC_MapFile>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_UnitSearchPath>..\CommonUnits\Vcl.ShellControls;..\CommonUnits\SqliteWrap;..\CommonUnits\kml;..\CommonUnits\mtp;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <VerInfo_Build>376</VerInfo_Build>
+        <VerInfo_Build>377</VerInfo_Build>
         <PreBuildEvent><![CDATA[del $(OUTPUTDIR)\*.dcu
 $(PreBuildEvent)]]></PreBuildEvent>
     </PropertyGroup>

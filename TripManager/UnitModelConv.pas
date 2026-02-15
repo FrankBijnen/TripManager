@@ -292,11 +292,16 @@ var
 begin
   result := '';
 
-  if not (Assigned(CurrentDevice) and
-         (CurrentDevice is TMTP_Device)) then
-    exit;
-
-  GarminDevice := TMTP_Device(CurrentDevice).GarminDevice;
+  if (Assigned(CurrentDevice)) and
+     (CurrentDevice is TMTP_Device) then
+    // If we have a device, get the paths from the GarminDevice.xml
+    GarminDevice := TMTP_Device(CurrentDevice).GarminDevice
+  else
+  begin
+    // Provide some defaults
+    GarminDevice := DefaultGarminDevice;
+    GarminDevice.Init(Model_Tab[Display2Garmin(DevIndex)].DeviceName);
+  end;
 
   case Display2Garmin(DevIndex) of
     TGarminModel.XT,
@@ -409,6 +414,9 @@ begin
     exit(false);
 
   // Look in Known devices
+  if (KnownDevices.IndexOf(TMTP_Device(Device).FriendlyName) > -1)  then
+    exit(true);
+
   for KnownIndex := KnownDevices.Count -1 downto 0  do
   begin
     if (MatchesMask(TBase_Device(Device).DisplayedDevice, KnownDevices[KnownIndex])) then
@@ -425,11 +433,16 @@ var
   KnownIndex, DevIndex: integer;
 begin
   result := -1;
-
+  
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
     if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
       continue;
+
+    // Look in Known devices
+    if (KnownDevices.IndexOf(TMTP_Device(DeviceList[DevIndex]).FriendlyName) > -1)  then
+      exit(DevIndex);
+
     for KnownIndex := KnownDevices.Count -1 downto 0 do
     begin
       // Allow wildcards for mass storage devices. EG ?:\Garmin

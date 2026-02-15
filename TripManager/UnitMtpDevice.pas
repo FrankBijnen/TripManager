@@ -49,6 +49,9 @@ type
     procedure ReadDeviceDB(const DBPath: string; const ExploreList: TStringList);
   end;
 
+var
+  DefaultGarminDevice: TGarminDevice;
+
 implementation
 
 uses
@@ -360,6 +363,11 @@ end;
 
 initialization
   System.Classes.RegisterClasses([TMTP_Data, TMTP_Device]);
+  DefaultGarminDevice := TGarminDevice.Create;
+  DefaultGarminDevice.init;
+
+finalization
+  DefaultGarminDevice.Free;
 
 end.
 
