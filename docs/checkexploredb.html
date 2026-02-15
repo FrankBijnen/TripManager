@@ -2,35 +2,35 @@
    <title>Check Explore.db </title>
    <meta name="generator"  content="HelpMaker.net" >
    <meta name="keywords"  content="explore.db,trips," ></head>
-<body bgcolor="FFFFFF" >
-<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFCEA" >
+<body bgcolor="FFFCEA" >
+<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
   <tr>
     <td align="left" >
     <b><font face="Calibri"  size="5" >
-        <a href="modelinfo.html">Previous</a>&nbsp;&nbsp;
+        <a href="modelinfo.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;
     </font></b>
     </td>
     <td align="center"  width="75%" >
-      <p align="center" ></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>Check Explore.db </b></span></font><font color="#010101" ></font><br>
+      <div align="center" ></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>Check Explore.db </b></span></font><font color="#010101" ></font></div>
 
     </td>
   </tr></table>
 <hr>
-</span><font face="Calibri"  size="4" ><span style="font-size:14pt" >When manually handling trip files it's possible to create inconsistencies 
+<div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >When manually handling trip files it's possible to create inconsistencies 
 between the <b>.System\Trips </b>folder and the <b>Explore.db </b>in the <b>.System\SQlite </b>folder. Especially for the <b>XT2 </b>and <b>Tread 2 </b>models this 
-can lead to problems. E.G. Trips can reappear after having been deleted.</span></font><font color="#010101" ></font><br><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The <b>XT </b>does not store the trips in Explore.db, even when connected to 
+can lead to problems. E.G. Trips can reappear after having been deleted.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The <b>XT </b>does not store the trips in Explore.db, even when connected to 
 Garmin Explore, and does not exhibit this behaviour.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Starting with V1.7 TripManager can perform checks, and repair some 
 inconsistencies.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Background:</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The trips for the XT2 and Tread 2 have an item 'mExploreUuid' that 
 contains a GUID. For newly created trips TripManager creates a new 
 GUID.</span></font><font color="#010101" ></font></div><table width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
     <td valign="top"  width="545"  height="52" >
-    <div align="left" ><img src="checkexploredb1.JPG"  width="439"  height="52"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    <div align="left" ><img src="checkexploredbb1.JPG"  width="439"  height="52"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
     </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >In Explore.db trips are also stored with 'type=4', their UUID and Name. 
 (and more)</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
     <td valign="top"  width="545" >
-    <div align="left" ><img src="checkexploredb2.JPG"  width="479"  height="182"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    <div align="left" ><img src="checkexploredbb2.JPG"  width="479"  height="182"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
     </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Ideally trips with the same trip name should have the same UUID in 
 Explore.db and in the Trips folder.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Advice: </b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >To prevent inconsistencies </span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >when using <b>TripManager </b>in conjunction with <b>Explore </b>it is recommended to delete trips on the device, and not from 
 the Trips folder.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >A known cause of errors: A route initially send using the normal 'Garmin' 
@@ -41,7 +41,7 @@ trip from the device first, to avoid inconsistencies.</span></font><font color="
 setting to take effect)</span></font><font color="#010101" ></font></div><table width="666"  cellpadding="0"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
     <td valign="top"  width="666" >
-    <div align="left" ><img src="checkexploredb3.JPG"  width="640"  height="688"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    <div align="left" ><img src="checkexploredbb3.JPG"  width="640"  height="688"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
     </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >With the setting enabled TripManager will check if a UUID is found for 
 the trip name in Explore.db when transferring, and use that value. To 
 avoid having multiple UUID's for a trip name.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >When connecting a unit with an Explore.db in .System\Sqlite it will copy 
@@ -51,20 +51,20 @@ device.</span></font><font color="#010101" ></font></div><div align="left" ><br>
 selected, 2 more functions are enabled.</span></font><font color="#010101" ></font></div><table width="846"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
     <td valign="top"  width="838" >
-    <div align="left" ><img src="checkexploredb4.JPG"  width="830"  height="308"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    <div align="left" ><img src="checkexploredbb4.JPG"  width="830"  height="308"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
     </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Query/Explore.db </b>will open a tab with a table-browser. Just for quickly 
 checking. You can enter any SQL statement.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Compare Explore.db with Trips</b> Will run a compare, and show the 
 results in a tab.</span></font><font color="#010101" ></font></div><table width="942"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
     <td valign="top"  width="934" >
-    <div align="left" ><img src="checkexploredb5.JPG"  width="755"  height="547"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    <div align="left" ><img src="checkexploredbb5.JPG"  width="755"  height="547"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
     </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >There are 5 possible groups. Note that you can double click to collapse 
-or expand a group.</span></font><font color="#010101" ></font></div><ul><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  font-weight= bold;  " ><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In Explore, not in Trips</b>. These trips are not correct, but TripManager 
+or expand a group.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In Explore, not in Trips</b>. These trips are not correct, but TripManager 
 can not fix that. To fix that the Explore.db would have to be written 
 and updated on the device. To resolve delete the trips on the device, 
-or in Explore/Tread app.</span></font><font color="#010101" ></font></div></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  font-weight= bold;  color= #010101;  " ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Trips and Explore, but duplicate TripName. </b>The same UUID is 
-found for multiple Trip names. Delete the duplicates manually.</span></font><font color="#010101" ></font></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  font-weight= bold;  color= #010101;  " ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Explore and Trips, but different UUID</b>. Clicking on <b>Correct UUID</b> 
+or in Explore/Tread app.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Trips and Explore, but duplicate TripName. </b>The same UUID is 
+found for multiple Trip names. Delete the duplicates manually.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Explore and Trips, but different UUID</b>. Clicking on <b>Correct UUID</b> 
 will write the UUID value from Explore in the trips. (no recalculation 
-needed)</span></font><font color="#010101" ></font></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  font-weight= bold;  color= #010101;  " ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Trips, not in Explore.</b> Probably these are new trips that have just 
-been transferred. Rebooting the device should fix it.</span></font><font color="#010101" ></font></li><li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  font-weight= bold;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In Explore, in Trips, Same Uuid. </b>These are the perfect trips.</span></font><font color="#010101" ></font></li></ul><br><font color="#010101" ><div align="left" ></font><font color="#010101" ></font></div>
+needed)</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Trips, not in Explore.</b> Probably these are new trips that have just 
+been transferred. Rebooting the device should fix it.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In Explore, in Trips, Same Uuid. </b>These are the perfect trips.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></font><font color="#010101" ></font></div>
 </body></html>
