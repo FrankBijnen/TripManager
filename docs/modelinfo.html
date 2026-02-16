@@ -1,590 +1,1126 @@
-<html><head>
-   <title>Model info</title>
-   <meta name="generator"  content="HelpMaker.net" >
-   <meta name="keywords"  content="model info,XT,XT2,Tread 2,Zumo,Garmin,Edge,340,350,590,595,Nuvi 2595,Drive 51," ></head>
-<body bgcolor="FFFCEA" >
-<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
-  <tr>
-    <td align="left" >
-    <b><font face="Calibri"  size="5" >
-        <a href="sqlitebrowser.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;<a href="checkexploredb.html">Next</a>
-    </font></b>
-    </td>
-    <td align="center"  width="75%" >
-      <div align="center" ></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>Model info</b></span></font><font color="#010101" ></font></div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Windows version 5.9.14">
+  <title>Model info</title>
+  <meta name="generator" content="HelpMaker.net">
+  <meta name="keywords" content=
+  "model info,XT,XT2,Tread 2,Zumo,Garmin,Edge,340,350,590,595,Nuvi 2595,Drive 51,">
 
-    </td>
-  </tr></table>
-<hr>
-<div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>TripManager </b>was initially created with the <b>Zumo XT </b>in mind. To my 
-knowledge TripManager was the first program to be able to read, write, 
-and create the trip file format. Thereby fixing some of the problems 
-found when importing GPX files by the unit itself.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Since the trip file format is not officially documented reverse engineering 
-the trip files is about the only way to support more models. This takes 
-time and usually a lot of testing.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Over time more trip file formats were supported. Like the formats for 
-the <b>XT2 </b>and the <b>Tread 2</b>. </span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Nearly every model has its own </span></font><a href="tripfile.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>trip file format</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" > 
-and it is important to 
-identify the model when reading and writing trip files. </span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Identification methods used are:</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Device name </b>as reported by Windows.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Reading <b>GarminDevice.xml, </b>usually located in the <b>Garmin </b>folder, to 
-get the <b>device name</b>, the <b>part number</b>, and the <b>path locations. </b>The 
-device name and part number can be used if the model could not be 
-identified by the device name as reported by Windows.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >To get additional information needed to properly create the trip 
-files TripManager can read the <b>Settings.db </b>and <b>Vehicle_profile.db </b>in <b>.System\SQlite</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Note: Required files are first copied to the <b>Temp </b>directory. Use the <b>Temp path </b>button and look in the Device sub directory to see the files.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >In addition to the trip file format TripManager can also read/write </span></font><a href="poifilesgpi.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>POI 
-files (.gpi)</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >&nbsp; that are used to mark </span></font><a href="10usingpoifiles.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Points of interest</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >. And has 
-experimental support for </span></font><a href="https://developer.garmin.com/fit/protocol/" target="blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>.fit files</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" > used on for example </span></font><a href="https://www.garmin.com/en-US/p/567991/?" target="blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Edge models</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >. </span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >For many Garmin models it is supported to transfer GPX files to the unit. 
-The GPX file(s) should be imported on the unit to be able to use it. See </span></font><a href="16usingolderzumos.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>16) Using older Zumo's</u></span></font></a></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >This document aims to provide an overview of the models and what is 
-supported in TripManager.</span></font><font color="#010101" ><br clear="all"  style="page-break-before:always" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="991"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+  <style type="text/css">
+  body {
+  background-color: #FFFCEA;
+  }
+  td.c16 {border: solid #000000 1px;}
+  table.c15 {border-collapse: collapse; border: none}
+  td.c14 {border: solid #010101 1px;}
+  span.c13 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c12 {color: #010101}
+  br.c11 {page-break-before:always}
+  div.c10 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c9 {font-family: Symbol; font-size: 12pt}
+  a.c8 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c7 {font-size: 14pt; text-decoration: underline}
+  span.c6 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c5 {font-family: Calibri; font-size: 120%}
+  table.c4 {background-color: #FFFFFF}
+  span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
+  td.c2 {font-weight: bold}
+  span.c1 {font-family: Calibri; font-size: 150%}
+  </style>
+</head>
+<body>
+  <table class="c4" width="100%" border="0" cellspacing="0"
+  cellpadding="2">
     <tr>
-    <td colspan="7"  valign="top"  width="983" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Models that TripManager does identify as compatible with the trip file format.</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td class="c2" align="left"><span class="c1"><a href=
+      "sqlitebrowser.html">Previous</a> <a href=
+      "toc.html">Top</a> <a href=
+      "checkexploredb.html">Next</a></span></td>
+      <td align="center" width="75%">
+        <div align="center">
+          <span class="c3">Model info</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div align="left">
+    <span class="c5"><b>TripManager</b> was initially created with
+    the <b>Zumo XT</b> in mind. To my knowledge TripManager was the
+    first program to be able to read, write, and create the trip
+    file format. Thereby fixing some of the problems found when
+    importing GPX files by the unit itself.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Since the trip file format is not officially
+    documented reverse engineering the trip files is about the only
+    way to support more models. This takes time and usually a lot
+    of testing.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Over time more trip file formats were
+    supported. Like the formats for the <b>XT2</b> and the <b>Tread
+    2</b>.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Nearly every model has its own</span>
+    <a class="c8" href="tripfile.html"><span class="c7">trip file
+    format</span></a> <span class="c5">and it is important to
+    identify the model when reading and writing trip files.</span>
+  </div>
+  <div align="left">
+    <span class="c5">Identification methods used are:</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·   </span><span class="c5"><b>Device name</b>
+    as reported by Windows.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·   </span><span class="c5">Reading
+    <b>GarminDevice.xml,</b> usually located in the <b>Garmin</b>
+    folder, to get the <b>device name</b>, the <b>part number</b>,
+    and the <b>path locations.</b> The device name and part number
+    can be used if the model could not be identified by the device
+    name as reported by Windows.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·   </span><span class="c5">To get additional
+    information needed to properly create the trip files
+    TripManager can read the <b>Settings.db</b> and
+    <b>Vehicle_profile.db</b> in <b>.System\SQlite</b></span>
+  </div>
+  <div align="left">
+    <span class="c5">Note: Required files are first copied to the
+    <b>Temp</b> directory. Use the <b>Temp path</b> button and look
+    in the Device sub directory to see the files.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">In addition to the trip file format
+    TripManager can also read/write</span> <a class="c8" href=
+    "poifilesgpi.html"><span class="c7">POI files
+    (.gpi)</span></a><span class="c5">  that are used to
+    mark</span> <a class="c8" href=
+    "10usingpoifiles.html"><span class="c7">Points of
+    interest</span></a><span class="c5">. And has experimental
+    support for</span> <a class="c8" href=
+    "https://developer.garmin.com/fit/protocol/" target=
+    "blank"><span class="c7">.fit files</span></a> <span class=
+    "c5">used on for example</span> <a class="c8" href=
+    "https://www.garmin.com/en-US/p/567991/?" target=
+    "blank"><span class="c7">Edge models</span></a><span class=
+    "c5">.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">For many Garmin models it is supported to
+    transfer GPX files to the unit. The GPX file(s) should be
+    imported on the unit to be able to use it. See</span> <a class=
+    "c8" href="16usingolderzumos.html"><span class="c7">16) Using
+    older Zumo's</span></a><span class="c6">.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">This document aims to provide an overview of
+    the models and what is supported in
+    TripManager.</span><span class="c12"><br clear="all" class=
+    "c11"></span>
+  </div>
+  <div align="left">
+    <br>
+  </div><br clear="all" class="c11">
+  <table width="991" cellpadding="4" cellspacing="0" class="c15">
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Model</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Identification</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Trip</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Poi</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Gpx</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Fit</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Remarks</b></span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td colspan="7" valign="top" width="983">
+        <div align="left">
+          <span class="c5">Models that TripManager does identify as
+          compatible with the trip file format.</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c13">Model</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c13">Identification</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Trip</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Poi</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Gpx</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c13">Fit</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c13">Remarks</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo XT</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >GarminDevice.xml</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Fully supported. </span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Unique feature: Grouping Trips</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Need to enable the .System directory .</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14"></td>
+      <td valign="top" width="147" class="c14"></td>
+      <td valign="top" width="39" class="c14"></td>
+      <td valign="top" width="39" class="c14"></td>
+      <td valign="top" width="39" class="c14"></td>
+      <td valign="top" width="45" class="c14"></td>
+      <td valign="top" width="496" class="c14"></td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo XT2</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >GarminDevice.xml</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Settings.db</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Vehicle_profile.db</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Fully supported. </span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Grouping Trips is replaced by Collections</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Route preference per segment.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Need to enable the .System directory&nbsp; AND make sure it is 
-    created by first loading at least 1 trip</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Zumo XT</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c6">GarminDevice.xml</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c5">Fully supported.</span>
+        </div>
+        <div align="left">
+          <span class="c6">Unique feature: Grouping Trips</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Need to enable the .System directory
+          .</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Tread 2</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >GarminDevice.xml</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Settings.db</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Vehicle_profile.db</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Fully supported.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >In addition to the XT2 it supports multiple vehicle profiles</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Zumo XT2</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c6">GarminDevice.xml</span>
+        </div>
+        <div align="left">
+          <span class="c5">Settings.db</span>
+        </div>
+        <div align="left">
+          <span class="c5">Vehicle_profile.db</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c5">Fully supported.</span>
+        </div>
+        <div align="left">
+          <span class="c5">Grouping Trips is replaced by
+          Collections</span>
+        </div>
+        <div align="left">
+          <span class="c5">Route preference per segment.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">Need to enable the .System directory 
+          AND make sure it is created by first loading at least 1
+          trip</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td colspan="7"  valign="top"  width="982"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW=Read/Write, RO=ReadOnly, N/A=Not Applicable</span></font><font color="#010101" ></font></div>
-    </td><br clear="all"  style="page-break-before:always" >
-    </tr></table><div align="left" ><br><font color="#010101" ></font></div><table width="990"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Tread 2</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c6">GarminDevice.xml</span>
+        </div>
+        <div align="left">
+          <span class="c5">Settings.db</span>
+        </div>
+        <div align="left">
+          <span class="c5">Vehicle_profile.db</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c5">Fully supported.</span>
+        </div>
+        <div align="left">
+          <span class="c5">In addition to the XT2 it supports
+          multiple vehicle profiles</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td colspan="7"  valign="top"  width="982" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Models that TripManager does <b>not </b>identify as compatible with the trip file format, because <b>writing </b>is not supported. <b>Reading </b>the 
-    trip files however is supported. But you will need to select the trip files manually.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >TripManager will use these devices as <b>Generic Garmin</b>.</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td colspan="7" valign="top" width="982" class="c14">
+        <div align="left">
+          <span class="c5">RW=Read/Write, RO=ReadOnly, N/A=Not
+          Applicable</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><br clear="all" class="c11">
+  <table width="990" cellpadding="4" cellspacing="0" class="c15">
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Model</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Identification</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Trip</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Poi</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Gpx</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Fit</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="495"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Remarks</b></span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td colspan="7" valign="top" width="982">
+        <div align="left">
+          <span class="c5">Models that TripManager does <b>not</b>
+          identify as compatible with the trip file format, because
+          <b>writing</b> is not supported. <b>Reading</b> the trip
+          files however is supported. But you will need to select
+          the trip files manually.</span>
+        </div>
+        <div align="left">
+          <span class="c5">TripManager will use these devices as
+          <b>Generic Garmin</b>.</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="147"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="45"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="495"  height="27"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c13">Model</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c13">Identification</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Trip</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Poi</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Gpx</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c13">Fit</span>
+        </div>
+      </td>
+      <td valign="top" width="495" class="c14">
+        <div align="left">
+          <span class="c13">Remarks</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 3x0</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >(340 + 350)</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GarminDevice.xml</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >System.db</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RO</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="495"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Can be identified, but writing trip files is not considered safe.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
-    <table border="1"  bordercolor="#000000"  width="496"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
-        <tr>
-        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >MTP</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Trips</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GPX\POI</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Auto Detect</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Internal storage</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="189"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="69"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="79"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-    </table>
-    <div align="left" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" height="27" class="c14"></td>
+      <td valign="top" width="147" height="27" class="c14"></td>
+      <td valign="top" width="39" height="27" class="c14"></td>
+      <td valign="top" width="39" height="27" class="c14"></td>
+      <td valign="top" width="39" height="27" class="c14"></td>
+      <td valign="top" width="45" height="27" class="c14"></td>
+      <td valign="top" width="495" height="27" class="c14"></td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 590 + 595</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >GarminDevice.xml</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RO</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="495"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Can be identified, but writing trip files is not considered safe.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >In the Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
-    <table border="1"  bordercolor="#000000"  width="496"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
-        <tr>
-        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >MTP</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="57"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RWFS </span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="135"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="63"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Trips</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="73"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GPX\POI</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Auto Detect</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="57"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hide</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="135"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Internal storage</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="63"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="73"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="57"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hide</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="135"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="63"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="73"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage </span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="57"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Show</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="135"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="63"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="73"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-    </table>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >So: Trips are only visible in Mass Storage&nbsp; Mode with RWFS 
-    enabled.&nbsp; In that mode the trip files are only visible on <b>System1, 
-    </b>the GPX\POI are only visible on an other device/ drive letter: 
-    <b>System</b></span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Zumo 3x0</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">(340 + 350)</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c5">GarminDevice.xml</span>
+        </div>
+        <div align="left">
+          <span class="c5">System.db</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RO</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="495" class="c14">
+        <div align="left">
+          <span class="c5">Can be identified, but writing trip
+          files is not considered safe.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Hidden menu/MTP Settings:</span>
+        </div>
+        <table border="1" bordercolor="#000000" width="496"
+        cellpadding="4" cellspacing="0" class="c15">
+          <tr>
+            <td valign="top" width="189" height="29" class="c16">
+              <div align="left">
+                <span class="c5">MTP</span>
+              </div>
+            </td>
+            <td valign="top" width="123" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Device</span>
+              </div>
+            </td>
+            <td valign="top" width="69" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Trips</span>
+              </div>
+            </td>
+            <td valign="top" width="79" height="29" class="c16">
+              <div align="left">
+                <span class="c5">GPX\POI</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="189" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Auto Detect</span>
+              </div>
+            </td>
+            <td valign="top" width="123" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Internal storage</span>
+              </div>
+            </td>
+            <td valign="top" width="69" height="29" class="c16">
+              <div align="left">
+                <span class="c5">No</span>
+              </div>
+            </td>
+            <td valign="top" width="79" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="189" class="c16">
+              <div align="left">
+                <span class="c5">Mass Storage</span>
+              </div>
+            </td>
+            <td valign="top" width="123" class="c16">
+              <div align="left">
+                <span class="c5">Drive lettter</span>
+              </div>
+            </td>
+            <td valign="top" width="69" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+            <td valign="top" width="79" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div align="left"></div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive 51</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RO</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="495"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Identification needs testing.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Note: The format is very similar to the 595 trip file format. The 
-    only difference is that it has no <b>mIsRoundTrip </b>item.</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Zumo 590 + 595</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c6">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c6">GarminDevice.xml</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RO</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="495" class="c14">
+        <div align="left">
+          <span class="c5">Can be identified, but writing trip
+          files is not considered safe.</span>
+        </div>
+        <div align="left">
+          <span class="c5">In the Hidden menu/MTP Settings:</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Hidden menu/MTP Settings:</span>
+        </div>
+        <table border="1" bordercolor="#000000" width="496"
+        cellpadding="4" cellspacing="0" class="c15">
+          <tr>
+            <td valign="top" width="123" height="29" class="c16">
+              <div align="left">
+                <span class="c5">MTP</span>
+              </div>
+            </td>
+            <td valign="top" width="57" height="29" class="c16">
+              <div align="left">
+                <span class="c5">RWFS</span>
+              </div>
+            </td>
+            <td valign="top" width="135" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Device</span>
+              </div>
+            </td>
+            <td valign="top" width="63" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Trips</span>
+              </div>
+            </td>
+            <td valign="top" width="73" height="29" class="c16">
+              <div align="left">
+                <span class="c5">GPX\POI</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="123" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Auto Detect</span>
+              </div>
+            </td>
+            <td valign="top" width="57" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Hide</span>
+              </div>
+            </td>
+            <td valign="top" width="135" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Internal storage</span>
+              </div>
+            </td>
+            <td valign="top" width="63" height="29" class="c16">
+              <div align="left">
+                <span class="c5">No</span>
+              </div>
+            </td>
+            <td valign="top" width="73" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="123" class="c16">
+              <div align="left">
+                <span class="c5">Mass Storage</span>
+              </div>
+            </td>
+            <td valign="top" width="57" class="c16">
+              <div align="left">
+                <span class="c5">Hide</span>
+              </div>
+            </td>
+            <td valign="top" width="135" class="c16">
+              <div align="left">
+                <span class="c5">Drive lettter</span>
+              </div>
+            </td>
+            <td valign="top" width="63" class="c16">
+              <div align="left">
+                <span class="c5">No</span>
+              </div>
+            </td>
+            <td valign="top" width="73" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="123" class="c16">
+              <div align="left">
+                <span class="c5">Mass Storage</span>
+              </div>
+            </td>
+            <td valign="top" width="57" class="c16">
+              <div align="left">
+                <span class="c5">Show</span>
+              </div>
+            </td>
+            <td valign="top" width="135" class="c16">
+              <div align="left">
+                <span class="c5">Drive lettter</span>
+              </div>
+            </td>
+            <td valign="top" width="63" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+            <td valign="top" width="73" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">So: Trips are only visible in Mass
+          Storage  Mode with RWFS enabled.  In that mode the trip
+          files are only visible on <b>System1,</b> the GPX\POI are
+          only visible on an other device/ drive letter:
+          <b>System</b></span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Nuvi 2595</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RO</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="495"  height="161"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Can be identified, but writing trip files is not considered safe.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Hidden menu/MTP Settings:</span></font><font color="#010101" ></font></div>
-    <table border="1"  bordercolor="#000000"  width="496"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
-        <tr>
-        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >MTP</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Trips</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GPX\POI</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="189"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Auto Detect</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="123"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Internal storage</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="69"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >No</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="79"  height="29"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-        <tr>
-        <td valign="top"  width="189"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Mass Storage</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="123"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Drive lettter</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="69"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td>
-        <td valign="top"  width="79"  style="border: solid #000000 1px;" >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Yes</span></font><font color="#010101" ></font></div>
-        </td></tr>
-    </table>
-    <div align="left" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Drive 51</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RO</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="495" class="c14">
+        <div align="left">
+          <span class="c5">Identification needs testing.</span>
+        </div>
+        <div align="left">
+          <span class="c5">Note: The format is very similar to the
+          595 trip file format. The only difference is that it has
+          no <b>mIsRoundTrip</b> item.</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td colspan="7"  valign="top"  width="981"  height="29"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW=Read/Write, RO=ReadOnly, N/A=Not Applicable</span></font><font color="#010101" ></font></div>
-    </td><br clear="all"  style="page-break-before:always" >
-    </tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font><font color="#010101" ></font></div><table width="991"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="123" height="161" class="c14">
+        <div align="left">
+          <span class="c5">Nuvi 2595</span>
+        </div>
+      </td>
+      <td valign="top" width="147" height="161" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="39" height="161" class="c14">
+        <div align="left">
+          <span class="c5">RO</span>
+        </div>
+      </td>
+      <td valign="top" width="39" height="161" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" height="161" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" height="161" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="495" height="161" class="c14">
+        <div align="left">
+          <span class="c5">Can be identified, but writing trip
+          files is not considered safe.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Hidden menu/MTP Settings:</span>
+        </div>
+        <table border="1" bordercolor="#000000" width="496"
+        cellpadding="4" cellspacing="0" class="c15">
+          <tr>
+            <td valign="top" width="189" height="29" class="c16">
+              <div align="left">
+                <span class="c5">MTP</span>
+              </div>
+            </td>
+            <td valign="top" width="123" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Device</span>
+              </div>
+            </td>
+            <td valign="top" width="69" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Trips</span>
+              </div>
+            </td>
+            <td valign="top" width="79" height="29" class="c16">
+              <div align="left">
+                <span class="c5">GPX\POI</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="189" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Auto Detect</span>
+              </div>
+            </td>
+            <td valign="top" width="123" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Internal storage</span>
+              </div>
+            </td>
+            <td valign="top" width="69" height="29" class="c16">
+              <div align="left">
+                <span class="c5">No</span>
+              </div>
+            </td>
+            <td valign="top" width="79" height="29" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="189" class="c16">
+              <div align="left">
+                <span class="c5">Mass Storage</span>
+              </div>
+            </td>
+            <td valign="top" width="123" class="c16">
+              <div align="left">
+                <span class="c5">Drive lettter</span>
+              </div>
+            </td>
+            <td valign="top" width="69" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+            <td valign="top" width="79" class="c16">
+              <div align="left">
+                <span class="c5">Yes</span>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div align="left"></div>
+      </td>
+    </tr>
     <tr>
-    <td colspan="7"  valign="top"  width="983" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Models that TripManager does <b>not </b>identify as compatible with a trip file format, because the trip file format is not used by the 
-    unit.</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td colspan="7" valign="top" width="981" height="29" class=
+      "c14">
+        <div align="left">
+          <span class="c5">RW=Read/Write, RO=ReadOnly, N/A=Not
+          Applicable</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c12"><br></span>
+  </div>
+  <table width="991" cellpadding="4" cellspacing="0" class="c15">
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Model</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Identification</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Trip</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Poi</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Gpx</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Fit</b></span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Remarks</b></span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td colspan="7" valign="top" width="983">
+        <div align="left">
+          <span class="c5">Models that TripManager does <b>not</b>
+          identify as compatible with a trip file format, because
+          the trip file format is not used by the unit.</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" ><font color="#010101" ></font></td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c13">Model</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c13">Identification</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Trip</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Poi</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c13">Gpx</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c13">Fit</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c13">Remarks</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Generic Garmin</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Tested:</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 220</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 660</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 340 + 350</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Zumo 590 + 595</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Dakota 20</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Nuvi 2595</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GarminDevice.XML</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Only the GPX and POI files are supported. The operation mode is 
-    much like copying the files traditionally via Windows Explorer, or 
-    BaseCamp.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >The TM fixes (RUT, Location changes) are not applicable. </span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Using TM could still be useful for Post processing GPX files, 
-    creating GPX files with tracks and waypoint, and POI files. </span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14"></td>
+      <td valign="top" width="147" class="c14"></td>
+      <td valign="top" width="39" class="c14"></td>
+      <td valign="top" width="39" class="c14"></td>
+      <td valign="top" width="39" class="c14"></td>
+      <td valign="top" width="45" class="c14"></td>
+      <td valign="top" width="496" class="c14"></td>
+    </tr>
     <tr>
-    <td valign="top"  width="123"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Edge</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ><br>
-    </font></div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Tested:</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Edge 1030</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="147"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Device name</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >GarminDevice.xml</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >N/A</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="39"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="45"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW</span></font><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="496"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >These devices don't use trip files, but fit files. These files can be 
-    stored on the Courses, or NewFiles, directory. After a reboot they 
-    are ready to navigate.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >In the NewFiles you can also store GPX files. These will be 
-    converted by the unit to Courses.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The NewFiles directory is emptied by the unit after conversion.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >In Activities you can find also find fit files. These are the recorded 
-    courses. Comparable to track logs.</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Generic Garmin</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Tested:</span>
+        </div>
+        <div align="left">
+          <span class="c5">Zumo 220</span>
+        </div>
+        <div align="left">
+          <span class="c5">Zumo 660</span>
+        </div>
+        <div align="left">
+          <span class="c5">Zumo 340 + 350</span>
+        </div>
+        <div align="left">
+          <span class="c5">Zumo 590 + 595</span>
+        </div>
+        <div align="left">
+          <span class="c5">Dakota 20</span>
+        </div>
+        <div align="left">
+          <span class="c5">Nuvi 2595</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c5">GarminDevice.XML</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c5">Only the GPX and POI files are
+          supported. The operation mode is much like copying the
+          files traditionally via Windows Explorer, or
+          BaseCamp.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">The TM fixes (RUT, Location changes) are
+          not applicable.</span>
+        </div>
+        <div align="left">
+          <span class="c5">Using TM could still be useful for Post
+          processing GPX files, creating GPX files with tracks and
+          waypoint, and POI files.</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td colspan="7"  valign="top"  width="982"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >RW=Read/Write, RO=ReadOnly, N/A=Not Applicable</span></font><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><font color="#010101" ></font></div>
-</body></html>
+      <td valign="top" width="123" class="c14">
+        <div align="left">
+          <span class="c5">Edge</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c12"><br></span>
+        </div>
+        <div align="left">
+          <span class="c5">Tested:</span>
+        </div>
+        <div align="left">
+          <span class="c5">Edge 1030</span>
+        </div>
+      </td>
+      <td valign="top" width="147" class="c14">
+        <div align="left">
+          <span class="c5">Device name</span>
+        </div>
+        <div align="left">
+          <span class="c5">GarminDevice.xml</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">N/A</span>
+        </div>
+      </td>
+      <td valign="top" width="39" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="45" class="c14">
+        <div align="left">
+          <span class="c5">RW</span>
+        </div>
+      </td>
+      <td valign="top" width="496" class="c14">
+        <div align="left">
+          <span class="c5">These devices don't use trip files, but
+          fit files. These files can be stored on the Courses, or
+          NewFiles, directory. After a reboot they are ready to
+          navigate.</span>
+        </div>
+        <div align="left">
+          <span class="c5">In the NewFiles you can also store GPX
+          files. These will be converted by the unit to
+          Courses.</span>
+        </div>
+        <div align="left">
+          <span class="c5">The NewFiles directory is emptied by the
+          unit after conversion.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">In Activities you can find also find fit
+          files. These are the recorded courses. Comparable to
+          track logs.</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="7" valign="top" width="982" class="c14">
+        <div align="left">
+          <span class="c5">RW=Read/Write, RO=ReadOnly, N/A=Not
+          Applicable</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left"></div>
+</body>
+</html>

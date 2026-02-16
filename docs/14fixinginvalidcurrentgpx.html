@@ -1,75 +1,299 @@
-<html><head>
-   <title>14) Fixing invalid current.gpx</title>
-   <meta name="generator"  content="HelpMaker.net" >
-   <meta name="keywords"  content="Current.gpx," ></head>
-<body bgcolor="FFFCEA" >
-<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
-  <tr>
-    <td align="left" >
-    <b><font face="Calibri"  size="5" >
-        <a href="13importexportcsvexcel.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;<a href="15tripmanagerandexplore.html">Next</a>
-    </font></b>
-    </td>
-    <td align="center"  width="75%" >
-      <div align="center" ></span><font face="Arial"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>14) Fixing invalid current.gpx</b></span></font><font color="#010101" ></font></div>
-
-    </td>
-  </tr></table>
-<hr>
-<div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" > </span></font><font color="#010101" ></font></div></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >(This document assumes you are using V1.5.0.320, or later)</span></font><font color="#010101" ></font><br><br><font color="#010101" ></font><br><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Symptom</b></span></font><font color="#010101" ></font></div></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >When using TripManager to send GPX files as trips to the Zumo the 
-following error can be observed when starting BaseCamp.</span></font><font color="#010101" ></font><br><br><font color="#010101" ></font><br><table width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Windows version 5.9.14">
+  <title>14) Fixing invalid current.gpx</title>
+  <meta name="generator" content="HelpMaker.net">
+  <meta name="keywords" content="Current.gpx,">
+  <style type="text/css">
+  body {
+  background-color: #FFFCEA;
+  }
+  span.c13 {color: #010101; font-family: Courier New; font-size: 10pt}
+  td.c12 {border: solid #010101 1px;}
+  div.c11 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c10 {color: #010101; font-family: Symbol; font-size: 12pt}
+  span.c9 {color: #010101}
+  br.c8 {page-break-before:always}
+  table.c7 {border-collapse: collapse; border: none}
+  span.c6 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c5 {color: #010101; font-family: Calibri; font-size: 120%}
+  table.c4 {background-color: #FFFFFF}
+  span.c3 {color: #0000FF; font-family: Arial; font-size: 150%; font-weight: bold}
+  td.c2 {font-weight: bold}
+  span.c1 {font-family: Calibri; font-size: 150%}
+  </style>
+</head>
+<body>
+  <table class="c4" width="100%" border="0" cellspacing="0"
+  cellpadding="2">
     <tr>
-    <td valign="top"  width="545" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb1.JPG"  width="481"  height="462"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><br><font color="#010101" ></font><br><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Cause</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >While it is possible that there are other causes, it is likely that not all 
-trips sent to the Zumo have been calculated. Calculation happens 
-automatically the first time you open a trip in the trip planner. (Or route 
-in the route planner for an XT2) If a trip has been transferred to the 
-Zumo, but it has never been opened it is said to be uncalculated, and can 
-cause the error.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >What is exactly wrong with current.gpx?</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >This can get a bit technical, skip if you like.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="1572"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td class="c2" align="left"><span class="c1"><a href=
+      "13importexportcsvexcel.html">Previous</a> <a href=
+      "toc.html">Top</a> <a href=
+      "15tripmanagerandexplore.html">Next</a></span></td>
+      <td align="center" width="75%">
+        <div align="center">
+          <span class="c3">14) Fixing invalid current.gpx</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div align="left"></div><span class="c5">(This document assumes
+  you are using V1.5.0.320, or later)</span><br>
+  <br>
+  <br>
+  <div align="left">
+    <span class="c6">Symptom</span>
+  </div><span class="c5">When using TripManager to send GPX files
+  as trips to the Zumo the following error can be observed when
+  starting BaseCamp.</span><br>
+  <br>
+  <br>
+  <table width="553" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="1564" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb2.JPG"  width="1539"  height="417"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Every &lt;rte&gt;&lt;name&gt; node in the GPX should be closed by a &lt;/rte&gt;. In the 
-screenshot above where &rsquo;11Steden.trip&rsquo; has not been calculated, there is 
-no closing &lt;/rte&gt; tag for the trip. In the lower portion, that has been 
-fixed, there is one. Also added are 2 dummy &lt;rtept&gt;.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Note: The file current.gpx is recreated automatically every time the 
-Zumo is started in FileTransfer mode. The process that handles this does 
-not cope well with uncalculated trips.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Identifying the uncalculated trips</b></span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="545">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb1.JPG" width="481" height="462"
+        border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table><br>
+  <br>
+  <div align="left">
+    <span class="c6">Cause</span>
+  </div>
+  <div align="left">
+    <span class="c5">While it is possible that there are other
+    causes, it is likely that not all trips sent to the Zumo have
+    been calculated. Calculation happens automatically the first
+    time you open a trip in the trip planner. (Or route in the
+    route planner for an XT2) If a trip has been transferred to the
+    Zumo, but it has never been opened it is said to be
+    uncalculated, and can cause the error.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">What is exactly wrong with current.gpx?</span>
+  </div>
+  <div align="left">
+    <span class="c5">This can get a bit technical, skip if you
+    like.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="1572" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="545" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb3.JPG"  width="249"  height="187"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><br><br><font color="#010101" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In the device file list the uncalculated trips are prefixed with an 
-exclamation mark. Using the default sort on Filename, these trips will 
-always be on top of the list.</span></font><font color="#010101" ><br clear="all"  style="page-break-before:always" ></font><br><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Fixing the problem</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >There are a few solutions. </span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>1) Using the Zumo</b></span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Remove the uncalculated trips from the Zumo if they are not 
-needed. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >If they are needed, opening them in the Trip planner will start the 
-calculation.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The downside is that you first need to reboot the Zumo in normal mode, 
-remove, or calculate the trips. Then reboot again in FileTransfer mode.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>2) Using TripManager</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >You can also remove the trip files with TripManager, but there have 
-been reports that trips will sometimes reappear. So it is recommended 
-to delete trips on the Zumo. Besides you still need to reboot.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >If you want to be able to start BaseCamp without rebooting the Zumo 
-you can use the function <b>Check and Fix Current.gpx.</b> (You still need to fix 
-the uncalculated trip at some point, or the error will popup again next 
-reboot.)</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on<b> Check and Fix Current.gpx</b></span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="702"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="1564">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb2.JPG" width="1539" height="417"
+        border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Every &lt;rte&gt;&lt;name&gt; node in the GPX
+    should be closed by a &lt;/rte&gt;. In the screenshot above
+    where 11Steden.trip has not been calculated, there is no
+    closing &lt;/rte&gt; tag for the trip. In the lower portion,
+    that has been fixed, there is one. Also added are 2 dummy
+    &lt;rtept&gt;.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Note: The file current.gpx is recreated
+    automatically every time the Zumo is started in FileTransfer
+    mode. The process that handles this does not cope well with
+    uncalculated trips.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Identifying the uncalculated trips</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="553" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="694" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb4.JPG"  width="626"  height="324"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >If any errors exist TripManager will report the first one.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="606"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="545">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb3.JPG" width="249" height="187"
+        border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table><br>
+  <br>
+  <span class="c5">In the device file list the uncalculated trips
+  are prefixed with an exclamation mark. Using the default sort on
+  Filename, these trips will always be on top of the
+  list.</span><span class="c9"><br clear="all" class=
+  "c8"></span><br>
+  <div align="left">
+    <span class="c6">Fixing the problem</span>
+  </div>
+  <div align="left">
+    <span class="c5">There are a few solutions.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">1) Using the Zumo</span>
+  </div>
+  <div align="left" class="c11">
+    <span class="c10">·   </span><span class="c5">Remove the
+    uncalculated trips from the Zumo if they are not needed.</span>
+  </div>
+  <div align="left" class="c11">
+    <span class="c10">·   </span><span class="c5">If they are
+    needed, opening them in the Trip planner will start the
+    calculation.</span>
+  </div>
+  <div align="left">
+    <span class="c5">The downside is that you first need to reboot
+    the Zumo in normal mode, remove, or calculate the trips. Then
+    reboot again in FileTransfer mode.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">2) Using TripManager</span>
+  </div>
+  <div align="left">
+    <span class="c5">You can also remove the trip files with
+    TripManager, but there have been reports that trips will
+    sometimes reappear. So it is recommended to delete trips on the
+    Zumo. Besides you still need to reboot.</span>
+  </div>
+  <div align="left">
+    <span class="c5">If you want to be able to start BaseCamp
+    without rebooting the Zumo you can use the function <b>Check
+    and Fix Current.gpx.</b> (You still need to fix the
+    uncalculated trip at some point, or the error will popup again
+    next reboot.)</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Click on <b>Check and Fix
+    Current.gpx</b></span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="702" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="333"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb5.JPG"  width="277"  height="173"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="255"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb6.JPG"  width="216"  height="124"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Current.gpx has been fixed, and saved on the device. BaseCamp should 
-now start without errors.&nbsp; The uncalculated trips will only have a Begin 
-and End point with gps coordinates &lt;0, 0&gt;</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="972"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="694">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb4.JPG" width="626" height="324"
+        border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c9"><br clear="all" class="c8"></span>
+  <div align="left">
+    <span class="c5">If any errors exist TripManager will report
+    the first one.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table border="1" width="606" cellpadding="4" cellspacing="0"
+  class="c7">
     <tr>
-    <td valign="top"  width="964" >
-    <div align="left" ><img src="14fixinginvalidcurrentgpxb7.JPG"  width="917"  height="460"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Preventing the problem</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >It is recommended to open all transferred trip files on the Zumo, or 
-remove if not needed. Pay attention to the exclamation mark in front of 
-the trip files.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Starting with TripManager V1.5.0.320 the data that can be found in the 
-&lt;subclass&gt; nodes of GPX files can be written to the trip files to prevent 
-the error. Only if the GPX file(s) are created and calculated by <b>BaseCamp </b>the &lt;subclass&gt; will be available. </span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Note that in this case the trip will be still be calculated when first 
-opened, and thus will have an exclamation mark in the file list.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Sample Subclass:</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Courier New"  color="#010101" ><span style="font-size:10pt" >&lt;gpxx:rpt lat=&quot;51.623661518096924&quot; lon=&quot;5.889937877655029&quot;&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Courier New"  color="#010101" ><span style="font-size:10pt" >&nbsp; &lt;gpxx:Subclass&gt;03000A67AB012E0002001F001A00C8634E00&lt;/gpxx:Subclass&gt;</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Courier New"  color="#010101" ><span style="font-size:10pt" >&lt;/gpxx:rpt&gt;</span></font><font color="#010101" ></font></div><div align="left" ><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" > </span></font><font color="#010101" ></font></div>
-</body></html>
+      <td valign="top" width="333" class="c12">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb5.JPG" width="277" height="173"
+        border="0" alt="graphic"></div>
+      </td>
+      <td valign="top" width="255" class="c12">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb6.JPG" width="216" height="124"
+        border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Current.gpx has been fixed, and saved on the
+    device. BaseCamp should now start without errors.  The
+    uncalculated trips will only have a Begin and End point with
+    gps coordinates &lt;0, 0&gt;</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="972" cellpadding="4" cellspacing="0" class="c7">
+    <tr>
+      <td valign="top" width="964">
+        <div align="left"><img src=
+        "14fixinginvalidcurrentgpxb7.JPG" width="917" height="460"
+        border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Preventing the problem</span>
+  </div>
+  <div align="left">
+    <span class="c5">It is recommended to open all transferred trip
+    files on the Zumo, or remove if not needed. Pay attention to
+    the exclamation mark in front of the trip files.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Starting with TripManager V1.5.0.320 the data
+    that can be found in the &lt;subclass&gt; nodes of GPX files
+    can be written to the trip files to prevent the error. Only if
+    the GPX file(s) are created and calculated by <b>BaseCamp</b>
+    the &lt;subclass&gt; will be available.</span>
+  </div>
+  <div align="left">
+    <span class="c5">Note that in this case the trip will be still
+    be calculated when first opened, and thus will have an
+    exclamation mark in the file list.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Sample Subclass:</span>
+  </div>
+  <div align="left">
+    <span class="c13">&lt;gpxx:rpt lat="51.623661518096924"
+    lon="5.889937877655029"&gt;</span>
+  </div>
+  <div align="left">
+    <span class="c13"> 
+    &lt;gpxx:Subclass&gt;03000A67AB012E0002001F001A00C8634E00&lt;/gpxx:Subclass&gt;</span>
+  </div>
+  <div align="left">
+    <span class="c13">&lt;/gpxx:rpt&gt;</span>
+  </div>
+  <div align="left"></div>
+  <div align="left"></div>
+</body>
+</html>
