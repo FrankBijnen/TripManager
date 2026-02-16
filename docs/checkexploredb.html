@@ -1,70 +1,257 @@
-<html><head>
-   <title>Check Explore.db </title>
-   <meta name="generator"  content="HelpMaker.net" >
-   <meta name="keywords"  content="explore.db,trips," ></head>
-<body bgcolor="FFFCEA" >
-<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
-  <tr>
-    <td align="left" >
-    <b><font face="Calibri"  size="5" >
-        <a href="modelinfo.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;
-    </font></b>
-    </td>
-    <td align="center"  width="75%" >
-      <div align="center" ></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>Check Explore.db </b></span></font><font color="#010101" ></font></div>
-
-    </td>
-  </tr></table>
-<hr>
-<div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >When manually handling trip files it's possible to create inconsistencies 
-between the <b>.System\Trips </b>folder and the <b>Explore.db </b>in the <b>.System\SQlite </b>folder. Especially for the <b>XT2 </b>and <b>Tread 2 </b>models this 
-can lead to problems. E.G. Trips can reappear after having been deleted.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The <b>XT </b>does not store the trips in Explore.db, even when connected to 
-Garmin Explore, and does not exhibit this behaviour.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Starting with V1.7 TripManager can perform checks, and repair some 
-inconsistencies.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Background:</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >The trips for the XT2 and Tread 2 have an item 'mExploreUuid' that 
-contains a GUID. For newly created trips TripManager creates a new 
-GUID.</span></font><font color="#010101" ></font></div><table width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Windows version 5.9.14">
+  <title>Check Explore.db</title>
+  <meta name="generator" content="HelpMaker.net">
+  <meta name="keywords" content="explore.db,trips,">
+  <style type="text/css">
+  body {
+  background-color: #FFFCEA;
+  }
+  div.c13 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c12 {font-family: Symbol; font-size: 12pt}
+  span.c11 {color: #010101}
+  br.c10 {page-break-before:always}
+  span.c9 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c8 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  table.c7 {border-collapse: collapse; border: none}
+  span.c6 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c5 {font-family: Calibri; font-size: 120%}
+  table.c4 {background-color: #FFFFFF}
+  span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
+  td.c2 {font-weight: bold}
+  span.c1 {font-family: Calibri; font-size: 150%}
+  </style>
+</head>
+<body>
+  <table class="c4" width="100%" border="0" cellspacing="0"
+  cellpadding="2">
     <tr>
-    <td valign="top"  width="545"  height="52" >
-    <div align="left" ><img src="checkexploredbb1.JPG"  width="439"  height="52"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >In Explore.db trips are also stored with 'type=4', their UUID and Name. 
-(and more)</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td class="c2" align="left"><span class="c1"><a href=
+      "modelinfo.html">Previous</a>&nbsp;<a href=
+      "toc.html">Top</a>&nbsp;</span></td>
+      <td align="center" width="75%">
+        <div align="center">
+          <span class="c3">Check Explore.db</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div align="left">
+    <span class="c5">When manually handling trip files it's
+    possible to create inconsistencies between the
+    <b>.System\Trips</b> folder and the <b>Explore.db</b> in the
+    <b>.System\SQlite</b> folder. Especially for the <b>XT2</b> and
+    <b>Tread 2</b> models this can lead to problems. E.G. Trips can
+    reappear after having been deleted.</span>
+  </div>
+  <div align="left">
+    <span class="c5">The <b>XT</b> does not store the trips in
+    Explore.db, even when connected to Garmin Explore, and does not
+    exhibit this behaviour.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Starting with V1.7 TripManager can perform
+    checks, and repair some inconsistencies.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Background:</span>
+  </div>
+  <div align="left">
+    <span class="c5">The trips for the XT2 and Tread 2 have an item
+    'mExploreUuid' that contains a GUID. For newly created trips
+    TripManager creates a new GUID.</span>
+  </div>
+  <table width="553" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="545" >
-    <div align="left" ><img src="checkexploredbb2.JPG"  width="479"  height="182"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Ideally trips with the same trip name should have the same UUID in 
-Explore.db and in the Trips folder.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Advice: </b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >To prevent inconsistencies </span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >when using <b>TripManager </b>in conjunction with <b>Explore </b>it is recommended to delete trips on the device, and not from 
-the Trips folder.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >A known cause of errors: A route initially send using the normal 'Garmin' 
-procedure, will be stored as '1234567890.trip'. If you send the same 
-route again using TripManager it will be stored using the 
-&lt;route_name&gt;.trip.&nbsp; This will lead to duplicates. In this case delete the 
-trip from the device first, to avoid inconsistencies.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Activating the function</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >First enable this in Settings. (Restart TripManager after changing this 
-setting to take effect)</span></font><font color="#010101" ></font></div><table width="666"  cellpadding="0"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="545" height="52">
+        <div align="left"><img src="checkexploredbb1.JPG" width=
+        "439" height="52" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">In Explore.db trips are also stored with
+    'type=4', their UUID and Name. (and more)</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="553" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="666" >
-    <div align="left" ><img src="checkexploredbb3.JPG"  width="640"  height="688"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >With the setting enabled TripManager will check if a UUID is found for 
-the trip name in Explore.db when transferring, and use that value. To 
-avoid having multiple UUID's for a trip name.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >When connecting a unit with an Explore.db in .System\Sqlite it will copy 
-the file to a sub folder (Device) of the Temp path. All reads are done on 
-that Temp path. TripManager will <b>NOT </b>update the Explore.db on your 
-device.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In addition:</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >When a model that uses Explore.db is connected AND the trips tab is 
-selected, 2 more functions are enabled.</span></font><font color="#010101" ></font></div><table width="846"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="545">
+        <div align="left"><img src="checkexploredbb2.JPG" width=
+        "479" height="182" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Ideally trips with the same trip name should
+    have the same UUID in Explore.db and in the Trips
+    folder.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c8">Advice:</span>
+  </div>
+  <div align="left">
+    <span class="c5">To prevent inconsistencies</span> <span class=
+    "c9">when using <b>TripManager</b> in conjunction with
+    <b>Explore</b> it is recommended to delete trips on the device,
+    and not from the Trips folder.</span>
+  </div>
+  <div align="left">
+    <span class="c9">A known cause of errors: A route initially
+    send using the normal 'Garmin' procedure, will be stored as
+    '1234567890.trip'. If you send the same route again using
+    TripManager it will be stored using the
+    &lt;route_name&gt;.trip.&nbsp; This will lead to duplicates. In
+    this case delete the trip from the device first, to avoid
+    inconsistencies.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div><span class="c11"><br clear="all" class="c10"></span>
+  <div align="left">
+    <span class="c6">Activating the function</span>
+  </div>
+  <div align="left">
+    <span class="c5">First enable this in Settings. (Restart
+    TripManager after changing this setting to take effect)</span>
+  </div>
+  <table width="666" cellpadding="0" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="838" >
-    <div align="left" ><img src="checkexploredbb4.JPG"  width="830"  height="308"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Query/Explore.db </b>will open a tab with a table-browser. Just for quickly 
-checking. You can enter any SQL statement.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Compare Explore.db with Trips</b> Will run a compare, and show the 
-results in a tab.</span></font><font color="#010101" ></font></div><table width="942"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="666">
+        <div align="left"><img src="checkexploredbb3.JPG" width=
+        "640" height="688" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">With the setting enabled TripManager will
+    check if a UUID is found for the trip name in Explore.db when
+    transferring, and use that value. To avoid having multiple
+    UUID's for a trip name.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">When connecting a unit with an Explore.db in
+    .System\Sqlite it will copy the file to a sub folder (Device)
+    of the Temp path. All reads are done on that Temp path.
+    TripManager will <b>NOT</b> update the Explore.db on your
+    device.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">In addition:</span>
+  </div>
+  <div align="left">
+    <span class="c5">When a model that uses Explore.db is connected
+    AND the trips tab is selected, 2 more functions are
+    enabled.</span>
+  </div>
+  <table width="846" cellpadding="4" cellspacing="0" class="c7">
     <tr>
-    <td valign="top"  width="934" >
-    <div align="left" ><img src="checkexploredbb5.JPG"  width="755"  height="547"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >There are 5 possible groups. Note that you can double click to collapse 
-or expand a group.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In Explore, not in Trips</b>. These trips are not correct, but TripManager 
-can not fix that. To fix that the Explore.db would have to be written 
-and updated on the device. To resolve delete the trips on the device, 
-or in Explore/Tread app.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Trips and Explore, but duplicate TripName. </b>The same UUID is 
-found for multiple Trip names. Delete the duplicates manually.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Explore and Trips, but different UUID</b>. Clicking on <b>Correct UUID</b> 
-will write the UUID value from Explore in the trips. (no recalculation 
-needed)</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>In Trips, not in Explore.</b> Probably these are new trips that have just 
-been transferred. Rebooting the device should fix it.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>In Explore, in Trips, Same Uuid. </b>These are the perfect trips.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></font><font color="#010101" ></font></div>
-</body></html>
+      <td valign="top" width="838">
+        <div align="left"><img src="checkexploredbb4.JPG" width=
+        "830" height="308" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c11"><br></span>
+  </div>
+  <div align="left">
+    <span class="c5"><b>Query/Explore.db</b> will open a tab with a
+    table-browser. Just for quickly checking. You can enter any SQL
+    statement.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div><span class="c11"><br clear="all" class="c10"></span>
+  <div align="left">
+    <span class="c5"><b>Compare Explore.db with Trips</b> Will run
+    a compare, and show the results in a tab.</span>
+  </div>
+  <table width="942" cellpadding="4" cellspacing="0" class="c7">
+    <tr>
+      <td valign="top" width="934">
+        <div align="left"><img src="checkexploredbb5.JPG" width=
+        "755" height="547" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c11"><br></span>
+  </div>
+  <div align="left">
+    <span class="c5">There are 5 possible groups. Note that you can
+    double click to collapse or expand a group.</span>
+  </div>
+  <div align="left" class="c13">
+    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5"><b>In Explore, not in Trips</b>. These trips are not
+    correct, but TripManager can not fix that. To fix that the
+    Explore.db would have to be written and updated on the device.
+    To resolve delete the trips on the device, or in Explore/Tread
+    app.</span>
+  </div>
+  <div align="left" class="c13">
+    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c9"><b>In Trips and Explore, but duplicate TripName.</b> The
+    same UUID is found for multiple Trip names. Delete the
+    duplicates manually.</span>
+  </div>
+  <div align="left" class="c13">
+    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c9"><b>In Explore and Trips, but different UUID</b>. Clicking
+    on <b>Correct UUID</b> will write the UUID value from Explore
+    in the trips. (no recalculation needed)</span>
+  </div>
+  <div align="left" class="c13">
+    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c9"><b>In Trips, not in Explore.</b> Probably these are new
+    trips that have just been transferred. Rebooting the device
+    should fix it.</span>
+  </div>
+  <div align="left" class="c13">
+    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5"><b>In Explore, in Trips, Same Uuid.</b> These are the
+    perfect trips.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left"></div>
+</body>
+</html>

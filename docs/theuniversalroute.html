@@ -1,201 +1,694 @@
-<html><head>
-   <title>The universal route</title>
-   <meta name="generator"  content="HelpMaker.net" >
-   <meta name="keywords"  content="Universal route,Trk2Rt,Kurviger,Compare and Fix," ></head>
-<body bgcolor="FFFCEA" >
-<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
-  <tr>
-    <td align="left" >
-    <b><font face="Calibri"  size="5" >
-        <a href="integrationstrk2rtkurviger.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;<a href="changehistory.html">Next</a>
-    </font></b>
-    </td>
-    <td align="center"  width="75%" >
-      <div align="center" ></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>The universal route</b></span></font><font color="#010101" ></font></div>
-
-    </td>
-  </tr></table>
-<hr>
-<div align="left" ></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>What is meant with a universal route?</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >A universal route is an effort to create a route in a route planner that will 
-remain the same when loaded in a Satnav.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >A personal note: I dont believe there is a method that will always </span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >work</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >, 
-for all routes. But that should not let us stop trying.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Targeted route planners are Basecamp, MyRouteApp, Kurviger, or 
-Google maps. More general any route planner that can create a GPX, or 
-KML file.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Targeted Satnav's are the Zumo XT(2), Tread 2. Other devices should 
-ideally also work, but require testing.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>I am using tracks, that I convert to trips on the Satnav. Why would I 
-need anything else?</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Typically trips converted from tracks do follow the original planned route 
-quite well, but they prevent the Satnav from calculating an alternative 
-when you need to deviate. Restarting the trip, after a stop, is often 
-problematic, because all Via and Shaping points are lost. Restarting the 
-trip with </span></font><a href="17createtripoptions.html#CEP"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Closest Entry Point</u></span></font></a></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" > does not always work.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >By it's nature (Trips from tracks only have begin and end points) these 
-trips are unable to calculate to the next route point. Resulting in RUT 
-behaviour.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>The general approach</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Create a route with <b>enough </b>shaping points to make the Satnav calculate 
-the same route, as the route planner did. But do not add <b>more than 
-needed</b> to allow the Satnav to calculate an alternative to the next route 
-point when you have to deviate.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>The Tools</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>1) Compare and Fix in TripManager. </b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The compare function in TripManager can be used to check semi-
-automatically the original track/route with the (re)calculated trip on the 
-Satnav. Only for XT(2) and Tread 2.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Added with V1.7 are checkboxes on the lines with differences, and a 
-button <b>Fix Trip, </b>that will create a new Trip, or GPX, with additional 
-shaping points only for the differences found.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >See the section </span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" ><b>Creating a fixed trip from the compare. </b></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >in </span></font><a href="7compareatripwithagpx.html#fix"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>7) Comparing 
-a trip with a GPX</u></span></font></a><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >So, It is a tool to check the result, and create only shaping points on 
-route segments that are different.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>2) Trk2Rt (By Steve Follen) </b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >One of the things Trk2RT can do is&nbsp; enhance a route by adding additional 
-shaping points. It can even create a route from a track(log).</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >It uses GPX, or KML , files as input, typically created by BaseCamp, 
-MyrouteApp, Kurviger, or Google Maps.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >If installed using the TripManager installer Trk2Rt is added to context 
-menu of GPX and KML files in&nbsp; Windows Explorer and TripManager. 
-Using the context menu you can easily 'Create a route from a track', or 
-'open' the file in the TrkT2Rt dialog, to have all options available.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Trk2Rt is also available in the </span></font><a href="12usingtripeditor.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Trip Editor</u></span></font></a></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" > via the speed button <b>Gpx/Trk2RT + import.</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >So, It is a valuable tool to add additional shaping points, resulting in a 
-device route that matches the planned route better.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >For more info See:&nbsp; </span></font><a href="https://github.com/SteveFollen/Trk2Rt" target="_blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Trk2Rt on GitHub</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" > and </span></font><a href="Trk2Rt_UsersGuide.pdf"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Trk2Rt_UsersGuide.pdf</u></span></font></a><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>3) Kurviger route planner</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Kurviger is a complete route planning tool, targeted at motorcycle usage. </span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >TripManager V1.7 has added options to open a GPX, or Trip, file directly 
-in Kurviger. The file can be on a device, or a Windows folder. This option 
-can help in quickly checking a route. Very helpful are the warnings that 
-Kurviger can give about misplaced route points.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In <b>Advanced/Settings </b>a Tab has been added called </span></font><a href="1initialtasks.html#kurviger"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Kurviger </u></span></font></a></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >where you 
-can set up the defaults to use for the Kurviger website.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >One of its unique features, that can help in creating a universal route, is 
-the option to add additional shaping points to the exported GPX. There is 
-even an intelligent option, but that is not available in the free version.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >So, In addition to being a good route planning tool, it can help you add 
-additional shaping points, resulting in a device route that matches the 
-planned route better.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Note: Kurviger uses the term Waypoint for Route points. This can be 
-confusing.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >For more info See:&nbsp; </span></font><a href="https://kurviger.com/" target="_blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Kurviger route planner</u></span></font></a><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></font> <a name="bc_compare_fix"></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b><u></u></b></span></font></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>Example usage</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>1) Using BaseCamp and Compare+Fix</b></span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Create a small route in BaseCamp and export the calculated route 
-to 
-GPX.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In TripManager use <b>Send to</b>, and use <b>Force recalculatio</b>n. 
-See </span></font><a href="6sendtodevice.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>6) Send 
-to device</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >. </span></font><a href="6sendtodevice.html#method5"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Method 5.</u></span></font></a><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Recalculate on the unit, reboot again in FileTransfer mode.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In TripManager. Select the trip file. Use the Compare+Fix method. 
-See screenshots:</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="1140"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Windows version 5.9.14">
+  <title>The universal route</title>
+  <meta name="generator" content="HelpMaker.net">
+  <meta name="keywords" content=
+  "Universal route,Trk2Rt,Kurviger,Compare and Fix,">
+  <style type="text/css">
+  body {
+  background-color: #FFFCEA;
+  }
+  a.c21 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c20 {font-size: 14pt; font-weight: bold}
+  table.c19 {border-collapse: collapse; border: none}
+  td.c18 {border: solid #010101 1px;}
+  div.c17 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c16 {color: #010101; font-family: Symbol; font-size: 12pt}
+  a.c15 {color: #0000FF; font-family: Calibri; font-size: 150%}
+  span.c14 {font-size: 18pt; font-weight: bold}
+  span.c13 {color: #010101}
+  br.c12 {page-break-before:always}
+  span.c11 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c10 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  a.c9 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c8 {font-size: 14pt; text-decoration: underline}
+  span.c7 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c6 {font-family: Calibri; font-size: 120%}
+  span.c5 {color: #0000FF; font-family: Calibri; font-size: 120%; font-weight: bold}
+  table.c4 {background-color: #FFFFFF}
+  span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
+  td.c2 {font-weight: bold}
+  span.c1 {font-family: Calibri; font-size: 150%}
+  </style>
+</head>
+<body>
+  <table class="c4" width="100%" border="0" cellspacing="0"
+  cellpadding="2">
     <tr>
-    <td valign="top"  width="1131"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb1.JPG"  width="664"  height="253"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Right click in the Trip Info tab. </span></font><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >You can use Ctrl+Alt+B for comparing BaseCamp GPX files, or CTRL+Alt+C for comparing with a GPX containing a track.</span></font><font color="#010101" ></font></div>
-    <div align="center" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td class="c2" align="left"><span class="c1"><a href=
+      "integrationstrk2rtkurviger.html">Previous</a>&nbsp;<a href=
+      "toc.html">Top</a>&nbsp;<a href=
+      "changehistory.html">Next</a></span></td>
+      <td align="center" width="75%">
+        <div align="center">
+          <span class="c3">The universal route</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div align="left">
+    <span class="c5">What is meant with a universal route?</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">A universal route is an effort to create a
+    route in a route planner that will remain the same when loaded
+    in a Satnav.</span>
+  </div>
+  <div align="left">
+    <span class="c6">A personal note: I dont believe there is a
+    method that will always</span> <span class=
+    "c7">work</span><span class="c6">, for all routes. But that
+    should not let us stop trying.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Targeted route planners are Basecamp,
+    MyRouteApp, Kurviger, or Google maps. More general any route
+    planner that can create a GPX, or KML file.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Targeted Satnav's are the Zumo XT(2), Tread 2.
+    Other devices should ideally also work, but require
+    testing.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">I am using tracks, that I convert to trips on
+    the Satnav. Why would I need anything else?</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Typically trips converted from tracks do
+    follow the original planned route quite well, but they prevent
+    the Satnav from calculating an alternative when you need to
+    deviate. Restarting the trip, after a stop, is often
+    problematic, because all Via and Shaping points are lost.
+    Restarting the trip with</span> <a class="c9" href=
+    "17createtripoptions.html#CEP"><span class="c8">Closest Entry
+    Point</span></a> <span class="c7">does not always work.</span>
+  </div>
+  <div align="left">
+    <span class="c7">By it's nature (Trips from tracks only have
+    begin and end points) these trips are unable to calculate to
+    the next route point. Resulting in RUT behaviour.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">The general approach</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Create a route with <b>enough</b> shaping
+    points to make the Satnav calculate the same route, as the
+    route planner did. But do not add <b>more than needed</b> to
+    allow the Satnav to calculate an alternative to the next route
+    point when you have to deviate.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">The Tools</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c10">1) Compare and Fix in TripManager.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">The compare function in TripManager can be
+    used to check semi- automatically the original track/route with
+    the (re)calculated trip on the Satnav. Only for XT(2) and Tread
+    2.</span>
+  </div>
+  <div align="left">
+    <span class="c7">Added with V1.7 are checkboxes on the lines
+    with differences, and a button <b>Fix Trip,</b> that will
+    create a new Trip, or GPX, with additional shaping points only
+    for the differences found.</span>
+  </div>
+  <div align="left">
+    <span class="c7">See the section</span> <span class=
+    "c11">Creating a fixed trip from the compare.</span>
+    <span class="c7">in</span> <a class="c9" href=
+    "7compareatripwithagpx.html#fix"><span class="c8">7) Comparing
+    a trip with a GPX</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">So, It is a tool to check the result, and
+    create only shaping points on route segments that are
+    different.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c10">2) Trk2Rt (By Steve Follen)</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">One of the things Trk2RT can do is&nbsp;
+    enhance a route by adding additional shaping points. It can
+    even create a route from a track(log).</span>
+  </div>
+  <div align="left">
+    <span class="c7">It uses GPX, or KML , files as input,
+    typically created by BaseCamp, MyrouteApp, Kurviger, or Google
+    Maps.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">If installed using the TripManager installer
+    Trk2Rt is added to context menu of GPX and KML files in&nbsp;
+    Windows Explorer and TripManager. Using the context menu you
+    can easily 'Create a route from a track', or 'open' the file in
+    the TrkT2Rt dialog, to have all options available.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Trk2Rt is also available in the</span>
+    <a class="c9" href="12usingtripeditor.html"><span class=
+    "c8">Trip Editor</span></a> <span class="c7">via the speed
+    button <b>Gpx/Trk2RT + import.</b></span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">So, It is a valuable tool to add additional
+    shaping points, resulting in a device route that matches the
+    planned route better.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">For more info See:&nbsp;</span> <a class="c9"
+    href="https://github.com/SteveFollen/Trk2Rt" target=
+    "_blank"><span class="c8">Trk2Rt on GitHub</span></a>
+    <span class="c6">and</span> <a class="c9" href=
+    "Trk2Rt_UsersGuide.pdf"><span class=
+    "c8">Trk2Rt_UsersGuide.pdf</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <span class="c10">3) Kurviger route planner</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Kurviger is a complete route planning tool,
+    targeted at motorcycle usage.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">TripManager V1.7 has added options to open a
+    GPX, or Trip, file directly in Kurviger. The file can be on a
+    device, or a Windows folder. This option can help in quickly
+    checking a route. Very helpful are the warnings that Kurviger
+    can give about misplaced route points.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">In <b>Advanced/Settings</b> a Tab has been
+    added called</span> <a class="c9" href=
+    "1initialtasks.html#kurviger"><span class=
+    "c8">Kurviger</span></a> <span class="c7">where you can set up
+    the defaults to use for the Kurviger website.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">One of its unique features, that can help in
+    creating a universal route, is the option to add additional
+    shaping points to the exported GPX. There is even an
+    intelligent option, but that is not available in the free
+    version.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">So, In addition to being a good route planning
+    tool, it can help you add additional shaping points, resulting
+    in a device route that matches the planned route better.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Note: Kurviger uses the term Waypoint for
+    Route points. This can be confusing.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">For more info See:&nbsp;</span> <a class="c9"
+    href="https://kurviger.com/" target="_blank"><span class=
+    "c8">Kurviger route planner</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c13"><br></span>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <a class="c15" name="bc_compare_fix" id=
+    "bc_compare_fix"><span class="c14">Example usage</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c10">1) Using BaseCamp and Compare+Fix</span>
+  </div>
+  <div align="left" class="c17">
+    <span class="c16">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c7">Create a small route in BaseCamp and export the calculated
+    route to GPX.</span>
+  </div>
+  <div align="left" class="c17">
+    <span class="c16">·&nbsp;&nbsp;&nbsp;</span><span class="c7">In
+    TripManager use <b>Send to</b>, and use <b>Force
+    recalculatio</b>n. See</span> <a class="c9" href=
+    "6sendtodevice.html"><span class="c8">6) Send to
+    device</span></a><span class="c6">.</span> <a class="c9" href=
+    "6sendtodevice.html#method5"><span class="c8">Method
+    5.</span></a>
+  </div>
+  <div align="left" class="c17">
+    <span class="c16">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c7">Recalculate on the unit, reboot again in FileTransfer
+    mode.</span>
+  </div>
+  <div align="left" class="c17">
+    <span class="c16">·&nbsp;&nbsp;&nbsp;</span><span class="c7">In
+    TripManager. Select the trip file. Use the Compare+Fix method.
+    See screenshots:</span>
+  </div>
+  <div align="left">
+    <br>
+  </div><br clear="all" class="c12">
+  <table border="1" width="1140" cellpadding="4" cellspacing="0"
+  class="c19">
     <tr>
-    <td valign="top"  width="1131"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb2.JPG"  width="541"  height="339"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="center" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="center" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Select the route/track in the GPX to compare with.</span></font><font color="#010101" ></font></div>
-    </td><br clear="all"  style="page-break-before:always" >
-    </tr></table><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="1140"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="1131" class="c18">
+        <div align="left"><img src="theuniversalrouteb1.JPG" width=
+        "664" height="253" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c7">Right click in the Trip Info tab.</span>
+        </div>
+        <div align="center">
+          <span class="c7">You can use Ctrl+Alt+B for comparing
+          BaseCamp GPX files, or CTRL+Alt+C for comparing with a
+          GPX containing a track.</span>
+        </div>
+        <div align="center"></div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="1131"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb3.JPG"  width="1107"  height="500"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ><br></font><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In the Log window the difference lines are prefixed with a checkbox. To manually create an additional shaping point, check the corresponding line. 
-    Note that you can also check the lines from the trip file, in case you prefer the Zumo alternative.</span></font><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >All checked lines will become additional shaping points when you 'Open fixed trip', or 'Save fixed GPX'.</span></font><font color="#010101" ></font></div>
-    <div align="center" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="1131" class="c18">
+        <div align="left"><img src="theuniversalrouteb2.JPG" width=
+        "541" height="339" border="0" alt="graphic"></div>
+        <div align="center">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c7">Select the route/track in the GPX to
+          compare with.</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <table border="1" width="1140" cellpadding="4" cellspacing="0"
+  class="c19">
     <tr>
-    <td valign="top"  width="1131"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb4.JPG"  width="636"  height="482"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ><br></font><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >When you select a <b>Segment Line, </b>or the <b>First line, </b>You can use <b>Prefer GPX. </b>TripManager will automatically check lines that you can use as a proposal. 
-    To control how many shaping points are added use the <b>General </b>setting <b>MinShapeDist.</b></span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="1131" class="c18">
+        <div align="left"><img src="theuniversalrouteb3.JPG" width=
+        "1107" height="500" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c13"><br></span>
+        </div>
+        <div align="center">
+          <span class="c7">In the Log window the difference lines
+          are prefixed with a checkbox. To manually create an
+          additional shaping point, check the corresponding line.
+          Note that you can also check the lines from the trip
+          file, in case you prefer the Zumo alternative.</span>
+        </div>
+        <div align="center">
+          <span class="c7">All checked lines will become additional
+          shaping points when you 'Open fixed trip', or 'Save fixed
+          GPX'.</span>
+        </div>
+        <div align="center"></div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="1131"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb5.JPG"  width="250"  height="162"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Open fixed trip</b> will open the Trip Editor with the added shaping points.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Save fixed GPX</b> will create a new GPX file.</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="1131" class="c18">
+        <div align="left"><img src="theuniversalrouteb4.JPG" width=
+        "636" height="482" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c13"><br></span>
+        </div>
+        <div align="center">
+          <span class="c7">When you select a <b>Segment Line,</b>
+          or the <b>First line,</b> You can use <b>Prefer GPX.</b>
+          TripManager will automatically check lines that you can
+          use as a proposal. To control how many shaping points are
+          added use the <b>General</b> setting
+          <b>MinShapeDist.</b></span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="1131"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb6.JPG"  width="550"  height="583"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Here you can:</span></font><font color="#010101" ></font></div>
-    <div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Export to a GPX, or CSV</span></font><font color="#010101" ></font></div>
-    <div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Open in Kurviger.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>OK. </b>Will save the trip file</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Cancel. </b>To abort the changes</span></font><font color="#010101" ></font></div>
-    <div align="left" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></font> <a name="kurviger_compare_fix"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b><u></u></b></span></font></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>2) Using Kurviger and Compare+Fix</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In Kurviger you have the option to create additional shaping points when 
-exporting. Once the GPX is exported the method for comparing is 
-analogous to the previous example.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="840"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="1131" class="c18">
+        <div align="left"><img src="theuniversalrouteb5.JPG" width=
+        "250" height="162" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c7"><b>Open fixed trip</b> will open the
+          Trip Editor with the added shaping points.</span>
+        </div>
+        <div align="left">
+          <span class="c7"><b>Save fixed GPX</b> will create a new
+          GPX file.</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="831"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb7.JPG"  width="766"  height="634"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on the 3 dots, and select Export</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="1131" class="c18">
+        <div align="left"><img src="theuniversalrouteb6.JPG" width=
+        "550" height="583" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c7">Here you can:</span>
+        </div>
+        <div align="left" class="c17">
+          <span class="c16">·&nbsp;&nbsp;&nbsp;</span><span class=
+          "c7">Export to a GPX, or CSV</span>
+        </div>
+        <div align="left" class="c17">
+          <span class="c16">·&nbsp;&nbsp;&nbsp;</span><span class=
+          "c7">Open in Kurviger.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c7"><b>OK.</b> Will save the trip
+          file</span>
+        </div>
+        <div align="left">
+          <span class="c7"><b>Cancel.</b> To abort the
+          changes</span>
+        </div>
+        <div align="left"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c13"><br></span>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <a class="c21" name="kurviger_compare_fix" id=
+    "kurviger_compare_fix"><span class="c20">2) Using Kurviger and
+    Compare+Fix</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">In Kurviger you have the option to create
+    additional shaping points when exporting. Once the GPX is
+    exported the method for comparing is analogous to the previous
+    example.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table border="1" width="840" cellpadding="4" cellspacing="0"
+  class="c19">
     <tr>
-    <td valign="top"  width="831"  height="699"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb8.JPG"  width="687"  height="584"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >I recommend using File format<b> GPX (*.gpx)</b> and selecting both <b>Route </b>and <b>Track.</b></span></font><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Your preferred interval should be experimentally determined.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Personal Note: Using 'Navigation device'/'Garmin/Zumo XT' adds a lot of lines to the GPX. TripManager does 
-    not use them. Importing on the XT takes a lot longer. </span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The intented advantage is a route that resembles the plan better, but in the event of recalculation they are all 
-    discarded, and the result will be different. As such it has no advantage over a Trip from a Track.</span></font><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The Compare+Fix is essentially the same, only now you need to use <b>Ctrl+Alt+C</b> and select the <b>Trk </b>line.</span></font><font color="#010101" ></font></div><table border="1"  width="1080"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="831" class="c18">
+        <div align="left"><img src="theuniversalrouteb7.JPG" width=
+        "766" height="634" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c7">Click on the 3 dots, and select
+          Export</span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="1071"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb9.JPG"  width="535"  height="346"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="831" height="699" class="c18">
+        <div align="left"><img src="theuniversalrouteb8.JPG" width=
+        "687" height="584" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c7">I recommend using File format <b>GPX
+          (*.gpx)</b> and selecting both <b>Route</b> and
+          <b>Track.</b></span>
+        </div>
+        <div align="center">
+          <span class="c7">Your preferred interval should be
+          experimentally determined.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c7">Personal Note: Using 'Navigation
+          device'/'Garmin/Zumo XT' adds a lot of lines to the GPX.
+          TripManager does not use them. Importing on the XT takes
+          a lot longer.</span>
+        </div>
+        <div align="left">
+          <span class="c7">The intented advantage is a route that
+          resembles the plan better, but in the event of
+          recalculation they are all discarded, and the result will
+          be different. As such it has no advantage over a Trip
+          from a Track.</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <span class="c7">The Compare+Fix is essentially the same, only
+    now you need to use <b>Ctrl+Alt+C</b> and select the <b>Trk</b>
+    line.</span>
+  </div>
+  <table border="1" width="1080" cellpadding="4" cellspacing="0"
+  class="c19">
     <tr>
-    <td valign="top"  width="1071"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb10.JPG"  width="1010"  height="575"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Because of the added shaping points the difference is only minimal. In real life I would not bother making changes to the Route.</span></font><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ><br></font></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></font> <a name="mra_trk2rt_compare_fix"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b><u></u></b></span></font></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>3) Using MyRouteApp and Trk2RT and Compare+Fix</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Export a route in MRA using GPX 1.1 (Route + Track + POI)</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="553"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="1071" class="c18">
+        <div align="left"><img src="theuniversalrouteb9.JPG" width=
+        "535" height="346" border="0" alt="graphic"></div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="544"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb11.JPG"  width="269"  height="541"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >For the purpose of this demonstration I'm now using the Trip Editor, but 
-the exported GPX can also be used in the Send To method.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table border="1"  width="900"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="1071" class="c18">
+        <div align="left"><img src="theuniversalrouteb10.JPG"
+        width="1010" height="575" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c7">Because of the added shaping points the
+          difference is only minimal. In real life I would not
+          bother making changes to the Route.</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c13"><br></span>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <a class="c21" name="mra_trk2rt_compare_fix" id=
+    "mra_trk2rt_compare_fix"><span class="c20">3) Using MyRouteApp
+    and Trk2RT and Compare+Fix</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Export a route in MRA using GPX 1.1 (Route +
+    Track + POI)</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table border="1" width="553" cellpadding="4" cellspacing="0"
+  class="c19">
     <tr>
-    <td valign="top"  width="891"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb12.JPG"  width="266"  height="132"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Use Trip Editor/New trip (MTP device) to create a new empty trip.</span></font><font color="#010101" ></font></div>
-    <div align="center" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="544" class="c18">
+        <div align="left"><img src="theuniversalrouteb11.JPG"
+        width="269" height="541" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">For the purpose of this demonstration I'm now
+    using the Trip Editor, but the exported GPX can also be used in
+    the Send To method.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table border="1" width="900" cellpadding="4" cellspacing="0"
+  class="c19">
     <tr>
-    <td valign="top"  width="891"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb13.JPG"  width="571"  height="167"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Type a name</span></font><font color="#010101" ></font></div>
-    <div align="center" ><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="891" class="c18">
+        <div align="left"><img src="theuniversalrouteb12.JPG"
+        width="266" height="132" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c6">Use Trip Editor/New trip (MTP device) to
+          create a new empty trip.</span>
+        </div>
+        <div align="center"></div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="891"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb14.JPG"  width="691"  height="581"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="center" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >In the blank trip Click on <b>Trk2Rt + Import</b></span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="891" class="c18">
+        <div align="left"><img src="theuniversalrouteb13.JPG"
+        width="571" height="167" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c6">Type a name</span>
+        </div>
+        <div align="center"></div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="891"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb15.JPG"  width="540"  height="339"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Open the GPX exported from MRA.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Check both the <b>Rte </b>and the <b>Trk </b>line, for best results.</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Change the <b>exportPercent </b>(Given in per mille) to control how many <b>Route points</b> the new trip should have. (In the 
-    screenshot 10 corresponds with 9 Route points)</span></font><font color="#010101" ></font></div>
-    </td></tr>
+      <td valign="top" width="891" class="c18">
+        <div align="left"><img src="theuniversalrouteb14.JPG"
+        width="691" height="581" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="center">
+          <span class="c6">In the blank trip Click on <b>Trk2Rt +
+          Import</b></span>
+        </div>
+      </td>
+    </tr>
     <tr>
-    <td valign="top"  width="891"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="theuniversalrouteb16.JPG"  width="873"  height="575"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >Note that MRA calculated the western variant.</span></font><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><font color="#010101" ></font></div>
-</body></html>
+      <td valign="top" width="891" class="c18">
+        <div align="left"><img src="theuniversalrouteb15.JPG"
+        width="540" height="339" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">Open the GPX exported from MRA.</span>
+        </div>
+        <div align="left">
+          <span class="c6">Check both the <b>Rte</b> and the
+          <b>Trk</b> line, for best results.</span>
+        </div>
+        <div align="left">
+          <span class="c6">Change the <b>exportPercent</b> (Given
+          in per mille) to control how many <b>Route points</b> the
+          new trip should have. (In the screenshot 10 corresponds
+          with 9 Route points)</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="891" class="c18">
+        <div align="left"><img src="theuniversalrouteb16.JPG"
+        width="873" height="575" border="0" alt="graphic"></div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">Note that MRA calculated the western
+          variant.</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left"></div>
+</body>
+</html>
