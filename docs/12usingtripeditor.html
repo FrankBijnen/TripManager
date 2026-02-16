@@ -1,146 +1,577 @@
-<html><head>
-   <title>12) Using Trip Editor</title>
-   <meta name="generator"  content="HelpMaker.net" >
-   <meta name="keywords"  content="Trip Editor," ></head>
-<body bgcolor="FFFCEA" >
-<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
-  <tr>
-    <td align="left" >
-    <b><font face="Calibri"  size="5" >
-        <a href="11usinggeocode.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;<a href="13importexportcsvexcel.html">Next</a>
-    </font></b>
-    </td>
-    <td align="center"  width="75%" >
-      <div align="center" ></span><font face="Arial"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>12) Using Trip Editor</b></span></font><font color="#010101" ></font></div>
-
-    </td>
-  </tr></table>
-<hr>
-<div align="left" ></span><font face="Arial"  color="#010101" ><span style="font-size:12pt" > </span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>Intro</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The Trip Editor should not be considered a full-blown trip planner tool. It 
-can not, and probably never will, calculate a route. The trip file format 
-has not been decoded enough, TripManager does not know anything 
-about routing algorithms in general and more importantly used on the 
-Zumo.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >What it can do:</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Review the results of a calculated trip, and make minor 
-modifications. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Change general parameters. Trip name, Routing preferences, 
-Transport method and Departure date.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Add, or Delete a route point.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Move a route point to a new location.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Reorder the route points.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Create a new empty trip. Add route points from map coordinates.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Lookup address information for selected route points and save 
-that 
-in the Address field. That info will also be available in the Trip planner 
-on the Zumo XT(2).</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Import/Export route points from/to GPX/CSV files.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Import can read Via and Shaping points from a route in the 
-GPX, 
-or Way points. The GPX can be processed by Trk2Rt first to 
-automatically add more shaping points. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Export can create a GPX from a trip file, that you can import in 
-BC.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The Trip can be opened in Kurviger, for route planning.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >It can read/write trip files in folders on your computer&rsquo;s 
-hard drive, 
-and on the Device Zumo XT(2).</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Note: Modifying a trip clears any existing calculation result, and will 
-make the Zumo recalculate the trip next time it is opened.</span></font><font color="#010101" ></font></div><br><br><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>Editing an existing trip</b></span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Open a trip, from your hard drive, or the device</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on <b>Trip Editor</b>, <b>Edit</b></span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="565"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Windows version 5.9.14">
+  <title>12) Using Trip Editor</title>
+  <meta name="generator" content="HelpMaker.net">
+  <meta name="keywords" content="Trip Editor,">
+  <style type="text/css">
+  body {
+  background-color: #FFFCEA;
+  }
+  span.c21 {font-size:14pt;background:#ffffff}
+  span.c20 {font-size:14pt;background:#ff00ff}
+  a.c19 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c18 {font-size: 14pt; text-decoration: underline}
+  span.c17 {font-family: Calibri; font-size: 120%}
+  div.c16 {margin-left:13mm; margin-right:0mm; text-indent:0mm;}
+  span.c15 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  td.c14 {border: solid #010101 1px;}
+  table.c13 {border-collapse: collapse; border: none}
+  span.c12 {color: #010101}
+  br.c11 {page-break-before:always}
+  div.c10 {margin-left:13mm; margin-right:0mm; text-indent:-6mm;}
+  span.c9 {color: #010101; font-family: Symbol; font-size: 120%}
+  div.c8 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c7 {color: #010101; font-family: Symbol; font-size: 12pt}
+  span.c6 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c5 {color: #0000FF; font-family: Calibri; font-size: 120%; font-weight: bold}
+  table.c4 {background-color: #FFFFFF}
+  span.c3 {color: #0000FF; font-family: Arial; font-size: 150%; font-weight: bold}
+  td.c2 {font-weight: bold}
+  span.c1 {font-family: Calibri; font-size: 150%}
+  </style>
+</head>
+<body>
+  <table class="c4" width="100%" border="0" cellspacing="0"
+  cellpadding="2">
     <tr>
-    <td valign="top"  width="550"  height="166" >
-    <div align="left" ><img src="12usingtripeditorb1.JPG"  width="1319"  height="524"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><table width="438"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td class="c2" align="left"><span class="c1"><a href=
+      "11usinggeocode.html">Previous</a>&nbsp;<a href=
+      "toc.html">Top</a>&nbsp;<a href=
+      "13importexportcsvexcel.html">Next</a></span></td>
+      <td align="center" width="75%">
+        <div align="center">
+          <span class="c3">12) Using Trip Editor</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div align="left"></div>
+  <div align="left">
+    <span class="c5">Intro</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">The Trip Editor should not be considered a
+    full-blown trip planner tool. It can not, and probably never
+    will, calculate a route. The trip file format has not been
+    decoded enough, TripManager does not know anything about
+    routing algorithms in general and more importantly used on the
+    Zumo.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">What it can do:</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Review the results of a calculated trip, and make minor
+    modifications.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Change general parameters. Trip name, Routing preferences,
+    Transport method and Departure date.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Add, or Delete a route point.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Move a route point to a new location.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Reorder the route points.</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Create a new empty trip. Add route points from map
+    coordinates.</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Lookup address information for selected route points and
+    save that in the Address field. That info will also be
+    available in the Trip planner on the Zumo XT(2).</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Import/Export route points from/to GPX/CSV files.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Import can read Via and Shaping points from a route in the
+    GPX, or Way points. The GPX can be processed by Trk2Rt first to
+    automatically add more shaping points.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Export can create a GPX from a trip file, that you can
+    import in BC.</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    Trip can be opened in Kurviger, for route planning.</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">It
+    can read/write trip files in folders on your computer’s hard
+    drive, and on the Device Zumo XT(2).</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Note: Modifying a trip clears any existing
+    calculation result, and will make the Zumo recalculate the trip
+    next time it is opened.</span>
+  </div><br>
+  <br>
+  <span class="c12"><br clear="all" class="c11"></span>
+  <div align="left">
+    <span class="c5">Editing an existing trip</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Open a trip, from your hard drive, or the device</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Click on <b>Trip Editor</b>, <b>Edit</b></span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="565" cellpadding="7" cellspacing="0" class="c13">
     <tr>
-    <td valign="top"  width="424"  height="17" >
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></font><img src="12usingtripeditorb2.JPG"  width="410"  height="90"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The Trip Editor opens up on the left, leaving space for the map. Selecting 
-a Route point will update the map.</span></font><font color="#010101" ></font></div><table width="1572"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="550" height="166">
+        <div align="left"><img src="12usingtripeditorb1.JPG" width=
+        "1319" height="524" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <table width="438" cellpadding="7" cellspacing="0" class="c13">
     <tr>
-    <td valign="top"  width="1564" >
-    <div align="left" ><img src="12usingtripeditorb3.JPG"  width="1564"  height="833"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>Creating a new trip</b></span></font><font color="#010101" ></font></div><br><font color="#010101" ></font><br><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Choose either <b>New trip (MTP device)</b>, or <b>New trip (Windows)</b>. A dialog 
-opens where you need to enter a <b>Trip name </b>and click on <b>OK.</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Notes:</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Make sure the selected model matches the model you want to 
-create the trip file for XT and XT2 trip files are not compatible.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="678"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="424" height="17">
+        <div align="left">
+          <br>
+        </div>
+        <div align="left"><img src="12usingtripeditorb2.JPG" width=
+        "410" height="90" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c12"><br clear="all" class="c11"></span>
+  <div align="left">
+    <span class="c6">The Trip Editor opens up on the left, leaving
+    space for the map. Selecting a Route point will update the
+    map.</span>
+  </div>
+  <table width="1572" cellpadding="4" cellspacing="0" class="c13">
     <tr>
-    <td valign="top"  width="670" >
-    <div align="left" ><img src="12usingtripeditorb4.JPG"  width="640"  height="155"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >MTP device will normally be an XT(2), but it is possible to 
-use any 
-MTP device that allows storing files. Hence the term &lsquo;MTP device&rsquo; is 
-used. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >New trip (MTP device) is only enabled if an MTP device is 
-connected.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><table width="648"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="1564">
+        <div align="left"><img src="12usingtripeditorb3.JPG" width=
+        "1564" height="833" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c12"><br clear="all" class="c11"></span>
+  <div align="left">
+    <span class="c5">Creating a new trip</span>
+  </div><br>
+  <br>
+  <div align="left">
+    <span class="c6">Choose either <b>New trip (MTP device)</b>, or
+    <b>New trip (Windows)</b>. A dialog opens where you need to
+    enter a <b>Trip name</b> and click on <b>OK.</b></span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Notes:</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Make sure the selected model matches the model you want to
+    create the trip file for XT and XT2 trip files are not
+    compatible.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="678" cellpadding="4" cellspacing="0" class="c13">
     <tr>
-    <td valign="top"  width="640" >
-    <div align="left" ><img src="12usingtripeditorb5.JPG"  width="615"  height="250"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><br clear="all"  style="page-break-before:always" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >A blank Trip Editor window opens:</span></font><font color="#010101" ></font></div><table border="1"  width="1572"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="670">
+        <div align="left"><img src="12usingtripeditorb4.JPG" width=
+        "640" height="155" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">MTP
+    device will normally be an XT(2), but it is possible to use any
+    MTP device that allows storing files. Hence the term ‘MTP
+    device’ is used.</span>
+  </div>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">New
+    trip (MTP device) is only enabled if an MTP device is
+    connected.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="648" cellpadding="4" cellspacing="0" class="c13">
     <tr>
-    <td valign="top"  width="1563"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="12usingtripeditorb6.JPG"  width="1560"  height="832"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>Trip editor controls</b></span></font><font color="#010101" ></font></div><table border="1"  width="1104"  cellpadding="4"  cellspacing="0"  style="border-collapse: collapse; border: none" >
+      <td valign="top" width="640">
+        <div align="left"><img src="12usingtripeditorb5.JPG" width=
+        "615" height="250" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c12"><br clear="all" class="c11"></span>
+  <div align="left">
+    <span class="c6">A blank Trip Editor window opens:</span>
+  </div>
+  <table border="1" width="1572" cellpadding="4" cellspacing="0"
+  class="c13">
     <tr>
-    <td valign="top"  width="615"  height="56"  style="border: solid #010101 1px;" >
-    <div align="left" ><img src="12usingtripeditorb7.JPG"  width="607"  height="839"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
-    </td>
-    <td valign="top"  width="471"  height="56"  style="border: solid #010101 1px;" >
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Edit boxes <b>TripName, RoutePreference, Transportation </b>and 
-    <b>Departure </b>can be edited.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The <b>model </b>(XT, or XT2) is readonly, the model of a trip file can 
-    only be specified when creating .</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The Grid columns can be edited, except for the ID, which is 
-    autoassigned.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Right Click brings up the context menu. All functions are also 
-    accessible using keyboard shortcuts.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The coloured buttons on the right:</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Move Up</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Insert</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Delete</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Move down</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Lookup address</b> (if configured)</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>GPX</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Import</span></font><font color="#010101" ></font></div>
-    <div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:0mm; " ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Trk2RT + Import</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Export</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>CSV</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Import</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Export</span></font><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Kurviger</b></span></font><font color="#010101" ></font></div>
-    <div align="left" ><br>
-    </div>
-    <font color="#010101" >
-    <div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Clicking <b>OK </b>saves the trip file, <b>Cancel </b>discards the changes.</span></font><font color="#010101" ></font></div>
-    <div align="left" ><br><font color="#010101" ></font></div>
-    <div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >You can use the clipboard to copy from/to Excel. To avoid 
-    problems with the decimal format in the GPS coordinates first 
-    set the format in Excel to &lsquo;text&rsquo;.</span></font><font color="#010101" ></font></div>
-    </td></tr></table><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><b>Common tasks</b></span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Change a route point:</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >You can change the name and address to something meaningful.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Change from <b>Shape </b>to <b>Via </b>or vice versa.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >To change to GPS position you can overtype the Lat/Lon values, 
-but it is easier to use the button &lsquo;Apply coordinates&rsquo; from the 
-map.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Delete a route point:&nbsp; <b>Ctrl+Del</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Insert a route point:&nbsp; <b>Ctrl+Ins</b></span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The route point will get a default name: &lsquo;RtePt&rsquo; 
-+ Id </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >All route points with default names will be renumbered when 
-(other) route points are inserted.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The route point will be set to <b>Shape. </b>When saving the 
-trip file, the 
-first and last route point are automatically reset to <b>Via.</b></span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The route point will get the GPS coordinates from the currently 
-selected point on the map.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Moving a route point: <b>Alt+Up</b>, or <b>Alt+Down</b></span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Moving multiple route points:</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Mark the lines to move, using Shift + Cursor keys, or Shift/Ctrl+Left 
-mouse button.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Cut the lines to the clipboard, using Ctrl+X.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Select the line where the route points should be moved to, 
-and 
-Paste using Ctrl+V.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Deleting route points, looking up address and copying/cutting to 
-clipboard support multi-selection.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Adding route points using the Map.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Locate the point you want to insert on the map. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >You can use the <b>Search </b>button, or use <b>Ctrl+Left </b>mouse 
-button.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Select the route point where the new point should be inserted 
-after.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on the <b>Plus </b>button, or use <b>Ctrl+Ins</b>.</span></font><font color="#010101" ><br clear="all"  style="page-break-before:always" ></font></div><div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Updating the Address</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Select the route points to update, or use CTRL+A to select 
-all route 
-points</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on the Lookup Address button.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The requests will be throttled, meaning TripManager will issue 
-no more requests/second than specified.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Import route points from a GPX, or CSV</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on the GPX/CSV button, and choose Import. Open the file.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >A dialog will be shown with the Waypoints and Routes found 
-in 
-the GPX.&nbsp; Check what to import. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >To automatically add more shaping points use Trk2Rt + Import. 
-More shaping point will create a trip that matches the original 
-route closer. //TODO add link</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The newly created route points will be added after any existing 
-route points.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Export route points to a GPX, or CSV</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on the GPX/CSV button, and choose Export.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The saved GPX contains only route points. In BC you will need 
-to 
-recalculate.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Open the trip in </span></font><a href="https://kurviger.com/en/plan" target="_blank"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Kurviger</u></span></font></a><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on the blue globe button.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >GPX compatibility has been tested with BC, Kurviger and MRA, but other 
-software should also work.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >When saving a trip file the calculation will be cleared, to ensure that the 
-next time the XT(2) will recalculate the trip. A MessageBox will appear to 
-warn you.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >The map will reflect the changes made, and connect the route points 
-using straight</span></font><font face="Calibri"  color="#ff00ff"  size="4" ><span style="font-size:14pt" > </span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt;background:#ff00ff" >magenta</span><span style="font-size:14pt;background:#ffffff" >.</span></font><font face="Calibri"  color="#ff00ff"  size="4" ><span style="font-size:14pt" > </span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >lines.</span></font><font color="#010101" ></font></div><div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >You can turn on/off zooming in on a selected route point using the 
-checkbox <b>Zoom in on point</b> at the bottom of the map. </span></font><font color="#010101" ></font></div><div align="left" ><font color="#010101" ></font></div><div align="left" ></span><font face="Arial"  color="#010101" ><span style="font-size:12pt" > </span></font><font color="#010101" ></font></div>
-</body></html>
+      <td valign="top" width="1563" class="c14">
+        <div align="left"><img src="12usingtripeditorb6.JPG" width=
+        "1560" height="832" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Trip editor controls</span>
+  </div>
+  <table border="1" width="1104" cellpadding="4" cellspacing="0"
+  class="c13">
+    <tr>
+      <td valign="top" width="615" height="56" class="c14">
+        <div align="left"><img src="12usingtripeditorb7.JPG" width=
+        "607" height="839" border="0" alt="graphic"></div>
+      </td>
+      <td valign="top" width="471" height="56" class="c14">
+        <div align="left">
+          <span class="c6">Edit boxes <b>TripName, RoutePreference,
+          Transportation</b> and <b>Departure</b> can be
+          edited.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">The <b>model</b> (XT, or XT2) is
+          readonly, the model of a trip file can only be specified
+          when creating .</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">The Grid columns can be edited, except
+          for the ID, which is autoassigned.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">Right Click brings up the context menu.
+          All functions are also accessible using keyboard
+          shortcuts.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">The coloured buttons on the
+          right:</span>
+        </div>
+        <div align="left">
+          <span class="c15">Move Up</span>
+        </div>
+        <div align="left">
+          <span class="c15">Insert</span>
+        </div>
+        <div align="left">
+          <span class="c15">Delete</span>
+        </div>
+        <div align="left">
+          <span class="c15">Move down</span>
+        </div>
+        <div align="left">
+          <span class="c6"><b>Lookup address</b> (if
+          configured)</span>
+        </div>
+        <div align="left">
+          <span class="c15">GPX</span>
+        </div>
+        <div align="left">
+          <span class=
+          "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Import</span>
+        </div>
+        <div align="left" class="c16">
+          <span class="c6">Trk2RT + Import</span>
+        </div>
+        <div align="left">
+          <span class=
+          "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Export</span>
+        </div>
+        <div align="left">
+          <span class="c15">CSV</span>
+        </div>
+        <div align="left">
+          <span class=
+          "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Import</span>
+        </div>
+        <div align="left">
+          <span class=
+          "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Export</span>
+        </div>
+        <div align="left">
+          <span class="c15">Kurviger</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">Clicking <b>OK</b> saves the trip file,
+          <b>Cancel</b> discards the changes.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c6">You can use the clipboard to copy
+          from/to Excel. To avoid problems with the decimal format
+          in the GPS coordinates first set the format in Excel to
+          ‘text’.</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Common tasks</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Change a route point:</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">You
+    can change the name and address to something meaningful.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Change from <b>Shape</b> to <b>Via</b> or vice
+    versa.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
+    change to GPS position you can overtype the Lat/Lon values, but
+    it is easier to use the button ‘Apply coordinates’ from the
+    map.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Delete a route point:&nbsp;
+    <b>Ctrl+Del</b></span>
+  </div>
+  <div align="left">
+    <span class="c6">Insert a route point:&nbsp;
+    <b>Ctrl+Ins</b></span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    route point will get a default name: ‘RtePt’ + Id</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">All
+    route points with default names will be renumbered when (other)
+    route points are inserted.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    route point will be set to <b>Shape.</b> When saving the trip
+    file, the first and last route point are automatically reset to
+    <b>Via.</b></span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    route point will get the GPS coordinates from the currently
+    selected point on the map.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Moving a route point: <b>Alt+Up</b>, or
+    <b>Alt+Down</b></span>
+  </div>
+  <div align="left">
+    <span class="c6">Moving multiple route points:</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Mark the lines to move, using Shift + Cursor keys, or
+    Shift/Ctrl+Left mouse button.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">Cut
+    the lines to the clipboard, using Ctrl+X.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Select the line where the route points should be moved to,
+    and Paste using Ctrl+V.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Deleting route points, looking up address and
+    copying/cutting to clipboard support multi-selection.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Adding route points using the Map.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Locate the point you want to insert on the map.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">You
+    can use the <b>Search</b> button, or use <b>Ctrl+Left</b> mouse
+    button.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Select the route point where the new point should be
+    inserted after.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Click on the <b>Plus</b> button, or use
+    <b>Ctrl+Ins</b>.</span><span class="c12"><br clear="all" class=
+    "c11"></span>
+  </div>
+  <div align="left">
+    <span class="c17">Updating the Address</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Select the route points to update, or use CTRL+A to select
+    all route points</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Click on the Lookup Address button.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    requests will be throttled, meaning TripManager will issue no
+    more requests/second than specified.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Import route points from a GPX, or CSV</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Click on the GPX/CSV button, and choose Import. Open the
+    file.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">A
+    dialog will be shown with the Waypoints and Routes found in the
+    GPX.&nbsp; Check what to import.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
+    automatically add more shaping points use Trk2Rt + Import. More
+    shaping point will create a trip that matches the original
+    route closer. //TODO add link</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    newly created route points will be added after any existing
+    route points.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Export route points to a GPX, or CSV</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Click on the GPX/CSV button, and choose Export.</span>
+  </div>
+  <div align="left" class="c10">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
+    saved GPX contains only route points. In BC you will need to
+    recalculate.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Open the trip in</span> <a class="c19" href=
+    "https://kurviger.com/en/plan" target="_blank"><span class=
+    "c18">Kurviger</span></a>
+  </div>
+  <div align="left" class="c10">
+    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Click on the blue globe button.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">GPX compatibility has been tested with BC,
+    Kurviger and MRA, but other software should also work.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">When saving a trip file the calculation will
+    be cleared, to ensure that the next time the XT(2) will
+    recalculate the trip. A MessageBox will appear to warn
+    you.</span>
+  </div>
+  <div align="left">
+    <span class="c6">The map will reflect the changes made, and
+    connect the route points using straight</span> <span class=
+    "c6"><span class="c20">magenta</span><span class=
+    "c21">.</span></span> <span class="c6">lines.</span>
+  </div>
+  <div align="left">
+    <span class="c6">You can turn on/off zooming in on a selected
+    route point using the checkbox <b>Zoom in on point</b> at the
+    bottom of the map.</span>
+  </div>
+  <div align="left"></div>
+  <div align="left"></div>
+</body>
+</html>
