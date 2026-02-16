@@ -99,9 +99,9 @@ type
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
     class function GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;
     class function IsKnownDevice(const Device: TObject): boolean;
-    class function GarminDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer;
-    class function KnownDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer; overload;
-    class function KnownDeviceIndex(const DeviceList: Tlist): integer; overload;
+    class function GarminDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer;
+    class function KnownDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer; overload;
+    class function KnownDeviceIndex(const DeviceList: TList): integer; overload;
     class function PreferedPartition(const SelectedDevice, InsertedDevice: string;
                                      const DeviceList: Tlist): boolean;
   end;
@@ -428,7 +428,7 @@ begin
 end;
 
 // Get first known device in connected list, for this prio
-class function TModelConv.KnownDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer;
+class function TModelConv.KnownDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer;
 var
   KnownIndex, DevIndex: integer;
 begin
