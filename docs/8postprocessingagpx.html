@@ -1,236 +1,75 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Windows version 5.9.14">
-  <title>8) Post processing a GPX</title>
-  <meta name="generator" content="HelpMaker.net">
-  <meta name="keywords" content=
-  "Post process,Unglitch,Lookup address,">
-  <style type="text/css">
-  body {
-  background-color: #FFFCEA;
-  }
-  table.c15 {border-collapse: collapse; border: none}
-  div.c14 {margin-left:13mm; margin-right:0mm; text-indent:-6mm;}
-  span.c13 {color: #010101; font-family: Symbol; font-size: 120%}
-  span.c12 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
-  span.c11 {color: #010101; font-family: Symbol; font-size: 12pt}
-  div.c10 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  a.c9 {color: #0000FF; font-family: Calibri; font-size: 120%}
-  span.c8 {font-size: 14pt; text-decoration: underline}
-  span.c7 {font-family: Calibri; font-size: 120%}
-  span.c6 {font-family: Symbol; font-size: 12pt}
-  span.c5 {color: #010101; font-family: Calibri; font-size: 120%}
-  table.c4 {background-color: #FFFFFF}
-  span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
-  td.c2 {font-weight: bold}
-  span.c1 {font-family: Calibri; font-size: 150%}
-  </style>
-</head>
-<body>
-  <table class="c4" width="100%" border="0" cellspacing="0"
-  cellpadding="2">
+<html><head>
+   <title>8) Post processing a GPX</title>
+   <meta name="generator"  content="HelpMaker.net" >
+   <meta name="keywords"  content="Post process,Unglitch,Lookup address," ></head>
+<body bgcolor="FFFCEA" >
+<table width="100%"  border="0"  cellspacing="0"  cellpadding="2"  bgcolor="FFFFFF" >
+  <tr>
+    <td align="left" >
+    <b><font face="Calibri"  size="5" >
+        <a href="7compareatripwithagpx.html">Previous</a>&nbsp;<a href="toc.html">Top</a>&nbsp;<a href="9sendtofolder.html">Next</a>
+    </font></b>
+    </td>
+    <td align="center"  width="75%" >
+      <div align="center" ></span><font face="Calibri"  color="#0000ff"  size="5" ><span style="font-size:18pt" ><b>8) Post processing a GPX file</b></span></font><font color="#010101" ></font></div>
+
+    </td>
+  </tr></table>
+<hr>
+<div align="left" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Strictly speaking post processing a GPX is not needed. But it can be 
+useful.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  size="4" ><span style="font-size:14pt" >It will clear the </span></font><a href="subclass.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>Subclass field</u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" > of the Via and Shaping points. 
+Thereby preventing a rename of Via and Shaping points on the XT(2).</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >It will put the shaping points &lsquo;on the road&rsquo;. Shaping 
+points that are 
+not placed on the road can lead to routing errors. This process is 
+sometimes called &lsquo;Unglitching&rsquo;.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Optionally the Begin, End and Shaping points are renamed and 
+assigned a category.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Via points are never renamed.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Optionally Shaping point are renamed to <b>Routename + distance</b> 
+or <b>Routename + sequence</b>. Example: the routename is &lsquo;tripmanager-
+demo&rsquo;. Shaping points will be named &lsquo;tripmanager-demo_010 Km, 
+(025 Km etc.)&rsquo; or &lsquo;tripmanager-demo_001, (002, 003 etc)&rsquo;. There are 
+also options to start the name with the distance, or have the distance 
+in Miles.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Optionally Waypoints are assigned categories. EG: SYM:&lt;name 
+of 
+symbol&gt; GPX:&lt;name of GPX file&gt; This makes finding waypoints (Saved 
+locations, favourites) easier on the Zumo.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >If GeoCoding has been set up in Advanced settings, TripManager 
+can lookup addresses and save them in the GPX.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Steps to perform</b></span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Export a GPX file from Basecamp. Or any other app that can 
+produce GPX files. </span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >For MRA choose GPX 1.1 Route + Track + Poi. Side note: MRA 
+mentions GPX 1.0, GPX 1.1 and GPX 1.2. But GPX 1.2 is a non-
+existing standard! If you look in a 1.2 file you will see GPX 1.1 
+format. I cant help thinking the 1.2 name was chosen by people 
+that have little knowledge of XML standards.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:13mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101"  size="4" ><span style="font-size:14pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >For Kurviger choose GPX (*.gpx), in 'Content' check 'Route' and 
+'Track'. Additonal Waypoints can be used to add more Shaping 
+points resulting in a trip on the device that looks closer to the 
+planned route.</span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >In TripManager navigate in the Top-Right panel to the folder 
+where 
+the GPX was saved. </span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Select the GPX file. (You can select multiple GPX files)</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Click on <b>Post process.</b></span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>The GPX file is updated &lsquo;in place&rsquo;.</b></span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Import the GPX back in Basecamp to see the changes. Note: 
+&lsquo;Delete&rsquo; the routes first in Basecamp (Shift/Delete). Make sure the 
+routes are 
+not listed in &lsquo;Unlisted Data&rsquo;. If you don&rsquo;t, Basecamp will add <b>-1 </b>to the 
+names to avoid duplicates.</span></font><font color="#010101" ></font></div><div align="left" ><br></div><font color="#010101" ><div align="left" ></span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" ><b>Notes:</b></span></font><font color="#010101" ></font></div><div align="left" ><br><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >TripManager supports Drag and Drop.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Dragging a directory into TripManager will change the current 
+directory.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Dragging a GPX file into TripManager will popup the post process 
+dialog.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Dragging a GPX file from TripManager into Basecamp will start 
+the 
+import.</span></font><font color="#010101" ></font></div><div align="left"  style="margin-left:6mm; margin-right:0mm; text-indent:-6mm; " ></span><font face="Symbol"  color="#010101" ><span style="font-size:12pt" >&middot;&nbsp;&nbsp;&nbsp;</span></font><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >If you check &lsquo;Watch&rsquo;. TripManager will watch for changes in 
+the 
+selected directory and popup the post process dialog. So you only 
+have to export a GPX file from BaseCamp and TripManager will 
+popup.</span></font><font color="#010101" ></font></div><blockquote><table width="762"  cellpadding="7"  cellspacing="0"  style="border-collapse: collapse; border: none" >
     <tr>
-      <td class="c2" align="left"><span class="c1"><a href=
-      "7compareatripwithagpx.html">Previous</a> <a href=
-      "toc.html">Top</a> <a href=
-      "9sendtofolder.html">Next</a></span></td>
-      <td align="center" width="75%">
-        <div align="center">
-          <span class="c3">8) Post processing a GPX file</span>
-        </div>
-      </td>
-    </tr>
-  </table>
-  <hr>
-  <div align="left">
-    <span class="c5">Strictly speaking post processing a GPX is not
-    needed. But it can be useful.</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left" class="c10">
-    <span class="c6">·   </span><span class="c7">It will clear
-    the</span> <a class="c9" href="subclass.html"><span class=
-    "c8">Subclass field</span></a> <span class="c7">of the Via and
-    Shaping points. Thereby preventing a rename of Via and Shaping
-    points on the XT(2).</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">It will put the
-    shaping points on the road. Shaping points that are not
-    placed on the road can lead to routing errors. This process is
-    sometimes called Unglitching.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Optionally the
-    Begin, End and Shaping points are renamed and assigned a
-    category.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Via points are
-    never renamed.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Optionally
-    Shaping point are renamed to <b>Routename + distance</b> or
-    <b>Routename + sequence</b>. Example: the routename is
-    tripmanager- demo. Shaping points will be named
-    tripmanager-demo_010 Km, (025 Km etc.) or
-    tripmanager-demo_001, (002, 003 etc). There are also options
-    to start the name with the distance, or have the distance in
-    Miles.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Optionally
-    Waypoints are assigned categories. EG: SYM:&lt;name of
-    symbol&gt; GPX:&lt;name of GPX file&gt; This makes finding
-    waypoints (Saved locations, favourites) easier on the
-    Zumo.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">If GeoCoding has
-    been set up in Advanced settings, TripManager can lookup
-    addresses and save them in the GPX.</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left">
-    <span class="c12">Steps to perform</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left" class="c10">
-    <span class="c13">·   </span><span class="c5">Export a GPX file
-    from Basecamp. Or any other app that can produce GPX
-    files.</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left" class="c14">
-    <span class="c13">·   </span><span class="c5">For MRA choose
-    GPX 1.1 Route + Track + Poi. Side note: MRA mentions GPX 1.0,
-    GPX 1.1 and GPX 1.2. But GPX 1.2 is a non- existing standard!
-    If you look in a 1.2 file you will see GPX 1.1 format. I cant
-    help thinking the 1.2 name was chosen by people that have
-    little knowledge of XML standards.</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left" class="c14">
-    <span class="c13">·   </span><span class="c5">For Kurviger
-    choose GPX (*.gpx), in 'Content' check 'Route' and 'Track'.
-    Additonal Waypoints can be used to add more Shaping points
-    resulting in a trip on the device that looks closer to the
-    planned route.</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">In TripManager
-    navigate in the Top-Right panel to the folder where the GPX was
-    saved.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Select the GPX
-    file. (You can select multiple GPX files)</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Click on <b>Post
-    process.</b></span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c12">The GPX file is
-    updated in place.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Import the GPX
-    back in Basecamp to see the changes. Note: Delete the routes
-    first in Basecamp (Shift/Delete). Make sure the routes are not
-    listed in Unlisted Data. If you dont, Basecamp will add
-    <b>-1</b> to the names to avoid duplicates.</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left">
-    <span class="c12">Notes:</span>
-  </div>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">TripManager
-    supports Drag and Drop.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Dragging a
-    directory into TripManager will change the current
-    directory.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Dragging a GPX
-    file into TripManager will popup the post process
-    dialog.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">Dragging a GPX
-    file from TripManager into Basecamp will start the
-    import.</span>
-  </div>
-  <div align="left" class="c10">
-    <span class="c11">·   </span><span class="c5">If you check
-    Watch. TripManager will watch for changes in the selected
-    directory and popup the post process dialog. So you only have
-    to export a GPX file from BaseCamp and TripManager will
-    popup.</span>
-  </div>
-  <blockquote>
-    <table width="762" cellpadding="7" cellspacing="0" class="c15">
-      <tr>
-        <td valign="top" width="748">
-          <div align="left"><img src="8postprocessingagpxb1.JPG"
-          width="1048" height="934" border="0" alt="graphic"></div>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" width="748">
-          <div align="left">
-            <br>
-          </div>
-          <div align="center">
-            <span class="c5">Before post processing</span>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" width="748">
-          <div align="left"><img src="8postprocessingagpxb2.JPG"
-          width="1195" height="944" border="0" alt="graphic"></div>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top" width="748">
-          <div align="left">
-            <br>
-          </div>
-          <div align="center">
-            <span class="c5">After post processing</span>
-          </div>
-        </td>
-      </tr>
-    </table>
-  </blockquote>
-  <div align="left">
-    <br>
-  </div>
-  <div align="left"></div>
-</body>
-</html>
+    <td valign="top"  width="748" >
+    <div align="left" ><img src="8postprocessingagpxb1.JPG"  width="1048"  height="934"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    </td></tr>
+    <tr>
+    <td valign="top"  width="748" >
+    <div align="left" ><br><font color="#010101" ></font></div>
+    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >Before post processing</span></font><font color="#010101" ></font></div>
+    </td></tr>
+    <tr>
+    <td valign="top"  width="748" >
+    <div align="left" ><img src="8postprocessingagpxb2.JPG"  width="1195"  height="944"  border="0"  alt="graphic" ><font color="#010101" ></font></div>
+    </td></tr>
+    <tr>
+    <td valign="top"  width="748" >
+    <div align="left" ><br><font color="#010101" ></font></div>
+    <div align="center" ></span><font face="Calibri"  color="#010101"  size="4" ><span style="font-size:14pt" >After post processing</span></font><font color="#010101" ></font></div>
+    </td></tr></table></blockquote><div align="left" ><br><font color="#010101" ></font></div><div align="left" ><font color="#010101" ></font></div>
+</body></html>
