@@ -702,7 +702,13 @@
       </td>
       <td valign="top" width="69" class="c12">
         <div align="left">
-          <span class="c5">16 or 20</span>
+          <span class="c5">12,</span>
+        </div>
+        <div align="left">
+          <span class="c5">16 or</span>
+        </div>
+        <div align="left">
+          <span class="c5">20</span>
         </div>
       </td>
       <td valign="top" width="561" class="c12">
@@ -711,13 +717,91 @@
           of a location (Via, or Shaping)</span>
         </div>
         <div align="left">
-          <span class="c5">Consists of 4 cardinals: (5 for Tread
-          2)</span>
+          <span class="c5"><b>Length</b>:</span>
         </div>
         <div align="left">
-          <span class="c5"><b>Length</b>: 0x0000 000C = 12 for
-          XT(2), 0x0000 0010 = 16 for Tread 2</span>
+          <span class="c5">Known sizes per model:</span>
         </div>
+        <table border="1" bordercolor="#000000" width="562"
+        cellpadding="4" cellspacing="0" class="c13">
+          <tr>
+            <td valign="top" width="177" height="23" class="c19">
+              <div align="left">
+                <span class="c5">Model</span>
+              </div>
+            </td>
+            <td valign="top" width="141" height="23" class="c19">
+              <div align="left">
+                <span class="c5">Length</span>
+              </div>
+            </td>
+            <td valign="top" width="217" height="23" class="c19">
+              <div align="left">
+                <span class="c5">Fields</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="177" class="c19">
+              <div align="left">
+                <span class="c5">3x0, 590, nuvi2595</span>
+              </div>
+            </td>
+            <td valign="top" width="141" class="c19">
+              <div align="left">
+                <span class="c5">0x0000 0008</span>
+              </div>
+            </td>
+            <td valign="top" width="217" class="c19">
+              <div align="left">
+                <span class="c5">Lat, Lon</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="177" class="c19">
+              <div align="left">
+                <span class="c5">595, Drive 51, XT, XT2</span>
+              </div>
+            </td>
+            <td valign="top" width="141" class="c19">
+              <div align="left">
+                <span class="c5">0x0000 000C</span>
+              </div>
+            </td>
+            <td valign="top" width="217" class="c19">
+              <div align="left">
+                <span class="c5">Unknown</span>
+              </div>
+              <div align="left">
+                <span class="c5">Lat, Lon</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td valign="top" width="177" class="c19">
+              <div align="left">
+                <span class="c5">Tread 2</span>
+              </div>
+            </td>
+            <td valign="top" width="141" class="c19">
+              <div align="left">
+                <span class="c5">0x0000 0010</span>
+              </div>
+            </td>
+            <td valign="top" width="217" class="c19">
+              <div align="left">
+                <span class="c5">Unknown</span>
+              </div>
+              <div align="left">
+                <span class="c5">Unknown_Tread2</span>
+              </div>
+              <div align="left">
+                <span class="c5">Lat, Lon</span>
+              </div>
+            </td>
+          </tr>
+        </table>
         <div align="left">
           <span class="c5"><b>Unknown</b>:</span>
         </div>
@@ -785,16 +869,10 @@
           </tr>
         </table>
         <div align="left">
-          <br>
-        </div>
-        <div align="left">
           <span class="c5">When creating a trip file this field can
           be set to zeroes. Recalculation on the Zumo will set the
           correct value. Appears to change when a new firmware
           version is loaded on the device.</span>
-        </div>
-        <div align="left">
-          <br>
         </div>
         <div align="left">
           <span class="c5"><b>Unknown_Tread2:</b> always 0x0000
