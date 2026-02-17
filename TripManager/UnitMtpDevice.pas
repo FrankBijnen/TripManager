@@ -1,12 +1,11 @@
 unit UnitMtpDevice;
-// Classes to hold info on MTP Devices
+// Specialized classes to hold info on MTP Devices
 
 interface
 
 uses
   System.Classes,
-  UnitGpxDefs,
-  mtp_helper;
+  UnitGpxDefs, UnitMTPDefs;
 
 type
   TMTP_Data = class(TBase_Data)
@@ -57,7 +56,7 @@ implementation
 uses
   System.SysUtils, System.Masks,
   UnitRegistry, UnitRegistryKeys,
-  UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite;
+  UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, mtp_helper;
 
 // Default paths. Will be overruled by reading GarminDevice.Xml
 procedure TGarminDevice.Init(const AModelDescription: string = '');

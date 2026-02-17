@@ -110,7 +110,7 @@ implementation
 
 uses
   System.StrUtils, System.Masks,
-  UnitVerySimpleXml, UnitStringUtils, mtp_helper,
+  UnitVerySimpleXml, UnitStringUtils, UnitMTPDefs,
   UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
 
 type

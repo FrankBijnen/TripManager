@@ -49,7 +49,8 @@ uses
   UnitUSBEvent in '..\CommonUnits\UnitUSBEvent.pas',
   UnitTripOverview in '..\CommonUnits\UnitTripOverview.pas',
   UnitRedirect in '..\CommonUnits\UnitRedirect.pas',
-  UnitMapUtils in '..\CommonUnits\UnitMapUtils.pas';
+  UnitMapUtils in '..\CommonUnits\UnitMapUtils.pas',
+  UnitMTPDefs in '..\CommonUnits\Mtp\UnitMTPDefs.pas';
 
 {$R *.res}
 

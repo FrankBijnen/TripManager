@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  UFrmTripManager, mtp_helper;
+  UFrmTripManager, UnitMTPDefs;
 
 {$R *.dfm}
 
@@ -52,14 +52,13 @@ end;
 
 function TFrmNewTrip.CheckTripExists: boolean;
 var
-  NFile, CurrentObjectId: string;
+  NFile: string;
 begin
   result := false;
   if (CurrentDevice <> nil) then
   begin
     NFile := ExtractFileName(EdResultFile.Text);
-    CurrentObjectId := GetIdForFile(TBase_Device(CurrentDevice).PortableDev, SavedFolderId, NFile);
-    if (CurrentObjectId <> '') then
+    if (TBase_Device(CurrentDevice).FileExists(SavedFolderId, NFile)) then
       exit(true);
   end
   else

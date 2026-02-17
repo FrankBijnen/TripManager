@@ -200,6 +200,7 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="..\CommonUnits\UnitTripOverview.pas"/>
         <DCCReference Include="..\CommonUnits\UnitRedirect.pas"/>
         <DCCReference Include="..\CommonUnits\UnitMapUtils.pas"/>
+        <DCCReference Include="..\CommonUnits\Mtp\UnitMTPDefs.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -233,10 +233,11 @@ begin
 end;
 
 procedure DebugMsg(const Msg: array of variant);
-var I: integer;
-    FMsg: string;
+var
+  I: integer;
+  FMsg: string;
 begin
-  Fmsg := Format('%s %s %s', ['MTP_Helper', Paramstr(0), IntToStr(GetCurrentThreadId)]);
+  Fmsg := Format('%s %s %s', ['DebugMsg', Paramstr(0), IntToStr(GetCurrentThreadId)]);
   for I := 0 to High(Msg) do
     FMsg := Format('%s,%s', [FMsg, VarToStr(Msg[I])]);
   OutputDebugString(PChar(FMsg));
