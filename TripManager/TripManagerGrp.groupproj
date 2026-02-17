@@ -6,9 +6,6 @@
         <Projects Include="TripManager.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="FixHtml.dproj">
-            <Dependencies/>
-        </Projects>
         <Projects Include="hhcfix.dproj">
             <Dependencies/>
         </Projects>
@@ -29,15 +26,6 @@
     <Target Name="TripManager:Make">
         <MSBuild Projects="TripManager.dproj" Targets="Make"/>
     </Target>
-    <Target Name="FixHtml">
-        <MSBuild Projects="FixHtml.dproj"/>
-    </Target>
-    <Target Name="FixHtml:Clean">
-        <MSBuild Projects="FixHtml.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="FixHtml:Make">
-        <MSBuild Projects="FixHtml.dproj" Targets="Make"/>
-    </Target>
     <Target Name="hhcfix">
         <MSBuild Projects="hhcfix.dproj"/>
     </Target>
@@ -48,22 +36,16 @@
         <MSBuild Projects="hhcfix.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="TripManager;FixHtml;hhcfix"/>
+        <CallTarget Targets="TripManager;hhcfix"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="TripManager:Clean;FixHtml:Clean;hhcfix:Clean"/>
+        <CallTarget Targets="TripManager:Clean;hhcfix:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="TripManager:Make;FixHtml:Make;hhcfix:Make"/>
+        <CallTarget Targets="TripManager:Make;hhcfix:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
     <ItemGroup Condition="'$(BuildGroup)'=='Release'">
-        <BuildGroupProject Include="FixHtml.dproj">
-            <ProjectGuid>{8D3F4E56-5C1D-4D41-9659-DFAD705D032B}</ProjectGuid>
-            <Configurations>Release</Configurations>
-            <Platforms>Win32</Platforms>
-            <Enabled>True</Enabled>
-        </BuildGroupProject>
         <BuildGroupProject Include="TripManager.dproj">
             <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA5}</ProjectGuid>
             <Configurations>Release</Configurations>

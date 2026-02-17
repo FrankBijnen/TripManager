@@ -45,6 +45,7 @@ const
 
   WM_DIRCHANGED           = WM_USER + 1;
   WM_ADDRLOOKUP           = WM_USER + 2;
+  WM_LISTFILES            = WM_USER + 3;
 
   TripNameCol             = 5;
   TripNameColWidth        = 250;
@@ -428,7 +429,7 @@ type
     procedure CopyFileFromTmp(const LocalFile: string; const AListItem: TListItem);
     procedure ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
     procedure DeleteObjects(const AllowRecurse: boolean);
-    procedure ReloadFileList;
+    procedure PostReloadFileList;
     procedure SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
     procedure SetImported(const AListItem: TListItem; const NewValue: boolean);
     procedure GroupTrips(Group: Boolean);
@@ -455,6 +456,7 @@ type
     procedure DestroyWnd; override;
     procedure WMDirChanged(var Msg: TMessage); message WM_DIRCHANGED;
     procedure WMAddrLookUp(var Msg: TMessage); message WM_ADDRLOOKUP;
+    procedure WMListFiles(var Msg: TMessage); message WM_LISTFILES;
   public
     { Public declarations }
     DeviceFolder: array[0..2] of string;
@@ -820,7 +822,7 @@ begin
   if CheckDevice(false) then
   begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
-    ListFiles;
+    PostReloadFileList;
   end;
 end;
 
@@ -1023,7 +1025,7 @@ begin
     end;
 
     EdFileSysFolder.Text := ShellTreeView1.Path;
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -1087,7 +1089,11 @@ begin
 {$IFNDEF DEBUG_TRANSFER}
     // Also checks for connected MTP
     if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
-      BgDeviceClick(BgDevice);
+    begin
+      CheckDevice;
+      SetDeviceListColumns;
+      SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
+    end;
 {$ENDIF}
 
     for AnItem in ShellListView1.Items do
@@ -1172,7 +1178,7 @@ begin
 
   case FrmSendTo.SendToDest of
     TSendToDest.stDevice:
-      {$IFNDEF DEBUG_TRANSFER}ListFiles{$ENDIF};
+      {$IFNDEF DEBUG_TRANSFER}PostReloadFileList{$ENDIF};
     TSendToDest.stWindows:
       BtnRefreshFileSysClick(Sender);
   end;
@@ -1200,7 +1206,7 @@ begin
         TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
 
       RebuildDeviceDbMenu;
-      ReloadFileList;
+      PostReloadFileList;
     end;
   except
     CloseDevice;  // Prevent needless tries
@@ -1329,7 +1335,7 @@ begin
       else
         CurSel := -1;
 
-      ReloadFileList;
+      PostReloadFileList;
       // Need to (re)select?
       if (CurSel > -1) and
          (CurSel < LstFiles.items.Count) then
@@ -1802,7 +1808,7 @@ begin
   if (Key = #13) then
   begin
     SetCurrentPath(GetDevicePath(EdDeviceFolder.Text));
-    ListFiles;
+    PostReloadFileList;
     Key := #0;
   end;
 end;
@@ -2123,7 +2129,7 @@ begin
   begin
     if (HasTMTPDevice(CurrentDevice)) then
       TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
-    ListFiles;
+    PostReloadFileList;
   end;
   RebuildDeviceDbMenu;
 end;
@@ -2308,7 +2314,7 @@ begin
   begin
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
     if (CheckDevice(false)) then
-      ListFiles;
+      PostReloadFileList;
   end;
 end;
 
@@ -2576,7 +2582,7 @@ begin
     finally
       TmpTripList.Free;
     end;
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -4445,7 +4451,7 @@ begin
                                                                         CurrentDevice.DisplayedDevice]));
     end;
 
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -4477,7 +4483,7 @@ begin
   if not CreatePath(CurrentDevice.PortableDev, FSavedFolderId, NewName) then
     raise Exception.Create('Folder could not be created!');
 
-  ReloadFileList;
+  PostReloadFileList;
 end;
 
 procedure TFrmTripManager.RenameFile(Sender: TObject);
@@ -4506,7 +4512,7 @@ begin
     if not RenameObject(CurrentDevice.PortableDev, TBase_Data(LstFiles.Selected.Data).ObjectId, NewName) then
       raise exception.Create('Rename failed on device');
 
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -4566,7 +4572,7 @@ begin
     finally
       TmpTripList.Free;
     end;
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -4652,7 +4658,7 @@ begin
     finally
       TmpTripList.Free;
     end;
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -4740,7 +4746,7 @@ begin
     finally
       TmpTripList.Free;
     end;
-    ReloadFileList;
+    PostReloadFileList;
   finally
     SetCursor(CrNormal);
   end;
@@ -4774,11 +4780,12 @@ var
   SParent: Widestring;
   CrWait, CrNormal: HCURSOR;
 begin
-  CrWait := LoadCursor(0, IDC_WAIT);
-  CrNormal := SetCursor(CrWait);
   if (LstFiles.Tag > 0) then
     exit;
   LstFiles.Tag := 1;
+
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
   try
     case (ListFilesDir) of
       TListFilesDir.lfUp:
@@ -4808,34 +4815,42 @@ begin
       2: DeleteTempFiles(CreatedTempPath, GPIMask);
     end;
 
-    // LstFile.Items should contain at least a Caption (Filename) and 4 subitems Date, Time, Ext and Size.
-    // ReadFilesFromDevice will populate the data.
-    // It returns the Parent ObjectId, we save it to be able to navigate to the parent directory.
-    // Defined in the Listview on the form.
-    FSavedParent := ReadFilesFromDevice(CurrentDevice.PortableDev, LstFiles.Items, SParent, FCurrentPath);
+    if (CurrentDevice <> nil) then
+    begin
+      // LstFile.Items should contain at least a Caption (Filename) and 4 subitems Date, Time, Ext and Size.
+      // ReadFilesFromDevice will populate the data.
+      // It returns the Parent ObjectId, we save it to be able to navigate to the parent directory.
+      // Defined in the Listview on the form.
+      FSavedParent := ReadFilesFromDevice(CurrentDevice.PortableDev, LstFiles.Items, SParent, FCurrentPath);
 
-    // Save Device and folder info
-    DeviceFolder[BgDevice.ItemIndex] := GetDevicePath(FCurrentPath);
-    SetDeviceDisplayPath;
+      // Save Device and folder info
+      DeviceFolder[BgDevice.ItemIndex] := GetDevicePath(FCurrentPath);
+      SetDeviceDisplayPath;
 
-    // Trips need to be checked, and tripname filled
-    case BgDevice.ItemIndex of
-      0:  CheckTrips;
-    // Future use
+      // Trips need to be checked, and tripname filled
+      case BgDevice.ItemIndex of
+        0: CheckTrips;
+      // Future use
+      end;
+
+      // Now sort
+      DoListViewSort(LstFiles, FSortSpecification.Column, FSortSpecification.Ascending, FSortSpecification);
     end;
-
-    // Now sort
-    DoListViewSort(LstFiles, FSortSpecification.Column, FSortSpecification.Ascending, FSortSpecification);
-
   finally
     LstFiles.Tag := 0;
     SetCursor(CrNormal);
   end;
 end;
 
-procedure TFrmTripManager.ReloadFileList;
+procedure TFrmTripManager.WMListFiles(var Msg: TMessage);
 begin
+  Msg.Result := 0;
   ListFiles;
+end;
+
+procedure TFrmTripManager.PostReloadFileList;
+begin
+  PostMessage(Self.Handle, WM_LISTFILES, 0 ,0);
 end;
 
 function TFrmTripManager.GetItemType(const AListview: TListView): TDirType;

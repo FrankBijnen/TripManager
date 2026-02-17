@@ -31,7 +31,8 @@ begin
                                 '>&Oslash;&nbsp;&nbsp;&nbsp;</span>',
                                 '>&Oslash;&nbsp;&nbsp;</span>',
                                 '>&Oslash;&nbsp;</span>',
-                                ' name="#'],
+                                ' name="#',
+                                ' bgcolor="FFFCEA" '],
                                ['"',
                                 '<font face="Calibri" size="3">',
                                 '>&middot;&nbsp;&nbsp;&nbsp;</span>',
@@ -41,7 +42,8 @@ begin
                                 '>&Oslash;</span>',
                                 '>&Oslash;</span>',
                                 '>&Oslash;</span>',
-                                ' name="'],
+                                ' name="',
+                                ' bgcolor="FFFFFF" '],
                                [rfReplaceAll]);
     TFile.WriteAllText(Fs.Name, AHtml);
     Rc := FindNext(Fs);
@@ -52,5 +54,20 @@ begin
   CmdLine := '"' + IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +  'hhc.exe" "' + Paramstr(1) + '"';
   Sto_RedirectedExecute(CmdLine, CurDir, Output, Error, ExitCode);
   Writeln(Output);
+
+  ChDir(Dir2Fix);
+  Rc := FindFirst('*.html', faAnyFile, Fs);
+  while (Rc = 0) do
+  begin
+    CmdLine := '"' + IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +  'tidy.exe" -c -i -m "' +
+                     IncludeTrailingPathDelimiter(Dir2Fix) + Fs.Name + '"';
+    Sto_RedirectedExecute(CmdLine, CurDir, Output, Error, ExitCode);
+    if (ExitCode <> 0) then
+      Writeln(Error);
+
+    Rc := FindNext(Fs);
+  end;
+  FindClose(Fs);
+
   Halt(ExitCode);
 end.
