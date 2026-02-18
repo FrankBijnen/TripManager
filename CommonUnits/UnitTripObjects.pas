@@ -5374,13 +5374,15 @@ begin
   if not Assigned(AnUdbHandle) then
     exit;
 
-  // Need CalculationMagic. Note: The 590 and 3x0 have no CalculationMagic
-  if (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[TripModel]) then
-    exit;
-
-  // Check Dummy SubClass in the 2nd UdbDir
-  if (NeedDummySubclass[TripModel]) then
+  if (NeedDummySubclass[TripModel] = false) then
   begin
+    // Need CalculationMagic. Note: The 590 and 3x0 have no CalculationMagic
+    if (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[TripModel]) then
+      exit;
+  end
+  else
+  begin
+    // Check Dummy SubClass in the 2nd UdbDir
     if (AnUdbHandle.FValue.UDbDirCount < 2) then
       exit;
 
