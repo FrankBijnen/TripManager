@@ -5361,18 +5361,35 @@ begin
     result := TTripModel.Drive51;
 end;
 
-// Is the TripList calculated? Need UDBdir > 0
+// Is the TripList calculated?
 function TTripList.GetIsCalculated: boolean;
 var
   AnUdbHandle: TmUdbDataHndl;
+  AnUdbDir: TUdbDir;
+  DummySubClass: TSubClass;
 begin
   result := false;
 
   AnUdbHandle := FirstUdbDataHndle;
   if not Assigned(AnUdbHandle) then
     exit;
-  if (AnUdbHandle.FValue.UDbDirCount = 0) then
+
+  // Need CalculationMagic. Note: The 590 and 3x0 have no CalculationMagic
+  if (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[TripModel]) then
     exit;
+
+  // Check Dummy SubClass in the 2nd UdbDir
+  if (NeedDummySubclass[TripModel]) then
+  begin
+    if (AnUdbHandle.FValue.UDbDirCount < 2) then
+      exit;
+
+    AnUdbDir :=  AnUdbHandle.Items[1];
+    DummySubClass.Init(RecalcSubClass(''));
+    if (DummySubClass.MapSegment = AnUdbDir.FValue.SubClass.MapSegment) and
+       (DummySubClass.RoadId = AnUdbDir.FValue.SubClass.RoadId) then
+      exit;
+  end;
 
   result := true;
 end;

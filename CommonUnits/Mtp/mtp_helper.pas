@@ -631,6 +631,7 @@ end;
 //https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/setting-properties-for-a-single-object
 // Notes: if 'NewName' already exists, no error is thrown.
 //        For the Zumo XT it is enough to just modify original name. For other device we may need object_name also.
+//        ListItems need to be refreshed afterwards.
 const
   BoolFalse = 0;
 
@@ -1080,17 +1081,20 @@ begin
   result := true;
 end;
 
-procedure FillObjectProperties(ObjId: PWideChar;
-                               Prop: IPortableDeviceProperties;
-                               AListItem: TListItem;
-                               AMinSubItems: integer); overload;
+procedure UpdObjectProperties(ObjId: PWideChar;
+                              Prop: IPortableDeviceProperties;
+                              AListItem: TListItem;
+                              AMinSubItems: integer);
 var
   ABASE_Data: TBase_Data;
   File_Info: TFile_Info;
 begin
-  ABASE_Data := TBase_Data.New;
+  if (AListItem.Data = nil) then
+    exit;
+  ABASE_Data := TBase_Data(AListItem.Data);
   if not GetFileInfo(ObjId, Prop, File_Info) then
     exit;
+
   ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
   ABASE_Data.UpdateListItem(AListItem, [File_Info.DateOriginal,
                                        File_Info.TimeOriginal,
@@ -1099,10 +1103,10 @@ begin
                                        AMinSubItems);
 end;
 
-procedure FillObjectProperties(ObjId: PWideChar;
-                               Prop: IPortableDeviceProperties;
-                               AListItems: TListItems;
-                               AMinSubItems: integer); overload;
+procedure AddObjectProperties(ObjId: PWideChar;
+                              Prop: IPortableDeviceProperties;
+                              AListItems: TListItems;
+                              AMinSubItems: integer);
 var
   ABASE_Data: TBase_Data;
   File_Info: TFile_Info;
@@ -1171,7 +1175,7 @@ begin
           if (Fetched = 0) then // Does it ever happen?
             break;
 
-          FillObjectProperties(ObjId, Prop, Lst, MinSubItems);
+          AddObjectProperties(ObjId, Prop, Lst, MinSubItems);
         end;
       end;
     end;
@@ -1334,7 +1338,7 @@ var
 begin
   result := GetPropForFile(PortableDev, SPath, SFile, Prop);
   if (Prop <> nil) then
-    FillObjectProperties(PWideChar(result), Prop, AListItem, AListItem.SubItems.Count);
+    UpdObjectProperties(PWideChar(result), Prop, AListItem, AListItem.SubItems.Count);
 end;
 
 function GetIdForFile(PortableDev: IPortableDevice;

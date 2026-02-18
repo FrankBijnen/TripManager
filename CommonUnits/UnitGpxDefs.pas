@@ -10,8 +10,13 @@ const
   EarthRadiusMi: Double       = 3958.761;
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
   LatLonFormat                = '%1.5f';
-  RecalcMapSegAndRoad         = 'FFFFFFFFFFFFFFFF';  // Mapseg and RoadId forcing a recalc
+  RecalcMapSeg                = 'FFFFFFFF';          // Mapseg and RoadId forcing a recalc
+  RecalcRoad                  = 'FFFFFFFF';          // Mapseg and RoadId forcing a recalc
+  RecalcMapSegAndRoad         = RecalcMapSeg + RecalcRoad ;
   MapSegRoadMask              = $ffff7f8d;           // Mask out flag bits in road id.
+  LeaveRoutePoint             = '2116';
+  ApproachRoutePoint          = '2117';
+
 type
   TDistanceUnit = (duKm, duMi);
   TProcessCategory = (pcSymbol, pcGPX);
@@ -171,7 +176,7 @@ begin
   result := ASubClass;
   if (Length(result) < Length(RecalcMapSegAndRoad)) then
     result := RecalcMapSegAndRoad +   // Unknown MapSeg and Road
-              '2116' +                // Leave Route point
+              LeaveRoutePoint +       // Leave Route point
               '000000000000'
   else
   begin

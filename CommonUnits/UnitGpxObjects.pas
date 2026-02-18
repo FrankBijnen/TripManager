@@ -325,7 +325,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
         CMapSegRoad := MapSegRoadExclBit(CMapSegRoad) // For compare only mapsegment and roadid
       else
       begin
-        if (Copy(CMapSegRoad, 21, 4) = '2116') then   // Complete subclass
+        if (Copy(CMapSegRoad, 21, 4) = LeaveRoutePoint) then   // Complete subclass
         begin
           KeepBegin := ((scFirst in SCType) and
                         (scFirst in CurType));
@@ -333,7 +333,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
             exit;
         end;
 
-        if (Copy(CMapSegRoad, 21, 4) = '2117') then
+        if (Copy(CMapSegRoad, 21, 4) = ApproachRoutePoint) then
         begin
           KeepEnd :=  ((ScLast in SCType) and
                        (ScLast in CurType));
