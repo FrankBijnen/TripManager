@@ -946,7 +946,7 @@ begin
       else if (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
         RtePt.AddChild('sym').NodeValue := DefProcessOptions.EndSymbol
       else
-        RtePt.AddChild('sym').NodeValue := DefProcessOptions.DefShapePtSymbol;
+        RtePt.AddChild('sym').NodeValue := DefProcessOptions.DefRtePtSymbol;
 
       // Add Point Type (Via of Shaping)
       if (CdsRoutePointsViaPoint.AsBoolean) then // Includes Begin and End

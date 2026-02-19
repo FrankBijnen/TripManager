@@ -820,7 +820,7 @@ begin
   // If there is a symbol defined, other than Waypoint, take that.
   DefinedSymbol := FindSubNodeValue(RtePtNode, 'sym');
   if (DefinedSymbol = '') or
-     (DefinedSymbol = ProcessOptions.DefShapePtSymbol) then
+     (DefinedSymbol = ProcessOptions.DefRtePtSymbol) then
     DefinedSymbol := Symbol;
 
   NewNode := CurrentViaPointRoute.AddChild('wpt');
@@ -961,7 +961,8 @@ begin
   if (Cnt = 1) then
   begin
     WptName := FindSubNodeValue(RtePtNode, 'name');
-    if (Symbol = '') then
+    if (Symbol = '') or
+       (Symbol = ProcessOptions.DefRtePtSymbol) then
       Symbol := ProcessOptions.BeginSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
@@ -1022,7 +1023,8 @@ begin
   if (Cnt = LastCnt) then
   begin
     WptName := FindSubNodeValue(RtePtNode, 'name');
-    if (Symbol = '') then
+    if (Symbol = '') or
+       (Symbol = ProcessOptions.DefRtePtSymbol) then
       Symbol := ProcessOptions.EndSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
@@ -1064,7 +1066,7 @@ begin
     ShapePtName := FindSubNodeValue(RtePtNode, 'name');
 
     if (Symbol = '') or
-       (Symbol = ProcessOptions.DefShapePtSymbol) then
+       (Symbol = ProcessOptions.DefRtePtSymbol) then
       Symbol := ProcessOptions.DefShapingPointSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
@@ -1091,7 +1093,7 @@ begin
       if (ProcessOptions.ProcessAddrShape) then
         LookUpAddrRtePt(RtePtNode);
 
-      Symbol := ProcessOptions.DefShapePtSymbol;
+      Symbol := ProcessOptions.DefRtePtSymbol;
       if (ProcessOptions.ProcessFlags) then
         RenameSubNode(RtePtNode, 'sym', Symbol); // Symbol for shaping and via points.
 
@@ -1108,7 +1110,8 @@ begin
      (Cnt <> LastCnt) and
      (IsShapePt = false) then
   begin
-    if (Symbol = '') then
+    if (Symbol = '') or
+       (Symbol = ProcessOptions.DefRtePtSymbol) then
       Symbol := ProcessOptions.DefViaPointSymbol;
 
     if (ProcessOptions.ProcessSubClass) then

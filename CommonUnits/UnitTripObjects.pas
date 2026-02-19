@@ -79,19 +79,21 @@ const
                                                         );
   UdbDirTurn              = 'Turn';
   StringLoaded: word      = $ffff;
-  UdbDirMagic:  Cardinal  = $51590469;
+  UdbDirMagic: Cardinal   = $51590469;
+  CalcUndef               = $00000000;
+  CalcUndefNuvi           = $00300030; //This value is not consistent, and can not be relied upon.
+  CalcNA                  = $ffffffff;
 
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  nuvi 2595 Unknown
   NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     false,    true,     false);
-  NeedDummySubclass:  array[TTripModel] of boolean  =(false,    false,    false,    false,    true,     true,     false,    true,     false);
   Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     false,    false,    false,    false,    false,    true);
   UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       16,       20);
   Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      76,       72,       72,       76,       72,       80);
   Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1348,     294,      254,      130,      294,      134,      512);
   UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    true,     true,     false,    true,     false);
-  CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,$00000000,$00000000,$0170feff,$00300030,$ffffffff);
+  CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$0574feff,$0170feff,CalcUndef,CalcUndef,$0170feff,CalcUndef,CalcNA);
   Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $8e,      $66,      $66,      $8e,      $00,      $00);
   Unknown3DistOffset: array[TTripModel] of integer  =($14,      $14,      $14,      $12,      $12,      $12,      $12,      $12,      $14);
   Unknown3TimeOffset: array[TTripModel] of integer  =($18,      $18,      $18,      $16,      $16,      $16,      $16,      $16,      $18);
@@ -891,7 +893,7 @@ type
 
   TUdbHandleValue = packed record
     UdbHandleSize:    Cardinal;
-    CalcStatus:       Cardinal; // See CalculationMagic. Set it to Zeroes, to force recalculation
+    CalcStatus:       Cardinal;
     Unknown2:         TBytes;
     UDbDirCount:      WORD;
     Unknown3:         TBytes;
@@ -3473,7 +3475,7 @@ begin
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
-  if (NeedDummySubclass[AModel]) and // Zumo 3x0, 590, nuvi 2595
+  if (CalculationMagic[AModel] = CalcUndef) and // Zumo 3x0, 590, nuvi 2595
      (ATripOption = TTripOption.ttCalc) then
     FValue.SubClass.Init(RecalcSubClass(GPXSubClass))
   else
@@ -3726,7 +3728,7 @@ begin
   FUdbPrefValue.PrefId := FUdbHandleId;
 
   if not (ForceRecalc) then
-    FValue.CalcStatus := CalculationMagic[AModel]; // Leave it to Zeroes, to force recalculation. Note: the 3x0 has zeroes
+    FValue.CalcStatus := CalculationMagic[AModel];
   FValue.AllocUnknown(AModel);
   SetLength(FTrailer, 0);
   FUdbDirList := TUdbDirList.Create;
@@ -3818,7 +3820,7 @@ begin
   result := TTripModel.Unknown;
 
   // Is the CalcStatus known?
-  if (FValue.CalcStatus <> 0) then
+  if (FValue.CalcStatus <> CalcUndef) then
   begin
     for AModel := Low(TTripModel) to High(TTripModel) do
     begin
@@ -3959,8 +3961,8 @@ begin
 
     // Alloc Unknown2 and unknown3 blocks
     // Try to get the model from a known calculation magic
-    SelModel := TTripModel.Unknown;               // Default to Unknown
-    if (AnUdbHandle.FValue.CalcStatus <> 0) then  // The Zumo 590, 3x0 have 0, even if calculated.
+    SelModel := TTripModel.Unknown;                       // Default to Unknown
+    if (AnUdbHandle.FValue.CalcStatus <> CalcUndef) then  // The Zumo 590, 3x0, nuvi have 0.
     begin
       for AModel := Low(TTripModel) to High(TTripModel) do
       begin
@@ -4932,7 +4934,7 @@ begin
 
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
-  NeedsDummy := NeedDummySubclass[TripModel];
+  NeedsDummy := CalculationMagic[TripModel] = CalcUndef;
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
     // The XT(2) recalculates all.
@@ -5352,7 +5354,7 @@ begin
   if not Assigned(AnUdbHandle) then
     exit;
 
-  // Get model from UdnHandle
+  // Get model from UdbHandle
   result := AnUdbHandle.GetModel;
 
   // 595 and drive5 share the same UDBHandle size, but the drive 51 has no mIsRoundTrip
@@ -5374,9 +5376,9 @@ begin
   if not Assigned(AnUdbHandle) then
     exit;
 
-  if (NeedDummySubclass[TripModel] = false) then
+  if (CalculationMagic[TripModel] <> CalcUndef) then
   begin
-    // Need CalculationMagic. Note: The 590 and 3x0 have no CalculationMagic
+    // This model we can check for CalculationMagic.
     if (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[TripModel]) then
       exit;
   end
@@ -5386,6 +5388,7 @@ begin
     if (AnUdbHandle.FValue.UDbDirCount < 2) then
       exit;
 
+    // Is it the special DummySubClass?
     AnUdbDir :=  AnUdbHandle.Items[1];
     DummySubClass.Init(RecalcSubClass(''));
     if (DummySubClass.MapSegment = AnUdbDir.FValue.SubClass.MapSegment) and
