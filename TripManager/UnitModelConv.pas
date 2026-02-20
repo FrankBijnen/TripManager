@@ -278,15 +278,14 @@ begin
       exit(TGarminModel(KnownDevices.Objects[DevIndex]));
 
   // Check for known partnumbers
-  if (result = TGarminModel.Unknown) then
+  for ZumoId := Low(PartsList) to High(PartsList) do
   begin
-    for ZumoId := Low(PartsList) to High(PartsList) do
+    if (GarminDevice.PartNumber = PartsList[ZumoId].PartNumber) then
     begin
-      if (GarminDevice.PartNumber = PartsList[ZumoId].PartNumber) then
-      begin
-        GarminDevice.ModelDescription := PartsList[ZumoId].DeviceName;
-        exit(GetModelFromGarminDevice(GarminDevice));
-      end;
+      GarminDevice.ModelDescription := PartsList[ZumoId].DeviceName;
+      for DevIndex := 0 to KnownDevices.Count -1 do
+        if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
+          exit(TGarminModel(KnownDevices.Objects[DevIndex]));
     end;
   end;
 

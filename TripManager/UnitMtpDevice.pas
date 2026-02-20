@@ -195,6 +195,7 @@ begin
         TGarminModel.Zumo595,
         TGarminModel.Zumo590,
         TGarminModel.Drive51,
+        TGarminModel.Drive66,
         TGarminModel.Zumo3x0,
         TGarminModel.Nuvi2595:
           if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
