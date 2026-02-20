@@ -1,4 +1,4 @@
-unit UfrmEditRoutePref;
+unit UFrmEditRoutePref;
 
 interface
 
@@ -73,7 +73,7 @@ begin
           Location.AdvLevel := TAdvlevel.advNA;
       end;
     end;
-    TTripList(CurTripList).SetRoutePrefs_XT2_Tread2(Locations, ProcessOptions);
+    TTripList(CurTripList).SetRoutePrefs_XT2_Tread2_Drive66(Locations, ProcessOptions);
   finally
     RoutePointList.Free;
     ProcessOptions.Free;

@@ -45,6 +45,11 @@ const
 //TODO Get partnumber
   XT2_PartNumber                    = 'XT2_NOT_EXIST';
 
+  // XT3
+  XT3_Name                          = Zumo_Name + ' XT3';
+//TODO Get partnumber
+  XT3_PartNumber                    = 'XT3_NOT_EXIST';
+
   // Tread 2 is almost an XT2
   Tread2_Name                       = 'Tread 2';
   Tread2_PartNumber                 = '006-B4557-00';
@@ -64,6 +69,9 @@ const
   Drive51_Name                      = Garmin_Name + ' Drive 51';
   Drive51_PartNumber                = '006-B2586-00';
 
+  Drive66_Name                      = Garmin_Name + ' DriveSmart 66';
+  Drive66_PartNumber                = '006-B3817-00';
+
   Zumo3x0_Name                      = Zumo_Name + ' 3x0';
   Zumo3x0_PartNumber                = '006-B1473-00';
 
@@ -81,6 +89,7 @@ type
 
   TModelConv = class
   private
+    class function Device2Display(const DeviceName: string): string;
     class function GetDevices(const Default: boolean): TStringList;
     class function GetTripModels: TStringList;
   public
@@ -109,7 +118,7 @@ type
 implementation
 
 uses
-  System.StrUtils, System.Masks,
+  System.StrUtils, System.Masks, System.Types,
   UnitVerySimpleXml, UnitStringUtils, UnitMTPDefs,
   UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
 
@@ -126,34 +135,37 @@ type
   end;
 
 const
-//  TGarminModel = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, GarminEdge, GarminGeneric, Unknown);
   Model_Tab: array[TGarminModel] of TModel_Rec =
   (
     (DeviceName: XT_Name;       TripModel: TTripModel.XT;       Safe: true;   Displayable: true),
     (DeviceName: XT2_Name;      TripModel: TTripModel.XT2;      Safe: true;   Displayable: true),
+    (DeviceName: XT3_Name;      TripModel: TTripModel.XT3;      Safe: false;  Displayable: false),
     (DeviceName: Tread2_Name;   TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true),
+    (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
+    (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Zumo595_Name;  TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true),
     (DeviceName: Zumo590_Name;  TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true),
     (DeviceName: Zumo3x0_Name;  TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true),
-    (DeviceName: Drive51_Name;  TripModel: TTripModel.Drive51;  Safe: false;  Displayable: false),
+    (DeviceName: Drive51_Name;  TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true),
+    (DeviceName: Drive66_Name;  TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true),
     (DeviceName: Nuvi2595_Name; TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true),
-    (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
-    (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true)
   );
 
 // Mapping from PartNumber to DeviceName
 // Used as a fallback when the Description in GarminDevice.XML is not as expected. E.G. Zumo 590 upgraded to Zumo 595
 
-  PartsList: array[0..7] of TParts_Rec =
+  PartsList: array[0..9] of TParts_Rec =
   (
     (PartNumber: Nuvi2595_PartNumber; DeviceName: Nuvi2595_Name),
     (PartNumber: Drive51_PartNumber;  DeviceName: Drive51_Name),
+    (PartNumber: Drive66_PartNumber;  DeviceName: Drive66_Name),
     (PartNumber: Zumo3x0_PartNumber;  DeviceName: Zumo3x0_Name),
     (PartNumber: Zumo590_PartNumber;  DeviceName: Zumo590_Name),
     (PartNumber: Zumo595_PartNumber;  DeviceName: Zumo595_Name),
     (PartNumber: XT_PartNumber;       DeviceName: XT_Name),
     (PartNumber: XT2_PartNumber;      DeviceName: XT2_Name),
+    (PartNumber: XT3_PartNumber;      DeviceName: XT3_Name),
     (PartNumber: Tread2_PartNumber;   DeviceName: Tread2_Name)
   );
 
@@ -161,6 +173,17 @@ var
   DefaultDevices: TStringList;
   KnownDevices: TStringList;
   TripModels: TStringList;
+
+// Only keep the last 2 words in the displayed device name
+class function TModelConv.Device2Display(const DeviceName: string): string;
+var
+  Splitted: TStringDynArray;
+begin
+  result := Devicename;
+  Splitted := SplitString(DeviceName, ' ');
+  if (High(Splitted) > 0) then
+    result := Format('%s %s', [Splitted[High(Splitted) -1], Splitted[High(Splitted)]]);
+end;
 
 class function TModelConv.GetDevices(const Default: boolean): TStringList;
 var
@@ -178,7 +201,7 @@ begin
     begin
       Inc(ModelIndex);
       if (Default) then
-        result.AddObject(Model_Tab[AGarminModel].DeviceName, TObject(AGarminModel))
+        result.AddObject(Device2Display(Model_Tab[AGarminModel].DeviceName), TObject(AGarminModel))
       else
         result.AddObject(GetRegistry(Reg_PrefDev_Key, Model_Tab[AGarminModel].DeviceName, IntToStr(ModelIndex)), TObject(AGarminModel));
     end;
@@ -254,15 +277,6 @@ begin
     if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
       exit(TGarminModel(KnownDevices.Objects[DevIndex]));
 
-  // Look for default Device names
-  // High -> Low, XT Contains XT2
-  for AGarminModel := High(TGarminModel) downto Low(TGarminModel) do
-  begin
-    if (Model_Tab[AGarminModel].Displayable) and
-       (ContainsText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
-      exit(AGarminModel);
-  end;
-
   // Check for known partnumbers
   if (result = TGarminModel.Unknown) then
   begin
@@ -274,6 +288,15 @@ begin
         exit(GetModelFromGarminDevice(GarminDevice));
       end;
     end;
+  end;
+
+  // Look for default Device names
+  // High -> Low, XT Contains XT2
+  for AGarminModel := High(TGarminModel) downto Low(TGarminModel) do
+  begin
+    if (Model_Tab[AGarminModel].Displayable) and
+       (ContainsText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
+      exit(AGarminModel);
   end;
 
   // Return Unknown
@@ -306,14 +329,15 @@ begin
   case Display2Garmin(DevIndex) of
     TGarminModel.XT,
     TGarminModel.XT2,
-    TGarminModel.Tread2:
+    TGarminModel.Tread2,
+    TGarminModel.Drive66:
       case PathId of
         0: result := Reg_PrefDevTripsFolder_Val;
         1: result := Reg_PrefDevGpxFolder_Val;
         2: result := Reg_PrefDevPoiFolder_Val;
       end;
-    TGarminModel.Zumo595,
     TGarminModel.Zumo590,
+    TGarminModel.Zumo595,
     TGarminModel.Drive51:
       case PathId of
         0: result := NonMTPRoot + SystemTripsPath;

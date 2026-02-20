@@ -2551,7 +2551,7 @@ var
   KnownExploreUuid: string;
 begin
   if (ProcessOptions.AllowGrouping) and
-     (ProcessOptions.TripModel = TTripModel.XT) then
+     (ProcessOptions.TripModel in [TTripModel.XT, TTripModel.Drive66]) then
     (FTripList.GetItem('mParentTripId') as TmParentTripId).AsCardinal := ParentTripId;
 
   mParentTripName := FTripList.GetItem('mParentTripName') as TmParentTripName;

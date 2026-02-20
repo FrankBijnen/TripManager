@@ -34,7 +34,7 @@ type
   TGPXFuncArray = array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: See TModelConv for mapping to TripModel
-  TGarminModel  = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, GarminEdge, GarminGeneric, Unknown);
+  TGarminModel  = (XT, XT2, XT3, Tread2, GarminEdge, GarminGeneric, Zumo595, Zumo590, Zumo3x0, Drive51, Drive66, Nuvi2595, Unknown);
 
   // Trip Info to CSV
   TTripInfo = class(TObject)

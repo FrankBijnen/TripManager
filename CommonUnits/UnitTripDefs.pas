@@ -3,7 +3,7 @@ unit UnitTripDefs;
 interface
 
 type
-  TTripModel    = (XT, XT2, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Nuvi2595, Unknown);
+  TTripModel    = (XT, XT2, XT3, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Drive66, Nuvi2595, Unknown);
   TTripOption   = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
   TRoutePreference  = (rmFasterTime       = $00,
                        rmShorterDistance  = $01,

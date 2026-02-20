@@ -507,7 +507,7 @@ var
   Links: TmAllLinks;
   Link: TBaseItem;
   Location, ANItem: TBaseItem;
-  LatLon: string;
+  LatLon, CalculationMode: string;
 begin
   FTripList := ATripList;
 
@@ -546,7 +546,16 @@ begin
       else
       begin
         ANItem := TTripList(FTripList).GetItem('mRoutePreference');
-        if (ANItem <> nil) then
+        if (ANItem = nil) then
+        begin
+          ANItem := TTripList(FTripList).GetItem('mRoutePreferences');
+          if (ANItem <> nil) then
+          begin
+            IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePreferenceMap);
+            CdsRouteRoutePreference.AsString := CalculationMode;
+          end;
+        end
+        else
           CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
 
         ANItem := TTripList(FTripList).GetItem('mTransportationMode');
