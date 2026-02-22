@@ -534,8 +534,7 @@ var
 begin
   // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-
-  SubKey := IntToStr(ModelIndex);
+  SubKey := TModelConv.GetDefaultDevice(ModelIndex);
   DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
                                          TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0),
                                          SubKey));
@@ -1676,18 +1675,19 @@ end;
 procedure TFrmTripManager.BtnSetDefaultClick(Sender: TObject);
 var
   CurrentDevicePath: string;
-  ModelIndex: string;
+  SubKey: string;
 begin
   // Need a device
   if (not CheckDevice(false)) then
     exit;
 
   CurrentDevicePath := WildCardDrive(GetDevicePath(FCurrentPath));
-  ModelIndex := IntToStr(CmbModel.ItemIndex);
+  SubKey := TModelConv.GetDefaultDevice(CmbModel.ItemIndex);
+
   case (BgDevice.ItemIndex) of
-    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, ModelIndex);
-    1: SetRegistry(Reg_PrefDevGpxFolder_Key, CurrentDevicePath, ModelIndex);
-    2: SetRegistry(Reg_PrefDevPoiFolder_Key, CurrentDevicePath, ModelIndex);
+    0: SetRegistry(Reg_PrefDevTripsFolder_Key, CurrentDevicePath, SubKey);
+    1: SetRegistry(Reg_PrefDevGpxFolder_Key,   CurrentDevicePath, SubKey);
+    2: SetRegistry(Reg_PrefDevPoiFolder_Key,   CurrentDevicePath, SubKey);
   end;
 end;
 
@@ -2890,21 +2890,21 @@ end;
 
 procedure TFrmTripManager.SetOverrideDeviceNameClick(Sender: TObject);
 var
-  ModelIndex: string;
+  SubKey: string;
 begin
   // Need a device
   if (not CheckDevice(false)) then
     exit;
 
-  ModelIndex := IntToStr(CmbModel.ItemIndex);
+  SubKey := TModelConv.GetDefaultDevice(CmbModel.ItemIndex);
   if (TMenuItem(Sender).Tag = 0) then
-    SetRegistry(Reg_PrefDev_Key, WildCardDrive(CmbDevices.Text), ModelIndex)
+    SetRegistry(Reg_PrefDev_Key, WildCardDrive(CmbDevices.Text), SubKey)
   else
   begin
-    SetRegistry(Reg_PrefDev_Key,            '', ModelIndex);
-    SetRegistry(Reg_PrefDevTripsFolder_Key, '', ModelIndex);
-    SetRegistry(Reg_PrefDevGpxFolder_Key,   '', ModelIndex);
-    SetRegistry(Reg_PrefDevPoiFolder_Key,   '', ModelIndex);
+    SetRegistry(Reg_PrefDev_Key,            '', SubKey);
+    SetRegistry(Reg_PrefDevTripsFolder_Key, '', SubKey);
+    SetRegistry(Reg_PrefDevGpxFolder_Key,   '', SubKey);
+    SetRegistry(Reg_PrefDevPoiFolder_Key,   '', SubKey);
   end;
   ActSettingsExecute(Sender);
 end;
@@ -5338,7 +5338,7 @@ var
   SubKey: string;
 begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-  SubKey := IntToStr(ModelIndex);
+  SubKey := TModelConv.GetDefaultDevice(ModelIndex);
 
   DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key,
                                  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0), SubKey);
@@ -5444,7 +5444,7 @@ begin
   if (Assigned(CurrentDevice)) then
     GuessModel(CurrentDevice.DisplayedDevice)
   else
-    GuessModel(GetRegistry(Reg_PrefDev_Key, TModelConv.GetKnownDevice(ModelIndex), IntToStr(ModelIndex)));
+    GuessModel(GetRegistry(Reg_PrefDev_Key, TModelConv.GetKnownDevice(ModelIndex), TModelConv.GetDefaultDevice(ModelIndex)));
 
   WarnRecalc := mrNone;
   RoutePointTimeOut := GetRegistry(Reg_RoutePointTimeOut_Key, Reg_RoutePointTimeOut_Val);

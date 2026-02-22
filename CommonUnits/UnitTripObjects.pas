@@ -97,8 +97,8 @@ const
   UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     false,    false,    true,     false);
   CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$05d8feff,$0574feff,$0170feff,CalcUndef,CalcUndef,$0170feff,$0574feff,CalcUndef,CalcNA);
   Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $c0,      $8e,      $66,      $66,      $8e,      $c0,      $00,      $c0);
-  Unknown3DistOffset: array[TTripModel] of integer  =($14,      $14,      $14,      $14,      $12,      $12,      $12,      $12,      $14,      $12,      $14);
-  Unknown3TimeOffset: array[TTripModel] of integer  =($18,      $18,      $18,      $18,      $16,      $16,      $16,      $16,      $18,      $16,      $18);
+  Unknown3DistOffset: array[TTripModel] of Cardinal =($14,      $14,      $14,      $14,      $12,      $12,      $12,      $12,      $14,      $12,      $14);
+  Unknown3TimeOffset: array[TTripModel] of Cardinal =($18,      $18,      $18,      $18,      $16,      $16,      $16,      $16,      $18,      $16,      $18);
   VersionSize:        array[TTripModel] of integer  =($08,      $08,      $08,      $08,      $05,      $05,      $05,      $05,      $08,      $05,      $08);
 
 type
@@ -3865,7 +3865,7 @@ end;
 
 // Compute size of Unknown3
 // Take the UdbHandleSize
-// Substract the fixed part (CalcStatus + Unknown2 + UdbDirCounr)
+// Substract the fixed part (CalcStatus + Unknown2 + UdbDirCount)
 // Substract the UdbDirSize * UdbDirCount
 // Must be the length of Unknown3
 function TmUdbDataHndl.ComputeUnknown3Size(AModel: TTripModel): integer;
@@ -4011,7 +4011,7 @@ begin
        (Diff > SizeOf(TUdbDirFixedValue))) then
     exit(TTripModel.Unknown);
 
-  // Check for UdbDirMagic in First UdbDir
+  // Check for UdbDirMagic in first UdbDir
   SavePos := AStream.Position;
   try
     if (AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir)) <> SizeOf(FirstUdbDir)) then

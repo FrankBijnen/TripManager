@@ -231,19 +231,20 @@ begin
     AddGridLine(GridDeviceSettings,   CurRow, '');
 
     ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-    SubKey := IntToStr(ModelIndex) + '\';
+    SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+
     AddGridLine(GridDeviceSettings,   CurRow, '', '',
-                                      Format('-Preferred folders (Model: %s)-', [TModelConv.GetDefaultDevice(ModelIndex)]));
-    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDev_Key,
+                                      Format('-Preferred folders (Model: %s)-', [SubKey]));
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDev_Key,
                                       '',
                                       'Override device name');
-    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevTripsFolder_Key,
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDevTripsFolder_Key,
                                       TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0),
                                       'Default trips folder');
-    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevGpxFolder_Key,
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDevGpxFolder_Key,
                                       TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1),
                                       'Default GPX folder');
-    AddGridLine(GridDeviceSettings,   CurRow, SubKey + Reg_PrefDevPoiFolder_Key,
+    AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDevPoiFolder_Key,
                                       TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2),
                                       'Default GPI folder');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_PrefFileSysFolder_Key,
@@ -651,7 +652,6 @@ begin
       ASubKey := NextField(AKey, '\')
     else
       ASubKey := '';
-
     SetRegistry(AKey, AGrid.Cells[2, Index], ASubKey);
   end;
 end;

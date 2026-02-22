@@ -56,7 +56,7 @@ object FrmSendTo: TFrmSendTo
     Left = 0
     Top = 89
     Width = 592
-    Height = 105
+    Height = 108
     Align = alTop
     Caption = 'Choose destination'
     TabOrder = 1
@@ -64,7 +64,7 @@ object FrmSendTo: TFrmSendTo
       Left = 2
       Top = 17
       Width = 588
-      Height = 86
+      Height = 89
       ActivePage = TabDevice
       Align = alClient
       Font.Charset = DEFAULT_CHARSET
@@ -80,6 +80,7 @@ object FrmSendTo: TFrmSendTo
       TabStop = False
       OnChange = PCTDestinationChange
       OnChanging = PCTDestinationChanging
+      ExplicitHeight = 86
       object TabDevice: TTabSheet
         Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
@@ -92,7 +93,7 @@ object FrmSendTo: TFrmSendTo
           Left = 0
           Top = 0
           Width = 580
-          Height = 56
+          Height = 59
           TabStop = False
           Align = alClient
           Color = clInfoBk
@@ -115,6 +116,7 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitHeight = 56
         end
       end
       object TabFolder: TTabSheet
@@ -124,7 +126,7 @@ object FrmSendTo: TFrmSendTo
           Left = 0
           Top = 0
           Width = 580
-          Height = 56
+          Height = 59
           Align = alClient
           Color = clInfoBk
           Font.Charset = DEFAULT_CHARSET
@@ -144,23 +146,25 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitHeight = 56
         end
       end
     end
   end
   object GrpDestination: TGroupBox
     Left = 0
-    Top = 194
+    Top = 197
     Width = 592
     Height = 40
     Align = alTop
     Caption = 'Destination device and folder(s)'
     TabOrder = 2
+    ExplicitTop = 194
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 3
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -179,16 +183,18 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
+      ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
     Left = 0
-    Top = 234
+    Top = 237
     Width = 592
     Height = 40
     Align = alTop
     Caption = 'Model used for creating .trip files'
     TabOrder = 3
+    ExplicitTop = 234
     object PnlModel: TPanel
       Left = 2
       Top = 17
@@ -229,7 +235,7 @@ object FrmSendTo: TFrmSendTo
         Left = 200
         Top = 1
         Width = 387
-        Height = 19
+        Height = 23
         Align = alRight
         Style = csDropDownList
         TabOrder = 0
@@ -247,9 +253,9 @@ object FrmSendTo: TFrmSendTo
   end
   object TvSelections: TTreeView
     Left = 0
-    Top = 274
+    Top = 277
     Width = 592
-    Height = 275
+    Height = 272
     Align = alClient
     AutoExpand = True
     CheckBoxes = True
@@ -299,6 +305,8 @@ object FrmSendTo: TFrmSendTo
       28002E00680074006D006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
+    ExplicitTop = 274
+    ExplicitHeight = 275
   end
   object PnlBot: TPanel
     Left = 0

@@ -190,22 +190,21 @@ end;
 class function TModelConv.GetDevices(const Default: boolean): TStringList;
 var
   AGarminModel: TGarminModel;
-  ModelIndex: integer;
   UnsafeModels: boolean;
 begin
   result := TStringList.Create;
   UnsafeModels := TProcessOptions.UnsafeModels;
-  ModelIndex := -1;
   for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
   begin
     if (Model_Tab[AGarminModel].Displayable) and
        ( (Model_Tab[AGarminModel].Safe) or (UnsafeModels) ) then
     begin
-      Inc(ModelIndex);
       if (Default) then
-        result.AddObject(Device2Display(Model_Tab[AGarminModel].DeviceName), TObject(AGarminModel))
+        result.AddObject(Device2Display(Model_Tab[AGarminModel].DeviceName),
+                         TObject(AGarminModel))
       else
-        result.AddObject(GetRegistry(Reg_PrefDev_Key, Model_Tab[AGarminModel].DeviceName, IntToStr(ModelIndex)), TObject(AGarminModel));
+        result.AddObject(GetRegistry(Reg_PrefDev_Key, Model_Tab[AGarminModel].DeviceName, Model_Tab[AGarminModel].DeviceName),
+                         TObject(AGarminModel));
     end;
   end;
 end;

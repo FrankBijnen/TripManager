@@ -152,9 +152,10 @@ begin
     0:begin
         SendToDest := TSendToDest.stDevice;
         ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-        SubKey := IntToStr(ModelIndex);
+        SubKey := TModelConv.GetDefaultDevice(ModelIndex);
         LblDestinations.Caption :=
           Format('Device:%s %s%s',        [#9, TBase_Device(CurrentDevice).DisplayedDevice, #10#10]);
+
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
