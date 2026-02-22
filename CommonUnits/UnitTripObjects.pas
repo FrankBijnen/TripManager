@@ -3690,11 +3690,14 @@ end;
 function TUdbDir.GetPointType: string;
 begin
   case FValue.SubClass.PointType of
-    3:
+    $01,
+    $03,
+    $05,
+    $0D:
       result := 'Route point';
-    31:
+    $1F:
       result := 'Intermediate';
-    33:
+    $21:
       result := 'Begin or end segment';
     else
      result := 'Unknown';
@@ -4002,7 +4005,7 @@ begin
      (Diff <> 0) then
     exit(TTripModel.Unknown);
 
-  // Allow a trailer for the Zumo 3x0, 590 and nuvi 2595 a
+  // Allow a trailer for the Zumo 3x0, 590 and nuvi 2595
   if (UdbHandleTrailer[AModel] = true) and
      ( (Diff < 0) or
        (Diff > SizeOf(TUdbDirFixedValue))) then
