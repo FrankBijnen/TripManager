@@ -800,15 +800,13 @@ begin
               for RoutePoint in GPXFileObj.WayPointList do
                 AddRoutePoint(RoutePoint, true);
             end;
-
           'R':
             begin
-              for RoutePoints in GPXFileObj.RouteViaPointList do
+              for RoutePoints in GPXFileObj.WayPointFromRouteList do
               begin
                 if (RoutePoints.NodeName <> AnItem.Caption) then
                   continue;
-                if (RoutePoints.ChildNodes.Count <= 2) then // Only Begin and End?
-                  continue;
+
                 for RoutePoint in RoutePoints.ChildNodes do
                   AddRoutePoint(RoutePoint, false);
               end;

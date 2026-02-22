@@ -410,6 +410,7 @@ type
     procedure ClearDeviceDbFiles;
     procedure RebuildTransportAndRoutePrefMenu;
     procedure RebuildDeviceDbMenu;
+    procedure ModelChanged;
     procedure GuessModel(const DisplayedDevice: string);
     procedure SelectDevice(const Indx: integer);
     procedure SelectKnownDevice;
@@ -586,7 +587,7 @@ begin
   CmbModel.AdjustWidths;
 
   CmbModel.ItemIndex := ModelIndex;
-  CmbModelChange(CmbModel);
+  ModelChanged;
 
   SetRegistry(Reg_CurrentModel, ModelIndex);
 end;
@@ -2123,13 +2124,12 @@ begin
   GetDeviceList;
   SelectKnownDevice;
 
-  // Get files from device
+  // Get DB files from device
   ClearDeviceDbFiles;  // Should not be there.
   if (CheckDevice(false)) then
   begin
     if (HasTMTPDevice(CurrentDevice)) then
       TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
-    PostReloadFileList;
   end;
   RebuildDeviceDbMenu;
 end;
@@ -2438,7 +2438,7 @@ begin
   CmbDevices.DropDownWidth := Max(CmbDevices.ItemsWidth, CmbDevices.Width);
 end;
 
-procedure TFrmTripManager.CmbModelChange(Sender: TObject);
+procedure TFrmTripManager.ModelChanged;
 var
   ModelIndex: integer;
   GarminModel: TGarminModel;
@@ -2478,11 +2478,23 @@ begin
   SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
 
   ReadDefaultFolders;
+
+  // Different models have diffent paths
+  if CheckDevice(false) then
+    SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
+
   SetDeviceListColumns;
 
   // Not all models support all transportation and routing preferences
-  // EG: Nuvi does not Motorcycling, but has Economic
+  // EG: Nuvi does not have Motorcycling, but has Economic
   RebuildTransportAndRoutePrefMenu;
+end;
+
+procedure TFrmTripManager.CmbModelChange(Sender: TObject);
+begin
+  ModelChanged;
+  if (HasTMTPDevice) then
+    PostReloadFileList;
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);
@@ -3684,7 +3696,7 @@ var
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.PointType)));
-    if (AnUdbDir.UdbDirValue.SubClass.PointType = $03) then
+    if (AnUdbDir.UdbDirValue.SubClass.IsKnownComprLatLon) then
       VlTripInfo.Strings.AddPair('Compressed LatLon', AnUdbDir.ComprLatLon,
                                 TGridSelItem.Create(AnUdbDir,
                                                     SizeOf(AnUdbDir.UdbDirValue.SubClass.ComprLatLon),
@@ -4136,8 +4148,8 @@ begin
   if (Node.Data <> nil) and
      (TObject(Node.Data) is TUdbDir) then
   begin
-    if (TUdbDir(Node.Data).UdbDirValue.SubClass.PointType = $3) or
-       (TUdbDir(Node.Data).IsTurn)  then
+    if (TUdbDir(Node.Data).UdbDirValue.SubClass.IsKnownRoutePoint) or
+       (TUdbDir(Node.Data).IsTurn) then
       Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
     case TUdbDir(Node.Data).Status of
       TUdbDirStatus.udsRoutePointNOK:
@@ -5327,6 +5339,7 @@ var
 begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := IntToStr(ModelIndex);
+
   DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key,
                                  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0), SubKey);
   DeviceFolder[1] := GetRegistry(Reg_PrefDevGpxFolder_Key,

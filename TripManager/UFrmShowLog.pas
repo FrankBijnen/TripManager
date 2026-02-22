@@ -270,7 +270,7 @@ begin
          (LbLog.items.Objects[Index] is TUdbDir) then
       begin
         AnUdbDir := LbLog.Items.Objects[Index] as TUdbDir;
-        if (AnUdbDir.UdbDirValue.SubClass.PointType <> $03) then
+        if (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint = false) then
           continue;
         Inc(RoutePt);
         if (RoutePt >  RoutePointList.Count -1) then // Past end?

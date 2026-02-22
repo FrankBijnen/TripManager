@@ -73,7 +73,7 @@ begin
           Location.AdvLevel := TAdvlevel.advNA;
       end;
     end;
-    TTripList(CurTripList).SetRoutePrefs_XT2_Tread2_Drive66(Locations, ProcessOptions);
+    TTripList(CurTripList).SetSegmentRoutePrefs(Locations, ProcessOptions);
   finally
     RoutePointList.Free;
     ProcessOptions.Free;

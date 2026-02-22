@@ -16,6 +16,8 @@ const
   MapSegRoadMask              = $ffff7f8d;           // Mask out flag bits in road id.
   LeaveRoutePoint             = '2116';
   ApproachRoutePoint          = '2117';
+  TrkOrigin                   = 'Trk';
+  RteOrigin                   = 'Rte';
 
 type
   TDistanceUnit = (duKm, duMi);

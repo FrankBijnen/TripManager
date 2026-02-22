@@ -195,6 +195,7 @@ type
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
     property TrackList: TXmlVSNodeList read FTrackList;
+    property WayPointFromRouteList: TXmlVSNodeList read FWayPointFromRouteList;
     property ProcessOptions: TProcessOptions read FProcessOptions write FProcessOptions;
     class procedure PerformFunctions(const AllFuncs: array of TGPXFunc;
                                      const GPXFile:string;
@@ -229,8 +230,6 @@ const
   DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
   DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
   UnglitchTreshold: double = 0.0005;      // In Km. ==> 50 Cm
-  TrkOrigin = 'Trk';
-  RteOrigin = 'Rte';
 
 var
   FormatSettings: TFormatSettings;
@@ -2199,7 +2198,7 @@ procedure TGPXFile.DoCreateKurviger;
 {$IFDEF OSMMAP}
 var
   RoutesProcessed: TXmlVSNodeList;
-  Route, Rte, Track: TXmlVSNode;
+  Route, Rte: TXmlVSNode;
   KurvUrl, HTML: string;
   OutFile: string;
 {$ENDIF}
@@ -2212,17 +2211,10 @@ begin
   try
     for Route in RoutesProcessed do
     begin
-      for Rte in RouteViaPointList do
+      for Rte in WayPointFromRouteList do
       begin
         // Get Route Via points of this route
         if (Rte.NodeName <> Route.Name) then
-          continue;
-
-        // Dont want Dummy route points from tracks
-        Track := FTrackList.Find(Rte.NodeName);
-        if (Track = nil) then
-          continue;
-        if (FindSubNodeValue(Track, 'desc') <> RteOrigin) then
           continue;
 
         KurvUrl := ProcessOptions.GetKurvigerUrl(Rte);

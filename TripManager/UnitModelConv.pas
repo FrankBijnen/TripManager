@@ -25,9 +25,11 @@ const
   Reg_PrefDevTripsFolder_Val        = InternalStorage + SystemTripsPath;
 
   Reg_PrefDevGpxFolder_Key          = 'PrefDeviceGpxFolder';
-  Reg_PrefDevGpxFolder_Val          = InternalStorage + 'GPX';
+  GPXPath                           = 'GPX';
+  Reg_PrefDevGpxFolder_Val          = InternalStorage + GPXPath;
   Reg_PrefDevPoiFolder_Key          = 'PrefDevicePoiFolder';
-  Reg_PrefDevPoiFolder_Val          = InternalStorage + 'POI';
+  POIPath                           = 'POI';
+  Reg_PrefDevPoiFolder_Val          = InternalStorage + POIPath;
 
   // Device names
   Zumo_Name                         = 'z' + #0363 + 'mo'; // Dont need to save as UTF8
@@ -47,8 +49,7 @@ const
 
   // XT3
   XT3_Name                          = Zumo_Name + ' XT3';
-//TODO Get partnumber
-  XT3_PartNumber                    = 'XT3_NOT_EXIST';
+  XT3_PartNumber                    = '006-B4782-00';
 
   // Tread 2 is almost an XT2
   Tread2_Name                       = 'Tread 2';
@@ -101,7 +102,8 @@ type
     class procedure CmbTripDevices(const Devices: TStrings);
     class function GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
     class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
-    class function GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string;
+    class function GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string; overload;
+    class function GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string; overload;
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
     class function Display2Trip(const CmbIndex: integer): TTripModel;
     class function Garmin2Display(const Garmin: TGarminModel): integer;
@@ -139,7 +141,7 @@ const
   (
     (DeviceName: XT_Name;       TripModel: TTripModel.XT;       Safe: true;   Displayable: true),
     (DeviceName: XT2_Name;      TripModel: TTripModel.XT2;      Safe: true;   Displayable: true),
-    (DeviceName: XT3_Name;      TripModel: TTripModel.XT3;      Safe: false;  Displayable: false),
+    (DeviceName: XT3_Name;      TripModel: TTripModel.XT3;      Safe: true;   Displayable: true),
     (DeviceName: Tread2_Name;   TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true),
     (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
     (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true),
@@ -308,6 +310,48 @@ begin
     exit(TGarminModel.GarminEdge);
 end;
 
+class function TModelConv.GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string;
+begin
+  result := '';
+
+  case GarminDevice.GarminModel of
+    TGarminModel.XT,
+    TGarminModel.XT2,
+    TGarminModel.XT3,
+    TGarminModel.Tread2,
+    TGarminModel.Drive66:
+      case PathId of
+        0: result := GarminDevice.TripsPath;
+        1: result := GarminDevice.GPXPath;
+        2: result := GarminDevice.GpiPath;
+      end;
+    TGarminModel.Zumo590,
+    TGarminModel.Zumo595,
+    TGarminModel.Drive51:
+      case PathId of
+        0: result := GarminDevice.TripsPath;
+      end;
+    TGarminModel.Zumo3x0,
+    TGarminModel.Nuvi2595:
+      case PathId of
+        0: result := GarminDevice.TripsPath;
+        1: result := GarminDevice.GpxPath;
+        2: result := GarminDevice.GpiPath;
+      end;
+    TGarminModel.GarminEdge:
+      case PathId of
+        0: result := GarminDevice.CoursePath;
+        1: result := GarminDevice.NewFilesPath;
+        2: result := GarminDevice.ActivitiesPath;
+      end;
+    else
+      case PathId of
+        1: result := GarminDevice.GpxPath;
+        2: result := GarminDevice.GpiPath;
+      end;
+  end;
+end;
+
 class function TModelConv.GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string;
 var
   GarminDevice: TGarminDevice;
@@ -325,41 +369,7 @@ begin
     GarminDevice.Init(Model_Tab[Display2Garmin(DevIndex)].DeviceName);
   end;
 
-  case Display2Garmin(DevIndex) of
-    TGarminModel.XT,
-    TGarminModel.XT2,
-    TGarminModel.Tread2,
-    TGarminModel.Drive66:
-      case PathId of
-        0: result := Reg_PrefDevTripsFolder_Val;
-        1: result := Reg_PrefDevGpxFolder_Val;
-        2: result := Reg_PrefDevPoiFolder_Val;
-      end;
-    TGarminModel.Zumo590,
-    TGarminModel.Zumo595,
-    TGarminModel.Drive51:
-      case PathId of
-        0: result := NonMTPRoot + SystemTripsPath;
-      end;
-    TGarminModel.Zumo3x0,
-    TGarminModel.Nuvi2595:
-      case PathId of
-        0: result := NonMTPRoot + SystemTripsPath;
-        1: result := GarminDevice.GpxPath;
-        2: result := GarminDevice.GpiPath;
-      end;
-    TGarminModel.GarminEdge:
-      case PathId of
-        0: result := GarminDevice.CoursePath;
-        1: result := GarminDevice.NewFilesPath;
-        2: result := GarminDevice.ActivitiesPath;
-      end;
-    else
-      case PathId of
-        1: result := GarminDevice.GpxPath;
-        2: result := GarminDevice.GpiPath;
-      end;
-  end;
+  result := GetKnownPath(GarminDevice, PathId);
 end;
 
 class function TModelConv.Display2Garmin(const CmbIndex: integer): TGarminModel;

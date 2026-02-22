@@ -22,6 +22,7 @@ type
     SoftwareVersion: string;
     ModelDescription: string;
     SerialNumber: string;
+    TripsPath: string;
     GpxPath: string;
     GpiPath: string;
     CoursePath: string;
@@ -74,6 +75,7 @@ begin
     GarminModel       := TGarminModel.Unknown;
   end;
   SerialNumber      := 'N/A';
+  TripsPath         := '';
   CoursePath        := NonMTPRoot + GarminPath + '\Courses';
   NewFilesPath      := NonMTPRoot + GarminPath + '\NewFiles';
   ActivitiesPath    := NonMTPRoot + GarminPath + '\Activities';
@@ -132,6 +134,13 @@ begin
   CurrentDevice := TMTP_Device(ACurrentDevice);
   if not (Assigned(CurrentDevice) and (CurrentDevice.CheckDevice)) then
     exit;
+
+  // Path for .System\Trips.
+  // Only 2 locations are known to work: ?:\.System\Trips and Internal Storage\.System\Trips
+  if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) <> '') then
+    TripsPath := NonMTPRoot + SystemTripsPath
+  else if (GetIdForPath(CurrentDevice.PortableDev, InternalStorage + SystemTripsPath, FriendlyPath) <> '') then
+    TripsPath := InternalStorage + SystemTripsPath;
 
   // Location of GarminDevice.Xml
   NFile := GarminDeviceXML;
@@ -192,16 +201,16 @@ begin
       GarminModel := TModelConv.GetModelFromGarminDevice(Self);
 
       case GarminModel of
-        TGarminModel.Zumo595,
-        TGarminModel.Zumo590,
-        TGarminModel.Drive51,
-        TGarminModel.Drive66,
-        TGarminModel.Zumo3x0,
-        TGarminModel.Nuvi2595:
-          if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) = '') then
-            GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
+        TGarminModel.GarminEdge,
+        TGarminModel.GarminGeneric:; // Do Nothing
+
         TGarminModel.Unknown:
           GarminModel := TModelConv.GuessGarminOrEdge(ModelDescription);
+        else
+        begin
+          if (GetIdForPath(CurrentDevice.PortableDev, TModelConv.GetKnownPath(Self, 0), FriendlyPath) = '') then
+            GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
+        end;
       end;
 
       // Get default paths
@@ -316,12 +325,12 @@ begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
 
   // Copy settings.db, Update Avoidances changed
-  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
+  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.XT3, TGarminModel.Tread2]) and
      (CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
     SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
   // Copy vehicle_profile.db
-  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.Tread2]) and
+  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.XT3, TGarminModel.Tread2]) and
      (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
     OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
@@ -356,7 +365,7 @@ begin
 
   // Copy explore.db
   if (GetRegistry(Reg_EnableExploreFuncs, false)) and
-     (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2, TGarminModel.Tread2]) and
+     (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2,TGarminModel.XT3, TGarminModel.Tread2]) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 end;

@@ -174,7 +174,7 @@ begin
     for AnUdbDir in AnUdbHandle.Items do
     begin
       AnUdbDir.Status := udsUnchecked;
-      if (AnUdbDir.UdbDirValue.SubClass.PointType = $03) then
+      if (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
         Inc(UdbDirCount);
     end;
     Inc(UdbHandleCount);
@@ -217,7 +217,7 @@ begin
     LocUdbDirCount := 1;
     for LocAnUdbDir in LocAnUdbHandle.Items do
     begin
-      if (LocAnUdbDir.UdbDirValue.SubClass.PointType = $03) then
+      if (LocAnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
       begin
         Messages.Add('');
         Messages.AddObject(Format('  %s: UdbHandle: %d Route point: %d %s',
@@ -529,14 +529,14 @@ begin
       begin
         FUdbDir := FUdbHandle.Items[AnUdbDirCnt];
 
-        if (FUdbDir.UdbDirValue.SubClass.PointType = $21) then
+        if (FUdbDir.UdbDirValue.SubClass.IsKnownStartEndSegment) then
           continue;
 
         CTMapSegRoad := FUdbDir.MapSegRoadExclBit;
         CoordTrip.Lat := FUdbDir.Lat;
         CoordTrip.Lon := FUdbDir.Lon;
 
-        if (FUdbDir.UdbDirValue.SubClass.PointType = $03) then
+        if (FUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
         begin
 
           if (StartSegmentLine > -1) then
@@ -851,7 +851,7 @@ begin
       TripLat := Format(LatLonFormat, [CoordTrip.Lat], FormatSettings);
       TripLon := Format(LatLonFormat, [CoordTrip.Lon], FormatSettings);
 
-      if (FUdbDir.UdbDirValue.SubClass.PointType = $03) then
+      if (FUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
       begin
 
         if (StartSegmentLine > -1) then
@@ -889,7 +889,7 @@ begin
           for ToUdbDirCnt := FromUdbDirCnt to ToUdbHandle.Items.Count -1 do
           begin
             ToUdbDir := ToUdbHandle.Items[ToUdbDirCnt];
-            if (ToUdbDir.UdbDirValue.SubClass.PointType = $03) then
+            if (ToUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
               break;
           end;
           Inc(ToUdbHandleCnt);
