@@ -325,12 +325,12 @@ begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
 
   // Copy settings.db, Update Avoidances changed
-  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.XT3, TGarminModel.Tread2]) and
+  if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
     SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
   // Copy vehicle_profile.db
-  if (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT2, TGarminModel.XT3, TGarminModel.Tread2]) and
+  if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
     OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
@@ -365,7 +365,7 @@ begin
 
   // Copy explore.db
   if (GetRegistry(Reg_EnableExploreFuncs, false)) and
-     (TModelConv.Display2Garmin(ModelIndex) in [TGarminModel.XT, TGarminModel.XT2,TGarminModel.XT3, TGarminModel.Tread2]) and
+     (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 end;

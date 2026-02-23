@@ -59,6 +59,7 @@ implementation
 uses
   System.Variants, System.SysUtils, System.StrUtils,
   Winapi.Windows,
+  Vcl.Dialogs,
   SQLite3,
   UnitStringUtils;
 
@@ -273,13 +274,17 @@ begin
   ExploreList.Clear;
   SqlResults := TSqlResults.Create;
   try
-    ExecSqlQuery(DbName,
-                 'Select Name, hex(UUID) from items where type = 4',
-                 SqlResults);
-    for SqlResult in SqlResults do
-      ExploreList.AddPair(SqlResult[0], MkGuid(SqlResult[1]));
-  finally
-    SqlResults.Free;
+    try
+      ExecSqlQuery(DbName,
+                   'Select Name, hex(UUID) from items where type = 4',
+                   SqlResults);
+      for SqlResult in SqlResults do
+        ExploreList.AddPair(SqlResult[0], MkGuid(SqlResult[1]));
+    finally
+      SqlResults.Free;
+    end;
+  except on E:Exception do
+    ShowMessage(E.Message);
   end;
 end;
 
@@ -375,19 +380,23 @@ begin
   result := '';
   SqlResults := TSqlResults.Create;
   try
-    ExecSqlQuery(DbName,
-      'Select value from data_number ' + CRLF +
-      'where context like ''%None%'' and name like ''%Avoid%''' + CRLF+
-      'limit 1;',
-      SqlResults);
-    for ALine in SqlResults do
-    begin
-      DBValue := ALine[0];
-      result := '0x' + IntToHex(DBValue, 8);
-      break;
+    try
+      ExecSqlQuery(DbName,
+        'Select value from data_number ' + CRLF +
+        'where context like ''%None%'' and name like ''%Avoid%''' + CRLF+
+        'limit 1;',
+        SqlResults);
+      for ALine in SqlResults do
+      begin
+        DBValue := ALine[0];
+        result := '0x' + IntToHex(DBValue, 8);
+        break;
+      end;
+    finally
+      SqlResults.Free;
     end;
-  finally
-    SqlResults.Free;
+  except on E:Exception do
+    ShowMessage(E.Message);
   end;
 end;
 
@@ -400,43 +409,48 @@ begin
   FillChar(result, SizeOf(result), 0);
   SqlResults := TSqlResults.Create;
   try
-    case Model of
-      TGarminModel.Tread2:
-        ExecSqlQuery(DbName,
-          'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
-          '(select Hex(g.description) from properties_dbg g' + CRLF +
-          '  where g."description:1" = ''guid'' and g.value = a.value limit 1) as Guid_Data,' + CRLF +
-          'v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
-          'from properties_dbg a' + CRLF +
-          'inner join vehicle_profile v on (v.vehicle_id = a.value)' + CRLF +
-          'where a."description:1" = ''active_profile''' + CRLF +
-          'limit 1;',
-          SqlResults);
-      else
-        ExecSqlQuery(DbName,
-          'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
-          'from active_vehicle a' + CRLF +
-          'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
-          'limit 1;',
-          SqlResults);
-    end;
+    try
+      case Model of
+        TGarminModel.XT3, // TODO Check
+        TGarminModel.Tread2:
+          ExecSqlQuery(DbName,
+            'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
+            '(select Hex(g.description) from properties_dbg g' + CRLF +
+            '  where g."description:1" = ''guid'' and g.value = a.value limit 1) as Guid_Data,' + CRLF +
+            'v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+            'from properties_dbg a' + CRLF +
+            'inner join vehicle_profile v on (v.vehicle_id = a.value)' + CRLF +
+            'where a."description:1" = ''active_profile''' + CRLF +
+            'limit 1;',
+            SqlResults);
+        else
+          ExecSqlQuery(DbName,
+            'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+            'from active_vehicle a' + CRLF +
+            'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
+            'limit 1;',
+            SqlResults);
+      end;
 
-    for ALine in SqlResults do
-    begin
-      if (ALine.Count < 7) then
-        exit;
-      result.Valid            := true;
-      result.Vehicle_Id       := Aline[0];
-      result.TruckType        := Aline[1];
-      result.Name             := Utf8String(VarToStr(Aline[2]));
-      result.GUID             := Utf8String(MkGuid(VarToStr(Aline[3])));
-      result.VehicleType      := ALine[4];
-      result.TransportMode    := ALine[5];
-      result.AdventurousLevel := ALine[6];
-      break;
+      for ALine in SqlResults do
+      begin
+        if (ALine.Count < 7) then
+          exit;
+        result.Valid            := true;
+        result.Vehicle_Id       := Aline[0];
+        result.TruckType        := Aline[1];
+        result.Name             := Utf8String(VarToStr(Aline[2]));
+        result.GUID             := Utf8String(MkGuid(VarToStr(Aline[3])));
+        result.VehicleType      := ALine[4];
+        result.TransportMode    := ALine[5];
+        result.AdventurousLevel := ALine[6];
+        break;
+      end;
+    finally
+      SqlResults.Free;
     end;
-  finally
-    SqlResults.Free;
+  except on E:Exception do
+    ShowMessage(E.Message);
   end;
 end;
 
