@@ -22,9 +22,10 @@ const
   CLIENT_MINOR_VER = 2;
   CLIENT_REVISION  = 0;
   DEF_BUFFERSIZE   = 512 * 1024;
-  USB_MSM          = '#wpdbusenum'; // For (Garmin's) in Mass Storage Mode
-  MTP              = 'MTP';
-  MSM              = 'MSM';
+  USB_DISK         = 'usbstor#disk'; // For (Garmin's) in Mass Storage Mode
+  USB_BUSENUM      = 'swd#wpdbusenum'; // For (Garmin's) in Mass Storage Mode
+  MTP_ID           = 'MTP';
+  MSM_ID           = 'MSM';
 
   CLSID_WPD_NAMESPACE_EXTENSION: TGUID = '{35786D3C-B075-49B9-88DD-029876E11C01}';
   CLASS_PortableDeviceValues: TGUID = '{0c15d503-d017-47ce-9016-7b3f978721cc}';
@@ -946,13 +947,13 @@ begin
         AMTP_Device.Description   := DevDescription;
         AMTP_Device.Manufacturer  := DevManufacturer;
         AMTP_Device.Device        := GetDevId(PDevs[Index]);
-        AMTP_Device.MSM := MTP;
-        if (ContainsText(AMTP_Device.Device, USB_MSM)) then
-          AMTP_Device.MSM := MSM;
+        AMTP_Device.MSM := MTP_ID;
+        if (ContainsText(AMTP_Device.Device, USB_DISK)) and
+           (ContainsText(AMTP_Device.Device, USB_BUSENUM)) then
+          AMTP_Device.MSM := MSM_ID;
         AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
         SerialList.Add(AMTP_Device.Serial);
         AMTP_Device.PortableDev   := nil;
-
         result.Add(AMTP_Device);
       end;
 
