@@ -46,7 +46,7 @@ type
                               const ADeviceList: Tlist;
                               const AManufacturer: string = ''): boolean;
     function IsGarminDeviceName: boolean;
-    procedure GetInfoFromDevice(DeviceList: Tlist); override;
+    procedure GetInfoFromDevice(const DeviceList: Tlist); override;
     procedure ReadDeviceDB(const DBPath: string; const ExploreList: TStringList);
   end;
 
@@ -294,34 +294,28 @@ begin
             ContainsText(Device, MtpVendorGarmin);    // MTP Mode Garmin
 end;
 
-procedure TMTP_Device.GetInfoFromDevice(DeviceList: TList);
+procedure TMTP_Device.GetInfoFromDevice(const DeviceList: Tlist);
 var
   FriendlyPath: string;
 begin
-  // Requires opening and closing device.
-  if not (ConnectToDevice(Device, PortableDev, true) ) then
-    exit;
-  try
-     // Hack for 'Generic MTP Device'
-    if (Manufacturer <> Garmin_Name) and
-       (IsGarminDeviceName) then
-      Manufacturer := Garmin_Name;
+  inherited GetInfoFromDevice(DeviceList);
 
-    // Get Garmin Device info
-    // The complete DeviceList is needed to identify SD Cards
-    if (Manufacturer = Garmin_Name) then
-      ReadGarminDevice(GarminDevice.ModelDescription, DeviceList, Manufacturer);
+  // Hack for 'Generic MTP Device'
+  if (Manufacturer <> Garmin_Name) and
+     (IsGarminDeviceName) then
+    Manufacturer := Garmin_Name;
 
-    if (MSM = MSM_ID) and
-       (MatchesMask(FriendlyName, '?:\') = false) then
-    begin
-      // Add the root path to friendlyname. Example Sd Cards of Zumo
-      GetIdForPath(PortableDev, '?:\.', FriendlyPath);
-      FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath), FriendlyName]);
-    end;
+  // Get Garmin Device info
+  // The complete DeviceList is needed to identify SD Cards
+  if (Manufacturer = Garmin_Name) then
+    ReadGarminDevice(GarminDevice.ModelDescription, DeviceList, Manufacturer);
 
-  finally
-    PortableDev := nil;
+  if (MSM = MSM_ID) and
+     (MatchesMask(FriendlyName, '?:\') = false) then
+  begin
+    // Add the root path to friendlyname. Example Sd Cards of Zumo
+    GetIdForPath(PortableDev, '?:\.', FriendlyPath);
+    FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath), FriendlyName]);
   end;
 end;
 

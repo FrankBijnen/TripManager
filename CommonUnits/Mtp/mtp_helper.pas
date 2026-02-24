@@ -880,7 +880,6 @@ var
   Index: Integer;
   DevFriendlyName: WideString;
   DevDescription: WideString;
-  DevManufacturer: WideString;
   AMTP_Device: TBase_Device;
   SerialList: TStringList;
 begin
@@ -912,7 +911,6 @@ begin
       begin
         DevFriendlyName := '';
         DevDescription := '';
-        DevManufacturer := '';
 
         //Get Friendly Name
         IDevNameLen := 0;
@@ -932,20 +930,10 @@ begin
           DevDescription := Trim(DevDescription);
         end;
 
-        //Get Manufacturer
-        IDevNameLen := 0;
-        if (PMan.GetDeviceManufacturer(PDevs[Index], Word(nil^), IDevNameLen) = S_OK) then
-        begin
-          SetLength(DevManufacturer, IDevNameLen);
-          PMan.GetDeviceManufacturer(PDevs[Index], PWord(PWideChar(DevManufacturer))^, IDevNameLen);
-          DevManufacturer := Trim(DevManufacturer);
-        end;
-
         //  Create device object
         AMTP_Device := TBase_Device.New;
         AMTP_Device.FriendlyName  := DevFriendlyName;
         AMTP_Device.Description   := DevDescription;
-        AMTP_Device.Manufacturer  := DevManufacturer;
         AMTP_Device.Device        := GetDevId(PDevs[Index]);
         AMTP_Device.MSM := MTP_ID;
         if (ContainsText(AMTP_Device.Device, USB_DISK)) and
@@ -967,13 +955,20 @@ begin
       result.Sort(@CompareDevice);
 
       // renumber Device ID, after sort
-      // Get Additional Info from opened device. (GarminDevice, Root path)
+      // Get Additional Info from opened device. (Manufacturer, GarminDevice, Root path)
       for Index := 0 to result.Count -1 do
       begin
         AMTP_Device := result[Index];
         AMTP_Device.ID := Index;
         AMTP_Device.Init;
-        AMTP_Device.GetInfoFromDevice(result);
+
+        ConnectToDevice(AMTP_Device.Device, AMTP_Device.PortableDev, true);
+        try
+          AMTP_Device.GetInfoFromDevice(result);
+        finally
+          AMTP_Device.PortableDev := nil;
+        end;
+
       end;
 
     end;

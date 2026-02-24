@@ -54,7 +54,8 @@ type
     procedure Init; virtual;
     function CheckDevice: boolean; virtual;
     function DisplayedDevice: string; virtual;
-    procedure GetInfoFromDevice(DeviceList: Tlist); virtual;
+    function GetManufacturer: PWideChar;
+    procedure GetInfoFromDevice(const DeviceList: Tlist); virtual;
 //TODO Add more methods. Eliminating need for 'uses mtp_helper'
     function FileExists(const APath, AFile:string): boolean; virtual;
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
@@ -151,9 +152,30 @@ begin
   result := Format('%s (%s)', [FriendlyName, Description]);
 end;
 
-procedure TBase_Device.GetInfoFromDevice(DeviceList: Tlist);
+// This method works more reliable, than IPortableDeviceManager.GetDeviceManufacturer
+function TBase_Device.GetManufacturer: PWideChar;
+var
+  Content: IPortableDeviceContent;
+  DevProps: IPortableDeviceProperties;
+  DevValues: IPortableDeviceValues;
+  Manufacturer_Key: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
-  {}
+  result := '';
+  if (PortableDev.Content(Content) <> S_OK) then
+    exit;
+  if (Content.Properties(DevProps) <> S_OK) then
+    exit;
+  if (DevProps.GetValues(WPD_DEVICE_OBJECT_ID, nil, DevValues) <> S_OK) then
+    exit;
+  Manufacturer_Key.fmtid := WPD_DEVICE_MANUFACTURER.fmtid;
+  Manufacturer_Key.pid := WPD_DEVICE_MANUFACTURER.pid;
+  if (DevValues.GetStringValue(Manufacturer_Key, result) <> S_OK) then
+    exit;
+end;
+
+procedure TBase_Device.GetInfoFromDevice(const DeviceList: Tlist);
+begin
+  Manufacturer := GetManufacturer;
 end;
 
 function TBase_Device.FileExists(const APath, AFile:string): boolean;

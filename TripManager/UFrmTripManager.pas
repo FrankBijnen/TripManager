@@ -5335,8 +5335,8 @@ end;
 
 procedure TFrmTripManager.ReadDefaultFolders;
 var
-  ModelIndex: integer;
-  SubKey: string;
+  ModelIndex, PathId: integer;
+  SubKey, FriendlyName: string;
 begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
@@ -5347,6 +5347,18 @@ begin
                                  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey);
   DeviceFolder[2] := GetRegistry(Reg_PrefDevPoiFolder_Key,
                                  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2), SubKey);
+
+  // Revert to default GarminDevice paths, if the overriden is not available
+  if (CheckDevice(false)) then
+  begin
+    for PathId := 0 to 2 do
+    begin
+      if (DeviceFolder[PathId] <> '') and
+         (GetIdForPath(CurrentDevice.PortableDev, DeviceFolder[PathId], FriendlyName) = '') then
+        DeviceFolder[PathId] := TModelConv.GetKnownPath(CurrentDevice, ModelIndex, PathId);
+    end;
+  end;
+
 end;
 
 procedure TFrmTripManager.SetDeviceListColumns;
