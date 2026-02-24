@@ -93,6 +93,7 @@ type
     class function Device2Display(const DeviceName: string): string;
     class function GetDevices(const Default: boolean): TStringList;
     class function GetTripModels: TStringList;
+    class function KnownDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer;
   public
     class procedure SetupKnownDevices;
     class procedure CmbModelDevices(const Devices: TStrings);
@@ -113,9 +114,7 @@ type
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
     class function GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;
     class function IsKnownDevice(const Device: TObject): boolean;
-    class function GarminDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer;
-    class function KnownDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer; overload;
-    class function KnownDeviceIndex(const DeviceList: TList): integer; overload;
+    class function FirstKnownDevice(const DeviceList: TList): integer;
     class function PreferedPartition(const SelectedDevice, InsertedDevice: string;
                                      const DeviceList: Tlist): boolean;
   end;
@@ -486,16 +485,18 @@ var
   KnownIndex, DevIndex: integer;
 begin
   result := -1;
-  
+
+  // First check known devices
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
     if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
       continue;
 
-    // Look in Known devices
+    // Check known devices
     if (KnownDevices.IndexOf(TMTP_Device(DeviceList[DevIndex]).FriendlyName) > -1)  then
       exit(DevIndex);
 
+    // Check overridden device names
     for KnownIndex := KnownDevices.Count -1 downto 0 do
     begin
       // Allow wildcards for mass storage devices. EG ?:\Garmin
@@ -504,15 +505,7 @@ begin
     end;
   end;
 
-end;
-
-// Get first Garmin device in connected list, for this prio. used as fallback
-class function TModelConv.GarminDeviceIndex(const DeviceList: Tlist; const APartPrio: TPartitionPrio): integer;
-var
-  DevIndex: integer;
-begin
-  result := -1;
-
+  // Check manufacturer Garmin. Generic support GPX/POI
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
     if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
@@ -520,19 +513,16 @@ begin
     if (SameText(TBase_Device(DeviceList[DevIndex]).Manufacturer, Garmin_Name)) then
       exit(DevIndex);
   end;
+
 end;
 
 // Device selection order.
 // Note: Cards are not selected
-class function TModelConv.KnownDeviceIndex(const DeviceList: Tlist): integer;
+class function TModelConv.FirstKnownDevice(const DeviceList: Tlist): integer;
 begin
   result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppHigh);
   if (result < 0) then
-    result := GarminDeviceIndex(DeviceList, TPartitionPrio.ppHigh);
-  if (result < 0) then
     result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppNorm);
-  if (result < 0) then
-    result := GarminDeviceIndex(DeviceList, TPartitionPrio.ppNorm);
 end;
 
 // The 590/595 in MassStorage mode and RWFS enabled has 2 partitions:

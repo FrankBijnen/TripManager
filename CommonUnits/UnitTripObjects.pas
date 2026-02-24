@@ -3707,8 +3707,9 @@ end;
 
 function TUdbDir.GetDirection: string;
 begin
+  result := '';
   if (FValue.SubClass.IsKnownRoutePoint) then
-    exit(PointType);
+    exit;
 
   case FValue.SubClass.Direction of
     0:

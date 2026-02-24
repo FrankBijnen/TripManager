@@ -2322,7 +2322,7 @@ procedure TFrmTripManager.SelectKnownDevice;
 begin
   CmbDevices.ItemIndex := -1;
   CmbDevices.Text := SelectMTPDevice;
-  CmbDevices.ItemIndex := TModelConv.KnownDeviceIndex(DeviceList);
+  CmbDevices.ItemIndex := TModelConv.FirstKnownDevice(DeviceList);
   SelectDevice(CmbDevices.ItemIndex);
 end;
 
@@ -2479,7 +2479,7 @@ begin
 
   ReadDefaultFolders;
 
-  // Different models have diffent paths
+  // Different models have different paths
   if CheckDevice(false) then
     SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
 
@@ -3703,10 +3703,11 @@ var
                                                     OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.ComprLatLon)))
     else
     begin
-      VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
-                                TGridSelItem.Create(AnUdbDir,
-                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
-                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
+      if (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint = false) then
+        VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
+                                  TGridSelItem.Create(AnUdbDir,
+                                                      SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
+                                                      OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
 
       VlTripInfo.Strings.AddPair('Subclass Unknown1', Format('%s %s %s',
                                                          [IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Time), 4),
