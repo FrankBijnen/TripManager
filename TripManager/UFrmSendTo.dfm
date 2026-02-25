@@ -116,7 +116,6 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
-          ExplicitHeight = 56
         end
       end
       object TabFolder: TTabSheet
@@ -146,7 +145,6 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
-          ExplicitHeight = 56
         end
       end
     end
@@ -164,7 +162,7 @@ object FrmSendTo: TFrmSendTo
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 578
+      Width = 3
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -183,7 +181,6 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
-      ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
@@ -235,7 +232,7 @@ object FrmSendTo: TFrmSendTo
         Left = 200
         Top = 1
         Width = 387
-        Height = 23
+        Height = 19
         Align = alRight
         Style = csDropDownList
         TabOrder = 0
@@ -305,8 +302,6 @@ object FrmSendTo: TFrmSendTo
       28002E00680074006D006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
-    ExplicitTop = 274
-    ExplicitHeight = 275
   end
   object PnlBot: TPanel
     Left = 0

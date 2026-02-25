@@ -105,6 +105,9 @@ type
     class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
     class function GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string; overload;
     class function GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string; overload;
+    class function GetKnownGarminPath(const CurrentDevice: TObject;
+                                      const RegKey: string;
+                                      const ModelIndex, PathId: integer): string;
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
     class function Display2Trip(const CmbIndex: integer): TTripModel;
     class function Garmin2Display(const Garmin: TGarminModel): integer;
@@ -374,6 +377,25 @@ begin
   end;
 
   result := GetKnownPath(GarminDevice, PathId);
+end;
+
+class function TModelConv.GetKnownGarminPath(const CurrentDevice: TObject;
+                                             const RegKey: string;
+                                             const ModelIndex, PathId: integer): string;
+var
+  SubKey: string;
+begin
+  SubKey := GetDefaultDevice(ModelIndex);
+
+  result  := GetRegistry(RegKey,
+                         GetKnownPath(CurrentDevice, ModelIndex, PathId),
+                         SubKey);
+
+  if (result <> '') and
+     (Assigned(CurrentDevice)) and
+     (CurrentDevice is TMTP_Device) and
+     (TMTP_Device(CurrentDevice).PathId[result] = '') then
+      result := GetKnownPath(TMTP_Device(CurrentDevice).GarminDevice, PathId);
 end;
 
 class function TModelConv.Display2Garmin(const CmbIndex: integer): TGarminModel;

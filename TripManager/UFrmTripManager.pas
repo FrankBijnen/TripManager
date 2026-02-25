@@ -406,7 +406,6 @@ type
     procedure FreeDevices;
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
-    function GetDbPath: string;
     procedure ClearDeviceDbFiles;
     procedure RebuildTransportAndRoutePrefMenu;
     procedure RebuildDeviceDbMenu;
@@ -524,24 +523,6 @@ end;
 procedure DeleteTripTrackFiles;
 begin
   DeleteTempFiles(GetOSMTemp, Format('\%s_%s_track%s', [App_Prefix, CurrentMapItem, GetTracksExt]));
-end;
-
-function TFrmTripManager.GetDbPath: string;
-var
-  ModelIndex: integer;
-  SubKey, DbPath: string;
-  LDelim: integer;
-begin
-  // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-  SubKey := TModelConv.GetDefaultDevice(ModelIndex);
-  DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
-                                         TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0),
-                                         SubKey));
-  LDelim := LastDelimiter('\', DbPath) -1;
-  DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
-  if (GetIdForPath(CurrentDevice.PortableDev, DbPath, result) = '') then
-    result := '';
 end;
 
 procedure TFrmTripManager.GuessModel(const DisplayedDevice: string);
@@ -693,14 +674,14 @@ end;
 procedure TFrmTripManager.CheckandFixcurrentgpx1Click(Sender: TObject);
 var
   CurrentObjectId, FolderId: widestring;
-  NFile, FriendlyPath: string;
+  NFile: string;
   GpxFile: TGPXFile;
   FixMessages: TStringList;
   Rc: integer;
 begin
   CheckDevice;
 
-  FolderId := GetIdForPath(CurrentDevice.PortableDev, DeviceFolder[1], FriendlyPath);
+  FolderId := TMTP_Device(CurrentDevice).PathId[DeviceFolder[1]];
   if (FolderId = '') then
     raise exception.Create(DeviceFolder[1] + ' not found');
 
@@ -1203,7 +1184,7 @@ begin
     begin
       if not (HadMtpDevice) and
          (HasTMTPDevice(CurrentDevice)) then  // No device was connected, now it is. Read settings.
-        TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
+        TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
 
       RebuildDeviceDbMenu;
       PostReloadFileList;
@@ -2129,7 +2110,7 @@ begin
   if (CheckDevice(false)) then
   begin
     if (HasTMTPDevice(CurrentDevice)) then
-      TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
+      TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
   end;
   RebuildDeviceDbMenu;
 end;
@@ -2359,7 +2340,7 @@ begin
     SelectDevice(CmbDevices.ItemIndex);
     ClearDeviceDbFiles;
     if (HasTMTPDevice(CurrentDevice)) then
-      TMTP_Device(CurrentDevice).ReadDeviceDB(GetDbPath, ExploreList);
+      TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
     RebuildDeviceDbMenu;
   end;
 end;
@@ -2526,12 +2507,10 @@ begin
 end;
 
 procedure TFrmTripManager.SetCurrentPath(const APath: string);
-var
-  FriendlyPath: string;
 begin
   CheckDevice;
 
-  FSavedFolderId := GetIdForPath(CurrentDevice.PortableDev, APath, FriendlyPath);
+  FSavedFolderId := TMTP_Device(CurrentDevice).PathId[APath];
 end;
 
 procedure TFrmTripManager.Setdeparturedatetimeofselected1Click(Sender: TObject);
@@ -3140,6 +3119,7 @@ begin
   end;
 end;
 
+//TODO Move to TMTP_Device?
 procedure TFrmTripManager.RecreateTrips;
 var
   FriendlyPath, TempFile, SystemPath, SystemTripsPath, LastRefreshFile: string;
@@ -3167,7 +3147,7 @@ begin
       exit;
 
     // DateTime of system.db
-    SystemSqlId := GetIdForPath(CurrentDevice.PortableDev, GetDbPath, FriendlyPath);
+    SystemSqlId := GetIdForPath(CurrentDevice.PortableDev, TMTP_Device(CurrentDevice).GetDbPath, FriendlyPath);
     if (GetIdForFile(CurrentDevice.PortableDev, SystemSqlId, SystemDb, File_Info) = '') then
       exit;
 
@@ -5335,30 +5315,23 @@ end;
 
 procedure TFrmTripManager.ReadDefaultFolders;
 var
-  ModelIndex, PathId: integer;
-  SubKey, FriendlyName: string;
+  ModelIndex: integer;
+  SubKey: string;
 begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
-
-  DeviceFolder[0] := GetRegistry(Reg_PrefDevTripsFolder_Key,
-                                 TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0), SubKey);
-  DeviceFolder[1] := GetRegistry(Reg_PrefDevGpxFolder_Key,
-                                 TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey);
-  DeviceFolder[2] := GetRegistry(Reg_PrefDevPoiFolder_Key,
-                                 TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2), SubKey);
-
-  // Revert to default GarminDevice paths, if the overriden is not available
-  if (CheckDevice(false)) then
-  begin
-    for PathId := 0 to 2 do
-    begin
-      if (DeviceFolder[PathId] <> '') and
-         (GetIdForPath(CurrentDevice.PortableDev, DeviceFolder[PathId], FriendlyName) = '') then
-        DeviceFolder[PathId] := TModelConv.GetKnownPath(CurrentDevice, ModelIndex, PathId);
-    end;
-  end;
-
+  DeviceFolder[0] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                   Reg_PrefDevTripsFolder_Key,
+                                                   ModelIndex,
+                                                   0);
+  DeviceFolder[1] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                   Reg_PrefDevGpxFolder_Key,
+                                                   ModelIndex,
+                                                   1);
+  DeviceFolder[2] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                   Reg_PrefDevPoiFolder_Key,
+                                                   ModelIndex,
+                                                   2);
 end;
 
 procedure TFrmTripManager.SetDeviceListColumns;

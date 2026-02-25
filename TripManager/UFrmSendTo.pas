@@ -158,23 +158,38 @@ begin
 
         if GetRegistry(Reg_EnableTripFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.trip files:%s %s%s', [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0), SubKey), #10])
+            Format('.trip files:%s %s%s',
+                      [#9,
+                       TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                     Reg_PrefDevTripsFolder_Key,
+                                                     ModelIndex, 0),
+                       #10])
         else if GetRegistry(Reg_EnableFitFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.fit files:%s %s%s',  [#9, GetRegistry(Reg_PrefDevTripsFolder_Key,
-                    TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey), #10]);
+            Format('.fit files:%s %s%s',
+                      [#9,
+                       TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                     Reg_PrefDevTripsFolder_Key,
+                                                     ModelIndex, 0),
+                       #10]);
 
         if GetRegistry(Reg_EnableGpxFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.gpx files:%s %s%s',    [#9, GetRegistry(Reg_PrefDevGpxFolder_Key,
-                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1), SubKey), #10]);
+            Format('.gpx files:%s %s%s',
+                      [#9,
+                       TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                     Reg_PrefDevGpxFolder_Key,
+                                                     ModelIndex, 1),
+                       #10]);
 
         if (GetRegistry(Reg_EnableGpiFuncs, false)) and
            (GetRegistry(Reg_EnableFitFuncs, false) = false) then
           LblDestinations.Caption := LblDestinations.Caption +
-            Format('.gpi files:%s %s',    [#9,  GetRegistry(Reg_PrefDevPoiFolder_Key,
-                    TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2), SubKey), #10]);
+            Format('.gpi files:%s %s',
+                      [#9,
+                       TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                     Reg_PrefDevPoiFolder_Key,
+                                                     ModelIndex, 2)]);
       end;
     1:begin
         SendToDest := TSendToDest.stWindows;

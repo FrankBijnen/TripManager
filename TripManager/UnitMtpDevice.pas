@@ -36,6 +36,9 @@ type
   end;
 
   TMTP_Device = class(TBase_Device)
+  private
+    function GetPathId(APath: string): string;
+    function GetFriendlyPath(APath: string): string;
   public
     GarminDevice: TGarminDevice;
     constructor Create; virtual;
@@ -47,7 +50,11 @@ type
                               const AManufacturer: string = ''): boolean;
     function IsGarminDeviceName: boolean;
     procedure GetInfoFromDevice(const DeviceList: Tlist); override;
-    procedure ReadDeviceDB(const DBPath: string; const ExploreList: TStringList);
+    procedure ReadDeviceDB(const ExploreList: TStringList);
+    function GetDBPath: string;
+    property PathId[APath: string]: string read GetPathId;
+    property FriendlyPath[APath: string]: string read GetFriendlyPath;
+
   end;
 
 var
@@ -93,14 +100,14 @@ function TGarminDevice.ReadGarminDevice(const ACurrentDevice: TObject;
                                         const ADeviceList: Tlist): boolean;
 var
   CurDevId, DevId: integer;
-  NFile, FriendlyPath: string;
+  NFile: string;
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
   CurrentDevice, TmpDevice: TMTP_Device;
 
   function GetPath(CheckNode: TXmlVSNode; AName, Direction, AExt: string): string;
   var
-    NewPath, FriendlyPath: string;
+    NewPath: string;
     DataTypeNode, FileNode, LocationNode: TXmlVSNode;
   begin
     result := '';
@@ -118,7 +125,7 @@ var
         begin
           NewPath := ReplaceAll(FindSubNodeValue(LocationNode, 'Path'), ['/'], ['\']);
           result := Format('%s%s', [NonMTPRoot, NewPath]);
-          if (GetIdForPath(CurrentDevice.PortableDev, result, FriendlyPath) <> '') then
+          if (CurrentDevice.PathId[result] <> '') then
             exit
           else
             exit(Format('%s%s', [InternalStorage, NewPath]));
@@ -142,9 +149,9 @@ begin
 
   // Path for .System\Trips.
   // Only 2 locations are known to work: ?:\.System\Trips and Internal Storage\.System\Trips
-  if (GetIdForPath(CurrentDevice.PortableDev, NonMTPRoot + SystemTripsPath, FriendlyPath) <> '') then
+  if (CurrentDevice.PathId[NonMTPRoot + SystemTripsPath] <> '') then
     TripsPath := NonMTPRoot + SystemTripsPath
-  else if (GetIdForPath(CurrentDevice.PortableDev, InternalStorage + SystemTripsPath, FriendlyPath) <> '') then
+  else if (CurrentDevice.PathId[InternalStorage + SystemTripsPath] <> '') then
     TripsPath := InternalStorage + SystemTripsPath;
 
   // Location of GarminDevice.Xml
@@ -213,7 +220,7 @@ begin
           GarminModel := TModelConv.GuessGarminOrEdge(ModelDescription);
         else
         begin
-          if (GetIdForPath(CurrentDevice.PortableDev, TModelConv.GetKnownPath(Self, 0), FriendlyPath) = '') then
+          if (CurrentDevice.PathId[TModelConv.GetKnownPath(Self, 0)] = '') then
             GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         end;
       end;
@@ -251,16 +258,27 @@ begin
   GarminDevice.Free;
 end;
 
+function TMTP_Device.GetPathId(APath: string): string;
+var
+  FriendlyName: string;
+begin
+  result := GetIdForPath(PortableDev, APath, FriendlyName);
+end;
+
+function TMTP_Device.GetFriendlyPath(APath: string): string;
+begin
+  GetIdForPath(PortableDev, APath, result);
+end;
+
 function TMTP_Device.CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
 var
-  CurrentObjectId, FolderId: widestring;
-  FriendlyPath: string;
+  CurrentObjectId, FolderId: WideString;
 begin
   result := false;
   if not CheckDevice then
     exit;
 
-  FolderId := GetIdForPath(PortableDev, APath, FriendlyPath);
+  FolderId := PathId[APath];
   if (FolderId = '') then
     exit;
 
@@ -295,8 +313,6 @@ begin
 end;
 
 procedure TMTP_Device.GetInfoFromDevice(const DeviceList: Tlist);
-var
-  FriendlyPath: string;
 begin
   inherited GetInfoFromDevice(DeviceList);
 
@@ -312,19 +328,36 @@ begin
 
   if (MSM = MSM_ID) and
      (MatchesMask(FriendlyName, '?:\') = false) then
-  begin
     // Add the root path to friendlyname. Example Sd Cards of Zumo
-    GetIdForPath(PortableDev, '?:\.', FriendlyPath);
-    FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath), FriendlyName]);
-  end;
+    FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath['?:\.']), FriendlyName]);
 end;
 
-procedure TMTP_Device.ReadDeviceDB(const DBpath: string; const ExploreList: TStringList);
+function TMTP_Device.GetDbPath: string;
+var
+  ModelIndex: integer;
+  SubKey, DbPath: string;
+  LDelim: integer;
+begin
+  // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
+  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+  DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
+                                         TModelConv.GetKnownPath(self, ModelIndex, 0),
+                                         SubKey));
+  LDelim := LastDelimiter('\', DbPath) -1;
+  DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
+  if (GetIdForPath(PortableDev, DbPath, result) = '') then
+    result := '';
+end;
+
+procedure TMTP_Device.ReadDeviceDB(const ExploreList: TStringList);
 var
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   ModelIndex, DefAdvLevel: integer;
+  DBPath: string;
 begin
   // SQLite path
+  DBPath := GetDbPath;
   if (DBPath = '') then
     exit;
 
