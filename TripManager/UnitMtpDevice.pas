@@ -5,6 +5,7 @@ interface
 
 uses
   System.Classes,
+  Vcl.ComCtrls,
   UnitGpxDefs, UnitMTPDefs;
 
 type
@@ -44,6 +45,8 @@ type
     constructor Create; virtual;
     procedure Init; override;
     destructor Destroy; override;
+    function CopyFileToTmp(const AListItem: TListItem): string;
+    procedure CopyFileFromTmp(const LocalFile, FolderId: string; const AListItem: TListItem);
     function CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
     function ReadGarminDevice(const AModelDescription: string;
                               const ADeviceList: Tlist;
@@ -52,9 +55,10 @@ type
     procedure GetInfoFromDevice(const DeviceList: Tlist); override;
     procedure ReadDeviceDB(const ExploreList: TStringList);
     function GetDBPath: string;
+    function RecreateTrips(const SystemTripsPath: string;
+                           const LstItems: TListItems): boolean;
     property PathId[APath: string]: string read GetPathId;
     property FriendlyPath[APath: string]: string read GetFriendlyPath;
-
   end;
 
 var
@@ -63,9 +67,9 @@ var
 implementation
 
 uses
-  System.SysUtils, System.StrUtils, System.Masks,
+  System.SysUtils, System.StrUtils, System.Masks, System.IOUtils,
   UnitRegistry, UnitRegistryKeys,
-  UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, mtp_helper;
+  UnitTripDefs, UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, mtp_helper;
 
 const
   MSMVendorGarmin = 'usbstor#disk&ven_garmin&';
@@ -87,12 +91,11 @@ begin
     GarminModel       := TGarminModel.Unknown;
   end;
   SerialNumber      := 'N/A';
-  TripsPath         := '';
+  GpxPath           := NonMTPRoot + GarminPath + '\GPX';
+  GpiPath           := NonMTPRoot + GarminPath + '\POI';
   CoursePath        := NonMTPRoot + GarminPath + '\Courses';
   NewFilesPath      := NonMTPRoot + GarminPath + '\NewFiles';
   ActivitiesPath    := NonMTPRoot + GarminPath + '\Activities';
-  GpxPath           := NonMTPRoot + GarminPath + '\GPX';
-  GpiPath           := NonMTPRoot + GarminPath + '\POI';
 end;
 
 function TGarminDevice.ReadGarminDevice(const ACurrentDevice: TObject;
@@ -270,6 +273,36 @@ begin
   GetIdForPath(PortableDev, APath, result);
 end;
 
+function TMTP_Device.CopyFileToTmp(const AListItem: TListItem): string;
+var
+  ABASE_Data_File: TBase_Data;
+  NFile: string;
+begin
+  result := '';
+
+  // Get Id of File
+  ABASE_Data_File := TBase_Data(TBase_Data(AListItem.Data));
+  if (ABASE_Data_File.IsFolder) then
+    exit;
+
+  // Get Name of file
+  NFile := AListItem.Caption;
+
+  if not GetFileFromDevice(PortableDev, ABASE_Data_File.ObjectId, CreatedTempPath, NFile) then
+    raise Exception.Create(Format('Copy %s from %s failed', [NFile, Device]));
+
+  result := IncludeTrailingPathDelimiter(CreatedTempPath) + NFile;
+end;
+
+procedure TMTP_Device.CopyFileFromTmp(const LocalFile, FolderId: string; const AListItem: TListItem);
+begin
+  if not Assigned(AListItem) then
+    raise exception.Create('No item selected.');
+
+  if not TransferExistingFileToDevice(PortableDev, LocalFile, FolderId, AListItem) then
+    raise Exception.Create(Format('TransferExistingFileToDevice %s to %s failed', [LocalFile, Device]));
+end;
+
 function TMTP_Device.CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
 var
   CurrentObjectId, FolderId: WideString;
@@ -342,7 +375,7 @@ begin
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
   DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
-                                         TModelConv.GetKnownPath(self, ModelIndex, 0),
+                                         TModelConv.GetKnownPath(self, 0),
                                          SubKey));
   LDelim := LastDelimiter('\', DbPath) -1;
   DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
@@ -408,6 +441,88 @@ begin
      (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
+end;
+
+function TMTP_Device.RecreateTrips(const SystemTripsPath: string;
+                                   const LstItems: TListItems): boolean;
+var
+  FriendlyPath, LastRefreshFile, TempFile,
+  SystemPath, SystemPathId,
+  ActualTripsPath, SystemTripsPathId: string;
+  Rc: integer;
+  Fs: TSearchRec;
+  AListItem: TListItem;
+  File_Info: TFile_Info;
+  LDelim: integer;
+begin
+  result := false;
+
+  // Checks
+  SystemTripsPathId := GetIdForPath(PortableDev, SystemTripsPath, FriendlyPath);
+  LDelim := LastDelimiter('\', FriendlyPath) -1;
+  SystemPath := Copy(FriendlyPath, 1, LDelim);          // .System
+  SystemPathId := PathId[SystemPath];                   // The ID. For MSM just .System
+  ActualTripsPath := ExtractFileName(FriendlyPath);     // Trips
+  if not SameText(ActualTripsPath, DefTripsPath) then   // And the sub folder should be Trips
+    exit;
+
+  // DateTime of system.db
+  if (GetIdForFile(PortableDev, PathId[GetDbPath], SystemDb, File_Info) = '') then
+    exit;
+
+  // Is there a .tmp with this timestamp in trips?
+  LastRefreshFile := Format('%10d.tmp', [TUnixDateConv.DateTimeAsCardinal(File_Info.ObjDate)]);
+  if (GetIdForFile(PortableDev, SystemTripsPathId, LastRefreshFile) <> '') then
+    exit;
+
+  // Need to recreate trips. Get directory list
+  ReadFilesFromDevice(PortableDev, LstItems, SystemTripsPathId);
+
+  // Clean temp
+  DeleteTempFiles(CreatedTempPath, '*.*');
+
+  // Create lastrefresh file
+  TFile.WriteAllText(CreatedTempPath + LastRefreshFile, '');
+
+  // Copy Trip Files to Temp directory
+  for AListItem in LstItems do
+  begin
+    if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
+      continue;
+
+    if (CopyFileToTmp(AListItem) = '') then
+      raise Exception.Create(Format('Could not copy file: %s to %s',
+                                    [AListItem.Caption, CreatedTempPath]));
+  end;
+
+  // Delete .System\Trips
+  DelFromDevice(PortableDev, SystemTripsPathId, true);
+
+  // Recreate .System\Trips, and get New Id.
+  CreatePath(PortableDev, SystemPathId, DefTripsPath);
+  SystemTripsPathId := PathId[SystemTripsPath];
+
+  // Copy Tmp file to device
+  if (TransferNewFileToDevice(PortableDev, CreatedTempPath + LastRefreshFile, SystemTripsPathId) = '') then
+    raise Exception.Create(Format('Could not overwrite file: %s on %s',
+                                  [LastRefreshFile, DisplayedDevice]));
+
+  // Copy trip files to device
+  Rc := FindFirst(CreatedTempPath + TripMask, faAnyFile - faDirectory, Fs);
+  while (Rc = 0) do
+  begin
+    // Transfer
+    TempFile := IncludeTrailingPathDelimiter(CreatedTempPath) + Fs.Name;
+
+    // Did the transfer work?
+    if (TransferNewFileToDevice(PortableDev, TempFile, SystemTripsPathId) = '') then
+      raise Exception.Create(Format('Could not overwrite file: %s on %s',
+                                    [ExtractFileName(TempFile), DisplayedDevice]));
+    Rc := FindNext(Fs);
+  end;
+  FindClose(Fs);
+
+  result := true;
 end;
 
 initialization

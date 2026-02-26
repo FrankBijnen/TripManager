@@ -18,6 +18,8 @@ const
   ApproachRoutePoint          = '2117';
   TrkOrigin                   = 'Trk';
   RteOrigin                   = 'Rte';
+  GpxExtension                = '.gpx';
+  GpxMask                     = '*' + GpxExtension;
 
 type
   TDistanceUnit = (duKm, duMi);

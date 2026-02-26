@@ -1,7 +1,6 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
-//TODO Check Needed
-{.$DEFINE CALCULATION_MAGIC}
+
 interface
 
 uses
@@ -83,9 +82,9 @@ const
   StringLoaded: word      = $ffff;
   UdbDirMagic: Cardinal   = $51590469;
   CalcUndef               = $00000000;
-  CalcUndefNuvi           = $00300030; //This value is not consistent, and can not be relied upon.
   CalcNA                  = $ffffffff;
 
+// The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       XT3       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  Drive 66  nuvi 2595 Unknown
   NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    false,    true,     false,    false,    true,     false);
@@ -100,7 +99,7 @@ const
   Unknown3DistOffset: array[TTripModel] of Cardinal =($14,      $14,      $14,      $14,      $12,      $12,      $12,      $12,      $14,      $12,      $14);
   Unknown3TimeOffset: array[TTripModel] of Cardinal =($18,      $18,      $18,      $18,      $16,      $16,      $16,      $16,      $18,      $16,      $18);
   VersionSize:        array[TTripModel] of integer  =($08,      $08,      $08,      $08,      $05,      $05,      $05,      $05,      $08,      $05,      $08);
-
+//Version                                             4,7       4,16      4,16      4,16      1,6       1,3       1,3       1,6       4,9       1,1
 type
   TTripList = class;
 
@@ -244,8 +243,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
   public
-    constructor Create(AMajor: Cardinal = 4;
-                       AMinor: Cardinal = 7); reintroduce;
+    constructor Create(AMajor, AMinor: Cardinal); reintroduce;
     destructor Destroy; override;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
   end;
@@ -327,9 +325,6 @@ type
   public
     constructor Create(AName: ShortString; AValue: TDateTime = 0);
     property AsUnixDateTime: Cardinal read GetAsUnixDateTime write SetAsUnixDateTime;
-    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
-    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
-    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
   end;
 
 {*** Unknown/not Editable ***}
@@ -943,7 +938,6 @@ type
     procedure EndWrite(AStream: TMemoryStream); override;
     function ComputeUnknown3Size(AModel: TTripModel): integer;
     function GetModel: TTripModel;
-    function GetModelDescription: string;
     function GetDistOffset: integer;
     function GetTimeOffset: integer;
     function GetShapeOffset: integer;
@@ -954,7 +948,6 @@ type
     property HandleId: Cardinal read FUdbHandleId;
     property PrefValue: TUdbPrefValue read FUdbPrefValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
-    property ModelDescription: string read GetModelDescription;
     property Items: TUdbDirList read FUdbDirList;
     property DistOffset: integer read GetDistOffset;
     property TimeOffset: integer read GetTimeOffset;
@@ -1721,20 +1714,19 @@ begin
 end;
 
 {*** Version ***}
-constructor TmVersionNumber.Create(AMajor: Cardinal = 4;
-                                   AMinor: Cardinal = 7);
+constructor TmVersionNumber.Create(AMajor, Aminor: Cardinal);
 begin
   case AMajor of
     1:
       begin
         inherited Create('mVersionNumber', SizeOf(FValue.Major) + SizeOf(FValue.MinorB), dtVersion);
-        FValue.Major := Swap32(AMajor);
+        FValue.Major  := Swap32(AMajor);
         FValue.MinorB := AMinor;
       end
     else
     begin
       inherited Create('mVersionNumber', SizeOf(FValue), dtVersion);
-      FValue.Major := Swap32(AMajor);
+      FValue.Major  := Swap32(AMajor);
       FValue.MinorC := AMinor;
     end;
   end;
@@ -2099,7 +2091,7 @@ end;
 
 constructor TUnixDate.Create(AName: ShortString; AValue: TDateTime = 0);
 begin
-  inherited Create(AName, TUnixDate.DateTimeAsCardinal(AValue));
+  inherited Create(AName, TUnixDateConv.DateTimeAsCardinal(AValue));
 end;
 
 function TUnixDate.GetItemEditMode: TItemEditMode;
@@ -2109,7 +2101,7 @@ end;
 
 function TUnixDate.GetValue: string;
 begin
-  result := TUnixDate.CardinalAsDateTimeString(FValue);
+  result := TUnixDateConv.CardinalAsDateTimeString(FValue);
 end;
 
 function TUnixDate.GetAsUnixDateTime: Cardinal;
@@ -2120,33 +2112,6 @@ end;
 procedure TUnixDate.SetAsUnixDateTime(AValue: Cardinal);
 begin
   FValue := AValue;
-end;
-
-class function TUnixDate.DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
-var
-  ValueEpoch: int64;
-  ValueUnix: int64;
-begin
-  result := 0;
-  if (ADateTime <> 0) then
-  begin
-    ValueUnix := DateTimeToUnix(ADateTime, false);
-    ValueEpoch := DateTimeToUnix(EncodeDateTime(1989, 12, 31, 0, 0, 0, 0));
-    result := ValueUnix - ValueEpoch;
-  end;
-end;
-
-class function TUnixDate.CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
-var
-  ValueEpoch: int64;
-begin
-  ValueEpoch := ACardinal + DateTimeToUnix(EncodeDateTime(1989,12,31,0,0,0,0)); // Starts from 1989/12/31
-  result := UnixToDateTime(ValueEpoch, false);
-end;
-
-class function TUnixDate.CardinalAsDateTimeString(ACardinal: Cardinal): string;
-begin
-  result := Format('%s', [DateTimeToStr(TUnixDate.CardinalAsDateTime(ACardinal))]);
 end;
 
 {*** Raw Data used for unknown
@@ -2223,7 +2188,7 @@ end;
 
 constructor TmAvoidancesChangedTimeAtSave.Create(AValue: cardinal);
 begin
-  inherited Create('mAvoidancesChangedTimeAtSave', TUnixDate.CardinalAsDateTime(AValue));
+  inherited Create('mAvoidancesChangedTimeAtSave', TUnixDateConv.CardinalAsDateTime(AValue));
 end;
 
 constructor TmOptimized.Create(AValue: boolean = false);
@@ -3929,30 +3894,17 @@ var
 begin
   result := TTripModel.Unknown;
 
-{$IFDEF CALCULATION_MAGIC}
-  // Is the CalcStatus known?
-
-  if (FValue.CalcStatus <> CalcUndef) then
-  begin
-    for AModel := Low(TTripModel) to High(TTripModel) do
-    begin
-      if (FValue.CalcStatus = CalculationMagic[AModel]) then
-        exit(AModel);
-    end;
-  end;
-{$ENDIF}
-
-  // Is the size of Unknown3 a known size of a model?
+  // Does the Calculation Magic match, and is the size of Unknown3 a known size of a model?
   for AModel := Low(TTripModel) to High(TTripModel) do
   begin
+    if (CalculationMagic[AModel] <> CalcUndef) and
+       (FValue.CalcStatus <> CalcUndef) and
+       (FValue.CalcStatus <> CalculationMagic[AModel]) then
+      continue;
+
     if (Length(FValue.Unknown3) = Unknown3Size[AModel]) then
       exit(AModel);
   end;
-end;
-
-function TmUdbDataHndl.GetModelDescription: string;
-begin
-  result := GetEnumName(TypeInfo(TTripModel), Ord(GetModel));
 end;
 
 function TmUdbDataHndl.GetDistOffset: integer;
@@ -4012,15 +3964,18 @@ begin
        (Diff > SizeOf(TUdbDirFixedValue))) then
     exit(TTripModel.Unknown);
 
-  // Check for UdbDirMagic in first UdbDir
-  SavePos := AStream.Position;
-  try
-    if (AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir)) <> SizeOf(FirstUdbDir)) then
-      exit(TTripModel.Unknown);
-    if (Swap32(FirstUdbDir.Unknown1) <> UdbDirMagic) then
-      exit(TTripModel.Unknown);
-  finally
-    AStream.Seek(SavePos, TSeekOrigin.soBeginning);
+  // Check for UdbDirMagic in first UdbDir. If there are UDBdir's!
+  if (AnUdbHandle.FValue.UDbDirCount > 0) then
+  begin
+    SavePos := AStream.Position;
+    try
+      if (AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir)) <> SizeOf(FirstUdbDir)) then
+        exit(TTripModel.Unknown);
+      if (Swap32(FirstUdbDir.Unknown1) <> UdbDirMagic) then
+        exit(TTripModel.Unknown);
+    finally
+      AStream.Seek(SavePos, TSeekOrigin.soBeginning);
+    end;
   end;
 end;
 
@@ -4072,37 +4027,21 @@ begin
     AStream.Read(AnUdbHandle.FValue.UdbHandleSize, SizeOf(AnUdbHandle.FValue.UdbHandleSize));
     AStream.Read(AnUdbHandle.FValue.CalcStatus, SizeOf(AnUdbHandle.FValue.CalcStatus));
 
-    // Alloc Unknown2 and unknown3 blocks
-    SelModel := TTripModel.Unknown;                       // Default to Unknown
-
-{$IFDEF CALCULATION_MAGIC}
-    // Try to get the model from a known calculation magic
-
-    if (AnUdbHandle.FValue.CalcStatus <> CalcUndef) then  // The Zumo 590, 3x0, nuvi have 0.
-    begin
-      for AModel := Low(TTripModel) to High(TTripModel) do
-      begin
-        if (AnUdbHandle.FValue.CalcStatus = CalculationMagic[AModel]) then
-        begin
-          SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream);
-          break;
-        end;
-      end;
-    end;
-{$ENDIF}
-
-    // Check for known unknown3 size
+    // Check for Calculation Magic and known unknown3 size
     // Need to compute.
-    if (SelModel = TTripModel.Unknown) then
+    SavePosCalcMagic := AStream.Position;
+    SelModel := TTripModel.Unknown;                       // Default to Unknown
+    for AModel := Low(TTripModel) to High(TTripModel) do
     begin
-      SavePosCalcMagic :=  AStream.Position;
-      for AModel := Low(TTripModel) to High(TTripModel) do
-      begin
-        AStream.Seek(SavePosCalcMagic, TSeekOrigin.soBeginning);         // reposition after CalculationMagic
-        SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream); // Now we have the UdbDirCount, we can compute the size.
-        if (SelModel = AModel) then
-          break;
-      end;
+      if (CalculationMagic[AModel] <> CalcUndef) and
+         (AnUdbHandle.FValue.CalcStatus <> CalcUndef) and
+         (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[AModel]) then
+        continue;
+
+      AStream.Seek(SavePosCalcMagic, TSeekOrigin.soBeginning);         // reposition after CalculationMagic
+      SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream); // Now we have the UdbDirCount, we can compute the size.
+      if (SelModel = AModel) then
+        break;
     end;
     AnUdbHandle.FValue.SwapCardinals;
 
@@ -5602,15 +5541,22 @@ begin
   // Get model from UdbHandle
   result := AnUdbHandle.GetModel;
 
-  // 595 and drive5 share the same UDBHandle size, but the drive 51 has no mIsRoundTrip
-  if (result = TTripModel.Zumo595) and
-     (GetItem('mIsRoundTrip') = nil) then
-    result := TTripModel.Drive51;
-
-  if (result = TTripModel.Tread2) and
-     (GetItem('mIsRoundTrip') = nil) then
-    result := TTripModel.Drive66;
-
+  // Zumo 595 and Drive 51 share the same UDBHandle size, but the Drive 51 has no mIsRoundTrip
+  // Tread 2 and SmartDrive 66 share the same UDBHandle size, but the SmartDrive 66 has no mIsRoundTrip
+  if (GetItem('mIsRoundTrip') = nil) then
+    case result of
+      TTripModel.Zumo595:
+        result := TTripModel.Drive51;
+      TTripModel.Tread2:
+        result := TTripModel.Drive66;
+    end
+  else
+    case result of
+      TTripModel.Drive51:
+        result := TTripModel.Zumo595;
+      TTripModel.Drive66:
+        result := TTripModel.Tread2;
+    end;
 end;
 
 // Is the TripList calculated?
@@ -5719,7 +5665,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmVersionNumber.Create);
+  Add(TmVersionNumber.Create(4, 7));
   Add(TmAllRoutes.Create);
   Add(TmTripName.Create(TripName));
 
@@ -5763,7 +5709,7 @@ begin
 
     CheckHRGuid(CreateGUID(Uuid));
     Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
-    Add(TmVersionNumber.Create(4, $10));
+    Add(TmVersionNumber.Create(4, 16));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
     Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
@@ -5837,7 +5783,7 @@ begin
     Add(TmRoutePreferences.Create);
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
-    Add(TmVersionNumber.Create(4, $10));
+    Add(TmVersionNumber.Create(4, 16));
 
     // Create dummy AllRoutes, and complete RoutePreferences
     ForceRecalc(TTripModel.XT3, 2);
@@ -5896,7 +5842,7 @@ begin
 
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
-    Add(TmVersionNumber.Create(4, $10));
+    Add(TmVersionNumber.Create(4, 16));
 
     // Create dummy AllRoutes, and complete RoutePreferences
     ForceRecalc(TTripModel.Tread2, 2);
@@ -6004,7 +5950,7 @@ begin
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
-    Add(TmVersionNumber.Create(4, $09));
+    Add(TmVersionNumber.Create(4, 9));
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmTripName.Create(TripName));
 
@@ -6118,7 +6064,7 @@ begin
         ANItem := TLocation(Location).LocationTmArrival;
         if (Assigned(ANItem)) and
            (TmArrival(ANItem).AsCardinal <> 0) then
-          Arrival := DateToISO8601(TmArrival.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
+          Arrival := DateToISO8601(TUnixDateConv.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
       end;
 
       // Point Name

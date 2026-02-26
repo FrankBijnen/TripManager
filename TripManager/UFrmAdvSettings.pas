@@ -133,7 +133,7 @@ begin
      (Startstext('Date: ', AGrid.Cells[1, ARow])) then
   begin
     ACardinal := StrToIntDef('$' + Copy(AGrid.Cells[2, ARow], 3), 0);
-    AGrid.Cells[1, ARow] := 'Date: ' + TUnixDate.CardinalAsDateTimeString(ACardinal);
+    AGrid.Cells[1, ARow] := 'Date: ' + TUnixDateConv.CardinalAsDateTimeString(ACardinal);
   end;
 
   ARow := ARow + 1;
@@ -209,7 +209,6 @@ end;
 procedure TFrmAdvSettings.LoadSettings_Device;
 var
   CurRow: integer;
-  ModelIndex: integer;
   SubKey: string;
 begin
   GridDeviceSettings.OnModified := GridModified;
@@ -230,8 +229,7 @@ begin
 
     AddGridLine(GridDeviceSettings,   CurRow, '');
 
-    ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-    SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
 
     AddGridLine(GridDeviceSettings,   CurRow, '', '',
                                       Format('-Preferred folders (Model: %s)-', [SubKey]));
@@ -239,13 +237,13 @@ begin
                                       '',
                                       'Override device name');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDevTripsFolder_Key,
-                                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 0),
+                                      TModelConv.GetKnownPath(CurrentDevice, 0),
                                       'Default trips folder');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDevGpxFolder_Key,
-                                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1),
+                                      TModelConv.GetKnownPath(CurrentDevice, 1),
                                       'Default GPX folder');
     AddGridLine(GridDeviceSettings,   CurRow, SubKey + '\' + Reg_PrefDevPoiFolder_Key,
-                                      TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2),
+                                      TModelConv.GetKnownPath(CurrentDevice, 2),
                                       'Default GPI folder');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_PrefFileSysFolder_Key,
                                       Reg_PrefFileSysFolder_Val,

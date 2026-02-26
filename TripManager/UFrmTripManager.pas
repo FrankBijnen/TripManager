@@ -24,24 +24,14 @@ const
   SelectMTPDevice         = 'Select an MTP device';
   UpDirString             = '..';
 
-  GpxExtension            = '.gpx';
-  GpxMask                 = '*' + GpxExtension;
-
-  TripExtension           = '.trip';
-  TripMask                = '*' + TripExtension;
-
-  GPIExtension            = '.gpi';
-  GPIMask                 = '*' + GPIExtension;
-  UnlExtension            = '.unl';
-
   HtmlExtension           = '.html';
   KmlExtension            = '.kml';
   FitExtension            = '.fit';
   DBExtension             = '.db';
-  CurrentMapItem          = 'CurrentMapItem';
 
   FileSysTrip             = 'FileSys';
   CompareTrip             = 'Compare';
+  CurrentMapItem          = 'CurrentMapItem';
 
   WM_DIRCHANGED           = WM_USER + 1;
   WM_ADDRLOOKUP           = WM_USER + 2;
@@ -497,20 +487,6 @@ begin
   result := IntPtr(@Field) - IntPtr(@Base);
 end;
 
-procedure DeleteTempFiles(const ATempPath, AMask: string);
-var
-  Fs: TSearchRec;
-  Rc: integer;
-begin
-  Rc := FindFirst(IncludeTrailingPathDelimiter(ATempPath) + AMask, faAnyFile - faDirectory, Fs);
-  while (Rc = 0) do
-  begin
-    DeleteFile(IncludeTrailingPathDelimiter(ATempPath) + Fs.Name);
-    Rc := FindNext(Fs);
-  end;
-  FindClose(Fs);
-end;
-
 procedure DeleteCompareFiles;
 begin
   DeleteTempFiles(GetOSMTemp, Format('\%s_%s%s%s',
@@ -726,22 +702,13 @@ begin
 end;
 
 function TFrmTripManager.CheckDevice(RaiseException: boolean = true): boolean;
-var
-  CrWait, CrNormal: HCURSOR;
 begin
-  CrWait := LoadCursor(0, IDC_WAIT);
-  CrNormal := SetCursor(CrWait);
-  try
-    result := Assigned(CurrentDevice) and
-              CurrentDevice.CheckDevice;
+  result := Assigned(CurrentDevice) and
+            CurrentDevice.CheckDevice;
 
-    if (not result) and
-       (RaiseException) then
-      raise exception.Create('No MTP Device opened.');
-
-  finally
-    SetCursor(CrNormal);
-  end;
+  if (not result) and
+     (RaiseException) then
+    raise exception.Create('No MTP Device opened.');
 end;
 
 function TFrmTripManager.HasTMTPDevice(const ADevice: TObject = nil): boolean;
@@ -2454,8 +2421,8 @@ begin
 
   SetRegistry(Reg_CurrentModel, ModelIndex);
   SetRegistry(Reg_EnableTripFuncs, TModelConv.Display2Trip(ModelIndex) <> TTripModel.Unknown);
-  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 1) <> '');
-  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(CurrentDevice, ModelIndex, 2) <> '');
+  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(CurrentDevice, 1) <> '');
+  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(CurrentDevice, 2) <> '');
   SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
 
   ReadDefaultFolders;
@@ -2534,7 +2501,7 @@ begin
   if (Arrival = nil) then
     exit;
 
-  ADateTime := TUnixDate.CardinalAsDateTime(Arrival.AsUnixDateTime);
+  ADateTime := TUnixDateConv.CardinalAsDateTime(Arrival.AsUnixDateTime);
   with TFrmDateDialog.Create(nil) do
   begin
     DtPicker.DateTime := ADateTime;
@@ -2563,7 +2530,7 @@ begin
         LocalFile := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
         TmpTripList.LoadFromFile(LocalFile);
         Arrival := TmpTripList.GetArrival;
-        Arrival.AsUnixDateTime := TUnixDate.DateTimeAsCardinal(ADateTime);
+        Arrival.AsUnixDateTime := TUnixDateConv.DateTimeAsCardinal(ADateTime);
         if (IncrementDay) then
           ADateTime := IncDay(ADateTime, 1);
         TmpTripList.SaveToFile(LocalFile);
@@ -3119,96 +3086,21 @@ begin
   end;
 end;
 
-//TODO Move to TMTP_Device?
 procedure TFrmTripManager.RecreateTrips;
 var
-  FriendlyPath, TempFile, SystemPath, SystemTripsPath, LastRefreshFile: string;
-  Rc: integer;
-  Fs: TSearchRec;
   CrNormal,CrWait: HCURSOR;
-  AListItem: TListItem;
-  File_Info: TFile_Info;
-  LDelim: integer;
-  SystemId, SystemTripsId, SystemSqlId: string;
-  CompletePath: WideString;
 begin
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
-
   try
-    // Make sure we do this for the .System\Trips folder
-    ReadDefaultFolders;
-
-    SystemTripsId := GetIdForPath(CurrentDevice.PortableDev, DeviceFolder[0], FriendlyPath);
-    LDelim := LastDelimiter('\', FriendlyPath) -1;
-    SystemPath := Copy(FriendlyPath, 1, LDelim);          // .System
-    SystemTripsPath := ExtractFileName(FriendlyPath);     // Trips
-    if not SameText(TripsPath, SystemTripsPath) then      // And the sub folder should be Trips
-      exit;
-
-    // DateTime of system.db
-    SystemSqlId := GetIdForPath(CurrentDevice.PortableDev, TMTP_Device(CurrentDevice).GetDbPath, FriendlyPath);
-    if (GetIdForFile(CurrentDevice.PortableDev, SystemSqlId, SystemDb, File_Info) = '') then
-      exit;
-
-    // Is there a .tmp in trips?
-    LastRefreshFile := Format('%10d.tmp', [TUnixDate.DateTimeAsCardinal(File_Info.ObjDate)]);
-    if (GetIdForFile(CurrentDevice.PortableDev, SystemTripsId, LastRefreshFile) <> '') then
-      exit;
-
-    SbPostProcess.Panels[0].Text := 'Recreating directory';
-    SbPostProcess.Panels[1].Text := DeviceFolder[0];
-    SbPostProcess.Update;
-
-    // Need to recreate trips
-    ReadFilesFromDevice(CurrentDevice.PortableDev, LstFiles.Items, SystemTripsId, CompletePath);
-
-    // Clean temp
-    DeleteTempFiles(CreatedTempPath, '*.*');
-
-    // Create lastrefresh file
-    TFile.WriteAllText(CreatedTempPath + LastRefreshFile, '');
-
-    // Copy Files to Temp directory
-    for AListItem in LstFiles.Items do
+    ReadDefaultFolders; // Make sure we do this for the .System\Trips folder
+    if (TMTP_Device(CurrentDevice).RecreateTrips(DeviceFolder[0],
+                                                 LstFiles.Items)) then
     begin
-      if (ContainsText(AListItem.SubItems[2], TripExtension) = false) then
-        continue;
-
-      TempFile := CopyFileToTmp(AListItem);
-      if (TempFile = '') then
-        exit;
+      SbPostProcess.Panels[0].Text := 'Directory recreated succesfully';
+      SbPostProcess.Panels[1].Text := SystemTripsPath;
     end;
 
-    // Delete and recreate .System\Trips
-    DelFromDevice(CurrentDevice.PortableDev, SystemTripsId, true);
-    SystemId := GetIdForPath(CurrentDevice.PortableDev, SystemPath, FriendlyPath);
-    CreatePath(CurrentDevice.PortableDev, SystemId, SystemTripsPath);
-
-    SetCurrentPath(DeviceFolder[0]); // Rescan .System\Trips
-    if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + LastRefreshFile, FSavedFolderId) = '') then
-      raise Exception.Create(Format('Could not overwrite file: %s on %s',
-                                    [LastRefreshFile, CurrentDevice.DisplayedDevice]));
-
-    Rc := FindFirst(CreatedTempPath + TripMask, faAnyFile - faDirectory, Fs);
-    while (Rc = 0) do
-    begin
-      // Save the File name and Extension. The rest of the loop must use these vars.
-      TempFile := Fs.Name;
-      // Make sure we read the next, so we can use Continue in the loop
-      Rc := FindNext(Fs);
-
-      // Transfer
-      TempFile := IncludeTrailingPathDelimiter(CreatedTempPath) + TempFile;
-
-      // Did the transfer work?
-      if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
-        raise Exception.Create(Format('Could not overwrite file: %s on %s',
-                                      [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
-    end;
-
-    FindClose(Fs);
-    SbPostProcess.Panels[0].Text := 'Directory recreated succesfully';
   finally
     SetCursor(CrNormal);
     StatusTimer.Enabled := false;
@@ -3782,8 +3674,8 @@ var
                                                    SizeOf(AnUdbhandle.UdbHandleValue.UdbHandleSize),
                                                    AnUdbhandle.OffsetValue));
 
-    VlTripInfo.Strings.AddPair('Calculation status', Format('0x%s (%s)',
-                                                       [IntToHex(AnUdbhandle.UdbHandleValue.CalcStatus, 8), AnUdbhandle.ModelDescription]),
+    VlTripInfo.Strings.AddPair('Calculation status', Format('0x%s',
+                                                       [IntToHex(AnUdbhandle.UdbHandleValue.CalcStatus, 8)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(AnUdbhandle.UdbHandleValue.CalcStatus),
                                                    AnUdbhandle.OffsetValue + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.CalcStatus) ));
@@ -4202,7 +4094,7 @@ begin
                 'Tip: Use Ctrl + Click on Map to get precise coordinates')
   else if (ABaseDataItem is TUnixDate) then
   begin
-    ADateTime := TUnixDate.CardinalAsDateTime(TUnixDate(ABaseDataItem).AsUnixDateTime);
+    ADateTime := TUnixDateConv.CardinalAsDateTime(TUnixDate(ABaseDataItem).AsUnixDateTime);
     with TFrmDateDialog.Create(nil) do
     begin
       DtPicker.DateTime := ADateTime;
@@ -4212,7 +4104,7 @@ begin
     end;
     if Rc = ID_OK then
     begin
-      TUnixDate(ABaseDataItem).AsUnixDateTime := TUnixDate.DateTimeAsCardinal(ADateTime);
+      TUnixDate(ABaseDataItem).AsUnixDateTime := TUnixDateConv.DateTimeAsCardinal(ADateTime);
       BtnSaveTripValues.Enabled := true;
       TvTripChange(TvTrip, TvTrip.Selected);
     end;
@@ -4278,25 +4170,11 @@ begin
 end;
 
 function TFrmTripManager.CopyFileToTmp(const AListItem: TListItem): string;
-var
-  ABASE_Data_File: TBase_Data;
-  NFile: string;
 begin
   result := '';
   CheckDevice;
 
-  // Get Id of File
-  ABASE_Data_File := TBase_Data(TBase_Data(AListItem.Data));
-  if (ABASE_Data_File.IsFolder) then
-    exit;
-
-  // Get Name of file
-  NFile := AListItem.Caption;
-
-  if not GetFileFromDevice(CurrentDevice.PortableDev, ABASE_Data_File.ObjectId, CreatedTempPath, NFile) then
-    raise Exception.Create(Format('Copy %s from %s failed', [NFile, CurrentDevice.Device]));
-
-  result := IncludeTrailingPathDelimiter(CreatedTempPath) + NFile;
+  result := TMTP_Device(CurrentDevice).CopyFileToTmp(AListItem);
 end;
 
 procedure TFrmTripManager.CopyValueFromTripClick(Sender: TObject);
@@ -4604,7 +4482,7 @@ begin
     ParentName := 'Group1';
     if not InputQuery('Group selected trips', 'Group name', ParentName) then
       exit;
-    ParentId := TUnixDate.DateTimeAsCardinal(Now);
+    ParentId := TUnixDateConv.DateTimeAsCardinal(Now);
   end;
 
   CrWait := LoadCursor(0, IDC_WAIT);
@@ -4758,12 +4636,7 @@ end;
 procedure TFrmTripManager.CopyFileFromTmp(const LocalFile: string; const AListItem: TListItem);
 begin
   CheckDevice;
-  if not Assigned(AListItem) then
-    raise exception.Create('No item selected.');
-
-  if not TransferExistingFileToDevice(CurrentDevice.PortableDev, LocalFile, FSavedFolderId, AListItem) then
-    raise Exception.Create(Format('TransferExistingFileToDevice %s to %s failed', [LocalFile, CurrentDevice.Device]));
-
+  TMTP_Device(CurrentDevice).CopyFileFromTmp(LocalFile, FSavedFolderId, AListItem);
   CheckTrip(AListItem, LocalFile);
 end;
 

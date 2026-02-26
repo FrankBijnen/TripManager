@@ -288,7 +288,7 @@ begin
                                 RoutePointList[RoutePt].RoutePref,
                                 RoutePointList[RoutePt].AdvLevel,
                                 AnUdbDir.Lat, AnUdbDir.Lon,
-                                TUnixDate.CardinalAsDateTime(RoutePointList[RoutePt].LocationTmArrival.AsUnixDateTime),
+                                TUnixDateConv.CardinalAsDateTime(RoutePointList[RoutePt].LocationTmArrival.AsUnixDateTime),
                                 RoutePointList[RoutePt].LocationTmName.AsString,
                                 RoutePointList[RoutePt].LocationTmAddress.AsString);
       end;

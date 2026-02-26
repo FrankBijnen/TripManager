@@ -450,7 +450,7 @@ begin
       end;
       ANItem := TTripList(FTripList).GetArrival;
       if (ANItem <> nil) then
-        TmArrival(ANItem).AsUnixDateTime := TmArrival(ANItem).DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
+        TmArrival(ANItem).AsUnixDateTime := TUnixDateConv.DateTimeAsCardinal(CdsRouteDepartureDate.AsDateTime);
 
       if (Assigned(FUuidList)) then
       begin
@@ -566,7 +566,7 @@ begin
 
     ANItem := TTripList(FTripList).GetArrival;
     if (ANItem <> nil) then
-      CdsRouteDepartureDate.AsDateTime := TmArrival(ANItem).CardinalAsDateTime(TmArrival(ANItem).AsUnixDateTime);
+      CdsRouteDepartureDate.AsDateTime := TUnixDateConv.CardinalAsDateTime(TmArrival(ANItem).AsUnixDateTime);
     CdsRoute.Post;
 
     CdsRoutePoints.IndexFieldNames := 'Id';

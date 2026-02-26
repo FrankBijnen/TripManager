@@ -354,7 +354,10 @@ function GetFirstStorageID(PortableDev: IPortableDevice): WideString;
 function ReadFilesFromDevice(PortableDev: IPortableDevice;
                              Lst: TListItems;
                              SParent: WideString;
-                             var CompletePath: WideString): PWideChar;
+                             var CompletePath: WideString): PWideChar; overload;
+procedure ReadFilesFromDevice(PortableDev: IPortableDevice;
+                              Lst: TListItems;
+                              SParent: WideString); overload;
 function GetIdForPath(PortableDev: IPortableDevice;
                       SPath: WideString;
                       var FriendlyPath: string): string;
@@ -1236,6 +1239,15 @@ begin
   finally
     SetCursor(CrNormal);
   end;
+end;
+
+procedure ReadFilesFromDevice(PortableDev: IPortableDevice;
+                              Lst: TListItems;
+                              SParent: WideString);
+var
+  CompletePath: WideString;
+begin
+  ReadFilesFromDevice(PortableDev, Lst, SParent, CompletePath);
 end;
 
 function FindItemInFolder(Content: IPortableDeviceContent;

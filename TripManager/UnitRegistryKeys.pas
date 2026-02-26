@@ -142,7 +142,7 @@ implementation
 uses
   System.SysUtils, System.StrUtils, System.DateUtils, System.TypInfo,
   Vcl.ComCtrls,
-  UnitTripDefs, UnitTripObjects, UnitRegistry, UnitProcessOptions, UnitGpi, UnitModelConv;
+  UnitTripDefs, UnitRegistry, UnitProcessOptions, UnitGpi, UnitModelConv;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
 begin
@@ -191,7 +191,7 @@ begin
     VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, XT2_VehicleProfileTruckType);
     VehicleProfileName := GetRegistry(Reg_VehicleProfileName, XT2_VehicleProfileName);
     AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
-                                                                      TUnixDate.DateTimeAsCardinal(IncYear(Now, -1)));
+                                                                      TUnixDateConv.DateTimeAsCardinal(IncYear(Now, -1)));
     DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2)) -1);
 
     // GPI defaults

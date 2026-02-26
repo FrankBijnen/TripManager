@@ -10,8 +10,8 @@ uses
 const
   // Device recognition constants
   InternalStorage                   = 'Internal Storage\';
-  TripsPath                         = 'Trips';
-  SystemTripsPath                   = '.System\' + TripsPath;
+  DefTripsPath                      = 'Trips';
+  SystemTripsPath                   = '.System\' + DefTripsPath;
   NonMTPRoot                        = '?:\';
   GarminPath                        = 'Garmin';
   SystemDb                          = 'system.db';
@@ -104,7 +104,7 @@ type
     class function GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
     class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
     class function GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string; overload;
-    class function GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string; overload;
+    class function GetKnownPath(const CurrentDevice: TObject; const PathId: integer): string; overload;
     class function GetKnownGarminPath(const CurrentDevice: TObject;
                                       const RegKey: string;
                                       const ModelIndex, PathId: integer): string;
@@ -359,7 +359,7 @@ begin
   end;
 end;
 
-class function TModelConv.GetKnownPath(const CurrentDevice: TObject; const DevIndex, PathId: integer): string;
+class function TModelConv.GetKnownPath(const CurrentDevice: TObject; const PathId: integer): string;
 var
   GarminDevice: TGarminDevice;
 begin
@@ -367,16 +367,11 @@ begin
 
   if (Assigned(CurrentDevice)) and
      (CurrentDevice is TMTP_Device) then
-    // If we have a device, get the paths from the GarminDevice.xml
-    GarminDevice := TMTP_Device(CurrentDevice).GarminDevice
-  else
   begin
-    // Provide some defaults
-    GarminDevice := DefaultGarminDevice;
-    GarminDevice.Init(Model_Tab[Display2Garmin(DevIndex)].DeviceName);
+    // If we have a device, get the paths from the GarminDevice.xml
+    GarminDevice := TMTP_Device(CurrentDevice).GarminDevice;
+    result := GetKnownPath(GarminDevice, PathId);
   end;
-
-  result := GetKnownPath(GarminDevice, PathId);
 end;
 
 class function TModelConv.GetKnownGarminPath(const CurrentDevice: TObject;
@@ -388,7 +383,7 @@ begin
   SubKey := GetDefaultDevice(ModelIndex);
 
   result  := GetRegistry(RegKey,
-                         GetKnownPath(CurrentDevice, ModelIndex, PathId),
+                         GetKnownPath(CurrentDevice, PathId),
                          SubKey);
 
   if (result <> '') and

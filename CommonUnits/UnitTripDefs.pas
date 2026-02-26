@@ -33,6 +33,46 @@ type
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
 
+  TUnixDateConv = class
+    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
+    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
+    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
+  end;
+
+const
+  TripExtension           = '.trip';
+  TripMask                = '*' + TripExtension;
+
 implementation
+
+uses
+  System.SysUtils, System.DateUtils;
+
+class function TUnixDateConv.DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
+var
+  ValueEpoch: int64;
+  ValueUnix: int64;
+begin
+  result := 0;
+  if (ADateTime <> 0) then
+  begin
+    ValueUnix := DateTimeToUnix(ADateTime, false);
+    ValueEpoch := DateTimeToUnix(EncodeDateTime(1989, 12, 31, 0, 0, 0, 0));
+    result := ValueUnix - ValueEpoch;
+  end;
+end;
+
+class function TUnixDateConv.CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
+var
+  ValueEpoch: int64;
+begin
+  ValueEpoch := ACardinal + DateTimeToUnix(EncodeDateTime(1989,12,31,0,0,0,0)); // Starts from 1989/12/31
+  result := UnixToDateTime(ValueEpoch, false);
+end;
+
+class function TUnixDateConv.CardinalAsDateTimeString(ACardinal: Cardinal): string;
+begin
+  result := Format('%s', [DateTimeToStr(CardinalAsDateTime(ACardinal))]);
+end;
 
 end.

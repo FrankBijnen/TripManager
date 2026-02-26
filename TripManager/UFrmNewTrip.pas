@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  UFrmTripManager, UnitMTPDefs;
+  UnitMTPDefs, UnitTripDefs;
 
 {$R *.dfm}
 

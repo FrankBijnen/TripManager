@@ -18,6 +18,9 @@ const
   DefGpiSmallSymbolsDir       = DefGpiSymbolsDir + '24x24\';
   Reg_GPISymbolSize           = 'GPISymbolsSize';
   Reg_GPIProximity            = 'GPIProximity';
+  GPIExtension                = '.gpi';
+  GPIMask                     = '*' + GPIExtension;
+  UnlExtension                = '.unl';
 
 type
 

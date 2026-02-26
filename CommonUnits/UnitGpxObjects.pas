@@ -2107,9 +2107,9 @@ begin
       GpxTime := FindSubNodeValue(TrackPoint, 'time');
       if (GpxTime <> '') and
         TryISO8601ToDate(GpxTime, WinDateTime, false) then
-        UnixTime := TUnixDate.DateTimeAsCardinal(WinDateTime)
+        UnixTime := TUnixDateConv.DateTimeAsCardinal(WinDateTime)
       else
-        UnixTime := TUnixDate.DateTimeAsCardinal(Now);
+        UnixTime := TUnixDateConv.DateTimeAsCardinal(Now);
       UnixTime := UnixTime + Cardinal(TrackId);  // Time needs to be unique.
 
       break;
@@ -2666,7 +2666,7 @@ begin
      (GpxNode.Name <> 'gpx') then
     exit;
 
-  ParentTripId := TUnixDate.DateTimeAsCardinal(Now) + FSeqNo;
+  ParentTripId := TUnixDateConv.DateTimeAsCardinal(Now) + FSeqNo;
   RouteCnt := 0;
   for RteNode in GpxNode.ChildNodes do
   begin

@@ -28,7 +28,6 @@ procedure AdjustLatLon(var Lat, Lon: string; No_Decimals: integer);
 procedure CheckHRGuid(HR: Hresult);
 procedure PrepStream(TmpStream: TMemoryStream; const Buffer: array of Cardinal);  overload;
 procedure PrepStream(TmpStream: TMemoryStream; const Count: Cardinal; const Buffer: array of WORD); overload;
-
 procedure DebugMsg(const Msg: array of variant);
 function TempFilename(const Prefix: string): string;
 function GetAppData: string;
@@ -45,6 +44,7 @@ function GetTracksTmp: string;
 function GetOSMTemp: string;
 function GetRoutesTmp: string;
 function GetDeviceTmp: string;
+procedure DeleteTempFiles(const ATempPath, AMask: string);
 function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
@@ -74,6 +74,7 @@ const
   OSMDir            = 'OSM\';
   RoutesDir         = 'Routes\';
   DeviceDir         = 'Device\';
+
 
 function SenSize(const S: int64): string;
 var
@@ -341,6 +342,20 @@ end;
 function GetDeviceTmp: string;
 begin
   result := CreatedTempPath + DeviceDir;
+end;
+
+procedure DeleteTempFiles(const ATempPath, AMask: string);
+var
+  Fs: TSearchRec;
+  Rc: integer;
+begin
+  Rc := System.Sysutils.FindFirst(IncludeTrailingPathDelimiter(ATempPath) + AMask, faAnyFile - faDirectory, Fs);
+  while (Rc = 0) do
+  begin
+    System.Sysutils.DeleteFile(IncludeTrailingPathDelimiter(ATempPath) + Fs.Name);
+    Rc := FindNext(Fs);
+  end;
+  System.Sysutils.FindClose(Fs);
 end;
 
 function EscapeDQuote(const HTML: string): string;
