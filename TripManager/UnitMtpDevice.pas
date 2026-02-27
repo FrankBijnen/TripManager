@@ -29,7 +29,8 @@ type
     CoursesPath: string;
     NewFilesPath: string;
     ActivitiesPath: string;
-    procedure Init(const AModelDescription: string = '');
+    procedure Init(const AGarminModel: TGarminModel); overload;
+    procedure Init(const AModelDescription: string = ''); overload;
     function ReadGarminDevice(const ACurrentDevice: TObject;
                               const AModelDescription: string;
                               const ADeviceList: Tlist): boolean;
@@ -78,26 +79,31 @@ const
   MTPVendorGarmin = 'usb#vid_091e&';
 
 // Default paths. Will be overruled by reading GarminDevice.Xml
-procedure TGarminDevice.Init(const AModelDescription: string = '');
+procedure TGarminDevice.Init(const AGarminModel: TGarminModel);
 begin
+  GarminModel       := AGarminModel;
   PartNumber        := NotApplicable;
   SoftwareVersion   := NotApplicable;
-  if (AModelDescription <> '') then
-  begin
-    ModelDescription  := AModelDescription;
-    GarminModel       := TModelConv.GetModelFromGarminDevice(Self);
-  end
-  else
-  begin
-    ModelDescription  := Unknown_Name;
-    GarminModel       := TGarminModel.Unknown;
-  end;
   SerialNumber      := NotApplicable;
   GpxPath           := NonMTPRoot + DefGarminPath + '\' + DefGPXPath;
   GpiPath           := NonMTPRoot + DefGarminPath + '\' + DefPOIPath;
   CoursesPath       := NonMTPRoot + DefGarminPath + '\' + DefCoursesPath;
   NewFilesPath      := NonMTPRoot + DefGarminPath + '\' + DefNewFilesPath;
   ActivitiesPath    := NonMTPRoot + DefGarminPath + '\' + DefActivitiesPath;
+end;
+
+procedure TGarminDevice.Init(const AModelDescription: string = '');
+begin
+  if (AModelDescription <> '') then
+  begin
+    ModelDescription := AModelDescription;
+    Init(TModelConv.GetModelFromGarminDevice(Self));
+  end
+  else
+  begin
+    ModelDescription := Unknown_Name;
+    Init(TGarminModel.Unknown);
+  end;
 end;
 
 function TGarminDevice.ReadGarminDevice(const ACurrentDevice: TObject;

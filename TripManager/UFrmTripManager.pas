@@ -2436,8 +2436,8 @@ begin
 
   SetRegistry(Reg_CurrentModel, ModelIndex);
   SetRegistry(Reg_EnableTripFuncs, TModelConv.Display2Trip(ModelIndex) <> TTripModel.Unknown);
-  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(ModelIndex, 1) <> '');
-  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(ModelIndex, 2) <> '');
+  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(GarminModel, 1) <> '');
+  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(GarminModel, 2) <> '');
   SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
 
   ReadDefaultFolders;
