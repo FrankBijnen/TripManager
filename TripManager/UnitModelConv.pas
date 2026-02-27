@@ -108,6 +108,7 @@ type
     class function GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
     class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
     class function GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string; overload;
+    class function GetKnownPath(const ModelIndex, PathId: integer): string; overload;
     class function GetKnownPath(const CurrentDevice: TObject; const PathId: integer): string; overload;
     class function GetKnownGarminPath(const CurrentDevice: TObject;
                                       const RegKey: string;
@@ -361,6 +362,12 @@ begin
         2: result := GarminDevice.GpiPath;
       end;
   end;
+end;
+
+class function TModelConv.GetKnownPath(const ModelIndex, PathId: integer): string;
+begin
+  DefaultGarminDevice.Init(TModelConv.GetDefaultDevice(ModelIndex));
+  result := GetKnownPath(DefaultGarminDevice, PathId);
 end;
 
 class function TModelConv.GetKnownPath(const CurrentDevice: TObject; const PathId: integer): string;
