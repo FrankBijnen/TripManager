@@ -69,6 +69,7 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 1
+        OnResize = PnlDeviceTopResize
         object CmbDevices: TComboBox
           AlignWithMargins = True
           Left = 142
@@ -85,6 +86,7 @@ object FrmTripManager: TFrmTripManager
           TextHint = 'Select an MTP device'
           OnChange = CmbDevicesChange
           OnDropDown = CmbDevicesDropDown
+          OnEnter = CmbDevicesEnter
           Items.Strings = (
             'Select an MTP device')
         end
@@ -1093,6 +1095,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1334
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1100,7 +1103,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

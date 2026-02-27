@@ -9,12 +9,6 @@ uses
   UnitTripDefs, UnitGpxDefs;
 
 const
-  Small_TmScPosnSize                  = 8; // Also Zumo 590
-  TmScPosnSize                        = 12;
-  Large_TmScPosnSize                  = 16;
-  TurnMagicUcs4: array[0..3] of byte  = ($47, $4E, $00, $00);
-  TurnMagicWide: array[0..3] of byte  = ($01, $00, $47, $4E); // Zumo 595 etc.
-  TripFileName                        = '0:/.System/Trips/%s.trip';
 
 { Elementary data types }
   dtByte          = 1;
@@ -55,12 +49,12 @@ const
                                                           (Value: Ord(rmPopular);           Name: 'Popular'),
                                                           (Value: Ord(rmNoShape);           Name: 'No Shape'),
                                                           (Value: Ord(rmScenic);            Name: 'Scenic'),
-                                                          (Value: Ord(rmNA);                Name: 'N/A')
+                                                          (Value: Ord(rmNA);                Name: NotApplicable)
                                                         );
 
   MinAdvLevelUserConfig = 1; // Only these are available to the user.
   MaxAdvLevelUserConfig = 4;
-  AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: 'N/A'),
+  AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: NotApplicable),
                                                           (Value: Ord(advLevel1);           Name: 'Faster'),
                                                           (Value: Ord(advLevel2);           Name: 'FastAndAdventurous'),
                                                           (Value: Ord(advLevel3);           Name: 'Adventurous'),
@@ -78,28 +72,6 @@ const
                                                           (Value: Ord(rpShaping);           Name: 'Shaping point'),
                                                           (Value: Ord(rpShapingXT2);        Name: 'Shaping point XT(2)')
                                                         );
-  UdbDirTurn              = 'Turn';
-  StringLoaded: word      = $ffff;
-  UdbDirMagic: Cardinal   = $51590469;
-  CalcUndef               = $00000000;
-  CalcNA                  = $ffffffff;
-
-// The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
-// Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
-// Model specific values                              XT        XT2       XT3       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  Drive 66  nuvi 2595 Unknown
-  NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    false,    true,     false,    false,    true,     false);
-  Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false,    true,     false,    true);
-  UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   121 * 4,  21 * 2,   64 * 2);
-  UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       18,       18,       16,       20);
-  Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      150,      76,       72,       72,       76,       150,      72,       80);
-  Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1452,     1348,     294,      254,      130,      294,      1348,     134,      512);
-  UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     false,    false,    true,     false);
-  CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$05d8feff,$0574feff,$0170feff,CalcUndef,CalcUndef,$0170feff,$0574feff,CalcUndef,CalcNA);
-  Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $c0,      $8e,      $66,      $66,      $8e,      $c0,      $00,      $c0);
-  Unknown3DistOffset: array[TTripModel] of Cardinal =($14,      $14,      $14,      $14,      $12,      $12,      $12,      $12,      $14,      $12,      $14);
-  Unknown3TimeOffset: array[TTripModel] of Cardinal =($18,      $18,      $18,      $18,      $16,      $16,      $16,      $16,      $18,      $16,      $18);
-  VersionSize:        array[TTripModel] of integer  =($08,      $08,      $08,      $08,      $05,      $05,      $05,      $05,      $08,      $05,      $08);
-//Version                                             4,7       4,16      4,16      4,16      1,6       1,3       1,3       1,6       4,9       1,1
 type
   TTripList = class;
 
@@ -243,7 +215,7 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
   public
-    constructor Create(AMajor, AMinor: Cardinal); reintroduce;
+    constructor Create(ATripVersion: TTripVersion); reintroduce;
     destructor Destroy; override;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
   end;
@@ -252,18 +224,18 @@ type
   TPosnValue = packed record
     procedure SwapCardinals;
     case ScnSize: Cardinal of
-    Small_TmScPosnSize:           // Zumo 340, 350 and 590
+    PosnSmall:                    // Zumo 340, 350 and 590
       (
         Lat_8:                    integer;
         Lon_8:                    integer;
       );
-    TmScPosnSize:                 // XT, XT2, 595, drive 51
+    PosnNorm:                     // XT, XT2, 595, drive 51, drive 66
       (
         Unknown1:                 Cardinal;
         Lat:                      integer;
         Lon:                      integer;
       );
-    Large_TmScPosnSize:           // Tread 2
+    PosnLarge:                    // XT3, Tread 2,
       (
         Unknown1_16: array[0..1] of Cardinal;
         Lat_16:                     integer;
@@ -284,7 +256,7 @@ type
     function CoordsAsPosnValue(const LatLon: string): TPosnValue;
     procedure SetMapCoords(ACoords: string);
   public
-    constructor Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal = TmScPosnSize); reintroduce;
+    constructor Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal); reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     property Unknown1: Cardinal read FValue.Unknown1;
@@ -1147,7 +1119,13 @@ uses
   UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions, UnitTripOverview;
 
 const
-  Coord_Decimals = '%1.6f';
+  Coord_Decimals                      = '%1.6f';
+  StringLoaded: word                  = $ffff;
+  TurnMagicUcs4: array[0..3] of byte  = ($47, $4E, $00, $00); // UCS4
+  TurnMagicWide: array[0..3] of byte  = ($01, $00, $47, $4E); // WideChar
+  TripFileName                        = '0:/.System/Trips/%s.trip';
+  UdbDirTurn                          = 'Turn';
+  UdbDirMagic: Cardinal               = $51590469;
 
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
@@ -1714,20 +1692,20 @@ begin
 end;
 
 {*** Version ***}
-constructor TmVersionNumber.Create(AMajor, Aminor: Cardinal);
+constructor TmVersionNumber.Create(ATripVersion: TTripVersion);
 begin
-  case AMajor of
+  case ATripVersion.Major of
     1:
       begin
         inherited Create('mVersionNumber', SizeOf(FValue.Major) + SizeOf(FValue.MinorB), dtVersion);
-        FValue.Major  := Swap32(AMajor);
-        FValue.MinorB := AMinor;
+        FValue.Major  := Swap32(ATripVersion.Major);
+        FValue.MinorB := ATripVersion.Minor;
       end
     else
     begin
       inherited Create('mVersionNumber', SizeOf(FValue), dtVersion);
-      FValue.Major  := Swap32(AMajor);
-      FValue.MinorC := AMinor;
+      FValue.Major  := Swap32(ATripVersion.Major);
+      FValue.MinorC := ATripVersion.Minor;
     end;
   end;
 end;
@@ -1770,19 +1748,19 @@ begin
   ScnSize := Swap32(ScnSize);
 end;
 
-constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal = TmScPosnSize);
+constructor TmScPosn.Create(ALat, ALon: double; AUnknown1: Cardinal; ASize: Cardinal);
 begin
   case ASize of
-    Small_TmScPosnSize:
+    PosnSmall:
       begin
         inherited Create('mScPosn',
-                         SizeOf(FValue.ScnSize) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
+                         SizeOf(FValue.ScnSize) + Sizeof(FValue.Lat_8) + SizeOf(FValue.Lon_8),
                          dtPosn);
-        FValue.ScnSize := + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
+        FValue.ScnSize := Sizeof(FValue.Lat_8) + SizeOf(FValue.Lon_8);
         FValue.Lat_8 := (CoordAsInt(ALat));
         FValue.Lon_8 := (CoordAsInt(ALon));
       end;
-    Large_TmScPosnSize:
+    PosnLarge:
       begin
         inherited Create('mScPosn', SizeOf(FValue), dtPosn);
         FValue.ScnSize := SizeOf(FValue.Unknown1_16) + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
@@ -1812,12 +1790,12 @@ begin
   FValue.SwapCardinals; // Unknown1, Lat and Lon are not swapped
 
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       begin
         AStream.Read(FValue.Lat_8, SizeOf(FValue.Lat_8));
         AStream.Read(FValue.Lon_8, SizeOf(FValue.Lon_8));
       end;
-    Large_TmScPosnSize:
+    PosnLarge:
       begin
         AStream.Read(FValue.Unknown1_16, SizeOf(FValue.Unknown1_16));
         AStream.Read(FValue.Lat_16, SizeOf(FValue.Lat_16));
@@ -1840,14 +1818,14 @@ end;
 procedure TmScPosn.WriteValue(AStream: TMemoryStream);
 begin
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       begin
         FValue.SwapCardinals;
         AStream.Write(FValue.ScnSize, SizeOf(FValue.ScnSize));
         AStream.Write(FValue.Lat_8, SizeOf(FValue.Lat_8));
         AStream.Write(FValue.Lon_8, SizeOf(FValue.Lon_8));
       end;
-    Large_TmScPosnSize:
+    PosnLarge:
       begin
         FValue.SwapCardinals;
         AStream.Write(FValue, SizeOf(FValue));
@@ -1872,12 +1850,12 @@ end;
 function TmScPosn.GetValue: string;
 begin
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       begin
         result := Format('Lat, Lon: %s',
                         [MapCoords]);
       end;
-    Large_TmScPosnSize:
+    PosnLarge:
       begin
         result := Format('Unknown1: 0x%s, Unknown2: 0x%s, Lat, Lon: %s',
                         [IntToHex(FValue.Unknown1_16[0], 8),
@@ -1898,9 +1876,9 @@ begin
   result := inherited GetOffSetValue + SizeOf(FValue.ScnSize);
 
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       ; // Do nothing
-    Large_TmScPosnSize:
+    PosnLarge:
       result := result + SizeOf(FValue.Unknown1_16);
     else
       result := result + SizeOf(FValue.Unknown1);
@@ -1910,9 +1888,9 @@ end;
 function TmScPosn.GetLenValue: Cardinal;
 begin
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       result := SizeOf(FValue.Lat_8) + SizeOf(FValue.Lon_8);
-    Large_TmScPosnSize:
+    PosnLarge:
       result := SizeOf(FValue.Lat_16) + SizeOf(FValue.Lon_16);
     else
       result := SizeOf(FValue.Lat) + SizeOf(FValue.Lon);
@@ -1922,9 +1900,9 @@ end;
 function TmScPosn.GetLat: double;
 begin
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       result := CoordAsDec(FValue.Lat_8);
-    Large_TmScPosnSize:
+    PosnLarge:
       result := CoordAsDec(FValue.Lat_16);
     else
       result := CoordAsDec(FValue.Lat);
@@ -1934,9 +1912,9 @@ end;
 function TmScPosn.GetLon: double;
 begin
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       result := CoordAsDec(FValue.Lon_8);
-    Large_TmScPosnSize:
+    PosnLarge:
       result := CoordAsDec(FValue.Lon_16);
     else
       result := CoordAsDec(FValue.Lon);
@@ -1946,9 +1924,9 @@ end;
 function TmScPosn.GetMapCoords: string;
 begin
   case FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_8), CoordAsDec(FValue.Lon_8));
-    Large_TmScPosnSize:
+    PosnLarge:
       result := FormatMapCoords(CoordAsDec(FValue.Lat_16), CoordAsDec(FValue.Lon_16));
     else
       result := FormatMapCoords(CoordAsDec(FValue.Lat), CoordAsDec(FValue.Lon));
@@ -1964,12 +1942,12 @@ begin
 
   ParseLatLon(LatLon, Lat, Lon);
   case result.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       begin
         result.Lat_8 := CoordAsInt(CoordAsDec(Lat));
         result.Lon_8 := CoordAsInt(CoordAsDec(Lon));
       end;
-    Large_TmScPosnSize:
+    PosnLarge:
       begin
         result.Lat_16 := CoordAsInt(CoordAsDec(Lat));
         result.Lon_16 := CoordAsInt(CoordAsDec(Lon));
@@ -2277,7 +2255,7 @@ end;
 function TmRoutePreference.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, RoutePreferenceMap)) then
-    result := 'N/A';
+    result := NotApplicable;
 end;
 
 procedure TmRoutePreference.SetByte(AByte: byte);
@@ -2359,7 +2337,7 @@ end;
 function TmTransportationMode.GetValue: string;
 begin
   if not (IntToIdent(FValue, result, TransportModeMap)) then
-    result := 'N/A';
+    result := NotApplicable;
 end;
 
 procedure TmTransportationMode.SetValue(AValue: string);
@@ -3512,12 +3490,12 @@ begin
 
   AmScPosn := ALocation.LocationTmScPosn;
   case AmScPosn.FValue.ScnSize of
-    Small_TmScPosnSize:
+    PosnSmall:
       begin
         FValue.Lat := Swap32(AmScPosn.FValue.Lat_8);
         FValue.Lon := Swap32(AmScPosn.FValue.Lon_8);
       end;
-    Large_TmScPosnSize:
+    PosnLarge:
       begin
         FValue.Lat := Swap32(AmScPosn.FValue.Lat_16);
         FValue.Lon := Swap32(AmScPosn.FValue.Lon_16);
@@ -4843,7 +4821,7 @@ begin
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.XT]));
   Locations.Add(TmAddress.Create(Address));
   Locations.Add(TmisTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
@@ -4871,40 +4849,10 @@ begin
     Locations.Add(TmIsDFSPoint.Create);
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.XT2]));
     Locations.Add(TmAddress.Create(Address));
     Locations.Add(TmisTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
-    Locations.Add(TmName.Create(Name));
-  finally
-    TmpStream.Free;
-  end;
-end;
-
-procedure TTripList.AddLocation_Tread2(Locations: TmLocations;
-                                       ProcessOptions: TObject;
-                                       RoutePoint: TRoutePoint;
-                                       RoutePref: TRoutePreference;
-                                       AdvLevel: TAdvlevel;
-                                       Lat, Lon: double;
-                                       DepartureDate: TDateTime;
-                                       Name, Address: string);
-var
-  TmpStream : TMemoryStream;
-begin
-  TmpStream := TMemoryStream.Create;
-  try
-    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
-
-    Locations.Add(TmisTravelapseDestination.Create);
-    Locations.Add(TmShapingRadius.Create);
-    PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
-    Locations.Add(TmDuration.Create);
-    Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Large_TmScPosnSize));
-    Locations.Add(TmAttr.Create(RoutePoint));
-    Locations.Add(TmAddress.Create(Address));
     Locations.Add(TmName.Create(Name));
   finally
     TmpStream.Free;
@@ -4933,7 +4881,37 @@ begin
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Large_TmScPosnSize));
+    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.XT3]));
+    Locations.Add(TmAttr.Create(RoutePoint));
+    Locations.Add(TmAddress.Create(Address));
+    Locations.Add(TmName.Create(Name));
+  finally
+    TmpStream.Free;
+  end;
+end;
+
+procedure TTripList.AddLocation_Tread2(Locations: TmLocations;
+                                       ProcessOptions: TObject;
+                                       RoutePoint: TRoutePoint;
+                                       RoutePref: TRoutePreference;
+                                       AdvLevel: TAdvlevel;
+                                       Lat, Lon: double;
+                                       DepartureDate: TDateTime;
+                                       Name, Address: string);
+var
+  TmpStream : TMemoryStream;
+begin
+  TmpStream := TMemoryStream.Create;
+  try
+    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
+
+    Locations.Add(TmisTravelapseDestination.Create);
+    Locations.Add(TmShapingRadius.Create);
+    PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
+    Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
+    Locations.Add(TmDuration.Create);
+    Locations.Add(TmArrival.Create(DepartureDate));
+    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Tread2]));
     Locations.Add(TmAttr.Create(RoutePoint));
     Locations.Add(TmAddress.Create(Address));
     Locations.Add(TmName.Create(Name));
@@ -4950,7 +4928,7 @@ procedure TTripList.AddLocation_Zumo595(Locations: TmLocations;
                                         Name, Address: string);
 begin
   Locations.AddLocation(TLocation.Create);
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Zumo595]));
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(DepartureDate));
@@ -4974,7 +4952,7 @@ begin
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Small_TmScPosnSize));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Zumo590]));
   Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
 end;
 
@@ -4989,7 +4967,7 @@ begin
   Locations.Add(TmAttr.Create(RoutePoint));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Drive51]));
   Locations.Add(TmAddress.Create(Address));
   Locations.Add(TmisTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
@@ -5014,7 +4992,7 @@ begin
     Locations.Add(TmAttr.Create(RoutePoint));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1));
+    Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Drive66]));
     Locations.Add(TmAddress.Create(Address));
     Locations.Add(TmisTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
@@ -5037,7 +5015,7 @@ begin
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Small_TmScPosnSize));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Zumo3x0]));
   Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
 end;
 
@@ -5055,7 +5033,7 @@ begin
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, Small_TmScPosnSize));
+  Locations.Add(TmScPosn.Create(Lat, Lon, TProcessOptions(ProcessOptions).ScPosn_Unknown1, ScPosnSize[TTripModel.Nuvi2595]));
 end;
 
 procedure TTripList.AddLocation(Locations: TmLocations;
@@ -5665,7 +5643,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmVersionNumber.Create(4, 7));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.XT]));
   Add(TmAllRoutes.Create);
   Add(TmTripName.Create(TripName));
 
@@ -5709,7 +5687,7 @@ begin
 
     CheckHRGuid(CreateGUID(Uuid));
     Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
-    Add(TmVersionNumber.Create(4, 16));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.XT2]));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
     Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
@@ -5783,7 +5761,7 @@ begin
     Add(TmRoutePreferences.Create);
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
-    Add(TmVersionNumber.Create(4, 16));
+    Add(TmVersionNumber.Create(TripVersion[TTripModel.XT3]));
 
     // Create dummy AllRoutes, and complete RoutePreferences
     ForceRecalc(TTripModel.XT3, 2);
@@ -5842,7 +5820,7 @@ begin
 
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
-    Add(TmVersionNumber.Create(4, 16));
+    Add(TmVersionNumber.Create(TripVersion[TTripModel.Tread2]));
 
     // Create dummy AllRoutes, and complete RoutePreferences
     ForceRecalc(TTripModel.Tread2, 2);
@@ -5871,7 +5849,7 @@ begin
   Add(TmTripName.Create(TripName));
   Add(TmAvoidancesChanged.Create);
   Add(TmParentTripName.Create(TripName));
-  Add(TmVersionNumber.Create(1, 6));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.Zumo595]));
   Add(TmIsRoundTrip.Create);
   Add(TmOptimized.Create);
 
@@ -5891,7 +5869,7 @@ begin
   Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
-  Add(TmVersionNumber.Create(1, 3));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.Zumo590]));
 
   // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
   ForceRecalc(TTripModel.Zumo590, 2);
@@ -5914,7 +5892,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTotalTripDistance.Create);
-  Add(TmVersionNumber.Create(1, 6));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.Drive51]));
   Add(TmAllRoutes.Create);
   Add(TmTripName.Create(TripName));
 
@@ -5950,7 +5928,7 @@ begin
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
-    Add(TmVersionNumber.Create(4, 9));
+    Add(TmVersionNumber.Create(TripVersion[TTripModel.Drive66]));
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmTripName.Create(TripName));
 
@@ -5972,7 +5950,7 @@ begin
   Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5, dt3x0RoutePref));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
-  Add(TmVersionNumber.Create(1, 3));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.Zumo3x0]));
 
   // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
   ForceRecalc(TTripModel.Zumo3x0, 2);
@@ -5986,7 +5964,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTripName.Create(TripName));
-  Add(TmVersionNumber.Create(1, 1));
+  Add(TmVersionNumber.Create(TripVersion[TTripModel.Nuvi2595]));
 
   // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
   ForceRecalc(TTripModel.Nuvi2595, 2);

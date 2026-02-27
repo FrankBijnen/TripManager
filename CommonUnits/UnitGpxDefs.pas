@@ -20,6 +20,7 @@ const
   RteOrigin                   = 'Rte';
   GpxExtension                = '.gpx';
   GpxMask                     = '*' + GpxExtension;
+  NotApplicable               = 'N/A';
 
 type
   TDistanceUnit = (duKm, duMi);

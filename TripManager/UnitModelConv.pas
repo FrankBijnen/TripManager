@@ -11,9 +11,11 @@ const
   // Device recognition constants
   InternalStorage                   = 'Internal Storage\';
   DefTripsPath                      = 'Trips';
+  DefTripsDesc                      = 'Trips';
   SystemTripsPath                   = '.System\' + DefTripsPath;
   NonMTPRoot                        = '?:\';
-  GarminPath                        = 'Garmin';
+  DefGarminPath                     = 'Garmin';
+  DefSQLitePath                     = '\SQlite';
   SystemDb                          = 'system.db';
   SettingsDb                        = 'settings.db';
   ProfileDb                         = 'vehicle_profile.db';
@@ -22,14 +24,16 @@ const
   Reg_UnsafeModels                  = 'UnsafeModels';
   Reg_PrefDev_Key                   = 'PrefDevice';
   Reg_PrefDevTripsFolder_Key        = 'PrefDeviceTripsFolder';
-  Reg_PrefDevTripsFolder_Val        = InternalStorage + SystemTripsPath;
-
   Reg_PrefDevGpxFolder_Key          = 'PrefDeviceGpxFolder';
-  GPXPath                           = 'GPX';
-  Reg_PrefDevGpxFolder_Val          = InternalStorage + GPXPath;
+  DefGPXPath                        = 'GPX';
+  DefGPXDesc                        = 'Gpx';
   Reg_PrefDevPoiFolder_Key          = 'PrefDevicePoiFolder';
-  POIPath                           = 'POI';
-  Reg_PrefDevPoiFolder_Val          = InternalStorage + POIPath;
+  DefPOIPath                        = 'POI';
+  DefPOIDesc                        = 'Poi (Gpi)';
+  DefCoursesPath                    = 'Courses';
+  DefNewFilesPath                   = 'NewFiles';
+  DefActivitiesPath                 = 'Activities';
+  DefUnusedDesc                     = 'Unused';
 
   // Device names
   Zumo_Name                         = 'z' + #0363 + 'mo'; // Dont need to save as UTF8
@@ -347,7 +351,7 @@ begin
       end;
     TGarminModel.GarminEdge:
       case PathId of
-        0: result := GarminDevice.CoursePath;
+        0: result := GarminDevice.CoursesPath;
         1: result := GarminDevice.NewFilesPath;
         2: result := GarminDevice.ActivitiesPath;
       end;

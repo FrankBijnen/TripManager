@@ -29,8 +29,8 @@ type
     function ItemsWidth: integer;
     procedure AdjustWidths;
     procedure SetColWidths(ACols: integer);
-    property  ColWidths: TColWidths read FColWidths write FColWidths;
-
+    procedure HideSelection;
+    property ColWidths: TColWidths read FColWidths write FColWidths;
     property FullTextSearch: boolean read FFullTextSearch write SetFullTextSearch;
   end;
 
@@ -163,6 +163,11 @@ procedure TComboBox.SetColWidths(ACols: integer);
 begin
   SetLength(FColWidths, 0); // Init to zeroes
   SetLength(FColWidths, ACols);
+end;
+
+procedure TComboBox.HideSelection;
+begin
+  PostMessage(Handle, CB_SETEDITSEL, WPARAM(-1), LPARAM(0));
 end;
 
 end.

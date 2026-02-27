@@ -48,7 +48,7 @@ begin
     if (ATripInfo.Time > 0) then
       result := Format('%d', [Round(ATripInfo.Distance * 3600 / ATripInfo.Time)])
     else
-      result := 'N/A'
+      result := NotApplicable;
   end;
 end;
 

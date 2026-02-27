@@ -333,6 +333,8 @@ type
     procedure CmbDevicesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure CmbDevicesDropDown(Sender: TObject);
     procedure SetOverrideDeviceNameClick(Sender: TObject);
+    procedure CmbDevicesEnter(Sender: TObject);
+    procedure PnlDeviceTopResize(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -742,6 +744,7 @@ begin
     ReadSettings;
 
   BgDeviceClick(BgDevice);
+  CmbDevices.HideSelection;
 end;
 
 procedure TFrmTripManager.ActInstalledDocExecute(Sender: TObject);
@@ -1650,6 +1653,11 @@ begin
   SbPostProcess.Panels[1].Width := PCTTripInfo.Width div 2;
 end;
 
+procedure TFrmTripManager.PnlDeviceTopResize(Sender: TObject);
+begin
+  CmbDevices.HideSelection;
+end;
+
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
   MnuTripNewMTP.Enabled := CheckDevice(false);
@@ -2234,6 +2242,7 @@ begin
     if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev)) then
       CmbDevices.ItemIndex := DevId;
   end;
+  CmbDevices.HideSelection;
 end;
 
 procedure TFrmTripManager.SelectDevice(const Indx: integer);
@@ -2310,6 +2319,7 @@ begin
       TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
     RebuildDeviceDbMenu;
   end;
+  TComboBox(Sender).HideSelection;
 end;
 
 procedure TFrmTripManager.CmbDevicesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
@@ -2386,6 +2396,11 @@ begin
   CmbDevices.DropDownWidth := Max(CmbDevices.ItemsWidth, CmbDevices.Width);
 end;
 
+procedure TFrmTripManager.CmbDevicesEnter(Sender: TObject);
+begin
+  TComboBox(Sender).HideSelection;
+end;
+
 procedure TFrmTripManager.ModelChanged;
 var
   ModelIndex: integer;
@@ -2395,26 +2410,26 @@ begin
   GarminModel := TModelConv.Display2Garmin(ModelIndex);
   BgDevice.ItemIndex := 0; // Default to trips
 
-  BgDevice.Items[0].Caption := 'Trips';
-  BgDevice.Items[1].Caption := 'Gpx';
-  BgDevice.Items[2].Caption := 'Poi (Gpi)';
+  BgDevice.Items[0].Caption := DefTripsDesc;
+  BgDevice.Items[1].Caption := DefGPXPath;
+  BgDevice.Items[2].Caption := DefPOIDesc;
   case GarminModel of
     TGarminModel.Zumo595,
     TGarminModel.Drive51:
       begin
-        BgDevice.Items[1].Caption := 'Unused';
-        BgDevice.Items[2].Caption := 'Unused';
+        BgDevice.Items[1].Caption := DefUnusedDesc;
+        BgDevice.Items[2].Caption := DefUnusedDesc;
       end;
     TGarminModel.GarminEdge:
       begin
-        BgDevice.Items[0].Caption := 'Courses';
-        BgDevice.Items[1].Caption := 'NewFiles';
-        BgDevice.Items[2].Caption := 'Activities';
+        BgDevice.Items[0].Caption := DefCoursesPath;
+        BgDevice.Items[1].Caption := DefNewFilesPath;
+        BgDevice.Items[2].Caption := DefActivitiesPath;
       end;
     TGarminModel.GarminGeneric,
     TGarminModel.Unknown:
       begin
-        BgDevice.Items[0].Caption := 'Unused';
+        BgDevice.Items[0].Caption := DefUnusedDesc;
         BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
       end;
   end;

@@ -26,7 +26,7 @@ type
     TripsPath: string;
     GpxPath: string;
     GpiPath: string;
-    CoursePath: string;
+    CoursesPath: string;
     NewFilesPath: string;
     ActivitiesPath: string;
     procedure Init(const AModelDescription: string = '');
@@ -50,7 +50,7 @@ type
     function CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
     function ReadGarminDevice(const AModelDescription: string;
                               const ADeviceList: Tlist;
-                              const AManufacturer: string = ''): boolean;
+                              const SelectManufacturer: string = '*'): boolean;
     function IsGarminDeviceName: boolean;
     procedure GetInfoFromDevice(const DeviceList: Tlist); override;
     procedure ReadDeviceDB(const ExploreList: TStringList);
@@ -72,30 +72,32 @@ uses
   UnitTripDefs, UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, mtp_helper;
 
 const
+// Known Garmin device names in MSM and MTP mode.
+// Used when the manufacturer is not reported as 'Garmin'
   MSMVendorGarmin = 'usbstor#disk&ven_garmin&';
-  MtpVendorGarmin = 'usb#vid_091e&';
+  MTPVendorGarmin = 'usb#vid_091e&';
 
 // Default paths. Will be overruled by reading GarminDevice.Xml
 procedure TGarminDevice.Init(const AModelDescription: string = '');
 begin
-  PartNumber        := 'N/A';
-  SoftwareVersion   := 'N/A';
+  PartNumber        := NotApplicable;
+  SoftwareVersion   := NotApplicable;
   if (AModelDescription <> '') then
   begin
-    ModelDescription := AModelDescription;
-    GarminModel := TModelConv.GetModelFromGarminDevice(Self);
+    ModelDescription  := AModelDescription;
+    GarminModel       := TModelConv.GetModelFromGarminDevice(Self);
   end
   else
   begin
     ModelDescription  := Unknown_Name;
     GarminModel       := TGarminModel.Unknown;
   end;
-  SerialNumber      := 'N/A';
-  GpxPath           := NonMTPRoot + GarminPath + '\GPX';
-  GpiPath           := NonMTPRoot + GarminPath + '\POI';
-  CoursePath        := NonMTPRoot + GarminPath + '\Courses';
-  NewFilesPath      := NonMTPRoot + GarminPath + '\NewFiles';
-  ActivitiesPath    := NonMTPRoot + GarminPath + '\Activities';
+  SerialNumber      := NotApplicable;
+  GpxPath           := NonMTPRoot + DefGarminPath + '\' + DefGPXPath;
+  GpiPath           := NonMTPRoot + DefGarminPath + '\' + DefPOIPath;
+  CoursesPath       := NonMTPRoot + DefGarminPath + '\' + DefCoursesPath;
+  NewFilesPath      := NonMTPRoot + DefGarminPath + '\' + DefNewFilesPath;
+  ActivitiesPath    := NonMTPRoot + DefGarminPath + '\' + DefActivitiesPath;
 end;
 
 function TGarminDevice.ReadGarminDevice(const ACurrentDevice: TObject;
@@ -164,8 +166,8 @@ begin
   CurDevId := CurrentDevice.Id;
   DeleteFile(GetDeviceTmp + NFile);
 
-  if not (CurrentDevice.CopyDeviceFile(NonMTPRoot + GarminPath, NFile, GetDeviceTmp)) and
-     not (CurrentDevice.CopyDeviceFile(InternalStorage + GarminPath, NFile, GetDeviceTmp)) then
+  if not (CurrentDevice.CopyDeviceFile(NonMTPRoot + DefGarminPath, NFile, GetDeviceTmp)) and
+     not (CurrentDevice.CopyDeviceFile(InternalStorage + DefGarminPath, NFile, GetDeviceTmp)) then
   begin
     // There is no garmindevice in ?:\Garmin, or Internal Storage\Garmin
     // Check other devices with the same serialId.
@@ -182,8 +184,8 @@ begin
           try
             if (ConnectToDevice(TmpDevice.Device, TmpDevice.PortableDev, true)) then
             begin
-              if (TmpDevice.CopyDeviceFile(NonMTPRoot + GarminPath, NFile, GetDeviceTmp)) or
-                 (TmpDevice.CopyDeviceFile(InternalStorage + GarminPath, NFile, GetDeviceTmp)) then
+              if (TmpDevice.CopyDeviceFile(NonMTPRoot + DefGarminPath, NFile, GetDeviceTmp)) or
+                 (TmpDevice.CopyDeviceFile(InternalStorage + DefGarminPath, NFile, GetDeviceTmp)) then
                break;
             end;
           finally
@@ -233,7 +235,7 @@ begin
       begin
         GpxPath := GetPath(MassStorageNode, 'GPSData', 'InputToUnit', 'gpx');
         GpiPath := GetPath(MassStorageNode, 'CustomPOI', 'InputToUnit', 'gpi');
-        CoursePath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'OutputFromUnit', 'fit');
+        CoursesPath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'OutputFromUnit', 'fit');
         NewFilesPath := GetPath(MassStorageNode, 'FIT_TYPE_6', 'InputToUnit', 'fit');
         ActivitiesPath := GetPath(MassStorageNode, 'FIT_TYPE_4', 'OutputFromUnit', 'fit');
       end;
@@ -329,11 +331,10 @@ end;
 
 function TMTP_Device.ReadGarminDevice(const AModelDescription: string;
                                       const ADeviceList: Tlist;
-                                      const AManufacturer: string = ''): boolean;
+                                      const SelectManufacturer: string = '*'): boolean;
 begin
   result := true;
-  if (AManufacturer = '') or
-     (AManufacturer = Manufacturer) then
+  if (MatchesMask(Manufacturer, SelectManufacturer)) then
     result := GarminDevice.ReadGarminDevice(Self, AModelDescription, ADeviceList)
   else
     GarminDevice.Init(AModelDescription);
@@ -342,26 +343,24 @@ end;
 function TMTP_Device.IsGarminDeviceName: boolean;
 begin
   result := ContainsText(Device, MSMVendorGarmin) or  // Mass Storage Mode Garmin
-            ContainsText(Device, MtpVendorGarmin);    // MTP Mode Garmin
+            ContainsText(Device, MTPVendorGarmin);    // MTP Mode Garmin
 end;
 
 procedure TMTP_Device.GetInfoFromDevice(const DeviceList: Tlist);
 begin
   inherited GetInfoFromDevice(DeviceList);
 
-  // Hack for 'Generic MTP Device'
+  // Hack for 'Generic MTP Device'.
   if (Manufacturer <> Garmin_Name) and
      (IsGarminDeviceName) then
     Manufacturer := Garmin_Name;
 
-  // Get Garmin Device info
-  // The complete DeviceList is needed to identify SD Cards
-  if (Manufacturer = Garmin_Name) then
-    ReadGarminDevice(GarminDevice.ModelDescription, DeviceList, Manufacturer);
+  // Get Garmin Device info. Note: The complete DeviceList is needed to identify SD Cards
+  ReadGarminDevice(GarminDevice.ModelDescription, DeviceList, Garmin_Name);
 
   if (MSM = MSM_ID) and
      (MatchesMask(FriendlyName, '?:\') = false) then
-    // Add the root path to friendlyname. Example Sd Cards of Zumo
+    // Add the root path to friendlyname. Example: SD Cards of Zumo
     FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath['?:\.']), FriendlyName]);
 end;
 
@@ -378,7 +377,7 @@ begin
                                          TModelConv.GetKnownPath(self, 0),
                                          SubKey));
   LDelim := LastDelimiter('\', DbPath) -1;
-  DbPath := Copy(DbPath, 1, LDelim) + '\SQlite';
+  DbPath := Copy(DbPath, 1, LDelim) + DefSQLitePath;
   if (GetIdForPath(PortableDev, DbPath, result) = '') then
     result := '';
 end;
