@@ -5181,6 +5181,10 @@ procedure TTripList.UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
 var
   TotalTripDistance: TmTotalTripDistance;
   TotalTripTime: TmTotalTripTime;
+  Locations: TmLocations;
+  RoutePoints: TList<TLocation>;
+  StartLocation, EndLocation: TLocation;
+  StartArrival, EndArrival: TmArrival;
 begin
   TotalTripDistance := (GetItem('mTotalTripDistance') as TmTotalTripDistance);
   if (Assigned(TotalTripDistance)) then
@@ -5188,6 +5192,36 @@ begin
   TotalTripTime := (GetItem('mTotalTripTime') as TmTotalTripTime);
   if (Assigned(TotalTripTime)) then
     TotalTripTime.AsCardinal := TotalTime;
+
+  // Update Arrival time of Destination.
+  // Will list the trip as scheduled on the 3x0, 590 and nuvi 2595. (And maybe others)
+  Locations := TmLocations(GetItem('mLocations'));
+  if not Assigned(Locations) then
+    exit;
+
+  RoutePoints := TList<TLocation>.Create;
+  try
+    Locations.GetRoutePoints(RoutePoints);
+    if (RoutePoints.Count > 1) then
+    begin
+      StartLocation := RoutePoints[0];
+      StartArrival := StartLocation.LocationTmArrival;
+      if (StartArrival = nil) then
+        exit;
+
+      if (StartArrival.GetAsUnixDateTime <> 0 ) then
+      begin
+        EndLocation := RoutePoints[RoutePoints.Count -1];
+        EndArrival := EndLocation.LocationTmArrival;
+        if (EndArrival = nil) then
+          exit;
+
+        EndArrival.SetAsUnixDateTime(StartArrival.GetAsUnixDateTime + TotalTime);
+      end;
+    end;
+  finally
+    RoutePoints.Free;
+  end;
 end;
 
 procedure TTripList.TripTrack(const AModel: TTripModel;
