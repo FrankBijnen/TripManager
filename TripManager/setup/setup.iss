@@ -238,16 +238,42 @@ begin
     result := ExpandConstant('{autopf32}');
 end;
 
-procedure MoveRegKey(RegKey, RegName: string);
+procedure CopyRegKey(RegKey, OldRegName, NewRegName: string);
 var
+  RegNames: TArrayOfString;
   RegValue: string;
+  Index: integer;
 begin
-  if RegQueryStringValue(HKCU, RegKey, RegName, RegValue) then
+  if RegKeyExists(HKCU, RegKey + NewRegName) then
+    exit;
+    
+  if RegGetValueNames(HKCU, RegKey + OldRegName, RegNames) then
   begin
-    RegWriteStringValue(HKCU, RegKey + '\0', RegName, RegValue);
-    RegWriteStringValue(HKCU, RegKey + '\1', RegName, RegValue);
-    RegWriteStringValue(HKCU, RegKey + '\2', RegName, RegValue);
-    RegDeleteValue(HKCU, RegKey, RegName);
+    for Index := 0 to High(RegNames) do
+    begin
+      if RegQueryStringValue(HKCU, RegKey + OldRegname, RegNames[Index], RegValue) then
+      begin
+        // Dont write default values
+        if RegValue = 'Internal Storage\.System\Trips' then 
+          continue;
+        if RegValue = 'Internal Storage\GPX' then 
+          continue;
+        if RegValue = 'Internal Storage\POI' then 
+          continue;
+        if RegValue = '?:\Garmin\GPX' then 
+          continue;
+        if RegValue = '?:\Garmin\POI' then 
+          continue;
+        if RegValue = '?:\Garmin\Courses' then 
+          continue;
+        if RegValue = '?:\Garmin\NewFiles' then 
+          continue;
+        if RegValue = '?:\Garmin\Activities' then 
+          continue;
+          
+        RegWriteStringValue(HKCU, RegKey + NewRegName, RegNames[Index], RegValue);
+      end;  
+    end;
   end;
 end;
 
@@ -271,9 +297,12 @@ begin
   // Clean old registry keys
   RegKey := 'SOFTWARE\TDBware\' + ExpandConstant('{#MyAppName}');
 
-  MoveRegKey(RegKey, 'PrefDeviceGpxFolder');
-  MoveRegKey(RegKey, 'PrefDevicePoiFolder');
-
+  CopyRegKey(RegKey, '\0', '\zūmo XT');
+  CopyRegKey(RegKey, '\1', '\zūmo XT2');
+  CopyRegKey(RegKey, '\2', '\Tread 2');
+  CopyRegKey(RegKey, '\3', '\Edge');
+  CopyRegKey(RegKey, '\4', '\Garmin');
+  
   RegDeleteValue(HKCU, RegKey, 'CurrentDevice');
   RegDeleteValue(HKCU, RegKey, 'ZumoModel');
   RegDeleteValue(HKCU, RegKey, 'EnableSendTo');
@@ -281,5 +310,7 @@ begin
   RegDeleteValue(HKCU, RegKey, 'ExploreUuid');
   RegDeleteValue(HKCU, RegKey, 'ForceRecalc');
   RegDeleteValue(HKCU, RegKey, 'AddSubClasses');
-  RegDeleteValue(HKCU, RegKey, 'WarnModel');
+  RegDeleteValue(HKCU, RegKey, 'PrefDeviceGpxFolder');
+  RegDeleteValue(HKCU, RegKey, 'PrefDevicePoiFolder');
+  
 end;
