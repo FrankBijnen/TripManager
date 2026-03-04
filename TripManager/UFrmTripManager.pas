@@ -335,6 +335,8 @@ type
     procedure SetOverrideDeviceNameClick(Sender: TObject);
     procedure CmbDevicesEnter(Sender: TObject);
     procedure PnlDeviceTopResize(Sender: TObject);
+    procedure CmbModelDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure CmbModelDropDown(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -542,7 +544,7 @@ begin
        (ModelDescription <> '') then
       CmbModel.Items[ModelIndex] := ModelDescription;
   end;
-  CmbModel.AdjustWidths;
+  CmbModel.AdjustWidth;
 
   CmbModel.ItemIndex := ModelIndex;
   ModelChanged;
@@ -2049,10 +2051,9 @@ begin
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
 
   TModelConv.CmbModelDevices(CmbModel.Items);
-  CmbModel.AdjustWidths;
+  CmbModel.AdjustWidth;
   if (GetRegistry(Reg_UnsafeModels, false)) then
   begin
-    CmbDevices.OnDrawItem := CmbDevicesDrawItem;
     BtnSetDefault.DropDownMenu := PopupSetDeviceDefault;
     BtnSetDefault.Style := TCustomButton.TButtonStyle.bsSplitButton;
   end;
@@ -2173,39 +2174,36 @@ procedure TFrmTripManager.SetDeviceColumnWidths;
 var
   Index: integer;
   CurrentMTPDevice: TMTP_Device;
-
-  procedure SetColWidth(AColumnText: string; AColumn: integer);
-  const
-    Margin = 6;
-  var
-    TextWidth: integer;
-  begin
-    TextWidth := CmbDevices.Canvas.TextWidth(AColumnText) + Margin;
-    if (TextWidth > CmbDevices.ColWidths[AColumn]) then
-      CmbDevices.ColWidths[AColumn] := TextWidth;
-  end;
-
+  GarminApplication: string;
 begin
   // Setup Column widths
-  if (GetRegistry(Reg_UnsafeModels, false)) then
+  CmbDevices.SetColCount(9);
+  for Index := 0 to DeviceList.Count - 1 do
   begin
-    CmbDevices.SetColWidths(7);
-    for Index := 0 to DeviceList.Count - 1 do
-    begin
-      if (HasTMTPDevice(DeviceList[Index])) then
-        CurrentMTPDevice := TMTP_Device(DeviceList[Index])
-      else
-        break;
-      SetColWidth(CurrentMTPDevice.FriendlyName,                  0);
-      SetColWidth(CurrentMTPDevice.Description,                   1);
-      SetColWidth(CurrentMTPDevice.Manufacturer,                  2);
-      SetColWidth(CurrentMTPDevice.GarminDevice.ModelDescription, 3);
-      SetColWidth(CurrentMTPDevice.GarminDevice.SoftwareVersion,  4);
-      SetColWidth(CurrentMTPDevice.GarminDevice.SerialNumber,     5);
-      SetColWidth(CurrentMTPDevice.MSM,                           6);
-    end;
+    if (HasTMTPDevice(DeviceList[Index])) then
+      CurrentMTPDevice := TMTP_Device(DeviceList[Index])
+    else
+      break;
+    GarminApplication := TModelConv.GarminApplication(CurrentMTPDevice.GarminDevice.GarminModel);
+
+    CmbDevices.SetColWidth(CurrentMTPDevice.FriendlyName,                  0);
+    CmbDevices.SetColWidth(CurrentMTPDevice.Description,                   1);
+    CmbDevices.SetColWidth(CurrentMTPDevice.Manufacturer,                  2);
+    CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.ModelDescription, 3);
+    CmbDevices.SetColWidth(GarminApplication,                              4);
+    CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.SoftwareVersion,  5);
+    CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.PartNumber,       6);
+    CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.SerialNumber,     7);
+    CmbDevices.SetColWidth(CurrentMTPDevice.MSM,                           8);
   end;
-  CmbDevices.AdjustWidths;
+
+  CmbModel.SetColCount(2);
+  for Index := 0 to CmbModel.Items.Count - 1 do
+  begin
+    CmbModel.SetColWidth(CmbModel.Items[Index],           0);
+    GarminApplication := TModelConv.GarminApplication(TGarminModel(CmbModel.Items.Objects[Index]));
+    CmbModel.SetColWidth(GarminApplication,               1);
+  end;
 end;
 
 procedure TFrmTripManager.GetDeviceList(KeepDevice: string = '');
@@ -2325,75 +2323,53 @@ end;
 procedure TFrmTripManager.CmbDevicesDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
 const
   Margin = 3;
+
 var
   AMTP_Device: TMTP_Device;
-  ACanvas: TCanvas;
   AComboBox: TComboBox;
-
-  procedure DrawLine(ACol: integer);
-  var
-    Cnt, LinePos: integer;
-  begin
-    LinePos := 0;
-    for Cnt := 0 to ACol do
-      LinePos := LinePos + AComboBox.ColWidths[Cnt];
-
-    ACanvas.Pen.Color := FStyleServices.GetStyleFontColor(TStyleFont.sfListItemTextNormal);
-    ACanvas.MoveTo(LinePos, Rect.Top);
-    ACanvas.LineTo(LinePos, Rect.Bottom);
-  end;
-
-  procedure DrawCol(ACol: integer; AText: string);
-  var
-    TextPos, Cnt: integer;
-    DrawRect: TRect;
-  begin
-    TextPos := 0;
-    for Cnt := 0 to ACol -1 do
-      TextPos := TextPos + AComboBox.ColWidths[Cnt];
-
-    DrawRect := Rect;
-    DrawRect.Left := TextPos + Margin;
-    DrawRect.Width := AComboBox.ColWidths[ACol];
-    ACanvas.TextRect(DrawRect, AText, [TTextFormats.tfLeft, TTextFormats.tfSingleLine]);
-  end;
-
+  GarminApplication: string;
 begin
   AComboBox := TComboBox(Control);
-  ACanvas := AComboBox.Canvas;
-  ACanvas.FillRect(Rect);
+  AComboBox.Canvas.FillRect(Rect);
 
   if not HasTMTPDevice(AComboBox.Items.Objects[Index]) then
-    ACanvas.TextOut(Rect.Left + 2, Rect.Top, AComboBox.Items[Index])
+    AComboBox.Canvas.TextOut(Rect.Left + 2, Rect.Top, AComboBox.Items[Index])
   else
   begin
     AMTP_Device := TMTP_Device(AComboBox.Items.Objects[Index]);
+    GarminApplication := TModelConv.GarminApplication(AMTP_Device.GarminDevice.GarminModel);
 
-    DrawCol(0, AMTP_Device.FriendlyName);
-    DrawLine(0);
+    AComboBox.DrawCol(0, AMTP_Device.FriendlyName, Rect);
+    AComboBox.DrawLine(0, Rect);
 
-    DrawCol(1, AMTP_Device.Description);
-    DrawLine(1);
+    AComboBox.DrawCol(1, AMTP_Device.Description, Rect);
+    AComboBox.DrawLine(1, Rect);
 
-    DrawCol(2, AMTP_Device.Manufacturer);
-    DrawLine(2);
+    AComboBox.DrawCol(2, AMTP_Device.Manufacturer, Rect);
+    AComboBox.DrawLine(2, Rect);
 
-    DrawCol(3, AMTP_Device.GarminDevice.ModelDescription);
-    DrawLine(3);
+    AComboBox.DrawCol(3, AMTP_Device.GarminDevice.ModelDescription, Rect);
+    AComboBox.DrawLine(3, Rect);
 
-    DrawCol(4, AMTP_Device.GarminDevice.SoftwareVersion);
-    DrawLine(4);
+    AComboBox.DrawCol(4, GarminApplication, Rect);
+    AComboBox.DrawLine(4, Rect);
 
-    DrawCol(5, AMTP_Device.GarminDevice.SerialNumber);
-    DrawLine(5);
+    AComboBox.DrawCol(5, AMTP_Device.GarminDevice.SoftwareVersion, Rect);
+    AComboBox.DrawLine(5, Rect);
 
-    DrawCol(6, AMTP_Device.MSM);
+    AComboBox.DrawCol(6, AMTP_Device.GarminDevice.PartNumber, Rect);
+    AComboBox.DrawLine(6, Rect);
+
+    AComboBox.DrawCol(7, AMTP_Device.GarminDevice.SerialNumber, Rect);
+    AComboBox.DrawLine(7, Rect);
+
+    AComboBox.DrawCol(8, AMTP_Device.MSM, Rect);
   end;
 end;
 
 procedure TFrmTripManager.CmbDevicesDropDown(Sender: TObject);
 begin
-  CmbDevices.DropDownWidth := Max(CmbDevices.ItemsWidth, CmbDevices.Width);
+  CmbDevices.AdjustDropDownWidth;
 end;
 
 procedure TFrmTripManager.CmbDevicesEnter(Sender: TObject);
@@ -2458,6 +2434,27 @@ begin
   ModelChanged;
   if (HasTMTPDevice) then
     PostReloadFileList;
+end;
+
+procedure TFrmTripManager.CmbModelDrawItem(Control: TWinControl; Index: Integer;
+  Rect: TRect; State: TOwnerDrawState);
+var
+  GarminApplication: string;
+  AComboBox: TComboBox;
+begin
+  AComboBox := TComboBox(Control);
+  AComboBox.Canvas.FillRect(Rect);
+
+  AComboBox.DrawCol(0, AComboBox.Items[Index], Rect);
+  AComboBox.DrawLine(0, Rect);
+
+  GarminApplication := TModelConv.GarminApplication(TGarminModel(AComboBox.Items.Objects[Index]));
+  AComboBox.DrawCol(1, GarminApplication, Rect);
+end;
+
+procedure TFrmTripManager.CmbModelDropDown(Sender: TObject);
+begin
+  CmbModel.AdjustDropDownWidth;
 end;
 
 procedure TFrmTripManager.CmbSQliteTabsChange(Sender: TObject);

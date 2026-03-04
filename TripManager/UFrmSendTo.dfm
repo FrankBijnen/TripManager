@@ -300,7 +300,6 @@ object FrmSendTo: TFrmSendTo
       28002E00680074006D006C00290000003B0000000000000000000000FFFFFFFF
       FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
       00200028002E006600690074002900}
-    ExplicitHeight = 272
   end
   object PnlBot: TPanel
     Left = 0
@@ -309,7 +308,6 @@ object FrmSendTo: TFrmSendTo
     Height = 33
     Align = alBottom
     TabOrder = 5
-    ExplicitTop = 568
     DesignSize = (
       592
       33)
@@ -351,6 +349,5 @@ object FrmSendTo: TFrmSendTo
     Height = 19
     Panels = <>
     SimplePanel = True
-    ExplicitTop = 549
   end
 end

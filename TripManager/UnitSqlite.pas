@@ -383,8 +383,10 @@ begin
     try
       ExecSqlQuery(DbName,
         'Select value from data_number ' + CRLF +
-        'where context like ''%None%'' and name like ''%Avoid%''' + CRLF+
-        'limit 1;',
+        'where context like ''%None%''' + CRLF +
+        ' and name like ''%Avoid%''' + CRLF +
+        ' and name like ''%Changed%'''+ CRLF+
+        ' limit 1;',
         SqlResults);
       for ALine in SqlResults do
       begin
@@ -411,7 +413,7 @@ begin
   try
     try
       case Model of
-        TGarminModel.XT3, // TODO Check
+        TGarminModel.XT3,
         TGarminModel.Tread2:
           ExecSqlQuery(DbName,
             'select v.vehicle_id, v.truck_type, v.name,' + CRLF +

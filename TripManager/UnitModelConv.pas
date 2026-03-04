@@ -48,8 +48,7 @@ const
   XT2_VehicleId                     = '1';
   XT2_VehicleProfileTruckType       = '7';
   XT2_VehicleProfileName            = Zumo_Name + ' Motorcycle';
-//TODO Get partnumber
-  XT2_PartNumber                    = 'XT2_NOT_EXIST';
+  XT2_PartNumber                    = '006-B4299-00';
 
   // XT3
   XT3_Name                          = Zumo_Name + ' XT3';
@@ -116,6 +115,7 @@ type
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
     class function Display2Trip(const CmbIndex: integer): TTripModel;
     class function Garmin2Display(const Garmin: TGarminModel): integer;
+    class function GarminApplication(const Garmin: TGarminModel): string;
     class function ReadDeviceDB(const Garmin: TGarminModel): boolean;
     class function ReadVehicleDB(const Garmin: TGarminModel): boolean;
     class function ReadExploreDB(const Garmin: TGarminModel): boolean;
@@ -135,7 +135,7 @@ uses
   UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
 
 type
-  TModel_Rec = record
+  TGarminModel_Rec = record
     DeviceName:  string;
     TripModel:   TTripModel;
     Safe:        boolean;
@@ -143,6 +143,7 @@ type
     DevDB:       boolean;
     VehicleDB:   boolean;
     ExploreDB:   boolean;
+    Application: string;
   end;
   TParts_Rec = record
     PartNumber:  string;
@@ -150,20 +151,21 @@ type
   end;
 
 const
-  Model_Tab: array[TGarminModel] of TModel_Rec =
+
+  Model_Tab: array[TGarminModel] of TGarminModel_Rec =
   (
-    (DeviceName: XT_Name;       TripModel: TTripModel.XT;       Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: true),
-    (DeviceName: XT2_Name;      TripModel: TTripModel.XT2;      Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true),
-    (DeviceName: XT3_Name;      TripModel: TTripModel.XT3;      Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true),
-    (DeviceName: Tread2_Name;   TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true),
-    (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Zumo595_Name;  TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Zumo590_Name;  TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Zumo3x0_Name;  TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Drive51_Name;  TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Drive66_Name;  TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
-    (DeviceName: Nuvi2595_Name; TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false),
+    (DeviceName: XT_Name;       TripModel: TTripModel.XT;       Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: XT2_Name;      TripModel: TTripModel.XT2;      Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: XT3_Name;      TripModel: TTripModel.XT3;      Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Tread2_Name;   TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Zumo595_Name;  TripModel: TTripModel.Zumo595;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Zumo590_Name;  TripModel: TTripModel.Zumo590;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Zumo3x0_Name;  TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Drive51_Name;  TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Drive66_Name;  TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Nuvi2595_Name; TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
+    (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'GPX,POI'),
     (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false)
   );
 
@@ -440,6 +442,11 @@ begin
     if (AGarminModel = SafeGarmin) then
       exit;
   end;
+end;
+
+class function TModelConv.GarminApplication(const Garmin: TGarminModel): string;
+begin
+  result := Model_Tab[Garmin].Application;
 end;
 
 class function TModelConv.GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;

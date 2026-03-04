@@ -163,14 +163,15 @@ begin
                        TModelConv.GetKnownGarminPath(CurrentDevice,
                                                      Reg_PrefDevTripsFolder_Key,
                                                      ModelIndex, 0),
-                       #10])
-        else if GetRegistry(Reg_EnableFitFuncs, false) then
+                       #10]);
+
+        if GetRegistry(Reg_EnableFitFuncs, false) then
           LblDestinations.Caption := LblDestinations.Caption +
             Format('.fit files:%s %s%s',
                       [#9,
                        TModelConv.GetKnownGarminPath(CurrentDevice,
                                                      Reg_PrefDevTripsFolder_Key,
-                                                     ModelIndex, 0),
+                                                     ModelIndex, 1),
                        #10]);
 
         if GetRegistry(Reg_EnableGpxFuncs, false) then

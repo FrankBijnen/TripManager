@@ -8,27 +8,34 @@ interface
 uses
   System.Classes,
   Winapi.Windows, Winapi.Messages,
-  Vcl.Controls, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.StdCtrls, Vcl.Themes;
 
 type
   TColWidths = array of integer;
 
   TComboBox = class(Vcl.StdCtrls.TComboBox)
   private
+    FStyleServices: TCustomStyleServices;
     FFullTextSearch: boolean;
     FFullTextSearchItems: TStringList;
     FColWidths: TColWidths;
     procedure FilterItems;
     procedure SetFullTextSearch(AValue: boolean);
     procedure CNCommand(var AMessage: TWMCommand); message CN_COMMAND;
+    function ItemsWidth: integer;
+    function DropDownItemsWidth: integer;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure CreateParams(var Params: TCreateParams); override;
     procedure AddFullTextSearch(ALine: string);
-    function ItemsWidth: integer;
-    procedure AdjustWidths;
-    procedure SetColWidths(ACols: integer);
+    procedure AdjustWidth;
+    procedure AdjustDropDownWidth;
+    procedure SetColCount(ACols: integer);
+    procedure SetColWidth(AColumnText: string; AColumn: integer);
+    procedure DrawLine(ACol: integer; Rect: TRect);
+    procedure DrawCol(ACol: integer; AText: string; Rect: Trect);
+
     procedure HideSelection;
     property ColWidths: TColWidths read FColWidths write FColWidths;
     property FullTextSearch: boolean read FFullTextSearch write SetFullTextSearch;
@@ -37,7 +44,8 @@ type
 implementation
 
 uses
-  System.StrUtils;
+  System.StrUtils,
+  Vcl.Graphics;
 
 constructor TComboBox.Create(AOwner: TComponent);
 begin
@@ -45,6 +53,8 @@ begin
   FFullTextSearch := false;
   FFullTextSearchItems := TStringList.Create;
   SetLength(FColWidths, 0); // Init to zeroes
+  FStyleServices := TStyleManager.ActiveStyle;
+
 end;
 
 destructor TComboBox.Destroy;
@@ -137,32 +147,78 @@ var
   LineWidth: integer;
 begin
   result := 0;
-  if (Length(FColWidths) > 0) then
+  for ALine in Items do
   begin
-    for LineWidth  in FColWidths do
-      result := result + LineWidth;
-  end
-  else
-  begin
-    for ALine in Items do
-    begin
-      LineWidth := Canvas.TextWidth(ALine) + Margin;
-      if (LineWidth > result) then
-        result := LineWidth;
-    end;
+    LineWidth := Canvas.TextWidth(ALine) + Margin;
+    if (LineWidth > result) then
+      result := LineWidth;
   end;
 end;
 
-procedure TComboBox.AdjustWidths;
+function TComboBox.DropDownItemsWidth: Integer;
+var
+  LineWidth: integer;
 begin
-  Width := ItemsWidth + GetSystemMetrics(SM_CXVSCROLL);
-  DropDownWidth := Width;
+  result := 0;
+  for LineWidth in FColWidths do
+    result := result + LineWidth;
 end;
 
-procedure TComboBox.SetColWidths(ACols: integer);
+procedure TComboBox.AdjustWidth;
+begin
+  Width := ItemsWidth + GetSystemMetrics(SM_CXVSCROLL);
+end;
+
+procedure TComboBox.AdjustDropDownWidth;
+begin
+  DropDownWidth := DropDownItemsWidth + GetSystemMetrics(SM_CXVSCROLL);
+end;
+
+procedure TComboBox.SetColCount(ACols: integer);
 begin
   SetLength(FColWidths, 0); // Init to zeroes
   SetLength(FColWidths, ACols);
+end;
+
+procedure TComboBox.SetColWidth(AColumnText: string; AColumn: integer);
+const
+  Margin = 6;
+var
+  TextWidth: integer;
+begin
+  TextWidth := Canvas.TextWidth(AColumnText) + Margin;
+  if (TextWidth > ColWidths[AColumn]) then
+    ColWidths[AColumn] := TextWidth;
+end;
+
+procedure TComboBox.DrawLine(ACol: integer; Rect: TRect);
+var
+  Cnt, LinePos: integer;
+begin
+  LinePos := 0;
+  for Cnt := 0 to ACol do
+    LinePos := LinePos + ColWidths[Cnt];
+
+  Canvas.Pen.Color := FStyleServices.GetStyleFontColor(TStyleFont.sfListItemTextNormal);
+  Canvas.MoveTo(LinePos, Rect.Top);
+  Canvas.LineTo(LinePos, Rect.Bottom);
+end;
+
+procedure TComboBox.DrawCol(ACol: integer; AText: string; Rect: Trect);
+const
+  Margin = 3;
+var
+  TextPos, Cnt: integer;
+  DrawRect: TRect;
+begin
+  TextPos := 0;
+  for Cnt := 0 to ACol -1 do
+    TextPos := TextPos + ColWidths[Cnt];
+
+  DrawRect := Rect;
+  DrawRect.Left := TextPos + Margin;
+  DrawRect.Width := ColWidths[ACol];
+  Canvas.TextRect(DrawRect, AText, [TTextFormats.tfLeft, TTextFormats.tfSingleLine]);
 end;
 
 procedure TComboBox.HideSelection;
