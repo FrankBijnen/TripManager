@@ -33,8 +33,8 @@ type
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
   TTripVersion      = packed record
-                        Major: integer;
-                        Minor: integer;
+                        Major: Cardinal;
+                        Minor: Cardinal;
                       end;
   TUnixDateConv = class
     class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
@@ -78,14 +78,6 @@ const
       (Major:4; Minor:9),    // Drive 66
       (Major:1; Minor:1),    // Nuvi 2595
       (Major:0; Minor:0));   // Unknown
-// Unknown2
-// Major=4         => unknown2=150
-// Major=1 Minor<4 => unknown2=72
-// Major=1 Minor>3 => unknown2=76
-
-// UCS4
-// Major=4         => UCS4
-// Major=1         => Wide
 
 implementation
 

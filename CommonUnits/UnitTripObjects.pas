@@ -214,10 +214,14 @@ type
     FValue:            TVersionValue;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
+    function GetIsUcs4: boolean;
+    function GetUnknown2Size: integer;
   public
     constructor Create(ATripVersion: TTripVersion); reintroduce;
     destructor Destroy; override;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    property IsUcs4: boolean read GetIsUcs4;
+    property Unknown2Size: integer read GetUnknown2Size;
   end;
 
   // Type 08 (ScPosn)
@@ -958,7 +962,7 @@ type
     FModelDescription: string;
     FIsUcs4: boolean;
     FTripInfoList: TTripInfoList;
-
+    FVersionNumber: TmVersionNumber;
     procedure ResetCalculation;
     procedure Calculate(AStream: TMemoryStream);
     function FirstUdbDataHndle: TmUdbDataHndl;
@@ -1061,10 +1065,12 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure AddHeader(AHeader: THeader);
+    procedure AddVersion(AVersionNumber: TmVersionNumber);
     function Add(ANItem: TBaseItem): TBaseItem;
     procedure SaveToStream(AStream: TMemoryStream);
     procedure SaveToFile(AFile: string);
     procedure ExportTripInfo(AFile: string);
+    function ScanStream(AStream: TStream; AKeyName: ShortString): TBaseItem;
     function LoadFromStream(AStream: TStream): boolean;
     function LoadFromFile(AFile: string): boolean;
     procedure Assign(ATripList: TTripList);
@@ -1100,6 +1106,7 @@ type
                              const TransportMode: string = '');
     procedure SaveAsGPX(const GPXFile: string; IncludeTrack: boolean = true);
     function KurvigerUrl: string;
+    property VersionNumber: TmVersionNumber read FVersionNumber;
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
     property IsCalculated: boolean read GetIsCalculated;
@@ -1742,6 +1749,25 @@ begin
     result := Format('0x%s / 0x%s', [IntToHex(FValue.Major, 8), IntToHex(FValue.MinorC, 8)]);
 end;
 
+function TmVersionNumber.GetIsUcs4: boolean;
+begin
+  result := (Swap32(FValue.Major) >= 4);
+end;
+
+function TmVersionNumber.GetUnknown2Size: integer;
+begin
+  result := 80;  // Dummy value
+  case (Swap32(FValue.Major)) of
+   1: begin
+        if (FValue.MinorB < 4) then
+          result := 72
+        else
+          result := 76;
+      end;
+   4: result := 150;
+  end;
+end;
+
 {*** ScPosn ***}
 procedure TPosnValue.SwapCardinals;
 begin
@@ -2266,7 +2292,8 @@ begin
   begin
     SetLength(FBytes, 5);
     FillChar(FBytes[0], Length(FBytes), 0);
-    FBytes[3] := $01;    FBytes[4] := FValue;
+    FBytes[3] := $01;
+    FBytes[4] := FValue;
   end;
 end;
 
@@ -4165,11 +4192,19 @@ begin
 
   if (Assigned(Header)) then
     FreeAndNil(Header);
+
+  if (Assigned(VersionNumber)) then
+    FreeAndNil(VersionNumber);
 end;
 
 procedure TTripList.AddHeader(AHeader: THeader);
 begin
   FHeader := AHeader;
+end;
+
+procedure TTripList.AddVersion(AVersionNumber: TmVersionNumber);
+begin
+  FVersionNumber := AVersionNUmber;
 end;
 
 function TTripList.Add(ANItem: TBaseItem): TBaseItem;
@@ -4377,6 +4412,48 @@ begin
   ExportTripInfoToCSV(FTripInfoList, AFile);
 end;
 
+function TTripList.ScanStream(AStream: TStream; AKeyName: ShortString): TBaseItem;
+var
+  AHeader: THeaderValue;
+  BytesRead: integer;
+  KeyLen: Cardinal;
+  KeyName: ShortString;
+  SavePos: Cardinal;
+  ValueLen: Cardinal;
+  DataType: Byte;
+  Initiator: AnsiChar;
+begin
+  result := nil;
+  AStream.Position := 0;
+  // Skip header
+  BytesRead := AStream.Read(AHeader, SizeOf(AHeader));
+  if (BytesRead <> SizeOf(AHeader)) or
+     (AHeader.Id <> 'TRPL') then
+     exit;
+
+  while true do
+  begin
+    BytesRead := ReadKeyVAlues(AStream,
+                               Initiator,
+                               KeyLen,
+                               KeyName,
+                               ValueLen,
+                               DataType);
+    if (BytesRead = 0) then
+      exit;
+    SavePos := AStream.Position;
+
+    if (KeyName = AKeyName) then
+    begin
+      result := CreateBaseItemByName(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      exit;
+    end;
+
+    // Point to next item
+    AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
+  end;
+end;
+
 function TTripList.LoadFromStream(AStream: TStream): boolean;
 var
   AHeader: THeaderValue;
@@ -4390,6 +4467,7 @@ var
   ABaseItem: TBaseItem;
 begin
   Clear;
+  AddVersion(TmVersionNumber(ScanStream(AStream, 'mVersionNumber')));
 
   AStream.Position := 0;
   BytesRead := AStream.Read(AHeader, SizeOf(AHeader));
@@ -5659,7 +5737,9 @@ end;
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
 procedure TTripList.CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
 begin
+  AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.XT]));
   AddHeader(THeader.Create);
+
   Add(TmPreserveTrackToRoute.Create);
   Add(TmParentTripId.Create(0));
   Add(TmDayNumber.Create);
@@ -5694,7 +5774,9 @@ begin
   ProcessOptions := TProcessOptions.Create;
   TmpStream := TMemoryStream.Create;
   try
+    AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.XT2]));
     AddHeader(THeader.Create);
+
     PrepStream(TmpStream, [$0000]);
     Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, dtRaw, TmpStream);
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
@@ -5721,7 +5803,7 @@ begin
 
     CheckHRGuid(CreateGUID(Uuid));
     Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
-  Add(TmVersionNumber.Create(TripVersion[TTripModel.XT2]));
+    Add(TmVersionNumber.Create(TripVersion[TTripModel.XT2]));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
     Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
@@ -5752,7 +5834,9 @@ begin
   ProcessOptions := TProcessOptions.Create;
   TmpStream := TMemoryStream.Create;
   try
+    AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.XT3]));
     AddHeader(THeader.Create);
+
     PrepStream(TmpStream, [$0000]);
     Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, dtRaw, TmpStream);
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
@@ -5814,7 +5898,9 @@ begin
   ProcessOptions := TProcessOptions.Create;
   TmpStream := TMemoryStream.Create;
   try
+    AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Tread2]));
     AddHeader(THeader.Create);
+
     PrepStream(TmpStream, [$0000]);
     Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, dtRaw, TmpStream);
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
@@ -5867,7 +5953,9 @@ end;
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
 procedure TTripList.CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
 begin
+  AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Zumo595]));
   AddHeader(THeader.Create);
+
   Add(TmTotalTripDistance.Create);
   Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
   Add(TmAllRoutes.Create);
@@ -5894,7 +5982,9 @@ end;
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
 procedure TTripList.CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
 begin
+  AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Zumo590]));
   AddHeader(THeader.Create);
+
   Add(TmAllRoutes.Create);
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmIsRoundTrip.Create);
@@ -5911,7 +6001,9 @@ end;
 
 procedure TTripList.CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
 begin
+  AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Drive51]));
   AddHeader(THeader.Create);
+
   Add(TmOptimized.Create);
   Add(TmParentTripId.Create(0));
   Add(TmDayNumber.Create);
@@ -5942,6 +6034,7 @@ begin
   ProcessOptions := TProcessOptions.Create;
   TmpStream := TMemoryStream.Create;
   try
+    AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Drive66]));
     AddHeader(THeader.Create);
 
     Add(TBooleanItem.Create('mIsDeviceRoute', true));
@@ -5976,7 +6069,9 @@ end;
 
 procedure TTripList.CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
 begin
+  AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Zumo3x0]));
   AddHeader(THeader.Create);
+
   Add(TmAllRoutes.Create);
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
@@ -5992,7 +6087,9 @@ end;
 
 procedure TTripList.CreateTemplate_nuvi2595(const TripName, CalculationMode, TransportMode: string);
 begin
+  AddVersion(TmVersionNumber.Create(TripVersion[TTripModel.Nuvi2595]));
   AddHeader(THeader.Create);
+
   Add(TmAllLinks.Create);
   Add(TmAllRoutes.Create);
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
