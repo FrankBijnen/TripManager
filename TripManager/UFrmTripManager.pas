@@ -223,6 +223,7 @@ type
     PopupSetDeviceDefault: TPopupMenu;
     OverrideDeviceName: TMenuItem;
     Cleardevicename: TMenuItem;
+    SpltMemoSql: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);

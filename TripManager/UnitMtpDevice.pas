@@ -431,8 +431,8 @@ begin
       SetRegistry(Reg_VehicleType,              NewVehicle_Profile.VehicleType);
       SetRegistry(Reg_VehicleTransportMode,     NewVehicle_Profile.TransportMode);
 
-      // Changed Vehicle profile. Set hash to 0
-      SetRegistry(Reg_VehicleProfileHash, 0);
+      // Changed Vehicle profile. Set hash to proposed value
+      SetRegistry(Reg_VehicleProfileHash, NewVehicle_Profile.Proposed_Hash);
 
       // Only load Default Adventurous level from profile if invalid
       DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);

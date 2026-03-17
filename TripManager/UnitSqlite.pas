@@ -1,6 +1,7 @@
 unit UnitSqlite;
 
 interface
+{.$DEFINE AVOIDANCES}  // Not needed for ProfileHash
 
 uses
   System.Generics.Collections, System.Classes,
@@ -27,6 +28,14 @@ type
     VehicleType: integer;
     TransportMode: integer;
     AdventurousLevel: integer;
+    Environmental: integer;
+{$IFDEF AVOIDANCES}
+    Avoidances: integer;
+{$ENDIF}
+    Calc_Method: integer;
+    Max_Speed: integer;
+    Proposed_Hash: cardinal;
+    procedure Calculate_ProposedHash(const Model: TGarminModel);
     function Changed(IName, IGUID: UTF8String;
                      IVehicle_Id, ITruckType, ITransportMode: integer): boolean; overload;
     function Changed(IVehicleProfile: TVehicleProfile): boolean; overload;
@@ -34,6 +43,28 @@ type
 
   TSqlResult = Tlist<Variant>;
   TSqlResults = TObjectList<TSqlResult>;
+
+  TProfCalcMethod  = (cmFaster = 0, cmShorter = 1, cmAdv = 7);
+  TProfAdvLevel    = (advL1 = 0, advL2 = 1, advL3 = 2, advL4 = 3);
+  TProfEnvironment = (enAvoid = 0, enAllow = 1, enAsk = 2);
+  TKnownHash = record
+    CM: TProfCalcMethod;
+    AdvLvl: TProfAdvLevel;
+    Hash: Cardinal;
+  end;
+
+const
+  KnownXT3Environments: array[TProfEnvironment] of Cardinal =
+    ($0000B000, $0000A000, $00009000);
+
+  KnownXT3Hashes: array[0..5] of TKnownHash = (
+    (CM: cmFaster;              Hash: $0A4F0F20),
+    (CM: cmShorter;             Hash: $07E0BF20),
+    (CM: cmAdv; AdvLvl: advL1;  Hash: $0A4A0F20),
+    (CM: cmAdv; AdvLvl: advL2;  Hash: $0A7A0F20),
+    (CM: cmAdv; AdvLvl: advL3;  Hash: $0AAA0F20),
+    (CM: cmAdv; AdvLvl: advL4;  Hash: $0A4F0F20)
+  );
 
 procedure GetTables(const DbName: string; TabList: TStrings);
 function GetColumns(const DbName: string;
@@ -73,6 +104,33 @@ begin
   insert('-', result, 14);
   insert('-', result, 19);
   insert('-', result, 24);
+end;
+
+procedure TVehicleProfile.Calculate_ProposedHash(const Model: TGarminModel);
+var
+  Index: integer;
+begin
+  Proposed_Hash := 0;
+  if (Environmental < Ord(TProfEnvironment.enAvoid)) or
+     (Environmental > Ord(TProfEnvironment.enAsk)) then
+    exit;
+
+  case Model of
+    TGarminModel.XT3:
+      begin
+        for Index := Low(KnownXT3Hashes) to High(KnownXT3Hashes) do
+        begin
+          if (TProfCalcMethod(Calc_Method) <> KnownXT3Hashes[Index].CM) then
+            continue;
+          if (TProfCalcMethod(Calc_Method) = TProfCalcMethod.cmAdv) and
+             (TProfAdvLevel(AdventurousLevel) <> KnownXT3Hashes[Index].AdvLvl) then
+            continue;
+          Proposed_Hash := KnownXT3Hashes[Index].Hash or
+                              KnownXT3Environments[TProfEnvironment(Environmental)];
+          break;
+        end;
+      end;
+  end;
 end;
 
 function TVehicleProfile.Changed(IName, IGUID: UTF8String;
@@ -385,7 +443,7 @@ begin
         'Select value from data_number ' + CRLF +
         'where context like ''%None%''' + CRLF +
         ' and name like ''%Avoid%''' + CRLF +
-        ' and name like ''%Changed%'''+ CRLF+
+        ' and name like ''%Changed%''' + CRLF+
         ' limit 1;',
         SqlResults);
       for ALine in SqlResults do
@@ -413,16 +471,23 @@ begin
   try
     try
       case Model of
-        TGarminModel.XT3,
-        TGarminModel.Tread2:
+        TGarminModel.Tread2,
+        TGarminModel.XT3:
           ExecSqlQuery(DbName,
             'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
-            '(select Hex(g.description) from properties_dbg g' + CRLF +
-            '  where g."description:1" = ''guid'' and g.value = a.value limit 1) as Guid_Data,' + CRLF +
-            'v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
-            'from properties_dbg a' + CRLF +
-            'inner join vehicle_profile v on (v.vehicle_id = a.value)' + CRLF +
-            'where a."description:1" = ''active_profile''' + CRLF +
+            'Hex(g.description) as Guid_Data,' + CRLF +
+            'v.vehicle_type, v.transport_mode, v.adventurous_route_mode,' + CRLF +
+            'e.value as Env_Data,' + CRLF +
+            'v.calc_method, v.max_vehicle_speed' + CRLF +
+{$IFDEF AVOIDANCES}
+            ', (select a.value from properties_dbg a where ' +
+            'a.key_id = g.key_id and a."description:1" is null limit 1) as Avoid_Data' + CRLF +
+{$ENDIF}
+            'from properties_dbg act' + CRLF +
+            'join vehicle_profile v on (v.vehicle_id = act.value)' + CRLF +
+            'join properties_dbg g on (g.value = act.value and g."description:1" = ''guid'')' + CRLF +
+            'join properties_dbg e on (e.key_id = g.key_id and e."description:1" like ''environmental%'')' + CRLF +
+            'where act."description:1" = ''active_profile''' + CRLF +
             'limit 1;',
             SqlResults);
         else
@@ -446,6 +511,16 @@ begin
         result.VehicleType      := ALine[4];
         result.TransportMode    := ALine[5];
         result.AdventurousLevel := ALine[6];
+        if (ALine.Count > 9) then
+        begin
+          result.Environmental  := ALine[7];
+          result.Calc_Method    := ALine[8];
+          result.Max_Speed      := ALine[9];
+{$IFDEF AVOIDANCES}
+          result.Avoidances     := StrToIntDef(ALine[10], 0);
+{$ENDIF}
+        end;
+        result.Calculate_ProposedHash(Model);
         break;
       end;
     finally

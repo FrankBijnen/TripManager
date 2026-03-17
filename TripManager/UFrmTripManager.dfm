@@ -454,7 +454,7 @@ object FrmTripManager: TFrmTripManager
     Top = 275
     Width = 709
     Height = 403
-    ActivePage = TsExplore
+    ActivePage = TsSQlite
     Align = alClient
     TabOrder = 1
     object TsHex: TTabSheet
@@ -710,6 +710,14 @@ object FrmTripManager: TFrmTripManager
         ExplicitTop = 190
         ExplicitWidth = 631
       end
+      object SpltMemoSql: TSplitter
+        Left = 0
+        Top = 105
+        Width = 701
+        Height = 5
+        Cursor = crVSplit
+        Align = alTop
+      end
       object PnlSQliteTop: TPanel
         Left = 0
         Top = 0
@@ -731,6 +739,7 @@ object FrmTripManager: TFrmTripManager
           Lines.Strings = (
             'MemoSQL')
           ParentFont = False
+          ScrollBars = ssVertical
           TabOrder = 0
           OnKeyUp = MemoSQLKeyUp
         end
@@ -814,9 +823,9 @@ object FrmTripManager: TFrmTripManager
       end
       object DbgDeviceDb: TDBGrid
         Left = 0
-        Top = 105
+        Top = 110
         Width = 701
-        Height = 175
+        Height = 170
         Align = alClient
         DataSource = DsDeviceDb
         Options = [dgAlwaysShowEditor, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgMultiSelect]
