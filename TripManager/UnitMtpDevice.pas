@@ -33,8 +33,8 @@ type
     procedure Init(const AModelDescription: string = ''); overload;
     function ReadGarminDevice(const ACurrentDevice: TObject;
                               const AModelDescription: string;
-                              const ADeviceList: Tlist): boolean;
-
+                              const ADeviceList: Tlist;
+                              const ReadOnly: boolean): boolean;
   end;
 
   TMTP_Device = class(TBase_Device)
@@ -56,6 +56,7 @@ type
     procedure GetInfoFromDevice(const DeviceList: Tlist); override;
     procedure ReadDeviceDB(const ExploreList: TStringList);
     function GetDBPath: string;
+    function CheckMTPTripsFolder(const SystemTripsPath: string): boolean;
     function RecreateTrips(const SystemTripsPath: string;
                            const LstItems: TListItems): boolean;
     property PathId[APath: string]: string read GetPathId;
@@ -108,7 +109,8 @@ end;
 
 function TGarminDevice.ReadGarminDevice(const ACurrentDevice: TObject;
                                         const AModelDescription: string;
-                                        const ADeviceList: Tlist): boolean;
+                                        const ADeviceList: Tlist;
+                                        const ReadOnly: boolean): boolean;
 var
   CurDevId, DevId: integer;
   NFile: string;
@@ -160,9 +162,9 @@ begin
 
   // Path for .System\Trips.
   // Only 2 locations are known to work: ?:\.System\Trips and Internal Storage\.System\Trips
-  if (CurrentDevice.PathId[NonMTPRoot + SystemTripsPath] <> '') then
+  if (CurrentDevice.PathId[NonMTPRoot + SystemPath] <> '') then
     TripsPath := NonMTPRoot + SystemTripsPath
-  else if (CurrentDevice.PathId[InternalStorage + SystemTripsPath] <> '') then
+  else if (CurrentDevice.PathId[InternalStorage + SystemPath] <> '') then
     TripsPath := InternalStorage + SystemTripsPath;
 
   // Location of GarminDevice.Xml
@@ -231,6 +233,10 @@ begin
           GarminModel := TModelConv.GuessGarminOrEdge(ModelDescription);
         else
         begin
+          // Need to create Internal Storage\.System\Trips?
+          if not (ReadOnly) then
+            CurrentDevice.CheckMTPTripsFolder(TModelConv.GetKnownPath(Self, 0));
+
           if (CurrentDevice.PathId[TModelConv.GetKnownPath(Self, 0)] = '') then
             GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
         end;
@@ -341,7 +347,10 @@ function TMTP_Device.ReadGarminDevice(const AModelDescription: string;
 begin
   result := true;
   if (MatchesMask(Manufacturer, SelectManufacturer)) then
-    result := GarminDevice.ReadGarminDevice(Self, AModelDescription, ADeviceList)
+    result := GarminDevice.ReadGarminDevice(Self,
+                                            AModelDescription,
+                                            ADeviceList,
+                                            (SelectManufacturer <> '*'))
   else
     GarminDevice.Init(AModelDescription);
 end;
@@ -446,6 +455,34 @@ begin
      (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
+end;
+
+function TMTP_Device.CheckMTPTripsFolder(const SystemTripsPath: string): boolean;
+var
+  FriendlyPath,
+  SystemPath, SystemPathId,
+  SystemTripsPathId: string;
+  LDelim: integer;
+begin
+  result := false;
+
+  // Checks
+  if (MSM = MSM_ID) then
+    exit;
+  if (SystemTripsPath = '') then
+    exit;
+  SystemTripsPathId := GetIdForPath(PortableDev, SystemTripsPath, FriendlyPath);
+  if (SystemTripsPathId <> '') then                     // .System\Trips exists
+    exit;
+  LDelim := LastDelimiter('\', SystemTripsPath) -1;
+  SystemPath := Copy(SystemTripsPath, 1, LDelim);       // .System
+  SystemPathId := PathId[SystemPath];                   // The ID.
+  if (SystemPathId = '') then                           // No .System exists
+    exit;
+
+  // Create .System\Trips
+  result := CreatePath(PortableDev, SystemPathId, DefTripsPath);
+
 end;
 
 function TMTP_Device.RecreateTrips(const SystemTripsPath: string;

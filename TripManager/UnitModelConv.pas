@@ -12,7 +12,8 @@ const
   InternalStorage                   = 'Internal Storage\';
   DefTripsPath                      = 'Trips';
   DefTripsDesc                      = 'Trips';
-  SystemTripsPath                   = '.System\' + DefTripsPath;
+  SystemPath                        = '.System';
+  SystemTripsPath                   = SystemPath + '\' + DefTripsPath;
   NonMTPRoot                        = '?:\';
   DefGarminPath                     = 'Garmin';
   DefSQLitePath                     = '\SQlite';
