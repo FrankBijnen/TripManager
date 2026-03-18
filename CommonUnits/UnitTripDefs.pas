@@ -35,6 +35,8 @@ type
   TTripVersion      = packed record
                         Major: Cardinal;
                         Minor: Cardinal;
+                        function IsUcs4: boolean;
+                        function Unknown2Size: integer;
                       end;
   TUnixDateConv = class
     class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
@@ -55,10 +57,8 @@ const
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
 // Model specific values                              XT        XT2       XT3       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  Drive 66  nuvi 2595 Unknown
   NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    false,    true,     false,    false,    true,     false);
-  Ucs4Model:          array[TTripModel] of boolean  =(true,     true,     true,     true,     false,    false,    false,    false,    true,     false,    true);
   UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   121 * 4,  21 * 2,   64 * 2);
   UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       18,       18,       16,       20);
-  Unknown2Size:       array[TTripModel] of integer  =(150,      150,      150,      150,      76,       72,       72,       76,       150,      72,       80);
   Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1452,     1348,     294,      254,      130,      294,      1348,     134,      512);
   UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     false,    false,    true,     false);
   CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$05d8feff,$0574feff,$0170feff,CalcUndef,CalcUndef,$0170feff,$0574feff,CalcUndef,CalcNA);
@@ -109,6 +109,25 @@ end;
 class function TUnixDateConv.CardinalAsDateTimeString(ACardinal: Cardinal): string;
 begin
   result := Format('%s', [DateTimeToStr(CardinalAsDateTime(ACardinal))]);
+end;
+
+function TTripVersion.IsUcs4: boolean;
+begin
+  result := (Major >= 4);
+end;
+
+function TTripVersion.Unknown2Size: integer;
+begin
+  result := 80;  // Dummy value
+  case (Major) of
+   1: begin
+        if (Minor < 4) then
+          result := 72
+        else
+          result := 76;
+      end;
+   4: result := 150;
+  end;
 end;
 
 end.
