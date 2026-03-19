@@ -69,7 +69,9 @@ var
 implementation
 
 uses
-  System.SysUtils, System.StrUtils, System.Masks, System.IOUtils,
+  Winapi.Windows, Winapi.ShellAPI,
+  System.SysUtils, System.StrUtils, System.Masks, System.IOUtils, System.UITypes,
+  Vcl.Dialogs,
   UnitRegistry, UnitRegistryKeys,
   UnitTripDefs, UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, mtp_helper;
 
@@ -78,6 +80,7 @@ const
 // Used when the manufacturer is not reported as 'Garmin'
   MSMVendorGarmin = 'usbstor#disk&ven_garmin&';
   MTPVendorGarmin = 'usb#vid_091e&';
+  InstallHelp     = 'https://frankbijnen.github.io/TripManager/1initialtasks.html#showsys';
 
 // Default paths. Will be overruled by reading GarminDevice.Xml
 procedure TGarminDevice.Init(const AGarminModel: TGarminModel);
@@ -469,16 +472,32 @@ begin
   // Checks
   if (MSM = MSM_ID) then
     exit;
-  if (SystemTripsPath = '') then
-    exit;
+
   SystemTripsPathId := GetIdForPath(PortableDev, SystemTripsPath, FriendlyPath);
   if (SystemTripsPathId <> '') then                     // .System\Trips exists
     exit;
-  LDelim := LastDelimiter('\', SystemTripsPath) -1;
-  SystemPath := Copy(SystemTripsPath, 1, LDelim);       // .System
-  SystemPathId := PathId[SystemPath];                   // The ID.
+
+  // Get Id of '.System', by stripping of '\Trips'
+  SystemPathId := '';
+  if (SystemTripsPath <> '') then
+  begin
+    LDelim := LastDelimiter('\', SystemTripsPath) -1;
+    SystemPath := Copy(SystemTripsPath, 1, LDelim);     // .System
+    SystemPathId := PathId[SystemPath];                 // The ID.
+  end;
+
   if (SystemPathId = '') then                           // No .System exists
+  begin
+    if (MessageDlg(Format('TripManager can not access .System\Trips! %s' +
+                          'Trip functions are not enabled. Using %s as Generic Garmin%s' +
+                          'Open online help how to ''Show .System''?',
+                          [#10, FriendlyName, #10]),
+                    TMsgDlgType.mtWarning,
+                    [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
+                    0, TMsgDlgBtn.mbNo) = MrYes) then
+        ShellExecute(0, 'Open', InstallHelp, '','', SW_SHOWNORMAL);
     exit;
+  end;
 
   // Create .System\Trips
   result := CreatePath(PortableDev, SystemPathId, DefTripsPath);
