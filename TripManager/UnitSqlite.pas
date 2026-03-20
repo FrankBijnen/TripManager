@@ -29,6 +29,7 @@ type
     TransportMode: integer;
     AdventurousLevel: integer;
     Environmental: integer;
+    Traction: integer;
 {$IFDEF AVOIDANCES}
     Avoidances: integer;
 {$ENDIF}
@@ -111,6 +112,16 @@ var
   Index: integer;
 begin
   Proposed_Hash := 0;
+  // Only MotorCycles
+  if (VehicleType <> 9) then
+    exit;
+  //TODO: Figure out how max_speed works
+  if (Max_Speed <> 0) then
+    exit;
+  // Only 2 Wheels traction
+  if( Traction <> 4) then
+    exit;
+  // Valid Environmental value
   if (Environmental < Ord(TProfEnvironment.enAvoid)) or
      (Environmental > Ord(TProfEnvironment.enAsk)) then
     exit;
@@ -162,7 +173,7 @@ begin
   SQL :=
     'SELECT m.name AS table_name' + CRLF +
     'FROM sqlite_master AS m ' + CRLF +
-    'WHERE m.type IN (''table'')' + CRLF +
+    'WHERE m.type IN (''table'', ''view'')' + CRLF +
     'ORDER BY m.name;';
 
   TableTab := Db.GetTable(SQL);
@@ -443,7 +454,7 @@ begin
         'Select value from data_number ' + CRLF +
         'where context like ''%None%''' + CRLF +
         ' and name like ''%Avoid%''' + CRLF +
-        ' and name like ''%Changed%''' + CRLF+
+        ' and name like ''%Changed%''' + CRLF +
         ' limit 1;',
         SqlResults);
       for ALine in SqlResults do
@@ -478,7 +489,7 @@ begin
             'Hex(g.description) as Guid_Data,' + CRLF +
             'v.vehicle_type, v.transport_mode, v.adventurous_route_mode,' + CRLF +
             'e.value as Env_Data,' + CRLF +
-            'v.calc_method, v.max_vehicle_speed' + CRLF +
+            'v.calc_method, v.max_vehicle_speed, v.traction' + CRLF +
 {$IFDEF AVOIDANCES}
             ', (select a.value from properties_dbg a where ' +
             'a.key_id = g.key_id and a."description:1" is null limit 1) as Avoid_Data' + CRLF +
@@ -511,13 +522,14 @@ begin
         result.VehicleType      := ALine[4];
         result.TransportMode    := ALine[5];
         result.AdventurousLevel := ALine[6];
-        if (ALine.Count > 9) then
+        if (ALine.Count > 10) then
         begin
           result.Environmental  := ALine[7];
           result.Calc_Method    := ALine[8];
           result.Max_Speed      := ALine[9];
+          result.Traction       := ALine[10];
 {$IFDEF AVOIDANCES}
-          result.Avoidances     := StrToIntDef(ALine[10], 0);
+          result.Avoidances     := StrToIntDef(ALine[11], 0);
 {$ENDIF}
         end;
         result.Calculate_ProposedHash(Model);
