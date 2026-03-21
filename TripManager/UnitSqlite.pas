@@ -38,7 +38,8 @@ type
     Proposed_Hash: cardinal;
     procedure Calculate_ProposedHash(const Model: TGarminModel);
     function Changed(IName, IGUID: UTF8String;
-                     IVehicle_Id, ITruckType, ITransportMode: integer): boolean; overload;
+                     IVehicle_Id, ITruckType, ITransportMode: integer;
+                     IEnvironmental, ICalc_Method: integer): boolean; overload;
     function Changed(IVehicleProfile: TVehicleProfile): boolean; overload;
   end;
 
@@ -145,13 +146,16 @@ begin
 end;
 
 function TVehicleProfile.Changed(IName, IGUID: UTF8String;
-                                 IVehicle_Id, ITruckType, ITransportMode: integer): boolean;
+                                 IVehicle_Id, ITruckType, ITransportMode: integer;
+                                 IEnvironmental, ICalc_Method: integer): boolean;
 begin
   result := (Name <> IName) or
             (GUID <> IGUID) or
             (Vehicle_Id <> IVehicle_Id) or
             (TruckType <> ITruckType) or
-            (TransportMode <> ITransportMode);
+            (TransportMode <> ITransportMode) or
+            (Environmental <> IEnvironmental) or
+            (Calc_Method <> ICalc_Method);
 end;
 
 function TVehicleProfile.Changed(IVehicleProfile: TVehicleProfile): boolean;
@@ -160,7 +164,9 @@ begin
                     IVehicleProfile.GUID,
                     IVehicleProfile.Vehicle_Id,
                     IVehicleProfile.TruckType,
-                    IVehicleProfile.TransportMode);
+                    IVehicleProfile.TransportMode,
+                    IVehicleProfile.Environmental,
+                    IVehicleProfile.Calc_Method);
 end;
 
 procedure TableNames(const Db: TSqliteDatabase; TabList: TStrings);

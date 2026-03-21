@@ -429,6 +429,8 @@ begin
     OldVehicle_Profile.Name             := UTF8String(GetRegistry(Reg_VehicleProfileName, ''));
     OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
     OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
+    OldVehicle_Profile.Calc_Method      := GetRegistry(Reg_VehicleCalcMethod, 0);
+    OldVehicle_Profile.Environmental    := GetRegistry(Reg_VehicleEnvironmental, 0);
 
     NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
 
@@ -441,7 +443,8 @@ begin
       SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType);
       SetRegistry(Reg_VehicleProfileName,       string(NewVehicle_Profile.Name));
       SetRegistry(Reg_VehicleType,              NewVehicle_Profile.VehicleType);
-      SetRegistry(Reg_VehicleTransportMode,     NewVehicle_Profile.TransportMode);
+      SetRegistry(Reg_VehicleCalcMethod,        NewVehicle_Profile.Calc_Method);
+      SetRegistry(Reg_VehicleEnvironmental,     NewVehicle_Profile.Environmental);
 
       // Changed Vehicle profile. Set hash to proposed value
       SetRegistry(Reg_VehicleProfileHash, NewVehicle_Profile.Proposed_Hash);

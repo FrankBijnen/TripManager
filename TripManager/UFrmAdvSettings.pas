@@ -328,6 +328,10 @@ begin
                                             XT2_VehicleId);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,
                                             XT2_VehicleProfileTruckType);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleCalcMethod,
+                                            '0');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleEnvironmental,
+                                            '0');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileName,
                                             XT2_VehicleProfileName);
     AddGridLine(GridZumoSettings, CurRow,   Reg_DefAdvLevel,

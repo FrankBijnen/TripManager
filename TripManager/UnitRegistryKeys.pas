@@ -29,6 +29,8 @@ const
   Reg_VehicleProfileName          = 'VehicleProfileName';
   Reg_VehicleType                 = 'VehicleType';
   Reg_VehicleTransportMode        = 'VehicleTransportMode';
+  Reg_VehicleCalcMethod           = 'VehicleCalcMethod';
+  Reg_VehicleEnvironmental        = 'VehicleEnvironmental';
 
   Reg_ProcessBegin                = 'ProcessBegin';
   Reg_CurrentModel                = 'CurrentModel';
