@@ -31,6 +31,7 @@ const
   Reg_VehicleTransportMode        = 'VehicleTransportMode';
   Reg_VehicleCalcMethod           = 'VehicleCalcMethod';
   Reg_VehicleEnvironmental        = 'VehicleEnvironmental';
+  Reg_VehicleTraction             = 'VehicleTraction';
 
   Reg_ProcessBegin                = 'ProcessBegin';
   Reg_CurrentModel                = 'CurrentModel';

@@ -36,9 +36,12 @@ type
     Calc_Method: integer;
     Max_Speed: integer;
     Proposed_Hash: cardinal;
+    function HashSpeed1: cardinal;
+    function HashSpeed2: cardinal;
+    function HashSpeed3: cardinal;
     procedure Calculate_ProposedHash(const Model: TGarminModel);
     function Changed(IName, IGUID: UTF8String;
-                     IVehicle_Id, ITruckType, ITransportMode: integer;
+                     IVehicle_Id, ITruckType, ITransportMode, ITraction: integer;
                      IEnvironmental, ICalc_Method: integer): boolean; overload;
     function Changed(IVehicleProfile: TVehicleProfile): boolean; overload;
   end;
@@ -49,10 +52,13 @@ type
   TProfCalcMethod  = (cmFaster = 0, cmShorter = 1, cmAdv = 7);
   TProfAdvLevel    = (advL1 = 0, advL2 = 1, advL3 = 2, advL4 = 3);
   TProfEnvironment = (enAvoid = 0, enAllow = 1, enAsk = 2);
+  TTraction        = (tr3Wheels = 3, tr2Wheels = 4);
+  TVehicleType     = (veMotorCycle = 9);
   TKnownHash = record
     CM: TProfCalcMethod;
     AdvLvl: TProfAdvLevel;
-    Hash: Cardinal;
+    HashT2: Cardinal;
+    HashT3: Cardinal;
   end;
 
 const
@@ -60,12 +66,12 @@ const
     ($0000B000, $0000A000, $00009000);
 
   KnownXT3Hashes: array[0..5] of TKnownHash = (
-    (CM: cmFaster;              Hash: $0A4F0F20),
-    (CM: cmShorter;             Hash: $07E0BF20),
-    (CM: cmAdv; AdvLvl: advL1;  Hash: $0A4A0F20),
-    (CM: cmAdv; AdvLvl: advL2;  Hash: $0A7A0F20),
-    (CM: cmAdv; AdvLvl: advL3;  Hash: $0AAA0F20),
-    (CM: cmAdv; AdvLvl: advL4;  Hash: $0A4F0F20)
+    (CM: cmFaster;              HashT2: $0A4F0000;  HashT3: $0A1F0000),
+    (CM: cmShorter;             HashT2: $07E00000;  HashT3: $07D00000),
+    (CM: cmAdv; AdvLvl: advL1;  HashT2: $0A4A0000;  HashT3: $0A1A0000),
+    (CM: cmAdv; AdvLvl: advL2;  HashT2: $0A7A0000;  HashT3: $0A6AA000),
+    (CM: cmAdv; AdvLvl: advL3;  HashT2: $0AAA0000;  HashT3: $0A3AA000),
+    (CM: cmAdv; AdvLvl: advL4;  HashT2: $0A4F0000;  HashT3: $0A0AA000)
   );
 
 procedure GetTables(const DbName: string; TabList: TStrings);
@@ -98,6 +104,7 @@ uses
 
 const
   CRLF = #13#10;
+  Max_Speed_Supported = 768; // 768 m/s = 2764 km/h!
 
 function MkGuid(const HexGuid: string): string;
 begin
@@ -108,23 +115,49 @@ begin
   insert('-', result, 24);
 end;
 
+function TVehicleProfile.HashSpeed1: cardinal;
+begin
+  result := (Max_Speed and $0000ff00) shl 16;
+end;
+
+function TVehicleProfile.HashSpeed2: cardinal;
+const
+  Speed2Tab: array[0..15] of byte =
+   ($0f, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01, $00);
+begin
+  result := (Speed2Tab[(Max_Speed and $000000f0) shr 4]) shl 8;
+end;
+
+function TVehicleProfile.HashSpeed3: cardinal;
+const
+  Speed3Tab: array[0..15] of byte =
+   ($02, $03, $00, $01, $06, $07, $04, $05, $0a, $0b, $08, $09, $0e, $0f, $0c, $0d);
+begin
+  result := (Speed3Tab[Max_Speed and $0000000f]) shl 4;
+end;
+
 procedure TVehicleProfile.Calculate_ProposedHash(const Model: TGarminModel);
 var
   Index: integer;
 begin
   Proposed_Hash := 0;
+
   // Only MotorCycles
-  if (VehicleType <> 9) then
+  if (VehicleType <> Ord(TVehicleType.veMotorCycle)) then
     exit;
-  //TODO: Figure out how max_speed works
-  if (Max_Speed <> 0) then
+
+  if (Max_Speed > Max_Speed_Supported) then
     exit;
-  // Only 2 Wheels traction
-  if( Traction <> 4) then
+
+  // Only 2, or 3 Wheels traction
+  if not (Traction in [Ord(TTraction.tr3Wheels),        // 3 Wheels
+                       Ord(TTraction.tr2Wheels)]) then  // 2 Wheels
     exit;
+
   // Valid Environmental value
-  if (Environmental < Ord(TProfEnvironment.enAvoid)) or
-     (Environmental > Ord(TProfEnvironment.enAsk)) then
+  if not (Environmental in [Ord(TProfEnvironment.enAvoid),
+                            Ord(TProfEnvironment.enAllow),
+                            Ord(TProfEnvironment.enAsk)]) then
     exit;
 
   case Model of
@@ -137,8 +170,17 @@ begin
           if (TProfCalcMethod(Calc_Method) = TProfCalcMethod.cmAdv) and
              (TProfAdvLevel(AdventurousLevel) <> KnownXT3Hashes[Index].AdvLvl) then
             continue;
-          Proposed_Hash := KnownXT3Hashes[Index].Hash or
-                              KnownXT3Environments[TProfEnvironment(Environmental)];
+
+          if (Traction = Ord(TTraction.tr2Wheels)) then // 2 Wheels
+            Proposed_Hash := KnownXT3Hashes[Index].HashT2 or
+                                KnownXT3Environments[TProfEnvironment(Environmental)]
+          else                   // 3 Wheels
+            Proposed_Hash := KnownXT3Hashes[Index].Hasht3 or
+                                KnownXT3Environments[TProfEnvironment(Environmental)];
+
+          Proposed_Hash := Proposed_Hash +  HashSpeed1;
+          Proposed_Hash := Proposed_Hash or HashSpeed2;
+          Proposed_Hash := Proposed_Hash or HashSpeed3;
           break;
         end;
       end;
@@ -146,7 +188,7 @@ begin
 end;
 
 function TVehicleProfile.Changed(IName, IGUID: UTF8String;
-                                 IVehicle_Id, ITruckType, ITransportMode: integer;
+                                 IVehicle_Id, ITruckType, ITransportMode, ITraction: integer;
                                  IEnvironmental, ICalc_Method: integer): boolean;
 begin
   result := (Name <> IName) or
@@ -154,6 +196,7 @@ begin
             (Vehicle_Id <> IVehicle_Id) or
             (TruckType <> ITruckType) or
             (TransportMode <> ITransportMode) or
+            (Traction <> ITraction) or
             (Environmental <> IEnvironmental) or
             (Calc_Method <> ICalc_Method);
 end;
@@ -165,6 +208,7 @@ begin
                     IVehicleProfile.Vehicle_Id,
                     IVehicleProfile.TruckType,
                     IVehicleProfile.TransportMode,
+                    IVehicleProfile.Traction,
                     IVehicleProfile.Environmental,
                     IVehicleProfile.Calc_Method);
 end;

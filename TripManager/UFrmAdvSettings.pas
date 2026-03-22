@@ -306,17 +306,15 @@ begin
                                             '0',
                                             'Trip create options');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '0=Force calculation');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Only for BaseCamp calculated routes-');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '1=No calculation');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '2=Preserve Track to Route');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '1=No calculation (BC only)');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '2=Preserve Track to Route  (BC only)');
     AddGridLine(GridZumoSettings, CurRow,   '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
                                             'True',
                                             'Group trips from the same GPX');
     AddGridLine(GridZumoSettings, CurRow,   '');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2 trips-');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2/XT3 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
                                             '',
                                             'Date: ');
@@ -329,9 +327,14 @@ begin
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,
                                             XT2_VehicleProfileTruckType);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleCalcMethod,
-                                            '0');
+                                            '0',
+                                            '(0=Faster, 1=Shorter, 7=Adventurous)');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleEnvironmental,
-                                            '0');
+                                            '0',
+                                            '(0=Avoid, 1=Allow, 2=Ask)');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleTraction,
+                                            '0',
+                                            '(3=3 Wheels, 4=2 Wheels)');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileName,
                                             XT2_VehicleProfileName);
     AddGridLine(GridZumoSettings, CurRow,   Reg_DefAdvLevel,
