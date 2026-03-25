@@ -35,6 +35,8 @@ type
 {$ENDIF}
     Calc_Method: integer;
     Max_Speed: integer;
+    Width: integer;
+    Imperial: boolean;
     Proposed_Hash: cardinal;
     function HashSpeed1: cardinal;
     function HashSpeed2: cardinal;
@@ -49,7 +51,7 @@ type
   TSqlResult = Tlist<Variant>;
   TSqlResults = TObjectList<TSqlResult>;
 
-  TProfCalcMethod  = (cmFaster = 0, cmShorter = 1, cmAdv = 7);
+  TProfCalcMethod  = (cmFaster = 0, cmShorter = 1, cmStraight = 4, cmAdv = 7);
   TProfAdvLevel    = (advL1 = 0, advL2 = 1, advL3 = 2, advL4 = 3);
   TProfEnvironment = (enAvoid = 0, enAllow = 1, enAsk = 2);
   TTraction        = (tr3Wheels = 3, tr2Wheels = 4);
@@ -65,13 +67,14 @@ const
   KnownXT3Environments: array[TProfEnvironment] of Cardinal =
     ($0000B000, $0000A000, $00009000);
 
-  KnownXT3Hashes: array[0..5] of TKnownHash = (
+  KnownXT3Hashes: array[0..6] of TKnownHash = (
     (CM: cmFaster;              HashT2: $0A4F0000;  HashT3: $0A1F0000),
     (CM: cmShorter;             HashT2: $07E00000;  HashT3: $07D00000),
+    (CM: cmStraight;            HashT2: $079B0000;  HashT3: $07CB0000),
     (CM: cmAdv; AdvLvl: advL1;  HashT2: $0A4A0000;  HashT3: $0A1A0000),
     (CM: cmAdv; AdvLvl: advL2;  HashT2: $0A7A0000;  HashT3: $0A6AA000),
     (CM: cmAdv; AdvLvl: advL3;  HashT2: $0AAA0000;  HashT3: $0A3AA000),
-    (CM: cmAdv; AdvLvl: advL4;  HashT2: $0A4F0000;  HashT3: $0A0AA000)
+    (CM: cmAdv; AdvLvl: advL4;  HashT2: $0A5A0000;  HashT3: $0A0AA000)
   );
 
 procedure GetTables(const DbName: string; TabList: TStrings);
@@ -122,18 +125,32 @@ end;
 
 function TVehicleProfile.HashSpeed2: cardinal;
 const
-  Speed2Tab: array[0..15] of byte =
+  Speed2TabImperial: array[0..15] of byte =
+   ($0a, $0c, $0f, $0e, $09, $08, $0b, $0a, $05, $04, $07, $06, $0e, $00, $03, $02);
+//  0=a  1=c  2=f  3=e  4=9  5=8  6=b  7=a  8=5  9=4  a=7  b=6  c=e  d=0  e=3  f=2
+  Speed2TabMetric: array[0..15] of byte =
    ($0f, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01, $00);
+//  0=f  1=e  2=d  3=c  4=b  5=a  6=9  7=8  8=7  9=6  a=5  b=4  c=3  d=2  e=1  f=0
 begin
-  result := (Speed2Tab[(Max_Speed and $000000f0) shr 4]) shl 8;
+  if (Imperial) then
+    result := (Speed2TabImperial[(Max_Speed and $000000f0) shr 4]) shl 8
+  else
+    result := (Speed2TabMetric[(Max_Speed and $000000f0) shr 4]) shl 8;
 end;
 
 function TVehicleProfile.HashSpeed3: cardinal;
 const
-  Speed3Tab: array[0..15] of byte =
+  Speed3TabImperial: array[0..15] of byte =
+   ($0e, $0f, $0c, $0d, $0a, $0b, $08, $09, $06, $07, $04, $05, $02, $03, $00, $01);
+//  0=e  1=f  2=c  3=d  4=a  5=b  6=8  7=9  8=6  9=7  a=4  b=5  c=2  d=3  e=0  f=1
+  Speed3TabMetric: array[0..15] of byte =
    ($02, $03, $00, $01, $06, $07, $04, $05, $0a, $0b, $08, $09, $0e, $0f, $0c, $0d);
+//  0=2  1=3  2=0  3=1  4=6  5=7  6=4  7=5  8=a  9=b  a=8  b=9  c=e  d=f  e=c  f=d
 begin
-  result := (Speed3Tab[Max_Speed and $0000000f]) shl 4;
+  if (Imperial) then
+    result := (Speed3TabImperial[Max_Speed and $0000000f]) shl 4
+  else
+    result := (Speed3TabMetric[Max_Speed and $0000000f]) shl 4;
 end;
 
 procedure TVehicleProfile.Calculate_ProposedHash(const Model: TGarminModel);
@@ -152,6 +169,11 @@ begin
   // Only 2, or 3 Wheels traction
   if not (Traction in [Ord(TTraction.tr3Wheels),        // 3 Wheels
                        Ord(TTraction.tr2Wheels)]) then  // 2 Wheels
+    exit;
+
+  // For 3 wheels must be width 120 if metric, non-metric = 122
+  if (Traction = Ord(TTraction.tr3Wheels)) and
+     (Width <> 120) then
     exit;
 
   // Valid Environmental value
@@ -539,7 +561,7 @@ begin
             'Hex(g.description) as Guid_Data,' + CRLF +
             'v.vehicle_type, v.transport_mode, v.adventurous_route_mode,' + CRLF +
             'e.value as Env_Data,' + CRLF +
-            'v.calc_method, v.max_vehicle_speed, v.traction' + CRLF +
+            'v.calc_method, v.max_vehicle_speed, v.traction, v.width, v.width_metric' + CRLF +
 {$IFDEF AVOIDANCES}
             ', (select a.value from properties_dbg a where ' +
             'a.key_id = g.key_id and a."description:1" is null limit 1) as Avoid_Data' + CRLF +
@@ -572,12 +594,14 @@ begin
         result.VehicleType      := ALine[4];
         result.TransportMode    := ALine[5];
         result.AdventurousLevel := ALine[6];
-        if (ALine.Count > 10) then
+        if (ALine.Count > 12) then
         begin
           result.Environmental  := ALine[7];
           result.Calc_Method    := ALine[8];
           result.Max_Speed      := ALine[9];
           result.Traction       := ALine[10];
+          result.Width          := ALine[11];
+          result.Imperial       := ALine[12] <> 0;
 {$IFDEF AVOIDANCES}
           result.Avoidances     := StrToIntDef(ALine[11], 0);
 {$ENDIF}
@@ -594,3 +618,4 @@ begin
 end;
 
 end.
+
