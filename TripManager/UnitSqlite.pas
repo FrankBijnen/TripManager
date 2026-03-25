@@ -126,8 +126,8 @@ end;
 function TVehicleProfile.HashSpeed2: cardinal;
 const
   Speed2TabImperial: array[0..15] of byte =
-   ($0a, $0c, $0f, $0e, $09, $08, $0b, $0a, $05, $04, $07, $06, $0e, $00, $03, $02);
-//  0=a  1=c  2=f  3=e  4=9  5=8  6=b  7=a  8=5  9=4  a=7  b=6  c=e  d=0  e=3  f=2
+   ($0d, $0c, $0f, $0e, $09, $08, $0b, $0a, $05, $04, $07, $06, $01, $00, $03, $02);
+//  0=d  1=c  2=f  3=e  4=9  5=8  6=b  7=a  8=5  9=4  a=7  b=6  c=1  d=0  e=3  f=2
   Speed2TabMetric: array[0..15] of byte =
    ($0f, $0e, $0d, $0c, $0b, $0a, $09, $08, $07, $06, $05, $04, $03, $02, $01, $00);
 //  0=f  1=e  2=d  3=c  4=b  5=a  6=9  7=8  8=7  9=6  a=5  b=4  c=3  d=2  e=1  f=0
@@ -171,9 +171,15 @@ begin
                        Ord(TTraction.tr2Wheels)]) then  // 2 Wheels
     exit;
 
-  // For 3 wheels must be width 120 if metric, non-metric = 122
+  // For 3 wheels must be width 120 if metric, non-imperial = 122
   if (Traction = Ord(TTraction.tr3Wheels)) and
+     (Imperial = false) and
      (Width <> 120) then
+    exit;
+
+  if (Traction = Ord(TTraction.tr3Wheels)) and
+     (Imperial = true) and
+     (Width <> 122) then
     exit;
 
   // Valid Environmental value
@@ -601,7 +607,7 @@ begin
           result.Max_Speed      := ALine[9];
           result.Traction       := ALine[10];
           result.Width          := ALine[11];
-          result.Imperial       := ALine[12] <> 0;
+          result.Imperial       := ALine[12] = 0;
 {$IFDEF AVOIDANCES}
           result.Avoidances     := StrToIntDef(ALine[11], 0);
 {$ENDIF}
@@ -618,4 +624,3 @@ begin
 end;
 
 end.
-
