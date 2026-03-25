@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Windows version 5.9.14">
+  <title>VehicleProfileHash XT3</title>
+  <meta name="generator" content="HelpMaker.net">
+  <meta name="keywords" content="explore.db,trips,">
+  <style type="text/css">
+  body {
+  background-color: #FFFFFF;
+  }
+  span.c17 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c16 {color: #010101; font-family: Courier New; font-size: 120%}
+  span.c15 {color: #010101; font-family: Courier New; font-size: 120%; font-weight: bold}
+  span.c14 {font-family: Courier New; font-size: 12pt}
+  table.c13 {border-collapse: collapse; border: none}
+  td.c12 {border: solid #010101 1px;}
+  span.c11 {color: #010101}
+  br.c10 {page-break-before:always}
+  span.c9 {font-family: Calibri; font-size: 120%}
+  span.c8 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  div.c7 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c6 {color: #010101; font-family: Symbol; font-size: 120%}
+  span.c5 {color: #010101; font-family: Calibri; font-size: 120%}
+  table.c4 {background-color: #FFFFFF}
+  span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
+  td.c2 {font-weight: bold}
+  span.c1 {font-family: Calibri; font-size: 150%}
+  </style>
+</head>
+<body>
+  <table class="c4" width="100%" border="0" cellspacing="0"
+  cellpadding="2">
+    <tr>
+      <td class="c2" align="left"><span class="c1"><a href=
+      "checkexploredb.html">Previous</a>&nbsp;<a href=
+      "toc.html">Top</a>&nbsp;</span></td>
+      <td align="center" width="75%">
+        <div align="center">
+          <span class="c3">VehicleProfileHash XT3</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <hr>
+  <div align="left">
+    <span class="c5">The XT3 features Vehicle Profiles. Something
+    that was already observed for the Tread2. In the Trip files
+    these items must be filled, or the XT3 will not accept it as a
+    valid trip file.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left" class="c7">
+    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileTruckType</span>
+  </div>
+  <div align="left" class="c7">
+    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileName</span>
+  </div>
+  <div align="left" class="c7">
+    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c8">mVehicleProfileHash</span>
+  </div>
+  <div align="left" class="c7">
+    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleId</span>
+  </div>
+  <div align="left" class="c7">
+    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileGuid</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">The data for these items can be found in the
+    vehicle_profile.db, except for the</span> <span class=
+    "c9"><b>mVehicleProfileHash.</b> Only recently, using a lot of
+    tests, it has been discovered how this Hash value can be
+    computed. The calculation is only valid for the XT3. The XT
+    does not have profiles, the XT2 only has one profile, and
+    accepts a value 0, The Tread2 may be working similarly, but the
+    computed values do not match.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c9">If a correct Hash is not supplied in the trip
+    file, the XT3 will popup a message when opening the trip, that
+    the selected profile is out of date, often resulting in
+    duplicated profile names, causing confusion.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c9">Known limitations:</span>
+  </div>
+  <div align="left">
+    <span class="c9">- Does not work for Car profiles.</span>
+  </div>
+  <div align="left">
+    <span class="c9">- For 3 Wheels traction, only the default
+    width value of 120, or 122 for imperial can be used.</span>
+  </div>
+  <div align="left">
+    <span class="c9">- Road use. Both 'Street Legal' and 'Highway
+    Legal' should be enabled.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c9">Tested for Locales: NL, DE, UK and US.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c9">This calculation has been implemented in
+    <b>UnitSqlite.pas.</b> Look for methods:
+    <b>GetVehicleProfile,&nbsp; Calculate_ProposedHash,
+    HashSpeed1..HashSpeed3</b></span><span class="c11"><br clear=
+    "all" class="c10"></span>
+  </div>
+  <div align="left">
+    <br>
+  </div><br clear="all" class="c10">
+  <table border="1" width="1158" cellpadding="4" cellspacing="0"
+  class="c13">
+    <tr>
+      <td valign="top" width="771" class="c12">
+        <div align="left">
+          <span class="c9">1. Execute SQL statement to get the data
+          from the active profile</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">select v.vehicle_id, v.truck_type,
+          v.name,</span>
+        </div>
+        <div align="left">
+          <span class="c9">Hex(g.description) as Guid_Data,</span>
+        </div>
+        <div align="left">
+          <span class="c9">v.vehicle_type, v.transport_mode,
+          v.adventurous_route_mode,</span>
+        </div>
+        <div align="left">
+          <span class="c9">e.value as Env_Data,</span>
+        </div>
+        <div align="left">
+          <span class="c9">v.calc_method, v.max_vehicle_speed,
+          v.traction, v.width, v.width_metric</span>
+        </div>
+        <div align="left">
+          <span class="c9">from properties_dbg act</span>
+        </div>
+        <div align="left">
+          <span class="c9">join vehicle_profile v on (v.vehicle_id
+          = act.value)</span>
+        </div>
+        <div align="left">
+          <span class="c9">join properties_dbg g on (g.value =
+          act.value and g."description:1" = 'guid')</span>
+        </div>
+        <div align="left">
+          <span class="c9">join properties_dbg e on (e.key_id =
+          g.key_id and e."description:1" like
+          'environmental%')</span>
+        </div>
+        <div align="left">
+          <span class="c9">where act."description:1" =
+          'active_profile'</span>
+        </div>
+        <div align="left">
+          <span class="c9">limit 1;</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left"><img src="vehicleprofilehashxt3b1.JPG"
+        width="766" height="303" border="0" alt="graphic"></div>
+      </td>
+      <td valign="top" width="369" class="c12">
+        <div align="left">
+          <span class="c9">Fields Vehicle_Id, Truck_Type, Name,
+          GUID_Data are copied into the corresponding items.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">Fields Adventurous_Route_Mode, ENV_Data,
+          Calc_Method, Max_Vehicle_Speed, Traction, Width,
+          Width_Metric are needed to compute the hash</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+        <div align="left">
+          <span class="c9">Results:</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">Adventurous_Route_Mode: 0</span>
+        </div>
+        <div align="left">
+          <span class="c9">ENV_Data: 1</span>
+        </div>
+        <div align="left">
+          <span class="c9">Calc_Method: 0</span>
+        </div>
+        <div align="left">
+          <span class="c9">Max_Vehicle_Speed: 0</span>
+        </div>
+        <div align="left">
+          <span class="c9">Traction: 4</span>
+        </div>
+        <div align="left">
+          <span class="c9">Width: 120</span>
+        </div>
+        <div align="left">
+          <span class="c9">Width_Metric: 1</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c11"><br></span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><br clear="all" class="c10">
+  <table border="1" width="1158" cellpadding="4" cellspacing="0"
+  class="c13">
+    <tr>
+      <td valign="top" width="771" class="c12">
+        <div align="left">
+          <span class="c9">2. Lookup the 'base value' in the table
+          'KnownXT3Hashes, using the fields <b>Calc_method,
+          Adventurous_Route_mode,</b> and <b>Traction.</b></span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp; KnownXT3Hashes: array[0..6] of
+          TKnownHash = (</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM:
+          cmFaster;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          HashT2: $0A4F0000;&nbsp; HashT3: $0A1F0000),</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM:
+          cmShorter;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          HashT2: $07E00000;&nbsp; HashT3: $07D00000),</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM:
+          cmStraight;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          HashT2: $079B0000;&nbsp; HashT3: $07CB0000),</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM: cmAdv; AdvLvl:
+          advL1;&nbsp; HashT2: $0A4A0000;&nbsp; HashT3:
+          $0A1A0000),</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM: cmAdv; AdvLvl:
+          advL2;&nbsp; HashT2: $0A7A0000;&nbsp; HashT3:
+          $0A6AA000),</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM: cmAdv; AdvLvl:
+          advL3;&nbsp; HashT2: $0AAA0000;&nbsp; HashT3:
+          $0A3AA000),</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp;&nbsp;&nbsp; (CM: cmAdv; AdvLvl:
+          advL4;&nbsp; HashT2: $0A5A0000;&nbsp; HashT3:
+          $0A0AA000)</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp; );</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left"></div>
+      </td>
+      <td valign="top" width="369" class="c12">
+        <div align="left">
+          <span class="c9">Calc_method 0 means:
+          <b>Faster</b></span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">See: TProfCalcMethod&nbsp; = (cmFaster =
+          0, cmShorter = 1, cmStraight = 4, cmAdv = 7);</span>
+        </div>
+        <div align="left">
+          <span class="c9">Note: for Faster Adventurous_Route_mode
+          is not used.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">Traction 4 means:&nbsp; <b>2 Wheels
+          traction</b></span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">See:&nbsp; (tr3Wheels = 3, tr2Wheels =
+          4);</span>
+        </div>
+        <div align="left">
+          <span class="c9">Note: the Values for Tr3Wheels are only
+          valid for the default of 120, or 122</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">The lookup gives the base value:</span>
+          <span class="c15">$0A4F0000</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="771" class="c12">
+        <div align="left">
+          <span class="c9">3. Use the value Env_Data to 'or in' the
+          value for 'Environmental'.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c14">KnownXT3Environments:
+          array[TProfEnvironment] of Cardinal =</span>
+        </div>
+        <div align="left">
+          <span class="c14">&nbsp; ($0000B000, $0000A000,
+          $00009000);</span>
+        </div>
+      </td>
+      <td valign="top" width="369" class="c12">
+        <div align="left">
+          <span class="c9">Env_data 1 means<b>: Allow</b></span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">See:TProfEnvironment = (enAvoid = 0,
+          enAllow = 1, enAsk = 2);</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c15">$0A4F0000 or $0000A000</span>
+        </div>
+        <div align="left">
+          <span class="c5">Results in:</span>
+        </div>
+        <div align="left">
+          <span class="c15">$0A4FA000</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><br clear="all" class="c10">
+  <table border="1" width="1158" cellpadding="4" cellspacing="0"
+  class="c13">
+    <tr>
+      <td valign="top" width="849" class="c12">
+        <div align="left">
+          <span class="c9">4. Use the value
+          <b>Max_Vehicle_Speed,</b> to complete the
+          calculation.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c9">Background info. The value</span>
+          <span class="c5"><b>Max_Vehicle_Speed</b> in the Vehicle
+          profile is expressed as Meters/Sec. In the Sample data
+          <b>Max_Vehicle_Speed</b> = 0, meaning no restriction. See
+          below for an example of max speed 60 kmh.</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Step 1: Write the value as 3
+          nibbles.</span>
+        </div>
+        <div align="left">
+          <span class="c5">0 = &gt; 0x000</span>
+        </div>
+      </td>
+      <td valign="top" width="291" class="c12"></td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" class="c12">
+        <div align="left">
+          <span class="c5">Nibble1: 0. Add this to the 2nd Nibble
+          of HashValue:</span> <span class=
+          "c16">$0<b>A</b>4FA000</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left">
+          <span class="c5">Note: Need values 90kmh or higher for
+          this to occur.</span>
+        </div>
+      </td>
+      <td valign="top" width="291" class="c12">
+        <div align="left">
+          <span class="c16">$0<b>A</b>4FA000 +
+          0=$0<b>A</b>4FA000</span>
+        </div>
+        <div align="left">
+          <br>
+        </div>
+        <div align="left"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" height="67" class="c12">
+        <div align="left">
+          <span class="c5">Nibble:2 0. Use the lookup table
+          Speed2TabMetric/Imperial and or that value to the 6th
+          Nibble:</span> <span class="c16">$0A4FA<b>0</b>00</span>
+        </div>
+        <div align="left">
+          <span class="c8">//&nbsp; 0=f&nbsp; 1=e&nbsp; 2=d&nbsp;
+          3=c&nbsp; 4=b&nbsp; 5=a&nbsp; 6=9&nbsp; 7=8&nbsp;
+          8=7&nbsp; 9=6&nbsp; a=5&nbsp; b=4&nbsp; c=3&nbsp;
+          d=2&nbsp; e=1&nbsp; f=0</span>
+        </div>
+        <div align="left">
+          <span class="c5">Because <b>Width_metric</b> = 1, we need
+          to use the Metric table</span>
+        </div>
+      </td>
+      <td valign="top" width="291" height="67" class="c12">
+        <div align="left">
+          <span class="c16">$0A4FA<b>0</b>00</span> <span class=
+          "c17">or f =</span> <span class=
+          "c16">$0A4FA<b>F</b>00</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" class="c12">
+        <div align="left">
+          <span class="c5">Nibble:3 0. Use the lookup table
+          Speed3TabMetric/Imperial and or that value to the 7th
+          Nibble:</span> <span class="c16">$0A4FA0<b>0</b>0</span>
+        </div>
+        <div align="left">
+          <span class="c8">//&nbsp; 0=2&nbsp; 1=3&nbsp; 2=0&nbsp;
+          3=1&nbsp; 4=6&nbsp; 5=7&nbsp; 6=4&nbsp; 7=5&nbsp;
+          8=a&nbsp; 9=b&nbsp; a=8&nbsp; b=9&nbsp; c=e&nbsp;
+          d=f&nbsp; e=c&nbsp; f=d</span>
+        </div>
+        <div align="left">
+          <span class="c5">Because <b>Width_metric</b> = 1, we need
+          to use the Metric table</span>
+        </div>
+      </td>
+      <td valign="top" width="291" class="c12">
+        <div align="left">
+          <span class="c16">$0A4FAF<b>0</b>0</span> <span class=
+          "c8">or 2 =</span> <span class=
+          "c16">$0A4FAF<b>2</b>0</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" class="c12">
+        <div align="left">
+          <span class="c5">4<b>. 60 kmh example.</b></span>
+        </div>
+        <div align="left">
+          <span class="c5">60 kmh corresponds to <b>166</b> m/sec
+          in the vehicle profile.</span>
+        </div>
+        <div align="left">
+          <span class="c5">166 =&gt; 0x0a6</span>
+        </div>
+      </td>
+      <td valign="top" width="291" class="c12"></td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" class="c12">
+        <div align="left">
+          <span class="c5">Nibble1: 0</span>
+        </div>
+      </td>
+      <td valign="top" width="291" class="c12">
+        <div align="left">
+          <span class="c16">$0<b>A</b>4FA000 +
+          0=$0<b>A</b>4FA000</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" height="45" class="c12">
+        <div align="left">
+          <span class="c5">Nibble2: a =&gt; 5</span>
+        </div>
+        <div align="left">
+          <span class="c8">//&nbsp; 0=f&nbsp; 1=e&nbsp; 2=d&nbsp;
+          3=c&nbsp; 4=b&nbsp; 5=a&nbsp; 6=9&nbsp; 7=8&nbsp;
+          8=7&nbsp; 9=6&nbsp; a=5&nbsp; b=4&nbsp; c=3&nbsp;
+          d=2&nbsp; e=1&nbsp; f=0</span>
+        </div>
+      </td>
+      <td valign="top" width="291" height="45" class="c12">
+        <div align="left">
+          <span class="c16">$0A4FA<b>0</b>00</span> <span class=
+          "c8">or 5 =</span> <span class=
+          "c16">$0A4FA<b>5</b>00</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="849" class="c12">
+        <div align="left">
+          <span class="c5">Nibble:3 6 =&gt; 4</span>
+        </div>
+        <div align="left">
+          <span class="c8">//&nbsp; 0=2&nbsp; 1=3&nbsp; 2=0&nbsp;
+          3=1&nbsp; 4=6&nbsp; 5=7&nbsp; 6=4&nbsp; 7=5&nbsp;
+          8=a&nbsp; 9=b&nbsp; a=8&nbsp; b=9&nbsp; c=e&nbsp;
+          d=f&nbsp; e=c&nbsp; f=d</span>
+        </div>
+      </td>
+      <td valign="top" width="291" class="c12">
+        <div align="left">
+          <span class="c16">$0A4FA5<b>0</b>0</span> <span class=
+          "c8">or 4 =</span> <span class=
+          "c16">$0A4FA5<b>4</b>0</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <span class="c17">Screenshots defining the profile</span>
+  </div>
+  <table border="1" width="648" cellpadding="4" cellspacing="0"
+  class="c13">
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b2.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b3.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b4.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b5.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b6.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b7.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="639" class="c12">
+        <div align="left"><img src="vehicleprofilehashxt3b8.PNG"
+        width="640" height="360" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left"></div>
+</body>
+</html>
