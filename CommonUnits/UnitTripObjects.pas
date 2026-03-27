@@ -5096,18 +5096,11 @@ var
 begin
 
   ExtRoutePoint := RoutePoint;
-  case (TProcessOptions(ProcessOptions).TripOption) of
-    TTripOption.ttNoCalc,
-    TTripOption.ttTripTrack,
-    TTripOption.ttTripTrackLoc,       // Not used
-    TTripOption.ttTripTrackLocPrefs:  // Not used
-      begin
-        case ExtRoutePoint of
-        TRoutePoint.rpShaping:
-          if (TripVersion[TripModel].CanUseExtShape) then
-            ExtRoutePoint := TRoutePoint.rpExtShaping;
-        end;
-      end;
+  case ExtRoutePoint of
+    TRoutePoint.rpShaping:
+      if (TProcessOptions(ProcessOptions).TripOption = TTripOption.ttNoCalc) and
+         (TripVersion[TripModel].CanUseExtShape) then
+        ExtRoutePoint := TRoutePoint.rpExtShaping; // Prevent renaming by Tread app for XT2, XT3, Tread 2
   end;
 
   case TProcessOptions(ProcessOptions).TripModel of
