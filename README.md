@@ -18,7 +18,7 @@ The XT3 needs additional testing. <br>
 
   <ul>
      <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " >
-        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Fix for </span></font><a href="vehicleprofilehashxt3.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>VehicleProfileHash </u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >for
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Fix for </span></font><a href="https://frankbijnen.github.io/TripManager/vehicleprofilehashxt3.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>VehicleProfileHash </u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >for
            the XT3.</span></font><font color="#010101" ></font>
         </div>
      </li>
