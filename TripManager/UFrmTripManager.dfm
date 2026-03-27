@@ -3,7 +3,7 @@ object FrmTripManager: TFrmTripManager
   Top = 0
   ActiveControl = CmbDevices
   AlphaBlend = True
-  Caption = 'XT(2) Trip Manager'
+  Caption = 'XT(2)(3) Trip Manager'
   ClientHeight = 678
   ClientWidth = 1334
   Color = clBtnFace
@@ -467,7 +467,6 @@ object FrmTripManager: TFrmTripManager
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
-        DoubleBufferedMode = dbmRequested
         FullRepaint = False
         ParentBackground = False
         ParentDoubleBuffered = False
@@ -644,12 +643,11 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -1022,7 +1020,6 @@ object FrmTripManager: TFrmTripManager
         Height = 334
         Align = alLeft
         DoubleBuffered = True
-        DoubleBufferedMode = dbmRequested
         HideSelection = False
         Indent = 19
         ParentDoubleBuffered = False
@@ -1107,6 +1104,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1334
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1114,7 +1112,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

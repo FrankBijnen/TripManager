@@ -24,11 +24,13 @@ object FrmAdvSettings: TFrmAdvSettings
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitTop = 613
+    ExplicitWidth = 615
     DesignSize = (
       621
       31)
     object BtnOK: TButton
-      Left = 457
+      Left = 451
       Top = 3
       Width = 75
       Height = 25
@@ -37,9 +39,10 @@ object FrmAdvSettings: TFrmAdvSettings
       Default = True
       ModalResult = 1
       TabOrder = 0
+      ExplicitLeft = 445
     end
     object BtnCancel: TButton
-      Left = 544
+      Left = 538
       Top = 3
       Width = 75
       Height = 25
@@ -48,6 +51,7 @@ object FrmAdvSettings: TFrmAdvSettings
       Caption = 'Cancel'
       ModalResult = 2
       TabOrder = 1
+      ExplicitLeft = 532
     end
   end
   object PctMain: TPageControl
@@ -60,6 +64,8 @@ object FrmAdvSettings: TFrmAdvSettings
     TabHeight = 25
     TabOrder = 1
     OnResize = PctMainResize
+    ExplicitWidth = 615
+    ExplicitHeight = 613
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
@@ -76,6 +82,8 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
+        ExplicitWidth = 607
+        ExplicitHeight = 578
         RowHeights = (
           24
           24

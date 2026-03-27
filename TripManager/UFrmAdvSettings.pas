@@ -302,12 +302,9 @@ begin
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_ScPosn_Unknown1,
                                             '0');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_TripOption,
-                                            '0',
-                                            'Trip create options');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '0=Force calculation');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '1=No calculation (BC only)');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '2=Preserve Track to Route  (BC only)');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_ExtShape,
+                                            'False',
+                                            'Extended Shaping Points');
     AddGridLine(GridZumoSettings, CurRow,   '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
@@ -328,7 +325,7 @@ begin
                                             XT2_VehicleProfileTruckType);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleCalcMethod,
                                             '0',
-                                            '(0=Faster, 1=Shorter, 7=Adventurous)');
+                                            '(0=Faster, 1=Shorter, 4=Straight, 7=Adventurous)');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleEnvironmental,
                                             '0',
                                             '(0=Avoid, 1=Allow, 2=Ask)');

@@ -3,8 +3,8 @@ object FrmShowLog: TFrmShowLog
   Top = 0
   ActiveControl = LbLog
   Caption = 'View Log'
-  ClientHeight = 441
-  ClientWidth = 624
+  ClientHeight = 437
+  ClientWidth = 622
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,13 +20,15 @@ object FrmShowLog: TFrmShowLog
   TextHeight = 15
   object PnlBot: TPanel
     Left = 0
-    Top = 408
-    Width = 624
+    Top = 404
+    Width = 622
     Height = 33
     Align = alBottom
     TabOrder = 0
+    ExplicitTop = 408
+    ExplicitWidth = 624
     DesignSize = (
-      624
+      622
       33)
     object BtnFixTrip: TButton
       Left = 10
@@ -38,7 +40,7 @@ object FrmShowLog: TFrmShowLog
       OnMouseUp = BtnFixTripMouseUp
     end
     object BtnClose: TBitBtn
-      Left = 538
+      Left = 534
       Top = 3
       Width = 75
       Height = 25
@@ -47,13 +49,14 @@ object FrmShowLog: TFrmShowLog
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnCloseClick
+      ExplicitLeft = 538
     end
   end
   object LbLog: TCheckListBox
     Left = 0
     Top = 0
-    Width = 624
-    Height = 408
+    Width = 622
+    Height = 404
     Align = alClient
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText

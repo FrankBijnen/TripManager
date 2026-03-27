@@ -70,7 +70,7 @@ const
 
   RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
                                                           (Value: Ord(rpShaping);           Name: 'Shaping point'),
-                                                          (Value: Ord(rpShapingXT2);        Name: 'Shaping point XT(2)')
+                                                          (Value: Ord(rpExtShaping);        Name: 'Extended Shaping point')
                                                         );
 type
   TTripList = class;
@@ -5091,28 +5091,38 @@ procedure TTripList.AddLocation(Locations: TmLocations;
                                 Lat, Lon: double;
                                 DepartureDate: TDateTime;
                                 Name, Address: string);
+var
+  ExtRoutePoint: TRoutePoint;
 begin
+
+  ExtRoutePoint := RoutePoint;
+  case ExtRoutePoint of
+  TRoutePoint.rpShaping:
+    if (TripVersion[TripModel].CanUseExtShape) then
+      ExtRoutePoint := TRoutePoint.rpExtShaping;
+  end;
+
   case TProcessOptions(ProcessOptions).TripModel of
     TTripModel.XT2:
-      AddLocation_XT2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_XT2(Locations, ProcessOptions, ExtRoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.XT3:
-      AddLocation_XT3(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_XT3(Locations, ProcessOptions, ExtRoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Tread2:
-      AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Tread2(Locations, ProcessOptions, ExtRoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo595:
-      AddLocation_Zumo595(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Zumo595(Locations, ProcessOptions, ExtRoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo590:
-      AddLocation_Zumo590(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Zumo590(Locations, ProcessOptions, ExtRoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Drive51:
-      AddLocation_Drive51(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Drive51(Locations, ProcessOptions, ExtRoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Drive66:
-      AddLocation_Drive66(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Drive66(Locations, ProcessOptions, ExtRoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Zumo3x0:
-      AddLocation_Zumo3x0(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Zumo3x0(Locations, ProcessOptions, ExtRoutePoint, Lat, Lon, DepartureDate, Name, Address);
     TTripModel.Nuvi2595:
-      AddLocation_nuvi2595(Locations, ProcessOptions, RoutePoint, RoutePref, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_nuvi2595(Locations, ProcessOptions, ExtRoutePoint, RoutePref, Lat, Lon, DepartureDate, Name, Address);
     else
-      AddLocation_XT(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_XT(Locations, ProcessOptions, ExtRoutePoint, Lat, Lon, DepartureDate, Name, Address);
   end;
 end;
 
