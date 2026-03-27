@@ -135,7 +135,8 @@ end;
 
 function TTripVersion.CanUseExtShape: boolean;
 begin
-  result := (Major >= 4) and //Check DriveSmart 66
+  result := (Major >= 4) and
+            (Minor >= 16) and
             GetRegistry(Reg_ExtShape, false);
 end;
 

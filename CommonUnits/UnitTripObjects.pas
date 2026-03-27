@@ -5096,10 +5096,18 @@ var
 begin
 
   ExtRoutePoint := RoutePoint;
-  case ExtRoutePoint of
-  TRoutePoint.rpShaping:
-    if (TripVersion[TripModel].CanUseExtShape) then
-      ExtRoutePoint := TRoutePoint.rpExtShaping;
+  case (TProcessOptions(ProcessOptions).TripOption) of
+    TTripOption.ttNoCalc,
+    TTripOption.ttTripTrack,
+    TTripOption.ttTripTrackLoc,       // Not used
+    TTripOption.ttTripTrackLocPrefs:  // Not used
+      begin
+        case ExtRoutePoint of
+        TRoutePoint.rpShaping:
+          if (TripVersion[TripModel].CanUseExtShape) then
+            ExtRoutePoint := TRoutePoint.rpExtShaping;
+        end;
+      end;
   end;
 
   case TProcessOptions(ProcessOptions).TripModel of
