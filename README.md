@@ -14,6 +14,21 @@ The XT3 needs additional testing. <br>
 # Download release
 [Latest](https://github.com/FrankBijnen/TripManager/releases/latest)<br>
 
+# Changed with V1.7.0.382
+
+  <ul>
+     <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " >
+        <div align="left" ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Fix for </span></font><a href="https://frankbijnen.github.io/TripManager/vehicleprofilehashxt3.html"></span><font face="Calibri"  color="#0000ff"  size="4" ><span style="font-size:14pt" ><u>VehicleProfileHash </u></span></font></a></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >for
+           the XT3.</span></font><font color="#010101" ></font>
+        </div>
+     </li>
+     <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Check .System folder. Create .System\Trips if needed. For MTP
+        models.</span></font><font color="#010101" ></font>
+     </li>
+     <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Get UCS4 and Unknown2Size from VersionNumber.</span></font><font color="#010101" ></font></li>
+     <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Enable Extended Shaping points.</span></font><font color="#010101" ></font></li>
+  </ul>
+
 # Changed with V1.7.0.380
 
   <ul>
