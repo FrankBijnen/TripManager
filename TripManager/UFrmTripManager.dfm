@@ -46,6 +46,7 @@ object FrmTripManager: TFrmTripManager
     Height = 245
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 1332
     object VSplitterDev_Files: TSplitter
       Left = 621
       Top = 1
@@ -258,6 +259,7 @@ object FrmTripManager: TFrmTripManager
       Height = 243
       Align = alClient
       TabOrder = 1
+      ExplicitWidth = 705
       object VSplitterFile_Sys: TSplitter
         Left = 278
         Top = 33
@@ -346,6 +348,7 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 4
+        ExplicitWidth = 703
         object BtnAddToMap: TButton
           AlignWithMargins = True
           Left = 155
@@ -418,6 +421,7 @@ object FrmTripManager: TFrmTripManager
         Height = 25
         Align = alBottom
         TabOrder = 3
+        ExplicitWidth = 703
         object EdFileSysFolder: TComboBox
           AlignWithMargins = True
           Left = 67
@@ -434,6 +438,7 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 1
           OnCloseUp = EdFileSysFolderCloseUp
           OnKeyPress = EdFileSysFolderKeyPress
+          ExplicitWidth = 632
         end
         object BtnOpenTemp: TButton
           Left = 1
@@ -457,6 +462,8 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsSQlite
     Align = alClient
     TabOrder = 1
+    ExplicitWidth = 707
+    ExplicitHeight = 399
     object TsHex: TTabSheet
       Caption = 'Hexadecimal display'
       object HexPanel: TPanel
@@ -686,8 +693,6 @@ object FrmTripManager: TFrmTripManager
         Height = 317
         Align = alClient
         TabOrder = 2
-        AllowSingleSignOnUsingOSPrimaryAccount = False
-        TargetCompatibleBrowserVersion = '117.0.2045.28'
         UserDataFolder = '%LOCALAPPDATA%\bds.exe.WebView2'
         OnCreateWebViewCompleted = EdgeBrowser1CreateWebViewCompleted
         OnNavigationStarting = EdgeBrowser1NavigationStarting
@@ -723,6 +728,7 @@ object FrmTripManager: TFrmTripManager
         Height = 105
         Align = alTop
         TabOrder = 0
+        ExplicitWidth = 699
         object MemoSQL: TMemo
           Left = 1
           Top = 57
@@ -740,6 +746,7 @@ object FrmTripManager: TFrmTripManager
           ScrollBars = ssVertical
           TabOrder = 0
           OnKeyUp = MemoSQLKeyUp
+          ExplicitWidth = 697
         end
         object PnlQuickSql: TPanel
           Left = 1
@@ -748,6 +755,7 @@ object FrmTripManager: TFrmTripManager
           Height = 56
           Align = alTop
           TabOrder = 1
+          ExplicitWidth = 697
           object LblSqlResults: TLabel
             Left = 1
             Top = 33
@@ -776,6 +784,7 @@ object FrmTripManager: TFrmTripManager
             Align = alTop
             Caption = 'PnlQuickSqlGo'
             TabOrder = 0
+            ExplicitWidth = 695
             object CmbSQliteTabs: TComboBox
               AlignWithMargins = True
               Left = 4
@@ -792,6 +801,7 @@ object FrmTripManager: TFrmTripManager
               ParentFont = False
               TabOrder = 0
               OnChange = CmbSQliteTabsChange
+              ExplicitWidth = 630
             end
             object BitBtnSQLGo: TBitBtn
               Left = 639
@@ -815,6 +825,7 @@ object FrmTripManager: TFrmTripManager
               NumGlyphs = 2
               TabOrder = 1
               OnClick = BitBtnSQLGoClick
+              ExplicitLeft = 637
             end
           end
         end
@@ -851,6 +862,8 @@ object FrmTripManager: TFrmTripManager
         ScrollBars = ssVertical
         TabOrder = 2
         OnDblClick = DBMemoDblClick
+        ExplicitTop = 281
+        ExplicitWidth = 699
       end
     end
     object TsExplore: TTabSheet
@@ -985,6 +998,7 @@ object FrmTripManager: TFrmTripManager
     Align = alLeft
     TabOrder = 2
     OnResize = PCTTripInfoResize
+    ExplicitHeight = 399
     object TsTripGpiInfo: TTabSheet
       Caption = 'Trip info'
       object VSplitterTree_Grid: TSplitter
@@ -1029,6 +1043,7 @@ object FrmTripManager: TFrmTripManager
         StyleElements = [seFont, seBorder]
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
+        ExplicitHeight = 330
       end
       object PnlVlTripInfo: TPanel
         Left = 246
@@ -1037,6 +1052,7 @@ object FrmTripManager: TFrmTripManager
         Height = 334
         Align = alClient
         TabOrder = 1
+        ExplicitHeight = 330
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
@@ -1050,6 +1066,7 @@ object FrmTripManager: TFrmTripManager
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
           OnStringsChange = VlTripInfoStringsChange
+          ExplicitHeight = 302
           ColWidths = (
             150
             208)
@@ -1096,6 +1113,7 @@ object FrmTripManager: TFrmTripManager
           item
             Width = 50
           end>
+        ExplicitTop = 352
       end
     end
   end
@@ -1107,7 +1125,7 @@ object FrmTripManager: TFrmTripManager
     UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
-    ColorMap.DisabledFontColor = 10461087
+    ColorMap.DisabledFontColor = 7171437
     ColorMap.HighlightColor = clWhite
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
@@ -1117,6 +1135,7 @@ object FrmTripManager: TFrmTripManager
     Font.Name = 'Segoe UI'
     Font.Style = []
     Spacing = 0
+    ExplicitWidth = 1332
   end
   object ImageList: TImageList
     Left = 124

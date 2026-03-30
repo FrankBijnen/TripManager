@@ -24,6 +24,7 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'How to use'
     TabOrder = 0
+    ExplicitWidth = 590
     object MemoTasks: TMemo
       Left = 2
       Top = 17
@@ -50,6 +51,7 @@ object FrmSendTo: TFrmSendTo
       ReadOnly = True
       TabOrder = 0
       StyleElements = [seFont, seBorder]
+      ExplicitWidth = 586
     end
   end
   object GrpSelDestination: TGroupBox
@@ -60,6 +62,7 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Choose destination'
     TabOrder = 1
+    ExplicitWidth = 590
     object PCTDestination: TPageControl
       Left = 2
       Top = 17
@@ -80,6 +83,7 @@ object FrmSendTo: TFrmSendTo
       TabStop = False
       OnChange = PCTDestinationChange
       OnChanging = PCTDestinationChanging
+      ExplicitWidth = 586
       object TabDevice: TTabSheet
         Caption = 'Send to device'
         Font.Charset = DEFAULT_CHARSET
@@ -115,6 +119,7 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitWidth = 578
         end
       end
       object TabFolder: TTabSheet
@@ -156,6 +161,7 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Destination device and folder(s)'
     TabOrder = 2
+    ExplicitWidth = 590
     object LblDestinations: TLabel
       AlignWithMargins = True
       Left = 7
@@ -190,6 +196,7 @@ object FrmSendTo: TFrmSendTo
     Align = alTop
     Caption = 'Model used for creating .trip files'
     TabOrder = 3
+    ExplicitWidth = 590
     object PnlModel: TPanel
       Left = 2
       Top = 17
@@ -197,6 +204,7 @@ object FrmSendTo: TFrmSendTo
       Height = 21
       Align = alClient
       TabOrder = 0
+      ExplicitWidth = 586
       object LblModel: TLabel
         AlignWithMargins = True
         Left = 6
@@ -243,6 +251,7 @@ object FrmSendTo: TFrmSendTo
           
             'Preserve route to track + locations + route prefs (BC, XT2/Tread' +
             ' 2 only)')
+        ExplicitLeft = 198
       end
     end
   end
@@ -262,44 +271,8 @@ object FrmSendTo: TFrmSendTo
     OnCheckStateChanging = TvSelectionsCheckStateChanging
     OnCollapsing = TvSelectionsCollapsing
     OnHint = TvSelectionsHint
-    Items.NodeData = {
-      070900000009540054007200650065004E006F00640065003900000000000000
-      00000000FFFFFFFFFFFFFFFF00000000010000000000000000010D5400720069
-      0070007300200028002E00740072006900700029000000390000000000000000
-      000000FFFFFFFFFFFFFFFF00000000010000000000000000010D540072006100
-      63006B007300200028002E00670070007800290000004B000000000000000000
-      0000FFFFFFFFFFFFFFFF00000000010000000000000000011643006F006D0070
-      006C00650074006500200072006F007500740065007300200028002E00670070
-      007800290000004B0000000000000000000000FFFFFFFFFFFFFFFF0000000001
-      0000000000000000011653007400720069007000700065006400200072006F00
-      7500740065007300200028002E00670070007800290000004100000000000000
-      00000000FFFFFFFFFFFFFFFF0000000001000000000300000001115700610079
-      00200070006F0069006E0074007300200028002E00670070007800290000004D
-      0000000000000000000000FFFFFFFFFFFFFFFF00000000010000000000000000
-      011741006400640020006F0072006900670069006E0061006C00200057006100
-      7900200070006F0069006E007400730000005D0000000000000000000000FFFF
-      FFFFFFFFFFFF00000000010000000000000000011F4100640064002000570061
-      007900200070006F0069006E00740073002000660072006F006D002000560069
-      006100200070006F0069006E0074007300200000006300000000000000000000
-      00FFFFFFFFFFFFFFFF0000000001000000000000000001224100640064002000
-      570061007900200070006F0069006E00740073002000660072006F006D002000
-      530068006100700069006E006700200070006F0069006E007400730000005100
-      00000000000000000000FFFFFFFFFFFFFFFF0000000001000000000300000001
-      1950006F0069006E007400730020004F006600200049006E0074006500720065
-      0073007400200028002E00670070006900290000003B00000000000000000000
-      00FFFFFFFFFFFFFFFF00000000010000000000000000010E4100640064002000
-      570061007900200070006F0069006E007400730000003B000000000000000000
-      0000FFFFFFFFFFFFFFFF00000000010000000000000000010E41006400640020
-      00560069006100200070006F0069006E00740073000000430000000000000000
-      000000FFFFFFFFFFFFFFFF000000000100000000000000000112410064006400
-      2000530068006100700069006E006700200070006F0069006E00740073000000
-      450000000000000000000000FFFFFFFFFFFFFFFF000000000100000000000000
-      00011347006F006F0067006C006500200045006100720074006800200028002E
-      006B006D006C00290000003F0000000000000000000000FFFFFFFFFFFFFFFF00
-      00000001000000000000000001104F0053004D0020006D006100700073002000
-      28002E00680074006D006C00290000003B0000000000000000000000FFFFFFFF
-      FFFFFFFF00000000010000000000000000010E43006F00750072007300650073
-      00200028002E006600690074002900}
+    ExplicitWidth = 590
+    ExplicitHeight = 274
   end
   object PnlBot: TPanel
     Left = 0
@@ -308,11 +281,13 @@ object FrmSendTo: TFrmSendTo
     Height = 33
     Align = alBottom
     TabOrder = 5
+    ExplicitTop = 570
+    ExplicitWidth = 590
     DesignSize = (
       592
       33)
     object BtnCancel: TBitBtn
-      Left = 509
+      Left = 507
       Top = 4
       Width = 75
       Height = 25
@@ -320,9 +295,10 @@ object FrmSendTo: TFrmSendTo
       Kind = bkCancel
       NumGlyphs = 2
       TabOrder = 1
+      ExplicitLeft = 505
     end
     object BtnOk: TBitBtn
-      Left = 428
+      Left = 426
       Top = 4
       Width = 75
       Height = 25
@@ -330,6 +306,7 @@ object FrmSendTo: TFrmSendTo
       Kind = bkOK
       NumGlyphs = 2
       TabOrder = 0
+      ExplicitLeft = 424
     end
     object BtnHelp: TBitBtn
       Left = 6
@@ -349,5 +326,7 @@ object FrmSendTo: TFrmSendTo
     Height = 19
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 551
+    ExplicitWidth = 590
   end
 end

@@ -271,7 +271,17 @@ begin
 end;
 
 procedure TFrmSendTo.FormCreate(Sender: TObject);
+var
+  ResStream: TResourceStream;
 begin
+  ResStream := TResourceStream.Create(hInstance, 'SendToItems', RT_RCDATA);
+  try
+    TvSelections.LoadFromStream(ResStream);
+    TvSelections.FullExpand;
+  finally
+    ResStream.Free;
+  end;
+
   // Constant size of GroupBox
   GrpDestHeight := GrpDestination.Height;
   GrpSelDestHeight := GrpSelDestination.Height;

@@ -103,7 +103,7 @@ const
   Reg_Trk2RtExportPerc_Key        = 'Trk2RtExportPerc';
   Reg_Trk2RtExportPerc_Val        = 10;
 
-
+// See SendToItems.txt for item texts
 const
   IdTrip          = 0;
   IdTrack         = 1;

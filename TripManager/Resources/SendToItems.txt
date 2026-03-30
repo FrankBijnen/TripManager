@@ -1,0 +1,15 @@
+Trips (.trip)
+Tracks (.gpx)
+Complete routes (.gpx)
+Stripped routes (.gpx)
+Way points (.gpx)
+	Add original Way points
+	Add Way points from Via points
+	Add Way points from Shaping points
+Points Of Interest (.gpi)
+	Add Way points
+	Add Via points
+	Add Shaping points
+Google Earth (.kml)
+OSM maps (.html)
+Courses (.fit)
