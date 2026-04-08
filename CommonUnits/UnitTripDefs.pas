@@ -37,7 +37,6 @@ type
                         Minor: Cardinal;
                         function IsUcs4: boolean;
                         function Unknown2Size: integer;
-                        function CanUseExtShape: boolean;
                       end;
   TUnixDateConv = class
     class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
@@ -53,7 +52,6 @@ const
   PosnSmall               =  8;
   PosnNorm                = 12;
   PosnLarge               = 16;
-  Reg_ExtShape            = 'ExtShape';
 
 // The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
 // Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
@@ -131,13 +129,6 @@ begin
       end;
    4: result := 150;
   end;
-end;
-
-function TTripVersion.CanUseExtShape: boolean;
-begin
-  result := (Major >= 4) and
-            (Minor >= 16) and
-            GetRegistry(Reg_ExtShape, false);
 end;
 
 end.

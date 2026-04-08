@@ -1621,22 +1621,34 @@ end;
 
 procedure TGPXfile.WriteTrack2XML(TracksRoot, Track: TXmlVSNode; DisplayColor: string);
 var
-  WptTrack: TXmlVSNode;
-  TrackPoint: TXmlVSNode;
+  OutTrack: TXmlVSNode;
+  OutTrackSeg: TXmlVSNode;
+  OutTrackPoint: TXmlVSNode;
+  InTrackPoint: TXmlVSNode;
+  SubNodeValue: string;
 begin
-  WptTrack := TracksRoot.AddChild('trk');
-  WptTrack.AddChild('name').NodeValue := Track.NodeValue;
+  OutTrack := TracksRoot.AddChild('trk');
+  OutTrack.AddChild('name').NodeValue := Track.NodeValue;
 
-  WptTrack.AddChild('extensions').
+  OutTrack.AddChild('extensions').
            AddChild('gpxx:TrackExtension').
            AddChild('gpxx:DisplayColor').NodeValue := DisplayColor;
 
-  WptTrack := WptTrack.AddChild('trkseg');
-  for TrackPoint in Track.ChildNodes do
+  OutTrackSeg := OutTrack.AddChild('trkseg');
+  for InTrackPoint in Track.ChildNodes do
   begin
-    if (TrackPoint.Name <> 'trkpt') then
+    if (InTrackPoint.Name <> 'trkpt') then
       continue;
-    CloneAttributes(TrackPoint, WptTrack.AddChild('trkpt'));
+    OutTrackPoint := OutTrackSeg.AddChild('trkpt');
+    CloneAttributes(InTrackPoint, OutTrackPoint);
+
+    // Write ele and time. If avail
+    SubNodeValue := FindSubNodeValue(InTrackPoint, 'ele');
+    if (SubNodeValue <> '') then
+      OutTrackPoint.AddChild('ele').NodeValue := SubNodeValue;
+    SubNodeValue := FindSubNodeValue(InTrackPoint, 'time');
+    if (SubNodeValue <> '') then
+      OutTrackPoint.AddChild('time').NodeValue := SubNodeValue;
   end;
 end;
 
