@@ -312,5 +312,6 @@ begin
   RegDeleteValue(HKCU, RegKey, 'AddSubClasses');
   RegDeleteValue(HKCU, RegKey, 'PrefDeviceGpxFolder');
   RegDeleteValue(HKCU, RegKey, 'PrefDevicePoiFolder');
+  RegDeleteValue(HKCU, RegKey, 'ExtShape');
   
 end;

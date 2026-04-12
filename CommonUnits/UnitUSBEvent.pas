@@ -94,7 +94,12 @@ begin
         begin
           DeviceName := PChar(@Data^.dbcc_name);
           GetIdsFromDevice(DeviceName, VendorId, ProductId);
-          FOnUSBChangeEvent((AMessage.wParam = DBT_DEVICEARRIVAL), PChar(@Data^.dbcc_name), VendorId, ProductId);
+          System.TMonitor.Enter(Self);
+          try
+            FOnUSBChangeEvent((AMessage.wParam = DBT_DEVICEARRIVAL), PChar(@Data^.dbcc_name), VendorId, ProductId);
+          finally
+            System.TMonitor.Exit(Self);
+          end;
         end;
       end;
   end;

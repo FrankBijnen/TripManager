@@ -302,9 +302,6 @@ begin
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_ScPosn_Unknown1,
                                             '0');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_ExtShape,
-                                            'False',
-                                            'Extended Shaping Points');
     AddGridLine(GridZumoSettings, CurRow,   '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
