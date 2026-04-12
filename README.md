@@ -26,7 +26,8 @@ The XT3 needs additional testing. <br>
         models.</span></font><font color="#010101" ></font>
      </li>
      <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Get UCS4 and Unknown2Size from VersionNumber.</span></font><font color="#010101" ></font></li>
-     <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Enable Extended Shaping points.</span></font><font color="#010101" ></font></li>
+     <li style="margin-left: 1mm; margin-right: 0mm; padding-left: 0mm; font-family= Calibri;  font-size= 14pt;  " ></span><font face="Calibri"  size="4" ><span style="font-size:14pt" >Enable Extended Shaping points.</span></font><font color="#010101" ></font>
+  <br><b>This is an experimental feature for the XT3 that will be removed in a future version.</b></li>
   </ul>
 
 # Changed with V1.7.0.380
