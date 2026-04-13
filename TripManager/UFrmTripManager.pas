@@ -371,7 +371,7 @@ type
 
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
     function WaitForDevice(const DeviceToWaitFor: string): integer;
-    procedure USBChangeEvent(Sender: TObject; const Inserted: boolean; const DeviceName: string);
+    procedure USBChangeEvent(Sender: TObject; const EventParm: WPARAM; const DeviceName: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     function SelectedScPosn: TmScPosn;
@@ -5516,7 +5516,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.USBChangeEvent(Sender: TObject; const Inserted: boolean; const DeviceName: string);
+procedure TFrmTripManager.USBChangeEvent(Sender: TObject; const EventParm: WPARAM; const DeviceName: string);
 var
   CurDevice, CurDisplayedDevice: string;
   DevIndex : integer;
@@ -5533,38 +5533,35 @@ begin
   // Serialize (Dis)Connects.
   System.TMonitor.Enter(Sender);
   try
+
     // Update the list of devices, keeping Current Device if possible
     GetDeviceList(CurDevice);
 
-    // Device removal ?
-    if (Inserted = false) then
-    begin
-      if (CurDevice <> '') then
-      begin
-        // Current Device no longer avail?
-        DevIndex := TBase_Device.DeviceIdInList(CurDevice, DeviceList);
-        if (DevIndex < 0) then
-          ConnectedDeviceChanged(CurDisplayedDevice, 'Disconnected');
-      end;
-      exit;
-    end;
+    case EventParm of
+      DBT_DEVICEREMOVECOMPLETE:
+        if (CurDevice <> '') then
+        begin
+          DevIndex := TBase_Device.DeviceIdInList(CurDevice, DeviceList);
+          if (DevIndex < 0) then // A Device was connected, and now no longer avail.
+            ConnectedDeviceChanged(CurDisplayedDevice, 'Disconnected');
+        end;
+      DBT_DEVICEARRIVAL:
+        if (CurDevice = '') or
+           (TModelConv.PreferedPartition(CurDevice, DeviceName, DeviceList)) then
+        begin
+          // No Device was connected and now it is.
+          // Or... A Zumo590 System partition was connected, and now a System1 is inserted. Prefer that.
+          DevIndex := WaitForDevice(DeviceName);
 
-    // No Device was connected and now it is.
-    // Or... A Zumo590 System partition was connected, and now a System1 is inserted. Prefer that.
-    if (CurDevice = '') or
-        TModelConv.PreferedPartition(CurDevice, DeviceName, DeviceList) then
-    begin
-      DevIndex := WaitForDevice(DeviceName);
-
-      // Inserted Device is in the DeviceList and a known device.
-      // Note: SD Cards are not known devices
-      if (DevIndex > -1) and
-         (TModelConv.IsKnownDevice(TBase_Device(DeviceList[DevIndex]))) then
-      begin
-        ConnectedDeviceChanged(TBase_Device(DeviceList[DevIndex]).DisplayedDevice, 'Connected');
-        CmbDevices.ItemIndex := DevIndex;
-        CmbDevicesChange(CmbDevices);
-      end;
+          if (DevIndex > -1) and
+             (TModelConv.IsKnownDevice(TBase_Device(DeviceList[DevIndex]))) then
+          begin
+            // Inserted Device is in the DeviceList and a known device. Note: SD Cards are not known devices
+            ConnectedDeviceChanged(TBase_Device(DeviceList[DevIndex]).DisplayedDevice, 'Connected');
+            CmbDevices.ItemIndex := DevIndex;
+            CmbDevicesChange(CmbDevices);
+          end;
+        end;
     end;
 
   finally

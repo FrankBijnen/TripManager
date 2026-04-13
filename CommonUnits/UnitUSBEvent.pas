@@ -27,7 +27,7 @@ type
     dbcc_name : char;
   end;
 
-  TOnUSBChangeEvent = procedure(Sender: TObject; const Inserted: boolean; const DeviceName: string) of object;
+  TOnUSBChangeEvent = procedure(Sender: TObject; const EventParm: WPARAM; const DeviceName: string) of object;
 
   TUSBEvent = class(TObject)
   private
@@ -77,7 +77,7 @@ begin
         Data := PDevBroadcastDeviceInterface(AMessage.LParam);
         if (Data^.dbcc_devicetype = USB_INTERFACE) and
            (Assigned(FOnUSBChangeEvent)) then
-          FOnUSBChangeEvent(Self, (AMessage.wParam = DBT_DEVICEARRIVAL), PChar(@Data^.dbcc_name));
+          FOnUSBChangeEvent(Self, AMessage.wParam, PChar(@Data^.dbcc_name));
       end;
   end;
 end;
