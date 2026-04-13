@@ -27,7 +27,7 @@ type
     dbcc_name : char;
   end;
 
-  TOnUSBChangeEvent = procedure(const Inserted : boolean; const DeviceName, VendorId, ProductId: string) of object;
+  TOnUSBChangeEvent = procedure(Sender: TObject; const Inserted: boolean; const DeviceName: string) of object;
 
   TUSBEvent = class(TObject)
   private
@@ -48,19 +48,6 @@ type
 
 implementation
 
-uses
-  UnitStringUtils;
-
-procedure GetIdsFromDevice(var IDeviceName: string;
-                           var OVendId: string;
-                           var OProdId: string);
-begin
-  OProdId := NextField(IDeviceName, '#');
-  OProdId := NextField(IDeviceName, '#');
-  OVendId := NextField(OProdId, '&');
-  OProdId := NextField(OProdId, '&');
-end;
-
 constructor TUSBEvent.Create;
 begin
   inherited Create;
@@ -79,7 +66,6 @@ end;
 procedure TUSBEvent.WMDeviceChange(var AMessage: TMessage);
 var
   Data: PDevBroadcastDeviceInterface;
-  DeviceName, VendorId, ProductId: string;
 begin
   case AMessage.wParam of
     DBT_DEVNODES_CHANGED:
@@ -91,16 +77,7 @@ begin
         Data := PDevBroadcastDeviceInterface(AMessage.LParam);
         if (Data^.dbcc_devicetype = USB_INTERFACE) and
            (Assigned(FOnUSBChangeEvent)) then
-        begin
-          DeviceName := PChar(@Data^.dbcc_name);
-          GetIdsFromDevice(DeviceName, VendorId, ProductId);
-          System.TMonitor.Enter(Self);
-          try
-            FOnUSBChangeEvent((AMessage.wParam = DBT_DEVICEARRIVAL), PChar(@Data^.dbcc_name), VendorId, ProductId);
-          finally
-            System.TMonitor.Exit(Self);
-          end;
-        end;
+          FOnUSBChangeEvent(Self, (AMessage.wParam = DBT_DEVICEARRIVAL), PChar(@Data^.dbcc_name));
       end;
   end;
 end;
