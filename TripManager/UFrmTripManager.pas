@@ -1361,6 +1361,8 @@ end;
 procedure TFrmTripManager.SaveGPX1Click(Sender: TObject);
 var
   GPIRec: TGPI;
+  OOutput, OError: string;
+  Rc: DWORD;
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
@@ -1368,8 +1370,17 @@ begin
   if not SaveTrip.Execute then
     exit;
 
-  if (APOIList <> nil) and
-     (APOIList.Count > 0) then
+  if (AFitInfo <> nil) and
+     (AFitInfo.Count > 0) then
+  begin
+    Sto_RedirectedExecute(Format('Fit2Gpx.exe "%s"', [HexEditFile]),
+                          GetRoutesTmp, OOutput, OError, Rc);
+    if (Rc <> 0) then
+      raise Exception.Create(OOutput + #10 + OError);
+    TFile.WriteAllText(SaveTrip.FileName, OOutput, TEncoding.UTF8);
+  end
+  else if (APOIList <> nil) and
+          (APOIList.Count > 0) then
     GPIRec.SaveGpx(SaveTrip.FileName, APOIList, TProcessOptions.GetCatSymbol)
   else if (Assigned(ATripList) and
           (ATripList.ItemList.Count > 0)) then
@@ -1668,11 +1679,11 @@ end;
 
 procedure TFrmTripManager.PopupTripInfoPopup(Sender: TObject);
 begin
-  SaveGPX1.Enabled := ( (ATripList <> nil) and (ATripList.ItemList.Count > 0)) or
-                      ( (APOIList <> nil)  and (APOIList.Count > 0));
-
-  MnuCompareGpxRoute.Enabled := SaveGPX1.Enabled;
-  MnuCompareGpxTrack.Enabled := SaveGPX1.Enabled;
+  MnuCompareGpxRoute.Enabled := (ATripList <> nil) and (ATripList.ItemList.Count > 0);
+  MnuCompareGpxTrack.Enabled := MnuCompareGpxRoute.Enabled;
+  SaveGPX1.Enabled := ( MnuCompareGpxRoute.Enabled ) or
+                      ( (APOIList <> nil)  and (APOIList.Count > 0)) or
+                      ( (AFitInfo <> nil)  and (AFitInfo.Count > 0));
 
   MnuPrevDiff.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
   MnuNextDiff.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);

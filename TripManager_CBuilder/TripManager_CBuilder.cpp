@@ -12,6 +12,7 @@
 #pragma link "vclx.bpi"
 #pragma link "vclsmp.bpi"
 #pragma hdrstop
+// (Re)Generate with dcc32 -jphn UnitStringUtils
 #include "..\CommonUnits\UnitStringUtils.hpp"
 
 #include <tchar.h>

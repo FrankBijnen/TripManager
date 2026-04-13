@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   if (argc < 2)
   {
     printf("usage: Fit2Gpx.exe <fit file>");
-    return FIT_FALSE;
+    return 1;
   }
 
   FitConvert_Init(FIT_TRUE);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
   if((file = fopen(argv[1], "rb")) == NULL)
   {
     printf("Error opening file %s.\n", argv[1]);
-    return FIT_FALSE;
+    return 1;
   }
 
   while(!feof(file) &&
