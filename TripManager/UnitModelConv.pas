@@ -4,8 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  UnitMtpDevice,
-  UnitTripDefs, UnitGpxDefs;
+  UnitMTPDefs, UnitTripDefs, UnitGpxDefs, UnitMtpDevice;
 
 const
   // Device recognition constants
@@ -69,7 +68,6 @@ const
 
   Zumo590_Name                      = Zumo_Name + ' 590';
   Zumo590_PartNumber                = '006-B1796-00';
-  System1Partition                  = 'System1';
 
   Drive51_Name                      = Garmin_Name + ' Drive 51';
   Drive51_PartNumber                = '006-B2586-00';
@@ -86,11 +84,7 @@ const
   // Unknown
   Unknown_Name                      = 'Unknown';
 
-  CardPartition                     = 'Card';
-
 type
-
-  TPartitionPrio = (ppLow, ppNorm, ppHigh);
 
   TModelConv = class
   private
@@ -98,6 +92,9 @@ type
     class function GetDevices(const Default: boolean): TStringList;
     class function GetTripModels: TStringList;
     class function KnownDeviceIndex(const DeviceList: TList; const APartPrio: TPartitionPrio): integer;
+    class function GetPreferredPrioDevice(const InsertedDevices: TStringList;
+                                          const DevicePrio: TPartitionPrio;
+                                          const DeviceList: Tlist): TBase_Device;
   public
     class procedure SetupKnownDevices;
     class procedure CmbModelDevices(const Devices: TStrings);
@@ -121,18 +118,18 @@ type
     class function ReadVehicleDB(const Garmin: TGarminModel): boolean;
     class function ReadExploreDB(const Garmin: TGarminModel): boolean;
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
-    class function GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;
     class function IsKnownDevice(const Device: TObject): boolean;
-    class function FirstKnownDevice(const DeviceList: TList): integer;
-    class function PreferedPartition(const SelectedDevice, InsertedDevice: string;
-                                     const DeviceList: Tlist): boolean;
+    class function FirstKnownDeviceIndex(const DeviceList: TList): integer;
+    class function GetPreferredDevice(const InsertedDevices: TStringList;
+                                      const DeviceList: Tlist): TBase_Device;
+
   end;
 
 implementation
 
 uses
   System.StrUtils, System.Masks, System.Types,
-  UnitVerySimpleXml, UnitStringUtils, UnitMTPDefs,
+  UnitVerySimpleXml, UnitStringUtils,
   UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
 
 type
@@ -450,21 +447,6 @@ begin
   result := Model_Tab[Garmin].Application;
 end;
 
-class function TModelConv.GetPartitionPrio(const PartitionDesc: string): TPartitionPrio;
-begin
-  if (ContainsText(PartitionDesc, System1Partition)) then
-  begin
-    if (TProcessOptions.UnsafeModels) then
-      result := TPartitionPrio.ppHigh
-    else
-      result := TPartitionPrio.ppLow;
-  end
-  else if (ContainsText(PartitionDesc, CardPartition)) then
-    result := TPartitionPrio.ppLow
-  else
-    result := TPartitionPrio.ppNorm;
-end;
-
 class function TModelConv.ReadDeviceDB(const Garmin: TGarminModel): boolean;
 begin
   result := Model_Tab[Garmin].DevDB;
@@ -498,7 +480,7 @@ var
   KnownIndex: integer;
 begin
   // Dont want Cards, usually they are part of the real device.
-  if (GetPartitionPrio(TBase_Device(Device).Description) = TPartitionPrio.ppLow) then
+  if (TBase_Device(Device).PartitionPrio = TPartitionPrio.ppLow) then
     exit(false);
 
   // Look in Known devices
@@ -525,7 +507,8 @@ begin
   // First check known devices
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
-    if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
+    // Check PartitionPrio
+    if (TBase_Device(DeviceList[DevIndex]).PartitionPrio <> APartPrio) then
       continue;
 
     // Check known devices
@@ -544,7 +527,7 @@ begin
   // Check manufacturer Garmin. Generic support GPX/POI
   for DevIndex := 0 to DeviceList.Count -1 do
   begin
-    if (GetPartitionPrio(TBase_Device(DeviceList[DevIndex]).Description) <> APartPrio) then
+    if (TBase_Device(DeviceList[DevIndex]).PartitionPrio <> APartPrio) then
       continue;
     if (SameText(TBase_Device(DeviceList[DevIndex]).Manufacturer, Garmin_Name)) then
       exit(DevIndex);
@@ -554,40 +537,45 @@ end;
 
 // Device selection order.
 // Note: Cards are not selected
-class function TModelConv.FirstKnownDevice(const DeviceList: Tlist): integer;
+class function TModelConv.FirstKnownDeviceIndex(const DeviceList: Tlist): integer;
 begin
-  result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppHigh);
+  result := -1;
+  if (TProcessOptions.UnsafeModels) then
+    result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppHigh);
   if (result < 0) then
     result := KnownDeviceIndex(DeviceList, TPartitionPrio.ppNorm);
 end;
 
-// The 590/595 in MassStorage mode and RWFS enabled has 2 partitions:
-// System. No trips
-// System. That has the trips.
-// If the System is connected first, allow connecting the System1 partition
-class function TModelConv.PreferedPartition(const SelectedDevice, InsertedDevice: string;
-                                            const DeviceList: Tlist): boolean;
+class function TModelConv.GetPreferredPrioDevice(const InsertedDevices: TStringList;
+                                                 const DevicePrio: TPartitionPrio;
+                                                 const DeviceList: Tlist): TBase_Device;
 var
-  Index: integer;
-  Selected, Inserted: TBase_Device;
-  SelectedPrio, InsertedPrio: TPartitionPrio;
+  CurIndex: integer;
+  TmpDev: string;
 begin
-  Index := TBase_Device.DeviceIdInList(SelectedDevice, DeviceList);
-  if (Index < 0) then
-    exit(false);
-  Selected := TBase_Device(DeviceList[Index]);
-  SelectedPrio := GetPartitionPrio(Selected.Description);
-
-  Index := TBase_Device.DeviceIdInList(InsertedDevice, DeviceList);
-  if (Index < 0) then
-    exit(false);
-  Inserted := TBase_Device(DeviceList[Index]);
-  InsertedPrio := GetPartitionPrio(Inserted.Description);
-
-  result := (Selected.Serial = Inserted.Serial) and
-            (SelectedPrio < InsertedPrio);
+  result := nil;
+  for TmpDev in InsertedDevices do
+  begin
+    CurIndex := TBase_Device.DeviceIdInList(TmpDev, DeviceList);
+    if (CurIndex > -1) and
+       (TModelConv.IsKnownDevice(TBase_Device(DeviceList[CurIndex]))) and
+       (TBase_Device(DeviceList[CurIndex]).PartitionPrio = DevicePrio) then
+      exit(TBase_Device(DeviceList[CurIndex]));
+  end;
 end;
 
+// The 590/595 in MassStorage mode and RWFS enabled have at least 2 partitions:
+// System. No trips
+// System1. That has the trips. Prefer that from InsertedDevices.
+class function TModelConv.GetPreferredDevice(const InsertedDevices: TStringList;
+                                             const DeviceList: Tlist): TBase_Device;
+begin
+  result := nil;
+  if (TProcessOptions.UnsafeModels) then
+    result := GetPreferredPrioDevice(InsertedDevices, TPartitionPrio.ppHigh, DeviceList);
+  if (result = nil) then
+    result := GetPreferredPrioDevice(InsertedDevices, TPartitionPrio.ppNorm, DeviceList);
+end;
 
 initialization
   // Load default device names

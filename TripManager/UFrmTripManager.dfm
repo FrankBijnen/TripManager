@@ -3615,4 +3615,11 @@ object FrmTripManager: TFrmTripManager
       OnClick = SetOverrideDeviceNameClick
     end
   end
+  object SelectDeviceTimer: TTimer
+    Enabled = False
+    Interval = 150
+    OnTimer = SelectDeviceTimerTimer
+    Left = 209
+    Top = 282
+  end
 end

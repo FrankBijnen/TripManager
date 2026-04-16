@@ -20,11 +20,11 @@ const
 type
   PDevBroadcastDeviceInterface  = ^DEV_BROADCAST_DEVICEINTERFACE;
   DEV_BROADCAST_DEVICEINTERFACE = record
-    dbcc_size : DWORD;
-    dbcc_devicetype : DWORD;
-    dbcc_reserved : DWORD;
-    dbcc_classguid : TGUID;
-    dbcc_name : char;
+    dbcc_size: DWORD;
+    dbcc_devicetype: DWORD;
+    dbcc_reserved: DWORD;
+    dbcc_classguid: TGUID;
+    dbcc_name: char;
   end;
 
   TOnUSBChangeEvent = procedure(Sender: TObject; const EventParm: WPARAM; const DeviceName: string) of object;

@@ -224,6 +224,7 @@ type
     OverrideDeviceName: TMenuItem;
     Cleardevicename: TMenuItem;
     SpltMemoSql: TSplitter;
+    SelectDeviceTimer: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -338,6 +339,7 @@ type
     procedure PnlDeviceTopResize(Sender: TObject);
     procedure CmbModelDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure CmbModelDropDown(Sender: TObject);
+    procedure SelectDeviceTimerTimer(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -351,6 +353,7 @@ type
     FSavedFolderId: WideString;
 
     FCurrentPath: WideString;
+    InsertedDevices: TStringList;
     DeviceList: TList;
     FSortSpecification: TSortSpecification;
     HexEdit: TBCHexEditor;
@@ -370,7 +373,7 @@ type
     USBEvent: TUSBEvent;
 
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
-    function WaitForDevice(const DeviceToWaitFor: string): integer;
+    procedure WaitForAllInsertedDevices(const CurDevice: TBase_Device);
     procedure USBChangeEvent(Sender: TObject; const EventParm: WPARAM; const DeviceName: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
@@ -414,7 +417,7 @@ type
     function CheckDevice(RaiseException: boolean = true): boolean;
     function HasTMTPDevice(const ADevice: TObject = nil): boolean;
     procedure SetDeviceColumnWidths;
-    procedure GetDeviceList(KeepDevice: string = '');
+    procedure GetDeviceList(KeepDevice: TBase_Device = nil);
     function GetDevicePath(const CompletePath: string): string;
     procedure SetDeviceDisplayPath;
     function GetSelectedFile: string;
@@ -668,10 +671,12 @@ begin
 
   // Get Id of File
   NFile := 'Current.gpx';
+//TODO mtp
   CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, FolderId, NFile);
   if (CurrentObjectId = '') then
     raise exception.Create(NFile + ' not found');
 
+//TODO mtp
   if not GetFileFromDevice(CurrentDevice.PortableDev, CurrentObjectId, CreatedTempPath, NFile) then
     raise Exception.Create(Format('Copy %s from %s failed', [NFile, CurrentDevice.Device]));
 
@@ -690,9 +695,11 @@ begin
     if (Rc = ID_YES) then
     begin
       GpxFile.FixCurrentGPX;
+//TODO mtp
       if not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectId) then
         raise exception.Create(Format('Deleting file %s failed', [NFile]));
 
+//TODO mtp
       if (TransferNewFileToDevice(CurrentDevice.PortableDev, CreatedTempPath + NFile, FolderId) = '') then
         raise exception.Create(Format('Writing file %s failed', [NFile]));
 
@@ -910,7 +917,7 @@ begin
 
       EdDeviceFolder.Text := Format('Transferring %s', [AnItem.Caption]);
       EdDeviceFolder.Update;
-
+//TODO mtp
       GetFileFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId, ShellTreeView1.Path, AnItem.Caption);
     end;
     SetDeviceDisplayPath;
@@ -944,11 +951,13 @@ begin
         continue;
 
       NFile := ExtractFileName(AFolder.PathName);
+//TODO mtp
       CurrentObjectId := GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, NFile);
       if (CurrentObjectId = '') then
       begin
         EdFileSysFolder.Text := Format('Transferring %s', [NFile]);
         EdFileSysFolder.Update;
+//TODO mtp
         if (TransferNewFileToDevice(CurrentDevice.PortableDev, AFolder.PathName, FSavedFolderId) = '') then
           raise exception.Create('Writing file failed');
       end
@@ -973,6 +982,7 @@ begin
           raise exception.Create('Overwrite file failed');
         EdFileSysFolder.Text := Format('Transferring %s', [NFile]);
         EdFileSysFolder.Update;
+//TODO mtp
         if (not TransferExistingFileToDevice(CurrentDevice.PortableDev, AFolder.PathName, FSavedFolderId, CurrentItem)) then
           raise exception.Create('Overwrite file failed');
       end;
@@ -1093,12 +1103,14 @@ begin
                 continue;
 
               // Overwrite?
+//TODO mtp
               CurrentObjectid := GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, TempFile);
               if (CurrentObjectid <> '') then
               begin
                 ShowWarnOverWrite(TempFile);
                 if (WarnOverWrite in [mrNo, mrNoToAll]) then
                   continue;
+//TODO mtp
                 if (not DelFromDevice(CurrentDevice.PortableDev, CurrentObjectid)) then
                   raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.DisplayedDevice]));
               end;
@@ -1109,6 +1121,7 @@ begin
               TempFile := IncludeTrailingPathDelimiter(GetRoutesTmp) + TempFile;
 
               // Did the transfer work?
+//TODO mtp
               if (TransferNewFileToDevice(CurrentDevice.PortableDev, TempFile, FSavedFolderId) = '') then
                 raise Exception.Create(Format('Could not overwrite file: %s on %s',
                                               [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
@@ -2042,6 +2055,7 @@ begin
   ModifiedList.Sorted := true;
   ModifiedList.Duplicates := TDuplicates.dupIgnore;
 
+  InsertedDevices := TStringList.Create;
   USBEvent := TUSBEvent.Create;
   USBEvent.OnUSBChange := USBChangeEvent;
   if not USBEvent.RegisterUSBHandler(GUID_DEVINTERFACE_WPD) then
@@ -2112,6 +2126,7 @@ begin
   if not USBEvent.UnRegisterUSBHandler then
     ShowMessage('Failed to unregister USB Events');
   USBEvent.Free;
+  InsertedDevices.Free;
 
   ClearTripInfo;
   ATripList.Free;
@@ -2218,7 +2233,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.GetDeviceList(KeepDevice: string = '');
+procedure TFrmTripManager.GetDeviceList(KeepDevice: TBase_Device = nil);
 var
   Index, DevIndex: integer;
 begin
@@ -2227,6 +2242,7 @@ begin
 
   // Get updated devicelist
   FreeDevices;
+//TODO mtp
   DeviceList := GetDevices;
 
   // Add to ComboBox
@@ -2236,7 +2252,10 @@ begin
   SetDeviceColumnWidths;
 
   // Reopen Device, and reposition ComboBox to new position
-  DevIndex := TBase_Device.DeviceIdInList(KeepDevice, DeviceList);
+  DevIndex := -1;
+  if (Assigned(KeepDevice)) then
+    DevIndex := TBase_Device.DeviceIdInList(KeepDevice.Device, DeviceList);
+
   if (DevIndex < 0) then
   begin
     // Device not found
@@ -2248,6 +2267,8 @@ begin
   begin
     // Device is still there. Re-connect and set ComboBox
     CurrentDevice := DeviceList[DevIndex];
+
+//TODO mtp
     if (ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev)) then
       CmbDevices.ItemIndex := DevIndex;
   end;
@@ -2265,6 +2286,8 @@ begin
     exit;
 
   CurrentDevice := DeviceList[Indx];
+
+//TODO mtp
   if not ConnectToDevice(CurrentDevice.Device, CurrentDevice.PortableDev) then
     raise exception.Create(Format('Device %s could not be opened.', [CurrentDevice.DisplayedDevice]));
 
@@ -2288,7 +2311,7 @@ procedure TFrmTripManager.SelectKnownDevice;
 begin
   CmbDevices.ItemIndex := -1;
   CmbDevices.Text := SelectMTPDevice;
-  CmbDevices.ItemIndex := TModelConv.FirstKnownDevice(DeviceList);
+  CmbDevices.ItemIndex := TModelConv.FirstKnownDeviceIndex(DeviceList);
   SelectDevice(CmbDevices.ItemIndex);
 end;
 
@@ -2314,6 +2337,73 @@ begin
       SelectDevice(Index);
       break;
     end;
+  end;
+end;
+
+procedure TFrmTripManager.WaitForAllInsertedDevices(const CurDevice: TBase_Device);
+const
+  MaxTries = 5;
+var
+  Retries: integer;
+  AllDevicesReady: boolean;
+  InsertedDevice: string;
+begin
+  Retries := MaxTries;
+  AllDevicesReady := false;
+  while (Retries > 0) and
+        not AllDevicesReady do
+  begin
+    Dec(Retries);
+    AllDevicesReady := true;
+    GetDeviceList(CurDevice);
+
+    for InsertedDevice in InsertedDevices do
+    begin
+      if (TBase_Device.DeviceIdInList(InsertedDevice, DeviceList) = -1) then
+      begin
+        AllDevicesReady := false;
+        Sleep(250);
+        break;
+      end;
+    end;
+  end;
+end;
+
+procedure TFrmTripManager.SelectDeviceTimerTimer(Sender: TObject);
+var
+  CurDevice, SelDevice: TBase_Device;
+begin
+  SelectDeviceTimer.Enabled := false;
+
+  // Save currently selected device
+  CurDevice := TBase_Device.Clone(CurrentDevice);
+  try
+
+    System.TMonitor.Enter(InsertedDevices);
+    try
+
+      // Edge in VirtualBox
+      WaitForAllInsertedDevices(CurDevice);
+
+      SelDevice := TModelConv.GetPreferredDevice(InsertedDevices, DeviceList);
+      InsertedDevices.Clear;
+
+    finally
+      System.TMonitor.Exit(InsertedDevices);
+    end;
+
+    if (SelDevice = nil) then
+      exit;
+
+    if (CurDevice.Device = '') or
+       ((CurDevice.Serial = SelDevice.Serial) and (SelDevice.PartitionPrio > CurDevice.PartitionPrio)) then
+    begin
+      ConnectedDeviceChanged(SelDevice.DisplayedDevice, 'Connected');
+      CmbDevices.ItemIndex := SelDevice.ID;
+      CmbDevicesChange(CmbDevices);
+    end;
+  finally
+    CurDevice.Free;
   end;
 end;
 
@@ -4288,6 +4378,8 @@ begin
                          (ContainsText(ANitem.SubItems[2], FITExtension))
                        );
       UnlockFiles := UnlockFiles or
+//TODO mtp
+
          (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, ChangeFileExt(ANitem.Caption, UnlExtension) ) <> '');
     end;
     Inc(SelCount);
@@ -4339,6 +4431,7 @@ begin
       if (ABase_Data.IsFolder <> AllowRecurse) then
         continue;
 
+//TODO mtp
       if not DelFromDevice(CurrentDevice.PortableDev, ABase_Data.ObjectId, AllowRecurse) then
         raise Exception.Create(Format('Could not remove %s: %s on %s', [ObjectName[AllowRecurse],
                                                                         ANitem.Caption,
@@ -4374,6 +4467,7 @@ begin
   if not (InputQuery('Create folder', 'Type a name', NewName)) then
     exit;
 
+//TODO mtp
   if not CreatePath(CurrentDevice.PortableDev, FSavedFolderId, NewName) then
     raise Exception.Create('Folder could not be created!');
 
@@ -4400,9 +4494,11 @@ begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   try
+//TODO mtp
     if (GetIdForFile(CurrentDevice.PortableDev, FSavedFolderId, NewName) <> '') then
       raise exception.Create(Format('File %s exists!', [NewName]));
 
+//TODO mtp
     if not RenameObject(CurrentDevice.PortableDev, TBase_Data(LstFiles.Selected.Data).ObjectId, NewName) then
       raise exception.Create('Rename failed on device');
 
@@ -4710,6 +4806,8 @@ begin
       // ReadFilesFromDevice will populate the data.
       // It returns the Parent ObjectId, we save it to be able to navigate to the parent directory.
       // Defined in the Listview on the form.
+
+//TODO mtp
       FSavedParent := ReadFilesFromDevice(CurrentDevice.PortableDev, LstFiles.Items, SParent, FCurrentPath);
 
       // Save Device and folder info
@@ -5502,81 +5600,42 @@ begin
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;
 
-// Wait until the DeviceName appears in the Devicelist
-// EG. Edge in VirtualBox
-function TFrmTripManager.WaitForDevice(const DeviceToWaitFor: string): integer;
-var
-  Retries: integer;
-begin
-  Retries := 5;
-  result := -1;
-  while (Retries > 0) do
-  begin
-    result := TBase_Device.DeviceIdInList(DeviceToWaitFor, DeviceList); // List after insert
-    if (result > -1) then
-        break;
-
-    // Device is not (yet) available in DeviceList. Retry a few times
-    SbPostProcess.Panels[0].Text := DeviceToWaitFor;
-    SbPostProcess.Panels[1].Text := 'Waiting for device to appear';
-    SbPostProcess.Update;
-
-    Dec(Retries);
-    Sleep(500);
-    GetDeviceList;  // Rescan devices. We dont have to keep the current device
-  end;
-end;
-
 procedure TFrmTripManager.USBChangeEvent(Sender: TObject; const EventParm: WPARAM; const DeviceName: string);
 var
-  CurDevice, CurDisplayedDevice: string;
-  DevIndex : integer;
+  CurDevice: TBase_Device;
+  DevIndex: integer;
 begin
-  // Save currently selected device info.
-  CurDevice := '';
-  CurDisplayedDevice := '';
-  if (Assigned(CurrentDevice)) then
-  begin
-    CurDevice := CurrentDevice.Device;
-    CurDisplayedDevice := CurrentDevice.DisplayedDevice;
-  end;
-
   // Serialize (Dis)Connects.
-  System.TMonitor.Enter(Sender);
+  System.TMonitor.Enter(InsertedDevices);
   try
-
-    // Update the list of devices, keeping Current Device if possible
-    GetDeviceList(CurDevice);
-
     case EventParm of
       DBT_DEVICEREMOVECOMPLETE:
-        if (CurDevice <> '') then
         begin
-          DevIndex := TBase_Device.DeviceIdInList(CurDevice, DeviceList);
-          if (DevIndex < 0) then // A Device was connected, and now no longer avail.
-            ConnectedDeviceChanged(CurDisplayedDevice, 'Disconnected');
-        end;
-      DBT_DEVICEARRIVAL:
-        if (CurDevice = '') or
-           (TModelConv.PreferedPartition(CurDevice, DeviceName, DeviceList)) then
-        begin
-          // No Device was connected and now it is.
-          // Or... A Zumo590 System partition was connected, and now a System1 is inserted. Prefer that.
-          DevIndex := WaitForDevice(DeviceName);
-
-          if (DevIndex > -1) and
-             (TModelConv.IsKnownDevice(TBase_Device(DeviceList[DevIndex]))) then
-          begin
-            // Inserted Device is in the DeviceList and a known device. Note: SD Cards are not known devices
-            ConnectedDeviceChanged(TBase_Device(DeviceList[DevIndex]).DisplayedDevice, 'Connected');
-            CmbDevices.ItemIndex := DevIndex;
-            CmbDevicesChange(CmbDevices);
+          // Save currently selected device info.
+          CurDevice := TBase_Device.Clone(CurrentDevice);
+          try
+            // Update the list of devices, keeping Current Device if possible
+            GetDeviceList(CurrentDevice);
+            if (CurDevice.Device <> '') then
+            begin
+              DevIndex := TBase_Device.DeviceIdInList(CurDevice.Device, DeviceList);
+              if (DevIndex < 0) then // A Device was connected, and now no longer avail.
+                ConnectedDeviceChanged(CurDevice.DisplayedDevice, 'Disconnected');
+            end;
+          finally
+            CurDevice.Free;
           end;
         end;
-    end;
+        DBT_DEVICEARRIVAL:
+          begin
+            InsertedDevices.Add(DeviceName);
+            SelectDeviceTimer.Enabled := false;
+            SelectDeviceTimer.Enabled := true;
+          end;
+      end;
 
   finally
-    System.TMonitor.Exit(Sender);
+    System.TMonitor.Exit(InsertedDevices);
   end;
 end;
 

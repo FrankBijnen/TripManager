@@ -9,7 +9,13 @@ uses
   Vcl.ComCtrls,
   PortableDeviceApiLib_TLB;
 
+const
+  System1Partition                  = 'System1';
+  CardPartition                     = 'Card';
+
 type
+  TPartitionPrio = (ppLow, ppNorm, ppHigh);
+
   TFile_Info = record
     ObjName: PWideChar;
     IsFolder: boolean;
@@ -58,9 +64,11 @@ type
     procedure GetInfoFromDevice(const DeviceList: Tlist); virtual;
 //TODO Add more methods. Eliminating need for 'uses mtp_helper'
     function FileExists(const APath, AFile:string): boolean; virtual;
+    function PartitionPrio: TPartitionPrio;
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
     class procedure GetRegisteredDeviceClasses;
     class function New: TBase_Device;
+    class function Clone(const ABase_Device: TBase_Device): TBase_Device;
   end;
 
 
@@ -183,6 +191,16 @@ begin
   result := (GetIdForFile(PortableDev, WideString(APath), WideString(AFile)) <> '');
 end;
 
+function TBase_Device.PartitionPrio: TPartitionPrio;
+begin
+  if (ContainsText(Description, System1Partition)) then
+    result := TPartitionPrio.ppHigh
+  else if (ContainsText(Description, CardPartition)) then
+    result := TPartitionPrio.ppLow
+  else
+    result := TPartitionPrio.ppNorm;
+end;
+
 class function TBase_Device.DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
 var
   Index: integer;
@@ -204,6 +222,25 @@ begin
     result := TBase_Device(FPersistentDeviceClass.Create)
   else
     result := TBase_Device.Create;
+end;
+
+class function TBase_Device.Clone(const ABase_Device: TBase_Device): TBase_Device;
+begin
+  result := New;
+  result.Device         := '';    // Documentation purpose
+
+  if not Assigned(ABase_Device) then
+    exit;
+
+  result.ID             := ABase_Device.ID;
+  result.SerialId       := ABase_Device.SerialId;
+  result.Device         := ABase_Device.Device;
+  result.Description    := ABase_Device.Description;
+  result.FriendlyName   := ABase_Device.FriendlyName;
+  result.Serial         := ABase_Device.Serial;
+  result.Manufacturer   := ABase_Device.Manufacturer;
+  result.MSM            := ABase_Device.MSM;
+  result.PortableDev    := nil;
 end;
 
 class procedure TBase_Device.GetRegisteredDeviceClasses;
