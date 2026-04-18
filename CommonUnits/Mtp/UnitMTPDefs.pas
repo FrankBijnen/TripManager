@@ -10,8 +10,12 @@ uses
   PortableDeviceApiLib_TLB;
 
 const
-  System1Partition                  = 'System1';
-  CardPartition                     = 'Card';
+  System1Partition    = 'System1';
+  CardPartition       = 'Card';
+  USB_DISK            = 'usbstor#disk'; // For (Garmin's) in Mass Storage Mode
+  USB_BUSENUM         = 'swd#wpdbusenum'; // For (Garmin's) in Mass Storage Mode
+  MTP_ID              = 'MTP';
+  MSM_ID              = 'MSM';
 
 type
   TPartitionPrio = (ppLow, ppNorm, ppHigh);
@@ -69,6 +73,7 @@ type
     class procedure GetRegisteredDeviceClasses;
     class function New: TBase_Device;
     class function Clone(const ABase_Device: TBase_Device): TBase_Device;
+    class function MTPorMSM(const DeviceName: string): string;
   end;
 
 
@@ -241,6 +246,14 @@ begin
   result.Manufacturer   := ABase_Device.Manufacturer;
   result.MSM            := ABase_Device.MSM;
   result.PortableDev    := nil;
+end;
+
+class function TBase_Device.MTPorMSM(const DeviceName: string): string;
+begin
+  result := MTP_ID;
+  if (ContainsText(DeviceName, USB_DISK)) and
+     (ContainsText(DeviceName, USB_BUSENUM)) then
+    result := MSM_ID;
 end;
 
 class procedure TBase_Device.GetRegisteredDeviceClasses;

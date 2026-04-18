@@ -27,7 +27,7 @@ type
     dbcc_name: char;
   end;
 
-  TOnUSBChangeEvent = procedure(Sender: TObject; const EventParm: WPARAM; const DeviceName: string) of object;
+  TOnUSBChangeEvent = procedure(Sender: TObject; const EventParam: WPARAM; const DeviceName: string) of object;
 
   TUSBEvent = class(TObject)
   private
