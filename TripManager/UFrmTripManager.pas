@@ -5569,8 +5569,6 @@ procedure TFrmTripManager.ProcessInsertedDevices;
 var
   CurDevice, SelDevice: TBase_Device;
 begin
-  DebugMsg(['ProcessInsertedDevices.Start', InsertedDevices.Count]);
-
   // Save currently selected device
   CurDevice := TBase_Device.Clone(CurrentDevice);
   try
@@ -5592,7 +5590,6 @@ begin
     end;
   finally
     CurDevice.Free;
-    DebugMsg(['ProcessInsertedDevices.End']);
   end;
 end;
 
@@ -5622,7 +5619,6 @@ procedure TFrmTripManager.WMUSBConnectEvent(var Msg: TMessage);
 var
   ANUSBDevice: TUSBDevice;
   CurDevice: TBase_Device;
-  DevIndex: integer;
 begin
   Msg.Result := 0;
   ANUSBDevice := TUSBDevice(Msg.LParam);
@@ -5637,8 +5633,7 @@ begin
             GetDeviceList(CurrentDevice);
             if (CurDevice.Device <> '') then
             begin
-              DevIndex := TBase_Device.DeviceIdInList(CurDevice.Device, DeviceList);
-              if (DevIndex < 0) then // A Device was connected, and now no longer avail.
+              if (TBase_Device.DeviceIdInList(CurDevice.Device, DeviceList) < 0) then
                 ConnectedDeviceChanged(CurDevice.DisplayedDevice, 'Disconnected');
             end;
           finally
@@ -5648,7 +5643,6 @@ begin
         DBT_DEVICEARRIVAL:
           begin
             InsertedDevices.Add(ANUSBDevice.Devicename);
-            DebugMsg(['InsertedDevices.Add', ANUSBDevice.DeviceName]);
 
             // Mass Storage Mode can have multiple devices. Wait until all are available.
             // E.G. Zumo 590
