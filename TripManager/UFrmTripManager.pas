@@ -36,6 +36,7 @@ const
   WM_DIRCHANGED           = WM_USER + 1;
   WM_ADDRLOOKUP           = WM_USER + 2;
   WM_LISTFILES            = WM_USER + 3;
+  WM_USBCONNECTEVENT      = WM_USER + 4;
 
   TripNameCol             = 5;
   TripNameColWidth        = 250;
@@ -376,7 +377,6 @@ type
     procedure ProcessInsertedDevices;
     procedure WaitForAllInsertedDevices(const TmpInserted: TStringList;
                                         const CurDevice: TBase_Device);
-    procedure USBChangeEvent(Sender: TObject; const EventParm: WPARAM; const DeviceName: string);
     procedure ConnectedDeviceChanged(const Device, Status: string);
     procedure FileSysDrop(var Msg: TWMDROPFILES); message WM_DROPFILES;
     function SelectedScPosn: TmScPosn;
@@ -456,7 +456,8 @@ type
     procedure DestroyWnd; override;
     procedure WMDirChanged(var Msg: TMessage); message WM_DIRCHANGED;
     procedure WMAddrLookUp(var Msg: TMessage); message WM_ADDRLOOKUP;
-    procedure WMListFiles(var Msg: TMessage); message WM_LISTFILES;
+    procedure WMListFiles(var Msg: TMessage); message WM_LISTFILES;    
+    procedure WMUSBConnectEvent(var Msg: TMessage); message WM_USBCONNECTEVENT;
   public
     { Public declarations }
     DeviceFolder: array[0..2] of string;
@@ -2059,8 +2060,7 @@ begin
 
   InsertedDevices := TStringList.Create;
   USBEvent := TUSBEvent.Create;
-  USBEvent.OnUSBChange := USBChangeEvent;
-  if not USBEvent.RegisterUSBHandler(GUID_DEVINTERFACE_WPD) then
+  if not USBEvent.RegisterUSBHandler(GUID_DEVINTERFACE_WPD, Handle, WM_USBCONNECTEVENT) then
     ShowMessage('Failed to register WPD Events');
 
   TsSQlite.TabVisible := false;
@@ -2339,81 +2339,6 @@ begin
       SelectDevice(Index);
       break;
     end;
-  end;
-end;
-
-procedure TFrmTripManager.SelectDeviceTimerTimer(Sender: TObject);
-begin
-  SelectDeviceTimer.Enabled := false;
-  ProcessInsertedDevices;
-end;
-
-procedure TFrmTripManager.WaitForAllInsertedDevices(const TmpInserted: TStringList;
-                                                    const CurDevice: TBase_Device);
-const
-  MaxTries = 5;
-var
-  Retries: integer;
-  AllDevicesReady: boolean;
-  InsertedDevice: string;
-begin
-  Retries := MaxTries;
-  AllDevicesReady := false;
-  while (Retries > 0) and
-        not AllDevicesReady do
-  begin
-    Dec(Retries);
-    AllDevicesReady := true;
-    GetDeviceList(CurDevice);
-
-    for InsertedDevice in TmpInserted do
-    begin
-      if (TBase_Device.DeviceIdInList(InsertedDevice, DeviceList) = -1) then
-      begin
-        AllDevicesReady := false;
-        Sleep(250);
-        break;
-      end;
-    end;
-  end;
-end;
-
-procedure TFrmTripManager.ProcessInsertedDevices;
-var
-  CurDevice, SelDevice: TBase_Device;
-  TmpInserted: TStringList;
-begin
-  // Save currently selected device
-  CurDevice := TBase_Device.Clone(CurrentDevice);
-  try
-    System.TMonitor.Enter(InsertedDevices);
-    TmpInserted := TStringList.Create;
-    try
-      // Copy to Tmp stringlist, and use that
-      TmpInserted.Text := InsertedDevices.Text;
-      InsertedDevices.Clear;
-
-      // Edge in VirtualBox
-      WaitForAllInsertedDevices(TmpInserted, CurDevice);
-      SelDevice := TModelConv.GetPreferredDevice(TmpInserted, DeviceList);
-
-    finally
-      TmpInserted.Free;
-      System.TMonitor.Exit(InsertedDevices);
-    end;
-
-    if (SelDevice = nil) then
-      exit;
-
-    if (CurDevice.Device = '') or
-       ((CurDevice.Serial = SelDevice.Serial) and (SelDevice.PartitionPrio > CurDevice.PartitionPrio)) then
-    begin
-      ConnectedDeviceChanged(SelDevice.DisplayedDevice, 'Connected');
-      CmbDevices.ItemIndex := SelDevice.ID;
-      CmbDevicesChange(CmbDevices);
-    end;
-  finally
-    CurDevice.Free;
   end;
 end;
 
@@ -5610,48 +5535,71 @@ begin
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;
 
-procedure TFrmTripManager.USBChangeEvent(Sender: TObject; const EventParm: WPARAM; const DeviceName: string);
+procedure TFrmTripManager.WaitForAllInsertedDevices(const TmpInserted: TStringList;
+                                                    const CurDevice: TBase_Device);
+const
+  MaxTries = 5;
 var
-  CurDevice: TBase_Device;
-  DevIndex: integer;
+  Retries: integer;
+  AllDevicesReady: boolean;
+  InsertedDevice: string;
 begin
-  case EventParm of
-    DBT_DEVICEREMOVECOMPLETE:
+  Retries := MaxTries;
+  AllDevicesReady := false;
+  while (Retries > 0) and
+        not AllDevicesReady do
+  begin
+    Dec(Retries);
+    AllDevicesReady := true;
+    GetDeviceList(CurDevice);
+
+    for InsertedDevice in TmpInserted do
+    begin
+      if (TBase_Device.DeviceIdInList(InsertedDevice, DeviceList) = -1) then
       begin
-        // Save currently selected device info.
-        CurDevice := TBase_Device.Clone(CurrentDevice);
-        try
-          // Update the list of devices, keeping Current Device if possible
-          GetDeviceList(CurrentDevice);
-          if (CurDevice.Device <> '') then
-          begin
-            DevIndex := TBase_Device.DeviceIdInList(CurDevice.Device, DeviceList);
-            if (DevIndex < 0) then // A Device was connected, and now no longer avail.
-              ConnectedDeviceChanged(CurDevice.DisplayedDevice, 'Disconnected');
-          end;
-        finally
-          CurDevice.Free;
-        end;
+        AllDevicesReady := false;
+        Sleep(250);
+        break;
       end;
-      DBT_DEVICEARRIVAL:
-        begin
-          System.TMonitor.Enter(InsertedDevices);
-          try
-            InsertedDevices.Add(DeviceName);
-          finally
-            System.TMonitor.Exit(InsertedDevices);
-          end;
-          // Mass Storage Mode can have multiple devices. Wait until all are available.
-          // Zumo 590
-          if (TBase_Device.MTPorMSM(DeviceName) <> MSM_ID) then
-            ProcessInsertedDevices
-          else
-          begin
-            SelectDeviceTimer.Enabled := false;
-            SelectDeviceTimer.Enabled := true;
-          end
-        end;
+    end;
   end;
+end;
+
+procedure TFrmTripManager.ProcessInsertedDevices;
+var
+  CurDevice, SelDevice: TBase_Device;
+begin
+  DebugMsg(['ProcessInsertedDevices.Start', InsertedDevices.Count]);
+
+  // Save currently selected device
+  CurDevice := TBase_Device.Clone(CurrentDevice);
+  try
+    // Edge in VirtualBox
+    WaitForAllInsertedDevices(InsertedDevices, CurDevice);
+
+    SelDevice := TModelConv.GetPreferredDevice(InsertedDevices, DeviceList);
+    InsertedDevices.Clear;
+
+     if (SelDevice = nil) then
+      exit;
+
+    if (CurDevice.Device = '') or
+       ((CurDevice.Serial = SelDevice.Serial) and (SelDevice.PartitionPrio > CurDevice.PartitionPrio)) then
+    begin
+      ConnectedDeviceChanged(SelDevice.DisplayedDevice, 'Connected');
+      CmbDevices.ItemIndex := SelDevice.ID;
+      CmbDevicesChange(CmbDevices);
+    end;
+  finally
+    CurDevice.Free;
+    DebugMsg(['ProcessInsertedDevices.End']);
+  end;
+end;
+
+procedure TFrmTripManager.SelectDeviceTimerTimer(Sender: TObject);
+begin
+  SelectDeviceTimer.Enabled := false;
+  ProcessInsertedDevices;
 end;
 
 procedure TFrmTripManager.ConnectedDeviceChanged(const Device, Status: string);
@@ -5668,6 +5616,54 @@ begin
 
   StatusTimer.Enabled := false;
   StatusTimer.Enabled := true;
+end;
+
+procedure TFrmTripManager.WMUSBConnectEvent(var Msg: TMessage);
+var
+  ANUSBDevice: TUSBDevice;
+  CurDevice: TBase_Device;
+  DevIndex: integer;
+begin
+  Msg.Result := 0;
+  ANUSBDevice := TUSBDevice(Msg.LParam);
+  try
+    case Msg.WParam of
+      DBT_DEVICEREMOVECOMPLETE:
+        begin
+          // Save currently selected device info.
+          CurDevice := TBase_Device.Clone(CurrentDevice);
+          try
+            // Update the list of devices, keeping Current Device if possible
+            GetDeviceList(CurrentDevice);
+            if (CurDevice.Device <> '') then
+            begin
+              DevIndex := TBase_Device.DeviceIdInList(CurDevice.Device, DeviceList);
+              if (DevIndex < 0) then // A Device was connected, and now no longer avail.
+                ConnectedDeviceChanged(CurDevice.DisplayedDevice, 'Disconnected');
+            end;
+          finally
+            CurDevice.Free;
+          end;
+        end;
+        DBT_DEVICEARRIVAL:
+          begin
+            InsertedDevices.Add(ANUSBDevice.Devicename);
+            DebugMsg(['InsertedDevices.Add', ANUSBDevice.DeviceName]);
+
+            // Mass Storage Mode can have multiple devices. Wait until all are available.
+            // E.G. Zumo 590
+            if (TBase_Device.MTPorMSM(ANUSBDevice.DeviceName) <> MSM_ID) then
+              ProcessInsertedDevices
+            else
+            begin
+              SelectDeviceTimer.Enabled := false;
+              SelectDeviceTimer.Enabled := true;
+            end
+          end;
+    end;
+  finally
+    ANUSBDevice.Free;
+  end;
 end;
 
 procedure TFrmTripManager.StatusTimerTimer(Sender: TObject);

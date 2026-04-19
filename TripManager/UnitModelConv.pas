@@ -118,6 +118,7 @@ type
     class function ReadVehicleDB(const Garmin: TGarminModel): boolean;
     class function ReadExploreDB(const Garmin: TGarminModel): boolean;
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
+    class function SafeGarminModel(const Garmin: TGarminModel): boolean;
     class function IsKnownDevice(const Device: TObject): boolean;
     class function FirstKnownDeviceIndex(const DeviceList: TList): integer;
     class function GetPreferredDevice(const InsertedDevices: TStringList;
@@ -472,6 +473,11 @@ begin
     if (Model_Tab[AGarminModel].TripModel = TripModel) then
       exit(Model_Tab[AGarminModel].Safe);
   end;
+end;
+
+class function TModelConv.SafeGarminModel(const Garmin: TGarminModel): boolean;
+begin
+  result := (Display2Trip(Garmin2Display(Garmin)) <> TTripModel.Unknown);
 end;
 
 // When a device is inserted, is it known?

@@ -116,6 +116,7 @@ function TGarminDevice.ReadGarminDevice(const ACurrentDevice: TObject;
                                         const ReadOnly: boolean): boolean;
 var
   CurDevId, DevId: integer;
+  SafeGarminModel: boolean;
   NFile: string;
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
@@ -236,12 +237,16 @@ begin
           GarminModel := TModelConv.GuessGarminOrEdge(ModelDescription);
         else
         begin
+          SafeGarminModel := TModelConv.SafeGarminModel(GarminModel);
+
           // Need to create Internal Storage\.System\Trips?
-          if not (ReadOnly) then
+          if (SafeGarminModel) and
+             not (ReadOnly) then
             CurrentDevice.CheckMTPTripsFolder(TModelConv.GetKnownPath(Self, 0));
 
-          if (CurrentDevice.PathId[TModelConv.GetKnownPath(Self, 0)] = '') then
-            GarminModel := TGarminModel.GarminGeneric; // No .System\Trips. Use it as a Generic Garmin
+          if not (SafeGarminModel) or
+             (CurrentDevice.PathId[TModelConv.GetKnownPath(Self, 0)] = '') then
+            GarminModel := TGarminModel.GarminGeneric; // No .System\Trips, or Unsafe model. Use it as a Generic Garmin
         end;
       end;
 

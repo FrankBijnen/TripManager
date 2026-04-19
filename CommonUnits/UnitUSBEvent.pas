@@ -27,26 +27,37 @@ type
     dbcc_name: char;
   end;
 
-  TOnUSBChangeEvent = procedure(Sender: TObject; const EventParam: WPARAM; const DeviceName: string) of object;
+  TUSBDevice = class(TObject)
+  public
+    DeviceName: string;
+    constructor Create(const ADeviceName: string);
+  end;
 
   TUSBEvent = class(TObject)
   private
     FHandle: HWND;
+    FParentHandle: HWND;
+    FMsgId: integer;
     FDevNotifyHandle: HDEVNOTIFY;
-    FOnUSBChangeEvent: TOnUSBChangeEvent;
-    FOnDeviceAddedOrRemoved: TNotifyEvent;
     procedure WindowProc(var AMessage: TMessage);
     procedure WMDeviceChange(var AMessage: TMessage);
   public
     constructor Create;
     destructor Destroy; override;
-    function RegisterUSBHandler(ClassGuid: TGUID): boolean;
+    function RegisterUSBHandler(const ClassGuid: TGUID;
+                                const AParentHandle: HWND;
+                                const AMsgId: integer): boolean;
     function UnRegisterUSBHandler: boolean;
-    property OnUSBChange: TOnUSBChangeEvent read FOnUSBChangeEvent write FOnUSBChangeEvent;
-    property OnDeviceAddedOrRemoved: TNotifyEvent read FOnDeviceAddedOrRemoved write FOnDeviceAddedOrRemoved;
   end;
 
 implementation
+
+constructor TUSBDevice.Create(const ADeviceName: string);
+begin
+  inherited Create;
+
+  DeviceName := ADeviceName;
+end;
 
 constructor TUSBEvent.Create;
 begin
@@ -66,18 +77,18 @@ end;
 procedure TUSBEvent.WMDeviceChange(var AMessage: TMessage);
 var
   Data: PDevBroadcastDeviceInterface;
+  AnUSBDevice: TUSBDevice;
 begin
   case AMessage.wParam of
-    DBT_DEVNODES_CHANGED:
-      if Assigned(FOnDeviceAddedOrRemoved) then
-        FOnDeviceAddedOrRemoved(Self);
     DBT_DEVICEARRIVAL,
     DBT_DEVICEREMOVECOMPLETE:
       begin
         Data := PDevBroadcastDeviceInterface(AMessage.LParam);
-        if (Data^.dbcc_devicetype = USB_INTERFACE) and
-           (Assigned(FOnUSBChangeEvent)) then
-          FOnUSBChangeEvent(Self, AMessage.wParam, PChar(@Data^.dbcc_name));
+        if (Data^.dbcc_devicetype = USB_INTERFACE) then
+        begin
+          AnUSBDevice := TUSBDevice.Create(PChar(@Data^.dbcc_name));
+          PostMessage(FParentHandle, FMsgId, AMessage.wParam, LPARAM(AnUSBDevice));
+        end;
       end;
   end;
 end;
@@ -92,7 +103,9 @@ begin
   end;
 end;
 
-function TUSBEvent.RegisterUSBHandler(ClassGuid: TGuid): boolean;
+function TUSBEvent.RegisterUSBHandler(const ClassGuid: TGuid;
+                                      const AParentHandle: HWND;
+                                      const AMsgId: integer): boolean;
 var
   Dbi: DEV_BROADCAST_DEVICEINTERFACE;
   Size : integer;
@@ -100,6 +113,9 @@ begin
   result := false;
   if Assigned(FDevNotifyHandle) then
     exit;
+
+  FParentHandle := AParentHandle;
+  FMsgId := AMsgId;
 
   Size := SizeOf(DEV_BROADCAST_DEVICEINTERFACE);
   ZeroMemory(@Dbi,Size);
