@@ -51,6 +51,10 @@ type
   end;
 
   TBase_Device = class(TPersistent)
+  protected
+    function GetPathId(APath: string): string;
+    function GetFileId(APath, AFile: string): string;
+    function GetFriendlyPath(APath: string): string;
   public
     ID: integer;
     SerialId: integer;
@@ -66,14 +70,41 @@ type
     function DisplayedDevice: string; virtual;
     function GetManufacturer: PWideChar;
     procedure GetInfoFromDevice(const DeviceList: Tlist); virtual;
-//TODO Add more methods. Eliminating need for 'uses mtp_helper'
     function FileExists(const APath, AFile:string): boolean; virtual;
     function PartitionPrio: TPartitionPrio;
+    function GetListInfo(const APath, AFile: string;
+                         const AListItem: TListItem): string;
+    function GetFileInfo(const APath, AFile: string;
+                         var File_Info: TFile_Info): string;
+    function GetFriendlyIdForPath(const SPath: string;
+                                 var FriendlyPath: string): string;
+
+    function GetFile(const SFile, SSaveTo, NFile: string): boolean;
+    function DelFile(const SFile: string; const Recurse: boolean = false): boolean;
+    function RenameFile(const ObjectId, NewName: string): boolean;
+    function TransferNewFile(const SFile, SSaveTo: string;
+                             const NewName: WideString = ''): string;
+    function TransferExistingFile(const SFile, SSaveTo: string;
+                                  const AListItem: TListItem): boolean;
+    function CreatePath(const Parent, DirName: string): boolean;
+    function ReadFiles(const Lst: TListItems;
+                       const SParent: string;
+                       var CompletePath: WideString): string; overload;
+    procedure ReadFiles(const Lst: TListItems;
+                        const SParent: string); overload;
+
+    function Connect(const Readonly: boolean = false): boolean;
+
+    class function GetDeviceList: TList;
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
     class procedure GetRegisteredDeviceClasses;
     class function New: TBase_Device;
     class function Clone(const ABase_Device: TBase_Device): TBase_Device;
-    class function MTPorMSM(const DeviceName: string): string;
+    class function GetMSM(const DeviceName: string): string;
+
+    property PathId[APath: string]: string read GetPathId;
+    property FileId[APath, AFile: string]: string read GetFileId;
+    property FriendlyPath[APath: string]: string read GetFriendlyPath;
   end;
 
 
@@ -191,9 +222,26 @@ begin
   Manufacturer := GetManufacturer;
 end;
 
+function TBase_Device.GetPathId(APath: string): string;
+var
+  FriendlyName: string;
+begin
+  result := GetIdForPath(PortableDev, APath, FriendlyName);
+end;
+
+function TBase_Device.GetFileId(APath, AFile: string): string;
+begin
+  result := GetIdForFile (PortableDev, APath, AFile);
+end;
+
+function TBase_Device.GetFriendlyPath(APath: string): string;
+begin
+  GetIdForPath(PortableDev, APath, result);
+end;
+
 function TBase_Device.FileExists(const APath, AFile:string): boolean;
 begin
-  result := (GetIdForFile(PortableDev, WideString(APath), WideString(AFile)) <> '');
+  result := (FileId[APath, AFile] <> '');
 end;
 
 function TBase_Device.PartitionPrio: TPartitionPrio;
@@ -204,6 +252,78 @@ begin
     result := TPartitionPrio.ppLow
   else
     result := TPartitionPrio.ppNorm;
+end;
+
+function TBase_Device.GetListInfo(const APath, AFile: string;
+                                  const AListItem: TListItem): string;
+
+begin
+  result := GetIdForFile(PortableDev, APath, AFile, AListItem);
+end;
+
+function TBase_Device.GetFileInfo(const APath, AFile: string;
+                                  var File_Info: TFile_Info): string;
+begin
+  result := GetIdForFile(PortableDev, APath, AFile, File_Info);
+end;
+
+function TBase_Device.GetFriendlyIdForPath(const SPath: string;
+                                           var FriendlyPath: string): string;
+begin
+  result := GetIdForPath(PortableDev, SPath, FriendlyPath);
+end;
+
+function TBase_Device.GetFile(const SFile, SSaveTo, NFile: string): boolean;
+begin
+  result := GetFileFromDevice(PortableDev, SFile, SSaveTo, NFile);
+end;
+
+function TBase_Device.DelFile(const SFile: string; const Recurse: boolean = false): boolean;
+begin
+  result := DelFromDevice(PortableDev, SFile, Recurse);
+end;
+
+function TBase_Device.RenameFile(const ObjectId, NewName: string): boolean;
+begin
+  result := RenameDeviceFile(PortableDev, ObjectId, NewName);
+end;
+
+function TBase_Device.TransferNewFile(const SFile, SSaveTo: string;
+                                      const NewName: WideString = ''): string;
+begin
+  result := TransferNewFileToDevice(PortableDev, SFile, SSaveTo, NewName);
+end;
+
+function TBase_Device.TransferExistingFile(const SFile, SSaveTo: string;
+                                           const AListItem: TListItem): boolean;
+begin
+  if not Assigned(AListItem) then
+    raise exception.Create('No item selected.');
+
+  result := TransferExistingFileToDevice(PortableDev, SFile, SSaveTo, AListItem);
+end;
+
+function TBase_Device.CreatePath(const Parent, DirName: string): boolean;
+begin
+  result := CreateDevicePath(PortableDev, Parent, DirName);
+end;
+
+function TBase_Device.ReadFiles(const Lst: TListItems;
+                                const SParent: string;
+                                var CompletePath: WideString): string;
+begin
+  result := ReadFilesFromDevice(PortableDev, Lst, Sparent, CompletePath);
+end;
+
+procedure TBase_Device.ReadFiles(const Lst: TListItems;
+                                 const SParent: string);
+begin
+  ReadFilesFromDevice(PortableDev, Lst, SParent);
+end;
+
+function TBase_Device.Connect(const Readonly: boolean = false): boolean;
+begin
+  result := ConnectToDevice(Device, PortableDev, Readonly);
 end;
 
 class function TBase_Device.DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
@@ -248,7 +368,7 @@ begin
   result.PortableDev    := nil;
 end;
 
-class function TBase_Device.MTPorMSM(const DeviceName: string): string;
+class function TBase_Device.GetMSM(const DeviceName: string): string;
 begin
   result := MTP_ID;
   if (ContainsText(DeviceName, USB_DISK)) and
@@ -260,6 +380,11 @@ class procedure TBase_Device.GetRegisteredDeviceClasses;
 begin
   FPersistentDataClass := GetClass(MTP_DATA_CLASS);
   FPersistentDeviceClass := GetClass(MTP_DEVICE_CLASS);
+end;
+
+class function TBase_Device.GetDeviceList: TList;
+begin
+  result := GetDevices;
 end;
 
 initialization

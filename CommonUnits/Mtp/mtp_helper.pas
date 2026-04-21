@@ -368,15 +368,15 @@ function GetIdForFile(PortableDev: IPortableDevice;
 function GetIdForFile(PortableDev: IPortableDevice;
                       SPath: WideString;
                       SFile: WideString): string; overload;
-function GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): Boolean;
-function DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: Boolean = false): Boolean;
-function CreatePath(PortableDev: IPortableDevice; Parent, DirName: WideString): Boolean;
-function RenameObject(PortableDev: IPortableDevice; ObjectId, NewName: WideString): Boolean;
+function GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): boolean;
+function DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
+function CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
+function RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
 function TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
                                  NewName: WideString = ''): WideString;
-function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
+function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
 function GetDevices: TList;
-function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): Boolean;
+function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 
 implementation
 
@@ -508,7 +508,7 @@ begin
   result := NextField(result, '&');
 end;
 
-function IsDirectory(Prop_Val: IPortableDeviceValues): Boolean;
+function IsDirectory(Prop_Val: IPortableDeviceValues): boolean;
 var
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
   Prop_Guid: TGUID;
@@ -635,7 +635,7 @@ end;
 const
   BoolFalse = 0;
 
-function RenameObject(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
+function RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
 var
   Content: IPortableDeviceContent;
   Properties: IPortableDeviceProperties;
@@ -684,7 +684,7 @@ begin
   result := (Hr = S_OK);
 end;
 
-function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): Boolean;
+function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 var
   PortableDeviceValues: IPortableDeviceValues;
   Hr: HResult;
@@ -934,7 +934,7 @@ begin
         AMTP_Device.FriendlyName  := DevFriendlyName;
         AMTP_Device.Description   := DevDescription;
         AMTP_Device.Device        := GetDevId(PDevs[Index]);
-        AMTP_Device.MSM           := TBase_Device.MTPorMSM(AMTP_Device.Device);
+        AMTP_Device.MSM           := TBase_Device.GetMSM(AMTP_Device.Device);
         AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
         SerialList.Add(AMTP_Device.Serial);
         AMTP_Device.PortableDev   := nil;
@@ -1401,7 +1401,7 @@ begin
   end;
 end;
 
-function GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): Boolean;
+function GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): boolean;
 var
   Content: IPortableDeviceContent;
   Resources: IPortableDeviceResources;
@@ -1449,7 +1449,7 @@ begin
   end;
 end;
 
-function DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: Boolean = false): Boolean;
+function DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
 var
   Content: IPortableDeviceContent;
   Prop_Var: Tag_Inner_PROPVARIANT;
@@ -1537,7 +1537,7 @@ begin
 
 end;
 
-function CreatePath(PortableDev: IPortableDevice; Parent, DirName: WideString): Boolean;
+function CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
 var
   Content: IPortableDeviceContent;
   PValues: IPortableDeviceValues;
@@ -1637,7 +1637,7 @@ end;
 const
   TempExtension = '.tmp';
 
-function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): Boolean;
+function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
 var
   BASE_Data: TBase_Data;
   Content: IPortableDeviceContent;
@@ -1677,7 +1677,8 @@ begin
     exit;
 
 // Rename back to original file
-  if not RenameObject(PortableDev, NewObjectId, OriginalName) then
+
+  if not RenameDeviceFile(PortableDev, NewObjectId, OriginalName) then
     exit;
 
 // And get properties
