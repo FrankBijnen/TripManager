@@ -1,7 +1,6 @@
 unit UnitSqlite;
 
 interface
-{.$DEFINE AVOIDANCES}  // Not needed for ProfileHash
 
 uses
   System.Generics.Collections, System.Classes,
@@ -30,21 +29,21 @@ type
     AdventurousLevel: integer;
     Environmental: integer;
     Traction: integer;
-{$IFDEF AVOIDANCES}
-    Avoidances: integer;
-{$ENDIF}
     Calc_Method: integer;
     Max_Speed: integer;
     Width: integer;
     Imperial: boolean;
+    Legality: integer;
     Proposed_Hash: cardinal;
     function HashSpeed1: cardinal;
     function HashSpeed2: cardinal;
     function HashSpeed3: cardinal;
-    procedure Calculate_ProposedHash(const Model: TGarminModel);
+    procedure Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
+    procedure Calculate_Proposed_Car_Hash(const Model: TGarminModel);
+    procedure Calculate_Proposed_Hash(const Model: TGarminModel);
     function Changed(IName, IGUID: UTF8String;
                      IVehicle_Id, ITruckType, ITransportMode, ITraction: integer;
-                     IEnvironmental, ICalc_Method: integer): boolean; overload;
+                     IEnvironmental, ICalc_Method, ILegality: integer): boolean; overload;
     function Changed(IVehicleProfile: TVehicleProfile): boolean; overload;
   end;
 
@@ -52,22 +51,28 @@ type
   TSqlResults = TObjectList<TSqlResult>;
 
   TProfCalcMethod  = (cmFaster = 0, cmShorter = 1, cmStraight = 4, cmAdv = 7);
+  TRoadLegality    = (rlNone = 0, rlNoHighway = 1, rlLegal = 2);
   TProfAdvLevel    = (advL1 = 0, advL2 = 1, advL3 = 2, advL4 = 3);
   TProfEnvironment = (enAvoid = 0, enAllow = 1, enAsk = 2);
-  TTraction        = (tr3Wheels = 3, tr2Wheels = 4);
-  TVehicleType     = (veMotorCycle = 9);
+  TTraction        = (tr2WD =1, tr3Wheels = 3, tr2Wheels = 4);
+  TVehicleType     = (veCar = 1, veMotorCycle = 9);
   TKnownHash = record
     CM: TProfCalcMethod;
     AdvLvl: TProfAdvLevel;
     HashT2: Cardinal;
     HashT3: Cardinal;
+    Hash2WD: Cardinal;
   end;
 
 const
-  KnownXT3Environments: array[TProfEnvironment] of Cardinal =
-    ($0000B000, $0000A000, $00009000);
+  XT3_Motor_environments: array[TRoadLegality, TProfEnvironment] of Cardinal =
+    (
+      ($00000000, $00000000, $00000000),  // Not legal, Not implemented
+      ($00008000, $00009000, $0000A000),  // Not Highway legal
+      ($0000B000, $0000A000, $00009000)   // Legal
+    );
 
-  KnownXT3Hashes: array[0..6] of TKnownHash = (
+  XT3_Motor_Hashes: array[0..6] of TKnownHash = (
     (CM: cmFaster;              HashT2: $0A4F0000;  HashT3: $0A1F0000),
     (CM: cmShorter;             HashT2: $07E00000;  HashT3: $07D00000),
     (CM: cmStraight;            HashT2: $079B0000;  HashT3: $07CB0000),
@@ -75,6 +80,19 @@ const
     (CM: cmAdv; AdvLvl: advL2;  HashT2: $0A7A0000;  HashT3: $0A6AA000),
     (CM: cmAdv; AdvLvl: advL3;  HashT2: $0AAA0000;  HashT3: $0A3AA000),
     (CM: cmAdv; AdvLvl: advL4;  HashT2: $0A5A0000;  HashT3: $0A0AA000)
+  );
+
+  XT3_Car_environments: array[TProfEnvironment] of Cardinal =
+      ($00000000, $00001000, $00002000);
+
+  XT3_Car_Hashes: array[0..6] of TKnownHash = (
+    (CM: cmFaster;              Hash2WD: $023F0F10),
+    (CM: cmShorter;             Hash2WD: $00300F20),
+    (CM: cmStraight;            Hash2WD: $002B0F20),
+    (CM: cmAdv; AdvLvl: advL1;  Hash2WD: $023A0F10),
+    (CM: cmAdv; AdvLvl: advL2;  Hash2WD: $020A0F10),
+    (CM: cmAdv; AdvLvl: advL3;  Hash2WD: $021A0F10),
+    (CM: cmAdv; AdvLvl: advL4;  Hash2WD: $026A0F10)
   );
 
 procedure GetTables(const DbName: string; TabList: TStrings);
@@ -153,16 +171,10 @@ begin
     result := (Speed3TabMetric[Max_Speed and $0000000f]) shl 4;
 end;
 
-procedure TVehicleProfile.Calculate_ProposedHash(const Model: TGarminModel);
+procedure TVehicleProfile.Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
 var
   Index: integer;
 begin
-  Proposed_Hash := 0;
-
-  // Only MotorCycles
-  if (VehicleType <> Ord(TVehicleType.veMotorCycle)) then
-    exit;
-
   if (Max_Speed > Max_Speed_Supported) then
     exit;
 
@@ -188,23 +200,27 @@ begin
                             Ord(TProfEnvironment.enAsk)]) then
     exit;
 
+  // Valid Legality
+  if not (Legality in [1,2]) then
+    exit;
+
   case Model of
     TGarminModel.XT3:
       begin
-        for Index := Low(KnownXT3Hashes) to High(KnownXT3Hashes) do
+        for Index := Low(XT3_Motor_Hashes) to High(XT3_Motor_Hashes) do
         begin
-          if (TProfCalcMethod(Calc_Method) <> KnownXT3Hashes[Index].CM) then
+          if (TProfCalcMethod(Calc_Method) <> XT3_Motor_Hashes[Index].CM) then
             continue;
           if (TProfCalcMethod(Calc_Method) = TProfCalcMethod.cmAdv) and
-             (TProfAdvLevel(AdventurousLevel) <> KnownXT3Hashes[Index].AdvLvl) then
+             (TProfAdvLevel(AdventurousLevel) <> XT3_Motor_Hashes[Index].AdvLvl) then
             continue;
 
           if (Traction = Ord(TTraction.tr2Wheels)) then // 2 Wheels
-            Proposed_Hash := KnownXT3Hashes[Index].HashT2 or
-                                KnownXT3Environments[TProfEnvironment(Environmental)]
+            Proposed_Hash := XT3_Motor_Hashes[Index].HashT2 or
+                                XT3_Motor_environments[TRoadLegality(Legality), TProfEnvironment(Environmental)]
           else                   // 3 Wheels
-            Proposed_Hash := KnownXT3Hashes[Index].Hasht3 or
-                                KnownXT3Environments[TProfEnvironment(Environmental)];
+            Proposed_Hash := XT3_Motor_Hashes[Index].Hasht3 or
+                                XT3_Motor_environments[TRoadLegality(Legality), TProfEnvironment(Environmental)];
 
           Proposed_Hash := Proposed_Hash +  HashSpeed1;
           Proposed_Hash := Proposed_Hash or HashSpeed2;
@@ -215,9 +231,67 @@ begin
   end;
 end;
 
+procedure TVehicleProfile.Calculate_Proposed_Car_Hash(const Model: TGarminModel);
+var
+  Index: integer;
+begin
+  if (Max_Speed <> 0) then
+    exit;
+
+  // Only 2WD, 2 Axles
+  if not (Traction in [Ord(TTraction.tr2WD)]) then
+    exit;
+
+  // Onle 2 Meter wide
+  if (Width <> 200) then
+    exit;
+
+  // Valid Environmental value
+  if not (Environmental in [Ord(TProfEnvironment.enAvoid),
+                            Ord(TProfEnvironment.enAllow),
+                            Ord(TProfEnvironment.enAsk)]) then
+    exit;
+
+  // Valid Legality
+  if not (Legality in [2]) then
+    exit;
+
+  case Model of
+    TGarminModel.XT3:
+      begin
+        for Index := Low(XT3_Car_Hashes) to High(XT3_Car_Hashes) do
+        begin
+          if (TProfCalcMethod(Calc_Method) <> XT3_Car_Hashes[Index].CM) then
+            continue;
+          if (TProfCalcMethod(Calc_Method) = TProfCalcMethod.cmAdv) and
+             (TProfAdvLevel(AdventurousLevel) <> XT3_Car_Hashes[Index].AdvLvl) then
+            continue;
+
+          Proposed_Hash := XT3_Car_Hashes[Index].Hash2WD or
+                              XT3_Car_environments[TProfEnvironment(Environmental)];
+          break;
+        end;
+      end;
+  end;
+
+
+end;
+
+procedure TVehicleProfile.Calculate_Proposed_Hash(const Model: TGarminModel);
+begin
+  Proposed_Hash := 0;
+
+  case VehicleType of
+    Ord(TVehicleType.veCar):
+      Calculate_Proposed_Car_Hash(Model);
+    Ord(TVehicleType.veMotorCycle):
+      Calculate_Proposed_Motor_Hash(Model);
+  end;
+end;
+
 function TVehicleProfile.Changed(IName, IGUID: UTF8String;
                                  IVehicle_Id, ITruckType, ITransportMode, ITraction: integer;
-                                 IEnvironmental, ICalc_Method: integer): boolean;
+                                 IEnvironmental, ICalc_Method, ILegality: integer): boolean;
 begin
   result := (Name <> IName) or
             (GUID <> IGUID) or
@@ -238,7 +312,8 @@ begin
                     IVehicleProfile.TransportMode,
                     IVehicleProfile.Traction,
                     IVehicleProfile.Environmental,
-                    IVehicleProfile.Calc_Method);
+                    IVehicleProfile.Calc_Method,
+                    IVehicleProfile.Legality);
 end;
 
 procedure TableNames(const Db: TSqliteDatabase; TabList: TStrings);
@@ -567,11 +642,7 @@ begin
             'Hex(g.description) as Guid_Data,' + CRLF +
             'v.vehicle_type, v.transport_mode, v.adventurous_route_mode,' + CRLF +
             'e.value as Env_Data,' + CRLF +
-            'v.calc_method, v.max_vehicle_speed, v.traction, v.width, v.width_metric' + CRLF +
-{$IFDEF AVOIDANCES}
-            ', (select a.value from properties_dbg a where ' +
-            'a.key_id = g.key_id and a."description:1" is null limit 1) as Avoid_Data' + CRLF +
-{$ENDIF}
+            'v.calc_method, v.max_vehicle_speed, v.traction, v.width, v.width_metric, v.road_legality' + CRLF +
             'from properties_dbg act' + CRLF +
             'join vehicle_profile v on (v.vehicle_id = act.value)' + CRLF +
             'join properties_dbg g on (g.value = act.value and g."description:1" = ''guid'')' + CRLF +
@@ -600,7 +671,7 @@ begin
         result.VehicleType      := ALine[4];
         result.TransportMode    := ALine[5];
         result.AdventurousLevel := ALine[6];
-        if (ALine.Count > 12) then
+        if (ALine.Count > 13) then
         begin
           result.Environmental  := ALine[7];
           result.Calc_Method    := ALine[8];
@@ -608,11 +679,9 @@ begin
           result.Traction       := ALine[10];
           result.Width          := ALine[11];
           result.Imperial       := ALine[12] = 0;
-{$IFDEF AVOIDANCES}
-          result.Avoidances     := StrToIntDef(ALine[11], 0);
-{$ENDIF}
+          result.Legality       := ALine[13];
         end;
-        result.Calculate_ProposedHash(Model);
+        result.Calculate_Proposed_Hash(Model);
         break;
       end;
     finally

@@ -410,6 +410,7 @@ begin
     OldVehicle_Profile.Traction         := GetRegistry(Reg_VehicleTraction, 0);
     OldVehicle_Profile.Calc_Method      := GetRegistry(Reg_VehicleCalcMethod, 0);
     OldVehicle_Profile.Environmental    := GetRegistry(Reg_VehicleEnvironmental, 0);
+    OldVehicle_Profile.Legality         := GetRegistry(Reg_VehicleLegality, 2);
 
     NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
 
@@ -426,6 +427,7 @@ begin
       SetRegistry(Reg_VehicleTraction,          NewVehicle_Profile.Traction);
       SetRegistry(Reg_VehicleCalcMethod,        NewVehicle_Profile.Calc_Method);
       SetRegistry(Reg_VehicleEnvironmental,     NewVehicle_Profile.Environmental);
+      SetRegistry(Reg_VehicleLegality,          NewVehicle_Profile.Legality);
 
       // Changed Vehicle profile. Set hash to proposed value
       SetRegistry(Reg_VehicleProfileHash, NewVehicle_Profile.Proposed_Hash);
