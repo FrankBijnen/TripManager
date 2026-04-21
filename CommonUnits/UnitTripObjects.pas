@@ -749,7 +749,7 @@ type
 |    UdbHandleSize:    Cardinal       |    4|                                |
 |    CalcStatus:       Cardinal       |    4| CalculationMagic[TTripModel]   |
 |----------------------------------------------------------------------------|
-|    Unknown2:         TBytes         |     | Unknown2Size[TTripModel]       |
+|    Unknown2:         TBytes         |     | TripFileVersion.Unknown2Size   |
 |----------------------------------------------------------------------------|
 |    UDbDirCount:      WORD           |    2|                                |
 |    Unknown3:         TBytes         |  var| Unknown3Size[TTripModel]       |
@@ -776,7 +776,7 @@ type
 |     SubClass:         TSubClass     |   30|                                |
 |     Lat:              integer       |    4|                                |
 |     Lon:              integer       |    4|                                |
-|     Unknown1:         Cardinal      |    4| UdbDirMagic ($51590469)        |
+|     UdbDirMagic:      Cardinal      |    4| $51590469                      |
 |     Time:             WORD          |    2|                                |
 |----------------------------------------------------------------------------|
 |Variable part UdbDir                 |     |                                |
@@ -812,7 +812,7 @@ type
     SubClass:         TSubClass;
     Lat:              integer;
     Lon:              integer;
-    Unknown1:         Cardinal; // Contains UdbDirMagic = $51590469;
+    UdbDirMagic:      Cardinal; // Contains $51590469;
     Time:             word;
     procedure SwapCardinals;
   end;
@@ -3472,7 +3472,7 @@ begin
   // Init FValue
   FValue.Lat      := Swap32(CoordAsInt(ALat));
   FValue.Lon      := Swap32(CoordAsInt(ALon));
-  FValue.Unknown1 := Swap32(UdbDirMagic);
+  FValue.UdbDirMagic := Swap32(UdbDirMagic);
   FValue.SubClass.PointType := APointType;
 
   FUdbDirStatus   := TUdbDirStatus.udsUnchecked;
@@ -3961,7 +3961,7 @@ begin
     try
       if (AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir)) <> SizeOf(FirstUdbDir)) then
         exit(TTripModel.Unknown);
-      if (Swap32(FirstUdbDir.Unknown1) <> UdbDirMagic) then
+      if (Swap32(FirstUdbDir.UdbDirMagic) <> UdbDirMagic) then
         exit(TTripModel.Unknown);
     finally
       AStream.Seek(SavePos, TSeekOrigin.soBeginning);
@@ -4832,12 +4832,12 @@ const
 
 var
   ViaPt, SegmentCount, SwapCount: Cardinal;
-  RTRoadType:   array of WORD;
-  RTDirection:  array of WORD;
-  RTMethod:     array of WORD;
-  RTUnits:      array of WORD;
-  TmpLenStream: TMemoryStream;
-  TmpStream:    TMemoryStream;
+  RTRoadType:     array of WORD;
+  RTDirection:    array of WORD;
+  RTMethod:       array of WORD;
+  RTUnits:        array of WORD;
+  TmpLenStream:   TMemoryStream;
+  TmpStream:      TMemoryStream;
   RoutePointList: TList<TLocation>;
 begin
   if (GetItem('mSerializedRoutePrefRoundTripRoadType') = nil) then
@@ -4873,18 +4873,18 @@ begin
     end;
 
     PrepStream(TmpStream, SegmentCount, RTRoadType);
-    SetRoutePref('mSerializedRoutePrefRoundTripRoadType',TmpStream);
+    SetRoutePref('mSerializedRoutePrefRoundTripRoadType', TmpStream);
 
     PrepStream(TmpStream, SegmentCount, RTDirection);
-    SetRoutePref('mSerializedRoutePrefRoundTripDirection',TmpStream);
+    SetRoutePref('mSerializedRoutePrefRoundTripDirection', TmpStream);
 
     PrepStream(TmpStream, SegmentCount, RTMethod);
-    SetRoutePref('mSerializedRoutePrefRoundTripMethod',TmpStream);
+    SetRoutePref('mSerializedRoutePrefRoundTripMethod', TmpStream);
 
     PrepStream(TmpStream, SegmentCount, RTUnits);
-    SetRoutePref('mSerializedRoutePrefRoundTripUnits',TmpStream);
+    SetRoutePref('mSerializedRoutePrefRoundTripUnits', TmpStream);
 
-    SetRoutePref('mSerializedRoutePrefRoundTripLength',TmpLenStream);
+    SetRoutePref('mSerializedRoutePrefRoundTripLength', TmpLenStream);
 
   finally
     TmpStream.Free;

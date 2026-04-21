@@ -3631,12 +3631,12 @@ var
                                                   SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
-    VlTripInfo.Strings.AddPair('UdbDir Unknown1', Format('%s',
-                                                         [IntToHex(Swap32(AnUdbDir.UdbDirValue.Unknown1), 8)]
+    VlTripInfo.Strings.AddPair('UdbDir Magic', Format('%s',
+                                                         [IntToHex(Swap32(AnUdbDir.UdbDirValue.UdbDirMagic), 8)]
                                                         ),
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.Unknown1),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Unknown1)));
+                                                  SizeOf(AnUdbDir.UdbDirValue.UdbDirMagic),
+                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.UdbDirMagic)));
 
     VlTripInfo.Strings.AddPair('Time', Format('%d sec.', [AnUdbDir.UdbDirValue.Time]),
                               TGridSelItem.Create(AnUdbDir,
