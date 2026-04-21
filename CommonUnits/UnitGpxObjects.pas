@@ -2612,7 +2612,7 @@ begin
   if (RtePts = nil) then // No route points, no trip
     exit;
 
-  FTripList := TTripList.Create;
+  FTripList := TTripList.Create(TripVersion[ProcessOptions.TripModel]);
   try
     FTripList.RouteCnt := RouteCnt;
     TripName := FindSubNodeValue(RteNode, 'name');
