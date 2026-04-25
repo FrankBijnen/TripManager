@@ -319,7 +319,8 @@ begin
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleId,
                                             XT2_VehicleId);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,
-                                            XT2_VehicleProfileTruckType);
+                                            XT2_VehicleProfileTruckType,
+                                            '7=Motorcycle, 11=Car');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleCalcMethod,
                                             '0',
                                             '(0=Faster, 1=Shorter, 4=Straight, 7=Adventurous)');
@@ -328,7 +329,7 @@ begin
                                             '(0=Avoid, 1=Allow, 2=Ask)');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleTraction,
                                             '0',
-                                            '(1=2WD 2 Axles, 3=3 Wheels, 4=2 Wheels)');
+                                            '(1=2WD, 2=4WD, 3=3 Wheels, 4=2 Wheels)');
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleLegality,
                                             '2',
                                             '(0=Not legal, 1=Not highway legal, 2=Legal');
