@@ -36,8 +36,9 @@ const
                     =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
 
 
-  MapTilerLayers:  array[0..5] of TMapTilerLayer
-                    = ( (Resource: 'tiles'; Style: 'satellite-v2';  Description: 'Map Tiler Satellite'),
+  MapTilerLayers:  array[0..6] of TMapTilerLayer
+                    = ( (Resource: 'maps';  Style: 'satellite-v4';  Description: 'Map Tiler Satellite'),
+                        (Resource: 'maps';  Style: 'hybrid-v4';     Description: 'Map Tiler Hybrid'),
                         (Resource: 'maps';  Style: 'base-v4';       Description: 'Map Tiler Base'),
                         (Resource: 'maps';  Style: 'openstreetmap'; Description: 'Map Tiler OpenStreetMap'),
                         (Resource: 'maps';  Style: 'streets-v4';    Description: 'Map Tiler Streets'),

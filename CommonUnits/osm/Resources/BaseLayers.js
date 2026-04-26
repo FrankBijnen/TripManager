@@ -66,15 +66,14 @@ OpenLayers.Layer.XYZ.TOPPlusOpen = OpenLayers.Class(OpenLayers.Layer.XYZ, {
     CLASS_NAME: "OpenLayers.Layer.XYZ.TOPPlusOpen"
 });
 
-
 OpenLayers.Layer.XYZ.MapTiler = OpenLayers.Class(OpenLayers.Layer.XYZ, {
     initialize: function(name, resource, style, key, options) {
         var url = [
-           "https://api.maptiler.com/" + resource + "/" + style + "/${z}/${x}/${y}.jpg?key=" + key
+           "https://api.maptiler.com/" + resource + "/" + style + "/256/${z}/${x}/${y}.jpg?key=" + key
         ];
         options = OpenLayers.Util.extend({
-            numZoomLevels: 20,
-            maxZoom: 20,
+            numZoomLevels: 22,
+            maxZoom: 22,
             sphericalMercator: true,
             attribution: "<a href='https://www.maptiler.com/copyright/' target='_blank'>&copy; MapTiler</a><a href='https://www.openstreetmap.org/copyright' target='_blank'>&copy;&nbsp;OpenStreetMap contributors</a>",
             buffer: 0,
