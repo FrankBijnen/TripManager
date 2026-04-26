@@ -35,7 +35,6 @@ const
   OSMMapLayer: TMapLayer
                     =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
 
-
   MapTilerLayers:  array[0..6] of TMapTilerLayer
                     = ( (Resource: 'maps';  Style: 'satellite-v4';  Description: 'Map Tiler Satellite'),
                         (Resource: 'maps';  Style: 'hybrid-v4';     Description: 'Map Tiler Hybrid'),
@@ -155,6 +154,7 @@ begin
   Html.Add('var timeoutId = null;');
   Html.Add('var popup = null;');
   Html.Add('var style;');
+  Html.Add('var defTileSize;');     // Default tileSize = (256, 256)
 
   Html.Add('var po;');
   Html.Add('var op;');
@@ -187,6 +187,10 @@ begin
   Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
   Html.Add('');
 
+  // Save default tileSize
+  Html.Add('     defTileSize = map.tileSize;');
+
+  // Add Cache
   Html.Add('     cacheWrite = new OpenLayers.Control.CacheWrite();');
   Html.Add('     map.addControl(cacheWrite);');
   Html.Add('     cacheRead = new OpenLayers.Control.CacheRead();');
@@ -202,9 +206,14 @@ begin
     // Add Map Tiler layers
     MapTilerKey := GetRegistry(Reg_MapTilerApi_Key, '');
     if (MapTilerKey <> '') then
+    begin
+      // MapTiler tiles are 512x512!
+      Html.Add('     map.tileSize = new OpenLayers.Size(512, 512);');
       for AMapTilerLayer in MapTilerLayers do
         Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.XYZ.MapTiler("%s", "%s", "%s", "%s")) -1]);',
                  [AMapTilerLayer.Description, AMapTilerLayer.Resource, AMapTilerLayer.Style, MapTilerKey]));
+      Html.Add('     map.tileSize = defTileSize;');
+    end;
 
     // Add Undocumented ESRI Base layers
     if (GetRegistry(Reg_EnableESRI, '') <> '') then
