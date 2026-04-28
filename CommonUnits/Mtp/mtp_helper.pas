@@ -691,7 +691,10 @@ var
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   Result := False;
-  PortableDev := CoPortableDeviceFTM.Create as IPortableDevice;
+  if CheckWin32Version(10) then // Need Windows 10 for FTM
+    PortableDev := CoPortableDeviceFTM.Create as IPortableDevice
+  else
+    PortableDev := CoPortableDevice.Create as IPortableDevice;
 
    //create device values:
   PortableDeviceValues := CreateComObject(CLASS_PortableDeviceValues) as IPortableDeviceValues;
