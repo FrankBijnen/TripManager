@@ -889,12 +889,12 @@ begin
   SerialList := TStringList.Create;
   SerialList.Sorted := True;
   SerialList.Duplicates := TDuplicates.dupIgnore;
-
-  TBase_Device.GetRegisteredDeviceClasses;
-
   try
+    TBase_Device.GetRegisteredDeviceClasses;
+
     PMan := CoPortableDeviceManager.Create;
-    if (PMan.RefreshDeviceList <> S_OK) then
+    if (PMan = nil) or
+       (PMan.RefreshDeviceList <> S_OK) then
       exit;
 
     // Determine how many WPD devices are connected
