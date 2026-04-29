@@ -1816,7 +1816,7 @@ var
 begin
   if (AResult <> S_OK) then
   begin
-    ShowMessage('Could not load OSM Map');
+    ShowMessage(Format('Could not load OSM Map: %s', [IntToHex(AResult, 8)]));
     exit;
   end;
 
@@ -2126,6 +2126,7 @@ begin
   APOIList.Free;
   AFitInfo.Free;
   FreeDevices;
+  DeviceList.Free;
 end;
 
 procedure TFrmTripManager.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2187,6 +2188,7 @@ begin
       FreeDeviceData(DeviceList[Indx]);
     FreeAndNil(DeviceList);
   end;
+  DeviceList := TList.Create;
   CmbDevices.Items.Clear;
 end;
 
@@ -2230,12 +2232,14 @@ procedure TFrmTripManager.GetDeviceList(KeepDevice: TBase_Device = nil);
 var
   Index, DevIndex: integer;
 begin
+  CmbDevices.SetColCount(0);
+
   // Not really needed
   CloseDevice;
 
   // Get updated devicelist
   FreeDevices;
-  DeviceList := TBase_Device.GetDeviceList;
+  TBase_Device.GetDeviceList(DeviceList);
 
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do

@@ -195,6 +195,9 @@ procedure TComboBox.DrawLine(ACol: integer; Rect: TRect);
 var
   Cnt, LinePos: integer;
 begin
+  if (High(ColWidths) < ACol) then
+    exit;
+
   LinePos := 0;
   for Cnt := 0 to ACol do
     LinePos := LinePos + ColWidths[Cnt];
@@ -211,13 +214,18 @@ var
   TextPos, Cnt: integer;
   DrawRect: TRect;
 begin
-  TextPos := 0;
-  for Cnt := 0 to ACol -1 do
-    TextPos := TextPos + ColWidths[Cnt];
-
   DrawRect := Rect;
-  DrawRect.Left := TextPos + Margin;
-  DrawRect.Width := ColWidths[ACol];
+
+  if (ACol <= High(ColWidths)) then
+  begin
+    TextPos := 0;
+    for Cnt := 0 to ACol -1 do
+      TextPos := TextPos + ColWidths[Cnt];
+
+    DrawRect.Left := TextPos + Margin;
+    DrawRect.Width := ColWidths[ACol];
+  end;
+
   Canvas.TextRect(DrawRect, AText, [TTextFormats.tfLeft, TTextFormats.tfSingleLine]);
 end;
 

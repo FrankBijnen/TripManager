@@ -375,7 +375,7 @@ function RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideS
 function TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
                                  NewName: WideString = ''): WideString;
 function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
-function GetDevices: TList;
+procedure GetDevices(const DeviceList: TList);
 function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 
 implementation
@@ -874,7 +874,7 @@ begin
     Result := CompareText(TBase_Device(Item1).Description, TBase_Device(Item2).Description);
 end;
 
-function GetDevices: TList;
+procedure GetDevices(const DeviceList: TList);
 var
   PMan: IPortableDeviceManager;
   IDevCount, IDevNameLen: LongWord;
@@ -885,17 +885,16 @@ var
   AMTP_Device: TBase_Device;
   SerialList: TStringList;
 begin
-  result := Tlist.Create;
+  PMan := CoPortableDeviceManager.Create;
+  if (PMan = nil) or
+     (PMan.RefreshDeviceList <> S_OK) then
+    exit;
+
   SerialList := TStringList.Create;
   SerialList.Sorted := True;
   SerialList.Duplicates := TDuplicates.dupIgnore;
   try
     TBase_Device.GetRegisteredDeviceClasses;
-
-    PMan := CoPortableDeviceManager.Create;
-    if (PMan = nil) or
-       (PMan.RefreshDeviceList <> S_OK) then
-      exit;
 
     // Determine how many WPD devices are connected
     IDevCount := 0;
@@ -941,35 +940,33 @@ begin
         AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
         SerialList.Add(AMTP_Device.Serial);
         AMTP_Device.PortableDev   := nil;
-        result.Add(AMTP_Device);
+        DeviceList.Add(AMTP_Device);
       end;
 
       // Assign same serialId to Device storage, and inserted SD cards
-      for Index := 0 to result.Count -1 do
+      for Index := 0 to DeviceList.Count -1 do
       begin
-        AMTP_Device := result[Index];
+        AMTP_Device := DeviceList[Index];
         AMTP_Device.SerialId := SerialList.IndexOf(AMTP_Device.Serial);
       end;
 
-      result.Sort(@CompareDevice);
+      DeviceList.Sort(@CompareDevice);
 
       // renumber Device ID, after sort
       // Get Additional Info from opened device. (Manufacturer, GarminDevice, Root path)
-      for Index := 0 to result.Count -1 do
+      for Index := 0 to DeviceList.Count -1 do
       begin
-        AMTP_Device := result[Index];
+        AMTP_Device := DeviceList[Index];
         AMTP_Device.ID := Index;
         AMTP_Device.Init;
 
         ConnectToDevice(AMTP_Device.Device, AMTP_Device.PortableDev, true);
         try
-          AMTP_Device.GetInfoFromDevice(result);
+          AMTP_Device.GetInfoFromDevice(DeviceList);
         finally
           AMTP_Device.PortableDev := nil;
         end;
-
       end;
-
     end;
   finally
     SerialList.Free;

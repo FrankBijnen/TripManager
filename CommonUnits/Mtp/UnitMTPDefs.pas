@@ -95,7 +95,7 @@ type
 
     function Connect(const Readonly: boolean = false): boolean;
 
-    class function GetDeviceList: TList;
+    class procedure GetDeviceList(const DeviceList: TList);
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
     class procedure GetRegisteredDeviceClasses;
     class function New: TBase_Device;
@@ -382,9 +382,9 @@ begin
   FPersistentDeviceClass := GetClass(MTP_DEVICE_CLASS);
 end;
 
-class function TBase_Device.GetDeviceList: TList;
+class procedure TBase_Device.GetDeviceList(const DeviceList: TList);
 begin
-  result := GetDevices;
+  GetDevices(DeviceList);
 end;
 
 initialization
