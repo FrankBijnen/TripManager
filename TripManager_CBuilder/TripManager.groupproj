@@ -1,0 +1,62 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{CEDF1A93-3389-4E40-9CBC-37DA420D33E7}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="PrepareStringUtils.cbproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TripManager_CBuilder.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="PrepareStringUtils">
+        <MSBuild Projects="PrepareStringUtils.cbproj"/>
+    </Target>
+    <Target Name="PrepareStringUtils:Clean">
+        <MSBuild Projects="PrepareStringUtils.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="PrepareStringUtils:Make">
+        <MSBuild Projects="PrepareStringUtils.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="TripManager_CBuilder">
+        <MSBuild Projects="TripManager_CBuilder.cbproj"/>
+    </Target>
+    <Target Name="TripManager_CBuilder:Clean">
+        <MSBuild Projects="TripManager_CBuilder.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TripManager_CBuilder:Make">
+        <MSBuild Projects="TripManager_CBuilder.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="PrepareStringUtils;TripManager_CBuilder"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="PrepareStringUtils:Clean;TripManager_CBuilder:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="PrepareStringUtils:Make;TripManager_CBuilder:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+    <ItemGroup Condition="'$(BuildGroup)'=='Rel'">
+        <BuildGroupProject Include="PrepareStringUtils.cbproj">
+            <ProjectGuid>{1FA74313-6677-43F9-BC65-339268E44D1E}</ProjectGuid>
+            <Configurations>Release</Configurations>
+            <Platforms>Win32</Platforms>
+            <Enabled>True</Enabled>
+        </BuildGroupProject>
+        <BuildGroupProject Include="TripManager_CBuilder.cbproj">
+            <ProjectGuid>{88DED9F2-7876-4C40-8B24-9BC6EA5F75CB}</ProjectGuid>
+            <Configurations>Release</Configurations>
+            <Platforms>Win32</Platforms>
+            <Enabled>True</Enabled>
+        </BuildGroupProject>
+    </ItemGroup>
+</Project>

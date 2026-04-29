@@ -58,8 +58,7 @@ implementation
 
 uses
   System.Math, System.StrUtils, Winapi.ShlObj, Winapi.KnownFolders, Winapi.ActiveX,
-  Vcl.Forms, Vcl.Dialogs,
-  MsgLoop;
+  Vcl.Forms, Vcl.Dialogs;
 
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
@@ -418,7 +417,7 @@ begin
 
     Dec(CurrentTry);
     Sleep(100);
-    ProcessMessages;
+
   until (CurrentTry < 1);
 
   if (ShResult <> 0) and (ShOp.fAnyOperationsAborted = false) then

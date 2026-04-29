@@ -4,8 +4,8 @@
 
 // (DO NOT EDIT: machine generated header) 'UnitStringUtils.pas' rev: 36.00 (Windows)
 
-#ifndef UnitStringUtilsHPP
-#define UnitStringUtilsHPP
+#ifndef UnitstringutilsHPP
+#define UnitstringutilsHPP
 
 #pragma delphiheader begin
 #pragma option push
@@ -52,6 +52,7 @@ extern DELPHI_PACKAGE void __fastcall ParseLatLon(const System::UnicodeString La
 extern DELPHI_PACKAGE void __fastcall DebugMsg(const System::Variant *Msg, const System::NativeInt Msg_High);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall TempFilename(const System::UnicodeString Prefix);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetAppData();
+extern DELPHI_PACKAGE System::UnicodeString __fastcall WildCardDrive(const System::UnicodeString APath);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall CreateTempPath(const System::UnicodeString Prefix);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetHtmlTmp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTracksExt();
@@ -60,14 +61,15 @@ extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTracksTmp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetOSMTemp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetRoutesTmp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetDeviceTmp();
+extern DELPHI_PACKAGE void __fastcall DeleteTempFiles(const System::UnicodeString ATempPath, const System::UnicodeString AMask);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeDQuote(const System::UnicodeString HTML);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeHtml(const System::UnicodeString HTML);
+extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeUrl(const System::UnicodeString URL);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeFileName(System::UnicodeString InFile);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GPX2HTMLColor(System::UnicodeString GPXColor);
 extern DELPHI_PACKAGE System::Sysutils::TFormatSettings __fastcall GetLocaleSetting();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall VerInfo(bool IncludeCompany = false);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall UserAgent();
-extern DELPHI_PACKAGE bool __fastcall Sto_RedirectedExecute(System::UnicodeString CmdLine, System::UnicodeString CurrentDir, System::UnicodeString &Output, System::UnicodeString &Error, unsigned &ExitCode, const System::UnicodeString Input = System::UnicodeString(), const unsigned Wait = (unsigned)(0x36ee80), const bool ShowWindow = false);
 }	/* namespace Unitstringutils */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITSTRINGUTILS)
 using namespace Unitstringutils;
@@ -77,4 +79,4 @@ using namespace Unitstringutils;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UnitStringUtilsHPP
+#endif	// UnitstringutilsHPP
