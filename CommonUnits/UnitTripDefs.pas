@@ -37,6 +37,7 @@ type
                         Minor: Cardinal;
                         function IsUcs4: boolean;
                         function Unknown2Size: integer;
+                        function CanCheckTrips: boolean;
                       end;
   TUnixDateConv = class
     class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
@@ -129,6 +130,11 @@ begin
       end;
    4: result := 150;
   end;
+end;
+
+function TTripVersion.CanCheckTrips: boolean;
+begin
+  result := (Major >= 4);
 end;
 
 end.

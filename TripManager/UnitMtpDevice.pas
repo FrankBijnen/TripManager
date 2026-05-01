@@ -52,7 +52,7 @@ type
     procedure GetInfoFromDevice(const DeviceList: Tlist); override;
     procedure ReadDeviceDB(const ExploreList: TStringList);
     function GetDBPath: string;
-    function CheckMTPTripsFolder(const SystemTripsPath: string): boolean;
+    function CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
     function RecreateTrips(const SystemTripsPath: string;
                            const LstItems: TListItems): boolean;
   end;
@@ -236,7 +236,7 @@ begin
           // Need to create Internal Storage\.System\Trips?
           if (SafeGarminModel) and
              not (ReadOnly) then
-            CurrentDevice.CheckMTPTripsFolder(TModelConv.GetKnownPath(Self, 0));
+            CurrentDevice.CheckSystemTripsFolder(TModelConv.GetKnownPath(Self, 0));
 
           if not (SafeGarminModel) or
              (CurrentDevice.PathId[TModelConv.GetKnownPath(Self, 0)] = '') then
@@ -446,22 +446,20 @@ begin
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 end;
 
-function TMTP_Device.CheckMTPTripsFolder(const SystemTripsPath: string): boolean;
+function TMTP_Device.CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
 var
-//  FriendlyPath,
   SystemPath, SystemPathId,
   SystemTripsPathId: string;
   LDelim: integer;
 begin
   result := false;
 
-  // Checks
-  if (MSM = MSM_ID) then
+  if (TripVersion[TModelConv.Garmin2Trip(GarminDevice.GarminModel)].CanCheckTrips = false) then
     exit;
 
-  //SystemTripsPathId := GetIdForPath(PortableDev, SystemTripsPath, FriendlyPath);
+  // .System\Trips exists?
   SystemTripsPathId := PathId[SystemTripsPath];
-  if (SystemTripsPathId <> '') then                     // .System\Trips exists
+  if (SystemTripsPathId <> '') then
     exit;
 
   // Get Id of '.System', by stripping of '\Trips'

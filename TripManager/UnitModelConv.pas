@@ -113,6 +113,7 @@ type
     class function Display2Garmin(const CmbIndex: integer): TGarminModel;
     class function Display2Trip(const CmbIndex: integer): TTripModel;
     class function Garmin2Display(const Garmin: TGarminModel): integer;
+    class function Garmin2Trip(const Garmin: TGarminModel): TTripModel;
     class function GarminApplication(const Garmin: TGarminModel): string;
     class function ReadDeviceDB(const Garmin: TGarminModel): boolean;
     class function ReadVehicleDB(const Garmin: TGarminModel): boolean;
@@ -443,6 +444,12 @@ begin
   end;
 end;
 
+// Also checks for safe model
+class function TModelConv.Garmin2Trip(const Garmin: TGarminModel): TTripModel;
+begin
+  result := Display2Trip(Garmin2Display(Garmin));
+end;
+
 class function TModelConv.GarminApplication(const Garmin: TGarminModel): string;
 begin
   result := Model_Tab[Garmin].Application;
@@ -477,7 +484,7 @@ end;
 
 class function TModelConv.SafeGarminModel(const Garmin: TGarminModel): boolean;
 begin
-  result := (Display2Trip(Garmin2Display(Garmin)) <> TTripModel.Unknown);
+  result := (Garmin2Trip(Garmin) <> TTripModel.Unknown);
 end;
 
 // When a device is inserted, is it known?
