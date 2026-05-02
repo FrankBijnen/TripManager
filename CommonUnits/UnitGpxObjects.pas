@@ -26,6 +26,7 @@ uses
   UfrmSelectGpx;
 
 type
+  TGPXFiles = array of string;
 
   TGPXFile = class
   private
@@ -76,8 +77,7 @@ type
     procedure FreeGlobals;
     procedure CreateGlobals;
     procedure ClearGlobals;
-
-    procedure ProcessGPX;
+    procedure ProcessGPX(GPXFiles: TGPXFiles);
 
     procedure ComputeDistance(RptNode: TXmlVSNode);
     procedure ClearSubClass(ANode: TXmlVSNode);
@@ -190,7 +190,7 @@ type
     procedure ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
 {$ENDIF}
     procedure FixCurrentGPX;
-    procedure AnalyzeGpx;
+    procedure AnalyzeGpx(AddGPXFiles: TGPXFiles = []);
     property SubClassList: TStringList read FSubClassList;
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
@@ -1364,18 +1364,22 @@ begin
   TFile.WriteAllText(FGPXFile, AllXml);
 end;
 
-procedure TGPXfile.ProcessGPX;
+procedure TGPXfile.ProcessGPX(GPXFiles: TGPXFiles);
 var
   GpxNode: TXmlVSNode;
+  GPXFile: string;
 begin
   MinTrackDistKms := FProcessOptions.GetMinTrackDistKms;
   ClearGlobals;
   try
-    FXmlDocument.LoadFromFile(FGPXFile);
-    for GpxNode in FXmlDocument.ChildNodes do
+    for GPXFile in GPXFiles do
     begin
-      if (GpxNode.Name = 'gpx') then
-        ProcessGPXNode(GpxNode);
+      FXmlDocument.LoadFromFile(GPXFile);
+      for GpxNode in FXmlDocument.ChildNodes do
+      begin
+        if (GpxNode.Name = 'gpx') then
+          ProcessGPXNode(GpxNode);
+      end;
     end;
   finally
   { Future use }
@@ -1524,12 +1528,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TGPXfile.AnalyzeGpx;
+procedure TGPXfile.AnalyzeGpx(AddGPXFiles: TGPXFiles = []);
 var
-  BaseFile: string;
+  AllGpx: TGPXFiles;
 begin
-  BaseFile := ChangeFileExt(ExtractFileName(FGPXFile), '');
-  ProcessGPX;
+  AllGpx := Concat([FGPXFile], AddGPXFiles);
+  ProcessGPX(AllGpx);
 end;
 
 // Add AllTracks to FrmSelectGpx
@@ -2744,7 +2748,7 @@ begin
     end;
 
     SetCursor(CrWait);
-    GpxFileObj.ProcessGPX;
+    GpxFileObj.AnalyzeGpx;
 
     SubCaption := '';
     for Func in AllFuncs do
