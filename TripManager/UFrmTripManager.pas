@@ -226,6 +226,11 @@ type
     Cleardevicename: TMenuItem;
     SpltMemoSql: TSplitter;
     SelectDeviceTimer: TTimer;
+    ProcessTrackLogs1: TMenuItem;
+    PopupPostProcess: TPopupMenu;
+    MnuPostProcess: TMenuItem;
+    MenuItem2: TMenuItem;
+    MnuProcessTrackLogs: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -341,6 +346,10 @@ type
     procedure CmbModelDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
     procedure CmbModelDropDown(Sender: TObject);
     procedure SelectDeviceTimerTimer(Sender: TObject);
+    procedure ProcessTrackLogs1Click(Sender: TObject);
+    procedure BtnPostProcessMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure MnuProcessTrackLogsClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -435,6 +444,7 @@ type
     procedure GroupTrips(Group: Boolean);
     procedure SetRouteParm(ARouteParm: TRouteParm; Value: byte);
     procedure CheckExploreDb;
+    procedure ProcessTrackLogs(const TempFiles: TGPXFiles; const OutDir: string);
     function CheckTrip(const AListItem: TListItem; const ALocalFile: string = ''): boolean;
     procedure CheckTrips;
     procedure RecreateTrips;
@@ -1666,6 +1676,18 @@ end;
 procedure TFrmTripManager.BtnOpenTempClick(Sender: TObject);
 begin
   ShellExecute(0, 'OPEN', PWideChar(CreatedTempPath), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TFrmTripManager.BtnPostProcessMouseUp(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if ShellListView1.SelectedFolder = nil then
+    exit;
+
+  if (ssCtrl in Shift) then
+    MnuProcessTrackLogsClick(MnuProcessTrackLogs)
+  else
+    PostProcessClick(BtnPostProcess);
 end;
 
 procedure TFrmTripManager.PCTTripInfoResize(Sender: TObject);
@@ -4857,6 +4879,42 @@ begin
     BitBtnSQLGoClick(BitBtnSQLGo);
 end;
 
+procedure TFrmTripManager.MnuProcessTrackLogsClick(Sender: TObject);
+var
+  AnItem: TlistItem;
+  TempFile, OutDir: string;
+  TempFiles: TGPXFiles;
+  CRWait, CRNormal: HCURSOR;
+begin
+  OutDir := ShellTreeView1.Path;
+  if not (SelectDirectory('Select Output Directory', 'Process Track Logs', OutDir) ) then
+    exit;
+  OutDir := IncludeTrailingPathDelimiter(OutDir);
+
+  CRWait := LoadCursor(0, IDC_WAIT);
+  CRNormal := SetCursor(CRWait);
+  try
+    SetLength(TempFiles, 0);
+
+    for AnItem in ShellListView1.Items do
+    begin
+      if (AnItem.Selected = false) then
+        continue;
+      if (ShellListView1.Folders[AnItem.Index].IsFolder) then
+        continue;
+      TempFile := ShellListView1.Folders[AnItem.Index].PathName;
+      if not (ContainsText(ExtractFileExt(TempFile), GpxExtension)) then
+        continue;
+      TempFiles := TempFiles + [TempFile];
+    end;
+
+    ProcessTrackLogs(TempFiles, OutDir);
+
+  finally
+    SetCursor(CRNormal);
+  end;
+end;
+
 procedure TFrmTripManager.LoadHex(const FileName: string);
 begin
   HexEdit.LoadFromFile(FileName);
@@ -5570,6 +5628,91 @@ begin
     end;
   finally
     CurDevice.Free;
+  end;
+end;
+
+procedure TFrmTripManager.ProcessTrackLogs(const TempFiles: TGPXFiles; const OutDir: string);
+var
+  GPXFile: TGPXFile;
+  CRWait, CRNormal: HCURSOR;
+begin
+  CRWait := LoadCursor(0, IDC_WAIT);
+  CRNormal := SetCursor(CRWait);
+  try
+
+    GpxFile := TGPXFile.Create(TempFiles[0], OutDir, nil, nil);
+    try
+      SbPostProcess.Panels[0].Text := 'Analyzing';
+      SbPostProcess.Panels[1].Text := Format('%d GPX Files', [Length(Tempfiles)]);
+      SbPostProcess.Update;
+
+      SetCursor(CRWait);
+      GPXFile.AnalyzeGpx(TempFiles);
+
+      if not GPXFile.ShowSelectTracks(
+        TTagsToShow.WptTrk,
+        Format('%s (+ %d more)', [ExtractFileName(Tempfiles[0]), Length(TempFiles) -1] ),
+        'Use the Checkboxes to select tracks',
+         '*', nil) then
+        exit;
+
+      SetCursor(CRWait);
+      GPXFile.ProcessTrackLogs(SbPostProcess);
+    finally
+      GpxFile.Free;
+    end;
+
+    BtnRefreshFileSysClick(BtnRefreshFileSys);
+  finally
+
+    SetCursor(CRNormal);
+  end;
+end;
+
+procedure TFrmTripManager.ProcessTrackLogs1Click(Sender: TObject);
+var
+  AnItem: TlistItem;
+  TempFile, OutDir: string;
+  TempFiles: TGPXFiles;
+  CRWait, CRNormal: HCURSOR;
+begin
+  OutDir := ShellTreeView1.Path;
+  if not (SelectDirectory('Select Output Directory', 'Process Track Logs', OutDir) ) then
+    exit;
+  OutDir := IncludeTrailingPathDelimiter(OutDir);
+  CheckDevice;
+
+  CRWait := LoadCursor(0, IDC_WAIT);
+  CRNormal := SetCursor(CRWait);
+  try
+    SetLength(TempFiles, 0);
+    DeleteTempFiles(CreatedTempPath, '*.gpx');
+
+    SbPostProcess.Panels[0].Text := 'Copying to Tmp';
+    for AnItem in LstFiles.Items do
+    begin
+      if (AnItem.Selected = false) then
+        continue;
+      if (TBase_Data(AnItem.Data).IsFolder) then
+        continue;
+
+      if (SameText(GPXExtension, AnItem.SubItems[2])) then
+      begin
+        SetCursor(CRWait);
+        SbPostProcess.Panels[1].Text := AnItem.Caption;
+        SbPostProcess.Update;
+
+        TempFile := CopyFileToTmp(AnItem);
+        if (TempFile = '') then
+          continue;
+        TempFiles := TempFiles + [TempFile];
+      end;
+    end;
+
+    ProcessTrackLogs(TempFiles, OutDir);
+
+  finally
+    SetCursor(CRNormal);
   end;
 end;
 

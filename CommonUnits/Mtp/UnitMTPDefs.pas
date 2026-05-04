@@ -77,7 +77,7 @@ type
     function GetFileInfo(const APath, AFile: string;
                          var File_Info: TFile_Info): string;
     function GetFriendlyIdForPath(const SPath: string;
-                                 var FriendlyPath: string): string;
+                                  var FriendlyPath: string): string;
 
     function GetFile(const SFile, SSaveTo, NFile: string): boolean;
     function DelFile(const SFile: string; const Recurse: boolean = false): boolean;

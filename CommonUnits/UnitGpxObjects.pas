@@ -4,8 +4,9 @@ unit UnitGPXObjects;
 interface
 
 uses
-  System.Classes, System.SysUtils,
-  WinApi.Windows, System.Math,
+  System.Classes, System.SysUtils, System.Math,
+  System.Generics.Defaults, System.Generics.Collections,
+  WinApi.Windows,
   Xml.XMLIntf, UnitVerySimpleXml,
   Vcl.ComCtrls,
 {$IFDEF KML}
@@ -191,6 +192,7 @@ type
 {$ENDIF}
     procedure FixCurrentGPX;
     procedure AnalyzeGpx(AddGPXFiles: TGPXFiles = []);
+    procedure ProcessTrackLogs(const AStatusBar: TStatusBar = nil);
     property SubClassList: TStringList read FSubClassList;
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
@@ -211,6 +213,7 @@ implementation
 uses
   System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils, System.UITypes,
   Vcl.Dialogs,
+  Xml.VerySimple,
 {$IFDEF OSMMAP}
   UnitOSMMap,
 {$ENDIF}
@@ -907,24 +910,22 @@ begin
   TrackPoint := CurrentTrack.AddChild('trkpt');
   CloneAttributes(RptNode, TrackPoint);
 
-// For track
-  SubNodeValue := FindSubNodeValue(RptNode, 'ele');
-  if (SubNodeValue <> '') then
-    TrackPoint.AddChild('ele').NodeValue := SubNodeValue;
-
-  SubNodeValue := '';
-  if (ExtensionNode <> nil) then
-  begin
-    // Use Departure from (Start) point as time
-    RtePtViaPoint := ExtensionNode.Find('trp:ViaPoint');
-    if (RtePtViaPoint <> nil) then
-      SubNodeValue := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
-  end
+  // If the source is a track, copy all items
+  if (RptNode.Name = 'trkpt') then
+    CloneNode(RptNode, TrackPoint)
   else
-    SubNodeValue := FindSubNodeValue(RptNode, 'time');
-
-  if (SubNodeValue <> '') then
+  begin
+    // Use Departure from (Start) point as time for route poins
+    if (ExtensionNode = nil) then
+      exit;
+    RtePtViaPoint := ExtensionNode.Find('trp:ViaPoint');
+    if (RtePtViaPoint = nil) then
+      exit;
+    SubNodeValue := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
+    if (SubNodeValue = '') then
+      exit;
     TrackPoint.AddChild('time').NodeValue := SubNodeValue;
+  end;
 end;
 
 procedure TGPXFile.ProcessRtePt(const RtePtNode: TXmlVsNode;
@@ -932,8 +933,8 @@ procedure TGPXFile.ProcessRtePt(const RtePtNode: TXmlVsNode;
                                 const Cnt, LastCnt: integer);
 
 var
-  ExtensionNode: TXmlVSNode;
-  RptNode, RtePtExtensions, RtePtShapingPoint, RtePtViaPoint: TXmlVSNode;
+  RtePtExtension: TXmlVSNode;
+  RptNode, ExtensionsNode, RtePtShapingPoint, RtePtViaPoint: TXmlVSNode;
   WptName, Symbol, ViaPtName, ShapePtName: string;
   IsShapePt: boolean;
   DescNode, RteNode: TXmlVSNode;
@@ -941,12 +942,12 @@ var
   MapSeg, NewDescPos: integer;
 begin
   Symbol := FindSubNodeValue(RtePtNode, 'sym');
-  RtePtExtensions := RtePtNode.Find('extensions');
-  if (RtePtExtensions = nil) then
+  ExtensionsNode := RtePtNode.Find('extensions');
+  if (ExtensionsNode = nil) then
     exit;
-  ExtensionNode := RtePtExtensions.Find('gpxx:RoutePointExtension');
-  RtePtShapingPoint := RtePtExtensions.Find('trp:ShapingPoint');
-  RtePtViaPoint := RtePtExtensions.Find('trp:ViaPoint');
+  RtePtExtension := ExtensionsNode.Find('gpxx:RoutePointExtension');
+  RtePtShapingPoint := ExtensionsNode.Find('trp:ShapingPoint');
+  RtePtViaPoint := ExtensionsNode.Find('trp:ViaPoint');
   IsShapePt := (RtePtShapingPoint <> nil) or                          // BaseCamp, or other planner using Via and Shaping points
                ((RtePtShapingPoint = nil) and (RtePtViaPoint = nil)); // Mapsource, or other planner not using Via and Shaping points
   // Begin
@@ -965,7 +966,7 @@ begin
       Symbol := ProcessOptions.BeginSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
-      ClearSubClass(ExtensionNode);
+      ClearSubClass(RtePtExtension);
 
     if (ProcessOptions.ProcessBegin) then
     begin
@@ -994,9 +995,9 @@ begin
         end;
 
         if (DescNode <> nil) and
-           (ExtensionNode <> nil) then
+           (RtePtExtension <> nil) then
         begin
-          CalculatedSubClass := GetFirstSubClass(ExtensionNode);
+          CalculatedSubClass := GetFirstSubClass(RtePtExtension);
           MapSeg := MapSegFromSubClass(CalculatedSubClass);
           DescNode.ChildNodes.DeleteRange(0, DescNode.ChildNodes.Count);
           if (MapSeg <> 0) then
@@ -1027,7 +1028,7 @@ begin
       Symbol := ProcessOptions.EndSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
-      ClearSubClass(ExtensionNode);
+      ClearSubClass(RtePtExtension);
 
     if (ProcessOptions.ProcessEnd) then
     begin
@@ -1069,7 +1070,7 @@ begin
       Symbol := ProcessOptions.DefShapingPointSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
-      ClearSubClass(ExtensionNode);
+      ClearSubClass(RtePtExtension);
 
     if (ProcessOptions.ProcessShape) then
     begin
@@ -1085,7 +1086,7 @@ begin
           ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), Processoptions.DistanceStr, RouteName]);
       end;
 
-      UnglitchNode(RtePtNode, ExtensionNode, UTF8String(ShapePtName));
+      UnglitchNode(RtePtNode, RtePtExtension, UTF8String(ShapePtName));
 
       RenameNode(RtePtNode, ShapePtName);
 
@@ -1114,7 +1115,7 @@ begin
       Symbol := ProcessOptions.DefViaPointSymbol;
 
     if (ProcessOptions.ProcessSubClass) then
-      ClearSubClass(ExtensionNode);
+      ClearSubClass(RtePtExtension);
 
     ViaPtName := FindSubNodeValue(RtePtNode, 'name');
     if (ProcessOptions.ProcessVia) then
@@ -1131,9 +1132,9 @@ begin
   end;
 
   if (ProcessOptions.ProcessDistance) and
-     (ExtensionNode <> nil) then
+     (RtePtExtension <> nil) then
   begin
-    for RptNode in ExtensionNode.ChildNodes do
+    for RptNode in RtePtExtension.ChildNodes do
     begin
       if (RptNode.Name = 'gpxx:rpt') then
         ComputeDistance(RptNode);
@@ -1141,10 +1142,10 @@ begin
   end;
 
   if (ProcessOptions.ProcessTracks) and
-     (ExtensionNode <> nil) then
+     (RtePtExtension <> nil) then
   begin
-    AddTrackPoint(RtePtNode, ExtensionNode);  // Add the <rtept> as a trackpoint. Will draw straight lines. In line with BC
-    for RptNode in ExtensionNode.ChildNodes do
+    AddTrackPoint(RtePtNode, ExtensionsNode);  // Add the <rtept> as a trackpoint. Will draw straight lines. In line with BC
+    for RptNode in RtePtExtension.ChildNodes do
     begin
       if (RptNode.Name = 'gpxx:rpt') then
         AddTrackPoint(RptNode);
@@ -1534,6 +1535,144 @@ var
 begin
   AllGpx := Concat([FGPXFile], AddGPXFiles);
   ProcessGPX(AllGpx);
+end;
+
+function GPSLocalTime(const Utc: string): string;
+var TmpUtc, TmpLocal: TSystemTime;
+    StrUtc: string;
+begin
+  FillChar(TmpUtc, SizeOf(TmpUtc), 0);
+  StrUtc          := Utc; // Timestamp like: 2009-02-08T13:16:15Z
+  TmpUtc.wYear    := StrToInt(NextField(StrUtc, '-'));
+  TmpUtc.wMonth   := StrToInt(NextField(StrUtc, '-'));
+  TmpUtc.wDay     := StrToInt(NextField(StrUtc, 'T'));
+  TmpUtc.wHour    := StrToInt(NextField(StrUtc, ':'));
+  TmpUtc.wMinute  := StrToInt(NextField(StrUtc, ':'));
+  TmpUtc.wSecond  := StrToInt(NextField(StrUtc, 'Z'));
+
+  SystemTimeToTzSpecificLocalTime(nil, TmpUtc, TmpLocal); // convert UTC to local
+  Result := Format('%.4d-%.2d-%.2d %.2d:%.2d:%.2d',
+                   [TmpLocal.wYear, TmpLocal.wMonth, TmpLocal.wDay, TmpLocal.wHour, TmpLocal.wMinute, TmpLocal.wSecond]);
+end;
+
+procedure TGPXfile.ProcessTrackLogs(const AStatusBar: TStatusBar = nil);
+type
+  TDayList = Tlist<TXmlVSNode>;
+var
+  TempList : TDayList;
+  DayList: TObjectDictionary<string, TDayList>;
+  TracksProcessed: TXmlVSNodeList;
+  Track, TrackPoint,
+  OutTrack, OutTrackSeg, OutTrackPoint, OutWpt: TXmlVSNode;
+  TrackDate, DisplayColor: string;
+  PrevDateTime, ThisDateTime: TDateTime;
+  Index: integer;
+
+  TracksXml: TXmlVSDocument;
+  TracksRoot: TXmlVSNode;
+  OutFile: string;
+
+  Comparison: TComparison<TXmlVSNode>;
+begin
+
+  Comparison :=
+    function(const Left, Right: TXmlVSNode): Integer
+    begin
+      result := CompareStr(FindSubNodeValue(Left, 'time'), FindSubNodeValue(Right, 'time'));
+    end;
+
+  DayList := TObjectDictionary<string, TDayList>.Create([doOwnsValues]);
+  try
+    TracksProcessed := GetSelectedTracks;
+    try
+      for Track in TracksProcessed do
+      begin
+        if Assigned(AStatusBar) then
+        begin
+          AStatusBar.Panels[0].Text := 'Reading tracklog';
+          AStatusBar.Panels[1].Text := Track.NodeValue;
+          AStatusBar.Update;
+        end;
+
+        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+        for TrackPoint in Track.ChildNodes do
+        begin
+          if (TrackPoint.Name <> 'trkpt') then
+            continue;
+          TrackDate := LeftStr(GPSLocalTime(FindSubNodeValue(TrackPoint, 'time')), 10);
+          if (DayList.ContainsKey(TrackDate)) then
+            TempList := DayList[TrackDate]
+          else
+          begin
+            TempList := TDayList.Create;
+            DayList.Add(TrackDate, TempList)
+          end;
+          TempList.Add(TrackPoint);
+        end;
+      end;
+    finally
+      TracksProcessed.Free;
+    end;
+
+    for TrackDate in DayList.Keys do
+    begin
+      if Assigned(AStatusBar) then
+      begin
+        AStatusBar.Panels[0].Text := 'Writing date';
+        AStatusBar.Panels[1].Text := TrackDate;
+        AStatusBar.Update;
+      end;
+
+      TempList := DayList[TrackDate];
+
+      TempList.Sort(TComparer<TXmlVSNode>.Construct(Comparison));
+
+      TracksXml := TXmlVSDocument.Create;
+      TracksXml.Options := [];
+      TracksXml.Encoding := 'utf-8';
+      try
+        TracksRoot := InitGarminGpx(TracksXml);
+        OutTrack := TracksRoot.AddChild('trk');
+        OutTrack.AddChild('name').NodeValue := TrackDate;
+        OutTrack.AddChild('extensions').
+                 AddChild('gpxx:TrackExtension').
+                 AddChild('gpxx:DisplayColor').NodeValue := DisplayColor;
+
+        OutTrackSeg := OutTrack.AddChild('trkseg');
+        PrevDateTime := 0;
+        for Index := 0 to TempList.Count -1 do
+        begin
+          ThisDateTime := ISO8601ToDate(FindSubNodeValue(TempList[Index], 'time'));
+          if (SecondsBetween(ThisDateTime, PrevDateTime) < 1) then
+            continue;
+
+          if (PrevDateTime <> 0) and
+             (SecondsBetween(ThisDateTime, PrevDateTime) > 60) then
+          begin
+            OutWpt := TracksRoot.InsertChild('wpt', 0);
+            CloneAttributes(TempList[Index], OutWpt);
+            OutWpt.AddChild('name').NodeValue :=
+              Format('Stop %s-%s',
+                 [ RightStr(GPSLocalTime(FindSubNodeValue(TempList[Index-1], 'time')), 8),
+                   RightStr(GPSLocalTime(FindSubNodeValue(TempList[Index],   'time')), 8)
+                 ]);
+          end;
+
+          PrevDateTime := ThisDateTime;
+          OutTrackPoint := OutTrackSeg.AddChild('trkpt');
+          CloneNode(TempList[Index], OutTrackPoint);
+        end;
+        OutFile := FOutDir +
+                   'TrackLog_' +
+                   TrackDate + '.gpx';
+        TracksXml.SaveToFile(OutFile);
+      finally
+        TracksXml.Free;
+      end;
+    end;
+  finally
+    DayList.Free;
+  end;
 end;
 
 // Add AllTracks to FrmSelectGpx
@@ -2583,7 +2722,9 @@ begin
 
   HasSubClasses := BuildSubClassesList(RtePts);
 
-  if (HasSubClasses = false) then
+  if (HasSubClasses = false) or
+//TODO Request Klaus
+     (ProcessOptions.TripOption in [TTripOption.ttCalc]) then
     // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
     FTripList.ForceRecalc(FTripList.TripModel)
   else

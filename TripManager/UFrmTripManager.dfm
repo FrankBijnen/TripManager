@@ -392,12 +392,15 @@ object FrmTripManager: TFrmTripManager
           AlignWithMargins = True
           Left = 327
           Top = 4
-          Width = 80
+          Width = 90
           Height = 24
           Align = alLeft
           Caption = 'Post process'
+          DropDownMenu = PopupPostProcess
+          Style = bsSplitButton
           TabOrder = 2
-          OnClick = PostProcessClick
+          OnMouseUp = BtnPostProcessMouseUp
+          ExplicitTop = 2
         end
         object BtnSendTo: TButton
           AlignWithMargins = True
@@ -1305,6 +1308,11 @@ object FrmTripManager: TFrmTripManager
       Caption = 'Check and Fix Current.gpx'
       GroupIndex = 1
       OnClick = CheckandFixcurrentgpx1Click
+    end
+    object ProcessTrackLogs1: TMenuItem
+      Caption = 'Process TrackLog(s)'
+      GroupIndex = 1
+      OnClick = ProcessTrackLogs1Click
     end
     object N10: TMenuItem
       Caption = '-'
@@ -3620,5 +3628,20 @@ object FrmTripManager: TFrmTripManager
     OnTimer = SelectDeviceTimerTimer
     Left = 209
     Top = 282
+  end
+  object PopupPostProcess: TPopupMenu
+    Left = 1154
+    Top = 98
+    object MnuPostProcess: TMenuItem
+      Caption = 'Post process'
+      OnClick = PostProcessClick
+    end
+    object MenuItem2: TMenuItem
+      Caption = '-'
+    end
+    object MnuProcessTrackLogs: TMenuItem
+      Caption = 'Process track logs (CTRL + Click)'
+      OnClick = MnuProcessTrackLogsClick
+    end
   end
 end

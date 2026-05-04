@@ -20,8 +20,10 @@
   * rights and limitations under the License.                         *
 }
 
+//FB
 // Changed for ExifToolGUI
 // - Add utf16
+//FB_X
 
 unit Xml.VerySimple;
 
@@ -211,7 +213,7 @@ type
     function FindPos(const Name: String; NodeTypes: TXmlNodeTypes = [ntElement]): Integer; overload; virtual;
     /// <summary> Find a child node by name and node value </summary>
     function FindPos(const Name, NodeValue: String; NodeTypes: TXmlNodeTypes = [ntElement]): Integer; overload; virtual;
-//FB_x
+//FB_X
     /// <summary> Find a node by its name (case sensitive), returns NIL if no node is found </summary>
     function Find(const Name: String; NodeTypes: TXmlNodeTypes = [ntElement]): TXmlNode; overload; virtual;
     /// <summary> Same as Find(), returnsa a node by its name (case sensitive) </summary>
@@ -498,9 +500,11 @@ end;
 
 function TXmlVerySimple.LoadFromFile(const FileName: String; BufferSize: Integer = 4096): TXmlVerySimple;
 var
-  Stream: TFileStream;
+//FB
+  Stream: TBufferedFileStream;
 begin
-  Stream := TFileStream.Create(FileName, fmOpenRead + fmShareDenyWrite);
+  Stream := TBufferedFileStream.Create(FileName, fmOpenRead + fmShareDenyWrite);
+//FB_X
   try
     LoadFromStream(Stream, BufferSize);
   finally
@@ -763,12 +767,13 @@ begin
   Node.Name := Tag;
 end;
 
-
 function TXmlVerySimple.SaveToFile(const FileName: String): TXmlVerySimple;
 var
-  Stream: TFileStream;
+//FB
+  Stream: TBufferedFileStream;
 begin
-  Stream := TFileStream.Create(FileName, fmCreate);
+  Stream := TBufferedFileStream.Create(FileName, fmCreate);
+//FB_X  
   try
     SaveToStream(Stream);
   finally
@@ -901,7 +906,7 @@ begin
       begin
 //FB
         if not (doNoHeader in Options) then
-//FB_x
+//FB_X
           Writer.Write(Line + '?' + Node.Name + Node.AttributeList.AsString + '?>');
         Exit;
       end;
@@ -1242,7 +1247,7 @@ begin
       Break;
     end;
 end;
-//FB_x
+//FB_X
 
 function TXmlNodeList.Find(const Name: String; NodeTypes: TXmlNodeTypes = [ntElement]): TXmlNode;
 var
@@ -1339,7 +1344,6 @@ function TXmlNodeList.FirstChild: TXmlNode;
 begin
   Result := First;
 end;
-
 
 function TXmlNodeList.Get(Index: Integer): TXmlNode;
 begin
