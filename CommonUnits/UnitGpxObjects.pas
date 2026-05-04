@@ -192,7 +192,9 @@ type
 {$ENDIF}
     procedure FixCurrentGPX;
     procedure AnalyzeGpx(AddGPXFiles: TGPXFiles = []);
-    procedure ProcessTrackLogs(const AStatusBar: TStatusBar = nil);
+    procedure ProcessTrackLogs(const TempFiles: TGPXFiles;
+                               const OutDir: string;
+                               const AStatusBar: TStatusBar = nil);
     property SubClassList: TStringList read FSubClassList;
     property WayPointList: TXmlVSNodeList read FWayPointList;
     property RouteViaPointList: TXmlVSNodeList read FRouteViaPointList;
@@ -1555,7 +1557,9 @@ begin
                    [TmpLocal.wYear, TmpLocal.wMonth, TmpLocal.wDay, TmpLocal.wHour, TmpLocal.wMinute, TmpLocal.wSecond]);
 end;
 
-procedure TGPXfile.ProcessTrackLogs(const AStatusBar: TStatusBar = nil);
+procedure TGPXfile.ProcessTrackLogs(const TempFiles: TGPXFiles;
+                                    const OutDir: string;
+                                    const AStatusBar: TStatusBar = nil);
 type
   TDayList = Tlist<TXmlVSNode>;
 var
@@ -1567,20 +1571,39 @@ var
   TrackDate, DisplayColor: string;
   PrevDateTime, ThisDateTime: TDateTime;
   Index: integer;
-
+  MinTimeAutoStop: integer;
   TracksXml: TXmlVSDocument;
   TracksRoot: TXmlVSNode;
   OutFile: string;
-
+  CurCursor: HCURSOR;
   Comparison: TComparison<TXmlVSNode>;
 begin
-
+  CurCursor := GetCursor;
+  MinTimeAutoStop := TProcessOptions.GetMinTimeTrackPoints;
   Comparison :=
     function(const Left, Right: TXmlVSNode): Integer
     begin
       result := CompareStr(FindSubNodeValue(Left, 'time'), FindSubNodeValue(Right, 'time'));
     end;
 
+  if Assigned(AStatusBar) then
+  begin
+    AStatusBar.Panels[0].Text := 'Analyzing';
+    AStatusBar.Panels[1].Text := Format('%d GPX Files', [Length(Tempfiles)]);
+    AStatusBar.Update;
+  end;
+
+  SetCursor(CurCursor);
+  AnalyzeGpx(TempFiles);
+
+  if not ShowSelectTracks(
+    TTagsToShow.WptTrk,
+    Format('%s (+ %d more)', [ExtractFileName(Tempfiles[0]), Length(TempFiles) -1] ),
+    'Use the Checkboxes to select tracks',
+     '*', nil) then
+    exit;
+
+  SetCursor(CurCursor);
   DayList := TObjectDictionary<string, TDayList>.Create([doOwnsValues]);
   try
     TracksProcessed := GetSelectedTracks;
@@ -1618,7 +1641,7 @@ begin
     begin
       if Assigned(AStatusBar) then
       begin
-        AStatusBar.Panels[0].Text := 'Writing date';
+        AStatusBar.Panels[0].Text := 'Writing track log for date';
         AStatusBar.Panels[1].Text := TrackDate;
         AStatusBar.Update;
       end;
@@ -1647,13 +1670,13 @@ begin
             continue;
 
           if (PrevDateTime <> 0) and
-             (SecondsBetween(ThisDateTime, PrevDateTime) > 60) then
+             (SecondsBetween(ThisDateTime, PrevDateTime) > MinTimeAutoStop) then
           begin
             OutWpt := TracksRoot.InsertChild('wpt', 0);
             CloneAttributes(TempList[Index], OutWpt);
             OutWpt.AddChild('name').NodeValue :=
               Format('Stop %s-%s',
-                 [ RightStr(GPSLocalTime(FindSubNodeValue(TempList[Index-1], 'time')), 8),
+                 [ GPSLocalTime(FindSubNodeValue(TempList[Index-1], 'time')),
                    RightStr(GPSLocalTime(FindSubNodeValue(TempList[Index],   'time')), 8)
                  ]);
           end;
@@ -1670,6 +1693,9 @@ begin
         TracksXml.Free;
       end;
     end;
+    AStatusBar.Panels[0].Text := 'Processing track logs finished.';
+    AStatusBar.Panels[1].Text := '';
+    AStatusBar.Update;
   finally
     DayList.Free;
   end;

@@ -10,7 +10,8 @@ const
   Reg_GPISymbolSize               = 'GPISymbolsSize';
   Reg_GPIProximity                = 'GPIProximity';
   Reg_TrackColor                  = 'TrackColor';         // User preferred track color
-  Reg_MinDistTrackPoints_Key      = 'MinDistTrackPoints'; // Used to filter trackpoints
+  Reg_MinDistTrackPoints          = 'MinDistTrackPoints'; // Used to filter trackpoints
+  Reg_MinTimeTrackPoints          = 'MinTimeTrackPoints'; // Used to auto create waypoints from stops
 
   // XT1 and XT2 and Tread 2
   Reg_ScPosn_Unknown1             = 'ScPosn_Unknown1';
@@ -158,7 +159,7 @@ begin
     ProcessShape := false;
 
     TrackColor := GetRegistry(Reg_TrackColor, '');
-    MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
+    MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints, 0);  // No filter
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
     TripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));

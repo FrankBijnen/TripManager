@@ -156,9 +156,12 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  '');
 
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Tracks-');
-    AddGridLine(GridGeneralSettings, CurRow,  Reg_MinDistTrackPoints_Key,
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_MinDistTrackPoints,
                                               '0',
                                               'Minimum distance track points (meters)');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_MinTimeTrackPoints,
+                                              '60',
+                                              'Minimum time Auto Stops (seconds)');
     AddGridLine(GridGeneralSettings, CurRow,  '');
 
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Compare-');

@@ -176,7 +176,7 @@ type
     function SpeedFromRoadClass(const RoadClass: string): integer;
     function ComputeTime(const RoadClass: string; const Dist: Double): double;
     class function GetMinDistTrackPoints: integer;
-    class procedure SetMinDistTrackPoints(AValue: integer);
+    class function GetMinTimeTrackPoints: integer;
     class function Trk2RtOptions: string;
     class procedure SetTrk2RtExportPerc(AValue: integer);
     class function GetTrk2RtExportPerc: integer;
@@ -417,12 +417,12 @@ end;
 
 class function TProcessOptions.GetMinDistTrackPoints: integer;
 begin
-  result := GetRegistry(Reg_MinDistTrackPoints_Key, 0);  // No filter
+  result := GetRegistry(Reg_MinDistTrackPoints, 0);  // No filter
 end;
 
-class procedure TProcessOptions.SetMinDistTrackPoints(AValue: integer);
+class function TProcessOptions.GetMinTimeTrackPoints: integer;
 begin
-  SetRegistry(Reg_MinDistTrackPoints_Key, AValue);
+  result := GetRegistry(Reg_MinTimeTrackPoints, 60);
 end;
 
 class function TProcessOptions.Trk2RtOptions: string;

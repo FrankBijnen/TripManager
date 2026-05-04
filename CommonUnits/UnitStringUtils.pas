@@ -10,19 +10,6 @@ uses
 type
   T4Bytes = array[0..3] of byte;
 
-  TBrowseRecord = record
-    Selection: PChar;
-    Caption: PChar;
-  end;
-
-  TBrowseForFolder = class(Tobject)
-    public
-      function BrowseForFolder(const Acaption, BrowseTitle: String;
-                               var AFolder: String;
-                               MayCreateNewFolder: boolean = true;
-                               UseNewStyle: boolean = true): boolean;
-  end;
-
 function SenSize(const S: int64): string;
 function Intd(const N: Integer; const D: Integer): string;
 function Spc(const Cnt: integer): string;
@@ -58,11 +45,11 @@ function GetOSMTemp: string;
 function GetRoutesTmp: string;
 function GetDeviceTmp: string;
 procedure DeleteTempFiles(const ATempPath, AMask: string);
+function SelectDirectory(const ACaption: string; var ADirectory: string): boolean;
 function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
 function UserAgent: string;
-function SelectDirectory(const ACaption, ATitle: string; var APath: string): boolean;
 
 var
   CreatedTempPath: string;
@@ -540,94 +527,20 @@ begin
   end
 end;
 
-function BrowseForFolderCallBack(Wnd: HWND; uMsg: UINT; lParam, lpData: LPARAM): Integer stdcall;
-var PszSelDir: array[0..MAX_PATH] of char;
-    ABrowseRecord: TBrowseRecord;
-begin
-  result := 0;
-  case uMsg of
-    BFFM_VALIDATEFAILED:
-      result := -1;
-    BFFM_SELCHANGED:
-      begin
-        if (SHGetPathFromIDList(PItemIDList(LParam), PszSelDir)) then
-            SendMessage(Wnd, BFFM_SETSTATUSTEXT, 0, nativeint(@PszSelDir[0]));
-      end;
-    BFFM_INITIALIZED:
-      begin
-        ABrowseRecord := TBrowseRecord(pointer(lpData)^);
-        SendMessage(Wnd, BFFM_SETSELECTION, 1, nativeint(ABrowseRecord.Selection));
-        SendMessage(Wnd, BFFM_SETEXPANDED, 1, nativeint(ABrowseRecord.Selection));
-        SetWindowText(Wnd, ABrowseRecord.Caption);
-      end;
-  end;
-end;
-
-function TBrowseForFolder.BrowseForFolder(const Acaption, BrowseTitle: String;
-                                          var AFolder: String;
-                                          MayCreateNewFolder: boolean = true;
-                                          UseNewStyle: boolean = true): boolean;
+function SelectDirectory(const ACaption: string; var ADirectory: string): boolean;
 var
-  Browse_info: TBrowseInfo;
-  Folder: array[0..MAX_PATH] of char;
-  Find_context: PItemIDList;
-  BrowseRecord: TBrowseRecord;
+  ADialog: TFileOpenDialog;
 begin
-  result := false;
-
+  ADialog := TFileOpenDialog.Create(nil);
   try
-    //--------------------------
-    // Initialise the structure.
-    //--------------------------
-    FillChar(Browse_info, SizeOf(Browse_info), #0);
-    FillChar(Folder, SizeOf(Folder), #0);
-    Browse_info.pszDisplayName := @Folder[0];
-    Browse_info.lpszTitle := PChar(BrowseTitle);
-    Browse_info.ulFlags :=  BIF_RETURNONLYFSDIRS or
-                            BIF_UAHINT or
-                            BIF_BROWSEINCLUDEFILES or
-                            BIF_VALIDATE or
-                            BIF_STATUSTEXT;
-    if (UseNewStyle) then
-       Browse_info.ulFlags := Browse_info.ulFlags or BIF_USENEWUI;
-    if not MayCreateNewFolder then
-      Browse_info.ulFlags := Browse_info.ulFlags or BIF_NONEWFOLDERBUTTON;
-
-    Browse_info.hwndOwner := Application.Handle;
-    Browse_info.lpfn := BrowseForFolderCallBack;
-
-    FillChar(BrowseRecord, SizeOf(BrowseRecord), #0);
-    if (AFolder <> '') then
-      BrowseRecord.Selection := @AFolder[1];
-    if (ACaption <> '') then
-      BrowseRecord.Caption := @ACaption[1];
-    Browse_info.lParam := nativeint(@BrowseRecord);
-
-    Find_context := SHBrowseForFolder(Browse_info);
-    if Assigned(Find_context) then
-    begin
-      if SHGetPathFromIDList(Find_context, Folder) then
-      begin
-        AFolder := Folder;
-        if not DirectoryExists(AFolder) then
-          AFolder := ExtractFilePath(AFolder);
-        result := true;
-      end;
-      GlobalFreePtr(Find_context);
-    end;
+    ADialog.Title := ACaption;
+    ADialog.DefaultFolder := ADirectory;
+    ADialog.Options := [fdoPickFolders, fdoForceFileSystem, fdoPathMustExist, fdoNoReadOnlyReturn];
+    result := ADialog.Execute(Application.Handle);
+    if (result) then
+      ADirectory := IncludeTrailingPathDelimiter(ADialog.FileName);
   finally
-  end;
-end;
-
-function SelectDirectory(const ACaption, ATitle: string; var APath: string): boolean;
-begin
-  with TBrowseForFolder.Create do
-  begin
-    try
-      result := BrowseForFolder(ACaption, ATitle, APath);
-    finally
-      Free;
-    end;
+    ADialog.Free;
   end;
 end;
 

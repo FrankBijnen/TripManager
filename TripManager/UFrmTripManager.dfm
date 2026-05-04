@@ -400,7 +400,6 @@ object FrmTripManager: TFrmTripManager
           Style = bsSplitButton
           TabOrder = 2
           OnMouseUp = BtnPostProcessMouseUp
-          ExplicitTop = 2
         end
         object BtnSendTo: TButton
           AlignWithMargins = True
@@ -646,11 +645,12 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 13
+          Height = 24
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -1310,7 +1310,7 @@ object FrmTripManager: TFrmTripManager
       OnClick = CheckandFixcurrentgpx1Click
     end
     object ProcessTrackLogs1: TMenuItem
-      Caption = 'Process TrackLog(s)'
+      Caption = 'Process track logs'
       GroupIndex = 1
       OnClick = ProcessTrackLogs1Click
     end
