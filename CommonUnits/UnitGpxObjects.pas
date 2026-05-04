@@ -2723,7 +2723,6 @@ begin
   HasSubClasses := BuildSubClassesList(RtePts);
 
   if (HasSubClasses = false) or
-//TODO Request Klaus
      (ProcessOptions.TripOption in [TTripOption.ttCalc]) then
     // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
     FTripList.ForceRecalc(FTripList.TripModel)

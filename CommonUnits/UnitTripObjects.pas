@@ -3529,8 +3529,7 @@ begin
 
   FValue.Lat := Swap32(CoordAsInt(Lat));
   FValue.Lon := Swap32(CoordAsInt(Lon));
-  if (CalculationMagic[AModel] = CalcUndef) and // Zumo 3x0, 590, nuvi 2595
-     (ATripOption = TTripOption.ttCalc) then
+  if (ATripOption = TTripOption.ttCalc) then
     FValue.SubClass.Init(RecalcSubClass(GPXSubClass))
   else
     FValue.SubClass.Init(GPXSubClass);
@@ -3792,8 +3791,7 @@ begin
   FUdbPrefValue.DataType := dtUdbPref;
   FUdbPrefValue.PrefId := FUdbHandleId;
 
-  if not (ForceRecalc) then
-    FValue.CalcStatus := CalculationMagic[AModel];
+  FValue.CalcStatus := CalculationMagic[AModel];
   FValue.AllocUnknown(AModel);
   SetLength(FTrailer, 0);
   FUdbDirList := TUdbDirList.Create;
@@ -5160,14 +5158,13 @@ procedure TTripList.ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; V
 var
   AllRoutes: TBaseItem;
   AllLinks: TBaseItem;
-  Index: integer;
+  Index, RoutePntCnt: integer;
   ViaCount: integer;
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
   Locations: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
   ProcessOptions: TProcessOptions;
-  NeedsDummy: boolean;
 begin
   // If the model is not supplied, try to get it from the data
   TripModel := GetCalculationModel(AModel);
@@ -5195,10 +5192,9 @@ begin
 
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
-  NeedsDummy := CalculationMagic[TripModel] = CalcUndef;
   try
     // Create Dummy UdbHandles and add to allroutes. Just one entry for every Via.
-    // The XT(2) recalculates all.
+    // The Zumo recalculates all.
     for Index := 1 to ViaCount -1 do
     begin
       AnUdbHandle := TmUdbDataHndl.Create(1, TripModel);
@@ -5213,18 +5209,17 @@ begin
         if (Assigned(AllLinks)) then
           TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
 
-        for ALocation in RoutePointList do
+        for RoutePntCnt := 0 to RoutePointList.Count -1 do
         begin
+          ALocation := RoutePointList[RoutePntCnt];
           AnUdbHandle.Add(TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation));
-          if (NeedsDummy) then
-          begin
+          // Add 1 Dummy UDBdir
+          if (RoutePntCnt = 0) then
             AnUdbHandle.Add(TUdbDir.Create(TripModel,
                                            TTripOption.ttCalc,
                                            'Dummy',     // Dummy SubClass with unlikely MapSegment/RoadId
                                            '00',        // RoadClass
                                            ALocation.LocationTmScPosn.Lat, ALocation.LocationTmScPosn.Lon));
-            NeedsDummy := false;
-          end;
         end;
       end;
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
@@ -5676,25 +5671,20 @@ begin
   if not Assigned(AnUdbHandle) then
     exit;
 
-  if (CalculationMagic[TripModel] <> CalcUndef) then
-  begin
-    // This model we can check for CalculationMagic.
-    if (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[TripModel]) then
-      exit;
-  end
-  else
-  begin
-    // Check Dummy SubClass in the 2nd UdbDir
-    if (AnUdbHandle.FValue.UDbDirCount < 2) then
-      exit;
+  // Need at least this sequence:
+  // Route point 03
+  // 2116 Start segment
+  // 'Some other udbdir'
+  // Route point 03
+  if (AnUdbHandle.FValue.UDbDirCount < 4) then
+    exit;
 
-    // Is it the special DummySubClass?
-    AnUdbDir :=  AnUdbHandle.Items[1];
-    DummySubClass.Init(RecalcSubClass(''));
-    if (DummySubClass.MapSegment = AnUdbDir.FValue.SubClass.MapSegment) and
-       (DummySubClass.RoadId = AnUdbDir.FValue.SubClass.RoadId) then
-      exit;
-  end;
+  // Check Dummy SubClass in the 2nd UdbDir. Is it the special DummySubClass?
+  AnUdbDir :=  AnUdbHandle.Items[1];
+  DummySubClass.Init(RecalcSubClass(''));
+  if (DummySubClass.MapSegment = AnUdbDir.FValue.SubClass.MapSegment) and
+     (DummySubClass.RoadId = AnUdbDir.FValue.SubClass.RoadId) then
+    exit;
 
   result := true;
 end;
