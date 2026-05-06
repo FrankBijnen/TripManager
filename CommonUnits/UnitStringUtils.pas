@@ -36,6 +36,7 @@ function EscapeHtml(const HTML: string): string;
 function EscapeUrl(const URL: string): string;
 function EscapeDQuote(const HTML: string): string;
 function EscapeFileName(InFile: string): string;
+function CombinePath(const APath, AFile: string): string;
 function CreateTempPath(const Prefix: string): string;
 function GetHtmlTmp: string;
 function GetTracksExt: string;
@@ -45,6 +46,7 @@ function GetOSMTemp: string;
 function GetRoutesTmp: string;
 function GetDeviceTmp: string;
 procedure DeleteTempFiles(const ATempPath, AMask: string);
+function RemovePath(const ADir: string; const AFlags: FILEOP_FLAGS = FOF_NO_UI; Retries: integer = 3): boolean;
 function SelectDirectory(const ACaption: string; var ADirectory: string): boolean;
 function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
@@ -392,6 +394,11 @@ begin
     if (CharInSet(result[Indx], InvalidChars)) then
       result[Indx] := '_';
   end;
+end;
+
+function CombinePath(const APath, AFile: string): string;
+begin
+  result := Format('%s%s', [IncludeTrailingPathDelimiter(APath), AFile]);
 end;
 
 function RemovePath(const ADir: string; const AFlags: FILEOP_FLAGS = FOF_NO_UI; Retries: integer = 3): boolean;

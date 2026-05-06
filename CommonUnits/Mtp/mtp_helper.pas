@@ -6,7 +6,7 @@ uses
   System.Classes,
   Vcl.ComCtrls,
   PortableDeviceApiLib_TLB,
-  UnitMTPDefs;
+  UnitBaseMTP;
 
 // based upon:
 // http://cgeers.com/2011/05/22/enumerating-windows-portable-devices/
@@ -19,7 +19,7 @@ uses
 const
   CLIENT_NAME : WideString = 'TDBware';
   CLIENT_MAJOR_VER = 1;
-  CLIENT_MINOR_VER = 2;
+  CLIENT_MINOR_VER = 3;
   CLIENT_REVISION  = 0;
   DEF_BUFFERSIZE   = 512 * 1024;
 
@@ -345,43 +345,43 @@ const
   E_WPD_DEVICE_ALREADY_OPENED            = HRESULT($802A0001);
 
 
-function FirstStorageIDs(PortableDev: IPortableDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
-function GetFirstStorageID(PortableDev: IPortableDevice): WideString;
-function ReadFilesFromDevice(PortableDev: IPortableDevice;
-                             Lst: TListItems;
-                             SParent: WideString;
-                             var CompletePath: WideString): PWideChar; overload;
-procedure ReadFilesFromDevice(PortableDev: IPortableDevice;
-                              Lst: TListItems;
-                              SParent: WideString); overload;
-function GetIdForPath(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      var FriendlyPath: string): string;
-function GetIdForFile(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      SFile: WideString;
-                      AListItem: TListItem): string; overload;
-function GetIdForFile(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      SFile: WideString;
-                      var File_Info: TFile_Info): string; overload;
-function GetIdForFile(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      SFile: WideString): string; overload;
-function GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): boolean;
-function DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
-function CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
-function RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
-function TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
-                                 NewName: WideString = ''): WideString;
-function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
-procedure GetDevices(const DeviceList: TList);
-function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
+function MTP_FirstStorageIDs(PortableDev: IPortableDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
+function MTP_GetFirstStorageID(PortableDev: IPortableDevice): WideString;
+function MTP_ReadFilesFromDevice(PortableDev: IPortableDevice;
+                                 Lst: TListItems;
+                                 SParent: WideString;
+                                 var CompletePath: WideString): PWideChar; overload;
+procedure MTP_ReadFilesFromDevice(PortableDev: IPortableDevice;
+                                  Lst: TListItems;
+                                  SParent: WideString); overload;
+function MTP_GetIdForPath(PortableDev: IPortableDevice;
+                          SPath: WideString;
+                          var FriendlyPath: string): string;
+function MTP_GetIdForFile(PortableDev: IPortableDevice;
+                          SPath: WideString;
+                          SFile: WideString;
+                          AListItem: TListItem): string; overload;
+function MTP_GetIdForFile(PortableDev: IPortableDevice;
+                          SPath: WideString;
+                          SFile: WideString;
+                          var File_Info: TFile_Info): string; overload;
+function MTP_GetIdForFile(PortableDev: IPortableDevice;
+                          SPath: WideString;
+                          SFile: WideString): string; overload;
+function MTP_GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): boolean;
+function MTP_DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
+function MTP_CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
+function MTP_RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
+function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
+                                     NewName: WideString = ''): WideString;
+function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
+procedure MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil);
+function MTP_ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 
 implementation
 
 uses
-  System.SysUtils, System.Variants, System.Math, System.DateUtils, System.Masks, System.StrUtils, System.Win.ComObj,
+  System.SysUtils, System.Variants, System.DateUtils, System.Masks, System.StrUtils, System.Win.ComObj,
   Winapi.Windows, Winapi.ActiveX,
   UnitStringUtils;
 
@@ -635,7 +635,7 @@ end;
 const
   BoolFalse = 0;
 
-function RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
+function MTP_RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
 var
   Content: IPortableDeviceContent;
   Properties: IPortableDeviceProperties;
@@ -684,7 +684,7 @@ begin
   result := (Hr = S_OK);
 end;
 
-function ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
+function MTP_ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 var
   PortableDeviceValues: IPortableDeviceValues;
   Hr: HResult;
@@ -867,113 +867,74 @@ begin
   EnumSupportedCommands(Capabilities);
 end;
 
-function CompareDevice(Item1, Item2: Pointer): Integer;
-begin
-  Result := CompareValue(TBase_Device(Item1).SerialId, TBase_Device(Item2).SerialId);
-  if (Result = 0) then
-    Result := CompareText(TBase_Device(Item1).Description, TBase_Device(Item2).Description);
-end;
-
-procedure GetDevices(const DeviceList: TList);
+procedure MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil);
 var
   PMan: IPortableDeviceManager;
+  DevFriendlyName: WideString;
+  DevDescription: WideString;
   IDevCount, IDevNameLen: LongWord;
   PDevs: array of PWideChar;
   Index: Integer;
-  DevFriendlyName: WideString;
-  DevDescription: WideString;
-  AMTP_Device: TBase_Device;
-  SerialList: TStringList;
+  ABase_Device: TBase_Device;
 begin
-  PMan := CoPortableDeviceManager.Create;
-  if (PMan = nil) or
-     (PMan.RefreshDeviceList <> S_OK) then
+  try
+    PMan := CoPortableDeviceManager.Create;
+    if (PMan = nil) or
+       (PMan.RefreshDeviceList <> S_OK) then
+      exit;
+  except
+    exit;
+  end;
+
+  // Determine how many WPD devices are connected
+  IDevCount := 0;
+  if PMan.GetDevices(PWideChar(nil^), IDevCount) <> S_OK then
     exit;
 
-  SerialList := TStringList.Create;
-  SerialList.Sorted := True;
-  SerialList.Duplicates := TDuplicates.dupIgnore;
-  try
-    TBase_Device.GetRegisteredDeviceClasses;
+  if (IDevCount = 0) then
+    exit;
 
-    // Determine how many WPD devices are connected
-    IDevCount := 0;
-    if PMan.GetDevices(PWideChar(nil^), IDevCount) <> S_OK then
-      exit;
+  // Retrieve the device id for each connected device
+  SetLength(PDevs, IDevCount);
+  if PMan.GetDevices(PDevs[0], IDevCount) <> S_OK then
+    exit;
 
-    if (IDevCount > 0) then
+  for Index := 0 to IDevCount - 1 do
+  begin
+    DevFriendlyName := '';
+    DevDescription := '';
+
+    //Get Friendly Name
+    IDevNameLen := 0;
+    if (PMan.GetDeviceFriendlyName(PDevs[Index], Word(nil^), IDevNameLen) = S_OK) then
     begin
-      // Retrieve the device id for each connected device
-      SetLength(PDevs, IDevCount);
-      if PMan.GetDevices(PDevs[0], IDevCount) <> S_OK then
-        exit;
-
-      for Index := 0 to IDevCount - 1 do
-      begin
-        DevFriendlyName := '';
-        DevDescription := '';
-
-        //Get Friendly Name
-        IDevNameLen := 0;
-        if (PMan.GetDeviceFriendlyName(PDevs[Index], Word(nil^), IDevNameLen) = S_OK) then
-        begin
-          SetLength(DevFriendlyName, IDevNameLen);
-          PMan.GetDeviceFriendlyName(PDevs[Index], PWord(PWideChar(DevFriendlyName))^, IDevNameLen);
-          DevFriendlyName := Trim(DevFriendlyName);
-        end;
-
-        //Get Description
-        IDevNameLen := 0;
-        if (PMan.GetDeviceDescription(PDevs[Index], Word(nil^), IDevNameLen) = S_OK) then
-        begin
-          SetLength(DevDescription, IDevNameLen);
-          PMan.GetDeviceDescription(PDevs[Index], PWord(PWideChar(DevDescription))^, IDevNameLen);
-          DevDescription := Trim(DevDescription);
-        end;
-
-        //  Create device object
-        AMTP_Device := TBase_Device.New;
-        AMTP_Device.FriendlyName  := DevFriendlyName;
-        AMTP_Device.Description   := DevDescription;
-        AMTP_Device.Device        := GetDevId(PDevs[Index]);
-        AMTP_Device.MSM           := TBase_Device.GetMSM(AMTP_Device.Device);
-        AMTP_Device.Serial        := GetSerial(AMTP_Device.Device);
-        SerialList.Add(AMTP_Device.Serial);
-        AMTP_Device.PortableDev   := nil;
-        DeviceList.Add(AMTP_Device);
-      end;
-
-      // Assign same serialId to Device storage, and inserted SD cards
-      for Index := 0 to DeviceList.Count -1 do
-      begin
-        AMTP_Device := DeviceList[Index];
-        AMTP_Device.SerialId := SerialList.IndexOf(AMTP_Device.Serial);
-      end;
-
-      DeviceList.Sort(@CompareDevice);
-
-      // renumber Device ID, after sort
-      // Get Additional Info from opened device. (Manufacturer, GarminDevice, Root path)
-      for Index := 0 to DeviceList.Count -1 do
-      begin
-        AMTP_Device := DeviceList[Index];
-        AMTP_Device.ID := Index;
-        AMTP_Device.Init;
-
-        ConnectToDevice(AMTP_Device.Device, AMTP_Device.PortableDev, true);
-        try
-          AMTP_Device.GetInfoFromDevice(DeviceList);
-        finally
-          AMTP_Device.PortableDev := nil;
-        end;
-      end;
+      SetLength(DevFriendlyName, IDevNameLen);
+      PMan.GetDeviceFriendlyName(PDevs[Index], PWord(PWideChar(DevFriendlyName))^, IDevNameLen);
+      DevFriendlyName := Trim(DevFriendlyName);
     end;
-  finally
-    SerialList.Free;
+
+    //Get Description
+    IDevNameLen := 0;
+    if (PMan.GetDeviceDescription(PDevs[Index], Word(nil^), IDevNameLen) = S_OK) then
+    begin
+      SetLength(DevDescription, IDevNameLen);
+      PMan.GetDeviceDescription(PDevs[Index], PWord(PWideChar(DevDescription))^, IDevNameLen);
+      DevDescription := Trim(DevDescription);
+    end;
+
+    //  Create device object
+    ABase_Device := TBase_Device.New(DeviceClass);
+    ABase_Device.FriendlyName  := DevFriendlyName;
+    ABase_Device.Description   := DevDescription;
+    ABase_Device.Device        := GetDevId(PDevs[Index]);
+    ABase_Device.FMediaType    := TBase_Device.GetMediaType(ABase_Device.Device);
+    ABase_Device.Serial        := GetSerial(ABase_Device.Device);
+    ABase_Device.PortableDev   := nil;
+    DeviceList.Add(ABase_Device);
   end;
 end;
 
-function FirstStorageIDs(PortableDev: IPortableDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
+function MTP_FirstStorageIDs(PortableDev: IPortableDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
 var
   Content: IPortableDeviceContent;
   ObjectIds: IEnumPortableDeviceObjectIDs;
@@ -984,14 +945,14 @@ begin
     result := ObjectIds;
 end;
 
-function GetFirstStorageID(PortableDev: IPortableDevice): WideString;
+function MTP_GetFirstStorageID(PortableDev: IPortableDevice): WideString;
 var
   ObjectIds: IEnumPortableDeviceObjectIDs;
   ObjectId: PWideChar;
   Fetched: Cardinal;
 begin
   Result := WPD_DEVICE_OBJECT_ID;
-  ObjectIds := FirstStorageIDs(PortableDev, '');
+  ObjectIds := MTP_FirstStorageIDs(PortableDev, '');
   if (ObjectIds = nil) then
     exit;
 
@@ -1089,10 +1050,10 @@ begin
 
   ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, ObjId, File_Info.ObjDate);
   ABASE_Data.UpdateListItem(AListItem, [File_Info.DateOriginal,
-                                       File_Info.TimeOriginal,
-                                       ExtractFileExt(File_Info.ObjName),
-                                       SenSize(File_Info.ObjSize)],
-                                       AMinSubItems);
+                                        File_Info.TimeOriginal,
+                                        ExtractFileExt(File_Info.ObjName),
+                                        SenSize(File_Info.ObjSize)],
+                                        AMinSubItems);
 end;
 
 procedure AddObjectProperties(ObjId: PWideChar;
@@ -1207,10 +1168,10 @@ begin
     result := GetParents(AContent, ParentName, result);
 end;
 
-function ReadFilesFromDevice(PortableDev: IPortableDevice;
-                             Lst: TListItems;
-                             SParent: WideString;
-                             var CompletePath: WideString): PWideChar;
+function MTP_ReadFilesFromDevice(PortableDev: IPortableDevice;
+                                 Lst: TListItems;
+                                 SParent: WideString;
+                                 var CompletePath: WideString): PWideChar;
 var
   Content: IPortableDeviceContent;
   CrNormal, CrWait: HCURSOR;
@@ -1224,7 +1185,7 @@ begin
     begin
       CompletePath := GetParents(Content, SParent, '');
       if (CompletePath = '') then
-        SParent := GetFirstStorageID(PortableDev);
+        SParent := MTP_GetFirstStorageID(PortableDev);
 
       //read content of device
       Result := EnumContentsOfFolder(Content, SParent, Lst);
@@ -1234,13 +1195,13 @@ begin
   end;
 end;
 
-procedure ReadFilesFromDevice(PortableDev: IPortableDevice;
-                              Lst: TListItems;
-                              SParent: WideString);
+procedure MTP_ReadFilesFromDevice(PortableDev: IPortableDevice;
+                                  Lst: TListItems;
+                                  SParent: WideString);
 var
   CompletePath: WideString;
 begin
-  ReadFilesFromDevice(PortableDev, Lst, SParent, CompletePath);
+  MTP_ReadFilesFromDevice(PortableDev, Lst, SParent, CompletePath);
 end;
 
 function FindItemInFolder(Content: IPortableDeviceContent;
@@ -1330,7 +1291,7 @@ begin
   Content.Properties(Prop);
 end;
 
-function GetIdForFile(PortableDev: IPortableDevice;
+function MTP_GetIdForFile(PortableDev: IPortableDevice;
                       SPath: WideString;
                       SFile: WideString;
                       AListItem: TListItem): string;
@@ -1342,10 +1303,10 @@ begin
     UpdObjectProperties(PWideChar(result), Prop, AListItem, AListItem.SubItems.Count);
 end;
 
-function GetIdForFile(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      SFile: WideString;
-                      var File_Info: TFile_Info): string;
+function MTP_GetIdForFile(PortableDev: IPortableDevice;
+                          SPath: WideString;
+                          SFile: WideString;
+                          var File_Info: TFile_Info): string;
 var
   Prop: IPortableDeviceProperties;
 begin
@@ -1354,7 +1315,7 @@ begin
     GetFileInfo(PWideChar(result), Prop, File_Info);
 end;
 
-function GetIdForFile(PortableDev: IPortableDevice;
+function MTP_GetIdForFile(PortableDev: IPortableDevice;
                       SPath: WideString;
                       SFile: WideString): string;
 var
@@ -1363,9 +1324,9 @@ begin
   result := GetPropForFile(PortableDev, SPath, SFile, Prop);
 end;
 
-function GetIdForPath(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      var FriendlyPath: string): string;
+function MTP_GetIdForPath(PortableDev: IPortableDevice;
+                          SPath: WideString;
+                          var FriendlyPath: string): string;
 var
   Content: IPortableDeviceContent;
   CrNormal, CrWait: HCURSOR;
@@ -1395,13 +1356,13 @@ begin
 
     //read content of device
     if PortableDev.Content(Content) = S_OK then
-      TraversePath(CurPath, GetFirstStorageID(PortableDev), CompletePath, SFolder, FriendlyPath, result);
+      TraversePath(CurPath, MTP_GetFirstStorageID(PortableDev), CompletePath, SFolder, FriendlyPath, result);
   finally
     SetCursor(CrNormal);
   end;
 end;
 
-function GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): boolean;
+function MTP_GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFile: WideString): boolean;
 var
   Content: IPortableDeviceContent;
   Resources: IPortableDeviceResources;
@@ -1449,7 +1410,7 @@ begin
   end;
 end;
 
-function DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
+function MTP_DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
 var
   Content: IPortableDeviceContent;
   Prop_Var: Tag_Inner_PROPVARIANT;
@@ -1537,7 +1498,7 @@ begin
 
 end;
 
-function CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
+function MTP_CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
 var
   Content: IPortableDeviceContent;
   PValues: IPortableDeviceValues;
@@ -1563,8 +1524,8 @@ end;
 
 // See for more info
 //https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/transferring-an-image-or-music-file-to-the-device
-function TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
-                                 NewName: WideString = ''): WideString;
+function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
+                                     NewName: WideString = ''): WideString;
 var
   Content: IPortableDeviceContent;
   PortableStream:  IPortableDeviceDataStream;
@@ -1637,7 +1598,7 @@ end;
 const
   TempExtension = '.tmp';
 
-function TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
+function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
 var
   BASE_Data: TBase_Data;
   Content: IPortableDeviceContent;
@@ -1667,22 +1628,22 @@ begin
   TempName := ChangeFileExt(OriginalName, TempExtension);
 
 // Copy File to Device. The Filename will exist (shortly) twice.
-  NewObjectId := TransferNewFileToDevice(PortableDev, SFile, SSaveTo, TempName);
+  NewObjectId := MTP_TransferNewFileToDevice(PortableDev, SFile, SSaveTo, TempName);
   if (NewObjectId = '') then
     exit;
 
 // Now delete the old object
 // If this fails, for some reason, the file will exist twice on the device.
-  if not DelFromDevice(PortableDev, OldObjectId) then
+  if not MTP_DelFromDevice(PortableDev, OldObjectId) then
     exit;
 
 // Rename back to original file
 
-  if not RenameDeviceFile(PortableDev, NewObjectId, OriginalName) then
+  if not MTP_RenameDeviceFile(PortableDev, NewObjectId, OriginalName) then
     exit;
 
 // And get properties
-  GetIdForFile(PortableDev, SSaveTo, OriginalName, AListItem);
+  MTP_GetIdForFile(PortableDev, SSaveTo, OriginalName, AListItem);
 
   result := true;
 end;

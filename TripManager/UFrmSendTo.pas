@@ -65,7 +65,7 @@ implementation
 
 uses
   System.TypInfo, System.Math,
-  UnitStringUtils, UnitMTPDefs,
+  UnitStringUtils, UnitBaseMTP,
   UnitRegistry, UnitRegistryKeys, UnitTripDefs, UnitModelConv;
 
 {$R *.dfm}

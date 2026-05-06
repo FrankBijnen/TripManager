@@ -17,7 +17,7 @@ uses
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
   Monitor, BCHexEditor, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
-  UnitListViewSort, UnitMTPDefs, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi,
+  UnitListViewSort, UnitBaseMTP, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi,
   UnitUSBEvent, Vcl.BaseImageCollection, Vcl.ImageCollection, Vcl.VirtualImageList;
 
 const
@@ -492,7 +492,7 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils, System.Generics.Collections,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
-  MsgLoop, UnitMTPDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
+  MsgLoop, UnitGarminDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
   UnitOSMMap, UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
@@ -530,12 +530,12 @@ var
   ModelIndex: integer;
   ModelDescription: string;
   TmpGarminDevice: TGarminDevice;
-  CurrentMTPDevice: TMTP_Device;
+  CurrentMTPDevice: TGarminMTP_Device;
 begin
   if (HasTMTPDevice) then
   begin
     // We have a TMTP device, read GarminDevice.XML
-    CurrentMTPDevice := TMTP_Device(CurrentDevice);
+    CurrentMTPDevice := TGarminMTP_Device(CurrentDevice);
     CurrentMTPDevice.ReadGarminDevice(DisplayedDevice, DeviceList);
     ModelIndex := TModelConv.Garmin2Display(CurrentMTPDevice.GarminDevice.GarminModel);
     ModelDescription := CurrentMTPDevice.GarminDevice.ModelDescription;
@@ -738,9 +738,9 @@ function TFrmTripManager.HasTMTPDevice(const ADevice: TObject = nil): boolean;
 begin
   if (ADevice = nil) then
     result := CheckDevice(false) and
-              (CurrentDevice is TMTP_Device)
+              (CurrentDevice is TGarminMTP_Device)
   else
-    result := (ADevice is TMTP_Device);
+    result := (ADevice is TGarminMTP_Device);
 end;
 
 procedure TFrmTripManager.ActAboutExecute(Sender: TObject);
@@ -1174,7 +1174,7 @@ begin
     begin
       if not (HadMtpDevice) and
          (HasTMTPDevice(CurrentDevice)) then  // No device was connected, now it is. Read settings.
-        TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
+        TGarminMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
 
       RebuildDeviceDbMenu;
       PostReloadFileList;
@@ -2130,7 +2130,7 @@ begin
   if (CheckDevice(false)) then
   begin
     if (HasTMTPDevice(CurrentDevice)) then
-      TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
+      TGarminMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
   end;
   RebuildDeviceDbMenu;
 end;
@@ -2220,7 +2220,7 @@ end;
 procedure TFrmTripManager.SetDeviceColumnWidths;
 var
   Index: integer;
-  CurrentMTPDevice: TMTP_Device;
+  CurrentMTPDevice: TGarminMTP_Device;
   GarminApplication: string;
 begin
   // Setup Column widths
@@ -2228,7 +2228,7 @@ begin
   for Index := 0 to DeviceList.Count - 1 do
   begin
     if (HasTMTPDevice(DeviceList[Index])) then
-      CurrentMTPDevice := TMTP_Device(DeviceList[Index])
+      CurrentMTPDevice := TGarminMTP_Device(DeviceList[Index])
     else
       break;
     GarminApplication := TModelConv.GarminApplication(CurrentMTPDevice.GarminDevice.GarminModel);
@@ -2241,7 +2241,7 @@ begin
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.SoftwareVersion,  5);
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.PartNumber,       6);
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.SerialNumber,     7);
-    CmbDevices.SetColWidth(CurrentMTPDevice.MSM,                           8);
+    CmbDevices.SetColWidth(CurrentMTPDevice.MediaType,                     8);
   end;
 
   CmbModel.SetColCount(2);
@@ -2264,7 +2264,9 @@ begin
 
   // Get updated devicelist
   FreeDevices;
-  TBase_Device.GetDeviceList(DeviceList);
+//TODO: Wine
+//  TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device, TGarminDrv_Device);
+  TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device);
 
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
@@ -2367,7 +2369,7 @@ begin
     SelectDevice(CmbDevices.ItemIndex);
     ClearDeviceDbFiles;
     if (HasTMTPDevice(CurrentDevice)) then
-      TMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
+      TGarminMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
     RebuildDeviceDbMenu;
   end;
   TComboBox(Sender).HideSelection;
@@ -2378,7 +2380,7 @@ const
   Margin = 3;
 
 var
-  AMTP_Device: TMTP_Device;
+  AMTP_Device: TGarminMTP_Device;
   AComboBox: TComboBox;
   GarminApplication: string;
 begin
@@ -2389,7 +2391,7 @@ begin
     AComboBox.Canvas.TextOut(Rect.Left + 2, Rect.Top, AComboBox.Items[Index])
   else
   begin
-    AMTP_Device := TMTP_Device(AComboBox.Items.Objects[Index]);
+    AMTP_Device := TGarminMTP_Device(AComboBox.Items.Objects[Index]);
     GarminApplication := TModelConv.GarminApplication(AMTP_Device.GarminDevice.GarminModel);
 
     AComboBox.DrawCol(0, AMTP_Device.FriendlyName, Rect);
@@ -2416,7 +2418,7 @@ begin
     AComboBox.DrawCol(7, AMTP_Device.GarminDevice.SerialNumber, Rect);
     AComboBox.DrawLine(7, Rect);
 
-    AComboBox.DrawCol(8, AMTP_Device.MSM, Rect);
+    AComboBox.DrawCol(8, AMTP_Device.MediaType, Rect);
   end;
 end;
 
@@ -3159,8 +3161,7 @@ begin
   CrNormal := SetCursor(CrWait);
   try
     ReadDefaultFolders; // Make sure we do this for the .System\Trips folder
-    if (TMTP_Device(CurrentDevice).RecreateTrips(DeviceFolder[0],
-                                                 LstFiles.Items)) then
+    if (TGarminMTP_Device(CurrentDevice).RecreateTrips(DeviceFolder[0], LstFiles.Items)) then
     begin
       SbPostProcess.Panels[0].Text := 'Directory recreated succesfully';
       SbPostProcess.Panels[1].Text := SystemTripsPath;
@@ -4238,7 +4239,7 @@ function TFrmTripManager.CopyFileToTmp(const AListItem: TListItem): string;
 begin
   result := '';
   CheckDevice;
-  result := TMTP_Device(CurrentDevice).CopyFileToTmp(AListItem);
+  result := TGarminMTP_Device(CurrentDevice).CopyFileToTmp(AListItem);
 end;
 
 procedure TFrmTripManager.CopyValueFromTripClick(Sender: TObject);
@@ -5746,7 +5747,7 @@ begin
 
             // Mass Storage Mode can have multiple devices. Wait until all are available.
             // E.G. Zumo 590
-            if (TBase_Device.GetMSM(ANUSBDevice.DeviceName) <> MSM_ID) then
+            if (TBase_Device.GetMediaType(ANUSBDevice.DeviceName) = TMediaType.mtMTP) then
               ProcessInsertedDevices
             else
             begin

@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  UnitMTPDefs, UnitTripDefs, UnitGpxDefs, UnitMtpDevice;
+  UnitBaseMTP, UnitTripDefs, UnitGpxDefs, UnitGarminDevice;
 
 const
   // Device recognition constants
@@ -377,12 +377,11 @@ var
   GarminDevice: TGarminDevice;
 begin
   result := '';
-
   if (Assigned(CurrentDevice)) and
-     (CurrentDevice is TMTP_Device) then
+     (CurrentDevice is TGarminMTP_Device) then
   begin
     // If we have a device, get the paths from the GarminDevice.xml
-    GarminDevice := TMTP_Device(CurrentDevice).GarminDevice;
+    GarminDevice := TGarminMTP_Device(CurrentDevice).GarminDevice;
     result := GetKnownPath(GarminDevice, PathId);
   end;
 end;
@@ -398,12 +397,11 @@ begin
   result  := GetRegistry(RegKey,
                          GetKnownPath(CurrentDevice, PathId),
                          SubKey);
-
   if (result <> '') and
      (Assigned(CurrentDevice)) and
-     (CurrentDevice is TMTP_Device) and
-     (TMTP_Device(CurrentDevice).PathId[result] = '') then
-      result := GetKnownPath(TMTP_Device(CurrentDevice).GarminDevice, PathId);
+     (CurrentDevice is TGarminMTP_Device) and
+     (TGarminMTP_Device(CurrentDevice).PathId[result] = '') then
+      result := GetKnownPath(TGarminMTP_Device(CurrentDevice).GarminDevice, PathId);
 end;
 
 class function TModelConv.Display2Garmin(const CmbIndex: integer): TGarminModel;
@@ -497,7 +495,7 @@ begin
     exit(false);
 
   // Look in Known devices
-  if (KnownDevices.IndexOf(TMTP_Device(Device).FriendlyName) > -1)  then
+  if (KnownDevices.IndexOf(TGarminMTP_Device(Device).FriendlyName) > -1)  then
     exit(true);
 
   for KnownIndex := KnownDevices.Count -1 downto 0  do
@@ -525,7 +523,7 @@ begin
       continue;
 
     // Check known devices
-    if (KnownDevices.IndexOf(TMTP_Device(DeviceList[DevIndex]).FriendlyName) > -1)  then
+    if (KnownDevices.IndexOf(TGarminMTP_Device(DeviceList[DevIndex]).FriendlyName) > -1)  then
       exit(DevIndex);
 
     // Check overridden device names

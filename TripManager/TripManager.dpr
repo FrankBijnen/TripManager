@@ -51,7 +51,7 @@ uses
   UnitTripOverview in '..\CommonUnits\UnitTripOverview.pas',
   UnitRedirect in '..\CommonUnits\UnitRedirect.pas',
   UnitMapUtils in '..\CommonUnits\UnitMapUtils.pas',
-  UnitMTPDefs in '..\CommonUnits\Mtp\UnitMTPDefs.pas';
+  UnitBaseMTP in '..\CommonUnits\Mtp\UnitBaseMTP.pas';
 
 {$R *.res}
 
@@ -70,6 +70,7 @@ begin
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
+
   CreateTempPath('TRIP');
 
   TStyleManager.TrySetStyle('Sapphire Kamri');

@@ -1,4 +1,4 @@
-unit UnitMtpDevice;
+unit UnitGarminDevice;
 // Specialized classes to hold info on MTP Devices
 
 interface
@@ -6,7 +6,7 @@ interface
 uses
   System.Classes,
   Vcl.ComCtrls,
-  UnitGpxDefs, UnitMTPDefs;
+  UnitGpxDefs, UnitBaseMTP;
 
 type
   TMTP_Data = class(TBase_Data)
@@ -37,7 +37,7 @@ type
                               const ReadOnly: boolean): boolean;
   end;
 
-  TMTP_Device = class(TBase_Device)
+  TGarminMTP_Device = class(TBase_Device)
   public
     GarminDevice: TGarminDevice;
     constructor Create; virtual;
@@ -55,6 +55,39 @@ type
     function CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
     function RecreateTrips(const SystemTripsPath: string;
                            const LstItems: TListItems): boolean;
+  end;
+
+  TGarminDrv_Device = class(TGarminMTP_Device)
+  protected
+    function GetMediaDescription: string; override;
+    function GetPathId(APath: string): string; override;
+    function GetFileId(APath, AFile: string): string; override;
+    function GetFriendlyPath(APath: string): string; override;
+  public
+    function CheckDevice: boolean; override;
+    function GetManufacturer: PWideChar; override;
+
+    function GetFileInfo(const APath, AFile: string;
+                         var File_Info: TFile_Info): string; override;
+    function GetListInfo(const APath, AFile: string;
+                         const AListItem: TListItem): string; override;
+    function GetFriendlyIdForPath(const SPath: string;
+                                  var FriendlyPath: string): string; override;
+    function FileExists(const APath, AFile:string): boolean; override;
+    function GetFile(const SFile, SSaveTo, NFile: string): boolean; override;
+    function DelFile(const SFile: string; const Recurse: boolean = false): boolean; override;
+    function RenameFile(const ObjectId, NewName: string): boolean; override;
+    function TransferNewFile(const SFile, SSaveTo: string;
+                             const NewName: WideString = ''): string; override;
+    function TransferExistingFile(const SFile, SSaveTo: string;
+                                  const AListItem: TListItem): boolean; override;
+    function CreatePath(const Parent, DirName: string): boolean; override;
+    function Connect(const Readonly: boolean = false): boolean; override;
+    procedure Close; override;
+    function ReadFiles(const Lst: TListItems;
+                       const SParent: string;
+                       var CompletePath: WideString): string; overload; override;
+
   end;
 
 var
@@ -114,7 +147,7 @@ var
   NFile: string;
   XmlDoc: TXmlVSDocument;
   DeviceNode, ModelNode, MassStorageNode: TXmlVSNode;
-  CurrentDevice, TmpDevice: TMTP_Device;
+  CurrentDevice, TmpDevice: TGarminMTP_Device;
 
   function GetPath(CheckNode: TXmlVSNode; AName, Direction, AExt: string): string;
   var
@@ -148,13 +181,13 @@ var
 begin
   result := false;
 
-  if not (ACurrentDevice is TMTP_Device) then
+  if not (ACurrentDevice is TGarminMTP_Device) then
     exit;
   // Set defaults based on device description
   Init(AModelDescription);
 
   // Need a device to check better
-  CurrentDevice := TMTP_Device(ACurrentDevice);
+  CurrentDevice := TGarminMTP_Device(ACurrentDevice);
   if not (Assigned(CurrentDevice) and (CurrentDevice.CheckDevice)) then
     exit;
 
@@ -184,7 +217,7 @@ begin
       begin
         if DevId = CurDevId then
           continue;
-        if (TMTP_Device(ADeviceList[DevId]).Serial = TMTP_Device(ADeviceList[CurDevId]).Serial) then
+        if (TGarminMTP_Device(ADeviceList[DevId]).Serial = TGarminMTP_Device(ADeviceList[CurDevId]).Serial) then
         begin
           TmpDevice := ADeviceList[DevId];
           try
@@ -195,7 +228,7 @@ begin
                break;
             end;
           finally
-            TmpDevice.PortableDev.Close;
+            TmpDevice.Close;
           end;
         end;
       end;
@@ -260,24 +293,24 @@ begin
   end;
 end;
 
-constructor TMTP_Device.Create;
+constructor TGarminMTP_Device.Create;
 begin
   inherited Create;
 end;
 
-procedure TMTP_Device.Init;
+procedure TGarminMTP_Device.Init;
 begin
   GarminDevice := TGarminDevice.Create;
   GarminDevice.Init;
 end;
 
-destructor TMTP_Device.Destroy;
+destructor TGarminMTP_Device.Destroy;
 begin
   inherited Destroy;
   GarminDevice.Free;
 end;
 
-function TMTP_Device.CopyFileToTmp(const AListItem: TListItem): string;
+function TGarminMTP_Device.CopyFileToTmp(const AListItem: TListItem): string;
 var
   ABASE_Data_File: TBase_Data;
   NFile: string;
@@ -297,7 +330,7 @@ begin
   result := IncludeTrailingPathDelimiter(CreatedTempPath) + NFile;
 end;
 
-function TMTP_Device.CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
+function TGarminMTP_Device.CopyDeviceFile(const APath, AFile, DeviceTmp: string): boolean;
 var
   CurrentObjectId, FolderId: WideString;
 begin
@@ -321,7 +354,7 @@ begin
   result := true;
 end;
 
-function TMTP_Device.ReadGarminDevice(const AModelDescription: string;
+function TGarminMTP_Device.ReadGarminDevice(const AModelDescription: string;
                                       const ADeviceList: Tlist;
                                       const SelectManufacturer: string = '*'): boolean;
 begin
@@ -335,13 +368,13 @@ begin
     GarminDevice.Init(AModelDescription);
 end;
 
-function TMTP_Device.IsGarminDeviceName: boolean;
+function TGarminMTP_Device.IsGarminDeviceName: boolean;
 begin
   result := ContainsText(Device, MSMVendorGarmin) or  // Mass Storage Mode Garmin
             ContainsText(Device, MTPVendorGarmin);    // MTP Mode Garmin
 end;
 
-procedure TMTP_Device.GetInfoFromDevice(const DeviceList: Tlist);
+procedure TGarminMTP_Device.GetInfoFromDevice(const DeviceList: Tlist);
 begin
   inherited GetInfoFromDevice(DeviceList);
 
@@ -353,13 +386,13 @@ begin
   // Get Garmin Device info. Note: The complete DeviceList is needed to identify SD Cards
   ReadGarminDevice(GarminDevice.ModelDescription, DeviceList, Garmin_Name);
 
-  if (MSM = MSM_ID) and
+  if (FMediaType = TMediaType.mtMSM) and
      (MatchesMask(FriendlyName, '?:\') = false) then
     // Add the root path to friendlyname. Example: SD Cards of Zumo
     FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath['?:\.']), FriendlyName]);
 end;
 
-function TMTP_Device.GetDbPath: string;
+function TGarminMTP_Device.GetDbPath: string;
 var
   ModelIndex: integer;
   SubKey, DbPath: string;
@@ -378,7 +411,7 @@ begin
     result := '';
 end;
 
-procedure TMTP_Device.ReadDeviceDB(const ExploreList: TStringList);
+procedure TGarminMTP_Device.ReadDeviceDB(const ExploreList: TStringList);
 var
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   ModelIndex, DefAdvLevel: integer;
@@ -446,7 +479,7 @@ begin
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
 end;
 
-function TMTP_Device.CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
+function TGarminMTP_Device.CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
 var
   SystemPath, SystemPathId,
   SystemTripsPathId: string;
@@ -489,8 +522,8 @@ begin
 
 end;
 
-function TMTP_Device.RecreateTrips(const SystemTripsPath: string;
-                                   const LstItems: TListItems): boolean;
+function TGarminMTP_Device.RecreateTrips(const SystemTripsPath: string;
+                                         const LstItems: TListItems): boolean;
 var
   FriendlyPath, LastRefreshFile, TempFile,
   SystemPath, SystemPathId,
@@ -573,8 +606,189 @@ begin
   result := true;
 end;
 
+procedure FillFileInfo(const AFs: TSearchRec; var AFile_Info: TFile_Info);
+begin
+  AFile_Info.ObjName := Afs.Name;
+  AFile_Info.IsFolder := ((AFs.Attr and faDirectory) <> 0);
+  AFile_Info.ObjDate := Afs.TimeStamp;
+  AFile_Info.TimeOriginal := FormatDateTime('yyyy-MM-DD"T"hh:mm:ss', AFile_Info.ObjDate);
+  AFile_Info.DateOriginal := NextField(AFile_Info.TimeOriginal, 'T');
+  AFile_Info.ObjSize := Afs.Size;
+end;
+
+function TGarminDrv_Device.GetMediaDescription: string;
+begin
+  result := 'DRV';
+end;
+
+function TGarminDrv_Device.GetPathId(APath: string): string;
+begin
+  result := ReplaceAll(APath, ['?:\'], [Device]);
+  if not System.SysUtils.DirectoryExists(result) then
+    result := '';
+end;
+
+function TGarminDrv_Device.GetFileId(APath, AFile: string): string;
+begin
+  result := CombinePath(APath, AFile);
+  if not System.SysUtils.FileExists(result) then
+    result := '';
+end;
+
+function TGarminDrv_Device.GetFriendlyPath(APath: string): string;
+begin
+  result := ReplaceAll(APath, ['?:\'], [Device]);
+  if not System.SysUtils.DirectoryExists(result) then
+    result := '';
+end;
+
+function TGarminDrv_Device.CheckDevice: boolean;
+begin
+  result := true;
+end;
+
+function TGarminDrv_Device.GetManufacturer: PWideChar;
+begin
+  result := PwideChar(Description);
+end;
+
+function TGarminDrv_Device.GetFileInfo(const APath, AFile: string;
+                                       var File_Info: TFile_Info): string;
+var
+  Fs: TSearchRec;
+begin
+  result := CombinePath(APath, AFile);
+  if (System.Sysutils.FindFirst(result, faAnyFile, Fs) = 0) then
+  begin
+    FillFileInfo(Fs, File_Info);
+    System.Sysutils.FindClose(Fs)
+  end;
+end;
+
+function TGarminDrv_Device.GetListInfo(const APath, AFile: string;
+                                       const AListItem: TListItem): string;
+var
+  AFile_Info: TFile_Info;
+  MinSubItems: integer;
+begin
+  MinSubItems := TListView(AListItem.ListView).Columns.Count -1;
+  result := GetFileInfo(APath, AFile, AFile_Info);
+  TBase_Data.UpdateListItem(AListItem,
+                            [AFile_Info.DateOriginal,
+                             AFile_Info.TimeOriginal,
+                             ExtractFileExt(AFile_Info.ObjName),
+                             SenSize(AFile_Info.ObjSize)],
+                            MinSubItems);
+end;
+
+function TGarminDrv_Device.GetFriendlyIdForPath(const SPath: string;
+                                                var FriendlyPath: string): string;
+begin
+  FriendlyPath := ReplaceAll(SPath, ['?:\'], [Device]);
+  result := FriendlyPath;
+end;
+
+function TGarminDrv_Device.FileExists(const APath, AFile:string): boolean;
+begin
+  result := System.SysUtils.FileExists(CombinePath(APath, AFile));
+end;
+
+function TGarminDrv_Device.GetFile(const SFile, SSaveTo, NFile: string): boolean;
+begin
+  result := CopyFile(Pchar(SFile), PChar(CombinePath(SSaveTo, NFile)), false);
+end;
+
+function TGarminDrv_Device.DelFile(const SFile: string; const Recurse: boolean = false): boolean;
+begin
+  if (Recurse) then
+    result := RemovePath(SFile, FOF_NO_UI, 1)
+  else
+    result := DeleteFile(Pchar(SFile));
+end;
+
+function TGarminDrv_Device.RenameFile(const ObjectId, NewName: string): boolean;
+begin
+  result := RenameFile(Pchar(ObjectId), Pchar(NewName));
+end;
+
+function TGarminDrv_Device.TransferNewFile(const SFile, SSaveTo: string;
+                                           const NewName: WideString = ''): string;
+begin
+  result := CombinePath(SSaveTo, ExtractFileName(SFile));
+  if not CopyFile(Pchar(SFile), PChar(result), true) then
+    exit('');
+end;
+
+function TGarminDrv_Device.TransferExistingFile(const SFile, SSaveTo: string;
+                                                const AListItem: TListItem): boolean;
+var
+  OPath: string;
+begin
+  if not Assigned(AListItem) then
+    raise exception.Create('No item selected.');
+
+  OPath := CombinePath(SSaveTo, ExtractFileName(SFile));
+  result := CopyFile(Pchar(SFile), PChar(OPath), false);
+  if (result) then
+    GetListInfo(SSaveTo, ExtractFileName(SFile), AListItem);
+end;
+
+function TGarminDrv_Device.CreatePath(const Parent, DirName: string): boolean;
+begin
+  result := System.SysUtils.CreateDir(CombinePath(Parent, DirName));
+end;
+
+function TGarminDrv_Device.Connect(const Readonly: boolean = false): boolean;
+begin
+  result := true;
+end;
+
+procedure TGarminDrv_Device.Close;
+begin
+// Nothing
+end;
+
+function TGarminDrv_Device.ReadFiles(const Lst: TListItems;
+                                     const SParent: string;
+                                     var CompletePath: WideString): string;
+var
+  File_Info: TFile_Info;
+  Fs: TSearchRec;
+  Rc, MinSubItems: integer;
+  ABASE_Data: TBase_Data;
+begin
+  result := ExtractFileDir(SParent);
+  CompletePath := SParent;
+  Lst.Clear;
+  MinSubItems := 0;
+  if (Lst.Owner is TListView) then
+    MinSubItems := TListView(Lst.Owner).Columns.Count -1;
+
+  // Add .. entry (up)
+  ABASE_Data := TBase_Data.New;
+  ABASE_Data.Init(true, 0, SParent, 0);
+  ABASE_Data.CreateListItem(Lst, '..', [], MinSubItems);
+
+  Rc := System.SysUtils.FindFirst(CombinePath(SParent, '*.*'), faAnyFile, Fs);
+  while (Rc = 0) do
+  begin
+    if (Fs.Name <> '.') and
+       (Fs.Name <> '..') then
+    begin
+      FillFileInfo(Fs, File_Info);
+      ABASE_Data := TBase_Data.New;
+      ABASE_Data.Init(File_Info.IsFolder, File_Info.ObjSize, CombinePath(SParent,  File_Info.ObjName), File_Info.ObjDate);
+      ABASE_Data.CreateListItem(Lst, File_Info.ObjName,
+        [File_Info.DateOriginal, File_Info.TimeOriginal, ExtractFileExt(File_Info.ObjName), SenSize(File_Info.ObjSize)],
+       MinSubItems);
+    end;
+    Rc := FindNext(Fs);
+  end;
+  System.SysUtils.FindClose(Fs);
+end;
+
 initialization
-  System.Classes.RegisterClasses([TMTP_Data, TMTP_Device]);
+  System.Classes.RegisterClasses([TMTP_Data, TGarminMTP_Device, TGarminDrv_Device]);
   DefaultGarminDevice := TGarminDevice.Create;
   DefaultGarminDevice.init;
 

@@ -238,6 +238,7 @@ object FrmTripManager: TFrmTripManager
         OnKeyUp = LstFilesKeyUp
         OnSelectItem = LstFilesSelectItem
         OnItemChecked = LstFilesItemChecked
+        ExplicitTop = 35
       end
       object EdDeviceFolder: TEdit
         AlignWithMargins = True
@@ -456,7 +457,7 @@ object FrmTripManager: TFrmTripManager
     Top = 275
     Width = 709
     Height = 403
-    ActivePage = TsSQlite
+    ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
     object TsHex: TTabSheet
@@ -683,13 +684,18 @@ object FrmTripManager: TFrmTripManager
         end
       end
       object EdgeBrowser1: TEdgeBrowser
-        Left = 0
-        Top = 28
-        Width = 701
-        Height = 317
+        AlignWithMargins = True
+        Left = 1
+        Top = 29
+        Width = 699
+        Height = 315
+        Margins.Left = 1
+        Margins.Top = 1
+        Margins.Right = 1
+        Margins.Bottom = 1
         Align = alClient
         TabOrder = 2
-        AllowSingleSignOnUsingOSPrimaryAccount = False
+        AllowSingleSignOnUsingOSPrimaryAccount = True
         TargetCompatibleBrowserVersion = '117.0.2045.28'
         UserDataFolder = '%LOCALAPPDATA%\bds.exe.WebView2'
         OnCreateWebViewCompleted = EdgeBrowser1CreateWebViewCompleted
