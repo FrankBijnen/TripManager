@@ -1539,22 +1539,9 @@ begin
   ProcessGPX(AllGpx);
 end;
 
-function GPSLocalTime(const Utc: string): string;
-var TmpUtc, TmpLocal: TSystemTime;
-    StrUtc: string;
+function GPSLocalTime(const Iso: string): string;
 begin
-  FillChar(TmpUtc, SizeOf(TmpUtc), 0);
-  StrUtc          := Utc; // Timestamp like: 2009-02-08T13:16:15Z
-  TmpUtc.wYear    := StrToInt(NextField(StrUtc, '-'));
-  TmpUtc.wMonth   := StrToInt(NextField(StrUtc, '-'));
-  TmpUtc.wDay     := StrToInt(NextField(StrUtc, 'T'));
-  TmpUtc.wHour    := StrToInt(NextField(StrUtc, ':'));
-  TmpUtc.wMinute  := StrToInt(NextField(StrUtc, ':'));
-  TmpUtc.wSecond  := StrToInt(NextField(StrUtc, 'Z'));
-
-  SystemTimeToTzSpecificLocalTime(nil, TmpUtc, TmpLocal); // convert UTC to local
-  Result := Format('%.4d-%.2d-%.2d %.2d:%.2d:%.2d',
-                   [TmpLocal.wYear, TmpLocal.wMonth, TmpLocal.wDay, TmpLocal.wHour, TmpLocal.wMinute, TmpLocal.wSecond]);
+  result := FormatDateTime('yyyy-mm-dd hh:nn:ss', ISO8601ToDate(Iso, false));
 end;
 
 procedure TGPXfile.ProcessTrackLogs(const TempFiles: TGPXFiles;
