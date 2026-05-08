@@ -3,6 +3,7 @@
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
 {$ENDIF}
+{.$DEFINE WINEHACKS}
 
 interface
 
@@ -351,6 +352,7 @@ type
     procedure MnuProcessTrackLogsClick(Sender: TObject);
     procedure BtnPostProcessMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure PctHexOsmChange(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -385,6 +387,7 @@ type
 
     TrackLogFiles: TGPXFiles;
     TrackLogDirectory: string;
+    procedure ReAlignEdgeBrowser;
     procedure DirectoryEvent(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString);
     procedure ProcessInsertedDevices;
     procedure WaitForAllInsertedDevices(const TmpInserted: TStringList;
@@ -785,6 +788,13 @@ var
 begin
   SizeLeft := AdvPanel_MapTop.Width - (PnlRoutePoint.Left + PnlRoutePoint.Width);
   LblRoute.Width := SizeLeft div 2;
+end;
+
+procedure TFrmTripManager.ReAlignEdgeBrowser;
+begin
+{$IFDEF WINEHACKS}
+  EdgeBrowser1.AlignWithMargins := not EdgeBrowser1.AlignWithMargins;
+{$ENDIF}
 end;
 
 procedure TFrmTripManager.BgDeviceClick(Sender: TObject);
@@ -1412,6 +1422,7 @@ begin
   CheckExploreDb;
   TsExplore.TabVisible := true;
   PctHexOsm.ActivePage := TsExplore;
+  ReAlignEdgeBrowser;
 end;
 
 procedure TFrmTripManager.CheckExploreDb;
@@ -1691,6 +1702,11 @@ begin
     MnuProcessTrackLogsClick(MnuProcessTrackLogs)
   else
     PostProcessClick(BtnPostProcess);
+end;
+
+procedure TFrmTripManager.PctHexOsmChange(Sender: TObject);
+begin
+  ReAlignEdgeBrowser;
 end;
 
 procedure TFrmTripManager.PCTTripInfoResize(Sender: TObject);
@@ -2193,6 +2209,7 @@ procedure TFrmTripManager.FormShow(Sender: TObject);
 begin
   PCTTripInfo.ActivePageIndex := 0;
   PctHexOsm.ActivePageIndex := 1;
+  ReAlignEdgeBrowser;
 end;
 
 procedure TFrmTripManager.FreeDeviceData(const TmpDevice: TBase_Device);
@@ -2264,9 +2281,12 @@ begin
 
   // Get updated devicelist
   FreeDevices;
-//TODO: Wine
-//  TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device, TGarminDrv_Device);
+
+{$IFDEF WINEHACKS}
+  TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device, TGarminDrv_Device);
+{$ELSE}
   TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device);
+{$ENDIF}
 
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
@@ -5229,6 +5249,7 @@ begin
   CmbSQliteTabsChange(CmbSQliteTabs);
   TsSQlite.TabVisible := true;
   PctHexOsm.ActivePage := TsSQlite;
+  ReAlignEdgeBrowser;
 end;
 
 procedure TFrmTripManager.SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
