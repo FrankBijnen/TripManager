@@ -57,6 +57,7 @@ begin
   result.SetAttribute('xmlns',       'http://www.topografix.com/GPX/1/1');
   result.SetAttribute('xmlns:gpxx',  'http://www.garmin.com/xmlschemas/GpxExtensions/v3');
   result.SetAttribute('xmlns:gpxtpx','http://www.garmin.com/xmlschemas/TrackPointExtension/v2');
+  result.SetAttribute('xmlns:gpxtmx','http://www.garmin.com/xmlschemas/TrackMotoExtension/v1');
   result.SetAttribute('xmlns:wptx1', 'http://www.garmin.com/xmlschemas/WaypointExtension/v1');
   result.SetAttribute('xmlns:ctx',   'http://www.garmin.com/xmlschemas/CreationTimeExtension/v1');
   result.SetAttribute('xmlns:trp',   'http://www.garmin.com/xmlschemas/TripExtensions/v1');

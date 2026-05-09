@@ -191,7 +191,7 @@ type
     procedure ProcessTrip(const RteNode: TXmlVSNode; RouteCnt, ParentTripId: Cardinal);
 {$ENDIF}
     procedure FixCurrentGPX;
-    procedure AnalyzeGpx(AddGPXFiles: TGPXFiles = []);
+    procedure AnalyzeGpx(AllGPXFiles: TGPXFiles = []);
     procedure ProcessTrackLogs(const TempFiles: TGPXFiles;
                                const OutDir: string;
                                const AStatusBar: TStatusBar = nil);
@@ -1531,12 +1531,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TGPXfile.AnalyzeGpx(AddGPXFiles: TGPXFiles = []);
-var
-  AllGpx: TGPXFiles;
+procedure TGPXfile.AnalyzeGpx(AllGPXFiles: TGPXFiles = []);
 begin
-  AllGpx := Concat([FGPXFile], AddGPXFiles);
-  ProcessGPX(AllGpx);
+  if (Length(AllGPXFiles) = 0) then
+    ProcessGPX([FGPXFile])
+  else
+    ProcessGPX(AllGPXFiles);
 end;
 
 function GPSLocalTime(const Iso: string): string;
