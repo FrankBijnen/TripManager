@@ -229,10 +229,12 @@ uses
 
 type
   TTimedXmlVSNode = class(TObject)
-    DateTime: string;
-    XmlNode: TXmlVSNode;
+    FDateTime: string;
+    FXmlNode: TXmlVSNode;
+    constructor Create(AnXmlNode: TXmlVSNode);
   end;
-  TDayList = TList<TTimedXmlVSNode>;
+  TDayList = TObjectList<TTimedXmlVSNode>;
+
 
 // Not configurable
 const
@@ -245,6 +247,12 @@ const
 
 var
   FormatSettings: TFormatSettings;
+
+constructor TTimedXmlVSNode.Create(AnXmlNode: TXmlVSNode);
+begin
+  FXmlNode := AnXmlNode;
+  FDateTime := FindSubNodeValue(AnXmlNode, 'time');
+end;
 
 function TGPXfile.DistanceFormat(Distance: double): string;
 begin
@@ -1555,8 +1563,7 @@ procedure TGPXfile.ProcessTrackLogs(const TempFiles: TGPXFiles;
                                     const OutDir: string;
                                     const AStatusBar: TStatusBar = nil);
 var
-  TimedNode: TTimedXmlVSNode;
-  TempList: TDayList;
+  CurrentDayList: TDayList;
   DayList: TObjectDictionary<string, TDayList>;
   TracksProcessed: TXmlVSNodeList;
   Track, TrackPoint,
@@ -1577,7 +1584,7 @@ begin
   Comparison :=
     function(const Left, Right: TTimedXmlVSNode): Integer
     begin
-      result := CompareStr(Left.DateTime, Right.DateTime);
+      result := CompareStr(Left.FDateTime, Right.FDateTime);
     end;
 
   if Assigned(AStatusBar) then
@@ -1618,16 +1625,13 @@ begin
             continue;
           TrackDate := LeftStr(GPSLocalTime(FindSubNodeValue(TrackPoint, 'time')), 10);
           if (DayList.ContainsKey(TrackDate)) then
-            TempList := DayList[TrackDate]
+            CurrentDayList := DayList[TrackDate]
           else
           begin
-            TempList := TDayList.Create;
-            DayList.Add(TrackDate, TempList)
+            CurrentDayList := TDayList.Create(True);
+            DayList.Add(TrackDate, CurrentDayList)
           end;
-          TimedNode := TTimedXmlVSNode.Create;
-          TimedNode.XmlNode := TrackPoint;
-          TimedNode.DateTime := FindSubNodeValue(TrackPoint, 'time');
-          TempList.Add(TimedNode);
+          CurrentDayList.Add(TTimedXmlVSNode.Create(TrackPoint));
         end;
       end;
     finally
@@ -1643,13 +1647,14 @@ begin
         AStatusBar.Update;
       end;
 
-      TempList := DayList[TrackDate];
-      if Assigned(AStatusBar) then
-
-      TempList.Sort(TComparer<TTimedXmlVSNode>.Construct(Comparison));
+      CurrentDayList := DayList[TrackDate];
+      CurrentDayList.Sort(TComparer<TTimedXmlVSNode>.Construct(Comparison));
 
       if Assigned(AStatusBar) then
+      begin
         AStatusBar.Panels[0].Text := 'Writing track log for date';
+        AStatusBar.Update;
+      end;
 
       TracksXml := TXmlVSDocument.Create;
       TracksXml.Options := [];
@@ -1664,9 +1669,9 @@ begin
 
         OutTrackSeg := OutTrack.AddChild('trkseg');
         PrevDateTime := 0;
-        for Index := 0 to TempList.Count -1 do
+        for Index := 0 to CurrentDayList.Count -1 do
         begin
-          ThisDateTime := ISO8601ToDate(TempList[Index].DateTime);
+          ThisDateTime := ISO8601ToDate(CurrentDayList[Index].FDateTime);
           if (SecondsBetween(ThisDateTime, PrevDateTime) < 1) then
             continue;
 
@@ -1674,17 +1679,17 @@ begin
              (SecondsBetween(ThisDateTime, PrevDateTime) > MinTimeAutoStop) then
           begin
             OutWpt := TracksRoot.InsertChild('wpt', 0);
-            CloneAttributes(TempList[Index].XmlNode, OutWpt);
+            CloneAttributes(CurrentDayList[Index].FXmlNode, OutWpt);
             OutWpt.AddChild('name').NodeValue :=
               Format('Stop %s-%s',
-                 [ GPSLocalTime(TempList[Index-1].DateTime),
-                   RightStr(GPSLocalTime(TempList[Index].DateTime), 8)
+                 [ GPSLocalTime(CurrentDayList[Index-1].FDateTime),
+                   RightStr(GPSLocalTime(CurrentDayList[Index].FDateTime), 8)
                  ]);
           end;
 
           PrevDateTime := ThisDateTime;
           OutTrackPoint := OutTrackSeg.AddChild('trkpt');
-          CloneNode(TempList[Index].XmlNode, OutTrackPoint);
+          CloneNode(CurrentDayList[Index].FXmlNode, OutTrackPoint);
         end;
         OutFile := FOutDir +
                    'TrackLog_' +
@@ -1699,12 +1704,6 @@ begin
     AStatusBar.Panels[1].Text := '';
     AStatusBar.Update;
   finally
-    for TrackDate in DayList.Keys do
-    begin
-      TempList := DayList[TrackDate];
-      for TimedNode in TempList do
-        TimedNode.Free;
-    end;
     DayList.Free;
   end;
 end;
