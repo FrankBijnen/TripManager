@@ -227,6 +227,13 @@ uses
   UnitRedirect,
   UnitStringUtils;
 
+type
+  TTimedXmlVSNode = class(TObject)
+    DateTime: string;
+    XmlNode: TXmlVSNode;
+  end;
+  TDayList = TList<TTimedXmlVSNode>;
+
 // Not configurable
 const
   DebugComments: string = 'False';
@@ -1547,10 +1554,9 @@ end;
 procedure TGPXfile.ProcessTrackLogs(const TempFiles: TGPXFiles;
                                     const OutDir: string;
                                     const AStatusBar: TStatusBar = nil);
-type
-  TDayList = Tlist<TXmlVSNode>;
 var
-  TempList : TDayList;
+  TimedNode: TTimedXmlVSNode;
+  TempList: TDayList;
   DayList: TObjectDictionary<string, TDayList>;
   TracksProcessed: TXmlVSNodeList;
   Track, TrackPoint,
@@ -1563,14 +1569,15 @@ var
   TracksRoot: TXmlVSNode;
   OutFile: string;
   CurCursor: HCURSOR;
-  Comparison: TComparison<TXmlVSNode>;
+  Comparison: TComparison<TTimedXmlVSNode>;
 begin
   CurCursor := GetCursor;
   MinTimeAutoStop := TProcessOptions.GetMinTimeTrackPoints;
+
   Comparison :=
-    function(const Left, Right: TXmlVSNode): Integer
+    function(const Left, Right: TTimedXmlVSNode): Integer
     begin
-      result := CompareStr(FindSubNodeValue(Left, 'time'), FindSubNodeValue(Right, 'time'));
+      result := CompareStr(Left.DateTime, Right.DateTime);
     end;
 
   if Assigned(AStatusBar) then
@@ -1617,7 +1624,10 @@ begin
             TempList := TDayList.Create;
             DayList.Add(TrackDate, TempList)
           end;
-          TempList.Add(TrackPoint);
+          TimedNode := TTimedXmlVSNode.Create;
+          TimedNode.XmlNode := TrackPoint;
+          TimedNode.DateTime := FindSubNodeValue(TrackPoint, 'time');
+          TempList.Add(TimedNode);
         end;
       end;
     finally
@@ -1628,14 +1638,18 @@ begin
     begin
       if Assigned(AStatusBar) then
       begin
-        AStatusBar.Panels[0].Text := 'Writing track log for date';
+        AStatusBar.Panels[0].Text := 'Sorting track log for date';
         AStatusBar.Panels[1].Text := TrackDate;
         AStatusBar.Update;
       end;
 
       TempList := DayList[TrackDate];
+      if Assigned(AStatusBar) then
 
-      TempList.Sort(TComparer<TXmlVSNode>.Construct(Comparison));
+      TempList.Sort(TComparer<TTimedXmlVSNode>.Construct(Comparison));
+
+      if Assigned(AStatusBar) then
+        AStatusBar.Panels[0].Text := 'Writing track log for date';
 
       TracksXml := TXmlVSDocument.Create;
       TracksXml.Options := [];
@@ -1652,7 +1666,7 @@ begin
         PrevDateTime := 0;
         for Index := 0 to TempList.Count -1 do
         begin
-          ThisDateTime := ISO8601ToDate(FindSubNodeValue(TempList[Index], 'time'));
+          ThisDateTime := ISO8601ToDate(TempList[Index].DateTime);
           if (SecondsBetween(ThisDateTime, PrevDateTime) < 1) then
             continue;
 
@@ -1660,17 +1674,17 @@ begin
              (SecondsBetween(ThisDateTime, PrevDateTime) > MinTimeAutoStop) then
           begin
             OutWpt := TracksRoot.InsertChild('wpt', 0);
-            CloneAttributes(TempList[Index], OutWpt);
+            CloneAttributes(TempList[Index].XmlNode, OutWpt);
             OutWpt.AddChild('name').NodeValue :=
               Format('Stop %s-%s',
-                 [ GPSLocalTime(FindSubNodeValue(TempList[Index-1], 'time')),
-                   RightStr(GPSLocalTime(FindSubNodeValue(TempList[Index],   'time')), 8)
+                 [ GPSLocalTime(TempList[Index-1].DateTime),
+                   RightStr(GPSLocalTime(TempList[Index].DateTime), 8)
                  ]);
           end;
 
           PrevDateTime := ThisDateTime;
           OutTrackPoint := OutTrackSeg.AddChild('trkpt');
-          CloneNode(TempList[Index], OutTrackPoint);
+          CloneNode(TempList[Index].XmlNode, OutTrackPoint);
         end;
         OutFile := FOutDir +
                    'TrackLog_' +
@@ -1679,11 +1693,18 @@ begin
       finally
         TracksXml.Free;
       end;
+
     end;
     AStatusBar.Panels[0].Text := 'Processing track logs finished.';
     AStatusBar.Panels[1].Text := '';
     AStatusBar.Update;
   finally
+    for TrackDate in DayList.Keys do
+    begin
+      TempList := DayList[TrackDate];
+      for TimedNode in TempList do
+        TimedNode.Free;
+    end;
     DayList.Free;
   end;
 end;
