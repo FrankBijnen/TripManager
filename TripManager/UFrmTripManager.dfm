@@ -474,7 +474,6 @@ object FrmTripManager: TFrmTripManager
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 0
-        ExplicitLeft = 2
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1

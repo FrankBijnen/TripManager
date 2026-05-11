@@ -38,6 +38,7 @@ type
     function HashSpeed1: cardinal;
     function HashSpeed2: cardinal;
     function HashSpeed3: cardinal;
+    function HashCarSpeed: cardinal;
     procedure Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
     procedure Calculate_Proposed_Car_Hash(const Model: TGarminModel);
     procedure Calculate_Proposed_Hash(const Model: TGarminModel);
@@ -87,13 +88,13 @@ const
       ($00000000, $00001000, $00002000);
 
   XT3_Car_Hashes: array[0..6] of TKnownHash = (
-    (CM: cmFaster;              Hash2WD: $023F0F10; Hash4WD: $026F0F10),
-    (CM: cmShorter;             Hash2WD: $00300F20; Hash4WD: $0FC00F10),
-    (CM: cmStraight;            Hash2WD: $002B0F20; Hash4WD: $0FFB0F10),
-    (CM: cmAdv; AdvLvl: advL1;  Hash2WD: $023A0F10; Hash4WD: $026A0F10),
-    (CM: cmAdv; AdvLvl: advL2;  Hash2WD: $020A0F10; Hash4WD: $021A0F10),
-    (CM: cmAdv; AdvLvl: advL3;  Hash2WD: $021A0F10; Hash4WD: $020A0F10),
-    (CM: cmAdv; AdvLvl: advL4;  Hash2WD: $026A0F10; Hash4WD: $023A0F10)
+    (CM: cmFaster;              Hash2WD: $023F0000; Hash4WD: $026F0000),
+    (CM: cmShorter;             Hash2WD: $00300010; Hash4WD: $0FC00000),
+    (CM: cmStraight;            Hash2WD: $002B0010; Hash4WD: $0FFB0000),
+    (CM: cmAdv; AdvLvl: advL1;  Hash2WD: $023A0000; Hash4WD: $026A0000),
+    (CM: cmAdv; AdvLvl: advL2;  Hash2WD: $020A0000; Hash4WD: $021A0000),
+    (CM: cmAdv; AdvLvl: advL3;  Hash2WD: $021A0000; Hash4WD: $020A0000),
+    (CM: cmAdv; AdvLvl: advL4;  Hash2WD: $026A0000; Hash4WD: $023A0000)
   );
 
 procedure GetTables(const DbName: string; TabList: TStrings);
@@ -172,6 +173,15 @@ begin
     result := (Speed3TabMetric[Max_Speed and $0000000f]) shl 4;
 end;
 
+// For cars no speed restriction
+function TVehicleProfile.HashCarSpeed: cardinal;
+begin
+  if (Imperial) then
+    result := $1D0
+  else
+    result := $F10;
+end;
+
 procedure TVehicleProfile.Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
 var
   Index: integer;
@@ -243,8 +253,13 @@ begin
   if not (Traction in [Ord(TTraction.tr2WD), Ord(TTraction.tr4WD)]) then
     exit;
 
-  // Onle 2 Meter wide
-  if (Width <> 200) then
+  // Only width allowed are 200 and 198
+  if (Imperial = false) and
+     (Width <> 200) then
+    exit;
+
+  if (Imperial = true) and
+     (Width <> 198) then
     exit;
 
   // Valid Environmental value
@@ -274,6 +289,7 @@ begin
           else                                      // 2WD
             Proposed_Hash := XT3_Car_Hashes[Index].Hash2WD or
                                 XT3_Car_environments[TProfEnvironment(Environmental)];
+          Proposed_Hash := Proposed_Hash + HashCarSpeed;
           break;
         end;
       end;
