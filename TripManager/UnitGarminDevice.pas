@@ -487,7 +487,7 @@ var
 begin
   result := false;
 
-  if (TripVersion[TModelConv.Garmin2Trip(GarminDevice.GarminModel)].CanCheckTrips = false) then
+  if (TripVersion[TModelConv.Garmin2Trip(GarminDevice.GarminModel)].CanCheckSystemTrips = false) then
     exit;
 
   // .System\Trips exists?

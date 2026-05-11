@@ -5,6 +5,9 @@
 {$ENDIF}
 {.$DEFINE WINEHACKS}
 
+//TODO Add level for RoutePoints?
+{.$DEFINE ROUTEPOINTSLEVEL}
+
 interface
 
 uses
@@ -4107,9 +4110,14 @@ begin
   if (Node.Data <> nil) and
      (TObject(Node.Data) is TUdbDir) then
   begin
+{$IFDEF ROUTEPOINTSLEVEL}
+    if (TUdbDir(Node.Data).IsTurn) then
+      Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
+{$ELSE}
     if (TUdbDir(Node.Data).UdbDirValue.SubClass.IsKnownRoutePoint) or
        (TUdbDir(Node.Data).IsTurn) then
       Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
+{$ENDIF}
     case TUdbDir(Node.Data).Status of
       TUdbDirStatus.udsRoutePointNOK:
         Sender.Canvas.Brush.Color := clWebAqua;
@@ -5007,6 +5015,29 @@ var
     AParentNode.Expand(false);
   end;
 
+{$IFDEF ROUTEPOINTSLEVEL}
+  procedure AddRoutes(AParentNode: TTreeNode; ARouteList: TmAllRoutes);
+  var
+    AnUdbHandle: TmUdbDataHndl;
+    AnUdbDir: TUdbDir;
+    CurrentUdbNode, CurrentRTPNode: TTreeNode;
+  begin
+    for AnUdbHandle in ARouteList.Items do
+    begin
+      CurrentUdbNode := TvTrip.Items.AddChildObject(AParentNode, AnUdbHandle.DisplayName, AnUdbHandle);
+      CurrentRTPNode := nil;
+      for AnUdbDir in AnUdbHandle.Items do
+      begin
+        if (CurrentRTPNode = nil) or
+           (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
+          CurrentRTPNode := TvTrip.Items.AddChildObject(CurrentUdbNode, AnUdbDir.DisplayName, AnUdbDir)
+        else
+          TvTrip.Items.AddChildObject(CurrentRTPNode, AnUdbDir.DisplayName, AnUdbDir);
+      end;
+    end;
+    AParentNode.Expand(false);
+  end;
+{$ELSE}
   procedure AddRoutes(AParentNode: TTreeNode; ARouteList: TmAllRoutes);
   var
     AnUdbHandle: TmUdbDataHndl;
@@ -5021,6 +5052,7 @@ var
     end;
     AParentNode.Expand(false);
   end;
+{$ENDIF}
 
 begin
   // Prevent AV's in Compare when a new trip file is loaded.

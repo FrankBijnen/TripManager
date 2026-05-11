@@ -37,7 +37,12 @@ type
                         Minor: Cardinal;
                         function IsUcs4: boolean;
                         function Unknown2Size: integer;
-                        function CanCheckTrips: boolean;
+                        function UdbDirUnknown2Size: integer;
+                        function Unknown3ShapeOffset: cardinal;
+                        function Unknown3DistOffset: cardinal;
+                        function Unknown3TimeOffset: cardinal;
+                        function HandleTrailer: boolean;
+                        function CanCheckSystemTrips: boolean;
                       end;
   TUnixDateConv = class
     class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
@@ -59,13 +64,8 @@ const
 // Model specific values                              XT        XT2       XT3       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  Drive 66  nuvi 2595 Unknown
   NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    false,    true,     false,    false,    true,     false);
   UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   121 * 4,  21 * 2,   0);
-  UdbDirUnknown2Size: array[TTripModel] of integer  =(18,       18,       18,       18,       18,       18,       18,       18,       18,       16,       0);
   Unknown3Size:       array[TTripModel] of integer  =(1288,     1448,     1452,     1348,     294,      254,      130,      294,      1348,     134,      0);
-  UdbHandleTrailer:   array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    true,     true,     false,    false,    true,     false);
   CalculationMagic:   array[TTripModel] of Cardinal =($0538feff,$05d8feff,$05d8feff,$0574feff,$0170feff,CalcUndef,CalcUndef,$0170feff,$0574feff,CalcUndef,CalcNA);
-  Unknown3ShapeOffset:array[TTripModel] of Cardinal =($90,      $c0,      $c0,      $c0,      $8e,      $66,      $66,      $8e,      $c0,      $00,      $00);
-  Unknown3DistOffset: array[TTripModel] of Cardinal =($14,      $14,      $14,      $14,      $12,      $12,      $12,      $12,      $14,      $12,      $00);
-  Unknown3TimeOffset: array[TTripModel] of Cardinal =($18,      $18,      $18,      $18,      $16,      $16,      $16,      $16,      $18,      $16,      $00);
   ScPosnSize:         array[TTripModel] of integer  =(PosnNorm, PosnNorm, PosnLarge,PosnLarge,PosnNorm, PosnSmall,PosnSmall,PosnNorm, PosnNorm, PosnSmall,PosnSmall);
   TripVersion:        array[TTripModel] of TTripVersion =
      ((Major:4; Minor:7),    // XT
@@ -132,7 +132,60 @@ begin
   end;
 end;
 
-function TTripVersion.CanCheckTrips: boolean;
+function TTripVersion.UdbDirUnknown2Size: integer;
+begin
+  result := 18;
+  if (Major = 1) and
+     (Minor < 4) then
+    result := 16;
+end;
+
+function TTripVersion.Unknown3ShapeOffset: cardinal;
+begin
+  result := 0;
+  case (Major) of
+    1:begin
+        if (Minor < 6) then
+          result := $66
+        else
+          result := $8e;
+      end;
+    4:begin
+        if (Minor < 9) then
+          result := $90
+        else
+          result := $c0;
+      end;
+  end;
+end;
+
+function TTripVersion.Unknown3DistOffset: cardinal;
+begin
+  result := 0;
+  case (Major) of
+    1: result := $12;
+    4: result := $14;
+  end;
+end;
+
+function TTripVersion.Unknown3TimeOffset: cardinal;
+begin
+  result := 0;
+  case (Major) of
+    1: result := $16;
+    4: result := $18;
+  end;
+end;
+
+function TTripVersion.HandleTrailer: boolean;
+begin
+  result := false;
+  if (Major = 1) and
+     (Minor < 4) then
+    result := true;
+end;
+
+function TTripVersion.CanCheckSystemTrips: boolean;
 begin
   result := (Major >= 4);
 end;

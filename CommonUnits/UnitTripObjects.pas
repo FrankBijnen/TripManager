@@ -3458,7 +3458,7 @@ begin
   inherited Create;
 
   FillChar(FValue, SizeOf(FValue), 0);
-  SetLength(FUnknown2, UdbDirUnknown2Size[AModel]);
+  SetLength(FUnknown2, TripVersion[AModel].UdbDirUnknown2Size);
   SetLength(FUdbDirName, UdbDirNameSize[AModel]);
 
   // Copy Name
@@ -3829,7 +3829,7 @@ var
 begin
   TotalHandleSize := Swap32(integer(FValue.UdbHandleSize)) -
                      (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount));
-  UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + (UdbDirUnknown2Size[AModel]) + UdbDirNameSize[AModel]));
+  UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + TripVersion[AModel].UdbDirUnknown2Size + UdbDirNameSize[AModel]));
   result := TotalHandleSize - UdbDirSize;
 end;
 
@@ -3897,17 +3897,17 @@ end;
 
 function TmUdbDataHndl.GetDistOffset: integer;
 begin
-  result := Unknown3DistOffset[FTripList.TripModel];
+  result := TripList.TripFileVersion.Unknown3DistOffset;
 end;
 
 function TmUdbDataHndl.GetTimeOffset: integer;
 begin
-  result := Unknown3TimeOffset[FTripList.TripModel];
+  result := TripList.TripFileVersion.Unknown3TimeOffset;
 end;
 
 function TmUdbDataHndl.GetShapeOffset: integer;
 begin
-  result := Unknown3ShapeOffset[FTripList.TripModel];
+  result := TripList.TripFileVersion.Unknown3ShapeOffset;
 end;
 
 {*** AllRoutesList ***}
@@ -3942,15 +3942,18 @@ begin
   Diff := AnUdbHandle.ComputeUnknown3Size(AModel) - Unknown3Size[AModel];
 
   // Diff must be 0, if no trailer allowed.
-  if (UdbHandleTrailer[AModel] = false) and
-     (Diff <> 0) then
+  if (TripList.TripFileVersion.HandleTrailer = false) then
+  begin
+    if (Diff <> 0) then
+      exit(TTripModel.Unknown);
+  end
+  else
+  begin
+    // Allow a trailer for the Zumo 3x0, 590 and nuvi 2595
+    if (Diff < 0) or
+       (Diff > SizeOf(TUdbDirFixedValue)) then
     exit(TTripModel.Unknown);
-
-  // Allow a trailer for the Zumo 3x0, 590 and nuvi 2595
-  if (UdbHandleTrailer[AModel] = true) and
-     ( (Diff < 0) or
-       (Diff > SizeOf(TUdbDirFixedValue))) then
-    exit(TTripModel.Unknown);
+  end;
 
   // Check for UdbDirMagic in first UdbDir. If there are UDBdir's!
   if (AnUdbHandle.FValue.UDbDirCount > 0) then
@@ -4044,7 +4047,7 @@ begin
       AnUdbDir := TUdbDir.Create('');
       AnUdbDir.SetTripList(TripList);
       AStream.Read(AnUdbDir.FValue, SizeOf(AnUdbDir.FValue));
-      SetLength(AnUdbDir.FUnknown2, UdbDirUnknown2Size[SelModel]);
+      SetLength(AnUdbDir.FUnknown2, TripVersion[SelModel].UdbDirUnknown2Size);
       AStream.Read(AnUdbDir.FUnknown2[0], Length(AnUdbDir.FUnknown2));
       SetLength(AnUdbDir.FUdbDirName, UdbDirNameSize[SelModel]);
       AStream.Read(AnUdbDir.FUdbDirName[0], Length(AnUdbDir.FUdbDirName));
@@ -4079,7 +4082,7 @@ begin
     AddUdbHandle(AnUdbHandle);
     Diff := (SavePos + ValueLen - SizeOf(Initiator)) - AStream.Position;
     if (Diff > 0) and
-       (UdbHandleTrailer[SelModel]) then // The Zumo 3x0, 590 and Nuvi 2595 can have trailer bytes.
+       (TripList.TripFileVersion.HandleTrailer) then // The Zumo 3x0, 590 and Nuvi 2595 can have trailer bytes.
     begin
       SetLength(AnUdbHandle.FTrailer, Diff);
       AStream.Read(AnUdbHandle.FTrailer[0], Length(AnUdbHandle.FTrailer));
