@@ -6,7 +6,8 @@
 {.$DEFINE WINEHACKS}
 
 //TODO Add level for RoutePoints?
-{.$DEFINE ROUTEPOINTSLEVEL}
+{$DEFINE ROUTEPOINTSLEVEL}
+{.$DEFINE PROCESSMESSAGES}
 
 interface
 
@@ -1766,7 +1767,11 @@ begin
         if (ContainsText(Ext, GpxExtension)) then
         begin
           SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
+{$IFDEF PROCESSMESSAGES}
           ProcessMessages;
+{$ELSE}
+          SbPostProcess.Update;
+{$ENDIF}
           TGPXFile.PerformFunctions([PostProcess], ShellListView1.Folders[AnItem.Index].PathName,
                                     OnSetPostProcessPrefs, SetProcessOptions.SavePrefs);
         end;
@@ -5559,7 +5564,11 @@ begin
       AGpx := ModifiedList[0];
       ModifiedList.Delete(0);
       SbPostProcess.Panels[0].Text := AGpx;
+{$IFDEF PROCESSMESSAGES}
       ProcessMessages;
+{$ELSE}
+      SbPostProcess.Update;
+{$ENDIF}
       TGPXFile.PerformFunctions([PostProcess], AGpx,
                                 OnSetPostProcessPrefs, SetProcessOptions.SavePrefs);
     end;
@@ -5574,7 +5583,11 @@ end;
 procedure TFrmTripManager.WMAddrLookUp(var Msg: TMessage);
 begin
   SbPostProcess.Panels[1].Text  := TPlace(Msg.LParam).FormattedAddress;
+{$IFDEF PROCESSMESSAGES}
   ProcessMessages;
+{$ELSE}
+  SbPostProcess.Update;
+{$ENDIF}
   Msg.Result := 0;
 end;
 
