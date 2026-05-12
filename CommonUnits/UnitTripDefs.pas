@@ -136,7 +136,7 @@ function TTripVersion.UdbDirUnknown2Size: integer;
 begin
   result := 18;
   if (Major = 1) and
-     (Minor < 4) then
+     (Minor < 3) then
     result := 16;
 end;
 
