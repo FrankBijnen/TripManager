@@ -629,7 +629,7 @@ begin
   else
   begin
     TripDir := GetRegistry(Reg_PrefFileSysFolder_Key, '');
-    if (SelectDirectoryOrFile('Scan for VehicleProfileHash in Directory or File', '', TripDir) = false) then
+    if (SelectDirectoryOrFile('No suitable trips found on the device. Scan in Directory or File?', '', TripDir) = false) then
       exit;
 
     if (FileExists(TripDir)) then

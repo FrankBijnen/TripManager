@@ -2255,9 +2255,9 @@ begin
 
   // Reopen Device, and reposition ComboBox to new position
   DevIndex := -1;
-  if (Assigned(KeepDevice)) then
+  if (Assigned(KeepDevice)) and
+     (KeepDevice.Device <> '') then
     DevIndex := TBase_Device.DeviceIdInList(KeepDevice.Device, DeviceList);
-
   if (DevIndex < 0) then
   begin
     // Device not found
@@ -2269,7 +2269,6 @@ begin
   begin
     // Device is still there. Re-connect and set ComboBox
     CurrentDevice := DeviceList[DevIndex];
-
     if (CurrentDevice.Connect) then
       CmbDevices.ItemIndex := DevIndex;
   end;
@@ -3041,6 +3040,7 @@ var
   LocalFile: string;
   Imported: TBooleanItem;
   AMTP_Data: TMTP_Data;
+  TmpHash: cardinal;
 begin
   result := false;
 
@@ -3086,7 +3086,9 @@ begin
     AMTP_Data.ExploreUUID := TmpTripList.ExploreUUID;
 
     // Save ProfileHashList
-    ProfileHashList.AddObject(TmpTripList.VehicleGUID, TObject(TmpTripList.VehicleHash));
+    TmpHash := TmpTripList.VehicleHash;
+    if (TmpHash <> 0) then
+      ProfileHashList.AddObject(TmpTripList.VehicleGUID, TObject(TmpHash));
 
     // Show trip name
     AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
@@ -5753,7 +5755,7 @@ begin
           CurDevice := TBase_Device.Clone(CurrentDevice);
           try
             // Update the list of devices, keeping Current Device if possible
-            GetDeviceList(CurrentDevice);
+            GetDeviceList(CurDevice);
             if (CurDevice.Device <> '') then
             begin
               if (TBase_Device.DeviceIdInList(CurDevice.Device, DeviceList) < 0) then

@@ -169,7 +169,7 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="UFrmEditRoutePref.pas">
             <Form>FrmEditRoutePref</Form>
         </DCCReference>
-        <DCCReference Include="UfrmVehProfiles.pas">
+        <DCCReference Include="UFrmVehProfiles.pas">
             <Form>FrmVehProfiles</Form>
         </DCCReference>
         <DCCReference Include="..\CommonUnits\UnitRegistry.pas"/>

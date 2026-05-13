@@ -30,7 +30,7 @@ object FrmVehProfiles: TFrmVehProfiles
       740
       31)
     object BtnOK: TButton
-      Left = 547
+      Left = 571
       Top = 3
       Width = 75
       Height = 25
@@ -41,7 +41,7 @@ object FrmVehProfiles: TFrmVehProfiles
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 634
+      Left = 658
       Top = 3
       Width = 75
       Height = 25

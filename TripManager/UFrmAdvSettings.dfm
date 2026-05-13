@@ -28,7 +28,7 @@ object FrmAdvSettings: TFrmAdvSettings
       615
       31)
     object BtnOK: TButton
-      Left = 403
+      Left = 443
       Top = 3
       Width = 75
       Height = 25
@@ -39,7 +39,7 @@ object FrmAdvSettings: TFrmAdvSettings
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 490
+      Left = 530
       Top = 3
       Width = 75
       Height = 25
