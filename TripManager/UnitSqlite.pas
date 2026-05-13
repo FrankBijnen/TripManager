@@ -9,6 +9,14 @@ uses
   UnitGpxDefs;
 
 type
+
+  TCDSEvents = class(TObject)
+  public
+    procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
+    procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
+    procedure AfterOpen(DataSet: TDataSet);
+  end;
+
   TSqlColumn = record
     Table_Name: UTF8String;
     Table_Type: UTF8String;
@@ -22,10 +30,8 @@ type
     Valid: boolean;
     Vehicle_Id: integer;
     TruckType: integer;
-    Name: UTF8String;
-    GUID: UTF8String;
-    VehicleType: integer;
-    TransportMode: integer;
+    Name: string;
+    GUID: string;
     AdventurousLevel: integer;
     Environmental: integer;
     Traction: integer;
@@ -34,6 +40,7 @@ type
     Width: integer;
     Imperial: boolean;
     Legality: integer;
+    Modified: cardinal;
     Proposed_Hash: cardinal;
     function HashSpeed1: cardinal;
     function HashSpeed2: cardinal;
@@ -42,8 +49,9 @@ type
     procedure Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
     procedure Calculate_Proposed_Car_Hash(const Model: TGarminModel);
     procedure Calculate_Proposed_Hash(const Model: TGarminModel);
-    function Changed(IName, IGUID: UTF8String;
-                     IVehicle_Id, ITruckType, ITransportMode, ITraction: integer;
+    procedure FromCds(const ACDS: TClientDataSet; const AModel: TGarminModel);
+    function Changed(IName, IGUID: string;
+                     IVehicle_Id, ITruckType, ITraction: integer;
                      IEnvironmental, ICalc_Method, ILegality: integer): boolean; overload;
     function Changed(IVehicleProfile: TVehicleProfile): boolean; overload;
   end;
@@ -56,7 +64,7 @@ type
   TProfAdvLevel    = (advL1 = 0, advL2 = 1, advL3 = 2, advL4 = 3);
   TProfEnvironment = (enAvoid = 0, enAllow = 1, enAsk = 2);
   TTraction        = (tr2WD = 1, tr4WD = 2, tr3Wheels = 3, tr2Wheels = 4);
-  TVehicleType     = (veCar = 1, veMotorCycle = 9);
+  TVehicleTruckType= (ttMotorCycle = 7, ttCar = 11);
   TKnownHash = record
     CM: TProfCalcMethod;
     AdvLvl: TProfAdvLevel;
@@ -108,13 +116,17 @@ procedure ExecSqlQuery(const DbName: string;
 function ExecUpdateSql(const DbName: string;
                        const Query: string): int64;
 function GetAvoidancesChanged(const DbName: string): string;
-function GetVehicleProfile(const DbName: string;
-                           const Model: TGarminModel): TVehicleProfile;
+function GetActiveVehicleProfile(const DbName: string;
+                                 const Model: TGarminModel): TVehicleProfile;
 procedure GetExploreList(const DBName: string;
                          const ExploreList: TStrings);
 function CDSFromQuery(const DbName: string;
                       const Query: string;
                       const ACds: TClientDataSet): integer;
+function GetAllVehicleProfilesQuery(const Model: TGarminModel): string;
+
+var
+  FCDSEvents: TCDSEvents;
 
 implementation
 
@@ -128,6 +140,59 @@ uses
 const
   CRLF = #13#10;
   Max_Speed_Supported = 768; // 768 m/s = 2764 km/h!
+
+procedure TCDSEvents.GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
+begin
+  Text := ReplaceAll(Copy(Sender.AsString, 1, 1024), [#0, #9, #10], ['.', '.', ' ']);
+end;
+
+procedure TCDSEvents.GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
+var
+  B: TBytes;
+  Index: integer;
+begin
+  Text := '';
+  B := Sender.AsBytes;
+  if Length(B) < 16 then
+    exit;
+  for Index := 0 to 3 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 4 to 5 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 6 to 7 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 8 to 9 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := text + '-';
+  for Index := 10 to 15 do
+    Text := Text + IntToHex(B[Index], 2);
+  Text := LowerCase(Text);
+end;
+
+procedure TCDSEvents.AfterOpen(DataSet: TDataSet);
+var
+  AField: TField;
+begin
+  for AField in DataSet.Fields do
+  begin
+    if (AField is TBlobField) then
+    begin
+      if (ContainsText(Afield.FieldName, 'UID')) then
+      begin
+        AField.OnGetText := GetGUID;
+        Afield.DisplayWidth := 40;
+      end
+      else
+      begin
+        AField.OnGetText := GetBlob;
+        AField.Tag := 1;
+      end;
+    end;
+  end;
+end;
 
 function MkGuid(const HexGuid: string): string;
 begin
@@ -216,6 +281,11 @@ begin
     exit;
 
   case Model of
+    TGarminModel.XT2:
+      if Imperial then
+        Proposed_Hash := $0815F4A0
+      else
+        Proposed_Hash := $0815F480;
     TGarminModel.XT3:
       begin
         for Index := Low(XT3_Motor_Hashes) to High(XT3_Motor_Hashes) do
@@ -300,23 +370,59 @@ procedure TVehicleProfile.Calculate_Proposed_Hash(const Model: TGarminModel);
 begin
   Proposed_Hash := 0;
 
-  case VehicleType of
-    Ord(TVehicleType.veCar):
+  case TruckType of
+    Ord(TVehicleTruckType.ttCar):
       Calculate_Proposed_Car_Hash(Model);
-    Ord(TVehicleType.veMotorCycle):
+    Ord(TVehicleTruckType.ttMotorCycle):
       Calculate_Proposed_Motor_Hash(Model);
   end;
 end;
 
-function TVehicleProfile.Changed(IName, IGUID: UTF8String;
-                                 IVehicle_Id, ITruckType, ITransportMode, ITraction: integer;
+procedure TVehicleProfile.FromCds(const ACDS: TClientDataSet; const AModel: TGarminModel);
+
+  function CDSField(AFieldName: string): Variant;
+  var
+    AField: TField;
+  begin
+    result := Unassigned;
+    AField := ACDS.FindField(AFieldName);
+    if (AField = nil) then
+      exit;
+
+    if (ContainsText(AFieldName, 'UID')) then
+      result := AField.DisplayText
+    else
+      result := AField.Value;
+  end;
+
+begin
+  Self := Default(TVehicleProfile);
+  Vehicle_Id := CDSField('Vehicle_id');
+  TruckType := CDSField('truck_type');
+  Name := CDSField('name');
+  GUID := CDSField('guid');
+  AdventurousLevel := CDSField('adventurous_route_mode');
+  Environmental := CDSField('environmental');
+  Traction := CDSField('traction');
+  Calc_Method := CDSField('calc_method');
+  Max_Speed := CDSField('max_vehicle_speed');
+  Width := CDSField('width');
+  Imperial := (CDSField('width_metric') = 0);
+  Legality := CDSField('road_legality');
+  Modified := CDSField('modified_date');
+  valid := true;
+
+  Calculate_Proposed_Hash(AModel);
+end;
+
+function TVehicleProfile.Changed(IName, IGUID: string;
+                                 IVehicle_Id, ITruckType, ITraction: integer;
                                  IEnvironmental, ICalc_Method, ILegality: integer): boolean;
 begin
   result := (Name <> IName) or
             (GUID <> IGUID) or
             (Vehicle_Id <> IVehicle_Id) or
             (TruckType <> ITruckType) or
-            (TransportMode <> ITransportMode) or
             (Traction <> ITraction) or
             (Environmental <> IEnvironmental) or
             (Calc_Method <> ICalc_Method);
@@ -328,7 +434,6 @@ begin
                     IVehicleProfile.GUID,
                     IVehicleProfile.Vehicle_Id,
                     IVehicleProfile.TruckType,
-                    IVehicleProfile.TransportMode,
                     IVehicleProfile.Traction,
                     IVehicleProfile.Environmental,
                     IVehicleProfile.Calc_Method,
@@ -643,13 +748,13 @@ begin
   end;
 end;
 
-function GetVehicleProfile(const DbName: string;
-                           const Model: TGarminModel): TVehicleProfile;
+function GetActiveVehicleProfile(const DbName: string;
+                                 const Model: TGarminModel): TVehicleProfile;
 var
   SqlResults: TSqlResults;
   ALine: TSqlResult;
 begin
-  FillChar(result, SizeOf(result), 0);
+  result := Default(TVehicleProfile);
   SqlResults := TSqlResults.Create;
   try
     try
@@ -659,9 +764,9 @@ begin
           ExecSqlQuery(DbName,
             'select v.vehicle_id, v.truck_type, v.name,' + CRLF +
             'Hex(g.description) as Guid_Data,' + CRLF +
-            'v.vehicle_type, v.transport_mode, v.adventurous_route_mode,' + CRLF +
+            'v.adventurous_route_mode, v.traction, v.road_legality, v.width_metric, v.modified_date,' + CRLF +
             'e.value as Env_Data,' + CRLF +
-            'v.calc_method, v.max_vehicle_speed, v.traction, v.width, v.width_metric, v.road_legality' + CRLF +
+            'v.calc_method, v.max_vehicle_speed, v.width' + CRLF +
             'from properties_dbg act' + CRLF +
             'join vehicle_profile v on (v.vehicle_id = act.value)' + CRLF +
             'join properties_dbg g on (g.value = act.value and g."description:1" = ''guid'')' + CRLF +
@@ -670,8 +775,8 @@ begin
             'limit 1;',
             SqlResults);
         else
-          ExecSqlQuery(DbName,
-            'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.vehicle_type, v.transport_mode, v.adventurous_route_mode' + CRLF +
+          ExecSqlQuery(DbName,  // XT2
+            'select v.vehicle_id, v.truck_type, v.name, Hex(v.guid_data), v.adventurous_route_mode, v.traction, v.road_legality, v.width_metric, v.modified_date' + CRLF +
             'from active_vehicle a' + CRLF +
             'join vehicle_profile v on (a.vehicle_id = v.vehicle_id)' + CRLF +
             'limit 1;',
@@ -680,25 +785,24 @@ begin
 
       for ALine in SqlResults do
       begin
-        if (ALine.Count < 7) then
+        if (ALine.Count < 9) then
           exit;
         result.Valid            := true;
         result.Vehicle_Id       := Aline[0];
         result.TruckType        := Aline[1];
-        result.Name             := Utf8String(VarToStr(Aline[2]));
-        result.GUID             := Utf8String(MkGuid(VarToStr(Aline[3])));
-        result.VehicleType      := ALine[4];
-        result.TransportMode    := ALine[5];
-        result.AdventurousLevel := ALine[6];
-        if (ALine.Count > 13) then
+        result.Name             := VarToStr(Aline[2]);
+        result.GUID             := MkGuid(VarToStr(Aline[3]));
+        result.AdventurousLevel := ALine[4];
+        result.Traction         := ALine[5];
+        result.Legality         := ALine[6];
+        result.Imperial         := ALine[7] = 0;
+        result.Modified         := ALine[8];
+        if (ALine.Count > 12) then
         begin
-          result.Environmental  := ALine[7];
-          result.Calc_Method    := ALine[8];
-          result.Max_Speed      := ALine[9];
-          result.Traction       := ALine[10];
-          result.Width          := ALine[11];
-          result.Imperial       := ALine[12] = 0;
-          result.Legality       := ALine[13];
+          result.Environmental  := ALine[9];
+          result.Calc_Method    := ALine[10];
+          result.Max_Speed      := ALine[11];
+          result.Width          := ALine[12];
         end;
         result.Calculate_Proposed_Hash(Model);
         break;
@@ -710,5 +814,36 @@ begin
     ShowMessage(E.Message);
   end;
 end;
+
+function GetAllVehicleProfilesQuery(const Model: TGarminModel): string;
+begin
+  case Model of
+    TGarminModel.Tread2,
+    TGarminModel.XT3:
+      result :=
+        'select' + CRLF +
+        '(select act."description:1" from properties_dbg act where act.value = v.vehicle_id and act."description:1" = ''active_profile'' ) as Status, ' + CRLF +
+        'g.description as GUID, ' + CRLF +
+        'e.value as Environmental,' + CRLF +
+        'v.*' + CRLF +
+        'from vehicle_profile v' + CRLF +
+        'join properties_dbg g on (g.value = v.vehicle_id and g."description:1" = ''guid'') ' + CRLF +
+        'join properties_dbg e on (e.key_id = g.key_id and e."description:1" like ''environmental%'')' + CRLF +
+        'order by Status desc';
+    else
+      result :=
+        'select' + CRLF +
+        '(select ''active_profile'' from active_vehicle a where a.vehicle_id = v.vehicle_id) as Status, ' + CRLF +
+        'v.Guid_Data as GUID, ' + CRLF +
+        'v.*' + CRLF +
+        'from vehicle_profile v'
+  end;
+end;
+
+initialization
+  FCDSEvents := TCDSEvents.Create;
+
+finalization
+  FCDSEvents.Free;
 
 end.

@@ -51,6 +51,7 @@ object FrmSendTo: TFrmSendTo
       ReadOnly = True
       TabOrder = 0
       StyleElements = [seFont, seBorder]
+      ExplicitWidth = 586
     end
   end
   object GrpSelDestination: TGroupBox
@@ -118,6 +119,7 @@ object FrmSendTo: TFrmSendTo
           ReadOnly = True
           TabOrder = 0
           StyleElements = [seFont, seBorder]
+          ExplicitWidth = 578
         end
       end
       object TabFolder: TTabSheet
@@ -164,7 +166,7 @@ object FrmSendTo: TFrmSendTo
       AlignWithMargins = True
       Left = 7
       Top = 19
-      Width = 3
+      Width = 578
       Height = 15
       Margins.Left = 5
       Margins.Top = 2
@@ -183,6 +185,7 @@ object FrmSendTo: TFrmSendTo
       Layout = tlCenter
       WordWrap = True
       StyleElements = [seBorder]
+      ExplicitWidth = 3
     end
   end
   object GrpModel: TGroupBox
@@ -235,7 +238,7 @@ object FrmSendTo: TFrmSendTo
         Left = 200
         Top = 1
         Width = 387
-        Height = 19
+        Height = 23
         Align = alRight
         Style = csDropDownList
         TabOrder = 0
@@ -248,6 +251,7 @@ object FrmSendTo: TFrmSendTo
           
             'Preserve route to track + locations + route prefs (BC, XT2/Tread' +
             ' 2 only)')
+        ExplicitLeft = 198
       end
     end
   end
@@ -267,6 +271,8 @@ object FrmSendTo: TFrmSendTo
     OnCheckStateChanging = TvSelectionsCheckStateChanging
     OnCollapsing = TvSelectionsCollapsing
     OnHint = TvSelectionsHint
+    ExplicitWidth = 590
+    ExplicitHeight = 274
   end
   object PnlBot: TPanel
     Left = 0

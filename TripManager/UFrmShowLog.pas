@@ -72,7 +72,7 @@ var
 
 function CoordsFromData(AnObject: TObject): TCoords;
 begin
-  FillChar(result, SizeOf(result), 0);
+  result := Default(TCoords);
   if (AnObject = nil) then
     exit;
 

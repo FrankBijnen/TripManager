@@ -169,6 +169,9 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="UFrmEditRoutePref.pas">
             <Form>FrmEditRoutePref</Form>
         </DCCReference>
+        <DCCReference Include="UfrmVehProfiles.pas">
+            <Form>FrmVehProfiles</Form>
+        </DCCReference>
         <DCCReference Include="..\CommonUnits\UnitRegistry.pas"/>
         <DCCReference Include="..\CommonUnits\BCHex\BCHexEditor.pas"/>
         <DCCReference Include="..\CommonUnits\DirMon\Monitor.pas"/>
@@ -183,6 +186,8 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="..\CommonUnits\UnitGeoCode.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpi.pas"/>
         <DCCReference Include="..\CommonUnits\UnitStringUtils.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitDSFields.pas"/>
+        <DCCReference Include="..\CommonUnits\UnitHotLabel.pas"/>
         <DCCReference Include="..\CommonUnits\UnitTripDefs.pas"/>
         <DCCReference Include="..\CommonUnits\UnitGpxDefs.pas"/>
         <DCCReference Include="..\CommonUnits\UnitTripObjects.pas"/>
@@ -202,7 +207,9 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="..\CommonUnits\UnitTripOverview.pas"/>
         <DCCReference Include="..\CommonUnits\UnitRedirect.pas"/>
         <DCCReference Include="..\CommonUnits\UnitMapUtils.pas"/>
-        <DCCReference Include="..\CommonUnits\Mtp\UnitBaseMTP.pas"/>
+        <DCCReference Include="..\CommonUnits\Mtp\UnitBaseMTP.pas">
+            <Form>$R *.res</Form>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

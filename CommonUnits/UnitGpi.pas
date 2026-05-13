@@ -530,7 +530,7 @@ end;
 
 procedure TMainRec.Read(S: TBufferedFileStream; var ExtraRec: TExtraRec);
 begin
-  FillChar(ExtraRec, SizeOf(ExtraRec), 0);
+  ExtraRec := Default(TExtraRec);
 
   Read(S);
 
@@ -856,11 +856,8 @@ begin
   BitMapRd := TBitMapReader.Create;
   try
     try
-      BitMapRd.Load(TGPXString(
-                      string(GPXBitMap.GpiSymbolsDir) +
-                      ChangeFileExt(
-                        StringReplace(string(GPXBitMap.Bitmap), '/', '_', [rfReplaceAll]),
-                        '.bmp')));
+      BitMapRd.Load(string(GPXBitMap.GpiSymbolsDir) +
+                           ChangeFileExt(StringReplace(string(GPXBitMap.Bitmap), '/', '_', [rfReplaceAll]), '.bmp'));
     except on E:Exception do
       begin
         ShowMessage(E.Message);

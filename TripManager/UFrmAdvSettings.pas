@@ -38,6 +38,7 @@ type
     GridTripOverview: TStringGrid;
     TabKurviger: TTabSheet;
     GridKurviger: TStringGrid;
+    BtnLoadHash: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -53,18 +54,16 @@ type
     procedure BtnCurrentClick(Sender: TObject);
     procedure PctMainResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure BtnLoadHashClick(Sender: TObject);
   private
     { Private declarations }
     SamplePlace: TObject;
     procedure GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
-    function GetSampleDataItem(const ABase: TObject): string;
-    function GetSampleItem(const KeyName: ShortString): string;
-    function GetSampleLocationItem(const ClassName: string): string;
     procedure LookupSamplePlace(UseCache: boolean);
     procedure ValidateApiKey;
     procedure LoadSettings_General;
     procedure LoadSettings_Device;
-    procedure LoadSettings_XT2;
+    procedure LoadSettings_Zumo;
     procedure LoadSettings_Kurviger;
     procedure LoadSettings_TripOverview;
     procedure LoadSettings_GeoCode;
@@ -73,8 +72,8 @@ type
     procedure SaveSettings;
   public
     { Public declarations }
+    ProfileHashList: TStringList;
     CurrentDevice: Tobject;
-    SampleTrip: TObject;
     SampleLat: string;
     SampleLon: string;
   end;
@@ -86,8 +85,10 @@ implementation
 
 uses
   System.UITypes, System.StrUtils, System.Math,
-  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UNitModelConv, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
-  UnitGeoCode, UnitOSMMap;
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitModelConv, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
+  UnitGeoCode, UnitOSMMap,
+  TripManager_Grid,
+  UfrmVehProfiles;
 
 {$R *.dfm}
 
@@ -106,39 +107,6 @@ begin
   MemoAddressFormat.Lines.Add('municipality,city,town,village,hamlet');
 end;
 
-procedure AddGridHeader(const AGrid: TStringGrid);
-begin
-  AGrid.FixedRows := 1;
-  AGrid.Cells[0, 0] := 'Registry Key';
-  AGrid.Cells[1, 0] := 'Description';
-  AGrid.Cells[2, 0] := 'Value';
-end;
-
-procedure AddGridLine(const AGrid: TStringGrid; var ARow: integer; const AKey: string;
-                      DefaultValue: string = ''; ADesc: string = '');
-var
-  ACardinal: Cardinal;
-  RegKey, SubKey: string;
-begin
-  AGrid.Cells[0, ARow] := AKey;
-  AGrid.Cells[1, ARow] := ADesc;
-  RegKey := AKey;
-  if (Pos('\', RegKey) > 0) then
-    SubKey := NextField(RegKey, '\')
-  else
-    SubKey := '';
-  AGrid.Cells[2, ARow] := GetRegistry(RegKey, DefaultValue, SubKey);
-
-  if (Startstext('0x', AGrid.Cells[2, ARow])) and
-     (Startstext('Date: ', AGrid.Cells[1, ARow])) then
-  begin
-    ACardinal := StrToIntDef('$' + Copy(AGrid.Cells[2, ARow], 3), 0);
-    AGrid.Cells[1, ARow] := 'Date: ' + TUnixDateConv.CardinalAsDateTimeString(ACardinal);
-  end;
-
-  ARow := ARow + 1;
-end;
-
 procedure TFrmAdvSettings.LoadSettings_General;
 var
   CurRow: integer;
@@ -153,7 +121,7 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  Reg_Maximized_Key,
                                               'False',
                                               'Start TripManager maximized');
-    AddGridLine(GridGeneralSettings, CurRow,  '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '');
 
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Tracks-');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MinDistTrackPoints,
@@ -162,7 +130,7 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MinTimeTrackPoints,
                                               '60',
                                               'Minimum time Auto Stops (seconds)');
-    AddGridLine(GridGeneralSettings, CurRow,  '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '');
 
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Compare-');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_CompareDistOK_Key,
@@ -171,11 +139,11 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MinShapeDist_Key,
                                               IntToStr(Reg_MinShapeDist_Val),
                                               'Minimum distance added Shaping points (meters)');
-    AddGridLine(GridGeneralSettings, CurRow,  '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_Trk2RtOptions_Key,
                                               Reg_Trk2RtOptions_Val,
                                               'Trk2Rt CMDline Options');
-    AddGridLine(GridGeneralSettings, CurRow,  '');
+    AddGridLine(GridGeneralSettings, CurRow,  '', '');
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Map display-');
     AddGridLine(GridGeneralSettings, CurRow,  Reg_MapTilerApi_Key,
                                               '',
@@ -230,7 +198,7 @@ begin
                                       'False',
                                       'Enable Explore');
 
-    AddGridLine(GridDeviceSettings,   CurRow, '');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '');
 
     SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
 
@@ -251,7 +219,7 @@ begin
     AddGridLine(GridDeviceSettings,   CurRow, Reg_PrefFileSysFolder_Key,
                                       Reg_PrefFileSysFolder_Val,
                                       'Last used Windows folder');
-    AddGridLine(GridDeviceSettings,   CurRow, '');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '');
 
     AddGridLine(GridDeviceSettings,   CurRow, '', '',
                                       '-Creating Way point files (*.gpx)-');
@@ -264,7 +232,7 @@ begin
     AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncWayPointShape,
                                       'False',
                                       'Add Shaping points from route');
-    AddGridLine(GridDeviceSettings,   CurRow, '');
+    AddGridLine(GridDeviceSettings,   CurRow, '', '');
 
     AddGridLine(GridDeviceSettings,   CurRow, '', '', '-Creating Poi files (*.gpi)-');
     AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncGpiWayPt,
@@ -292,7 +260,7 @@ begin
   end;
 end;
 
-procedure TFrmAdvSettings.LoadSettings_XT2;
+procedure TFrmAdvSettings.LoadSettings_Zumo;
 var
   CurRow: integer;
 begin
@@ -303,41 +271,30 @@ begin
 
     CurRow := 1;
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_ScPosn_Unknown1,
-                                            '0');
-    AddGridLine(GridZumoSettings, CurRow,   '');
+    AddGridLine(GridZumoSettings, CurRow,   '', '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
                                             'True',
                                             'Group trips from the same GPX');
-    AddGridLine(GridZumoSettings, CurRow,   '');
+    AddGridLine(GridZumoSettings, CurRow,   '', '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2/XT3 trips-');
     AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
                                             '',
                                             'Date: ');
+    AddGridLine(GridZumoSettings, CurRow,   '', '');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
+                                            'True', 'Load active profile on connect');
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleId,
+                                            XT2_VehicleId);
+    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileName,
+                                            XT2_VehicleProfileName);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileGuid,
                                             XT2_VehicleProfileGuid);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileHash,
                                             '0');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleId,
-                                            XT2_VehicleId);
     AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,
                                             XT2_VehicleProfileTruckType,
                                             '7=Motorcycle, 11=Car');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleCalcMethod,
-                                            '0',
-                                            '(0=Faster, 1=Shorter, 4=Straight, 7=Adventurous)');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleEnvironmental,
-                                            '0',
-                                            '(0=Avoid, 1=Allow, 2=Ask)');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleTraction,
-                                            '0',
-                                            '(1=2WD, 2=4WD, 3=3 Wheels, 4=2 Wheels)');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleLegality,
-                                            '2',
-                                            '(0=Not legal, 1=Not highway legal, 2=Legal');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileName,
-                                            XT2_VehicleProfileName);
     AddGridLine(GridZumoSettings, CurRow,   Reg_DefAdvLevel,
                                             IntToStr(Ord(TAdvlevel.advLevel2)),
                                             'Default Adventurous Level (1-4)');
@@ -361,19 +318,19 @@ begin
 
     CurRow := 1;
     AddGridLine(GridKurviger, CurRow,  '', '', '-Kurviger parameters-');
-    AddGridLine(GridKurviger, CurRow,  '');
+    AddGridLine(GridKurviger, CurRow,  '', '');
     AddGridLine(GridKurviger, CurRow,  Reg_KurvigerUrl_Key,
                                        Reg_KurvigerUrl_Val,
                                        'Kurviger URL');
     AddGridLine(GridKurviger, CurRow,  '', '', 'en=English, de=Deutsch, nl=Nederlands');
     AddGridLine(GridKurviger, CurRow,  '', '', 'fr=Français, es=Español, it=Italiano');
-    AddGridLine(GridKurviger, CurRow,  '');
+    AddGridLine(GridKurviger, CurRow,  '', '');
     AddGridLine(GridKurviger, CurRow,  Reg_KurvigerCurvature,
                                        IntToStr(3),
                                        'Default Curvature Level (1-4)');
     AddGridLine(GridKurviger, CurRow,  '', '', '1=Fastest, 2=Fast and curvy, 3=Curvy, 4=Extra curvy');
     AddGridLine(GridKurviger, CurRow,  '', '', '5=All curvy route modes (Not implemented)');
-    AddGridLine(GridKurviger, CurRow,  '');
+    AddGridLine(GridKurviger, CurRow,  '', '');
 
     AddGridLine(GridKurviger, CurRow,  '', '', '-Avoidances-');
     AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidSame,
@@ -395,7 +352,7 @@ begin
                                        'False',
                                        'Unpaved roads');
 
-    AddGridLine(GridKurviger, CurRow,  '');
+    AddGridLine(GridKurviger, CurRow,  '', '');
     GridKurviger.RowCount := CurRow;
     AddGridHeader(GridKurviger);
 
@@ -418,7 +375,7 @@ begin
     AddGridLine(GridTripOverview, CurRow,  Reg_EnableTripOverview,
                                               'False',
                                               'Create detailed CSV (Only for BC calculated GPX)');
-    AddGridLine(GridTripOverview, CurRow,  '');
+    AddGridLine(GridTripOverview, CurRow,  '', '');
     AddGridLine(GridTripOverview, CurRow,  '', '', '-Road Speeds (kmh)-');
     AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key + '_01',
                                               '108',
@@ -459,7 +416,7 @@ begin
     AddGridLine(GridTripOverview, CurRow,   Reg_RoadSpeed_Key,
                                               '25',
                                               'All others');
-    AddGridLine(GridTripOverview, CurRow,  '');
+    AddGridLine(GridTripOverview, CurRow,  '', '');
 
     GridTripOverview.RowCount := CurRow;
     AddGridHeader(GridTripOverview);
@@ -506,61 +463,10 @@ procedure TFrmAdvSettings.LoadSettings;
 begin
   LoadSettings_General;
   LoadSettings_Device;
-  LoadSettings_XT2;
+  LoadSettings_Zumo;
   LoadSettings_Kurviger;
   LoadSettings_TripOverview;
   LoadSettings_GeoCode;
-end;
-
-function TFrmAdvSettings.GetSampleDataItem(const ABase: TObject): string;
-begin
-  result := '';
-
-  if (ABase is TUnixDate) then
-    result := '0x' + IntTohex(TUnixDate(ABase).AsUnixDateTime, 8)
-  else if (ABase is TmScPosn) then
-    result := '0x' + IntTohex(TmScPosn(ABase).Unknown1, 8)
-  else if (ABase is TBaseDataItem) then
-    result := TBaseDataItem(ABase).AsString;
-end;
-
-
-function TFrmAdvSettings.GetSampleItem(const KeyName: ShortString): string;
-var
-  ABase: TBaseItem;
-begin
-  result := '';
-
-  if (SampleTrip <> nil) and
-     (SampleTrip is TTripList) then
-  begin
-    ABase := TTripList(SampleTrip).GetItem('m' + KeyName);
-    if (ABase <> nil) then
-      result := GetSampleDataItem(ABase);
-  end;
-end;
-
-function TFrmAdvSettings.GetSampleLocationItem(const ClassName: string): string;
-var
-  Alocation: Tlocation;
-  ANItem: TBaseItem;
-begin
-  result := '';
-
-  if (SampleTrip <> nil) and
-     (SampleTrip is TTripList) then
-  begin
-    Alocation := TTripList(SampleTrip).GetRoutePoint(0);
-    if (Alocation <> nil) then
-    begin
-      for ANItem in Alocation.LocationItems do
-      begin
-        if (ANItem is TBaseDataItem) and
-           (ANItem.ClassName = ClassName) then
-          exit(GetSampleDataItem(ANItem));
-      end;
-    end;
-  end;
 end;
 
 procedure TFrmAdvSettings.GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
@@ -612,36 +518,15 @@ end;
 procedure TFrmAdvSettings.PctMainResize(Sender: TObject);
 var
   SpaceLeft: integer;
-  Margin: integer;
-
-  procedure AlignGrid(AGrid: TStringGrid);
-  var
-    Index: integer;
-    CurCol: integer;
-    LastCol: integer;
-    SpaceNeeded: integer;
-  begin
-    LastCol := SpaceLeft;
-    for CurCol := 0 to AGrid.ColCount -2 do
-    begin
-      SpaceNeeded := 0;
-      for Index := 0 to AGrid.RowCount do
-        SpaceNeeded := Max(SpaceNeeded, AGrid.Canvas.TextWidth(AGrid.Cells[CurCol, Index]) + Margin);
-      AGrid.ColWidths[CurCol] := SpaceNeeded;
-      Dec(LastCol, SpaceNeeded);
-    end;
-    AGrid.ColWidths[AGrid.ColCount -1] := LastCol;
-  end;
 
 begin
-  Margin := ScaleValue(10);
   SpaceLeft := TPageControl(Sender).ClientWidth - GetSystemMetrics(SM_CXVSCROLL);
-  AlignGrid(GridGeneralSettings);
-  AlignGrid(GridDeviceSettings);
-  AlignGrid(GridZumoSettings);
-  AlignGrid(GridKurviger);
-  AlignGrid(GridTripOverview);
-  AlignGrid(GridGeoCodeSettings);
+  AlignGrid(GridGeneralSettings, SpaceLeft);
+  AlignGrid(GridDeviceSettings, SpaceLeft);
+  AlignGrid(GridZumoSettings, SpaceLeft);
+  AlignGrid(GridKurviger, SpaceLeft);
+  AlignGrid(GridTripOverview, SpaceLeft);
+  AlignGrid(GridGeoCodeSettings, SpaceLeft);
 end;
 
 procedure TFrmAdvSettings.SaveGrid(AGrid: TStringGrid);
@@ -703,16 +588,77 @@ begin
 end;
 
 procedure TFrmAdvSettings.BtnCurrentClick(Sender: TObject);
+var
+  F: TFrmVehProfiles;
 begin
-  SetRegistry(Reg_ScPosn_Unknown1,              GetSampleLocationItem(TmScPosn.ClassName));
-  SetRegistry(Reg_VehicleProfileGuid,           GetSampleItem(Reg_VehicleProfileGuid));
-  SetRegistry(Reg_VehicleProfileHash,           GetSampleItem(Reg_VehicleProfileHash));
-  SetRegistry(Reg_VehicleId,                    GetSampleItem(Reg_VehicleId));
-  SetRegistry(Reg_VehicleProfileTruckType,      GetSampleItem(Reg_VehicleProfileTruckType));
-  SetRegistry(Reg_VehicleProfileName,           GetSampleItem(Reg_VehicleProfileName));
-  SetRegistry(Reg_AvoidancesChangedTimeAtSave,  GetSampleItem(Reg_AvoidancesChangedTimeAtSave));
+  SaveSettings;
 
-  LoadSettings_XT2;
+  F := TFrmVehProfiles.Create(nil);
+  try
+    if (F.ShowModal = idOK) then
+    begin
+      SetRegistry(Reg_VehicleId,                    F.VehicleProfile.Vehicle_Id);
+      SetRegistry(Reg_VehicleProfileName,           F.VehicleProfile.Name);
+      SetRegistry(Reg_VehicleProfileGuid,           F.VehicleProfile.GUID);
+      SetRegistry(Reg_VehicleProfileHash,           F.VehicleProfile.Proposed_Hash);
+      SetRegistry(Reg_VehicleProfileTruckType,      F.VehicleProfile.TruckType);
+    end;
+ finally
+    F.Free;
+  end;
+  LoadSettings_Zumo;
+end;
+
+procedure TFrmAdvSettings.BtnLoadHashClick(Sender: TObject);
+var
+  Index: integer;
+  TripDirMask, TripDir: string;
+  Fs: TSearchRec;
+  Rc: integer;
+  TmpTripList: TTripList;
+  ScanGuid: string;
+  NewHash: cardinal;
+begin
+  SaveSettings;
+
+  NewHash := 0;
+  ScanGuid := GetRegistry(Reg_VehicleProfileGuid, '');
+  Index := ProfileHashList.IndexOf(ScanGuid);
+  if (Index > -1) then
+    NewHash := Cardinal(ProfileHashList.Objects[Index])
+  else
+  begin
+    TripDir := GetRegistry(Reg_PrefFileSysFolder_Key, '');
+    if (SelectDirectoryOrFile('Scan for VehicleProfileHash in Directory or File', '', TripDir) = false) then
+      exit;
+
+    if (FileExists(TripDir)) then
+      TripDirMask := TripDir
+    else
+      TripDirMask := IncludeTrailingPathDelimiter(TripDir) + TripMask;
+    TripDir := ExtractFilePath(TripDirMask);
+
+    TmpTripList := TTripList.Create;
+    try
+      Rc := System.Sysutils.FindFirst(TripDirMask, faAnyFile, Fs);
+      while (Rc = 0) and
+            (NewHash = 0) do
+      begin
+        TmpTripList.LoadFromFile(TripDir + Fs.Name);
+        if (TmpTripList.VehicleGUID = ScanGuid) then
+          NewHash := TmpTripList.VehicleHash;
+        Rc := FindNext(Fs);
+      end;
+      FindClose(Fs);
+    finally
+      TmpTripList.Free;
+    end;
+  end;
+  if (NewHash = 0) then
+    ShowMessage('No suitable trips found!')
+  else
+    SetRegistry(Reg_VehicleProfileHash, NewHash);
+  LoadSettings_Zumo;
 end;
 
 procedure TFrmAdvSettings.Clear1Click(Sender: TObject);
@@ -745,6 +691,10 @@ begin
   LoadSettings;
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   MemoAddressFormatChange(MemoAddressFormat);
+
+  BtnCurrent.Enabled := TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0))) and
+                        FileExists(GetDeviceTmp + ProfileDb);
+
 end;
 
 end.

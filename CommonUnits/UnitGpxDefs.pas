@@ -91,7 +91,7 @@ begin
       Lon := StrToFloat(Find('lon').Value, FormatSettings);
     end;
   except
-    FillChar(Self, SizeOf(Self), 0);
+    Self := Default(TCoords);
   end;
 end;
 

@@ -558,9 +558,9 @@ begin
   SVal := PVal;
 end;
 
-procedure DateToPropVar(DateTime: TDateTime; var PropVarValue:Tag_Inner_PROPVARIANT);
+procedure DateToPropVar(DateTime: TDateTime; var PropVarValue: Tag_Inner_PROPVARIANT);
 begin
-  FillChar(PropVarValue, sizeof(PropVarValue), 0);
+  PropVarValue := Default(Tag_Inner_PROPVARIANT);
   PropVarValue.vt := 7;
 {$IFDEF USE_WINAPI_PROPVARIANT}
   PropVarValue.date := DateTime;
@@ -1010,7 +1010,7 @@ var
   Dev_Val: PortableDeviceApiLib_TLB._tagpropertykey;
 begin
   result := false;
-  FillChar(File_Info, SizeOf(File_Info), 0);
+  File_Info := Default(TFile_Info);
 
   //Get object prop.
   Prop.GetSupportedProperties(ObjId, Keys);

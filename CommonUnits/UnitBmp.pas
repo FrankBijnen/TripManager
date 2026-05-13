@@ -49,7 +49,7 @@ TBitMapReader = class
   ColPat: array of byte;
   ScanLines: array of byte;
   constructor Create;
-  procedure Load(ABitMap: UTF8String);
+  procedure Load(ABitMap: string);
   destructor Destroy; override;
 end;
 
@@ -60,7 +60,7 @@ begin
   inherited;
 end;
 
-procedure TBitMapReader.Load(ABitMap: UTF8String);
+procedure TBitMapReader.Load(ABitMap: string);
 var F: file;
     Idstr: TIDString;
     Y, RowLength: integer;

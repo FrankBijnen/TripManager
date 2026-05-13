@@ -434,29 +434,26 @@ begin
   if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
-    OldVehicle_Profile.GUID             := UTF8String(GetRegistry(Reg_VehicleProfileGuid, ''));
+    OldVehicle_Profile.GUID             := GetRegistry(Reg_VehicleProfileGuid, '');
     OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
     OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
-    OldVehicle_Profile.Name             := UTF8String(GetRegistry(Reg_VehicleProfileName, ''));
-    OldVehicle_Profile.VehicleType      := GetRegistry(Reg_VehicleType, 0);
-    OldVehicle_Profile.TransportMode    := GetRegistry(Reg_VehicleTransportMode, 0);
+    OldVehicle_Profile.Name             := GetRegistry(Reg_VehicleProfileName, '');
     OldVehicle_Profile.Traction         := GetRegistry(Reg_VehicleTraction, 0);
     OldVehicle_Profile.Calc_Method      := GetRegistry(Reg_VehicleCalcMethod, 0);
     OldVehicle_Profile.Environmental    := GetRegistry(Reg_VehicleEnvironmental, 0);
     OldVehicle_Profile.Legality         := GetRegistry(Reg_VehicleLegality, 2);
 
-    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
+    NewVehicle_Profile := GetActiveVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
 
-    if (NewVehicle_Profile.Valid) and
+    if (GetRegistry(Reg_LoadActiveProfile, true)) and
+       (NewVehicle_Profile.Valid) and
        (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
     begin
       // Update Vehicle profile
-      SetRegistry(Reg_VehicleProfileGuid,       string(NewVehicle_Profile.GUID));
+      SetRegistry(Reg_VehicleProfileGuid,       NewVehicle_Profile.GUID);
       SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id);
       SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType);
-      SetRegistry(Reg_VehicleProfileName,       string(NewVehicle_Profile.Name));
-      SetRegistry(Reg_VehicleType,              NewVehicle_Profile.VehicleType);
-      SetRegistry(Reg_VehicleTransportMode,     NewVehicle_Profile.TransportMode);
+      SetRegistry(Reg_VehicleProfileName,       NewVehicle_Profile.Name);
       SetRegistry(Reg_VehicleTraction,          NewVehicle_Profile.Traction);
       SetRegistry(Reg_VehicleCalcMethod,        NewVehicle_Profile.Calc_Method);
       SetRegistry(Reg_VehicleEnvironmental,     NewVehicle_Profile.Environmental);

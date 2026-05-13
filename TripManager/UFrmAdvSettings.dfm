@@ -3,8 +3,8 @@ object FrmAdvSettings: TFrmAdvSettings
   Top = 0
   BorderStyle = bsSizeToolWin
   Caption = 'Advanced settings'
-  ClientHeight = 658
-  ClientWidth = 621
+  ClientHeight = 675
+  ClientWidth = 615
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,17 +18,17 @@ object FrmAdvSettings: TFrmAdvSettings
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 627
-    Width = 621
+    Top = 644
+    Width = 615
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
     DesignSize = (
-      621
+      615
       31)
     object BtnOK: TButton
-      Left = 451
+      Left = 403
       Top = 3
       Width = 75
       Height = 25
@@ -39,7 +39,7 @@ object FrmAdvSettings: TFrmAdvSettings
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 538
+      Left = 490
       Top = 3
       Width = 75
       Height = 25
@@ -53,9 +53,9 @@ object FrmAdvSettings: TFrmAdvSettings
   object PctMain: TPageControl
     Left = 0
     Top = 0
-    Width = 621
-    Height = 627
-    ActivePage = TabGeneral
+    Width = 615
+    Height = 644
+    ActivePage = TabZumo
     Align = alClient
     TabHeight = 25
     TabOrder = 1
@@ -65,8 +65,8 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridGeneralSettings: TStringGrid
         Left = 0
         Top = 0
-        Width = 613
-        Height = 592
+        Width = 607
+        Height = 609
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -89,8 +89,8 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridDeviceSettings: TStringGrid
         Left = 0
         Top = 0
-        Width = 613
-        Height = 592
+        Width = 607
+        Height = 609
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -113,8 +113,8 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridZumoSettings: TStringGrid
         Left = 0
         Top = 33
-        Width = 613
-        Height = 559
+        Width = 607
+        Height = 576
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -140,18 +140,27 @@ object FrmAdvSettings: TFrmAdvSettings
       object PnlZumoFuncs: TPanel
         Left = 0
         Top = 0
-        Width = 613
+        Width = 607
         Height = 33
         Align = alTop
         TabOrder = 1
         object BtnCurrent: TButton
           Left = 2
           Top = 2
-          Width = 137
+          Width = 167
           Height = 25
-          Caption = 'Values from loaded trip'
+          Caption = 'Load from Vehicle_Profile.db'
           TabOrder = 0
           OnClick = BtnCurrentClick
+        end
+        object BtnLoadHash: TButton
+          Left = 175
+          Top = 2
+          Width = 167
+          Height = 25
+          Caption = 'Lookup Hash in trips'
+          TabOrder = 1
+          OnClick = BtnLoadHashClick
         end
       end
     end
@@ -160,8 +169,8 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridKurviger: TStringGrid
         Left = 0
         Top = 0
-        Width = 613
-        Height = 592
+        Width = 607
+        Height = 609
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -190,8 +199,8 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridTripOverview: TStringGrid
         Left = 0
         Top = 0
-        Width = 613
-        Height = 592
+        Width = 607
+        Height = 609
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -219,8 +228,8 @@ object FrmAdvSettings: TFrmAdvSettings
       Caption = 'GeoCode settings'
       object Splitter1: TSplitter
         Left = 0
-        Top = 289
-        Width = 613
+        Top = 306
+        Width = 607
         Height = 3
         Cursor = crVSplit
         Align = alBottom
@@ -229,15 +238,15 @@ object FrmAdvSettings: TFrmAdvSettings
       end
       object PnlAddressFormat: TPanel
         Left = 0
-        Top = 292
-        Width = 613
+        Top = 309
+        Width = 607
         Height = 300
         Align = alBottom
         TabOrder = 0
         object MemoAddressFormat: TMemo
           Left = 1
           Top = 36
-          Width = 611
+          Width = 605
           Height = 93
           Align = alTop
           Lines.Strings = (
@@ -249,7 +258,7 @@ object FrmAdvSettings: TFrmAdvSettings
         object PnlResult: TPanel
           Left = 1
           Top = 129
-          Width = 611
+          Width = 605
           Height = 35
           Align = alTop
           Caption = 'Result'
@@ -258,7 +267,7 @@ object FrmAdvSettings: TFrmAdvSettings
         object MemoResult: TMemo
           Left = 1
           Top = 164
-          Width = 611
+          Width = 605
           Height = 135
           Align = alClient
           Lines.Strings = (
@@ -270,7 +279,7 @@ object FrmAdvSettings: TFrmAdvSettings
         object PnlAddressFormatTop: TPanel
           Left = 1
           Top = 1
-          Width = 611
+          Width = 605
           Height = 35
           Align = alTop
           Caption = 'Address format'
@@ -289,8 +298,8 @@ object FrmAdvSettings: TFrmAdvSettings
       object GridGeoCodeSettings: TStringGrid
         Left = 0
         Top = 33
-        Width = 613
-        Height = 256
+        Width = 607
+        Height = 273
         Align = alClient
         ColCount = 3
         DefaultColWidth = 230
@@ -310,7 +319,7 @@ object FrmAdvSettings: TFrmAdvSettings
       object PnlGeoCodeFuncs: TPanel
         Left = 0
         Top = 0
-        Width = 613
+        Width = 607
         Height = 33
         Align = alTop
         TabOrder = 2

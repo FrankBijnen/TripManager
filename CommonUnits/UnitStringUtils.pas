@@ -48,6 +48,9 @@ function GetDeviceTmp: string;
 procedure DeleteTempFiles(const ATempPath, AMask: string);
 function RemovePath(const ADir: string; const AFlags: FILEOP_FLAGS = FOF_NO_UI; Retries: integer = 3): boolean;
 function SelectDirectory(const ACaption: string; var ADirectory: string): boolean;
+function SelectDirectoryOrFile(const ACaption: string;
+                               const ARoot: WideString;
+                               var APath: string): boolean;
 function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
@@ -61,7 +64,7 @@ implementation
 
 uses
   System.Math, System.StrUtils, Winapi.ShlObj, Winapi.KnownFolders, Winapi.ActiveX,
-  Vcl.Forms, Vcl.Dialogs;
+  Vcl.Forms, Vcl.Dialogs, Vcl.FileCtrl;
 
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
@@ -271,7 +274,7 @@ begin
   begin
     result := IncludeTrailingPathDelimiter(StrPas(NameBuffer)) + IncludeTrailingPathDelimiter(Application.Title);
     CoTaskMemFree(NameBuffer);
-    if not DirectoryExists(result) then
+    if not System.Sysutils.DirectoryExists(result) then
       CreateDir(result);
   end;
 end;
@@ -298,16 +301,16 @@ begin
 
   // Strip .tmp from directory name, and create
   result := ChangeFileExt(result, '');
-  if not ForceDirectories(result) then
+  if not System.Sysutils.ForceDirectories(result) then
     raise Exception.Create(Format('Error creating: %s', [result]));
 
   // Save path name
   CreatedTempPath := IncludeTrailingPathDelimiter(result);
 
-  if not ForceDirectories(GetOSMTemp) then
+  if not System.Sysutils.ForceDirectories(GetOSMTemp) then
     raise Exception.Create(Format('Error creating: %s', [GetOSMTemp]));
 
-  if not ForceDirectories(GetRoutesTmp) then
+  if not System.Sysutils.ForceDirectories(GetRoutesTmp) then
     raise Exception.Create(Format('Error creating: %s', [GetRoutesTmp]));
 end;
 
@@ -408,12 +411,12 @@ var
   CurrentTry: integer;
 begin
   result := false;
-  if not(DirectoryExists(ADir)) then
+  if not(System.Sysutils.DirectoryExists(ADir)) then
     exit;
 
   CurrentTry := Retries;
   repeat
-    FillChar(ShOp, SizeOf(ShOp), 0);
+    ShOp := Default(TSHFileOpStruct);
     ShOp.Wnd := Application.Handle;
     ShOp.wFunc := FO_DELETE;
     ShOp.pFrom := PChar(ADir + #0);
@@ -551,6 +554,15 @@ begin
   end;
 end;
 
+function SelectDirectoryOrFile(const ACaption: string;
+                               const ARoot: WideString;
+                               var APath: string): boolean;
+begin
+  result := Vcl.FileCtrl.SelectDirectory(ACaption, ARoot, APath,
+              [TSelectDirExtOpt.sdNewFolder, TSelectDirExtOpt.sdShowEdit, TSelectDirExtOpt.sdNewUI, TSelectDirExtOpt.sdShowFiles],
+              nil);
+end;
+
 initialization
 begin
   FloatFormatSettings.ThousandSeparator := ',';
@@ -558,7 +570,6 @@ begin
 end;
 
 finalization
-
 begin
   RemovePath(CreatedTempPath);
 end;

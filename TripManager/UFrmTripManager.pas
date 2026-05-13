@@ -324,7 +324,6 @@ type
     procedure CheckandFixcurrentgpx1Click(Sender: TObject);
     procedure BgDeviceItemsTripsClick(Sender: TObject);
     procedure CmbSQliteTabsChange(Sender: TObject);
-    procedure CdsDeviceDbAfterOpen(DataSet: TDataSet);
     procedure CdsDeviceDbAfterScroll(DataSet: TDataSet);
     procedure DbgDeviceDbColEnter(Sender: TObject);
     procedure DBMemoDblClick(Sender: TObject);
@@ -364,6 +363,7 @@ type
     HexEditFile: string;
     SqlFile: string;
     ExploreList: TStringList;
+    ProfileHashList: TStringList;
 
     CurrentDevice: TBase_Device;
     FSavedParent: WideString;
@@ -423,8 +423,6 @@ type
     procedure LoadSqlFile(const FileName: string; const FromDevice: boolean);
     procedure FreeDeviceData(const TmpDevice: TBase_Device);
     procedure FreeDevices;
-    procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
-    procedure GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
     procedure ClearDeviceDbFiles;
     procedure RebuildTransportAndRoutePrefMenu;
     procedure RebuildDeviceDbMenu;
@@ -585,59 +583,6 @@ begin
   CurrentDevice := nil;
 end;
 
-procedure TFrmTripManager.GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
-begin
-  Text := ReplaceAll(Copy(Sender.AsString, 1, 1024), [#0, #9, #10], ['.', '.', ' ']);
-end;
-
-procedure TFrmTripManager.GetGUID(Sender: TField; var Text: string; DisplayText: Boolean);
-var
-  B: TBytes;
-  Index: integer;
-begin
-  Text := '';
-  B := Sender.AsBytes;
-  if Length(B) < 16 then
-    exit;
-  for Index := 0 to 3 do
-    Text := Text + IntToHex(B[Index], 2);
-  Text := text + '-';
-  for Index := 4 to 5 do
-    Text := Text + IntToHex(B[Index], 2);
-  Text := text + '-';
-  for Index := 6 to 7 do
-    Text := Text + IntToHex(B[Index], 2);
-  Text := text + '-';
-  for Index := 8 to 9 do
-    Text := Text + IntToHex(B[Index], 2);
-  Text := text + '-';
-  for Index := 10 to 15 do
-    Text := Text + IntToHex(B[Index], 2);
-  Text := LowerCase(Text);
-end;
-
-procedure TFrmTripManager.CdsDeviceDbAfterOpen(DataSet: TDataSet);
-var
-  AField: TField;
-begin
-  for AField in DataSet.Fields do
-  begin
-    if (AField is TBlobField) then
-    begin
-      if (ContainsText(Afield.FieldName, 'UID')) then
-      begin
-        AField.OnGetText := GetGUID;
-        Afield.DisplayWidth := 40;
-      end
-      else
-      begin
-        AField.OnGetText := GetBlob;
-        AField.Tag := 1;
-      end;
-    end;
-  end;
-end;
-
 procedure TFrmTripManager.CdsDeviceDbAfterScroll(DataSet: TDataSet);
 var
   AField: TField;
@@ -764,7 +709,8 @@ procedure TFrmTripManager.ActSettingsExecute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   FrmAdvSettings.CurrentDevice := CurrentDevice;
-  FrmAdvSettings.SampleTrip := ATripList;
+  FrmAdvSettings.ProfileHashList := ProfileHashList;
+
   if (Sender is TMenuItem) then
     FrmAdvSettings.PctMain.ActivePage := FrmAdvSettings.TabDevice;
 
@@ -2132,6 +2078,9 @@ begin
   TsExplore.TabVisible := false;
 
   ReadSettings;
+  ProfileHashList := TStringList.Create;
+  ProfileHashList.Sorted := true;
+  ProfileHashList.Duplicates := TDuplicates.dupIgnore;
 
   ATripList := TTripList.Create;
   APOIList := TPOIList.Create;
@@ -2157,6 +2106,7 @@ begin
       TGarminMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
   end;
   RebuildDeviceDbMenu;
+  CdsDeviceDb.AfterOpen := FCDSEvents.AfterOpen;
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -2164,6 +2114,7 @@ begin
   DirectoryMonitor.Free;
   ModifiedList.Free;
   ExploreList.Free;
+  ProfileHashList.Free;
 
   if not USBEvent.UnRegisterUSBHandler then
     ShowMessage('Failed to unregister USB Events');
@@ -3134,6 +3085,9 @@ begin
     // Save Explore UUID
     AMTP_Data.ExploreUUID := TmpTripList.ExploreUUID;
 
+    // Save ProfileHashList
+    ProfileHashList.AddObject(TmpTripList.VehicleGUID, TObject(TmpTripList.VehicleHash));
+
     // Show trip name
     AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
 
@@ -3163,6 +3117,8 @@ begin
                      (SbPostProcess.Panels[1].Text = '');
   if (CanUseStatusBar) then
     SbPostProcess.Panels[1].Text := 'Trip file checked';
+
+  ProfileHashList.Clear;
   try
     for AListItem in LstFiles.Items do
     begin

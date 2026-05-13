@@ -140,7 +140,6 @@ var
   Overlap: TOverlapped;
   Action: TDirectoryMonitorAction;
   FileNamePtr: PChar;
-
 begin
   if (FDirHandle = INVALID_HANDLE_VALUE) then
   begin
@@ -148,8 +147,7 @@ begin
     Writeln('FDirHandle = INVALID_HANDLE_VALUE');
     exit;
   end;
-
-  FillChar(Overlap, SizeOf(Overlap), 0);
+  Overlap := Default(TOverlapped);
   Overlap.hEvent := FChangeHandle;
   Events[0] := FChangeHandle;
   Events[1] := FShutdownHandle;

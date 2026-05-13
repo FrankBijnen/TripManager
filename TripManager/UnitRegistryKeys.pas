@@ -13,28 +13,29 @@ const
   Reg_MinDistTrackPoints          = 'MinDistTrackPoints'; // Used to filter trackpoints
   Reg_MinTimeTrackPoints          = 'MinTimeTrackPoints'; // Used to auto create waypoints from stops
 
-  // XT1 and XT2 and Tread 2
-  Reg_ScPosn_Unknown1             = 'ScPosn_Unknown1';
+  // XT1
   Reg_AllowGrouping               = 'AllowGrouping';
+
+  // XT1 and XT2 and XT3 and Tread 2
   Reg_TripOption                  = 'TripOption';
   Reg_DefAdvLevel                 = 'DefAdvLevel';
   Reg_MaxViaPoints_Key            = 'MaxViaPoints';
   Reg_MaxViaPoints_Val            = 31;
 
-  // XT2 and Tread 2
+  // XT2 and XT3 and Tread 2
+  Reg_LoadActiveProfile           = 'LoadActiveProfile';
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
   Reg_VehicleProfileHash          = 'VehicleProfileHash';
   Reg_VehicleId                   = 'VehicleId';
   Reg_VehicleProfileTruckType     = 'VehicleProfileTruckType';
   Reg_AvoidancesChangedTimeAtSave = 'AvoidancesChangedTimeAtSave';
   Reg_VehicleProfileName          = 'VehicleProfileName';
-  Reg_VehicleType                 = 'VehicleType';
-  Reg_VehicleTransportMode        = 'VehicleTransportMode';
   Reg_VehicleCalcMethod           = 'VehicleCalcMethod';
   Reg_VehicleEnvironmental        = 'VehicleEnvironmental';
   Reg_VehicleTraction             = 'VehicleTraction';
   Reg_VehicleLegality             = 'VehicleLegality';
 
+  // Post Processing
   Reg_ProcessBegin                = 'ProcessBegin';
   Reg_CurrentModel                = 'CurrentModel';
   Reg_BeginSymbol                 = 'BeginSymbol';
@@ -184,8 +185,7 @@ begin
     KurvigerAvoidNarrow := GetRegistry(Reg_KurvigerAvoidNarrow, false);
     KurvigerAvoidUnpaved := GetRegistry(Reg_KurvigerAvoidUnpaved, false);
 
-    // XT1 and XT2 Defaults
-    ScPosn_Unknown1 := StrToIntDef('$' + Copy(GetRegistry(Reg_ScPosn_Unknown1, ''), 3), 0);
+    // XT1, XT2, and XT3 Defaults
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
 
@@ -200,8 +200,7 @@ begin
     DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2)) -1);
 
     // GPI defaults
-    GpiSymbolsDir := Utf8String(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir +
-                       GetRegistry(Reg_GPISymbolSize, '80x80') + '\');
+    GpiSymbolsDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '80x80'));
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
     MinShapeDist := GetRegistry(Reg_MinShapeDist_Key, Reg_MinShapeDist_Val);

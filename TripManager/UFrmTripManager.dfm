@@ -459,7 +459,6 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
-    OnChange = PctHexOsmChange
     object TsHex: TTabSheet
       Caption = 'Hexadecimal display'
       object HexPanel: TPanel
@@ -695,7 +694,7 @@ object FrmTripManager: TFrmTripManager
         Margins.Bottom = 1
         Align = alClient
         TabOrder = 2
-        AllowSingleSignOnUsingOSPrimaryAccount = True
+        AllowSingleSignOnUsingOSPrimaryAccount = False
         TargetCompatibleBrowserVersion = '117.0.2045.28'
         UserDataFolder = '%LOCALAPPDATA%\bds.exe.WebView2'
         OnCreateWebViewCompleted = EdgeBrowser1CreateWebViewCompleted
@@ -1645,7 +1644,6 @@ object FrmTripManager: TFrmTripManager
   object CdsDeviceDb: TClientDataSet
     Aggregates = <>
     Params = <>
-    AfterOpen = CdsDeviceDbAfterOpen
     AfterScroll = CdsDeviceDbAfterScroll
     Left = 1053
     Top = 427

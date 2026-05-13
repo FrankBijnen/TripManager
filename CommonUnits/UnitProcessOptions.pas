@@ -114,7 +114,7 @@ type
     ProcessShapePtsInGpi: boolean;            // False, Add Shaping points to <Gpx_name>.gpi
                                               // Category 'Route:<Route_name>
     DefaultProximityStr: string;              // 500, Default proximity for alerts (meters)
-    GPISymbolsDir: UTF8String;                // Symbols\24x24\ Sets the size of the GPI Symbols
+    GPISymbolsDir: string;                    // Symbols\24x24\ Sets the size of the GPI Symbols
 
     ProcessDistance: boolean;                 // True, Compute distance. Added in KML, and name of shaping points
     DistanceUnit: TDistanceUnit;              // duKm, Kilometers.
@@ -143,7 +143,6 @@ type
 
     {$IFDEF TRIPOBJECTS}
     TripModel: TTripModel;                    // XT1 and XT2
-    ScPosn_Unknown1: Cardinal;                // XT1 and XT2
     VehicleProfileGuid: string;               // XT2
     VehicleProfileHash: string;               // XT2
     VehicleId: string;                        // XT2
@@ -293,7 +292,6 @@ begin
 
 {$IFDEF TRIPOBJECTS}
   TripModel := TTripModel.XT;
-  ScPosn_Unknown1 := 0;
   VehicleProfileGuid := XT2_VehicleProfileGuid;
   VehicleProfileHash := '0';
   VehicleId := XT2_VehicleId;

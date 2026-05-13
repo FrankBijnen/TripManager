@@ -82,7 +82,7 @@ type
 
     procedure ComputeDistance(RptNode: TXmlVSNode);
     procedure ClearSubClass(ANode: TXmlVSNode);
-    procedure UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName: UTF8String);
+    procedure UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName: string);
     procedure EnsureSubNodeAfter(ANode: TXmlVSNode; ChildNode: string; const AfterNodes: array of string);
     procedure RenameSubNode(RtePtNode: TXmlVSNode; const NodeName:string; const NewName: string);
     procedure LookUpAddrRtePt(RtePtNode: TXmlVSNode);
@@ -569,7 +569,7 @@ begin
   end;
 end;
 
-procedure TGPXfile.UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName: UTF8String);
+procedure TGPXfile.UnglitchNode(RtePtNode, ExtensionNode: TXmlVSNode; ViaPtName: string);
 var
   RptNode, DebugNode: TXmlVSNode;
   ViaPtCoord, NextCoord: TCoords;
@@ -1103,7 +1103,7 @@ begin
           ShapePtName := Format('%3.3d %s_%s', [Round(TotalDistance), Processoptions.DistanceStr, RouteName]);
       end;
 
-      UnglitchNode(RtePtNode, RtePtExtension, UTF8String(ShapePtName));
+      UnglitchNode(RtePtNode, RtePtExtension, ShapePtName);
 
       RenameNode(RtePtNode, ShapePtName);
 
@@ -1200,7 +1200,7 @@ begin
   NumberNode := nil;
   if (ProcessOptions.ProcessTracks) then
   begin
-    FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
+    PrevTrackCoords := Default(TCoords);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
     CurrentTrack.AddChild('desc').NodeValue := RteOrigin;
@@ -1263,7 +1263,7 @@ begin
 
   if (ProcessOptions.ProcessTracks) then
   begin
-    FillChar(PrevTrackCoords, SizeOf(PrevTrackCoords), 0);
+    PrevTrackCoords := Default(TCoords);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
     CurrentTrack.NodeValue := CurrentRouteTrackName;
     CurrentTrack.AddChild('desc').NodeValue := TrkOrigin;
@@ -1499,7 +1499,7 @@ end;
 
 function TGPXfile.GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
 begin
-  result := TGPXBitmap.Create(ProcessOptions.GPISymbolsDir);
+  result := TGPXBitmap.Create(TGPXString(ProcessOptions.GPISymbolsDir));
   result.Bitmap := TGPXString(FindSubNodeValue(WayPoint, 'sym'));
 end;
 
