@@ -4,8 +4,8 @@ object FrmVehProfiles: TFrmVehProfiles
   ActiveControl = GrdVehProfile
   BorderStyle = bsSizeToolWin
   Caption = 'Vehicle profiles'
-  ClientHeight = 695
-  ClientWidth = 740
+  ClientHeight = 761
+  ClientWidth = 849
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,6 +13,7 @@ object FrmVehProfiles: TFrmVehProfiles
   Font.Name = 'Segoe UI'
   Font.Style = []
   Position = poMainFormCenter
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnMouseWheel = FormMouseWheel
   OnResize = FormResize
@@ -20,17 +21,17 @@ object FrmVehProfiles: TFrmVehProfiles
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 664
-    Width = 740
+    Top = 730
+    Width = 849
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
     DesignSize = (
-      740
+      849
       31)
     object BtnOK: TButton
-      Left = 571
+      Left = 662
       Top = 3
       Width = 75
       Height = 25
@@ -41,7 +42,7 @@ object FrmVehProfiles: TFrmVehProfiles
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 658
+      Left = 749
       Top = 3
       Width = 75
       Height = 25
@@ -51,12 +52,22 @@ object FrmVehProfiles: TFrmVehProfiles
       ModalResult = 2
       TabOrder = 1
     end
+    object BtnUnitTest: TButton
+      Left = 16
+      Top = 2
+      Width = 75
+      Height = 25
+      Caption = 'Unit test'
+      TabOrder = 2
+      Visible = False
+      OnClick = BtnUnitTestClick
+    end
   end
   object PCTMain: TPageControl
     Left = 0
     Top = 0
-    Width = 740
-    Height = 664
+    Width = 849
+    Height = 730
     ActivePage = TabAllProfiles
     Align = alClient
     TabOrder = 0
@@ -65,11 +76,11 @@ object FrmVehProfiles: TFrmVehProfiles
       object GrdVehProfile: TDBGrid
         Left = 0
         Top = 0
-        Width = 732
+        Width = 841
         Height = 139
         Align = alTop
         DataSource = DsVehProfile
-        Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
+        Options = [dgEditing, dgAlwaysShowEditor, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgTitleClick, dgTitleHotTrack]
         ReadOnly = True
         TabOrder = 0
         TitleFont.Charset = DEFAULT_CHARSET
@@ -78,12 +89,47 @@ object FrmVehProfiles: TFrmVehProfiles
         TitleFont.Name = 'Segoe UI'
         TitleFont.Style = []
         OnDblClick = GrdVehProfileDblClick
+        Columns = <
+          item
+            Expanded = False
+            FieldName = 'Status'
+            Width = 96
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'Vehicle_Id'
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'Name'
+            Width = 200
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'Guid'
+            Width = 250
+            Visible = True
+          end
+          item
+            Alignment = taRightJustify
+            Expanded = False
+            FieldName = 'Proposed_Hash'
+            Visible = True
+          end
+          item
+            Expanded = False
+            FieldName = 'Truck_type'
+            Visible = True
+          end>
       end
       object PctDetails: TPageControl
         Left = 0
         Top = 139
-        Width = 732
-        Height = 495
+        Width = 841
+        Height = 561
         ActivePage = TabTripFiles
         Align = alClient
         TabOrder = 1
@@ -92,8 +138,8 @@ object FrmVehProfiles: TFrmVehProfiles
           object GridProfile: TStringGrid
             Left = 0
             Top = 0
-            Width = 724
-            Height = 465
+            Width = 833
+            Height = 531
             Align = alClient
             ColCount = 3
             DefaultColWidth = 230
@@ -105,7 +151,7 @@ object FrmVehProfiles: TFrmVehProfiles
             Font.Name = 'Segoe UI'
             Font.Style = []
             GradientEndColor = clMoneyGreen
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goFixedRowDefAlign]
+            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
             ParentFont = False
             TabOrder = 0
             StyleElements = []
@@ -123,15 +169,15 @@ object FrmVehProfiles: TFrmVehProfiles
           object ScrllAllFields: TScrollBox
             Left = 0
             Top = 0
-            Width = 724
-            Height = 465
+            Width = 833
+            Height = 531
             VertScrollBar.Tracking = True
             Align = alClient
             TabOrder = 0
             object PnlAllFields: TPanel
               Left = 0
               Top = 0
-              Width = 720
+              Width = 829
               Height = 313
               Align = alTop
               TabOrder = 0
@@ -147,6 +193,7 @@ object FrmVehProfiles: TFrmVehProfiles
     Aggregates = <>
     Params = <>
     ReadOnly = True
+    BeforePost = CDSVehProfileBeforePost
     AfterScroll = CDSVehProfileAfterScroll
     Left = 464
     Top = 80

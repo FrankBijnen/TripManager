@@ -23,7 +23,7 @@ uses
   UFrmNewTrip in 'UFrmNewTrip.pas' {FrmNewTrip},
   UFrmShowLog in 'UFrmShowLog.pas' {FrmShowLog},
   UFrmEditRoutePref in 'UFrmEditRoutePref.pas' {FrmEditRoutePref},
-  UfrmVehProfiles in 'UfrmVehProfiles.pas' {FrmVehProfiles},
+  UFrmVehProfiles in 'UFrmVehProfiles.pas' {FrmVehProfiles},
   UnitRegistryKeys,
   UnitRegistry in '..\CommonUnits\UnitRegistry.pas',
   BCHexEditor in '..\CommonUnits\BCHex\BCHexEditor.pas',

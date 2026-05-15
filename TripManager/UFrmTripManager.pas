@@ -8,6 +8,7 @@
 //TODO Add level for RoutePoints?
 {$DEFINE ROUTEPOINTSLEVEL}
 {.$DEFINE PROCESSMESSAGES}
+{.$DEFINE HASHDEBUG}
 
 interface
 
@@ -364,7 +365,9 @@ type
     SqlFile: string;
     ExploreList: TStringList;
     ProfileHashList: TStringList;
-
+{$IFDEF HASHDEBUG}
+    HashDebugList: TStringList;
+{$ENDIF}
     CurrentDevice: TBase_Device;
     FSavedParent: WideString;
     FSavedFolderId: WideString;
@@ -2082,6 +2085,12 @@ begin
   ProfileHashList.Sorted := true;
   ProfileHashList.Duplicates := TDuplicates.dupIgnore;
 
+{$IFDEF HASHDEBUG}
+  HashDebugList := TStringList.Create;
+  HashDebugList.Sorted := true;
+  HashDebugList.Duplicates := TDuplicates.dupIgnore;
+{$ENDIF}
+
   ATripList := TTripList.Create;
   APOIList := TPOIList.Create;
   AFitInfo := TStringList.Create;
@@ -2115,6 +2124,9 @@ begin
   ModifiedList.Free;
   ExploreList.Free;
   ProfileHashList.Free;
+{$IFDEF HASHDEBUG}
+  HashDebugList.Free;
+{$ENDIF}
 
   if not USBEvent.UnRegisterUSBHandler then
     ShowMessage('Failed to unregister USB Events');
@@ -3088,8 +3100,12 @@ begin
     // Save ProfileHashList
     TmpHash := TmpTripList.VehicleHash;
     if (TmpHash <> 0) then
+    begin
       ProfileHashList.AddObject(TmpTripList.VehicleGUID, TObject(TmpHash));
-
+{$IFDEF HASHDEBUG}
+      HashDebugList.AddObject(TmpTripList.TripName, TObject(TmpHash));
+{$ENDIF}
+    end;
     // Show trip name
     AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
 
@@ -3106,6 +3122,11 @@ var
   AListItem: TListItem;
   CrNormal,CrWait: HCURSOR;
   CanUseStatusBar, TripChecked: boolean;
+{$IFDEF HASHDEBUG}
+  Index: integer;
+  F: TextFile;
+  B2: string;
+{$ENDIF}
 begin
   if (GetRegistry(Reg_EnableTripFuncs, false) = false) then
     exit;
@@ -3121,6 +3142,9 @@ begin
     SbPostProcess.Panels[1].Text := 'Trip file checked';
 
   ProfileHashList.Clear;
+{$IFDEF HASHDEBUG}
+  HashDebugList.Clear;
+{$ENDIF}
   try
     for AListItem in LstFiles.Items do
     begin
@@ -3137,6 +3161,21 @@ begin
     StatusTimer.Enabled := false;
     StatusTimer.Enabled := true;
   end;
+
+{$IFDEF HASHDEBUG}
+  AssignFile(F, 'c:\temp\hashes.txt');
+  Rewrite(F);
+  for Index := 0 to HashDebugList .Count -1 do
+  begin
+    B2 := IntTohex(integer(HashDebugList.Objects[Index]), 8);
+    Insert(' ', B2, 7);
+    Insert(' ', B2, 6);
+    Writeln(F, Integer(HashDebugList.Objects[Index]),
+               #9, '0x', B2,
+               #9, HashDebugList[Index]);
+  end;
+  CloseFile(F);
+{$ENDIF}
 end;
 
 procedure TFrmTripManager.RecreateTrips;

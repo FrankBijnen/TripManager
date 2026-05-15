@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls, Vcl.Menus,
-  Unit_StringGrid;
+  UnitStringGrid;
 
 type
   TFrmAdvSettings = class(TForm)
@@ -58,7 +58,7 @@ type
   private
     { Private declarations }
     SamplePlace: TObject;
-    procedure GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
+    procedure GridModified(Sender: TObject; ACol, ARow: LongInt; var Value: string);
     procedure LookupSamplePlace(UseCache: boolean);
     procedure ValidateApiKey;
     procedure LoadSettings_General;
@@ -88,7 +88,7 @@ uses
   UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitModelConv, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
   UnitGeoCode, UnitOSMMap,
   TripManager_Grid,
-  UfrmVehProfiles;
+  UFrmVehProfiles;
 
 {$R *.dfm}
 
@@ -469,7 +469,7 @@ begin
   LoadSettings_GeoCode;
 end;
 
-procedure TFrmAdvSettings.GridModified(Sender: TObject; ACol, ARow: LongInt; const Value: string);
+procedure TFrmAdvSettings.GridModified(Sender: TObject; ACol, ARow: LongInt; var Value: string);
 begin
   if (TStringGrid(Sender).Cells[0, Arow] = '') then
     TStringGrid(Sender).Cells[2, Arow] := ''
