@@ -12,9 +12,11 @@ object FrmVehProfiles: TFrmVehProfiles
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  KeyPreview = True
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyPress = FormKeyPress
   OnMouseWheel = FormMouseWheel
   OnResize = FormResize
   OnShow = FormShow
@@ -31,24 +33,24 @@ object FrmVehProfiles: TFrmVehProfiles
       849
       31)
     object BtnOK: TButton
-      Left = 662
+      Left = 650
       Top = 3
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Caption = 'OK'
-      Default = True
       ModalResult = 1
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 749
+      Left = 737
       Top = 3
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
       Cancel = True
       Caption = 'Cancel'
+      Default = True
       ModalResult = 2
       TabOrder = 1
     end
@@ -59,7 +61,6 @@ object FrmVehProfiles: TFrmVehProfiles
       Height = 25
       Caption = 'Unit test'
       TabOrder = 2
-      Visible = False
       OnClick = BtnUnitTestClick
     end
   end

@@ -75,11 +75,17 @@ type
     Hash4WD: Cardinal;
   end;
 
+var
+  VehicleTruckTypeDesc: array[TVehicleTruckType] of string = ('MotorCycle', '' ,'' ,'', 'Car');
+  TractionDesc: array[TTraction] of string = ('2WD', '4WD' ,'3 Wheels' ,'2 Wheels');
+  ProfCalcMethodDesc: array[TProfCalcMethod] of string = ('Faster', 'Shorter', '', '', 'Straight', '', '', 'Adventurous');
+
 const
 
   XT3_Environments: array[0..15, TRoadLegality, TProfEnvironment] of Cardinal =
     (
       // Not legal, Not implemented          Not Highway legal                  Legal
+      // Avoid      Allow      Ask           Avoid      Allow      Ask          Avoid      Allow      Ask
       ( ($00000000, $00000000, $00000000),  ($00000000, $00000000, $00000000), ($00000000, $00000000, $00000000) ), // 0 Not implemented
       ( ($00000000, $00000000, $00000000),  ($00000000, $00000000, $00000000), ($00000000, $00000000, $00000000) ), // 1 Not implemented
       ( ($00000000, $00000000, $00000000),  ($00000000, $00000000, $00000000), ($00000000, $00000000, $00000000) ), // 2 Not implemented
