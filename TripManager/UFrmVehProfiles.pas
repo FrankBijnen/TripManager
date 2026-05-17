@@ -78,13 +78,12 @@ type
 
   const
     BoolValues: array[boolean] of string =        ('False', 'True');
-    NoSpeedsMSec: array[0..0] of integer =        (0); //MSec
     SpeedsMSec: array[0..3] of integer =          (0, 138, 222, 277); //MSec
     Speeds: array[0..3] of integer =              (0,  50,  80, 100); //Kmh
     Widths3W: array[0..7] of integer =            (110, 120, 125, 130, 140, 150, 155, 170);
     WidthsMetric: array[0..0] of integer =        (120);
     WidthsImperial: array[0..0] of integer =      (122);
-    CarWidthsMetric: array[0..0] of integer =     (200);
+    CarWidthsMetric: array[0..8] of integer =     (150, 155, 170, 185, 190, 200, 215, 220, 230);
     CarWidthsImperial: array[0..0] of integer =   (198);
 
   var
@@ -105,16 +104,8 @@ type
     P.Traction := Ord(Traction);
     P.Imperial := Imperial;
 
-    if (TruckType = TVehicleTruckType.ttCar) then
-    begin
-      SetLength(SpeedsArray, Length(NoSpeedsMSec));
-      MoveMemory(@SpeedsArray[0], @NoSpeedsMSec, SizeOf(NoSpeedsMSec));
-    end
-    else
-    begin
-      SetLength(SpeedsArray, Length(SpeedsMSec));
-      MoveMemory(@SpeedsArray[0], @SpeedsMSec, SizeOf(SpeedsMSec));
-    end;
+    SetLength(SpeedsArray, Length(SpeedsMSec));
+    MoveMemory(@SpeedsArray[0], @SpeedsMSec, SizeOf(SpeedsMSec));
 
     if (Traction = TTraction.tr3Wheels) then
     begin

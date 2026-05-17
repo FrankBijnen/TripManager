@@ -313,5 +313,8 @@ begin
   RegDeleteValue(HKCU, RegKey, 'PrefDeviceGpxFolder');
   RegDeleteValue(HKCU, RegKey, 'PrefDevicePoiFolder');
   RegDeleteValue(HKCU, RegKey, 'ExtShape');
-  
+  RegDeleteValue(HKCU, RegKey, 'VehicleType');
+  RegDeleteValue(HKCU, RegKey, 'VehicleTransportMode');
+  RegDeleteValue(HKCU, RegKey, 'ScPosn_Unknown1');
+
 end;

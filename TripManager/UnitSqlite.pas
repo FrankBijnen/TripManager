@@ -45,8 +45,10 @@ type
     Proposed_Hash: cardinal;
     function HashSpeed1: cardinal;
     function HashSpeed2: cardinal;
-    function HashSpeed3: cardinal;
-    function HashCarSpeed: cardinal;
+    function HashSpeed3Bike: cardinal;
+    function HashSpeed2Bike: cardinal;
+    function HashSpeed2Car: cardinal;
+    function HashSpeed3Car: cardinal;
     procedure Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
     procedure Calculate_Proposed_Car_Hash(const Model: TGarminModel);
     procedure Calculate_Proposed_Hash(const Model: TGarminModel);
@@ -82,7 +84,7 @@ var
 
 const
 
-  XT3_Environments: array[0..15, TRoadLegality, TProfEnvironment] of Cardinal =
+  XT3_Environments: array[0..$f, TRoadLegality, TProfEnvironment] of Cardinal =
     (
       // Not legal, Not implemented          Not Highway legal                  Legal
       // Avoid      Allow      Ask           Avoid      Allow      Ask          Avoid      Allow      Ask
@@ -100,7 +102,7 @@ const
       ( ($00000000, $00000000, $00000000),  ($00004000, $00005000, $00006000), ($00007000, $00006000, $00005000) ), // b
       ( ($00000000, $00000000, $00000000),  ($00003000, $00002000, $00001000), ($00000000, $00001000, $00002000) ), // c
       ( ($00000000, $00000000, $00000000),  ($00002000, $00003000, $00000000), ($00001000, $00000000, $00003000) ), // d
-      ( ($00000000, $00000000, $00000000),  ($00002000, $00003000, $00000000), ($00001000, $00000000, $00003000) ), // e
+      ( ($00000000, $00000000, $00000000),  ($00001000, $00000000, $00003000), ($00002000, $00003000, $00000000) ), // e
       ( ($00000000, $00000000, $00000000),  ($00000000, $00000000, $00000000), ($00000000, $00000000, $00000000) )  // f Not implemented
     );
 
@@ -239,7 +241,7 @@ end;
 
 function TVehicleProfile.HashSpeed2: cardinal;
 const
-  Speed2Tab: array[0..15, 0..15] of byte =
+  Speed2Tab: array[0..$f, 0..$f] of byte =
     (
       ($7  ,$6  ,$5  ,$4  ,$3  ,$2  ,$1  ,$0  ,$f  ,$e  ,$d  ,$c  ,$b  ,$a  ,$9  ,$8),   // 0x90  =144
       ($6  ,$7  ,$4  ,$5  ,$2  ,$3  ,$0  ,$1  ,$e  ,$f  ,$c  ,$d  ,$a  ,$b  ,$8  ,$9),   // 0x91
@@ -262,14 +264,22 @@ begin
   result := (Speed2Tab[Byte(Width) and $0f, (Max_Speed and $000000f0) shr 4]) shl 8;
 end;
 
-function TVehicleProfile.HashSpeed3: cardinal;
+function TVehicleProfile.HashSpeed2Bike: cardinal;
+begin
+  result := HashSpeed2 + HashSpeed3Bike;
+end;
+
+function TVehicleProfile.HashSpeed2Car: cardinal;
+begin
+  result := HashSpeed2 + HashSpeed3Car;
+end;
+
+function TVehicleProfile.HashSpeed3Bike: cardinal;
 const
-  Speed3TabImperial: array[0..15] of byte =
-   ($0e, $0f, $0c, $0d, $0a, $0b, $08, $09, $06, $07, $04, $05, $02, $03, $00, $01);
-//  0=e  1=f  2=c  3=d  4=a  5=b  6=8  7=9  8=6  9=7  a=4  b=5  c=2  d=3  e=0  f=1
-  Speed3TabMetric: array[0..15] of byte =
-   ($02, $03, $00, $01, $06, $07, $04, $05, $0a, $0b, $08, $09, $0e, $0f, $0c, $0d);
-//  0=2  1=3  2=0  3=1  4=6  5=7  6=4  7=5  8=a  9=b  a=8  b=9  c=e  d=f  e=c  f=d
+  Speed3TabImperial: array[0..$f] of byte =
+   ($e, $f, $c, $d, $a, $b, $8, $9, $6, $7, $4, $5, $2, $3, $0, $1);
+  Speed3TabMetric: array[0..$f] of byte =
+   ($2, $3, $0, $1, $6, $7, $4, $5, $a, $b, $8, $9, $e, $f, $c, $d);
 begin
   if (Imperial) then
     result := (Speed3TabImperial[Max_Speed and $0000000f]) shl 4
@@ -277,13 +287,18 @@ begin
     result := (Speed3TabMetric[Max_Speed and $0000000f]) shl 4;
 end;
 
-// For cars no speed restriction possible
-function TVehicleProfile.HashCarSpeed: cardinal;
+//TODO only element 0, 5, $e have been verified. Need more tests
+function TVehicleProfile.HashSpeed3Car: cardinal;
+const
+  Speed3TabImperial: array[0..$f] of byte =
+   ($d, $c, $f, $e, $9, $8, $b, $a, $5, $4, $7, $6, $1, $0, $3, $2);
+  Speed3TabMetric: array[0..$f] of byte =
+   ($1, $0, $3, $2, $5, $4, $7, $6, $9, $8, $b, $a, $d, $c, $f, $e);
 begin
   if (Imperial) then
-    result := $1D0
+    result := (Speed3TabImperial[Max_Speed and $0000000f]) shl 4
   else
-    result := $F10;
+    result := (Speed3TabMetric[Max_Speed and $0000000f]) shl 4;
 end;
 
 procedure TVehicleProfile.Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
@@ -304,6 +319,8 @@ begin
      (Width > $ef) then
       exit;
   HWidth := (Byte(Width) and $f0) shr 4;
+  if (HWidth > $d) then  // max width 223
+    HWidth := $d;
 
   // Valid Environmental value
   if not (Environmental in [Ord(TProfEnvironment.enAvoid),
@@ -338,9 +355,8 @@ begin
             Proposed_Hash := XT3_Motor_Hashes[Index].HashT3 or
                                 XT3_Environments[HWidth, TRoadLegality(Legality), TProfEnvironment(Environmental)];
 
-          Proposed_Hash := Proposed_Hash +  HashSpeed1;
-          Proposed_Hash := Proposed_Hash or HashSpeed2;
-          Proposed_Hash := Proposed_Hash or HashSpeed3;
+          Proposed_Hash := Proposed_Hash + HashSpeed1;
+          Proposed_Hash := Proposed_Hash + HashSpeed2Bike;
           break;
         end;
       end;
@@ -352,22 +368,18 @@ var
   Index: integer;
   HWidth: byte;
 begin
-  if (Max_Speed <> 0) then
-    exit;
-
   // Only 2WD and 4WD, 2 Axles
   if not (Traction in [Ord(TTraction.tr2WD), Ord(TTraction.tr4WD)]) then
     exit;
 
-  // Only width allowed are 200 and 198
-  if (Imperial = false) and
-     (Width <> 200) then
-    exit;
+  // Need more tests
+  if (Width < $60) or
+     (Width > $ef) then
+      exit;
 
-  if (Imperial = true) and
-     (Width <> 198) then
-    exit;
   HWidth := (Byte(Width) and $f0) shr 4;
+  if (HWidth > $e) then  // max width 239
+    HWidth := $e;
 
   // Valid Environmental value
   if not (Environmental in [Ord(TProfEnvironment.enAvoid),
@@ -408,7 +420,8 @@ begin
               Proposed_Hash := XT3_Car_Hashes[Index].Hash2WD or
                                   XT3_Environments[HWidth, TRoadLegality(Legality), TProfEnvironment(Environmental)];
           end;
-          Proposed_Hash := Proposed_Hash + HashCarSpeed;
+          Proposed_Hash := Proposed_Hash + HashSpeed1;
+          Proposed_Hash := Proposed_Hash + HashSpeed2Car;
           break;
         end;
       end;
