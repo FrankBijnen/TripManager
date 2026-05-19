@@ -120,7 +120,7 @@ end;
 
 procedure SetRegistry(const Name: string; Value: boolean; const SubKey: string = '');
 begin
-  SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, SubApplicationKey(SubKey), BooleanValues[Value]);
+  SetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, BooleanValues[Value]);
 end;
 
 procedure SetRegistry(const Name: string; Value: integer; const SubKey: string = '');
