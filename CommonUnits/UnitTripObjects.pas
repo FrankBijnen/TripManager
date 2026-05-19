@@ -966,6 +966,7 @@ type
     function GetTripName: string;
     function GetIsCalculated: boolean;
     function GetExploreUUID: string;
+    function GetVehicleProfileName: string;
     function GetVehicleGUID: string;
     function GetVehicleHash: cardinal;
     function GetTripModel: TTripModel;
@@ -1112,6 +1113,7 @@ type
     property TripName: string read GetTripName;
     property ExploreUUID: string read GetExploreUUID;
     property VehicleGUID: string read GetVehicleGUID;
+    property VehicleProfileName: string read GetVehicleProfileName;
     property VehicleHash: cardinal read GetVehicleHash;
     property TripModel: TTripModel read FTripModel write SetTripModel;
     property ModelDescription: string read FModelDescription;
@@ -5697,6 +5699,11 @@ end;
 function TTripList.GetExploreUUID: string;
 begin
   result := GetValue('mExploreUuid');
+end;
+
+function TTripList.GetVehicleProfileName: string;
+begin
+  result := GetValue('mVehicleProfileName');
 end;
 
 function TTripList.GetVehicleGUID: string;

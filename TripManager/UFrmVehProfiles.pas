@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Datasnap.DBClient, Vcl.Grids,
   Vcl.DBGrids, Vcl.StdCtrls, Vcl.Mask, Vcl.ExtCtrls,
   UnitGpxDefs, Vcl.ComCtrls,
-  UnitDSFields, UnitSqlite, UnitStringGrid;
+  UnitDSFields, UnitSqlite, UnitVehProfile, UnitStringGrid;
 
 type
   TFrmVehProfiles = class(TForm)
@@ -26,6 +26,7 @@ type
     PnlAllFields: TPanel;
     ScrllAllFields: TScrollBox;
     BtnUnitTest: TButton;
+    BtnLookupHash: TButton;
     procedure FormShow(Sender: TObject);
     procedure CDSVehProfileAfterScroll(DataSet: TDataSet);
     procedure FormResize(Sender: TObject);
@@ -39,16 +40,21 @@ type
     procedure BtnUnitTestClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure BtnLookupHashClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure GridProfileKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
     InScroll: boolean;
     FDSFields: TDSFields;
     AModel: TGarminModel;
+    procedure SetOverridden_Hash(const NewHash: cardinal);
     procedure GrdModified(Sender: TObject; ACol, ARow: Longint; var Value: string);
     procedure LoadProfiles;
     procedure LoadProfile;
   public
     { Public declarations }
+    ProfileHashList: TStringList;
     VehicleProfile: TVehicleProfile;
   end;
 
@@ -60,7 +66,7 @@ implementation
 uses
   System.StrUtils, System.TypInfo,
   UnitStringUtils, UnitModelConv, UnitRegistry, UnitregistryKeys,
-  UnitTripDefs, TripManager_Grid;
+  UnitTripDefs, UnitTripObjects, TripManager_Grid;
 
 {$R *.dfm}
 
@@ -536,6 +542,66 @@ begin
   CloseFile(F);
 end;
 
+procedure TFrmVehProfiles.SetOverridden_Hash(const NewHash: cardinal);
+begin
+  if not (CDSVehProfile.State in [dsEdit, dsInsert]) then
+    CDSVehProfile.Edit;
+  CDSVehProfile.FieldByName('Overridden_Hash').AsInteger := NewHash;
+  CDSVehProfile.Post;
+  LoadProfile;
+  ShowMessage(Format('Hash set to %d for profile: %s', [NewHash, CDSVehProfile.FieldByName('Name').AsString]));
+end;
+
+procedure TFrmVehProfiles.BtnLookupHashClick(Sender: TObject);
+var
+  Index: integer;
+  TripDirMask, TripDir: string;
+  Fs: TSearchRec;
+  Rc: integer;
+  TmpTripList: TTripList;
+  ScanGuid: string;
+  NewHash: cardinal;
+begin
+  NewHash := 0;
+  ScanGuid := CDSVehProfile.FieldByName('GUID').DisplayText;
+  Index := ProfileHashList.IndexOf(ScanGuid);
+  if (Index > -1) then
+    NewHash := Cardinal(ProfileHashList.Objects[Index])
+  else
+  begin
+    TripDir := GetRegistry(Reg_PrefFileSysFolder_Key, '');
+    if (SelectDirectoryOrFile('No suitable trips found on the device. Scan in Directory or File?', '', TripDir) = false) then
+      exit;
+
+    if (FileExists(TripDir)) then
+      TripDirMask := TripDir
+    else
+      TripDirMask := IncludeTrailingPathDelimiter(TripDir) + TripMask;
+    TripDir := ExtractFilePath(TripDirMask);
+
+    TmpTripList := TTripList.Create;
+    try
+      Rc := System.Sysutils.FindFirst(TripDirMask, faAnyFile, Fs);
+      while (Rc = 0) and
+            (NewHash = 0) do
+      begin
+        TmpTripList.LoadFromFile(TripDir + Fs.Name);
+        if (TmpTripList.VehicleGUID = ScanGuid) then
+          NewHash := TmpTripList.VehicleHash;
+        Rc := FindNext(Fs);
+      end;
+      FindClose(Fs);
+    finally
+      TmpTripList.Free;
+    end;
+  end;
+
+  if (NewHash <> 0) then
+    SetOverridden_Hash(NewHash)
+  else
+    ShowMessage('No suitable trips found!')
+end;
+
 procedure TFrmVehProfiles.CDSVehProfileAfterScroll(DataSet: TDataSet);
 begin
   if (Dataset.state in [dsBrowse]) then
@@ -548,6 +614,13 @@ var
 begin
   TmpProfile.FromCds(TClientDataset(DataSet), AModel);
   Dataset.FieldByName('Proposed_Hash').AsInteger := TmpProfile.Proposed_Hash;
+end;
+
+procedure TFrmVehProfiles.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  if (ModalResult = IdOK) and
+     (VehicleProfile.Proposed_Hash = 0) then
+    ShowMessage('Warning. VehicleProfileHash is 0!');
 end;
 
 procedure TFrmVehProfiles.FormCreate(Sender: TObject);
@@ -572,7 +645,8 @@ end;
 
 procedure TFrmVehProfiles.GrdModified(Sender: TObject; ACol, ARow: Longint; var Value: string);
 begin
-  Value := TStringGrid(Sender).Cells[ACol, ARow];
+  if (TStringGrid(Sender).Cells[0, ARow] <> Reg_VehicleProfileHash) then
+    Value := TStringGrid(Sender).Cells[ACol, ARow];
 end;
 
 procedure TFrmVehProfiles.FormMouseWheel(Sender: TObject; Shift: TShiftState;
@@ -607,6 +681,19 @@ begin
   ModalResult := mrOk;
 end;
 
+procedure TFrmVehProfiles.GridProfileKeyPress(Sender: TObject; var Key: Char);
+var
+  Sg: TStringGrid;
+begin
+  Sg := TStringGrid(Sender);
+  if (Key = #13) and
+     (Sg.Cells[0, Sg.Row] = Reg_VehicleProfileHash) then
+  begin
+    SetOverridden_Hash(StrToIntDef(Sg.Cells[2, Sg.Row], 0));
+    Key := #0;
+  end;
+end;
+
 procedure TFrmVehProfiles.LoadProfiles;
 begin
   AModel := TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0));
@@ -616,7 +703,7 @@ begin
   if not (FileExists(GetDeviceTmp + ProfileDb)) then
     exit;
   CDSVehProfile.AfterOpen := FCDSEvents.AfterOpen;
-  CDSFromQuery(GetDeviceTmp + ProfileDb, GetAllVehicleProfilesQuery(AModel), CDSVehProfile);
+  CDSFromQuery(GetDeviceTmp + ProfileDb, GetVehicleProfilesQuery(AModel), CDSVehProfile);
 end;
 
 procedure TFrmVehProfiles.PnlAllFieldsMouseEnter(Sender: TObject);
@@ -632,11 +719,15 @@ end;
 procedure TFrmVehProfiles.LoadProfile;
 var
   CurRow: integer;
+  OverriddenHash: cardinal;
 begin
   if not Assigned(FDSFields) then
     FDSFields := TDSFields.Create(PnlAllFields, DsVehProfile);
 
   VehicleProfile.FromCds(CDSVehProfile, AModel);
+  OverriddenHash := CDSVehProfile.FieldByName('Overridden_Hash').AsInteger;
+  if (OverriddenHash <> 0) then
+    VehicleProfile.Proposed_Hash := OverriddenHash;
   GridProfile.RowCount := GridProfile.FixedRows +1;
   GridProfile.BeginUpdate;
   try
@@ -646,37 +737,44 @@ begin
     AddGridValueLine(GridProfile, CurRow, Reg_VehicleId,               VehicleProfile.Vehicle_Id);
     AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileName,      VehicleProfile.Name);
     AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileGuid,      VehicleProfile.GUID);
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,      VehicleProfile.Proposed_Hash,
-                                          '(TripManager Proposed Hash)');
+
+    if (OverriddenHash <> 0) then
+      AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,      VehicleProfile.Proposed_Hash,
+                                            '(Hash overridden)')
+    else
+      AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,      VehicleProfile.Proposed_Hash,
+                                            '(Hash proposed by TripManager)');
+
     AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileTruckType, VehicleProfile.TruckType,
                                           '(7=Motorcycle, 11=Car)');
+    AddGridValueLine(GridProfile, CurRow, Reg_DefAdvLevel,             VehicleProfile.AdventurousLevel,
+                                          '(0=L1, 1=L2, 2=L3, 3=L4)');
 
     AddGridValueLine(GridProfile, CurRow, '', '');
     AddGridValueLine(GridProfile, CurRow, '', '', '-Items needed to compute Hash-');
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleTraction,         VehicleProfile.Traction,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleTraction,         VehicleProfile.Traction,
                                           '(1=2WD, 2=4WD, 3=3 Wheels, 4=2 Wheels)');
+
     if (CDSVehProfile.FindField('environmental') <> nil) then
-      AddGridValueLine(GridProfile, CurRow, Reg_VehicleEnvironmental,    VehicleProfile.Environmental,
+      AddGridValueLine(GridProfile, CurRow, Hash_VehicleEnvironmental,    VehicleProfile.Environmental,
                                             '(0=Avoid, 1=Allow, 2=Ask)');
 
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleLegality,         VehicleProfile.Legality,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleLegality,         VehicleProfile.Legality,
                                           '(0=Not legal, 1=Not highway legal, 2=Legal');
 
     if (CDSVehProfile.FindField('calc_method') <> nil) then
-      AddGridValueLine(GridProfile, CurRow, Reg_VehicleCalcMethod,       VehicleProfile.Calc_Method,
+      AddGridValueLine(GridProfile, CurRow, Hash_VehicleCalcMethod,       VehicleProfile.Calc_Method,
                                             '(0=Faster, 1=Shorter, 4=Straight, 7=Adventurous)');
 
-    AddGridValueLine(GridProfile, CurRow, Reg_DefAdvLevel,             VehicleProfile.AdventurousLevel,
-                                          '(0=L1, 1=L2, 2=L3, 3=L4)');
-    AddGridValueLine(GridProfile, CurRow, 'Max Speed',                 VehicleProfile.Max_Speed,
-                                          '(Meters/Sec.)');
-    AddGridValueLine(GridProfile, CurRow, 'Vehicle Width',             VehicleProfile.Width,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleMaxSpeed,               VehicleProfile.Max_Speed,
+                                          '(Decimeters/Sec.)');
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleWidth,           VehicleProfile.Width,
                                           '(Centimeters)');
-    AddGridValueLine(GridProfile, CurRow, 'Imperial',                  VehicleProfile.Imperial,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleImperial,        VehicleProfile.Imperial,
                                           '(True=Miles, False=Kms)');
-    AddGridValueLine(GridProfile, CurRow, 'High clearance',            VehicleProfile.Clearance,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleClearance,       VehicleProfile.Clearance,
                                           '');
-    AddGridValueLine(GridProfile, CurRow, 'Last modified',             Format('0x%s', [IntToHex(VehicleProfile.Modified, 8)]),
+    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileModified,  Format('0x%s', [IntToHex(VehicleProfile.Modified, 8)]),
                                           'Date: ');
 
     AddGridValueLine(GridProfile, CurRow,   '', '');
@@ -688,7 +786,6 @@ begin
     GridProfile.EndUpdate;
   end;
 end;
-
 
 end.
 

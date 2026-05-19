@@ -10,17 +10,17 @@ const
   BooleanValues: array[boolean] of string = ('False', 'True');
 
 function GetRegistry(const Name: string; const Default: string = ''; const SubKey: string = ''): string; overload;
-function GetRegistry(const Name: string; const Default: boolean): boolean; overload;
-function GetRegistry(const Name: string; const Default: integer): integer; overload;
-function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo): integer; overload;
+function GetRegistry(const Name: string; const Default: boolean; const SubKey: string = ''): boolean; overload;
+function GetRegistry(const Name: string; const Default: integer; const SubKey: string = ''): integer; overload;
+function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo; const SubKey: string = ''): integer; overload;
 {$IFNDEF VER350}
-function GetRegistry(const Name: string; const Default: TArray<string>): TArray<string>; overload;
+function GetRegistry(const Name: string; const Default: TArray<string>; const SubKey: string = ''): TArray<string>; overload;
 {$ENDIF}
 procedure SetRegistry(const Name, Value: string; const SubKey: string = ''); overload;
-procedure SetRegistry(const Name: string; Value: boolean); overload;
-procedure SetRegistry(const Name: string; Value: integer); overload;
+procedure SetRegistry(const Name: string; Value: boolean; const SubKey: string = ''); overload;
+procedure SetRegistry(const Name: string; Value: integer; const SubKey: string = ''); overload;
 {$IFNDEF VER350}
-procedure SetRegistry(const Name: string; Value: TArray<string>); overload;
+procedure SetRegistry(const Name: string; Value: TArray<string>; const SubKey: string = ''); overload;
 {$ENDIF}
 
 implementation
@@ -33,6 +33,13 @@ uses
 function ApplicationKey: string;
 begin
   result := 'Software\TDBware\' + Application.Title;
+end;
+
+function SubApplicationKey(const SubKey: string): string;
+begin
+  result := ApplicationKey;
+  if (SubKey <> '') then
+    result := result + '\' + ReplaceAll(SubKey, [':\'],  ['']);
 end;
 
 function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
@@ -54,43 +61,35 @@ begin
 end;
 
 function GetRegistry(const Name: string; const Default: string = ''; const SubKey: string = ''): string;
-var
-  KeyName: string;
 begin
-  KeyName := ApplicationKey;
-  if (SubKey <> '') then
-    KeyName := KeyName + '\' + ReplaceAll(SubKey, [':\'],  ['']);
-  result := GetRegistryValue(HKEY_CURRENT_USER, KeyName, Name, Default);
+  result := GetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, Default);
 end;
 
-function GetRegistry(const Name: string; const Default: boolean): boolean;
+function GetRegistry(const Name: string; const Default: boolean; const SubKey: string = ''): boolean;
 begin
-  result := SameText(GetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, BooleanValues[Default]), BooleanValues[True]);
+  result := SameText(GetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, BooleanValues[Default]), BooleanValues[True]);
 end;
 
-function GetRegistry(const Name: string; const Default: integer): integer;
+function GetRegistry(const Name: string; const Default: integer; const SubKey: string = ''): integer;
 begin
-  result := StrToint(GetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, IntToStr(Default)));
+  result := StrToIntDef(GetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, IntToStr(Default)), 0);
 end;
 
-function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo): integer;
+function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo; const SubKey: string = ''): integer;
 begin
-  result := GetEnumValue(AType, GetRegistry(Name, GetEnumName(AType, Default)));
+  result := GetEnumValue(AType, GetRegistry(Name, GetEnumName(AType, Default), SubKey));
 end;
 
 {$IFNDEF VER350}
-function GetRegistry(const Name: string; const Default: TArray<string>): TArray<string>; overload;
+function GetRegistry(const Name: string; const Default: TArray<string>; const SubKey: string = ''): TArray<string>; overload;
 var
   Registry: TRegistry;
-  KeyName: string;
 begin
   SetLength(result, 0);
-  KeyName := ApplicationKey;
-
   Registry := TRegistry.Create(KEY_READ);
   try
     Registry.RootKey := HKEY_CURRENT_USER;
-    if (Registry.OpenKey(KeyName, False)) then
+    if (Registry.OpenKey(SubApplicationKey(SubKey), False)) then
       result := Registry.ReadMultiString(Name);
   finally
     Registry.Free;
@@ -115,37 +114,29 @@ begin
 end;
 
 procedure SetRegistry(const Name, Value: string; const SubKey: string = '');
-var
-  KeyName: string;
 begin
-  KeyName := ApplicationKey;
-  if (SubKey <> '') then
-    KeyName := KeyName + '\' + ReplaceAll(SubKey, [':\'],  ['']);
-  SetRegistryValue(HKEY_CURRENT_USER, KeyName, Name, Value);
+  SetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, Value);
 end;
 
-procedure SetRegistry(const Name: string; Value: boolean);
+procedure SetRegistry(const Name: string; Value: boolean; const SubKey: string = '');
 begin
-  SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, BooleanValues[Value]);
+  SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, SubApplicationKey(SubKey), BooleanValues[Value]);
 end;
 
-procedure SetRegistry(const Name: string; Value: integer);
+procedure SetRegistry(const Name: string; Value: integer; const SubKey: string = '');
 begin
-  SetRegistryValue(HKEY_CURRENT_USER, ApplicationKey, Name, IntToStr(Value));
+  SetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, IntToStr(Value));
 end;
 
 {$IFNDEF VER350}
-procedure SetRegistry(const Name: string; Value: TArray<string>);
+procedure SetRegistry(const Name: string; Value: TArray<string>; const SubKey: string = '');
 var
   Registry: TRegistry;
-  KeyName: string;
 begin
-  KeyName := ApplicationKey;
-
   Registry := TRegistry.Create(KEY_WRITE);
   try
     Registry.RootKey := HKEY_CURRENT_USER;
-    Registry.OpenKey(KeyName, True);
+    Registry.OpenKey(SubApplicationKey(SubKey), True);
     Registry.WriteMultiString(Name, Value);
   finally
     Registry.Free;

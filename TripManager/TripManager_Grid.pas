@@ -15,7 +15,7 @@ procedure AddGridLine(const AGrid: TStringGrid;
 
 implementation
 uses
-  System.Math, System.StrUtils, System.SysUtils,
+  System.Math, System.StrUtils, System.SysUtils, System.Variants,
   UnitStringUtils, UnitRegistry, UnitTripDefs;
 
 procedure AlignGrid(AGrid: TStringGrid; SpaceLeft: integer);
@@ -72,12 +72,22 @@ procedure AddGridLine(const AGrid: TStringGrid;
 var
   RegKey, SubKey: string;
 begin
-  RegKey := AKey;
-  if (Pos('\', RegKey) > 0) then
-    SubKey := NextField(RegKey, '\')
+  if (AKey = '') then
+    AddGridValueLine(AGrid, ARow, AKey, '', ADesc)
   else
-    SubKey := '';
-  AddGridValueLine(AGrid, ARow, AKey, GetRegistry(RegKey, DefaultValue, SubKey), ADesc);
+  begin
+    RegKey := AKey;
+    if (Pos('\', RegKey) > 0) then
+      SubKey := NextField(RegKey, '\')
+    else
+      SubKey := '';
+    if (VarIsStr(DefaultValue)) then
+      AddGridValueLine(AGrid, ARow, AKey, GetRegistry(RegKey, VarToStr(DefaultValue), SubKey), ADesc)
+    else if (VarIsNumeric(DefaultValue)) then
+      AddGridValueLine(AGrid, ARow, AKey, GetRegistry(RegKey, integer(DefaultValue), SubKey), ADesc)
+    else if (VarIsOrdinal(DefaultValue)) then
+      AddGridValueLine(AGrid, ARow, AKey, GetRegistry(RegKey, boolean(DefaultValue), SubKey), ADesc)
+  end;
 end;
 
 end.

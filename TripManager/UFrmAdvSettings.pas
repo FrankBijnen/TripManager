@@ -38,7 +38,6 @@ type
     GridTripOverview: TStringGrid;
     TabKurviger: TTabSheet;
     GridKurviger: TStringGrid;
-    BtnLoadHash: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -54,7 +53,6 @@ type
     procedure BtnCurrentClick(Sender: TObject);
     procedure PctMainResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure BtnLoadHashClick(Sender: TObject);
   private
     { Private declarations }
     SamplePlace: TObject;
@@ -186,6 +184,7 @@ begin
   GridDeviceSettings.RowCount := GridDeviceSettings.FixedRows +1;
   GridDeviceSettings.BeginUpdate;
   try
+    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
 
     CurRow := 1;
 
@@ -199,8 +198,6 @@ begin
                                       'Enable Explore');
 
     AddGridLine(GridDeviceSettings,   CurRow, '', '');
-
-    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
 
     AddGridLine(GridDeviceSettings,   CurRow, '', '',
                                       Format('-Preferred folders (Model: %s)-', [SubKey]));
@@ -263,13 +260,17 @@ end;
 procedure TFrmAdvSettings.LoadSettings_Zumo;
 var
   CurRow: integer;
+  SubKey: string;
 begin
   GridZumoSettings.OnModified := GridModified;
   GridZumoSettings.RowCount := GridZumoSettings.FixedRows +1;
   GridZumoSettings.BeginUpdate;
   try
 
+    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+
     CurRow := 1;
+
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
     AddGridLine(GridZumoSettings, CurRow,   '', '');
     AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
@@ -282,22 +283,25 @@ begin
                                             '',
                                             'Date: ');
     AddGridLine(GridZumoSettings, CurRow,   '', '');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
-                                            'True', 'Load active profile on connect');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleId,
-                                            XT2_VehicleId);
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileName,
-                                            XT2_VehicleProfileName);
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileGuid,
-                                            XT2_VehicleProfileGuid);
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileHash,
-                                            '0');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_VehicleProfileTruckType,
-                                            XT2_VehicleProfileTruckType,
-                                            '7=Motorcycle, 11=Car');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_DefAdvLevel,
-                                            IntToStr(Ord(TAdvlevel.advLevel2)),
-                                            'Default Adventurous Level (1-4)');
+    if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0)))) then
+    begin
+      AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
+                                              'True', 'Load active profile on connect');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleId,
+                                              XT2_VehicleId);
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileName,
+                                              XT2_VehicleProfileName);
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileGuid,
+                                              XT2_VehicleProfileGuid);
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileHash,
+                                              '0');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileTruckType,
+                                              XT2_VehicleProfileTruckType,
+                                              '7=Motorcycle, 11=Car');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_DefAdvLevel,
+                                              IntToStr(Ord(TAdvlevel.advLevel2)),
+                                              'Default Adventurous Level (1-4)');
+    end;
     GridZumoSettings.RowCount := CurRow;
 
     AddGridHeader(GridZumoSettings);
@@ -590,74 +594,27 @@ end;
 procedure TFrmAdvSettings.BtnCurrentClick(Sender: TObject);
 var
   F: TFrmVehProfiles;
+  SubKey: string;
 begin
   SaveSettings;
 
   F := TFrmVehProfiles.Create(nil);
   try
+    F.ProfileHashList := ProfileHashList;
     if (F.ShowModal = idOK) then
     begin
-      SetRegistry(Reg_VehicleId,                    F.VehicleProfile.Vehicle_Id);
-      SetRegistry(Reg_VehicleProfileName,           F.VehicleProfile.Name);
-      SetRegistry(Reg_VehicleProfileGuid,           F.VehicleProfile.GUID);
-      SetRegistry(Reg_VehicleProfileHash,           F.VehicleProfile.Proposed_Hash);
-      SetRegistry(Reg_VehicleProfileTruckType,      F.VehicleProfile.TruckType);
+      SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+
+      SetRegistry(Reg_VehicleProfileGuid,           F.VehicleProfile.GUID,          SubKey);
+      SetRegistry(Reg_VehicleId,                    F.VehicleProfile.Vehicle_Id,    SubKey);
+      SetRegistry(Reg_VehicleProfileTruckType,      F.VehicleProfile.TruckType,     SubKey);
+      SetRegistry(Reg_VehicleProfileName,           F.VehicleProfile.Name,          SubKey);
+      SetRegistry(Reg_VehicleProfileModified,       F.VehicleProfile.Modified,      SubKey);
+      SetRegistry(Reg_VehicleProfileHash,           F.VehicleProfile.Proposed_Hash, SubKey);
     end;
  finally
     F.Free;
   end;
-  LoadSettings_Zumo;
-end;
-
-procedure TFrmAdvSettings.BtnLoadHashClick(Sender: TObject);
-var
-  Index: integer;
-  TripDirMask, TripDir: string;
-  Fs: TSearchRec;
-  Rc: integer;
-  TmpTripList: TTripList;
-  ScanGuid: string;
-  NewHash: cardinal;
-begin
-  SaveSettings;
-
-  NewHash := 0;
-  ScanGuid := GetRegistry(Reg_VehicleProfileGuid, '');
-  Index := ProfileHashList.IndexOf(ScanGuid);
-  if (Index > -1) then
-    NewHash := Cardinal(ProfileHashList.Objects[Index])
-  else
-  begin
-    TripDir := GetRegistry(Reg_PrefFileSysFolder_Key, '');
-    if (SelectDirectoryOrFile('No suitable trips found on the device. Scan in Directory or File?', '', TripDir) = false) then
-      exit;
-
-    if (FileExists(TripDir)) then
-      TripDirMask := TripDir
-    else
-      TripDirMask := IncludeTrailingPathDelimiter(TripDir) + TripMask;
-    TripDir := ExtractFilePath(TripDirMask);
-
-    TmpTripList := TTripList.Create;
-    try
-      Rc := System.Sysutils.FindFirst(TripDirMask, faAnyFile, Fs);
-      while (Rc = 0) and
-            (NewHash = 0) do
-      begin
-        TmpTripList.LoadFromFile(TripDir + Fs.Name);
-        if (TmpTripList.VehicleGUID = ScanGuid) then
-          NewHash := TmpTripList.VehicleHash;
-        Rc := FindNext(Fs);
-      end;
-      FindClose(Fs);
-    finally
-      TmpTripList.Free;
-    end;
-  end;
-  if (NewHash = 0) then
-    ShowMessage('No suitable trips found!')
-  else
-    SetRegistry(Reg_VehicleProfileHash, NewHash);
   LoadSettings_Zumo;
 end;
 

@@ -3103,7 +3103,7 @@ begin
     begin
       ProfileHashList.AddObject(TmpTripList.VehicleGUID, TObject(TmpHash));
 {$IFDEF HASHDEBUG}
-      HashDebugList.AddObject(TmpTripList.TripName, TObject(TmpHash));
+      HashDebugList.AddObject(TmpTripList.VehicleProfileName + #9 + TmpTripList.TripName, TObject(TmpHash));
 {$ENDIF}
     end;
     // Show trip name
@@ -3125,7 +3125,6 @@ var
 {$IFDEF HASHDEBUG}
   Index: integer;
   F: TextFile;
-  B2: string;
 {$ENDIF}
 begin
   if (GetRegistry(Reg_EnableTripFuncs, false) = false) then
@@ -3167,11 +3166,8 @@ begin
   Rewrite(F);
   for Index := 0 to HashDebugList .Count -1 do
   begin
-    B2 := IntTohex(integer(HashDebugList.Objects[Index]), 8);
-    Insert(' ', B2, 7);
-    Insert(' ', B2, 6);
     Writeln(F, Integer(HashDebugList.Objects[Index]),
-               #9, '0x', B2,
+               #9, '0x', IntTohex(integer(HashDebugList.Objects[Index]), 8),
                #9, HashDebugList[Index]);
   end;
   CloseFile(F);

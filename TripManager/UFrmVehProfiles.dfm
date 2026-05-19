@@ -14,6 +14,7 @@ object FrmVehProfiles: TFrmVehProfiles
   Font.Style = []
   KeyPreview = True
   Position = poMainFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
@@ -55,13 +56,22 @@ object FrmVehProfiles: TFrmVehProfiles
       TabOrder = 1
     end
     object BtnUnitTest: TButton
-      Left = 16
+      Left = 167
       Top = 2
       Width = 75
       Height = 25
       Caption = 'Unit test'
       TabOrder = 2
       OnClick = BtnUnitTestClick
+    end
+    object BtnLookupHash: TButton
+      Left = 8
+      Top = 2
+      Width = 153
+      Height = 25
+      Caption = 'Lookup Hash from trips'
+      TabOrder = 3
+      OnClick = BtnLookupHashClick
     end
   end
   object PCTMain: TPageControl
@@ -156,6 +166,7 @@ object FrmVehProfiles: TFrmVehProfiles
             ParentFont = False
             TabOrder = 0
             StyleElements = []
+            OnKeyPress = GridProfileKeyPress
             RowHeights = (
               24
               24

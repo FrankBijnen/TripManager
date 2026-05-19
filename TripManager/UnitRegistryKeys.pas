@@ -24,16 +24,14 @@ const
 
   // XT2 and XT3 and Tread 2
   Reg_LoadActiveProfile           = 'LoadActiveProfile';
+  Reg_AvoidancesChangedTimeAtSave = 'AvoidancesChangedTimeAtSave';
+
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
   Reg_VehicleProfileHash          = 'VehicleProfileHash';
   Reg_VehicleId                   = 'VehicleId';
   Reg_VehicleProfileTruckType     = 'VehicleProfileTruckType';
-  Reg_AvoidancesChangedTimeAtSave = 'AvoidancesChangedTimeAtSave';
   Reg_VehicleProfileName          = 'VehicleProfileName';
-  Reg_VehicleCalcMethod           = 'VehicleCalcMethod';
-  Reg_VehicleEnvironmental        = 'VehicleEnvironmental';
-  Reg_VehicleTraction             = 'VehicleTraction';
-  Reg_VehicleLegality             = 'VehicleLegality';
+  Reg_VehicleProfileModified      = 'VehicleProfileModified';
 
   // Post Processing
   Reg_ProcessBegin                = 'ProcessBegin';
@@ -151,6 +149,8 @@ uses
   UnitTripDefs, UnitRegistry, UnitProcessOptions, UnitGpi, UnitModelConv;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
+var
+  SubKey: string;
 begin
   with Sender as TProcessOptions do
   begin
@@ -164,6 +164,8 @@ begin
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
     TripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
+    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+
     EnableTripOverview := GetRegistry(Reg_EnableTripOverview, false);
     DefRoadSpeed := GetRegistry(Reg_RoadSpeed_Key, 25);
     RoadSpeedMap[0].Value := GetRegistry(Reg_RoadSpeed_Key + '_01', 108);
@@ -190,14 +192,14 @@ begin
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
 
     // XT2, Tread 2 Defaults
-    VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid);
-    VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, '0');
-    VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId);
-    VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, XT2_VehicleProfileTruckType);
-    VehicleProfileName := GetRegistry(Reg_VehicleProfileName, XT2_VehicleProfileName);
+    VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid, SubKey);
+    VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, '0', SubKey);
+    VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId, SubKey);
+    VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, XT2_VehicleProfileTruckType, SubKey);
+    VehicleProfileName := GetRegistry(Reg_VehicleProfileName, XT2_VehicleProfileName, SubKey);
     AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
                                                                       TUnixDateConv.DateTimeAsCardinal(IncYear(Now, -1)));
-    DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2)) -1);
+    DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2), SubKey) -1);
 
     // GPI defaults
     GpiSymbolsDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '80x80'));

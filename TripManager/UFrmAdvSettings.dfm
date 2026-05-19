@@ -145,22 +145,13 @@ object FrmAdvSettings: TFrmAdvSettings
         Align = alTop
         TabOrder = 1
         object BtnCurrent: TButton
-          Left = 2
+          Left = 0
           Top = 2
-          Width = 167
+          Width = 153
           Height = 25
-          Caption = 'Load from Vehicle_Profile.db'
+          Caption = 'Load profile from DB'
           TabOrder = 0
           OnClick = BtnCurrentClick
-        end
-        object BtnLoadHash: TButton
-          Left = 175
-          Top = 2
-          Width = 167
-          Height = 25
-          Caption = 'Lookup Hash in trips'
-          TabOrder = 1
-          OnClick = BtnLoadHashClick
         end
       end
     end

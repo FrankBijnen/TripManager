@@ -87,7 +87,6 @@ type
     function ReadFiles(const Lst: TListItems;
                        const SParent: string;
                        var CompletePath: WideString): string; overload; override;
-
   end;
 
 var
@@ -100,7 +99,7 @@ uses
   System.SysUtils, System.StrUtils, System.Masks, System.IOUtils, System.UITypes,
   Vcl.Dialogs,
   UnitRegistry, UnitRegistryKeys,
-  UnitTripDefs, UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite;
+  UnitTripDefs, UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, UnitVehProfile;
 
 const
 // Known Garmin device names in MSM and MTP mode.
@@ -415,7 +414,9 @@ procedure TGarminMTP_Device.ReadDeviceDB(const ExploreList: TStringList);
 var
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
   ModelIndex, DefAdvLevel: integer;
+  SubKey: string;
   DBPath: string;
+  LoadActive: boolean;
 begin
   // SQLite path
   DBPath := GetDbPath;
@@ -424,6 +425,7 @@ begin
 
   // Needed for checking if the connected Device needs reading SQlite
   ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  SubKey := TModelConv.GetDefaultDevice(ModelIndex);
 
   // Copy settings.db, Update Avoidances changed
   if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(ModelIndex))) and
@@ -434,38 +436,34 @@ begin
   if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
-    OldVehicle_Profile.GUID             := GetRegistry(Reg_VehicleProfileGuid, '');
-    OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0);
-    OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0);
-    OldVehicle_Profile.Name             := GetRegistry(Reg_VehicleProfileName, '');
-    OldVehicle_Profile.Traction         := GetRegistry(Reg_VehicleTraction, 0);
-    OldVehicle_Profile.Calc_Method      := GetRegistry(Reg_VehicleCalcMethod, 0);
-    OldVehicle_Profile.Environmental    := GetRegistry(Reg_VehicleEnvironmental, 0);
-    OldVehicle_Profile.Legality         := GetRegistry(Reg_VehicleLegality, 2);
+    OldVehicle_Profile := Default(TVehicleProfile);
+    OldVehicle_Profile.GUID             := GetRegistry(Reg_VehicleProfileGuid, '', SubKey);
+    OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0, SubKey);
+    OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0, SubKey);
+    OldVehicle_Profile.Name             := GetRegistry(Reg_VehicleProfileName, '', SubKey);
+    OldVehicle_Profile.Modified         := GetRegistry(Reg_VehicleProfileModified, 0, SubKey);
 
-    NewVehicle_Profile := GetActiveVehicleProfile(GetDeviceTmp + ProfileDb, TModelConv.Display2Garmin(ModelIndex));
+    LoadActive := GetRegistry(Reg_LoadActiveProfile, true);
+    NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb,
+                                            TModelConv.Display2Garmin(ModelIndex),
+                                            LoadActive,
+                                            GetRegistry(Reg_VehicleProfileName, '', SubKey));
 
-    if (GetRegistry(Reg_LoadActiveProfile, true)) and
-       (NewVehicle_Profile.Valid) and
-       (NewVehicle_Profile.Changed(OldVehicle_Profile)) then
+    if (NewVehicle_Profile.Valid) and
+       ( (LoadActive) or (NewVehicle_Profile.Changed(OldVehicle_Profile))) then
     begin
       // Update Vehicle profile
-      SetRegistry(Reg_VehicleProfileGuid,       NewVehicle_Profile.GUID);
-      SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id);
-      SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType);
-      SetRegistry(Reg_VehicleProfileName,       NewVehicle_Profile.Name);
-      SetRegistry(Reg_VehicleTraction,          NewVehicle_Profile.Traction);
-      SetRegistry(Reg_VehicleCalcMethod,        NewVehicle_Profile.Calc_Method);
-      SetRegistry(Reg_VehicleEnvironmental,     NewVehicle_Profile.Environmental);
-      SetRegistry(Reg_VehicleLegality,          NewVehicle_Profile.Legality);
-
-      // Changed Vehicle profile. Set hash to proposed value
-      SetRegistry(Reg_VehicleProfileHash, NewVehicle_Profile.Proposed_Hash);
+      SetRegistry(Reg_VehicleProfileGuid,       NewVehicle_Profile.GUID, SubKey);
+      SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id, SubKey);
+      SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType, SubKey);
+      SetRegistry(Reg_VehicleProfileName,       NewVehicle_Profile.Name, Subkey);
+      SetRegistry(Reg_VehicleProfileModified,   NewVehicle_Profile.Modified, SubKey);
+      SetRegistry(Reg_VehicleProfileHash,       NewVehicle_Profile.Proposed_Hash, SubKey);
 
       // Only load Default Adventurous level from profile if invalid
       DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
       if not (DefAdvLevel in [1..4]) then
-        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.AdventurousLevel +1);
+        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.AdventurousLevel +1, SubKey);
     end;
   end;
 
