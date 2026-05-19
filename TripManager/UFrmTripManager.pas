@@ -501,7 +501,7 @@ uses
   Winapi.ShellAPI,
   Vcl.Clipbrd,
   MsgLoop, UnitGarminDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
-  UnitOSMMap, UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv,
+  UnitOSMMap, UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv, UnitVehProfile,
   UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
@@ -3111,7 +3111,6 @@ begin
 
     // File Checked
     result := true;
-
   finally
     TmpTripList.Free;
   end;
@@ -3122,6 +3121,9 @@ var
   AListItem: TListItem;
   CrNormal,CrWait: HCURSOR;
   CanUseStatusBar, TripChecked: boolean;
+  ModelIndex: integer;
+  SubKey: string;
+  VehicleProfile: TVehicleProfile;
 {$IFDEF HASHDEBUG}
   Index: integer;
   F: TextFile;
@@ -3155,6 +3157,14 @@ begin
         SbPostProcess.Update;
       end;
     end;
+
+    ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+    if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(ModelIndex))) then
+    begin
+      SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+      VehicleProfile.UpdateFromHashList(SubKey, ProfileHashList);
+    end;
+
   finally
     SetCursor(CrNormal);
     StatusTimer.Enabled := false;

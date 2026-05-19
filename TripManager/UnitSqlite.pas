@@ -479,7 +479,7 @@ begin
     ACds.First;
     while not ACds.Eof do
     begin
-      if (ACds.FieldByName('Status').Value <> '') then
+      if not (ACds.FieldByName('Status').IsNull) then
       begin
         result.FromCds(ACds, Model);
         if (OnlyActive) then

@@ -436,13 +436,7 @@ begin
   if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
-    OldVehicle_Profile := Default(TVehicleProfile);
-    OldVehicle_Profile.GUID             := GetRegistry(Reg_VehicleProfileGuid, '', SubKey);
-    OldVehicle_Profile.Vehicle_Id       := GetRegistry(Reg_VehicleId, 0, SubKey);
-    OldVehicle_Profile.TruckType        := GetRegistry(Reg_VehicleProfileTruckType, 0, SubKey);
-    OldVehicle_Profile.Name             := GetRegistry(Reg_VehicleProfileName, '', SubKey);
-    OldVehicle_Profile.Modified         := GetRegistry(Reg_VehicleProfileModified, 0, SubKey);
-
+    OldVehicle_Profile.FromRegistry(SubKey);
     LoadActive := GetRegistry(Reg_LoadActiveProfile, true);
     NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb,
                                             TModelConv.Display2Garmin(ModelIndex),
@@ -453,17 +447,12 @@ begin
        ( (LoadActive) or (NewVehicle_Profile.Changed(OldVehicle_Profile))) then
     begin
       // Update Vehicle profile
-      SetRegistry(Reg_VehicleProfileGuid,       NewVehicle_Profile.GUID, SubKey);
-      SetRegistry(Reg_VehicleId,                NewVehicle_Profile.Vehicle_Id, SubKey);
-      SetRegistry(Reg_VehicleProfileTruckType,  NewVehicle_Profile.TruckType, SubKey);
-      SetRegistry(Reg_VehicleProfileName,       NewVehicle_Profile.Name, Subkey);
-      SetRegistry(Reg_VehicleProfileModified,   NewVehicle_Profile.Modified, SubKey);
-      SetRegistry(Reg_VehicleProfileHash,       NewVehicle_Profile.Proposed_Hash, SubKey);
+      NewVehicle_Profile.ToRegistry(SubKey);
 
       // Only load Default Adventurous level from profile if invalid
       DefAdvLevel := GetRegistry(Reg_DefAdvLevel, 0);
       if not (DefAdvLevel in [1..4]) then
-        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.AdventurousLevel +1, SubKey);
+        SetRegistry(Reg_DefAdvLevel, NewVehicle_Profile.Adventurous_Route_Mode +1, SubKey);
     end;
   end;
 

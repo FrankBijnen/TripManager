@@ -31,7 +31,7 @@ const
   Reg_VehicleId                   = 'VehicleId';
   Reg_VehicleProfileTruckType     = 'VehicleProfileTruckType';
   Reg_VehicleProfileName          = 'VehicleProfileName';
-  Reg_VehicleProfileModified      = 'VehicleProfileModified';
+  Reg_VehicleProfileModifiedDate  = 'VehicleProfileModifiedDate';
 
   // Post Processing
   Reg_ProcessBegin                = 'ProcessBegin';

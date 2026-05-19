@@ -34,7 +34,7 @@ object FrmVehProfiles: TFrmVehProfiles
       849
       31)
     object BtnOK: TButton
-      Left = 650
+      Left = 638
       Top = 3
       Width = 75
       Height = 25
@@ -44,7 +44,7 @@ object FrmVehProfiles: TFrmVehProfiles
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 737
+      Left = 725
       Top = 3
       Width = 75
       Height = 25
@@ -215,5 +215,11 @@ object FrmVehProfiles: TFrmVehProfiles
     DataSet = CDSVehProfile
     Left = 568
     Top = 80
+  end
+  object SaveUnitTestDialog: TSaveDialog
+    DefaultExt = 'txt'
+    Filter = '*.txt|*.txt'
+    Left = 196
+    Top = 162
   end
 end

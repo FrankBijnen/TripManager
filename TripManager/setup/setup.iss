@@ -313,8 +313,18 @@ begin
   RegDeleteValue(HKCU, RegKey, 'PrefDeviceGpxFolder');
   RegDeleteValue(HKCU, RegKey, 'PrefDevicePoiFolder');
   RegDeleteValue(HKCU, RegKey, 'ExtShape');
+  RegDeleteValue(HKCU, RegKey, 'ScPosn_Unknown1');
+  RegDeleteValue(HKCU, RegKey, 'VehicleProfileGuid');
   RegDeleteValue(HKCU, RegKey, 'VehicleType');
   RegDeleteValue(HKCU, RegKey, 'VehicleTransportMode');
-  RegDeleteValue(HKCU, RegKey, 'ScPosn_Unknown1');
+  RegDeleteValue(HKCU, RegKey, 'VehicleProfileHash');
+  RegDeleteValue(HKCU, RegKey, 'VehicleId');
+  RegDeleteValue(HKCU, RegKey, 'VehicleProfileTruckType');
+  RegDeleteValue(HKCU, RegKey, 'AvoidancesChangedTimeAtSave');
+  RegDeleteValue(HKCU, RegKey, 'VehicleProfileName');
+  RegDeleteValue(HKCU, RegKey, 'VehicleCalcMethod');
+  RegDeleteValue(HKCU, RegKey, 'VehicleEnvironmental');
+  RegDeleteValue(HKCU, RegKey, 'VehicleTraction');
+  RegDeleteValue(HKCU, RegKey, 'VehicleLegality');
 
 end;

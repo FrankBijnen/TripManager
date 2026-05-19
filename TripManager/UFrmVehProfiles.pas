@@ -27,6 +27,7 @@ type
     ScrllAllFields: TScrollBox;
     BtnUnitTest: TButton;
     BtnLookupHash: TButton;
+    SaveUnitTestDialog: TSaveDialog;
     procedure FormShow(Sender: TObject);
     procedure CDSVehProfileAfterScroll(DataSet: TDataSet);
     procedure FormResize(Sender: TObject);
@@ -74,9 +75,6 @@ procedure TFrmVehProfiles.BtnUnitTestClick(Sender: TObject);
 var
   P: TVehicleProfile;
   F: TextFile;
-type
-  TArrayType = array of integer;
-
 
   procedure Generic_Tests(TruckType: TVehicleTruckType;
                           Traction: TTraction;
@@ -84,7 +82,7 @@ type
 
   const
     BoolValues: array[boolean] of string =        ('False', 'True');
-    SpeedsMSec: array[0..3] of integer =          (0, 138, 222, 277); //MSec
+    SpeedsDMSec: array[0..3] of integer =         (0, 138, 222, 277); //DMSec
     Speeds: array[0..3] of integer =              (0,  50,  80, 100); //Kmh
     Widths3W: array[0..7] of integer =            (110, 120, 125, 130, 140, 150, 155, 170);
     WidthsMetric: array[0..0] of integer =        (120);
@@ -100,50 +98,34 @@ type
     Advlevel: integer;
     Clearance: boolean;
     ToClearance: boolean;
-    WidthsArray: TArrayType;
-    SpeedsArray: TArrayType;
+    WidthsArray: TDynArrayType;
+    SpeedsArray: TDynArrayType;
     Width: integer;
     Speed, SpeedCnt: integer;
   begin
     P := Default(TVehicleProfile);
-    P.TruckType := Ord(TruckType);
+    P.Truck_Type := Ord(TruckType);
     P.Traction := Ord(Traction);
     P.Imperial := Imperial;
 
-    SetLength(SpeedsArray, Length(SpeedsMSec));
-    MoveMemory(@SpeedsArray[0], @SpeedsMSec, SizeOf(SpeedsMSec));
-
+    SpeedsArray := DynArray(SpeedsDMSec);
     if (Traction = TTraction.tr3Wheels) then
-    begin
-      SetLength(WidthsArray, Length(Widths3W));
-      MoveMemory(@WidthsArray[0], @Widths3W, SizeOf(Widths3W));
-    end else if (Imperial) then
+      WidthsArray := DynArray(Widths3W)
+    else if (Imperial) then
     begin
       if (TruckType = TVehicleTruckType.ttCar) then
-      begin
-        SetLength(WidthsArray, Length(CarWidthsImperial));
-        MoveMemory(@WidthsArray[0], @CarWidthsImperial, SizeOf(CarWidthsImperial));
-      end
+        WidthsArray := DynArray(CarWidthsImperial)
       else
-      begin
-        SetLength(WidthsArray, Length(WidthsImperial));
-        MoveMemory(@WidthsArray[0], @WidthsImperial, SizeOf(WidthsImperial));
-      end;
+        WidthsArray := DynArray(WidthsImperial)
     end else
     begin
       if (TruckType = TVehicleTruckType.ttCar) then
-      begin
-        SetLength(WidthsArray, Length(CarWidthsMetric));
-        MoveMemory(@WidthsArray[0], @CarWidthsMetric, SizeOf(CarWidthsMetric));
-      end
+        WidthsArray := DynArray(CarWidthsMetric)
       else
-      begin
-        SetLength(WidthsArray, Length(WidthsMetric));
-        MoveMemory(@WidthsArray[0], @WidthsMetric, SizeOf(WidthsMetric));
-      end;
+        WidthsArray := DynArray(WidthsMetric)
     end;
 
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     ToClearance := (TruckType = TVehicleTruckType.ttCar);
     for Clearance := False to ToClearance do
     begin
@@ -172,26 +154,26 @@ type
                     ProfCalcMethodDesc[TProfCalcMethod(CalcMethod)]
                   ]);
                 P.Name := PName;
-                P.Legality := Ord(Legal);
+                P.Road_Legality := Ord(Legal);
                 P.Width := Width;
-                P.Max_Speed := Speed;
+                P.Max_Vehicle_Speed := Speed;
                 P.Environmental := Ord(Environment);
                 P.Calc_Method := Ord(CalcMethod);
                 P.Calculate_Proposed_Hash(AModel);
-                P.Clearance := Clearance;
+                P.High_Clearance := Clearance;
                 if (CalcMethod = TProfCalcMethod.cmAdv) then
                 begin
                   for Advlevel := Ord(Low(TProfAdvLevel)) to Ord(High(TProfAdvLevel)) do
                   begin
                     P.Name := Format('%s%s%d', [PName, #9, Advlevel]);
-                    P.AdventurousLevel := Advlevel;
+                    P.Adventurous_Route_Mode := Advlevel;
                     P.Calculate_Proposed_Hash(AModel);
                     writeln(F, P.Name, #9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
                   end;
                 end
                 else
                 begin
-                  P.AdventurousLevel := 0;
+                  P.Adventurous_Route_Mode := 0;
                   P.Calculate_Proposed_Hash(AModel);
                   writeln(F, P.Name, #9, #9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
                 end;
@@ -207,129 +189,129 @@ type
   begin
     P := Default(TVehicleProfile);
     P.Name := 'VFR Avoid Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAvoid);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Allow Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Ask Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAsk);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Allow Not Highway legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlNoHighway);
+    P.Road_Legality := Ord(TRoadLegality.rlNoHighway);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Allow Legal Shorter';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmShorter);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Ask Legal L2';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAsk);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmAdv);
-    p.AdventurousLevel := 1;
-    P.Clearance := false;
+    P.Adventurous_Route_Mode := 1;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Ask Legal Faster 80 km';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 80;
+    P.Max_Vehicle_Speed := 222;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAsk);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Ask Legal Shorter 80 km';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 222;
+    P.Max_Vehicle_Speed := 222;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAsk);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmShorter);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'VFR Ask Legal L3 80 km';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr2Wheels);
-    P.Max_Speed := 222;
+    P.Max_Vehicle_Speed := 222;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAsk);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmAdv);
-    p.AdventurousLevel := 1;
-    P.Clearance := false;
+    P.Adventurous_Route_Mode := 2;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
   end;
@@ -338,85 +320,85 @@ type
   begin
     P := Default(TVehicleProfile);
     P.Name := 'Trike Allow Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr3Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Trike Ask Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr3Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAsk);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Trike Allow Legal Faster 150cm';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr3Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := 150;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Trike Allow Legal Faster 150cm 50 km';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr3Wheels);
-    P.Max_Speed := 138;
+    P.Max_Vehicle_Speed := 138;
     P.Width := 150;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Trike Allow Not Highway legal Faster 150cm';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr3Wheels);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := 150;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlNoHighway);
+    P.Road_Legality := Ord(TRoadLegality.rlNoHighway);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Trike Allow Legal Faster 80 km';
-    P.TruckType := Ord(TVehicleTruckType.ttMotorCycle);
+    P.Truck_Type := Ord(TVehicleTruckType.ttMotorCycle);
     P.Traction := Ord(TTraction.tr3Wheels);
-    P.Max_Speed := 80;
+    P.Max_Vehicle_Speed := 80;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
@@ -426,120 +408,125 @@ type
   begin
     P := Default(TVehicleProfile);
     P.Name := 'Mazda Allow Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttCar);
+    P.Truck_Type := Ord(TVehicleTruckType.ttCar);
     P.Traction := Ord(TTraction.tr2WD);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Mazda Avoid Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttCar);
+    P.Truck_Type := Ord(TVehicleTruckType.ttCar);
     P.Traction := Ord(TTraction.tr2WD);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAvoid);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Mazda Avoid Legal Shorter';
-    P.TruckType := Ord(TVehicleTruckType.ttCar);
+    P.Truck_Type := Ord(TVehicleTruckType.ttCar);
     P.Traction := Ord(TTraction.tr2WD);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAvoid);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmShorter);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Mazda Avoid Legal L3';
-    P.TruckType := Ord(TVehicleTruckType.ttCar);
+    P.Truck_Type := Ord(TVehicleTruckType.ttCar);
     P.Traction := Ord(TTraction.tr2WD);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAvoid);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmAdv);
-    P.AdventurousLevel := 2;
-    P.Clearance := false;
+    P.Adventurous_Route_Mode := 2;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Mazda 4WD Allow Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttCar);
+    P.Truck_Type := Ord(TVehicleTruckType.ttCar);
     P.Traction := Ord(TTraction.tr4WD);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := false;
+    P.High_Clearance := false;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
     P := Default(TVehicleProfile);
     P.Name := 'Mazda 4WD Allow High Legal Faster';
-    P.TruckType := Ord(TVehicleTruckType.ttCar);
+    P.Truck_Type := Ord(TVehicleTruckType.ttCar);
     P.Traction := Ord(TTraction.tr4WD);
-    P.Max_Speed := 0;
+    P.Max_Vehicle_Speed := 0;
     P.Width := Width;
     P.Imperial := Imperial;
     P.Environmental := Ord(TProfEnvironment.enAllow);
-    P.Legality := Ord(TRoadLegality.rlLegal);
+    P.Road_Legality := Ord(TRoadLegality.rlLegal);
     P.Calc_Method := Ord(TProfCalcMethod.cmFaster);
-    P.Clearance := true;
+    P.High_Clearance := true;
     P.Calculate_Proposed_Hash(AModel);
     writeln(F, P.Name, #9#9#9#9#9#9#9#9#9, P.Proposed_Hash, #9, '0x', IntToHex(P.Proposed_Hash, 8));
 
   end;
 
 begin
-  AssignFile(F, 'c:\temp\unittest.txt');
+  if not SaveUnitTestDialog.Execute then
+    exit;
+
+  AssignFile(F, SaveUnitTestDialog.FileName);
   Rewrite(F);
-  Writeln(F, Format('Profile%sTraction%sLegal%sWidth%sMaxSpeed%sEnvironment%sHigh Clearance%sCalcMethod%sLevel%sHash%sHash Hex',
-                    [#9,#9,#9,#9,#9,#9,#9,#9,#9,#9]));
+  try
+    Writeln(F, Format('Profile%sTraction%sLegal%sWidth%sMaxSpeed%sEnvironment%sHigh Clearance%sCalcMethod%sLevel%sHash%sHash Hex',
+                      [#9,#9,#9,#9,#9,#9,#9,#9,#9,#9]));
 
-  Writeln(F, 'Metric Specific');
-  MotorProfiles(false, 120);
-  TrikeProfiles(false, 120);
-  CarProfiles(false, 200);
+    Writeln(F, 'Metric Specific');
+    MotorProfiles(false, 120);
+    TrikeProfiles(false, 120);
+    CarProfiles(false, 200);
 
-  Writeln(F, 'Metric Generic');
-  Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr2Wheels, false);
-  Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr3Wheels, false);
-  Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr2WD, false);
-  Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr4WD, false);
+    Writeln(F, 'Metric Generic');
+    Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr2Wheels, false);
+    Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr3Wheels, false);
+    Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr2WD, false);
+    Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr4WD, false);
 
-  Writeln(F, 'Imperial Specific');
-  MotorProfiles(true, 122);
-  TrikeProfiles(true, 122);
-  CarProfiles(true, 198);
+    Writeln(F, 'Imperial Specific');
+    MotorProfiles(true, 122);
+    TrikeProfiles(true, 122);
+    CarProfiles(true, 198);
 
-  Writeln(F, 'Imperial Generic');
-  Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr2Wheels, true);
-  Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr3Wheels, true);
-  Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr2WD, true);
-  Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr4WD, true);
-
-  CloseFile(F);
+    Writeln(F, 'Imperial Generic');
+    Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr2Wheels, true);
+    Generic_Tests(TVehicleTruckType.ttMotorCycle, TTraction.tr3Wheels, true);
+    Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr2WD, true);
+    Generic_Tests(TVehicleTruckType.ttCar, TTraction.tr4WD, true);
+  finally
+    CloseFile(F);
+  end;
 end;
 
 procedure TFrmVehProfiles.SetOverridden_Hash(const NewHash: cardinal);
@@ -554,7 +541,6 @@ end;
 
 procedure TFrmVehProfiles.BtnLookupHashClick(Sender: TObject);
 var
-  Index: integer;
   TripDirMask, TripDir: string;
   Fs: TSearchRec;
   Rc: integer;
@@ -564,36 +550,30 @@ var
 begin
   NewHash := 0;
   ScanGuid := CDSVehProfile.FieldByName('GUID').DisplayText;
-  Index := ProfileHashList.IndexOf(ScanGuid);
-  if (Index > -1) then
-    NewHash := Cardinal(ProfileHashList.Objects[Index])
+  TripDir := GetRegistry(Reg_PrefFileSysFolder_Key, '');
+  if (SelectDirectoryOrFile('Scan in Directory or File for hash value?', '', TripDir) = false) then
+    exit;
+
+  if (FileExists(TripDir)) then
+    TripDirMask := TripDir
   else
-  begin
-    TripDir := GetRegistry(Reg_PrefFileSysFolder_Key, '');
-    if (SelectDirectoryOrFile('No suitable trips found on the device. Scan in Directory or File?', '', TripDir) = false) then
-      exit;
+    TripDirMask := IncludeTrailingPathDelimiter(TripDir) + TripMask;
+  TripDir := ExtractFilePath(TripDirMask);
 
-    if (FileExists(TripDir)) then
-      TripDirMask := TripDir
-    else
-      TripDirMask := IncludeTrailingPathDelimiter(TripDir) + TripMask;
-    TripDir := ExtractFilePath(TripDirMask);
-
-    TmpTripList := TTripList.Create;
-    try
-      Rc := System.Sysutils.FindFirst(TripDirMask, faAnyFile, Fs);
-      while (Rc = 0) and
-            (NewHash = 0) do
-      begin
-        TmpTripList.LoadFromFile(TripDir + Fs.Name);
-        if (TmpTripList.VehicleGUID = ScanGuid) then
-          NewHash := TmpTripList.VehicleHash;
-        Rc := FindNext(Fs);
-      end;
-      FindClose(Fs);
-    finally
-      TmpTripList.Free;
+  TmpTripList := TTripList.Create;
+  try
+    Rc := System.Sysutils.FindFirst(TripDirMask, faAnyFile, Fs);
+    while (Rc = 0) and
+          (NewHash = 0) do
+    begin
+      TmpTripList.LoadFromFile(TripDir + Fs.Name);
+      if (TmpTripList.VehicleGUID = ScanGuid) then
+        NewHash := TmpTripList.VehicleHash;
+      Rc := FindNext(Fs);
     end;
+    FindClose(Fs);
+  finally
+    TmpTripList.Free;
   end;
 
   if (NewHash <> 0) then
@@ -614,6 +594,8 @@ var
 begin
   TmpProfile.FromCds(TClientDataset(DataSet), AModel);
   Dataset.FieldByName('Proposed_Hash').AsInteger := TmpProfile.Proposed_Hash;
+  if (TmpProfile.Proposed_Hash = 0) then
+    Dataset.FieldByName('Overridden_Hash').AsInteger := TmpProfile.HashFromHashList(ProfileHashList);
 end;
 
 procedure TFrmVehProfiles.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -728,53 +710,54 @@ begin
   OverriddenHash := CDSVehProfile.FieldByName('Overridden_Hash').AsInteger;
   if (OverriddenHash <> 0) then
     VehicleProfile.Proposed_Hash := OverriddenHash;
+
   GridProfile.RowCount := GridProfile.FixedRows +1;
   GridProfile.BeginUpdate;
   try
     CurRow := 1;
     AddGridValueLine(GridProfile, CurRow, '', '', '-Items saved in trip files-');
 
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleId,               VehicleProfile.Vehicle_Id);
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileName,      VehicleProfile.Name);
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileGuid,      VehicleProfile.GUID);
+    AddGridValueLine(GridProfile, CurRow, Reg_VehicleId,                  VehicleProfile.Vehicle_Id);
+    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileName,         VehicleProfile.Name);
+    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileGuid,         VehicleProfile.GUID);
 
     if (OverriddenHash <> 0) then
-      AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,      VehicleProfile.Proposed_Hash,
-                                            '(Hash overridden)')
+      AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,       VehicleProfile.Proposed_Hash,
+                                            '(Hash from trip file, or overridden)')
     else
-      AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,      VehicleProfile.Proposed_Hash,
+      AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileHash,       VehicleProfile.Proposed_Hash,
                                             '(Hash proposed by TripManager)');
 
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileTruckType, VehicleProfile.TruckType,
+    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileTruckType,    VehicleProfile.Truck_Type,
                                           '(7=Motorcycle, 11=Car)');
-    AddGridValueLine(GridProfile, CurRow, Reg_DefAdvLevel,             VehicleProfile.AdventurousLevel,
+    AddGridValueLine(GridProfile, CurRow, Reg_DefAdvLevel,                VehicleProfile.Adventurous_Route_Mode,
                                           '(0=L1, 1=L2, 2=L3, 3=L4)');
 
     AddGridValueLine(GridProfile, CurRow, '', '');
     AddGridValueLine(GridProfile, CurRow, '', '', '-Items needed to compute Hash-');
-    AddGridValueLine(GridProfile, CurRow, Hash_VehicleTraction,         VehicleProfile.Traction,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleTraction,           VehicleProfile.Traction,
                                           '(1=2WD, 2=4WD, 3=3 Wheels, 4=2 Wheels)');
 
     if (CDSVehProfile.FindField('environmental') <> nil) then
       AddGridValueLine(GridProfile, CurRow, Hash_VehicleEnvironmental,    VehicleProfile.Environmental,
                                             '(0=Avoid, 1=Allow, 2=Ask)');
 
-    AddGridValueLine(GridProfile, CurRow, Hash_VehicleLegality,         VehicleProfile.Legality,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleLegality,           VehicleProfile.Road_Legality,
                                           '(0=Not legal, 1=Not highway legal, 2=Legal');
 
     if (CDSVehProfile.FindField('calc_method') <> nil) then
       AddGridValueLine(GridProfile, CurRow, Hash_VehicleCalcMethod,       VehicleProfile.Calc_Method,
                                             '(0=Faster, 1=Shorter, 4=Straight, 7=Adventurous)');
 
-    AddGridValueLine(GridProfile, CurRow, Hash_VehicleMaxSpeed,               VehicleProfile.Max_Speed,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleMaxSpeed,           VehicleProfile.Max_Vehicle_Speed,
                                           '(Decimeters/Sec.)');
-    AddGridValueLine(GridProfile, CurRow, Hash_VehicleWidth,           VehicleProfile.Width,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleWidth,              VehicleProfile.Width,
                                           '(Centimeters)');
-    AddGridValueLine(GridProfile, CurRow, Hash_VehicleImperial,        VehicleProfile.Imperial,
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleImperial,           VehicleProfile.Imperial,
                                           '(True=Miles, False=Kms)');
-    AddGridValueLine(GridProfile, CurRow, Hash_VehicleClearance,       VehicleProfile.Clearance,
-                                          '');
-    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileModified,  Format('0x%s', [IntToHex(VehicleProfile.Modified, 8)]),
+    AddGridValueLine(GridProfile, CurRow, Hash_VehicleClearance,          VehicleProfile.High_Clearance,
+                                          '(True=High, False=Normal)');
+    AddGridValueLine(GridProfile, CurRow, Reg_VehicleProfileModifiedDate, Format('0x%s', [IntToHex(VehicleProfile.Modified_Date, 8)]),
                                           'Date: ');
 
     AddGridValueLine(GridProfile, CurRow,   '', '');

@@ -9,6 +9,7 @@ uses
 
 type
   T4Bytes = array[0..3] of byte;
+  TDynArrayType = array of integer;
 
 function SenSize(const S: int64): string;
 function Intd(const N: Integer; const D: Integer): string;
@@ -55,6 +56,7 @@ function GPX2HTMLColor(GPXColor: string): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
 function UserAgent: string;
+function DynArray(const ConstArray: array of integer): TDynArrayType;
 
 var
   CreatedTempPath: string;
@@ -561,6 +563,12 @@ begin
   result := Vcl.FileCtrl.SelectDirectory(ACaption, ARoot, APath,
               [TSelectDirExtOpt.sdNewFolder, TSelectDirExtOpt.sdShowEdit, TSelectDirExtOpt.sdNewUI, TSelectDirExtOpt.sdShowFiles],
               nil);
+end;
+
+function DynArray(const ConstArray: array of integer): TDynArrayType;
+begin
+  SetLength(result, Length(ConstArray));
+  MoveMemory(@result[0], @ConstArray, SizeOf(ConstArray));
 end;
 
 initialization

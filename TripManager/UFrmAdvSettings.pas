@@ -286,7 +286,7 @@ begin
     if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0)))) then
     begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
-                                              'True', 'Load active profile on connect');
+                                              'True', 'Load active profile automatically');
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleId,
                                               XT2_VehicleId);
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileName,
@@ -604,13 +604,7 @@ begin
     if (F.ShowModal = idOK) then
     begin
       SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
-
-      SetRegistry(Reg_VehicleProfileGuid,           F.VehicleProfile.GUID,          SubKey);
-      SetRegistry(Reg_VehicleId,                    F.VehicleProfile.Vehicle_Id,    SubKey);
-      SetRegistry(Reg_VehicleProfileTruckType,      F.VehicleProfile.TruckType,     SubKey);
-      SetRegistry(Reg_VehicleProfileName,           F.VehicleProfile.Name,          SubKey);
-      SetRegistry(Reg_VehicleProfileModified,       F.VehicleProfile.Modified,      SubKey);
-      SetRegistry(Reg_VehicleProfileHash,           F.VehicleProfile.Proposed_Hash, SubKey);
+      F.VehicleProfile.ToRegistry(SubKey);
     end;
  finally
     F.Free;
