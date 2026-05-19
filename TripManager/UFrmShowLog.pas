@@ -42,16 +42,19 @@ type
   private
     { Private declarations }
     FstyleServices: TCustomStyleServices;
+    FSyncTreeview: TNotifyEvent;
+    FReloadTrip: TNotifyEvent;
     procedure ClearGpxRptList;
     procedure SetCheck(const FileType: string);
     procedure FixTripList;
   public
     { Public declarations }
     CompareGpx: string;
-    FSyncTreeview: TNotifyEvent;
     GpxRptList: Tlist;
     procedure ClearLog;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
+    property OnSyncTreeview: TNotifyEvent read FSyncTreeview write FSyncTreeview;
+    property OnReloadTrip: TNotifyEvent read FReloadTrip write FReloadTrip;
   end;
 
 var
@@ -91,17 +94,23 @@ procedure TFrmShowLog.SavefixedGPXClick(Sender: TObject);
 var
   ATripList: TTripList;
 begin
-  ATripList := TTripList(FrmTripEditor.CurTripList);
-  FixTripList;
+  try
+    ATripList := TTripList(FrmTripEditor.CurTripList);
+    FixTripList;
 
-  SaveTrip.Filter := '*.gpx|*.gpx';
-  SaveTrip.InitialDir := ExtractFilePath(CompareGpx);
-  SaveTrip.FileName := Format('%s.gpx', [ATripList.TripName]);
-  if not SaveTrip.Execute then
-    exit;
+    SaveTrip.Filter := '*.gpx|*.gpx';
+    SaveTrip.InitialDir := ExtractFilePath(CompareGpx);
+    SaveTrip.FileName := Format('%s.gpx', [ATripList.TripName]);
+    if not SaveTrip.Execute then
+      exit;
 
-  ATripList.SaveAsGPX(SaveTrip.FileName, false);
-  Close;
+    ATripList.SaveAsGPX(SaveTrip.FileName, false);
+
+    Close;
+  finally
+    if Assigned(FReloadTrip) then
+      FReloadTrip(Self);
+  end;
 end;
 
 procedure TFrmShowLog.SetCheck(const FileType: string);

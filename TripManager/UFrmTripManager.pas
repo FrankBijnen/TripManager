@@ -471,6 +471,7 @@ type
     procedure InstallTripEdit;
     procedure EditTrip(NewFile: boolean);
     procedure SyncDiff(Sender: TObject);
+    procedure ReloadTrip(Sender: TObject);
   protected
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
@@ -1577,7 +1578,8 @@ begin
                                               ExtractFileName(OpenTrip.FileName),
                                               GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
-      FrmShowLog.FSyncTreeview := SyncDiff;
+      FrmShowLog.OnSyncTreeview := SyncDiff;
+      FrmShowLog.OnReloadTrip := ReLoadTrip;
       FrmShowLog.CompareGpx := OpenTrip.FileName;
       FrmShowLog.Show;
     end;
@@ -2006,6 +2008,11 @@ begin
     end;
     exit;
   end;
+end;
+
+procedure TFrmTripManager.ReloadTrip(Sender: TObject);
+begin
+  LoadTripFile(HexEditFile, DeviceFile);
 end;
 
 procedure TFrmTripManager.MnuTripEditClick(Sender: TObject);
