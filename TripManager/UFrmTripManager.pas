@@ -357,6 +357,7 @@ type
     procedure BtnPostProcessMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure PctHexOsmChange(Sender: TObject);
+    procedure PnlTripGpiInfoDblClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -1671,6 +1672,14 @@ end;
 procedure TFrmTripManager.PnlDeviceTopResize(Sender: TObject);
 begin
   CmbDevices.HideSelection;
+end;
+
+procedure TFrmTripManager.PnlTripGpiInfoDblClick(Sender: TObject);
+begin
+  if (PCTTripInfo.Width < TvTrip.Width + VSplitterTree_Grid.Width + VlTripInfo.Width) then
+    PCTTripInfo.Width := TvTrip.Width + VSplitterTree_Grid.Width + VlTripInfo.Width
+  else
+    PCTTripInfo.Width := TvTrip.Width;
 end;
 
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);

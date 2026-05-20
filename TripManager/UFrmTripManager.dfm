@@ -464,7 +464,7 @@ object FrmTripManager: TFrmTripManager
       object HexPanel: TPanel
         Left = 0
         Top = 0
-        Width = 701
+        Width = 610
         Height = 375
         Align = alClient
         Color = clWhite
@@ -476,7 +476,7 @@ object FrmTripManager: TFrmTripManager
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1
-          Width = 699
+          Width = 608
           Height = 25
           Align = alTop
           ParentBackground = False
@@ -824,7 +824,6 @@ object FrmTripManager: TFrmTripManager
               NumGlyphs = 2
               TabOrder = 1
               OnClick = BitBtnSQLGoClick
-              ExplicitLeft = 639
             end
           end
         end
@@ -861,7 +860,6 @@ object FrmTripManager: TFrmTripManager
         ScrollBars = ssVertical
         TabOrder = 2
         OnDblClick = DBMemoDblClick
-        ExplicitWidth = 701
       end
     end
     object TsExplore: TTabSheet
@@ -870,7 +868,7 @@ object FrmTripManager: TFrmTripManager
       object LvExplore: TListView
         Left = 0
         Top = 28
-        Width = 701
+        Width = 610
         Height = 347
         Align = alClient
         Columns = <
@@ -950,7 +948,7 @@ object FrmTripManager: TFrmTripManager
       object PnlExploreTop: TPanel
         Left = 0
         Top = 0
-        Width = 701
+        Width = 610
         Height = 28
         Align = alTop
         TabOrder = 1
@@ -1023,6 +1021,7 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 2
         StyleElements = [seBorder]
+        OnDblClick = PnlTripGpiInfoDblClick
       end
       object TvTrip: TTreeView
         Left = 0
