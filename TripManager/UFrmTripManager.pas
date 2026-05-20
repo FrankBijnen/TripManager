@@ -447,7 +447,8 @@ type
     procedure SetCurrentPath(const APath: string);
     function CopyFileToTmp(const AListItem: TListItem): string;
     procedure CopyFileFromTmp(const LocalFile: string; const AListItem: TListItem);
-    procedure ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
+    procedure ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent;
+                        const SelectFile: string = '');
     procedure DeleteObjects(const AllowRecurse: boolean);
     procedure PostReloadFileList;
     procedure SetCheckMark(const AListItem: TListItem; const NewValue: boolean);
@@ -471,7 +472,6 @@ type
     procedure InstallTripEdit;
     procedure EditTrip(NewFile: boolean);
     procedure SyncDiff(Sender: TObject);
-    procedure ReloadTrip(Sender: TObject);
   protected
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
@@ -1122,29 +1122,27 @@ end;
 
 procedure TFrmTripManager.BtnRefreshClick(Sender: TObject);
 var
-  HadMtpDevice: boolean;
-  DeviceId: string;
+  CurDevice: TBase_Device;
 begin
-  HadMtpDevice := Assigned(CurrentDevice);
-  if HadMtpDevice then
-    DeviceId := CurrentDevice.Device
-  else
-    DeviceId := '';
-
-  GetDeviceList;
+  CurDevice := TBase_Device.Clone(CurrentDevice); // Save currently selected device
   try
-    SelectDeviceById(DeviceId);
-    if CheckDevice(false) then
-    begin
-      if not (HadMtpDevice) and
-         (HasTMTPDevice(CurrentDevice)) then  // No device was connected, now it is. Read settings.
-        TGarminMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
+    GetDeviceList(CurDevice);
+    try
+      SelectDeviceById(CurDevice.Device);
+      if CheckDevice(false) then
+      begin
+        if not (CurDevice.Device = '') and
+           (HasTMTPDevice(CurrentDevice)) then  // No device was connected, now it is. Read settings.
+          TGarminMTP_Device(CurrentDevice).ReadDeviceDB(ExploreList);
 
-      RebuildDeviceDbMenu;
-      PostReloadFileList;
+        RebuildDeviceDbMenu;
+        PostReloadFileList;
+      end;
+    except
+      CloseDevice;  // Prevent needless tries
     end;
-  except
-    CloseDevice;  // Prevent needless tries
+  finally
+    CurDevice.Free;
   end;
 end;
 
@@ -1579,7 +1577,7 @@ begin
                                               GetTracksExt]));
       Clipboard.AsText := FrmShowLog.LbLog.Items.Text;
       FrmShowLog.OnSyncTreeview := SyncDiff;
-      FrmShowLog.OnReloadTrip := ReLoadTrip;
+      FrmShowLog.OnTripFileUpdating := TripFileUpdating;
       FrmShowLog.CompareGpx := OpenTrip.FileName;
       FrmShowLog.Show;
     end;
@@ -2008,11 +2006,6 @@ begin
     end;
     exit;
   end;
-end;
-
-procedure TFrmTripManager.ReloadTrip(Sender: TObject);
-begin
-  LoadTripFile(HexEditFile, DeviceFile);
 end;
 
 procedure TFrmTripManager.MnuTripEditClick(Sender: TObject);
@@ -4744,11 +4737,13 @@ begin
   CheckTrip(AListItem, LocalFile);
 end;
 
-procedure TFrmTripManager.ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent);
+procedure TFrmTripManager.ListFiles(const ListFilesDir: TListFilesDir = TListFilesDir.lfCurrent;
+                                    const SelectFile: string = '');
 var
   ABASE_Data: TBase_Data;
   SParent: Widestring;
   CrWait, CrNormal: HCURSOR;
+  Index: integer;
 begin
   if (LstFiles.Tag > 0) then
     exit;
@@ -4806,6 +4801,22 @@ begin
 
       // Now sort
       DoListViewSort(LstFiles, FSortSpecification.Column, FSortSpecification.Ascending, FSortSpecification);
+
+      // Select a file?
+      if (SelectFile <> '') then
+      begin
+        for Index := 0 to LstFiles.Items.Count -1 do
+        begin
+          if (SameText(LstFiles.Items[Index].Caption, SelectFile)) then
+          begin
+            LstFiles.Items[Index].Selected := true;
+            LstFiles.Items[Index].Focused := true;
+            LstFiles.Items[Index].MakeVisible(false);
+            break;
+          end;
+        end;
+      end;
+
     end;
   finally
     LstFiles.Tag := 0;
@@ -4814,9 +4825,15 @@ begin
 end;
 
 procedure TFrmTripManager.WMListFiles(var Msg: TMessage);
+var
+  SelectedFile: string;
 begin
+  SelectedFile := '';
+  if (LstFiles.Selected <> nil) then
+    SelectedFile := LstFiles.Selected.Caption;
+
+  ListFiles(lfCurrent, SelectedFile);
   Msg.Result := 0;
-  ListFiles;
 end;
 
 procedure TFrmTripManager.PostReloadFileList;
