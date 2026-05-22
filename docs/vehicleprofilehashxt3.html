@@ -137,7 +137,7 @@
   <div align="left">
     <br>
   </div><br clear="all" class="c10">
-  <table border="1" width="1158" cellpadding="4" cellspacing="0"
+  <table border="1" width="1182" cellpadding="4" cellspacing="0"
   class="c13">
     <tr>
       <td valign="top" width="771" height="640" class="c12">
@@ -194,7 +194,7 @@
         <div align="left"><img src="vehicleprofilehashxt3b1.JPG"
         width="767" height="278" border="0" alt="graphic"></div>
       </td>
-      <td valign="top" width="369" height="640" class="c12">
+      <td valign="top" width="393" height="640" class="c12">
         <div align="left">
           <span class="c9">Fields Vehicle_Id, Truck_Type, Name,
           GUID_Data are copied into the corresponding items.</span>
@@ -272,7 +272,7 @@
   <div align="left">
     <br>
   </div><br clear="all" class="c10">
-  <table border="1" width="1158" cellpadding="4" cellspacing="0"
+  <table border="1" width="1182" cellpadding="4" cellspacing="0"
   class="c13">
     <tr>
       <td valign="top" width="771" class="c12">
@@ -308,21 +308,22 @@
         </div>
         <div align="left">
           <span class="c14">(CM: cmAdv; AdvLvl: advL2;&nbsp;
-          HashT2: $0A7A0000;&nbsp; HashT3: $0A6AA000),</span>
+          HashT2: $0A7A0000;&nbsp; HashT3: $0A6A0000),</span>
         </div>
         <div align="left">
           <span class="c14">(CM: cmAdv; AdvLvl: advL3;&nbsp;
-          HashT2: $0AAA0000;&nbsp; HashT3: $0A3AA000),</span>
+          HashT2: $0AAA0000;&nbsp; HashT3: $0A3A0000),</span>
         </div>
         <div align="left">
           <span class="c14">(CM: cmAdv; AdvLvl: advL4;&nbsp;
-          HashT2: $0A5A0000;&nbsp; HashT3: $0A0AA000)</span>
+          HashT2: $0A5A0000;&nbsp; HashT3: $0A0A0000)</span>
         </div>
         <div align="left">
           <span class="c14">);</span>
         </div>
+        <div align="left"></div>
       </td>
-      <td valign="top" width="369" class="c12">
+      <td valign="top" width="393" class="c12">
         <div align="left">
           <span class="c9">TProfCalcMethod&nbsp; = (cmFaster = 0,
           cmShorter = 1, cmStraight = 4, cmAdv = 7);</span>
@@ -354,8 +355,8 @@
       <td valign="top" width="771" class="c12">
         <div align="left">
           <span class="c9">3. Use the high nibble of Width,
-          Env_Data and Road_Legality to 'or in' the value for
-          'Legal_Environments'.</span>
+          Env_Data and Road_Legality to add the value for
+          'Legal_Environments' to the Base_Hash.</span>
         </div>
         <div align="left">
           <span class="c14">XT3_Legal_Environments: array[0..$f,
@@ -459,7 +460,7 @@
           <span class="c14">&nbsp; );</span>
         </div>
       </td>
-      <td valign="top" width="369" class="c12">
+      <td valign="top" width="393" class="c12">
         <div align="left">
           <span class="c9">For Width use only the high
           nibble.</span>
@@ -515,7 +516,7 @@
           <span class="c11"><br></span>
         </div>
         <div align="left">
-          <span class="c16">$0A4F0000 or $A000</span> <span class=
+          <span class="c16">$0A4F0000 + $A000</span> <span class=
           "c5">=</span> <span class="c16">$0A4FA000</span>
         </div>
       </td>
@@ -524,7 +525,7 @@
   <div align="left">
     <br>
   </div><br clear="all" class="c10">
-  <table border="1" width="1158" cellpadding="4" cellspacing="0"
+  <table border="1" width="1182" cellpadding="4" cellspacing="0"
   class="c13">
     <tr>
       <td valign="top" width="849" class="c12">
@@ -555,7 +556,7 @@
           <span class="c5">0 = &gt; 0x000</span>
         </div>
       </td>
-      <td valign="top" width="291" class="c12"></td>
+      <td valign="top" width="315" class="c12"></td>
     </tr>
     <tr>
       <td valign="top" width="849" class="c12">
@@ -572,7 +573,7 @@
           value &gt; 0.</span>
         </div>
       </td>
-      <td valign="top" width="291" class="c12">
+      <td valign="top" width="315" class="c12">
         <div align="left">
           <span class="c17">Nibble 1 Speed: 0</span>
         </div>
@@ -581,7 +582,7 @@
         </div>
         <div align="left">
           <span class="c17">$0<b>A</b>4FA000 +
-          0=$0<b>A</b>4FA000</span>
+          <b>$0</b>=$0<b>A</b>4FA000</span>
         </div>
       </td>
     </tr>
@@ -703,7 +704,7 @@
           <span class="c19">&nbsp; )<b>;</b></span>
         </div>
       </td>
-      <td valign="top" width="291" height="67" class="c12">
+      <td valign="top" width="315" height="67" class="c12">
         <div align="left">
           <span class="c17">Low nibble Width: 8</span>
         </div>
@@ -757,7 +758,7 @@
         </div>
         <div align="left">
           <span class="c17">$0A4FA<b>0</b>00</span> <span class=
-          "c20">+ F00 =</span> <span class=
+          "c20">+ $F00 =</span> <span class=
           "c17">$0A4FA<b>F</b>00</span>
         </div>
       </td>
@@ -812,7 +813,7 @@
           <b>BikeSpeed3TabMetric&nbsp;</b> table.</span>
         </div>
       </td>
-      <td valign="top" width="291" class="c12">
+      <td valign="top" width="315" class="c12">
         <div align="left">
           <span class="c17">Nibble 3 speed: 0</span>
         </div>
@@ -845,7 +846,7 @@
         </div>
         <div align="left">
           <span class="c17">$0A4FAF<b>0</b>0</span> <span class=
-          "c8">+&nbsp; 20 =</span> <span class=
+          "c8">+&nbsp; $20 =</span> <span class=
           "c17">$0A4FAF<b>2</b>0</span>
         </div>
       </td>
@@ -866,7 +867,7 @@
           <span class="c5">Width 120 =&gt; 0x78</span>
         </div>
       </td>
-      <td valign="top" width="291" class="c12"></td>
+      <td valign="top" width="315" class="c12"></td>
     </tr>
     <tr>
       <td valign="top" width="849" class="c12">
@@ -875,13 +876,13 @@
         </div>
         <div align="left"></div>
       </td>
-      <td valign="top" width="291" class="c12">
+      <td valign="top" width="315" class="c12">
         <div align="left">
           <br>
         </div>
         <div align="left">
           <span class="c17">$0<b>A</b>4FA000 +
-          0=$0<b>A</b>4FA000</span>
+          <b>$0</b>=$0<b>A</b>4FA000</span>
         </div>
       </td>
     </tr>
@@ -900,7 +901,7 @@
           <span class="c5">Speed2Tab[0x08, 0x0a] = 5</span>
         </div>
       </td>
-      <td valign="top" width="291" height="45" class="c12">
+      <td valign="top" width="315" height="45" class="c12">
         <div align="left">
           <br>
         </div>
@@ -912,7 +913,7 @@
         </div>
         <div align="left">
           <span class="c17">$0A4FA<b>0</b>00</span> <span class=
-          "c8">+ 500 =</span> <span class=
+          "c8">+ $500 =</span> <span class=
           "c17">$0A4FA<b>5</b>00</span>
         </div>
       </td>
@@ -929,7 +930,7 @@
           <span class="c5">BikeSpeed3Metric[0x06] = 4</span>
         </div>
       </td>
-      <td valign="top" width="291" class="c12">
+      <td valign="top" width="315" class="c12">
         <div align="left">
           <br>
         </div>
@@ -938,7 +939,7 @@
         </div>
         <div align="left">
           <span class="c17">$0A4FA5<b>0</b>0</span> <span class=
-          "c8">+ 40 =</span> <span class=
+          "c8">+ $40 =</span> <span class=
           "c17">$0A4FA5<b>4</b>0</span>
         </div>
       </td>
