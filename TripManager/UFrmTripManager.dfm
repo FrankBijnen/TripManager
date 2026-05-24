@@ -1114,7 +1114,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1243
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1122,7 +1121,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
@@ -3649,6 +3648,18 @@ object FrmTripManager: TFrmTripManager
     object MnuProcessTrackLogs: TMenuItem
       Caption = 'Process track logs (CTRL + Click)'
       OnClick = MnuProcessTrackLogsClick
+    end
+  end
+  object PopupDropped: TPopupMenu
+    Left = 529
+    Top = 146
+    object MnuPostprocessDropped: TMenuItem
+      Caption = 'Post process'
+      OnClick = MnuPostprocessDroppedClick
+    end
+    object MnuSendToDropped: TMenuItem
+      Caption = 'Send To'
+      OnClick = MnuSendToDroppedClick
     end
   end
 end

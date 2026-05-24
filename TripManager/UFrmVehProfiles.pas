@@ -28,6 +28,7 @@ type
     BtnUnitTest: TButton;
     BtnLookupHash: TButton;
     SaveUnitTestDialog: TSaveDialog;
+    SpltGridDetail: TSplitter;
     procedure FormShow(Sender: TObject);
     procedure CDSVehProfileAfterScroll(DataSet: TDataSet);
     procedure FormResize(Sender: TObject);
@@ -44,11 +45,14 @@ type
     procedure BtnLookupHashClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure GridProfileKeyPress(Sender: TObject; var Key: Char);
+    procedure GrdVehProfileTitleClick(Column: TColumn);
   private
     { Private declarations }
     InScroll: boolean;
     FDSFields: TDSFields;
     AModel: TGarminModel;
+    OrderBy: string;
+    AscDesc: string;
     procedure SetOverridden_Hash(const NewHash: cardinal);
     procedure GrdModified(Sender: TObject; ACol, ARow: Longint; var Value: string);
     procedure LoadProfiles;
@@ -70,6 +74,12 @@ uses
   UnitTripDefs, UnitTripObjects, TripManager_Grid;
 
 {$R *.dfm}
+
+const
+  Arrow_Up    = #$25b2;
+  Arrow_Down  = #$25bc;
+  Sort_Asc    = 'Asc';
+  Sort_Desc   = 'Desc';
 
 procedure TFrmVehProfiles.BtnUnitTestClick(Sender: TObject);
 var
@@ -607,6 +617,8 @@ end;
 
 procedure TFrmVehProfiles.FormCreate(Sender: TObject);
 begin
+  OrderBy := VehicleProfileOrder;
+  AscDesc := '';
   BtnUnitTest.Visible := {$IFDEF DEBUG}true{$ELSE}false{$ENDIF};
   GridProfile.OnModified := GrdModified;
 end;
@@ -663,6 +675,31 @@ begin
   ModalResult := mrOk;
 end;
 
+procedure TFrmVehProfiles.GrdVehProfileTitleClick(Column: TColumn);
+var
+  Index: integer;
+begin
+  for Index := 0 to GrdVehProfile.Columns.Count -1 do
+    GrdVehProfile.Columns[Index].Title.Caption := GrdVehProfile.Columns[Index].FieldName;
+  if (Column.FieldName <> OrderBy) then
+  begin
+    OrderBy := Column.FieldName;
+    AscDesc := Sort_Asc;
+  end
+  else
+  begin
+    if (Sametext(AscDesc, Sort_Asc)) then
+      AscDesc := Sort_Desc
+    else
+      AscDesc := Sort_Asc;
+  end;
+  if (Sametext(AscDesc, Sort_Asc)) then
+    Column.Title.Caption := Column.Title.Caption + ' ' + Arrow_Up
+  else
+    Column.Title.Caption := Column.Title.Caption + ' ' + Arrow_Down;
+  LoadProfiles;
+end;
+
 procedure TFrmVehProfiles.GridProfileKeyPress(Sender: TObject; var Key: Char);
 var
   Sg: TStringGrid;
@@ -685,7 +722,7 @@ begin
   if not (FileExists(GetDeviceTmp + ProfileDb)) then
     exit;
   CDSVehProfile.AfterOpen := FCDSEvents.AfterOpen;
-  CDSFromQuery(GetDeviceTmp + ProfileDb, GetVehicleProfilesQuery(AModel), CDSVehProfile);
+  CDSFromQuery(GetDeviceTmp + ProfileDb, GetVehicleProfilesQuery(AModel, Format('%s %s', [OrderBy, AscDesc])), CDSVehProfile);
 end;
 
 procedure TFrmVehProfiles.PnlAllFieldsMouseEnter(Sender: TObject);

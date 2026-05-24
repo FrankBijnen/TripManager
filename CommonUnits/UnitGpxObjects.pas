@@ -1562,6 +1562,7 @@ end;
 procedure TGPXfile.ProcessTrackLogs(const TempFiles: TGPXFiles;
                                     const OutDir: string;
                                     const AStatusBar: TStatusBar = nil);
+{$IFDEF TRIPOBJECTS}
 var
   CurrentDayList: TDayList;
   DayList: TObjectDictionary<string, TDayList>;
@@ -1577,10 +1578,11 @@ var
   OutFile: string;
   CurCursor: HCURSOR;
   Comparison: TComparison<TTimedXmlVSNode>;
+{$ENDIF}
 begin
+{$IFDEF TRIPOBJECTS}
   CurCursor := GetCursor;
   MinTimeAutoStop := TProcessOptions.GetMinTimeTrackPoints;
-
   Comparison :=
     function(const Left, Right: TTimedXmlVSNode): Integer
     begin
@@ -1706,6 +1708,7 @@ begin
   finally
     DayList.Free;
   end;
+{$ENDIF}
 end;
 
 // Add AllTracks to FrmSelectGpx

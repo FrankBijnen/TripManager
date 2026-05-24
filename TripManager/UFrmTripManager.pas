@@ -238,6 +238,9 @@ type
     MnuPostProcess: TMenuItem;
     MenuItem2: TMenuItem;
     MnuProcessTrackLogs: TMenuItem;
+    PopupDropped: TPopupMenu;
+    MnuPostprocessDropped: TMenuItem;
+    MnuSendToDropped: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -358,6 +361,8 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure PctHexOsmChange(Sender: TObject);
     procedure PnlTripGpiInfoDblClick(Sender: TObject);
+    procedure MnuPostprocessDroppedClick(Sender: TObject);
+    procedure MnuSendToDroppedClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -1699,6 +1704,11 @@ begin
   MnuNextDiff.ShortCut := TextToShortCut('Alt+Down'); //Tshortcut(32808);
 end;
 
+procedure TFrmTripManager.MnuPostprocessDroppedClick(Sender: TObject);
+begin
+  PostProcessClick(Self);
+end;
+
 procedure TFrmTripManager.PostProcessClick(Sender: TObject);
 var
   AnItem: TListItem;
@@ -2333,6 +2343,11 @@ begin
   CmbDevices.Text := SelectMTPDevice;
   CmbDevices.ItemIndex := TModelConv.FirstKnownDeviceIndex(DeviceList);
   SelectDevice(CmbDevices.ItemIndex);
+end;
+
+procedure TFrmTripManager.MnuSendToDroppedClick(Sender: TObject);
+begin
+  BtnSendToClick(Self);
 end;
 
 procedure TFrmTripManager.SelectDeviceById(const Device: string);
@@ -5528,8 +5543,12 @@ var
   FNames: TStringList;
   Index: integer;
   HasGpx: boolean;
+  ShiftPressed: boolean;
+  Pt: TPoint;
 begin
   HasGpx := false;
+  ShiftPressed := (GetAsyncKeyState(VK_SHIFT) and $8000) <> 0;
+  Pt := Mouse.CursorPos;
   FNames := TStringList.Create;
   try
     NumFiles := DragQueryFile(Msg.Drop, UINT(-1), nil, 0);
@@ -5569,7 +5588,12 @@ begin
     DragFinish(Msg.Drop);
   end;
   if (HasGpx) then
-    PostProcessClick(Self);
+  begin
+    if ShiftPressed then
+      PopupDropped.Popup(Pt.X, Pt.Y)
+    else
+      PostProcessClick(Self);
+  end;
 end;
 
 procedure TFrmTripManager.WMDirChanged(var Msg: TMessage);

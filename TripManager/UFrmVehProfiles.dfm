@@ -84,6 +84,14 @@ object FrmVehProfiles: TFrmVehProfiles
     TabOrder = 0
     object TabAllProfiles: TTabSheet
       Caption = 'All Profiles'
+      object SpltGridDetail: TSplitter
+        Left = 0
+        Top = 139
+        Width = 841
+        Height = 5
+        Cursor = crVSplit
+        Align = alTop
+      end
       object GrdVehProfile: TDBGrid
         Left = 0
         Top = 0
@@ -100,6 +108,7 @@ object FrmVehProfiles: TFrmVehProfiles
         TitleFont.Name = 'Segoe UI'
         TitleFont.Style = []
         OnDblClick = GrdVehProfileDblClick
+        OnTitleClick = GrdVehProfileTitleClick
         Columns = <
           item
             Expanded = False
@@ -138,19 +147,21 @@ object FrmVehProfiles: TFrmVehProfiles
       end
       object PctDetails: TPageControl
         Left = 0
-        Top = 139
+        Top = 144
         Width = 841
-        Height = 561
+        Height = 556
         ActivePage = TabTripFiles
         Align = alClient
         TabOrder = 1
+        ExplicitTop = 139
+        ExplicitHeight = 561
         object TabTripFiles: TTabSheet
           Caption = 'Trip file items'
           object GridProfile: TStringGrid
             Left = 0
             Top = 0
             Width = 833
-            Height = 531
+            Height = 526
             Align = alClient
             ColCount = 3
             DefaultColWidth = 230
@@ -167,6 +178,7 @@ object FrmVehProfiles: TFrmVehProfiles
             TabOrder = 0
             StyleElements = []
             OnKeyPress = GridProfileKeyPress
+            ExplicitHeight = 531
             RowHeights = (
               24
               24
@@ -182,7 +194,7 @@ object FrmVehProfiles: TFrmVehProfiles
             Left = 0
             Top = 0
             Width = 833
-            Height = 531
+            Height = 526
             VertScrollBar.Tracking = True
             Align = alClient
             TabOrder = 0

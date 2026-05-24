@@ -8,8 +8,10 @@ uses
   SQLiteWrap,
   UnitGpxDefs, UnitVehProfile;
 
-type
+const
+  VehicleProfileOrder = 'Status desc, v.vehicle_id asc';
 
+type
   TCDSEvents = class(TObject)
   public
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
@@ -44,7 +46,8 @@ function CDSFromQuery(const DbName: string;
 function GetAvoidancesChanged(const DbName: string): string;
 procedure GetExploreList(const DBName: string;
                          const ExploreList: TStrings);
-function GetVehicleProfilesQuery(const Model: TGarminModel): string;
+function GetVehicleProfilesQuery(const Model: TGarminModel;
+                                 const OrderBy: string): string;
 function GetVehicleProfile(const DbName: string;
                            const Model: TGarminModel;
                            const OnlyActive: boolean;
@@ -435,7 +438,8 @@ begin
   end;
 end;
 
-function GetVehicleProfilesQuery(const Model: TGarminModel): string;
+function GetVehicleProfilesQuery(const Model: TGarminModel;
+                                 const OrderBy: string): string;
 begin
   case Model of
     TGarminModel.Tread2,
@@ -451,7 +455,7 @@ begin
         'from vehicle_profile v' + CRLF +
         'join properties_dbg g on (g.value = v.vehicle_id and g."description:1" = ''guid'') ' + CRLF +
         'join properties_dbg e on (e.key_id = g.key_id and e."description:1" like ''environmental%'')' + CRLF +
-        'order by Status desc, v.vehicle_id asc';
+        'order by ' + OrderBy;
     else
       result :=
         'select' + CRLF +
@@ -475,7 +479,7 @@ begin
   ACds := TClientDataSet.Create(nil);
   try
     ACds.AfterOpen := FCDSEvents.AfterOpen;
-    CDSFromQuery(DbName, GetVehicleProfilesQuery(Model), ACds);
+    CDSFromQuery(DbName, GetVehicleProfilesQuery(Model, VehicleProfileOrder), ACds);
     ACds.First;
     while not ACds.Eof do
     begin
