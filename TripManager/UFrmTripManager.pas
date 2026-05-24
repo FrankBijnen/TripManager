@@ -5543,11 +5543,13 @@ var
   FNames: TStringList;
   Index: integer;
   HasGpx: boolean;
-  ShiftPressed: boolean;
+  PopupMenu: boolean;
   Pt: TPoint;
 begin
   HasGpx := false;
-  ShiftPressed := (GetAsyncKeyState(VK_SHIFT) and $8000) <> 0;
+  PopupMenu := ((GetAsyncKeyState(VK_SHIFT) and $8000) <> 0) or
+               ((GetAsyncKeyState(VK_CONTROL) and $8000) <> 0);
+
   Pt := Mouse.CursorPos;
   FNames := TStringList.Create;
   try
@@ -5589,7 +5591,7 @@ begin
   end;
   if (HasGpx) then
   begin
-    if ShiftPressed then
+    if PopupMenu then
       PopupDropped.Popup(Pt.X, Pt.Y)
     else
       PostProcessClick(Self);
