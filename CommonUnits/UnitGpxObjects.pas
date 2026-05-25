@@ -2150,7 +2150,7 @@ var
 begin
   result := TXmlVSNodeList.Create(false);
 
-  // First add the rreferred (trk, or rte)
+  // First add the preferred (trk, or rte)
   for Track in FTrackList do
   begin
     DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
@@ -2185,7 +2185,7 @@ begin
   result := GetSelected(TrkOrigin);
 end;
 
-// Prefer origin <trk>
+// Prefer origin <rte>
 function TGPXFile.GetSelectedRoutes: TXmlVSNodeList;
 begin
   result := GetSelected(RteOrigin);
@@ -2546,36 +2546,53 @@ var
   RteNode, GpxNode: TXmlVSNode;
   Node2Delete: TXmlVSNode;
   Node2DeletePos: integer;
+  RoutesProcessed: TXmlVSNodeList;
+  RouteName: string;
 begin
-  GpxNode := FXmlDocument.ChildNodes.find('gpx');  // Look for <gpx> node
-  if (GpxNode = nil) or
-   (GpxNode.Name <> 'gpx') then
-    exit;
+  RoutesProcessed := GetSelectedRoutes;
+  try
+    GpxNode := FXmlDocument.ChildNodes.find('gpx');  // Look for <gpx> node
+    if (GpxNode = nil) or
+     (GpxNode.Name <> 'gpx') then
+      exit;
 
-  // Remove WayPt and Trk from GPX
-  for Node2DeletePos := GpxNode.ChildNodes.Count -1 downto 0 do
-  begin
-    Node2Delete := GpxNode.ChildNodes[Node2DeletePos];
-
-    if (DeleteWayPtsInRoute) and
-       (Node2Delete.Name = 'wpt') then
+    // Remove WayPt and Trk from GPX
+    for Node2DeletePos := GpxNode.ChildNodes.Count -1 downto 0 do
     begin
-      GpxNode.ChildNodes.Delete(Node2DeletePos);
-      continue;
+      Node2Delete := GpxNode.ChildNodes[Node2DeletePos];
+
+      if (DeleteWayPtsInRoute) and
+         (Node2Delete.Name = 'wpt') then
+      begin
+        GpxNode.ChildNodes.Delete(Node2DeletePos);
+        continue;
+      end;
+
+      if (DeleteTracksInRoute) and
+         (Node2Delete.Name = 'trk') then
+      begin
+        GpxNode.ChildNodes.Delete(Node2DeletePos);
+        continue;
+      end;
+
+      RouteName := FindSubNodeValue(Node2Delete, 'name');
+      if (Node2Delete.Name = 'rte') and
+         (RoutesProcessed.Find(RouteName) = nil) then // Delete routes not selected
+      begin
+        GpxNode.ChildNodes.Delete(Node2DeletePos);
+        continue;
+      end;
+
     end;
 
-    if (DeleteTracksInRoute) and
-       (Node2Delete.Name = 'trk') then
+    for RteNode in GpxNode.ChildNodes do
     begin
-      GpxNode.ChildNodes.Delete(Node2DeletePos);
-      continue
+      if (RteNode.Name = 'rte') then // Only want <rte> nodes. No <trk> or <wpt>
+        StripRte(RteNode);
     end;
-  end;
 
-  for RteNode in GpxNode.ChildNodes do
-  begin
-    if (RteNode.Name = 'rte') then // Only want <rte> nodes. No <trk> or <wpt>
-      StripRte(RteNode);
+  finally
+    RoutesProcessed.Free;
   end;
 
   OutFile := FOutDir +
@@ -2922,6 +2939,8 @@ begin
     for Func in AllFuncs do
     begin
       case Func of
+        CreateRoutes:
+          SubCaption := AddSubCaption(SubCaption, 'Routes');
         CreateTracks:
           SubCaption := AddSubCaption(SubCaption, 'Tracks');
         CreateKML:
