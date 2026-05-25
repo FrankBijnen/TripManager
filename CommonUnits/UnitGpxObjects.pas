@@ -2002,6 +2002,7 @@ var
   BmpId: integer;
   IsViaPt: boolean;
   ExtensionsNode: TXmlVSNode;
+  RoutesProcessed: TXmlVSNodeList;
 {$ENDIF}
 begin
 {$IFDEF GPI}
@@ -2027,32 +2028,39 @@ begin
 
   // Create Way points, from Via, or Shaping points in routes.
   // Create a file per route/track
-    if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
-       (ProcessOptions.ProcessWayPtsFromRoute) then
-    begin
-      for RouteWayPoints in FWayPointFromRouteList do
+    RoutesProcessed := GetSelectedRoutes;
+    try
+      if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
+         (ProcessOptions.ProcessWayPtsFromRoute) then
       begin
-        CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
-
-        for WayPoint in RouteWayPoints.ChildNodes do
+        for RouteWayPoints in FWayPointFromRouteList do
         begin
-          if (WayPointNotProcessed(WayPoint)) then
-          begin
-            IsViaPt := false;
-            ExtensionsNode := WayPoint.find('extensions');
-            if (ExtensionsNode <> nil) then
-              IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+          if (RoutesProcessed.Find(RouteWayPoints.Name) = nil) then
+            continue;
+          CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
 
-            if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
-               ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
+          for WayPoint in RouteWayPoints.ChildNodes do
+          begin
+            if (WayPointNotProcessed(WayPoint)) then
             begin
-              BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-              PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+              IsViaPt := false;
+              ExtensionsNode := WayPoint.find('extensions');
+              if (ExtensionsNode <> nil) then
+                IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+
+              if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
+                 ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
+              begin
+                BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+                PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+              end;
             end;
           end;
-        end;
 
+        end;
       end;
+    finally
+      RoutesProcessed.Free;
     end;
 
     POIGroup.Write(S);
@@ -2547,7 +2555,6 @@ var
   Node2Delete: TXmlVSNode;
   Node2DeletePos: integer;
   RoutesProcessed: TXmlVSNodeList;
-  RouteName: string;
 begin
   RoutesProcessed := GetSelectedRoutes;
   try
@@ -2575,9 +2582,8 @@ begin
         continue;
       end;
 
-      RouteName := FindSubNodeValue(Node2Delete, 'name');
       if (Node2Delete.Name = 'rte') and
-         (RoutesProcessed.Find(RouteName) = nil) then // Delete routes not selected
+         (RoutesProcessed.Find(FindSubNodeValue(Node2Delete, 'name')) = nil) then // Delete routes not selected
       begin
         GpxNode.ChildNodes.Delete(Node2DeletePos);
         continue;
@@ -2943,6 +2949,8 @@ begin
           SubCaption := AddSubCaption(SubCaption, 'Routes');
         CreateTracks:
           SubCaption := AddSubCaption(SubCaption, 'Tracks');
+        CreatePOI:
+          SubCaption := AddSubCaption(SubCaption, 'POI');
         CreateKML:
           SubCaption := AddSubCaption(SubCaption, 'Kml');
         CreateHTML:
