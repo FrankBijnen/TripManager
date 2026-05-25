@@ -378,11 +378,9 @@ var
   SaveRecNo: integer;
   Locations: TmLocations;
   Links: TmAllLinks;
-  TmpStream: TMemoryStream;
   ANItem: TBaseItem;
-  ProcessOptions: TProcessOptions;
-  RoutePoint: TRoutePoint;
   P: integer;
+  Location2Add: TLocation2Add;
 begin
   if (CdsRoute.State in [dsEdit, dsInsert]) then
     CdsRoute.Post;
@@ -392,9 +390,6 @@ begin
 
   SaveRecNo := CdsRoutePoints.RecNo;
   CdsRoutePoints.DisableControls;
-  TmpStream := TMemoryStream.Create;
-  ProcessOptions := TProcessOptions.Create;
-  ProcessOptions.TripModel := TTripList(FTripList).TripModel;
   try
     Locations := TmLocations(TTripList(FTripList).GetItem('mLocations'));
     if not (Assigned(Locations)) then
@@ -404,23 +399,23 @@ begin
     CdsRoutePoints.First;
     while not CdsRoutePoints.Eof do
     begin
+      Location2Add := Default(TLocation2Add);
+      Location2Add.TripModel := TTripList(FTripList).TripModel;
       if (CdsRoutePointsViaPoint.AsBoolean) or
          (CdsRoutePoints.RecNo = 1) or
          (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
-        RoutePoint := TRoutePoint.rpVia
+        Location2Add.RoutePoint := TRoutePoint.rpVia
       else
-        RoutePoint := TRoutePoint.rpShaping;
+        Location2Add.RoutePoint := TRoutePoint.rpShaping;
+      Location2Add.RoutePref      := TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger));
+      Location2Add.AdvLevel       := TAdvlevel(Lo(CdsRoutePointsRoutePref.AsInteger));
+      Location2Add.Lat            := StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings);
+      Location2Add.Lon            := StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings);
+      Location2Add.DepartureDate  := 0;
+      Location2Add.Name           := CdsRoutePointsName.AsString;
+      Location2Add.Address        := CdsRoutePointsAddress.AsString;
+      TTripList(FTripList).AddLocation(Location2Add);
 
-      TTripList(FTripList).AddLocation(Locations,
-                                       ProcessOptions,
-                                       RoutePoint,
-                                       TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger)),
-                                       TAdvlevel(Lo(CdsRoutePointsRoutePref.AsInteger)),
-                                       StrToFloatDef(CdsRoutePointsLat.AsString, 0, FloatFormatSettings),
-                                       StrToFloatDef(CdsRoutePointsLon.AsString, 0, FloatFormatSettings),
-                                       0,
-                                       CdsRoutePointsName.AsString,
-                                       CdsRoutePointsAddress.AsString);
       CdsRoutePoints.Next;
     end;
 
@@ -465,8 +460,6 @@ begin
 
     end;
   finally
-    TmpStream.Free;
-    ProcessOptions.Free;
     CdsRoutePoints.RecNo := SaveRecNo;
     CdsRoutePoints.EnableControls;
   end;

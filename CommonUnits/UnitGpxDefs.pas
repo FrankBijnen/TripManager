@@ -3,7 +3,7 @@ unit UnitGpxDefs;
 interface
 
 uses
-  UnitVerySimpleXml, System.Generics.Collections;
+  UnitVerySimpleXml;
 
 const
   EarthRadiusKm: Double       = 6371.009;
@@ -41,20 +41,6 @@ type
   // Note: See TModelConv for mapping to TripModel
   TGarminModel  = (XT, XT2, XT3, Tread2, Zumo595, Zumo590, Zumo3x0, Drive51, Drive66, Nuvi2595, GarminEdge, GarminGeneric, Unknown);
 
-  // Trip Info to CSV
-  TTripInfo = class(TObject)
-    SegmentId: integer;
-    RoutePointId: integer;
-    RoutePoint: string;
-    RoadClass: byte;
-    MapSegRoadId: string;
-    Description: string;
-    Coords: string;
-    Speed: integer;
-    Distance: double;
-    Time: double;
-  end;
-  TTripInfoList = TObjectDictionary<string, TTripInfo>;
   TTagsToShow = (WptRte = 1, WptTrk = 2, WptRteTrk = 3, RteTrk = 10, Rte = 20, Trk = 30);
   THtmlOutput = (OSM, Kurviger, Both);
 

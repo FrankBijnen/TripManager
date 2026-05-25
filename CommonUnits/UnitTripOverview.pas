@@ -3,30 +3,76 @@ unit UnitTripOverview;
 interface
 
 uses
-  System.Classes, System.SysUtils, System.Generics.Collections,
-  UnitGpxDefs;
+  System.Generics.Collections;
+
+type
+  TTripInfoKey = record
+    SegmentId: integer;
+    RoutePointId: integer;
+    UdbId: integer;
+    function GetKey: string;
+  end;
+
+  TTripInfoData = record
+    RoutePoint: string;
+    RoadClass: byte;
+    MapSegRoadId : string;
+    Description: string;
+    Coords: string;
+    Speed: integer;
+    Dist: double;
+    Time: double;
+  end;
+
+  TTripInfo = class(TObject)
+    SegmentId: integer;
+    RoutePointId: integer;
+    RoutePoint: string;
+    RoadClass: byte;
+    MapSegRoadId: string;
+    Description: string;
+    Coords: string;
+    Speed: integer;
+    Distance: double;
+    Time: double;
+    constructor Create(const TripKey: TTripInfoKey;
+                       const TripData: TTripInfoData);
+
+  end;
+  TTripInfoList = TObjectDictionary<string, TTripInfo>;
+
 
 function TripTimeAsHrMin(AValue: cardinal): string;
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
-                       const SegmentId, RoutePointId, UdbId: integer;
-                       const RoutePoint, RoadClass: string;
-                       const UdbDir: TObject;
-                       const Dist: double;
-                       const Time: double;
-                       const Speed: integer): word; overload;
-procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
-                        const SegmentId, RoutePointId, UdbId: integer;
-                        const RoutePoint: string;
-                        const UdbDir: TObject;
-                        const Dist: double;
-                        const Time: word); overload;
+                       const TripKey: TTripInfoKey;
+                       const TripData: TTripInfoData): word;
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);
 
 implementation
 
 uses
-  System.Math,
-  UnitTripObjects, UnitProcessOptions;
+  System.Classes, System.SysUtils, System.Math,
+  UnitGpxDefs;
+
+function TTripInfoKey.GetKey: string;
+begin
+  result := Format('%.3d_%.3d_%.5d', [SegmentId, RoutePointId, UdbId]);
+end;
+
+constructor TTripInfo.Create(const TripKey: TTripInfoKey;
+                             const TripData: TTripInfoData);
+begin
+  inherited Create;
+
+  SegmentId := TripKey.SegmentId;
+  RoutePointId := TripKey.RoutePointId;
+  RoutePoint := TripData.RoutePoint;
+  RoadClass := TripData.RoadClass;
+  MapSegRoadId := TripData.MapSegRoadId;
+  Coords := TripData.Coords;
+  Speed := TripData.Speed;
+  Description := TripData.Description;
+end;
 
 function TripTimeAsHrMin(AValue: cardinal): string;
 var
@@ -53,66 +99,23 @@ begin
 end;
 
 function AddToTripInfo(const ATripInfoList: TTripInfoList;
-                       const SegmentId, RoutePointId, UdbId: integer;
-                       const RoutePoint, RoadClass: string;
-                       const UdbDir: TObject;
-                       const Dist: double;
-                       const Time: double;
-                       const Speed: integer): word;
-var
-  ATripInfo: TTripInfo;
-  DistTime: double;
-  TripInfoKey: string;
-begin
-  TripInfoKey := Format('%.3d_%.3d_%.5d', [SegmentId, RoutePointId, UdbId]);
-  if (ATripInfoList.ContainsKey(TripInfoKey)) then
-    ATripInfo := ATripInfoList.Items[TripInfoKey]
-  else
-  begin
-    ATripInfo := TTripInfo.Create;
-    ATripInfo.SegmentId := SegmentId;
-    ATripInfo.RoutePointId := RoutePointId;
-    ATripInfo.RoutePoint := RoutePoint;
-    ATripInfo.RoadClass := StrToIntDef('$' + RoadClass, 0);
-    ATripInfo.MapSegRoadId := TUdbDir(UdbDir).MapSegRoadDisplay;
-    ATripInfo.Description := TProcessOptions.DescriptionFromRoadClass(ATripInfo.RoadClass);
-    ATripInfo.Coords := TUdbDir(UdbDir).MapCoords;
-    ATripInfo.Speed := Speed;
-    ATripInfoList.Add(TripInfoKey, ATripInfo);
-  end;
-  DistTime := Time;
-  ATripInfo.Distance := ATripInfo.Distance + Dist;
-  ATripInfo.Time := ATripInfo.Time + DistTime;
-  result := Min($fffe, Round(DistTime));
-end;
-
-procedure AddToTripInfo(const ATripInfoList: TTripInfoList;
-                        const SegmentId, RoutePointId, UdbId: integer;
-                        const RoutePoint: string;
-                        const UdbDir: TObject;
-                        const Dist: double;
-                        const Time: word);
+                       const TripKey: TTripInfoKey;
+                       const TripData: TTripInfoData): word;
 var
   ATripInfo: TTripInfo;
   TripInfoKey: string;
 begin
-  TripInfoKey := Format('%.3d_%.3d_%.5d', [SegmentId, RoutePointId, UdbId]);
+  TripInfoKey := TripKey.GetKey;
   if (ATripInfoList.ContainsKey(TripInfoKey)) then
     ATripInfo := ATripInfoList.Items[TripInfoKey]
   else
   begin
-    ATripInfo := TTripInfo.Create;
-    ATripInfo.SegmentId := SegmentId;
-    ATripInfo.RoutePointId := RoutePointId;
-    ATripInfo.RoutePoint := RoutePoint;
-    ATripInfo.MapSegRoadId := TUdbDir(UdbDir).MapSegRoadDisplay;
-    ATripInfo.Description := TProcessOptions.DescriptionFromRoadClass(ATripInfo.RoadClass);
-    ATripInfo.Coords := TUdbDir(UdbDir).MapCoords;
-    ATripInfo.Speed := 0;
+    ATripInfo := TTripInfo.Create(TripKey, TripData);
     ATripInfoList.Add(TripInfoKey, ATripInfo);
   end;
-  ATripInfo.Distance := ATripInfo.Distance + Dist;
-  ATripInfo.Time := ATripInfo.Time + Time;
+  ATripInfo.Distance := ATripInfo.Distance + TripData.Dist;
+  ATripInfo.Time := ATripInfo.Time + TripData.Time;
+  result := Min($fffe, Round(TripData.Time));
 end;
 
 procedure ExportTripInfoToCSV(const ATripInfoList: TTripInfoList; const CSVFile: string);

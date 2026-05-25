@@ -32,6 +32,24 @@ type
                        rpExtShaping       = 2);
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
+
+  TUnixDateConv = class
+    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
+    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
+    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
+  end;
+
+  TLocation2Add = record
+    TripModel: TTripModel;
+    RoutePoint: TRoutePoint;
+    RoutePref: TRoutePreference;
+    AdvLevel: TAdvlevel;
+    Lat, Lon: double;
+    DepartureDate: TDateTime;
+    Name: string;
+    Address: string;
+  end;
+
   TTripVersion      = packed record
                         Major: Cardinal;
                         Minor: Cardinal;
@@ -44,11 +62,6 @@ type
                         function HandleTrailer: boolean;
                         function CanCheckSystemTrips: boolean;
                       end;
-  TUnixDateConv = class
-    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
-    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
-    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
-  end;
 
 const
   TripExtension           = '.trip';
@@ -60,7 +73,7 @@ const
   PosnLarge               = 16;
 
 // The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
-// Assign unique sizes for model UNKNOWN to Unknown2Size and Unknown3Size
+// Assign unique sizes for model UNKNOWN to Unknown3Size
 // Model specific values                              XT        XT2       XT3       Tread 2   Zumo 595  Zumo 590  Zumo 3x0  Drive 51  Drive 66  nuvi 2595 Unknown
   NeedRecreateTrips:  array[TTripModel] of boolean  =(false,    false,    false,    false,    false,    false,    true,     false,    false,    true,     false);
   UdbDirNameSize:     array[TTripModel] of integer  =(121 * 4,  121 * 4,  121 * 4,  121 * 4,  32 * 2,   32 * 2,   66 * 2,   32 * 2,   121 * 4,  21 * 2,   0);

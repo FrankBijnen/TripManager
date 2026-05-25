@@ -6,7 +6,7 @@ interface
 uses
   System.SysUtils, System.Variants, System.Classes, System.Generics.Collections,
   Winapi.Windows,
-  UnitTripDefs, UnitGpxDefs;
+  UnitTripOverview, UnitTripDefs, UnitGpxDefs;
 
 const
 
@@ -73,8 +73,8 @@ const
                                                           (Value: Ord(rpExtShaping);        Name: 'Extended Shaping point')
                                                         );
 type
-  TTripList = class;
 
+  TTripList = class;
   TOSMRoutePoint = record
     Name: string;
     MapCoords: string;
@@ -979,75 +979,26 @@ type
     procedure UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
     procedure Trip2XmlRte(Rte: TObject);
     procedure Trip2XmlTrk(Trk: TObject);
-    procedure AddLocation_XT(Locations: TmLocations;
-                             ProcessOptions: TObject;
-                             RoutePoint: TRoutePoint;
-                             Lat, Lon: double;
-                             DepartureDate: TDateTime;
-                             Name, Address: string);
-    procedure AddLocation_XT2(Locations: TmLocations;
-                             ProcessOptions: TObject;
-                             RoutePoint: TRoutePoint;
-                             RoutePref: TRoutePreference;
-                             AdvLevel: TAdvlevel;
-                             Lat, Lon: double;
-                             DepartureDate: TDateTime;
-                             Name, Address: string);
-    procedure AddLocation_XT3(Locations: TmLocations;
-                             ProcessOptions: TObject;
-                             RoutePoint: TRoutePoint;
-                             RoutePref: TRoutePreference;
-                             AdvLevel: TAdvlevel;
-                             Lat, Lon: double;
-                             DepartureDate: TDateTime;
-                             Name, Address: string);
-    procedure AddLocation_Tread2(Locations: TmLocations;
-                             ProcessOptions: TObject;
-                             RoutePoint: TRoutePoint;
-                             RoutePref: TRoutePreference;
-                             AdvLevel: TAdvlevel;
-                             Lat, Lon: double;
-                             DepartureDate: TDateTime;
-                             Name, Address: string);
-    procedure AddLocation_Zumo595(Locations: TmLocations;
-                                  ProcessOptions: TObject;
-                                  RoutePoint: TRoutePoint;
-                                  Lat, Lon: double;
-                                  DepartureDate: TDateTime;
-                                  Name, Address: string);
-    procedure AddLocation_Zumo590(Locations: TmLocations;
-                                  ProcessOptions: TObject;
-                                  RoutePoint: TRoutePoint;
-                                  Lat, Lon: double;
-                                  DepartureDate: TDateTime;
-                                  Name, Address: string);
-    procedure AddLocation_Drive51(Locations: TmLocations;
-                                  ProcessOptions: TObject;
-                                  RoutePoint: TRoutePoint;
-                                  Lat, Lon: double;
-                                  DepartureDate: TDateTime;
-                                  Name, Address: string);
-    procedure AddLocation_Drive66(Locations: TmLocations;
-                             ProcessOptions: TObject;
-                             RoutePoint: TRoutePoint;
-                             RoutePref: TRoutePreference;
-                             AdvLevel: TAdvlevel;
-                             Lat, Lon: double;
-                             DepartureDate: TDateTime;
-                             Name, Address: string);
-    procedure AddLocation_Zumo3x0(Locations: TmLocations;
-                                  ProcessOptions: TObject;
-                                  RoutePoint: TRoutePoint;
-                                  Lat, Lon: double;
-                                  DepartureDate: TDateTime;
-                                  Name, Address: string);
-    procedure AddLocation_nuvi2595(Locations: TmLocations;
-                                  ProcessOptions: TObject;
-                                  RoutePoint: TRoutePoint;
-                                  RoutePref: TRoutePreference;
-                                  Lat, Lon: double;
-                                  DepartureDate: TDateTime;
-                                  Name, Address: string);
+    procedure AddLocation_XT(const Locations: TmLocations;
+                             const Location2Add: TLocation2Add);
+    procedure AddLocation_XT2(const Locations: TmLocations;
+                              const Location2Add: TLocation2Add);
+    procedure AddLocation_XT3(const Locations: TmLocations;
+                              const Location2Add: TLocation2Add);
+    procedure AddLocation_Tread2(const Locations: TmLocations;
+                                 const Location2Add: TLocation2Add);
+    procedure AddLocation_Zumo595(const Locations: TmLocations;
+                                  const Location2Add: TLocation2Add);
+    procedure AddLocation_Zumo590(const Locations: TmLocations;
+                                  const Location2Add: TLocation2Add);
+    procedure AddLocation_Drive51(const Locations: TmLocations;
+                                  const Location2Add: TLocation2Add);
+    procedure AddLocation_Drive66(const Locations: TmLocations;
+                                  const Location2Add: TLocation2Add);
+    procedure AddLocation_Zumo3x0(const Locations: TmLocations;
+                                  const Location2Add: TLocation2Add);
+    procedure AddLocation_nuvi2595(const Locations: TmLocations;
+                                   const Location2Add: TLocation2Add);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT3(const TripName, CalculationMode, TransportMode: string);
@@ -1084,14 +1035,7 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
-    procedure AddLocation(Locations: TmLocations;
-                          ProcessOptions: TObject;
-                          RoutePoint: TRoutePoint;
-                          RoutePref: TRoutePreference;
-                          AdvLevel: TAdvlevel;
-                          Lat, Lon: double;
-                          DepartureDate: TDateTime;
-                          Name, Address: string);
+    procedure AddLocation(const Location2Add: TLocation2Add); overload;
     procedure SetSegmentRoutePrefs(Locations: TmLocations; ProcessOptions: TObject);
     procedure SetRoundTripPrefs(Locations: TmLocations; ProcessOptions: TObject);
     procedure ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
@@ -1126,7 +1070,7 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo, System.UITypes,
   Vcl.Dialogs,
-  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions, UnitTripOverview;
+  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
 
 const
   Coord_Decimals                      = '%1.6f';
@@ -3992,8 +3936,8 @@ var
   PrevUdbDir, RtePtUdbDir, AnUdbDir: TUdbDir;
   SelModel, AModel: TTripModel;
   Diff: Int64;
-  Distance: double;
-  DistTime: word;
+  TripData: TTripInfoData;
+  TripKey: TTripInfoKey;
 begin
   inherited InitFromStream(AName, SizeOf(FValue), ADataType, AStream);
   FUdBList := TUdbHandleList.Create;
@@ -4002,9 +3946,11 @@ begin
   AStream.Read(FValue.UdbHandleCount, SizeOf(FValue.UdbHandleCount));
   FValue.UdbHandleCount := Swap32(FValue.UdbHandleCount);
 
+  TripKey := Default(TTripInfoKey);
   RtePtCnt := 0;
   for UdbHandleCnt := 0 to FValue.UdbHandleCount -1 do
   begin
+    TripKey.SegmentId := UdbHandleCnt;
     AnUdbHandle := TmUdbDataHndl.Create(UdbHandleCnt);
     AnUdbHandle.SetTripList(TripList);
 
@@ -4049,6 +3995,7 @@ begin
     RtePtUdbDir := nil;
     for UdbDirCnt := 0 to AnUdbHandle.FValue.UDbDirCount -1 do
     begin
+      TripKey.UdbId := UdbDirCnt;
       AnUdbDir := TUdbDir.Create('');
       AnUdbDir.SetTripList(TripList);
       AStream.Read(AnUdbDir.FValue, SizeOf(AnUdbDir.FValue));
@@ -4062,24 +4009,31 @@ begin
 
       if (PrevUdbDir <> nil) then
       begin
+
+        TripData := Default(TTripInfoData);
         if (PrevUdbDir.FValue.SubClass.IsKnownRoutePoint) then
         begin
-          Inc(RtePtCnt);
           RtePtUdbDir := PrevUdbDir;
-          AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
-                        RtePtUdbDir.GetName,
-                        PrevUdbDir, 0, 0);
+
+          Inc(RtePtCnt);
+          TripKey.RoutePointId := RtePtCnt;
         end
         else
         begin
-          DistTime := PrevUdbDir.FValue.Time;
-          Distance := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
           if (RtePtUdbDir = nil) then // Failsafe.
             RtePtUdbDir := PrevUdbDir;
-          AddToTripInfo(Triplist.FTripInfoList, UdbHandleCnt, RtePtCnt, UdbDirCnt,
-                        RtePtUdbDir.GetName,
-                        PrevUdbDir, Distance, DistTime);
+
+          TripData.Time := PrevUdbDir.FValue.Time;
+          TripData.Dist := CoordDistance(PrevUdbDir.Coords, AnUdbDir.Coords, TDistanceUnit.duKm);
         end;
+        TripData.RoutePoint := RtePtUdbDir.GetName;
+        TripData.MapSegRoadId := PrevUdbDir.MapSegRoadDisplay;
+        TripData.Description := PrevUdbDir.GetName;
+        TripData.Coords := PrevUdbDir.MapCoords;
+
+        AddToTripInfo(Triplist.FTripInfoList,
+                      TripKey,
+                      TripData);
       end;
       PrevUdbDir := AnUdbDir;
     end;
@@ -4899,71 +4853,55 @@ begin
 end;
 
 
-procedure TTripList.AddLocation_XT(Locations: TmLocations;
-                                   ProcessOptions: TObject;
-                                   RoutePoint: TRoutePoint;
-                                   Lat, Lon: double;
-                                   DepartureDate: TDateTime;
-                                   Name, Address: string);
+procedure TTripList.AddLocation_XT(const Locations: TmLocations;
+                                   const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
 
-  Locations.Add(TmAttr.Create(RoutePoint));
+  Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
-  Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.XT]));
-  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT]));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
   Locations.Add(TmisTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
-  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmName.Create(Location2Add.Name));
 end;
 
-procedure TTripList.AddLocation_XT2(Locations: TmLocations;
-                                    ProcessOptions: TObject;
-                                    RoutePoint: TRoutePoint;
-                                    RoutePref: TRoutePreference;
-                                    AdvLevel: TAdvlevel;
-                                    Lat, Lon: double;
-                                    DepartureDate: TDateTime;
-                                    Name, Address: string);
+procedure TTripList.AddLocation_XT2(const Locations: TmLocations;
+                                    const Location2Add: TLocation2Add);
 var
   TmpStream : TMemoryStream;
 begin
   TmpStream := TMemoryStream.Create;
   try
-    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
+    Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
-    Locations.Add(TmAttr.Create(RoutePoint));
+    Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
     Locations.Add(TmIsDFSPoint.Create);
     Locations.Add(TmDuration.Create);
-    Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.XT2]));
-    Locations.Add(TmAddress.Create(Address));
+    Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT2]));
+    Locations.Add(TmAddress.Create(Location2Add.Address));
     Locations.Add(TmisTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
-    Locations.Add(TmName.Create(Name));
+    Locations.Add(TmName.Create(Location2Add.Name));
   finally
     TmpStream.Free;
   end;
 end;
 
-procedure TTripList.AddLocation_XT3(Locations: TmLocations;
-                                       ProcessOptions: TObject;
-                                       RoutePoint: TRoutePoint;
-                                       RoutePref: TRoutePreference;
-                                       AdvLevel: TAdvlevel;
-                                       Lat, Lon: double;
-                                       DepartureDate: TDateTime;
-                                       Name, Address: string);
+procedure TTripList.AddLocation_XT3(const Locations: TmLocations;
+                                    const Location2Add: TLocation2Add);
 var
   TmpStream : TMemoryStream;
 begin
   TmpStream := TMemoryStream.Create;
   try
-    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
+    Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
     Locations.Add(TmIsDFSPoint.Create);
     Locations.Add(TmisTravelapseDestination.Create);
@@ -4971,193 +4909,151 @@ begin
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
     Locations.Add(TmDuration.Create);
-    Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.XT3]));
-    Locations.Add(TmAttr.Create(RoutePoint));
-    Locations.Add(TmAddress.Create(Address));
-    Locations.Add(TmName.Create(Name));
+    Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT3]));
+    Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
+    Locations.Add(TmAddress.Create(Location2Add.Address));
+    Locations.Add(TmName.Create(Location2Add.Name));
   finally
     TmpStream.Free;
   end;
 end;
 
-procedure TTripList.AddLocation_Tread2(Locations: TmLocations;
-                                       ProcessOptions: TObject;
-                                       RoutePoint: TRoutePoint;
-                                       RoutePref: TRoutePreference;
-                                       AdvLevel: TAdvlevel;
-                                       Lat, Lon: double;
-                                       DepartureDate: TDateTime;
-                                       Name, Address: string);
+procedure TTripList.AddLocation_Tread2(const Locations: TmLocations;
+                                       const Location2Add: TLocation2Add);
 var
   TmpStream : TMemoryStream;
 begin
   TmpStream := TMemoryStream.Create;
   try
-    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
+    Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
     Locations.Add(TmisTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
     Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
     Locations.Add(TmDuration.Create);
-    Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Tread2]));
-    Locations.Add(TmAttr.Create(RoutePoint));
-    Locations.Add(TmAddress.Create(Address));
-    Locations.Add(TmName.Create(Name));
+    Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Tread2]));
+    Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
+    Locations.Add(TmAddress.Create(Location2Add.Address));
+    Locations.Add(TmName.Create(Location2Add.Name));
   finally
     TmpStream.Free;
   end;
 end;
 
-procedure TTripList.AddLocation_Zumo595(Locations: TmLocations;
-                                        ProcessOptions: TObject;
-                                        RoutePoint: TRoutePoint;
-                                        Lat, Lon: double;
-                                        DepartureDate: TDateTime;
-                                        Name, Address: string);
+procedure TTripList.AddLocation_Zumo595(const Locations: TmLocations;
+                                        const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
-  Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Zumo595]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo595]));
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
-  Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmName.Create(Name));
-  Locations.Add(TmAddress.Create(Address));
-  Locations.Add(TmAttr.Create(RoutePoint));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+  Locations.Add(TmName.Create(Location2Add.Name));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmShapingRadius.Create);
 end;
 
-procedure TTripList.AddLocation_Zumo590(Locations: TmLocations;
-                                        ProcessOptions: TObject;
-                                        RoutePoint: TRoutePoint;
-                                        Lat, Lon: double;
-                                        DepartureDate: TDateTime;
-                                        Name, Address: string);
+procedure TTripList.AddLocation_Zumo590(const Locations: TmLocations;
+                                        const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
-  Locations.Add(TmAddress.Create(Address));
-  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmIsDFSPoint.Create);
-  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmName.Create(Location2Add.Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Zumo590]));
-  Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo590]));
+  Locations.Add(TmShaping.Create(Location2Add.RoutePoint <> TRoutePoint.rpVia));
 end;
 
-procedure TTripList.AddLocation_Drive51(Locations: TmLocations;
-                                        ProcessOptions: TObject;
-                                        RoutePoint: TRoutePoint;
-                                        Lat, Lon: double;
-                                        DepartureDate: TDateTime;
-                                        Name, Address: string);
+procedure TTripList.AddLocation_Drive51(const Locations: TmLocations;
+                                        const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
-  Locations.Add(TmAttr.Create(RoutePoint));
+  Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmDuration.Create);
-  Locations.Add(TmArrival.Create(DepartureDate));
-  Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Drive51]));
-  Locations.Add(TmAddress.Create(Address));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Drive51]));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
   Locations.Add(TmisTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
-  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmName.Create(Location2Add.Name));
 end;
 
-procedure TTripList.AddLocation_Drive66(Locations: TmLocations;
-                                       ProcessOptions: TObject;
-                                       RoutePoint: TRoutePoint;
-                                       RoutePref: TRoutePreference;
-                                       AdvLevel: TAdvlevel;
-                                       Lat, Lon: double;
-                                       DepartureDate: TDateTime;
-                                       Name, Address: string);
-var
-  TmpStream : TMemoryStream;
+procedure TTripList.AddLocation_Drive66(const Locations: TmLocations;
+                                        const Location2Add: TLocation2Add);
+
 begin
-  TmpStream := TMemoryStream.Create;
-  try
-    Locations.AddLocation(TLocation.Create(RoutePref, AdvLevel));
+ Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
-    Locations.Add(TmAttr.Create(RoutePoint));
-    Locations.Add(TmDuration.Create);
-    Locations.Add(TmArrival.Create(DepartureDate));
-    Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Drive66]));
-    Locations.Add(TmAddress.Create(Address));
-    Locations.Add(TmisTravelapseDestination.Create);
-    Locations.Add(TmShapingRadius.Create);
-    Locations.Add(TmName.Create(Name));
-  finally
-    TmpStream.Free;
-  end;
+  Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Drive66]));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmisTravelapseDestination.Create);
+  Locations.Add(TmShapingRadius.Create);
+  Locations.Add(TmName.Create(Location2Add.Name));
 end;
 
-procedure TTripList.AddLocation_Zumo3x0(Locations: TmLocations;
-                                        ProcessOptions: TObject;
-                                        RoutePoint: TRoutePoint;
-                                        Lat, Lon: double;
-                                        DepartureDate: TDateTime;
-                                        Name, Address: string);
+procedure TTripList.AddLocation_Zumo3x0(const Locations: TmLocations;
+                                        const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
-  Locations.Add(TmAddress.Create(Address));
-  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
   Locations.Add(TmDuration.Create);
-  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmName.Create(Location2Add.Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Zumo3x0]));
-  Locations.Add(TmShaping.Create(RoutePoint <> TRoutePoint.rpVia));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo3x0]));
+  Locations.Add(TmShaping.Create(Location2Add.RoutePoint <> TRoutePoint.rpVia));
 end;
 
-procedure TTripList.AddLocation_nuvi2595(Locations: TmLocations;
-                                        ProcessOptions: TObject;
-                                        RoutePoint: TRoutePoint;
-                                        RoutePref: TRoutePreference;
-                                        Lat, Lon: double;
-                                        DepartureDate: TDateTime;
-                                        Name, Address: string);
+procedure TTripList.AddLocation_nuvi2595(const Locations: TmLocations;
+                                         const Location2Add: TLocation2Add);
 begin
-  Locations.AddLocation(TLocation.Create(RoutePref));
-  Locations.Add(TmAddress.Create(Address));
-  Locations.Add(TmArrival.Create(DepartureDate));
+  Locations.AddLocation(TLocation.Create(Location2Add.RoutePref));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
   Locations.Add(TmDuration.Create);
-  Locations.Add(TmName.Create(Name));
+  Locations.Add(TmName.Create(Location2Add.Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Lat, Lon, ScPosnSize[TTripModel.Nuvi2595]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi2595]));
 end;
 
-procedure TTripList.AddLocation(Locations: TmLocations;
-                                ProcessOptions: TObject;
-                                RoutePoint: TRoutePoint;
-                                RoutePref: TRoutePreference;
-                                AdvLevel: TAdvlevel;
-                                Lat, Lon: double;
-                                DepartureDate: TDateTime;
-                                Name, Address: string);
-
+procedure TTripList.AddLocation(const Location2Add: TLocation2Add);
+var
+  Locations: TmLocations;
 begin
-  case TProcessOptions(ProcessOptions).TripModel of
+  Locations := GetItem('mLocations') as TmLocations;
+  case Location2Add.TripModel of
+    TTripModel.XT:
+      AddLocation_XT(Locations, Location2Add);
     TTripModel.XT2:
-      AddLocation_XT2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_XT2(Locations, Location2Add);
     TTripModel.XT3:
-      AddLocation_XT3(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_XT3(Locations, Location2Add);
     TTripModel.Tread2:
-      AddLocation_Tread2(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Tread2(Locations, Location2Add);
     TTripModel.Zumo595:
-      AddLocation_Zumo595(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Zumo595(Locations, Location2Add);
     TTripModel.Zumo590:
-      AddLocation_Zumo590(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Zumo590(Locations, Location2Add);
     TTripModel.Drive51:
-      AddLocation_Drive51(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Drive51(Locations, Location2Add);
     TTripModel.Drive66:
-      AddLocation_Drive66(Locations, ProcessOptions, RoutePoint, RoutePref, AdvLevel, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Drive66(Locations, Location2Add);
     TTripModel.Zumo3x0:
-      AddLocation_Zumo3x0(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_Zumo3x0(Locations, Location2Add);
     TTripModel.Nuvi2595:
-      AddLocation_nuvi2595(Locations, ProcessOptions, RoutePoint, RoutePref, Lat, Lon, DepartureDate, Name, Address);
+      AddLocation_nuvi2595(Locations, Location2Add);
     else
-      AddLocation_XT(Locations, ProcessOptions, RoutePoint, Lat, Lon, DepartureDate, Name, Address);
+      raise exception.Create('AddLocation. Model not supported');
   end;
 end;
 
@@ -5431,8 +5327,8 @@ procedure TTripList.SaveCalculated(const AModel: TTripModel;
 var
   AllLinks: TBaseItem;
   AllRoutes: TBaseItem;
-  Index, UdbId: integer;
-  ViaCount, RoutePtCount: integer;
+  SegmentId, UdbId: integer;
+  ViaCount, RoutePointId: integer;
   RoutePointList: TList<TLocation>;
   ALocation: TLocation;
   Locations: TBaseItem;
@@ -5444,6 +5340,8 @@ var
   TotalDist, UdbDist, CurDist: double;
   TotalTime, UdbTime: cardinal;
   ProcessOptions: TProcessOptions;
+  TripKey: TTripInfoKey;
+  TripData: TTripInfoData;
 begin
   TotalTime := 0;
   TotalDist := 0;
@@ -5474,8 +5372,10 @@ begin
   RoutePointList := TList<TLocation>.Create;
   UdbId := 0;
   try
-    for Index := 1 to ViaCount -1 do
+    TripKey := Default(TTripInfoKey);
+    for SegmentId := 1 to ViaCount -1 do
     begin
+      TripKey.SegmentId := SegmentId;
       AnUdbHandle := TmUdbDataHndl.Create(1, TripModel, ProcessOptions.TripOption = TTripOption.ttCalc);
       AnUdbHandle.SetTripList(Self);
       UdbDist := 0;
@@ -5484,7 +5384,7 @@ begin
 
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
-      TmLocations(Locations).GetSegmentPoints(Index, RoutePointList);
+      TmLocations(Locations).GetSegmentPoints(SegmentId, RoutePointList);
 
       // AllLinks
       if (Assigned(AllLinks)) then
@@ -5497,9 +5397,10 @@ begin
 
       if (AnUdbHandle.ShapeOffset <> 0) then
         GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[AnUdbHandle.ShapeOffset]);
-      for RoutePtCount := 0 to RoutePointList.Count -2 do
+      for RoutePointId := 0 to RoutePointList.Count -2 do
       begin
-        ALocation := RoutePointList[RoutePtCount];
+        TripKey.RoutePointId := RoutePointId;
+        ALocation := RoutePointList[RoutePointId];
         RtePtUdbDir := TUdbDir.Create(TripModel, ProcessOptions.TripOption, ALocation);
         AnUdbHandle.Add(RtePtUdbDir);
 
@@ -5548,11 +5449,21 @@ begin
             if (Assigned(PrevUdbDir)) then
             begin
               Inc(UdbId);
-              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList, Index, RoutePtCount, UdbId,
-                                                      RtePtUdbDir.GetName, PrevUdbDir.RoadClass,
-                                                      PrevUdbDir, CurDist,
-                                                      ProcessOptions.ComputeTime(PrevUdbDir.RoadClass, CurDist),
-                                                      ProcessOptions.SpeedFromRoadClass(PrevUdbDir.RoadClass));
+              TripKey.UdbId := UdbId;
+
+              TripData := Default(TTripInfoData);
+              TripData.RoutePoint := RtePtUdbDir.GetName;
+              TripData.RoadClass := StrToIntDef('$' + PrevUdbDir.RoadClass, 0);
+              TripData.MapSegRoadId := PrevUdbDir.MapSegRoadDisplay;
+              TripData.Description := TProcessOptions.DescriptionFromRoadClass(TripData.RoadClass);
+              TripData.Coords := PrevUdbDir.MapCoords;
+              TripData.Speed := ProcessOptions.SpeedFromRoadClass(PrevUdbDir.RoadClass);
+              TripData.Dist := CurDist;
+              TripData.Time := ProcessOptions.ComputeTime(PrevUdbDir.RoadClass, CurDist);
+
+              PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList,
+                                                      TripKey,
+                                                      TripData);
 
               // Totals for the UdbHdandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;

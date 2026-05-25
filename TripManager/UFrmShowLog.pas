@@ -200,11 +200,8 @@ var
   RoutePt, AddedShape: integer;
   RoutePointList: TList<TLocation>;
   CoordGpx: TCoords;
-  NewLat, NewLon: double;
   FixedTripList, OldTripList: TTripList;
-  ProcessOptions: TProcessOptions;
-  RoutePoint: TRoutePoint;
-  ShapeName, ShapeCmt: string;
+  Location2Add: TLocation2Add;
 begin
   if Assigned(FTripFileUpdating) then
     FTripFileUpdating(Self);
@@ -214,10 +211,6 @@ begin
   // Save locations and calculation info from current trip
   OldTripList := TTripList.Create;
   OldTripList.Assign(FixedTripList);
-
-  // ProcessOptions only needed for Creating Locations
-  ProcessOptions := TProcessOptions.Create;
-  ProcessOptions.TripModel := FixedTripList.TripModel;
 
   // Source locations
   OldLocations := TmLocations(OldTripList.GetItem('mLocations'));
@@ -242,34 +235,31 @@ begin
       begin
         if not (Assigned(LbLog.Items.Objects[Index])) then
           continue;
+
+        Location2Add := Default(TLocation2Add);
+        Location2Add.TripModel      := FixedTripList.TripModel;
+        Location2Add.RoutePoint     := TRoutePoint.rpShaping;
+        Location2Add.RoutePref      := TRoutePreference.rmNA;
+        Location2Add.AdvLevel       := TAdvlevel.advNA;
         if (LbLog.Items.Objects[Index] is TXmlVSNode) then
         begin
           CoordGpx.FromAttributes(TXmlVSNode(LbLog.Items.Objects[Index]).AttributeList);
-          NewLat := CoordGpx.Lat;
-          NewLon := CoordGpx.Lon;
+          Location2Add.Lat          := CoordGpx.Lat;
+          Location2Add.Lon          := CoordGpx.Lon;
         end
         else if (LbLog.Items.Objects[Index] is TUdbDir) then
         begin
-          NewLat := TUdbDir(LbLog.Items.Objects[Index]).Lat;
-          NewLon := TUdbDir(LbLog.Items.Objects[Index]).Lon
+          Location2Add.Lat          := TUdbDir(LbLog.Items.Objects[Index]).Lat;
+          Location2Add.Lon          := TUdbDir(LbLog.Items.Objects[Index]).Lon
         end
         else
           continue;
-
+        Location2Add.DepartureDate  := 0;
         Inc(AddedShape);
-        ShapeName := Format('%s_%d', [RoutePointList[RoutePt].LocationTmName.AsString, AddedShape]);
-        ShapeCmt := Format('%s, %s', [FormatFloat('##0.00000', NewLat, FormatSettings),
-                                      FormatFloat('##0.00000', NewLon, FormatSettings)]);
-
-        FixedTripList.AddLocation(NewLocations,
-                                ProcessOptions,
-                                TRoutePoint.rpShaping,
-                                TRoutePreference.rmNA,
-                                TAdvlevel.advNA,
-                                NewLat, NewLon,
-                                0, // Departure date
-                                ShapeName,
-                                ShapeCmt);
+        Location2Add.Name := Format('%s_%d', [RoutePointList[RoutePt].LocationTmName.AsString, AddedShape]);
+        Location2Add.Address := Format('%s, %s', [FormatFloat('##0.00000', Location2Add.Lat, FormatSettings),
+                                                  FormatFloat('##0.00000', Location2Add.Lon, FormatSettings)]);
+        FixedTripList.AddLocation(Location2Add);
         continue;
       end;
 
@@ -283,28 +273,29 @@ begin
         if (RoutePt >  RoutePointList.Count -1) then // Past end?
           break;
 
+        Location2Add := Default(TLocation2Add);
+        Location2Add.TripModel      := FixedTripList.TripModel;
+
         AddedShape := 0;
         if (RoutePointList[RoutePt].IsViaPoint) then
-          RoutePoint := TRoutePoint.rpVia
+          Location2Add.RoutePoint := TRoutePoint.rpVia
         else
-          RoutePoint := TRoutePoint.rpShaping;
-
-        FixedTripList.AddLocation(NewLocations,
-                                ProcessOptions,
-                                RoutePoint,
-                                RoutePointList[RoutePt].RoutePref,
-                                RoutePointList[RoutePt].AdvLevel,
-                                AnUdbDir.Lat, AnUdbDir.Lon,
-                                TUnixDateConv.CardinalAsDateTime(RoutePointList[RoutePt].LocationTmArrival.AsUnixDateTime),
-                                RoutePointList[RoutePt].LocationTmName.AsString,
-                                RoutePointList[RoutePt].LocationTmAddress.AsString);
+          Location2Add.RoutePoint   := TRoutePoint.rpShaping;
+        Location2Add.RoutePref      := RoutePointList[RoutePt].RoutePref;
+        Location2Add.AdvLevel       := RoutePointList[RoutePt].AdvLevel;
+        Location2Add.Lat            := AnUdbDir.Lat;
+        Location2Add.Lon            := AnUdbDir.Lon;
+        Location2Add.DepartureDate  := TUnixDateConv.CardinalAsDateTime(RoutePointList[RoutePt].LocationTmArrival.AsUnixDateTime);
+        Location2Add.Name           := RoutePointList[RoutePt].LocationTmName.AsString;
+        Location2Add.Address        := RoutePointList[RoutePt].LocationTmAddress.AsString;
+        FixedTripList.AddLocation(Location2Add);
       end;
     end;
+
     FixedTripList.ForceRecalc;
 
   finally
     RoutePointList.Free;
-    ProcessOptions.Free;
     OldTripList.Free;
   end;
 end;
