@@ -5528,6 +5528,7 @@ procedure TFrmTripManager.CreateWnd;
 begin
   inherited;
   DragAcceptFiles(Handle, True);
+//TODO  EnableMouseHook;
 end;
 
 procedure TFrmTripManager.DestroyWnd;
@@ -5547,10 +5548,6 @@ var
   Pt: TPoint;
 begin
   HasGpx := false;
-  PopupMenu := ((GetAsyncKeyState(VK_SHIFT) and $8000) <> 0) or
-               ((GetAsyncKeyState(VK_CONTROL) and $8000) <> 0);
-
-  Pt := Mouse.CursorPos;
   FNames := TStringList.Create;
   try
     NumFiles := DragQueryFile(Msg.Drop, UINT(-1), nil, 0);
@@ -5589,12 +5586,23 @@ begin
     FNames.Free;
     DragFinish(Msg.Drop);
   end;
+
   if (HasGpx) then
   begin
+    // GetAsyncKeyState does not work for DropFiles. Need MouseHook
+//TODO    PopupMenu := MouseButtonHook.Right_Button;
+    PopupMenu := ((GetAsyncKeyState(VK_CONTROL) and $8000) <> 0);
+    Pt := Mouse.CursorPos;
     if PopupMenu then
       PopupDropped.Popup(Pt.X, Pt.Y)
     else
-      PostProcessClick(Self);
+    begin
+      Pt := LstFiles.ScreenToClient(Pt);
+      if PtInRect(LstFiles.ClientRect, Pt) then
+        BtnSendToClick(Self)
+      else
+        PostProcessClick(Self);
+    end;
   end;
 end;
 

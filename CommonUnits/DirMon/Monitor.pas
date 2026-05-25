@@ -74,6 +74,19 @@ type
     destructor Destroy; override;
   end;
 
+  TMouseButtonHook = record
+    hMouseHook: HHOOK;
+    Left_Button: boolean;
+    Middle_Button: boolean;
+    Right_Button: boolean;
+  end;
+
+procedure EnableMouseHook;
+procedure DisableMouseHook;
+
+var
+  MouseButtonHook: TMouseButtonHook;
+
 implementation
 
 constructor TDirectoryMonitorWorkerThread.Create(Owner: TDirectoryMonitor);
@@ -300,5 +313,69 @@ begin
     StrDispose(FileNamePtr);
   end;
 end;
+
+function MouseHookProc(nCode: Integer; wParam: WPARAM; lParam: LPARAM): LResult; stdcall;
+begin
+  // If nCode is less than zero, the hook procedure must return the value returned by CallNextHookEx.
+  if nCode < 0 then
+  begin
+    Result := CallNextHookEx(MouseButtonHook.hMouseHook, nCode, wParam, lParam);
+    Exit;
+  end;
+
+  // Process specific mouse events here
+  if nCode = HC_ACTION then
+  begin
+    case wParam of
+      WM_LBUTTONDOWN:
+      begin
+        MouseButtonHook.Left_Button := true;
+        MouseButtonHook.Middle_Button := false;
+        MouseButtonHook.Right_Button := false;
+      end;
+      WM_RBUTTONDOWN:
+      begin
+        MouseButtonHook.Left_Button := false;
+        MouseButtonHook.Middle_Button := false;
+        MouseButtonHook.Right_Button := true;
+      end;
+      WM_MBUTTONDOWN:
+      begin
+        MouseButtonHook.Left_Button := false;
+        MouseButtonHook.Middle_Button := true;
+        MouseButtonHook.Right_Button := false;
+      end;
+    end;
+  end;
+
+  // Pass the event down the Windows hook chain
+  Result := CallNextHookEx(MouseButtonHook.hMouseHook, nCode, wParam, lParam);
+end;
+
+procedure EnableMouseHook;
+begin
+  if MouseButtonHook.hMouseHook = 0 then
+  begin
+    MouseButtonHook.hMouseHook := SetWindowsHookEx(
+      WH_MOUSE_LL,           // Type of hook
+      @MouseHookProc,        // Pointer to your callback function
+      HInstance,             // Handle to the application instance
+      0                      // 0 indicates a global system-wide hook
+    );
+  end;
+end;
+
+procedure DisableMouseHook;
+begin
+  if (MouseButtonHook.hMouseHook <> 0) then
+    UnhookWindowsHookEx(MouseButtonHook.hMouseHook);
+  MouseButtonHook.hMouseHook := 0;
+end;
+
+initialization
+  MouseButtonHook := Default(TMouseButtonHook);
+
+finalization
+  DisableMouseHook;
 
 end.
