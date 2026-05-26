@@ -2,12 +2,13 @@
 
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
+{$ELSE}
+{.$DEFINE HOOK_MOUSE}      // For detecting Left/Right mouse button when dropping
 {$ENDIF}
 {.$DEFINE WINEHACKS}
 
 //TODO Add level for RoutePoints?
 {$DEFINE ROUTEPOINTSLEVEL}
-{.$DEFINE PROCESSMESSAGES}
 {.$DEFINE HASHDEBUG}
 
 interface
@@ -1025,7 +1026,7 @@ begin
   CrNormal := SetCursor(CrWait);
   SavedFolderId := FSavedFolderId;
   WarnOverWrite := mrNone;
-
+  BtnSendTo.Enabled := false;
   try
 {$IFNDEF DEBUG_TRANSFER}
     // Also checks for connected MTP
@@ -1114,6 +1115,7 @@ begin
   finally
     EdFileSysFolder.Text := ShellTreeView1.Path;
     FSavedFolderId := SavedFolderId;
+    BtnSendTo.Enabled := true;
     SetCursor(CrNormal);
   end;
 
@@ -1716,6 +1718,7 @@ var
   CrNormal,CrWait: HCURSOR;
 begin
   DirectoryMonitor.Active := false;
+  BtnPostProcess.Enabled := false;
   try
     if (ShellListView1.SelectedFolder = nil) then
       exit;
@@ -1735,11 +1738,7 @@ begin
         if (ContainsText(Ext, GpxExtension)) then
         begin
           SbPostProcess.Panels[0].Text := ShellListView1.Folders[AnItem.Index].PathName;
-{$IFDEF PROCESSMESSAGES}
           ProcessMessages;
-{$ELSE}
-          SbPostProcess.Update;
-{$ENDIF}
           TGPXFile.PerformFunctions([PostProcess], ShellListView1.Folders[AnItem.Index].PathName,
                                     OnSetPostProcessPrefs, SetProcessOptions.SavePrefs);
         end;
@@ -1751,6 +1750,7 @@ begin
     end;
   finally
     DirectoryMonitor.Active := ChkWatch.Checked;
+    BtnPostProcess.Enabled := true;
   end;
 end;
 
@@ -5528,7 +5528,9 @@ procedure TFrmTripManager.CreateWnd;
 begin
   inherited;
   DragAcceptFiles(Handle, True);
-//TODO  EnableMouseHook;
+{$IFDEF HOOK_MOUSE}
+  EnableMouseHook;
+{$ENDIF}
 end;
 
 procedure TFrmTripManager.DestroyWnd;
@@ -5589,9 +5591,8 @@ begin
 
   if (HasGpx) then
   begin
-    // GetAsyncKeyState does not work for DropFiles. Need MouseHook
-//TODO    PopupMenu := MouseButtonHook.Right_Button;
-    PopupMenu := ((GetAsyncKeyState(VK_CONTROL) and $8000) <> 0);
+    PopupMenu := MouseButtonHook.Right_Button or // GetAsyncKeyState does not work for DropFiles. Need MouseHook
+                 ((GetAsyncKeyState(VK_CONTROL) and $8000) <> 0);
     Pt := Mouse.CursorPos;
     if PopupMenu then
       PopupDropped.Popup(Pt.X, Pt.Y)
@@ -5628,17 +5629,14 @@ begin
   // If not we will get an event when postprocessing.
   System.TMonitor.Enter(ModifiedList);
   DirectoryMonitor.Active := false;
+  BtnPostProcess.Enabled := false;
   try
     while (ModifiedList.Count > 0) do
     begin
       AGpx := ModifiedList[0];
       ModifiedList.Delete(0);
       SbPostProcess.Panels[0].Text := AGpx;
-{$IFDEF PROCESSMESSAGES}
       ProcessMessages;
-{$ELSE}
-      SbPostProcess.Update;
-{$ENDIF}
       TGPXFile.PerformFunctions([PostProcess], AGpx,
                                 OnSetPostProcessPrefs, SetProcessOptions.SavePrefs);
     end;
@@ -5647,17 +5645,14 @@ begin
     System.TMonitor.Exit(ModifiedList);
     SbPostProcess.Panels[0].Text  := '';
     SbPostProcess.Panels[1].Text  := '';
+    BtnPostProcess.Enabled := true;
   end;
 end;
 
 procedure TFrmTripManager.WMAddrLookUp(var Msg: TMessage);
 begin
   SbPostProcess.Panels[1].Text  := TPlace(Msg.LParam).FormattedAddress;
-{$IFDEF PROCESSMESSAGES}
   ProcessMessages;
-{$ELSE}
-  SbPostProcess.Update;
-{$ENDIF}
   Msg.Result := 0;
 end;
 

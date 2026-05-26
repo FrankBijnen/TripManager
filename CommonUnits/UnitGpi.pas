@@ -1535,6 +1535,7 @@ begin
         $04:
           begin
             PoiBitmapRef.Read(S, MainRec);
+//TODO: Handle lengths 2,4,6,10 etc.
             GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Symbol := TGPXString(IntToStr(PoiBitmapRef.Id));
             continue;

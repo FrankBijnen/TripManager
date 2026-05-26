@@ -168,12 +168,18 @@ begin
 
     EnableTripOverview := GetRegistry(Reg_EnableTripOverview, false);
     DefRoadSpeed := GetRegistry(Reg_RoadSpeed_Key, 25);
-    RoadSpeedMap[0].Value := GetRegistry(Reg_RoadSpeed_Key + '_01', 108);
-    RoadSpeedMap[1].Value := GetRegistry(Reg_RoadSpeed_Key + '_02',  72);
-    RoadSpeedMap[2].Value := GetRegistry(Reg_RoadSpeed_Key + '_03',  56);
-    RoadSpeedMap[3].Value := GetRegistry(Reg_RoadSpeed_Key + '_04',  50);
-    RoadSpeedMap[4].Value := GetRegistry(Reg_RoadSpeed_Key + '_05',  48);
-    RoadSpeedMap[5].Value := GetRegistry(Reg_RoadSpeed_Key + '_0C',  15);
+    RoadSpeedMap[0].Value   := GetRegistry(Reg_RoadSpeed_Key + '_01', 108);
+    RoadSpeedMap[1].Value   := GetRegistry(Reg_RoadSpeed_Key + '_02',  72);
+    RoadSpeedMap[2].Value   := GetRegistry(Reg_RoadSpeed_Key + '_03',  56);
+    RoadSpeedMap[3].Value   := GetRegistry(Reg_RoadSpeed_Key + '_04',  50);
+    RoadSpeedMap[4].Value   := GetRegistry(Reg_RoadSpeed_Key + '_05',  48);
+    RoadSpeedMap[5].Value   := GetRegistry(Reg_RoadSpeed_Key + '_06',  30);
+    RoadSpeedMap[6].Value   := GetRegistry(Reg_RoadSpeed_Key + '_07',  15);
+    RoadSpeedMap[7].Value   := GetRegistry(Reg_RoadSpeed_Key + '_08',  50);
+    RoadSpeedMap[8].Value   := GetRegistry(Reg_RoadSpeed_Key + '_09',  80);
+    RoadSpeedMap[9].Value   := GetRegistry(Reg_RoadSpeed_Key + '_0A',  15);
+    RoadSpeedMap[10].Value  := GetRegistry(Reg_RoadSpeed_Key + '_0B',  25);
+    RoadSpeedMap[11].Value  := GetRegistry(Reg_RoadSpeed_Key + '_0C',  15);
 
     // Kurviger
     KurvigerUrl := GetRegistry(Reg_KurvigerUrl_Key, Reg_KurvigerUrl_Val);

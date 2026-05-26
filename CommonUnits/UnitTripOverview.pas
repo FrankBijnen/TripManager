@@ -168,8 +168,8 @@ begin
             if (RpDist > 0) then
             begin
               Lst.Clear;
-              Lst.AddStrings([CurRoutePoint,
-                              'Total',
+              Lst.AddStrings([ATripInfo.RoutePoint,
+                              'Route point',
                               '',
                               '',
                               '',
@@ -211,7 +211,7 @@ begin
         if (RpDist > 0) then
         begin
           Lst.Clear;
-          Lst.AddStrings([CurRoutePoint,
+          Lst.AddStrings(['Route',
                           'Total',
                           '',
                           '',
