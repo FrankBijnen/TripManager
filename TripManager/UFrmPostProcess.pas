@@ -85,6 +85,15 @@ begin
 
   CrWait := LoadCursor(0, IDC_WAIT);
   CrNormal := SetCursor(CrWait);
+
+  ABitMap := TBitmap.Create;
+  ABitMap.Transparent := true;
+  ABitMap.TransparentMode := TTransparentMode.tmAuto;
+
+  ImgListSymbols.BeginUpdate;
+  CmbBeginSymbol.ItemsEx.BeginUpdate;
+  CmbEndSymbol.ItemsEx.BeginUpdate;
+
   try
     CmbBeginSymbol.ItemsEx.Clear;
     CmbEndSymbol.ItemsEx.Clear;
@@ -97,13 +106,9 @@ begin
     while (Rc = 0) do
     begin
       SymbolName := ChangeFileExt(Fs.Name, '');
-      ABitMap := TBitmap.Create;
       ABitMap.LoadFromFile(Dir + '\' + Fs.Name);
-      ABitMap.Transparent := true;
-      ABitMap.TransparentMode := TTransparentMode.tmAuto;
 
       ImgIndex := ImgListSymbols.Add(ABitMap, nil);
-      ABitMap.Free;
 
       CbItem := CmbBeginSymbol.ItemsEx.Add;
       CbItem.ImageIndex := ImgIndex;
@@ -118,6 +123,11 @@ begin
     FindClose(Fs);
     SymbolsLoaded := true;
   finally
+    CmbBeginSymbol.ItemsEx.EndUpdate;
+    CmbEndSymbol.ItemsEx.EndUpdate;
+    ImgListSymbols.EndUpdate;
+
+    ABitMap.Free;
     SetCursor(CrNormal);
   end;
 end;
