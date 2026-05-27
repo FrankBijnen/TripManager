@@ -331,7 +331,8 @@ begin
       Error := myReadErrorThread.Content;
       GetExitCodeProcess(myProcessInfo.hProcess, ExitCode);
     finally
-      myWriteInputThread.Free;
+      if (hPipeInputWrite <> 0) then
+        myWriteInputThread.Free;
       myReadOutputThread.Free;
       myReadErrorThread.Free;
       CloseHandle(myProcessInfo.hThread);

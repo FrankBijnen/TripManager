@@ -143,19 +143,19 @@ type
 
     {$IFDEF TRIPOBJECTS}
     TripModel: TTripModel;                    // XT1 and XT2
-    VehicleProfileGuid: string;               // XT2
-    VehicleProfileHash: string;               // XT2
-    VehicleId: string;                        // XT2
-    VehicleProfileTruckType: string;          // XT2
-    VehicleProfileName: string;               // XT2
-    AvoidancesChangedTimeAtSave: Cardinal;    // XT2
-    AllowGrouping: boolean;                   // XT1. (Not used anymore for XT2)
+    VehicleProfileGuid: string;               // XT2,XT3
+    VehicleProfileHash: Cardinal;             // XT2,XT3
+    VehicleId: integer;                       // XT2,XT3
+    VehicleProfileTruckType: integer;         // XT2,XT3
+    VehicleProfileName: string;               // XT2,XT3
+    AvoidancesChangedTimeAtSave: Cardinal;    // XT2,XT3
+    AllowGrouping: boolean;                   // XT1
     TripOption: TTripOption;                  // XT1 and XT2
     EnableTripOverview: boolean;              // XT1 and XT2
-    DefAdvLevel: TAdvlevel;                   // XT2
-    DefRoadSpeed: integer;                    // XT1 and XT2
+    DefAdvLevel: TAdvlevel;                   // XT2,XT3
+    DefRoadSpeed: integer;                    // XT1,XT2,XT3
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
-    ExploreUUIDList: TStrings;                // XT2
+    ExploreUUIDList: TStrings;                // XT2,XT3
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -292,11 +292,11 @@ begin
 
 {$IFDEF TRIPOBJECTS}
   TripModel := TTripModel.XT;
-  VehicleProfileGuid := XT2_VehicleProfileGuid;
-  VehicleProfileHash := '0';
-  VehicleId := XT2_VehicleId;
-  VehicleProfileTruckType := XT2_VehicleProfileTruckType;
-  VehicleProfileName := XT2_VehicleProfileName;
+  VehicleProfileGuid := DEF_VehicleProfileGuid;
+  VehicleProfileHash := 0;
+  VehicleId := DEF_VehicleId;
+  VehicleProfileTruckType := DEF_VehicleProfileTruckType;
+  VehicleProfileName := DEF_VehicleProfileName;
   AvoidancesChangedTimeAtSave := 0;
   AllowGrouping := true;
   TripOption := TTripOption.ttCalc;

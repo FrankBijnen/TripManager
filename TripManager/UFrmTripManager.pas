@@ -571,9 +571,14 @@ begin
   end;
 
   // Change description for 'old' Garmin units and Edge
-  CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminEdge)] := Edge_Name;
+  if (TModelConv.DisplayableGarminModel(TGarminModel.GarminEdge)) then
+    CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminEdge)] := Edge_Name;
+  if (TModelConv.DisplayableGarminModel(TGarminModel.GarminForeRunner)) then
+    CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminForeRunner)] := ForeRunner_Name;
   CmbModel.items[TModelConv.Garmin2Display(TGarminModel.GarminGeneric)] := Garmin_Name;
+
   if (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminEdge)) or
+     (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminForeRunner)) or
      (ModelIndex = TModelConv.Garmin2Display(TGarminModel.GarminGeneric)) then
   begin
     if (DisplayedDevice <> CmbModel.Items[ModelIndex]) and
@@ -2465,6 +2470,7 @@ begin
         BgDevice.Items[1].Caption := DefUnusedDesc;
         BgDevice.Items[2].Caption := DefUnusedDesc;
       end;
+    TGarminModel.GarminForeRunner,
     TGarminModel.GarminEdge:
       begin
         BgDevice.Items[0].Caption := DefCoursesPath;
@@ -2483,7 +2489,7 @@ begin
   SetRegistry(Reg_EnableTripFuncs, TModelConv.Display2Trip(ModelIndex) <> TTripModel.Unknown);
   SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(GarminModel, 1) <> '');
   SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(GarminModel, 2) <> '');
-  SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge]));
+  SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge, TGarminModel.GarminForeRunner]));
 
   ReadDefaultFolders;
 

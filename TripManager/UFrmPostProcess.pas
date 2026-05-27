@@ -76,7 +76,6 @@ var
   Fs: TSearchRec;
   Rc, ImgIndex: Integer;
   ABitMap: TBitmap;
-  CbItem: TComboExItem;
   Dir, SymbolName: string;
   CrWait, CrNormal: HCURSOR;
 begin
@@ -101,22 +100,15 @@ begin
     ImgListSymbols.Clear;
     ImgListSymbols.Width := 24;
     ImgListSymbols.Height := 24;
-    Dir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSmallSymbolsDir;
-    Rc := FindFirst(Dir + '\*.bmp', faAnyFile - faDirectory, Fs);
+    Dir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSmallSymbolsDir);
+    Rc := FindFirst(Dir + '*.bmp', faAnyFile - faDirectory, Fs);
     while (Rc = 0) do
     begin
       SymbolName := ChangeFileExt(Fs.Name, '');
       ABitMap.LoadFromFile(Dir + '\' + Fs.Name);
-
       ImgIndex := ImgListSymbols.Add(ABitMap, nil);
-
-      CbItem := CmbBeginSymbol.ItemsEx.Add;
-      CbItem.ImageIndex := ImgIndex;
-      CbItem.Caption := SymbolName;
-
-      CbItem := CmbEndSymbol.ItemsEx.Add;
-      CbItem.ImageIndex := ImgIndex;
-      CbItem.Caption := SymbolName;
+      CmbBeginSymbol.ItemsEx.AddItem(SymbolName, ImgIndex, ImgIndex, -1, 0, nil);
+      CmbEndSymbol.ItemsEx.AddItem(SymbolName, ImgIndex, ImgIndex, -1, 0, nil);
 
       Rc := FindNext(Fs);
     end;
@@ -126,7 +118,6 @@ begin
     CmbBeginSymbol.ItemsEx.EndUpdate;
     CmbEndSymbol.ItemsEx.EndUpdate;
     ImgListSymbols.EndUpdate;
-
     ABitMap.Free;
     SetCursor(CrNormal);
   end;

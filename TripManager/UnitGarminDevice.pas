@@ -257,10 +257,11 @@ begin
 
       case GarminModel of
         TGarminModel.GarminEdge,
+        TGarminModel.GarminForeRunner,
         TGarminModel.GarminGeneric:; // Do Nothing
 
         TGarminModel.Unknown:
-          GarminModel := TModelConv.GuessGarminOrEdge(ModelDescription);
+          GarminModel := TModelConv.GuessGarminGeneric(ModelDescription);
         else
         begin
           SafeGarminModel := TModelConv.SafeGarminModel(GarminModel);

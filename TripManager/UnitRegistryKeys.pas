@@ -197,12 +197,12 @@ begin
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
 
-    // XT2, Tread 2 Defaults
-    VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, XT2_VehicleProfileGuid, SubKey);
-    VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, '0', SubKey);
-    VehicleId := GetRegistry(Reg_VehicleId, XT2_VehicleId, SubKey);
-    VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, XT2_VehicleProfileTruckType, SubKey);
-    VehicleProfileName := GetRegistry(Reg_VehicleProfileName, XT2_VehicleProfileName, SubKey);
+    // XT2, XT3, Tread 2 Defaults
+    VehicleProfileGuid := GetRegistry(Reg_VehicleProfileGuid, DEF_VehicleProfileGuid, SubKey);
+    VehicleProfileHash := GetRegistry(Reg_VehicleProfileHash, 0, SubKey);
+    VehicleId := GetRegistry(Reg_VehicleId, DEF_VehicleId, SubKey);
+    VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, DEF_VehicleProfileTruckType, SubKey);
+    VehicleProfileName := GetRegistry(Reg_VehicleProfileName, DEF_VehicleProfileName, SubKey);
     AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
                                                                       TUnixDateConv.DateTimeAsCardinal(IncYear(Now, -1)));
     DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2), SubKey) -1);

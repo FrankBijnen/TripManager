@@ -288,15 +288,15 @@ begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
                                               'True', 'Load active profile automatically');
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleId,
-                                              XT2_VehicleId);
+                                              DEF_VehicleId);
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileName,
-                                              XT2_VehicleProfileName);
+                                              DEF_VehicleProfileName);
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileGuid,
-                                              XT2_VehicleProfileGuid);
+                                              DEF_VehicleProfileGuid);
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileHash,
                                               '0');
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_VehicleProfileTruckType,
-                                              XT2_VehicleProfileTruckType,
+                                              DEF_VehicleProfileTruckType,
                                               '7=Motorcycle, 11=Car');
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_DefAdvLevel,
                                               IntToStr(Ord(TAdvlevel.advLevel2)),

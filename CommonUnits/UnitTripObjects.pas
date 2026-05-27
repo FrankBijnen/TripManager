@@ -5723,8 +5723,8 @@ begin
     Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
     Add(TmAvoidancesChanged.Create);
     Add(TmParentTripName.Create(TripName));
-    Add(TByteItem.Create('mVehicleProfileTruckType', StrToInt(ProcessOptions.VehicleProfileTruckType) ));
-    Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
+    Add(TByteItem.Create('mVehicleProfileTruckType', ProcessOptions.VehicleProfileTruckType) );
+    Add(TCardinalItem.Create('mVehicleProfileHash', ProcessOptions.VehicleProfileHash));
     Add(TmRoutePreferences.Create);
     Add(TmImported.Create);
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
@@ -5734,7 +5734,7 @@ begin
     Add(TmVersionNumber.Create(TripFileVersion));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
-    Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
+    Add(TCardinalItem.Create('mVehicleId', ProcessOptions.VehicleId));
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
@@ -5778,12 +5778,12 @@ begin
     Add(TmParentTripName.Create(TripName));
     Add(TmTotalTripDistance.Create);
     Add(TmTotalTripTime.Create);
-    Add(TByteItem.Create('mVehicleProfileTruckType', StrToInt(ProcessOptions.VehicleProfileTruckType) ));
+    Add(TByteItem.Create('mVehicleProfileTruckType', ProcessOptions.VehicleProfileTruckType ));
     Add(TmAvoidancesChanged.Create);
     Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
-    Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
+    Add(TCardinalItem.Create('mVehicleProfileHash', ProcessOptions.VehicleProfileHash));
     Add(TmParentTripId.Create(0));
-    Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
+    Add(TCardinalItem.Create('mVehicleId', ProcessOptions.VehicleId));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
     Add(TmSerializedRoutePrefRoundTripRoadType.Create);
@@ -5842,12 +5842,12 @@ begin
     Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
     Add(TmTotalTripDistance.Create);
     Add(TmTotalTripTime.Create);
-    Add(TByteItem.Create('mVehicleProfileTruckType', StrToInt(ProcessOptions.VehicleProfileTruckType) ));
+    Add(TByteItem.Create('mVehicleProfileTruckType', ProcessOptions.VehicleProfileTruckType ));
     Add(TmAvoidancesChanged.Create);
     Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
-    Add(TCardinalItem.Create('mVehicleProfileHash', StrToInt(ProcessOptions.VehicleProfileHash)));
+    Add(TCardinalItem.Create('mVehicleProfileHash', ProcessOptions.VehicleProfileHash));
     Add(TmParentTripId.Create(0));
-    Add(TCardinalItem.Create('mVehicleId', StrToInt(ProcessOptions.VehicleId)));
+    Add(TCardinalItem.Create('mVehicleId', ProcessOptions.VehicleId));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);

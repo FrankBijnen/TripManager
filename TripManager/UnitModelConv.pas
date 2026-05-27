@@ -44,10 +44,6 @@ const
 
   // XT2
   XT2_Name                          = Zumo_Name + ' XT2';
-  XT2_VehicleProfileGuid            = 'dbcac367-42c5-4d01-17aa-ecfe025f2d1c';
-  XT2_VehicleId                     = '1';
-  XT2_VehicleProfileTruckType       = '7';
-  XT2_VehicleProfileName            = Zumo_Name + ' Motorcycle';
   XT2_PartNumber                    = '006-B4299-00';
 
   // XT3
@@ -58,9 +54,10 @@ const
   Tread2_Name                       = 'Tread 2';
   Tread2_PartNumber                 = '006-B4557-00';
 
-  // Generic Garmin & Edge
+  // Generic Garmin & Edge & ForeRunner
   Garmin_Name                       = 'Garmin';
   Edge_Name                         = 'Edge';
+  ForeRunner_Name                   = 'ForeRunner';
 
   // Older models
   Zumo595_Name                      = Zumo_Name + ' 595';
@@ -84,6 +81,12 @@ const
   // Unknown
   Unknown_Name                      = 'Unknown';
 
+  // Defaults vehicle profile
+  DEF_VehicleProfileGuid            = '00000000-0000-0000-0000-000000000000';
+  DEF_VehicleId                     = 1;
+  DEF_VehicleProfileTruckType       = 7;
+  DEF_VehicleProfileName            = Zumo_Name + ' Motorcycle';
+
 type
 
   TModelConv = class
@@ -103,7 +106,7 @@ type
     class function GetTripModel(const TripModel: TTripModel): string;
     class procedure CmbTripDevices(const Devices: TStrings);
     class function GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
-    class function GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
+    class function GuessGarminGeneric(const GarminDevice: string): TGarminModel;
     class function GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string; overload;
     class function GetKnownPath(const AGarminModel: TGarminModel; const PathId: integer): string; overload;
     class function GetKnownPath(const CurrentDevice: TObject; const PathId: integer): string; overload;
@@ -120,6 +123,7 @@ type
     class function ReadExploreDB(const Garmin: TGarminModel): boolean;
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
     class function SafeGarminModel(const Garmin: TGarminModel): boolean;
+    class function DisplayableGarminModel(const Garmin: TGarminModel): boolean;
     class function IsKnownDevice(const Device: TObject): boolean;
     class function FirstKnownDeviceIndex(const DeviceList: TList): integer;
     class function GetPreferredDevice(const InsertedDevices: TStringList;
@@ -154,19 +158,20 @@ const
 
   Model_Tab: array[TGarminModel] of TGarminModel_Rec =
   (
-    (DeviceName: XT_Name;       TripModel: TTripModel.XT;       Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: XT2_Name;      TripModel: TTripModel.XT2;      Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: XT3_Name;      TripModel: TTripModel.XT3;      Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: Tread2_Name;   TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true; DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: Zumo595_Name;  TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
-    (DeviceName: Zumo590_Name;  TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
-    (DeviceName: Zumo3x0_Name;  TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
-    (DeviceName: Drive51_Name;  TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
-    (DeviceName: Drive66_Name;  TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
-    (DeviceName: Nuvi2595_Name; TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
-    (DeviceName: Edge_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
-    (DeviceName: Garmin_Name;   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'GPX,POI'),
-    (DeviceName: Unknown_Name;  TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true; DevDB: false; VehicleDB: false; ExploreDB: false)
+    (DeviceName: XT_Name;         TripModel: TTripModel.XT;       Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: XT2_Name;        TripModel: TTripModel.XT2;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: XT3_Name;        TripModel: TTripModel.XT3;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Tread2_Name;     TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Zumo595_Name;    TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Zumo590_Name;    TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Zumo3x0_Name;    TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Drive51_Name;    TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Drive66_Name;    TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Nuvi2595_Name;   TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Edge_Name;       TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
+    (DeviceName: ForeRunner_Name; TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
+    (DeviceName: Garmin_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'GPX,POI'),
+    (DeviceName: Unknown_Name;    TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false)
   );
 
 // Mapping from PartNumber to DeviceName
@@ -317,11 +322,13 @@ begin
   // Return Unknown
 end;
 
-class function TModelConv.GuessGarminOrEdge(const GarminDevice: string): TGarminModel;
+class function TModelConv.GuessGarminGeneric(const GarminDevice: string): TGarminModel;
 begin
   result := TGarminModel.GarminGeneric;
   if (ContainsText(GarminDevice, Edge_Name)) then
     exit(TGarminModel.GarminEdge);
+  if (ContainsText(GarminDevice, ForeRunner_Name)) then
+    exit(TGarminModel.GarminForeRunner);
 end;
 
 class function TModelConv.GetKnownPath(const GarminDevice: TGarminDevice; const PathId: integer): string;
@@ -352,7 +359,8 @@ begin
         1: result := GarminDevice.GpxPath;
         2: result := GarminDevice.GpiPath;
       end;
-    TGarminModel.GarminEdge:
+    TGarminModel.GarminEdge,
+    TGarminModel.GarminForeRunner:
       case PathId of
         0: result := GarminDevice.CoursesPath;
         1: result := GarminDevice.NewFilesPath;
@@ -483,6 +491,11 @@ end;
 class function TModelConv.SafeGarminModel(const Garmin: TGarminModel): boolean;
 begin
   result := (Garmin2Trip(Garmin) <> TTripModel.Unknown);
+end;
+
+class function TModelConv.DisplayableGarminModel(const Garmin: TGarminModel): boolean;
+begin
+  result := Model_Tab[Garmin].Displayable;
 end;
 
 // When a device is inserted, is it known?
