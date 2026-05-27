@@ -344,7 +344,7 @@ begin
   TModelConv.CmbTripDevices(CmbModel.Items);
   CmbModel.ItemIndex := Ord(TTripList(CurTripList).TripModel);
 
-  if (TTripList(CurTripList).GetItem('mRoutePreferences') = nil) then
+  if (TTripList(CurTripList).GetItem(TmRoutePreferences.GetKey) = nil) then
     LblRoutePref.Cursor := TCursor(crDefault)
   else
     LblRoutePref.Cursor := TCursor(crHandPoint);

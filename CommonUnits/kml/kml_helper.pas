@@ -2,9 +2,10 @@ unit kml_helper;
 
 interface
 
-uses System.Classes, System.SysUtils,
-     Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc,
-     ogckml23;
+uses
+  System.Classes, System.SysUtils,
+  Xml.xmldom, Xml.XMLIntf, Xml.XMLDoc,
+  ogckml23;
 
 type
   TStyleMap = record
@@ -28,7 +29,7 @@ type
     procedure WriteStyle(AStyle: TStyleMap);
     procedure WriteStyleMap(Styles: array of TStyleMap);
     function WriteFolder(AName: string; ACoordinates: string): IXMLNode;
-    procedure WriteHeader(ARing:boolean = false);
+    procedure WriteHeader(ARing: boolean = false);
     procedure WritePointsStart(const ATrackName, AColor: string);
     procedure WritePoint(const ALon, ALat, AEle: string);
     function WritePointsEnd: IXMLNode;
@@ -48,8 +49,9 @@ type
     property UseFolder: boolean read FUseFolder write FUseFolder;
   end;
 
-const KML_StyleUrl = 'm_ylw-pushpin';
-      Href = 'http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png';
+const
+  KML_StyleUrl = 'm_ylw-pushpin';
+  Href = 'http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png';
 
 implementation
 
@@ -88,7 +90,8 @@ begin
 end;
 
 procedure TKMLHelper.WriteStyle(AStyle: TStyleMap);
-var Style: IXMLNode;
+var
+  Style: IXMLNode;
 begin
   Style := AddTypedNode(FDocumentNode, 'Style', TXMLStyleType);
   with Style as IXMLStyleType do
@@ -110,9 +113,10 @@ begin
   end;
 end;
 
-procedure TKMLHelper.WriteStyleMap(Styles:array of TStyleMap);
-var StyleMap  : IXMLNode;
-    Style     : TStyleMap;
+procedure TKMLHelper.WriteStyleMap(Styles: array of TStyleMap);
+var
+  StyleMap  : IXMLNode;
+  Style     : TStyleMap;
 begin
   StyleMap := AddTypedNode(FDocumentNode, 'StyleMap', TXMLStyleMapType);
   with StyleMap as IXMLStyleMapType do

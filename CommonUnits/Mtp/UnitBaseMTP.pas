@@ -101,10 +101,10 @@ type
 
     class procedure UpdateDeviceList(const DeviceList: TList);
     class procedure GetRemovableDrives(const DeviceList: TList; const DeviceClass: TPersistentClass = nil);
-    class procedure GetDeviceList(const DeviceList: TList;
-                                  const DataClass: TPersistentClass = nil;
-                                  const MTPClass: TPersistentClass = nil;
-                                  const DRVClass: TPersistentClass = nil);
+    class function GetDeviceList(const DeviceList: TList;
+                                 const DataClass: TPersistentClass = nil;
+                                 const MTPClass: TPersistentClass = nil;
+                                 const DRVClass: TPersistentClass = nil): boolean;
     class function DeviceIdInList(const Device: string; const DeviceList: Tlist): integer;
     class function New(DeviceClass: TPersistentClass): TBase_Device;
 
@@ -116,7 +116,6 @@ type
     property FriendlyPath[APath: string]: string read GetFriendlyPath;
     property MediaType: string read GetMediaDescription;
   end;
-
 
 implementation
 
@@ -520,17 +519,17 @@ not reliable on Wine
   end;
 end;
 
-class procedure TBase_Device.GetDeviceList(const DeviceList: TList;
-                                           const DataClass: TPersistentClass = nil;
-                                           const MTPClass: TPersistentClass = nil;
-                                           const DRVClass: TPersistentClass = nil);
+class function TBase_Device.GetDeviceList(const DeviceList: TList;
+                                          const DataClass: TPersistentClass = nil;
+                                          const MTPClass: TPersistentClass = nil;
+                                          const DRVClass: TPersistentClass = nil): boolean;
 begin
   FPersistentDataClass := DataClass;
   FPersistentMTPDeviceClass := MTPClass;
   FPersistentDRVDeviceClass := DRVClass;
 
-  MTP_GetDevices(DeviceList, FPersistentMTPDeviceClass);
-  if (DeviceList.Count = 0) and
+  result := MTP_GetDevices(DeviceList, FPersistentMTPDeviceClass);
+  if (result = false) and
      Assigned(FPersistentDRVDeviceClass) then
     GetRemovableDrives(DeviceList, FPersistentDRVDeviceClass);
 

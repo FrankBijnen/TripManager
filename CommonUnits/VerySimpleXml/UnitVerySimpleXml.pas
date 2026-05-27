@@ -25,7 +25,8 @@ function InitGarminGpx(GarminGPX: TXmlVSDocument): TXmlVSNode;
 implementation
 
 function XMLPrefix(const AName: TXmlVSNode): string;
-var P: Integer;
+var
+  P: Integer;
 begin
   result := '';
   P := Pos(':', AName.NodeName);

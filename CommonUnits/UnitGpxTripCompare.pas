@@ -106,7 +106,7 @@ begin
 
   FDistOKKms := ProcessOptions.GetDistOKKms;
   FMinShapeDistKms := ProcessOptions.GetMinShapeDistKms;
-  FAllRoutes := TmAllRoutes(ATripList.GetItem('mAllRoutes'));
+  FAllRoutes := TmAllRoutes(ATripList.GetItem(TmAllRoutes.GetKey));
   FGpxRptList := AGpxRptList;
 end;
 
@@ -118,7 +118,7 @@ end;
 // Adds an XML node containing lat/lan values and a nodevalue to the objects of Messages.
 // The reason is that the 'FromNode' will be freed after the compare,
 // but is needed to reposition the map from the ShowLog Form.
-// These objects will be freed  in TFrmShowLog.ClearGpxRptList.
+// These objects will be freed in TFrmShowLog.ClearGpxRptList.
 function TGPXTripCompare.AddGpxRptPt(const FromNode: TXmlVSNode;
                                      const ANodeValue: string): TXmlVSNode;
 begin

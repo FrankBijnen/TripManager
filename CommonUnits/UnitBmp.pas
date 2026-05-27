@@ -61,10 +61,11 @@ begin
 end;
 
 procedure TBitMapReader.Load(ABitMap: string);
-var F: file;
-    Idstr: TIDString;
-    Y, RowLength: integer;
-    Red, Blue: byte;
+var
+  F: file;
+  Idstr: TIDString;
+  Y, RowLength: integer;
+  Red, Blue: byte;
 begin
   if (not FileExists(string(ABitMap))) then
     raise exception.Create(string(ABitMap) + ' not found');

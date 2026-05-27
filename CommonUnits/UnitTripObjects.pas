@@ -99,6 +99,7 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); virtual;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); virtual;
     procedure SetTripList(const ATripList: TTripList);
+    class function GetKey: ShortString;
     property SelStart: Cardinal read FStartPos;
     property SelEnd: Cardinal read FEndPos;
     property ItemEditMode: TItemEditMode read GetItemEditMode;
@@ -350,9 +351,34 @@ type
     constructor Create(AValue: string);
   end;
 
+  TmIsDeviceRoute = class(TBooleanItem)
+  public
+    constructor Create(AValue: boolean = true);
+  end;
+
   TmExploreUuid = class(TStringItem)
   public
     constructor Create(AValue: string);
+  end;
+
+  TmVehicleProfileTruckType = class(TByteItem)
+    constructor Create(AValue: byte);
+  end;
+
+  TmVehicleProfileGuid = class(TStringItem)
+    constructor Create(AValue: string);
+  end;
+
+  TmVehicleProfileName = class(TStringItem)
+    constructor Create(AValue: string);
+  end;
+
+  TmVehicleProfileHash = class(TCardinalItem)
+    constructor Create(AValue: Cardinal);
+  end;
+
+  TmVehicleId = class(TCardinalItem)
+    constructor Create(AValue: Cardinal);
   end;
 
   TmAvoidancesChangedTimeAtSave = class(TUnixDate)
@@ -362,6 +388,11 @@ type
   end;
 
   TmOptimized = class(TBooleanItem)
+  public
+    constructor Create(AValue: boolean = false);
+  end;
+
+  TmShowLastStopAsShapingPoint = class(TBooleanItem)
   public
     constructor Create(AValue: boolean = false);
   end;
@@ -465,7 +496,7 @@ type
     constructor Create(AValue: string);
   end;
 
-  TmisTravelapseDestination = class(TBooleanItem)
+  TmIsTravelapseDestination = class(TBooleanItem)
   public
     constructor Create(AValue: boolean = false);
   end;
@@ -476,6 +507,10 @@ type
     function GetItemEditMode: TItemEditMode; override;
   public
     constructor Create(AValue: Cardinal = $80000000);
+  end;
+
+  TmShapingCenter = class(TRawDataItem)
+    constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
   end;
 
   TmName = class(TStringItem)
@@ -600,10 +635,15 @@ type
   private
   public
     FTrackHeader: TTrackHeader;
+    constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure Clear;
     procedure InitFromGpxxRpt(RtePts: TObject);
     function GetCoords(Color: string = ''): string;
+  end;
+
+  TmGreatRidesInfoMap = class(TRawDataItem)
+    constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
   end;
 
 {*** Header ***}
@@ -1383,6 +1423,11 @@ begin
     FEndPos := AStream.Position;
 end;
 
+class function TBaseItem.GetKey: ShortString;
+begin
+  result := ShortString(Copy(ClassName, 2));
+end;
+
 {*** BaseDataItem ***}
 constructor TBaseDataItem.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
@@ -1651,13 +1696,13 @@ begin
   case ATripVersion.Major of
     1:
       begin
-        inherited Create('mVersionNumber', SizeOf(FValue.Major) + SizeOf(FValue.MinorB), dtVersion);
+        inherited Create(GetKey, SizeOf(FValue.Major) + SizeOf(FValue.MinorB), dtVersion);
         FValue.Major  := Swap32(ATripVersion.Major);
         FValue.MinorB := ATripVersion.Minor;
       end
     else
     begin
-      inherited Create('mVersionNumber', SizeOf(FValue), dtVersion);
+      inherited Create(GetKey, SizeOf(FValue), dtVersion);
       FValue.Major  := Swap32(ATripVersion.Major);
       FValue.MinorC := ATripVersion.Minor;
     end;
@@ -1707,7 +1752,7 @@ begin
   case ASize of
     PosnSmall:
       begin
-        inherited Create('mScPosn',
+        inherited Create(GetKey,
                          SizeOf(FValue.ScnSize) + Sizeof(FValue.Lat_8) + SizeOf(FValue.Lon_8),
                          dtPosn);
         FValue.ScnSize := Sizeof(FValue.Lat_8) + SizeOf(FValue.Lon_8);
@@ -1716,7 +1761,7 @@ begin
       end;
     PosnLarge:
       begin
-        inherited Create('mScPosn', SizeOf(FValue), dtPosn);
+        inherited Create(GetKey, SizeOf(FValue), dtPosn);
         FValue.ScnSize := SizeOf(FValue.Unknown1_16) + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
         FValue.Unknown1_16[0] := $00000000;
         FValue.Unknown1_16[1] := $00000000;
@@ -1725,7 +1770,7 @@ begin
       end;
     else
     begin
-      inherited Create('mScPosn',
+      inherited Create(GetKey,
                        SizeOf(FValue.ScnSize) + SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon),
                        dtPosn);
       FValue.ScnSize      := SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon);
@@ -2070,67 +2115,102 @@ end;
 {*** General trip info classes ***}
 constructor TmPreserveTrackToRoute.Create(AValue: boolean = false);
 begin
-  inherited Create('mPreserveTrackToRoute', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmParentTripId.Create(AValue: Cardinal = 0);
 begin
-  inherited Create('mParentTripId', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmDayNumber.Create(AValue: byte = $ff);
 begin
-  inherited Create('mDayNumber', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmTripDate.Create(AValue: integer = -1);
 begin
-  inherited Create('mTripDate', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmIsDisplayable.Create(AValue: boolean = true);
 begin
-  inherited Create('mIsDisplayable', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmAvoidancesChanged.Create(AValue: boolean = false);
 begin
-  inherited Create('mAvoidancesChanged', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmIsRoundTrip.Create(AValue: boolean = false);
 begin
-  inherited Create('mIsRoundTrip', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmParentTripName.Create(AValue: string);
 begin
-  inherited Create('mParentTripName', AValue);
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmIsDeviceRoute.Create(AValue: boolean = true);
+begin
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmExploreUuid.Create(AValue: string);
 begin
-  inherited Create('mExploreUuid', AValue);
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmVehicleProfileTruckType.Create(AValue: byte);
+begin
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmVehicleProfileGuid.Create(AValue: string);
+begin
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmVehicleProfileName.Create(AValue: string);
+begin
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmVehicleProfileHash.Create(AValue: Cardinal);
+begin
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmVehicleId.Create(AValue: Cardinal);
+begin
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmAvoidancesChangedTimeAtSave.Create(AValue: TDateTime = 0);
 begin
-  inherited Create('mAvoidancesChangedTimeAtSave', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmAvoidancesChangedTimeAtSave.Create(AValue: cardinal);
 begin
-  inherited Create('mAvoidancesChangedTimeAtSave', TUnixDateConv.CardinalAsDateTime(AValue));
+  inherited Create(GetKey, TUnixDateConv.CardinalAsDateTime(AValue));
 end;
 
 constructor TmOptimized.Create(AValue: boolean = false);
 begin
-  inherited Create('mOptimized', AValue);
+  inherited Create(GetKey, AValue);
+end;
+
+constructor TmShowLastStopAsShapingPoint.Create(AValue: boolean = false);
+begin
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmTotalTripTime.Create(AValue: Cardinal = 0);
 begin
-  inherited Create('mTotalTripTime', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 function TmTotalTripTime.GetValue: string;
@@ -2140,12 +2220,12 @@ end;
 
 constructor TmImported.Create(AValue: boolean = false);
 begin
-  inherited Create('mImported', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; ALenValue: Cardinal = 1; ADataType: byte = dtByte);
 begin
-  inherited Create('mRoutePreference', Ord(AValue));
+  inherited Create(GetKey, Ord(AValue));
 
   // Zumo 3x0, nuvi2595
   if (ADataType <> dtByte) then
@@ -2276,7 +2356,7 @@ end;
 
 constructor TmTransportationMode.Create(AValue: TTransportMode = tmMotorcycling);
 begin
-  inherited Create('mTransportationMode', Ord(AValue));
+  inherited Create(GetKey, Ord(AValue));
 end;
 
 class function TmTransportationMode.TransPortMethod(AValue: string): TTransportMode;
@@ -2340,7 +2420,7 @@ end;
 
 constructor TmTotalTripDistance.Create(AValue: single = 0);
 begin
-  inherited Create('mTotalTripDistance', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 function TmTotalTripDistance.GetValue: string;
@@ -2351,24 +2431,24 @@ end;
 
 constructor TmFileName.Create(AValue: string);
 begin
-  inherited Create('mFileName', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmPartOfSplitRoute.Create(AValue: boolean = false);
 begin
-  inherited Create('mPartOfSplitRoute', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmTripName.Create(AValue: string);
 begin
-  inherited Create('mTripName', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 {*** Location Info classes ***}
 { TmAttr }
 constructor TmAttr.Create(ARoutePoint: TRoutePoint);
 begin
-  inherited Create('mAttr', Ord(ARoutePoint));
+  inherited Create(GetKey, Ord(ARoutePoint));
 end;
 
 class function TmAttr.RoutePoint(AValue: string): TRoutePoint;
@@ -2414,36 +2494,36 @@ end;
 { TmIsDFSPoint }
 constructor TmIsDFSPoint.Create(AValue: boolean = false);
 begin
-  inherited Create('mIsDFSPoint', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 constructor TmDuration.Create(AValue: integer = -1);
 begin
-  inherited Create('mDuration', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 { TmArrival }
 constructor TmArrival.Create(AValue: TDateTime = 0);
 begin
-  inherited Create('mArrival', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 { TmAddress }
 constructor TmAddress.Create(AValue: string);
 begin
-  inherited Create('mAddress', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
-{ TmisTravelapseDestination }
-constructor TmisTravelapseDestination.Create(AValue: boolean = false);
+{ TmIsTravelapseDestination }
+constructor TmIsTravelapseDestination.Create(AValue: boolean = false);
 begin
-  inherited Create('mIsTravelapseDestination', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 { TmShapingRadius }
 constructor TmShapingRadius.Create(AValue: Cardinal = $80000000);
 begin
-  inherited Create('mShapingRadius', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 function TmShapingRadius.GetValue: string;
@@ -2456,22 +2536,29 @@ begin
   result := TItemEditMode.emNone;
 end;
 
+{ TmShapingCenter }
+constructor TmShapingCenter.Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream);
+begin
+  inherited Create;
+  InitFromStream(GetKey, ALenValue, ADataType, AStream);
+end;
+
 { TmName }
 constructor TmName.Create(AValue: string);
 begin
-  inherited Create('mName', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 { TmPhoneNumber, only for Zumo3X0}
 constructor TmPhoneNumber.Create(AValue: string);
 begin
-  inherited Create('mPhoneNumber', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 { TmShaping, only for Zumo3X0}
 constructor TmShaping.Create(AValue: boolean = false);
 begin
-  inherited Create('mShaping', AValue);
+  inherited Create(GetKey, AValue);
 end;
 
 { TBaseRoutePreferences }
@@ -2555,7 +2642,7 @@ end;
 
 constructor TmRoutePreferences.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mRoutePreferences', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 function TmRoutePreferences.GetIntToIdent(const Value: word): string;
@@ -2578,17 +2665,17 @@ end;
 
 constructor TmRoutePreferencesAdventurousHillsAndCurves.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mRoutePreferencesAdventurousHillsAndCurves', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mRoutePreferencesAdventurousScenicRoads', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mRoutePreferencesAdventurousMode', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 function TmRoutePreferencesAdventurousMode.GetIntToIdent(const Value: word): string;
@@ -2611,33 +2698,33 @@ end;
 
 constructor TmRoutePreferencesAdventurousPopularPaths.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mRoutePreferencesAdventurousPopularPaths', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 {*** XT3 ***}
 constructor TmSerializedRoutePrefRoundTripRoadType.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mSerializedRoutePrefRoundTripRoadType', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmSerializedRoutePrefRoundTripDirection.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mSerializedRoutePrefRoundTripDirection', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmSerializedRoutePrefRoundTripMethod.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mSerializedRoutePrefRoundTripMethod', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmSerializedRoutePrefRoundTripUnits.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mSerializedRoutePrefRoundTripUnits', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmSerializedRoutePrefRoundTripLength.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create('mSerializedRoutePrefRoundTripLength', 0 , $80);
+  inherited Create(GetKey, 0 , $80);
 end;
 
 (*** TripTrack ***)
@@ -2668,6 +2755,12 @@ begin
   ValueLenLat := $05000000;
   DataTypeLat := $03;
   LatAsInt    := $0;
+end;
+
+constructor TmTrackToRouteInfoMap.Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream);
+begin
+  inherited Create;
+  InitFromStream(GetKey, ALenValue, ADataType, AStream);
 end;
 
 procedure TmTrackToRouteInfoMap.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
@@ -2788,6 +2881,13 @@ begin
   end;
 end;
 
+{*** TmGreatRidesInfoMap ***}
+constructor TmGreatRidesInfoMap.Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream);
+begin
+  inherited Create;
+  InitFromStream(GetKey, ALenValue, ADataType, AStream);
+end;
+
 {*** Header ***}
 procedure THeaderValue.SwapCardinals;
 begin
@@ -2892,7 +2992,7 @@ end;
 
 constructor TmAllLinks.Create;
 begin
-  inherited Create('mAllLinks', SizeOf(FItemCount), dtList); // Will get Length later, Via Calculate
+  inherited Create(GetKey, SizeOf(FItemCount), dtList); // Will get Length later, Via Calculate
   FItemList := TItemList.Create;
   FItemCount := 0;
   FDefRoutePref := TRoutePreference.rmFasterTime;
@@ -3164,7 +3264,7 @@ end;
 {*** LocationList ***}
 constructor TmLocations.Create;
 begin
-  inherited Create('mLocations', SizeOf(FItemCount), dtList); // Will get Length later, Via Calculate
+  inherited Create(GetKey, SizeOf(FItemCount), dtList); // Will get Length later, Via Calculate
   FItemList := TItemList.Create;
   FItemCount := 0;
 end;
@@ -3732,7 +3832,7 @@ constructor TmUdbDataHndl.Create(AHandleId: Cardinal;
                                  AModel: TTripModel = TTripModel.Unknown;
                                  ForceRecalc: boolean = true);
 begin
-  inherited Create('mUdbDataHndl', SizeOf(FValue), dtUdbHandle); // Will get Length later, Via Calculate
+  inherited Create(GetKey, SizeOf(FValue), dtUdbHandle); // Will get Length later, Via Calculate
   FUdbHandleId := AHandleId; // Only value seen = 1
   Fvalue := Default(TUdbHandleValue);
 
@@ -3867,7 +3967,7 @@ end;
 
 constructor TmAllRoutes.Create;
 begin
-  inherited Create('mAllRoutes', 0, dtList); // Will get Length later, Via Calculate
+  inherited Create(GetKey, 0, dtList); // Will get Length later, Via Calculate
   FValue := Default(TmAllRoutesValue);
   FUdBList := TUdbHandleList.Create;
 end;
@@ -4234,14 +4334,14 @@ var
   RoutePointList: TList<TLocation>;
   Location: TLocation;
 begin
-  RoutePreferences := GetItem('mRoutePreferences') as TmRoutePreferences;
+  RoutePreferences := GetItem(TmRoutePreferences.GetKey) as TmRoutePreferences;
   if (RoutePreferences = nil) then
     exit;
-  RoutePreferencesAdventurousMode := GetItem('mRoutePreferencesAdventurousMode') as TmRoutePreferencesAdventurousMode;
+  RoutePreferencesAdventurousMode := GetItem(TmRoutePreferencesAdventurousMode.GetKey) as TmRoutePreferencesAdventurousMode;
   if (RoutePreferencesAdventurousMode = nil) then
     exit;
 
-  Locations := GetItem('mLocations') as TmLocations;
+  Locations := GetItem(TmLocations.GetKey) as TmLocations;
   if (Locations = nil) then
     exit;
   RoutePointList := TList<TLocation>.Create;
@@ -4271,11 +4371,11 @@ var
   RoutePointList: TList<TLocation>;
   Location: TLocation;
 begin
-  MAllLinks := GetItem('mAllLinks') as TmAllLinks;
+  MAllLinks := GetItem(TmAllLinks.GetKey) as TmAllLinks;
   if (MAllLinks = nil) then
     exit;
 
-  Locations := GetItem('mLocations') as TmLocations;
+  Locations := GetItem(TmLocations.GetKey) as TmLocations;
   if (Locations = nil) then
     exit;
 
@@ -4330,7 +4430,7 @@ begin
   if not TProcessOptions.SafeModel2Write(TripModel) then
     raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
 
-  mLocations := GetItem('mLocations') as TmLocations;
+  mLocations := GetItem(TmLocations.GetKey) as TmLocations;
   if (mLocations <> nil) and // No Locations, cant be too many...
      (TProcessOptions.MaxViaPoints > 0) and
      (mLocations.GetViaPointCount > TProcessOptions.MaxViaPoints) then
@@ -4409,7 +4509,7 @@ var
   mVersionNumber: TmVersionNumber;
 begin
   FTripFileVersion := TripVersion[TTripModel.Unknown];
-  mVersionNumber := TmVersionNumber(ScanStream(AStream, 'mVersionNumber'));
+  mVersionNumber := TmVersionNumber(ScanStream(AStream, TmVersionNumber.GetKey));
   if not Assigned(mVersionNumber) then
     exit;
   try
@@ -4555,7 +4655,7 @@ var
   ALocation: TBaseItem;
 begin
   result := 0;
-  ALocations := TmLocations(GetItem('mLocations'));
+  ALocations := TmLocations(GetItem(TmLocations.GetKey));
   if not (Assigned(ALocations)) then
     exit;
   for ALocation in ALocations.Locations do
@@ -4572,7 +4672,7 @@ var
   RoutePointCnt: integer;
 begin
   result := nil;
-  ALocations := TmLocations(GetItem('mLocations'));
+  ALocations := TmLocations(GetItem(TmLocations.GetKey));
   if not (Assigned(ALocations)) then
     exit;
   RoutePointCnt := -1;
@@ -4638,7 +4738,7 @@ begin
   EscapedTripName := EscapeDQuote(TripName);
   HasUdbs := false;
 
-  AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
+  AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if (Assigned(AllRoutes)) then
   begin
     for UdbDataHndl in AllRoutes.Items do
@@ -4649,7 +4749,7 @@ begin
     end;
   end;
 
-  Locations := TmLocations(GetItem('mLocations'));
+  Locations := TmLocations(GetItem(TmLocations.GetKey));
   if (Assigned(Locations)) then
   begin
     for Location in Locations.Locations do
@@ -4718,7 +4818,7 @@ var
   RoutePointList: TList<TLocation>;
   Location: TLocation;
 begin
-  if (GetItem('mRoutePreferences') = nil) then
+  if (GetItem(TmRoutePreferences.GetKey) = nil) then
     exit;
 
   SegmentCount := Locations.ViaPointCount -1;
@@ -4756,22 +4856,22 @@ begin
     end;
 
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
-    SetRoutePref('mRoutePreferences',TmpStream);
+    SetRoutePref(TmRoutePreferences.GetKey,TmpStream);
 
     // RoutePrefs from Adventurous
     PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurous);
-    SetRoutePref('mRoutePreferencesAdventurousMode', TmpStream);
+    SetRoutePref(TmRoutePreferencesAdventurousMode.GetKey, TmpStream);
 
     // RoutePrefs from Adventurous Hills and Curves
     PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurousHillsAndCurves);
-    SetRoutePref('mRoutePreferencesAdventurousHillsAndCurves', TmpStream);
+    SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpStream);
 
     // All others
     for ViaPt := 0 to High(RoutePreferences) do
       RoutePreferences[ViaPt] := Swap(DefRoutePref);
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
-    SetRoutePref('mRoutePreferencesAdventurousScenicRoads', TmpStream);
-    SetRoutePref('mRoutePreferencesAdventurousPopularPaths', TmpStream);
+    SetRoutePref(TmRoutePreferencesAdventurousScenicRoads.GetKey, TmpStream);
+    SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpStream);
   finally
     TmpStream.Free;
     RoutePointList.Free;
@@ -4799,7 +4899,7 @@ var
   TmpStream:      TMemoryStream;
   RoutePointList: TList<TLocation>;
 begin
-  if (GetItem('mSerializedRoutePrefRoundTripRoadType') = nil) then
+  if (GetItem(TmSerializedRoutePrefRoundTripRoadType.GetKey) = nil) then
     exit;
 
   SegmentCount := Locations.ViaPointCount -1;
@@ -4832,18 +4932,18 @@ begin
     end;
 
     PrepStream(TmpStream, SegmentCount, RTRoadType);
-    SetRoutePref('mSerializedRoutePrefRoundTripRoadType', TmpStream);
+    SetRoutePref(TmSerializedRoutePrefRoundTripRoadType.GetKey, TmpStream);
 
     PrepStream(TmpStream, SegmentCount, RTDirection);
-    SetRoutePref('mSerializedRoutePrefRoundTripDirection', TmpStream);
+    SetRoutePref(TmSerializedRoutePrefRoundTripDirection.GetKey, TmpStream);
 
     PrepStream(TmpStream, SegmentCount, RTMethod);
-    SetRoutePref('mSerializedRoutePrefRoundTripMethod', TmpStream);
+    SetRoutePref(TmSerializedRoutePrefRoundTripMethod.GetKey, TmpStream);
 
     PrepStream(TmpStream, SegmentCount, RTUnits);
-    SetRoutePref('mSerializedRoutePrefRoundTripUnits', TmpStream);
+    SetRoutePref(TmSerializedRoutePrefRoundTripUnits.GetKey, TmpStream);
 
-    SetRoutePref('mSerializedRoutePrefRoundTripLength', TmpLenStream);
+    SetRoutePref(TmSerializedRoutePrefRoundTripLength.GetKey, TmpLenStream);
 
   finally
     TmpStream.Free;
@@ -4864,7 +4964,7 @@ begin
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
   Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
-  Locations.Add(TmisTravelapseDestination.Create);
+  Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
 end;
@@ -4879,14 +4979,14 @@ begin
     Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
+    Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
     Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
     Locations.Add(TmIsDFSPoint.Create);
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
     Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT2]));
     Locations.Add(TmAddress.Create(Location2Add.Address));
-    Locations.Add(TmisTravelapseDestination.Create);
+    Locations.Add(TmIsTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
     Locations.Add(TmName.Create(Location2Add.Name));
   finally
@@ -4904,10 +5004,10 @@ begin
     Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
     Locations.Add(TmIsDFSPoint.Create);
-    Locations.Add(TmisTravelapseDestination.Create);
+    Locations.Add(TmIsTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
+    Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
     Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT3]));
@@ -4928,10 +5028,10 @@ begin
   try
     Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
-    Locations.Add(TmisTravelapseDestination.Create);
+    Locations.Add(TmIsTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TRawDataItem.Create).InitFromStream('mShapingCenter', TmpStream.Size, $08, TmpStream);
+    Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
     Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Tread2]));
@@ -4980,7 +5080,7 @@ begin
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
   Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Drive51]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
-  Locations.Add(TmisTravelapseDestination.Create);
+  Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
 end;
@@ -4996,7 +5096,7 @@ begin
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
   Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Drive66]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
-  Locations.Add(TmisTravelapseDestination.Create);
+  Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
 end;
@@ -5030,7 +5130,7 @@ procedure TTripList.AddLocation(const Location2Add: TLocation2Add);
 var
   Locations: TmLocations;
 begin
-  Locations := GetItem('mLocations') as TmLocations;
+  Locations := GetItem(TmLocations.GetKey) as TmLocations;
   case Location2Add.TripModel of
     TTripModel.XT:
       AddLocation_XT(Locations, Location2Add);
@@ -5079,7 +5179,7 @@ begin
   AllRoutes := InitAllRoutes;
 
   // Need locations
-  Locations := GetItem('mLocations');
+  Locations := GetItem(TmLocations.GetKey);
 
   // Count Via points
   ViaCount := ViaPointCount;
@@ -5130,8 +5230,8 @@ begin
     end;
 
     // Recreate RoutePreferences
-    if (GetItem('mTrackToRouteInfoMap') <> nil) then
-      TmTrackToRouteInfoMap(GetItem('mTrackToRouteInfoMap')).Clear;
+    if (GetItem(TmTrackToRouteInfoMap.GetKey) <> nil) then
+      TmTrackToRouteInfoMap(GetItem(TmTrackToRouteInfoMap.GetKey)).Clear;
     SetSegmentRoutePrefs(TmLocations(Locations), ProcessOptions);
   finally
     RoutePointList.Free;
@@ -5145,18 +5245,18 @@ var
   PreserveTrackToRoute: TmPreserveTrackToRoute;
   DayNumber: TmDayNumber;
 begin
-  DayNumber := (GetItem('mDayNumber') as TmDayNumber);
+  DayNumber := (GetItem(TmDayNumber.GetKey) as TmDayNumber);
   if Assigned(DayNumber) then
     DayNumber.AsByte := 0;
 
-  // Create TrackToRouteInfoMap for XT2 and Tread2
-  TrackToRouteInfoMap := GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
+  // Create TrackToRouteInfoMap for XT2, XT3 and Tread2
+  TrackToRouteInfoMap := GetItem(TmTrackToRouteInfoMap.GetKey) as TmTrackToRouteInfoMap;
   if Assigned(TrackToRouteInfoMap) and
      Assigned(RtePts) then
     TrackToRouteInfoMap.InitFromGpxxRpt(RtePts);
 
   // For XT
-  PreserveTrackToRoute := GetItem('mPreserveTrackToRoute') as TmPreserveTrackToRoute;
+  PreserveTrackToRoute := GetItem(TmPreserveTrackToRoute.GetKey) as TmPreserveTrackToRoute;
   if Assigned(PreserveTrackToRoute) then
     PreserveTrackToRoute.AsBoolean := true;
 end;
@@ -5170,16 +5270,16 @@ var
   StartLocation, EndLocation: TLocation;
   StartArrival, EndArrival: TmArrival;
 begin
-  TotalTripDistance := (GetItem('mTotalTripDistance') as TmTotalTripDistance);
+  TotalTripDistance := (GetItem(TmTotalTripDistance.GetKey) as TmTotalTripDistance);
   if (Assigned(TotalTripDistance)) then
     TotalTripDistance.AsSingle := TotalDist;
-  TotalTripTime := (GetItem('mTotalTripTime') as TmTotalTripTime);
+  TotalTripTime := (GetItem(TmTotalTripTime.GetKey) as TmTotalTripTime);
   if (Assigned(TotalTripTime)) then
     TotalTripTime.AsCardinal := TotalTime;
 
   // Update Arrival time of Destination.
   // Will list the trip as scheduled on the 3x0, 590 and nuvi 2595. (And maybe others)
-  Locations := TmLocations(GetItem('mLocations'));
+  Locations := TmLocations(GetItem(TmLocations.GetKey));
   if not Assigned(Locations) then
     exit;
 
@@ -5228,7 +5328,7 @@ var
   ProcessOptions: TProcessOptions;
 begin
   // Need locations
-  Locations := GetItem('mLocations');
+  Locations := GetItem(TmLocations.GetKey);
   if not Assigned(Locations) then
     exit;
 
@@ -5356,7 +5456,7 @@ begin
   AllRoutes := InitAllRoutes;
 
   // Need locations
-  Locations := GetItem('mLocations');
+  Locations := GetItem(TmLocations.GetKey);
   if not Assigned(Locations) then
     exit;
 
@@ -5520,7 +5620,7 @@ var
   AllRoutes: TmAllRoutes;
 begin
   // Try to get allroutes
-  AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
+  AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if not Assigned(AllRoutes) or
      not Assigned(AllRoutes.Items) or
      (AllRoutes.Items.Count = 0) then
@@ -5531,7 +5631,7 @@ end;
 
 function TTripList.GetTripName: string;
 begin
-  result := GetValue('mTripName');
+  result := GetValue(TmTripName.GetKey);
 end;
 
 // Get the model by checking the magic number, or the size.
@@ -5553,7 +5653,7 @@ begin
 
   // Zumo 595 and Drive 51 share the same UDBHandle size, but the Drive 51 has no mIsRoundTrip
   // Tread 2 and SmartDrive 66 share the same UDBHandle size, but the SmartDrive 66 has no mIsRoundTrip
-  if (GetItem('mIsRoundTrip') = nil) then
+  if (GetItem(TmIsRoundTrip.GetKey) = nil) then
     case result of
       TTripModel.Zumo595:
         result := TTripModel.Drive51;
@@ -5609,22 +5709,22 @@ end;
 
 function TTripList.GetExploreUUID: string;
 begin
-  result := GetValue('mExploreUuid');
+  result := GetValue(TmExploreUuid.GetKey);
 end;
 
 function TTripList.GetVehicleProfileName: string;
 begin
-  result := GetValue('mVehicleProfileName');
+  result := GetValue(TmVehicleProfileName.GetKey);
 end;
 
 function TTripList.GetVehicleGUID: string;
 begin
-  result := GetValue('mVehicleProfileGuid');
+  result := GetValue(TmVehicleProfileGuid.GetKey);
 end;
 
 function TTripList.GetVehicleHash: cardinal;
 begin
-  result := StrToIntDef(GetValue('mVehicleProfileHash'), 0);
+  result := StrToIntDef(GetValue(TmVehicleProfileHash.GetKey), 0);
 end;
 
 function TTripList.GetCalculationModel(AModel: TTripModel): TTripModel;
@@ -5640,7 +5740,7 @@ begin
   if (TripModel <> TTripModel.Nuvi2595) then
     exit(nil);
 
-  result := GetItem('mAllLinks');
+  result := GetItem(TmAllLinks.GetKey);
   if Assigned(result) then
     TmAllLinks(result).Clear;
 end;
@@ -5649,7 +5749,7 @@ function TTripList.InitAllRoutes: TBaseItem;
 var
   AnUdbHandle:  TmUdbDataHndl;
 begin
-  result := GetItem('mAllRoutes');
+  result := GetItem(TmAllRoutes.GetKey);
   if not Assigned(result) then
   begin
     result := TmAllRoutes.Create;
@@ -5706,25 +5806,25 @@ begin
     SetHeader(THeader.Create);
 
     PrepStream(TmpStream, [$0000]);
-    Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, dtRaw, TmpStream);
+    Add(TmGreatRidesInfoMap.Create(TmpStream.Size, dtRaw, TmpStream));
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
     TmpStream.Position := 0;
-    Add(TmTrackToRouteInfoMap.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, dtRaw, TmpStream);
+    Add(TmTrackToRouteInfoMap.Create(TmpStream.Size, dtRaw, TmpStream));
     Add(TmIsDisplayable.Create);
-    Add(TBooleanItem.Create('mIsDeviceRoute', true));
+    Add(TmIsDeviceRoute.Create);
     Add(TmDayNumber.Create);
     Add(TmTripDate.Create);
     Add(TmOptimized.Create);
     Add(TmTotalTripTime.Create);
     Add(TmTripName.Create(TripName));
-    Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
+    Add(TmVehicleProfileGuid.Create(ProcessOptions.VehicleProfileGuid));
     Add(TmParentTripId.Create(0));
     Add(TmIsRoundTrip.Create);
-    Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
+    Add(TmVehicleProfileName.Create(ProcessOptions.VehicleProfileName));
     Add(TmAvoidancesChanged.Create);
     Add(TmParentTripName.Create(TripName));
-    Add(TByteItem.Create('mVehicleProfileTruckType', ProcessOptions.VehicleProfileTruckType) );
-    Add(TCardinalItem.Create('mVehicleProfileHash', ProcessOptions.VehicleProfileHash));
+    Add(TmVehicleProfileTruckType.Create(ProcessOptions.VehicleProfileTruckType));
+    Add(TmVehicleProfileHash.Create(ProcessOptions.VehicleProfileHash));
     Add(TmRoutePreferences.Create);
     Add(TmImported.Create);
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
@@ -5734,13 +5834,13 @@ begin
     Add(TmVersionNumber.Create(TripFileVersion));
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmTotalTripDistance.Create);
-    Add(TCardinalItem.Create('mVehicleId', ProcessOptions.VehicleId));
+    Add(TmVehicleId.Create(ProcessOptions.VehicleId));
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
-    Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
+    Add(TmShowLastStopAsShapingPoint.Create);
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmLocations.Create);
@@ -5765,12 +5865,12 @@ begin
     SetHeader(THeader.Create);
 
     PrepStream(TmpStream, [$0000]);
-    Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, dtRaw, TmpStream);
+    Add(TmGreatRidesInfoMap.Create(TmpStream.Size, dtRaw, TmpStream));
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
     TmpStream.Position := 0;
-    Add(TmTrackToRouteInfoMap.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, dtRaw, TmpStream);
+    Add(TmTrackToRouteInfoMap.Create(TmpStream.Size, dtRaw, TmpStream));
     Add(TmIsDisplayable.Create);
-    Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
+    Add(TmShowLastStopAsShapingPoint.Create);
     CheckHRGuid(CreateGUID(Uuid));
     Add(TmExploreUuid.Create(ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
     Add(TmOptimized.Create);
@@ -5778,12 +5878,12 @@ begin
     Add(TmParentTripName.Create(TripName));
     Add(TmTotalTripDistance.Create);
     Add(TmTotalTripTime.Create);
-    Add(TByteItem.Create('mVehicleProfileTruckType', ProcessOptions.VehicleProfileTruckType ));
+    Add(TmVehicleProfileTruckType.Create(ProcessOptions.VehicleProfileTruckType));
     Add(TmAvoidancesChanged.Create);
-    Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
-    Add(TCardinalItem.Create('mVehicleProfileHash', ProcessOptions.VehicleProfileHash));
+    Add(TmVehicleProfileName.Create(ProcessOptions.VehicleProfileName));
+    Add(TmVehicleProfileHash.Create(ProcessOptions.VehicleProfileHash));
     Add(TmParentTripId.Create(0));
-    Add(TCardinalItem.Create('mVehicleId', ProcessOptions.VehicleId));
+    Add(TmVehicleId.Create(ProcessOptions.VehicleId));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
     Add(TmSerializedRoutePrefRoundTripRoadType.Create);
@@ -5801,8 +5901,8 @@ begin
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
-    Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
-    Add(TBooleanItem.Create('mIsDeviceRoute', true));
+    Add(TmVehicleProfileGuid.Create(ProcessOptions.VehicleProfileGuid));
+    Add(TmIsDeviceRoute.Create);
     Add(TmRoutePreferences.Create);
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
@@ -5828,10 +5928,10 @@ begin
     SetHeader(THeader.Create);
 
     PrepStream(TmpStream, [$0000]);
-    Add(TRawDataItem.Create).InitFromStream('mGreatRidesInfoMap', TmpStream.Size, dtRaw, TmpStream);
+    Add(TmGreatRidesInfoMap.Create(TmpStream.Size, dtRaw, TmpStream));
     Add(TmAvoidancesChangedTimeAtSave.Create(ProcessOptions.AvoidancesChangedTimeAtSave));
     TmpStream.Position := 0;
-    Add(TmTrackToRouteInfoMap.Create).InitFromStream('mTrackToRouteInfoMap', TmpStream.Size, dtRaw, TmpStream);
+    Add(TmTrackToRouteInfoMap.Create(TmpStream.Size, dtRaw, TmpStream));
     Add(TmIsDisplayable.Create);
 
     CheckHRGuid(CreateGUID(Uuid));
@@ -5839,15 +5939,15 @@ begin
     Add(TmOptimized.Create);
     Add(TmDayNumber.Create);
     Add(TmParentTripName.Create(TripName));
-    Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
+    Add(TmShowLastStopAsShapingPoint.Create);
     Add(TmTotalTripDistance.Create);
     Add(TmTotalTripTime.Create);
-    Add(TByteItem.Create('mVehicleProfileTruckType', ProcessOptions.VehicleProfileTruckType ));
+    Add(TmVehicleProfileTruckType.Create(ProcessOptions.VehicleProfileTruckType));
     Add(TmAvoidancesChanged.Create);
-    Add(TStringItem.Create('mVehicleProfileName', ProcessOptions.VehicleProfileName));
-    Add(TCardinalItem.Create('mVehicleProfileHash', ProcessOptions.VehicleProfileHash));
+    Add(TmVehicleProfileName.Create(ProcessOptions.VehicleProfileName));
+    Add(TmVehicleProfileHash.Create(ProcessOptions.VehicleProfileHash));
     Add(TmParentTripId.Create(0));
-    Add(TCardinalItem.Create('mVehicleId', ProcessOptions.VehicleId));
+    Add(TmVehicleId.Create(ProcessOptions.VehicleId));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
@@ -5860,9 +5960,9 @@ begin
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferences.Create);
-    Add(TBooleanItem.Create('mIsDeviceRoute', true));
+    Add(TmIsDeviceRoute.Create);
     Add(TmRoutePreferencesAdventurousScenicRoads.Create);
-    Add(TStringItem.Create('mVehicleProfileGuid', ProcessOptions.VehicleProfileGuid));
+    Add(TmVehicleProfileGuid.Create(ProcessOptions.VehicleProfileGuid));
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmVersionNumber.Create(TripFileVersion));
@@ -5958,14 +6058,14 @@ begin
   try
     SetHeader(THeader.Create);
 
-    Add(TBooleanItem.Create('mIsDeviceRoute', true));
+    Add(TmIsDeviceRoute.Create);
     Add(TmPreserveTrackToRoute.Create);
     Add(TmParentTripId.Create(0));
     Add(TmDayNumber.Create);
     Add(TmTripDate.Create);
     Add(TmAvoidancesChanged.Create);
     Add(TmParentTripName.Create(TripName));
-    Add(TBooleanItem.Create('mShowLastStopAsShapingPoint', false));
+    Add(TmShowLastStopAsShapingPoint.Create);
     Add(TmOptimized.Create);
     Add(TmTotalTripTime.Create);
     Add(TmRoutePreferences.Create);
@@ -6059,19 +6159,19 @@ var
   ViaPointType, Arrival, TransportMode, CalculationMode, PointName, Lat, Lon, Address: string;
 begin
   IntToIdent(Ord(TTransportMode.tmMotorcycling), TransportMode, TransportModeMap);
-  ANItem := GetItem('mTransportationMode');
+  ANItem := GetItem(TmTransportationMode.GetKey);
   if (Assigned(ANItem)) then
     TransportMode := TmTransportationMode(ANItem).AsString;
 
   IntToIdent(Ord(TRoutePreference.rmFasterTime), CalculationMode, RoutePreferenceMap);
-  ANItem := GetItem('mRoutePreference');
+  ANItem := GetItem(TmRoutePreference.GetKey);
   if (Assigned(ANItem)) then
     CalculationMode := TmRoutePreference(ANItem).AsString;
 
   TXmlVSNode(Rte).AddChild('name').NodeValue := TripName;
   TXmlVSNode(Rte).AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
 
-  Locations := TmLocations(GetItem('mLocations'));
+  Locations := TmLocations(GetItem(TmLocations.GetKey));
   if not (Assigned(Locations)) then
     exit;
 
@@ -6147,7 +6247,7 @@ var
 begin
   TXmlVSNode(Trk).AddChild('name').NodeValue := TripName;
 
-  AllRoutes := TmAllRoutes(GetItem('mAllRoutes'));
+  AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if not Assigned(AllRoutes) then
     exit;
 
@@ -6210,12 +6310,14 @@ begin
 
   System.Classes.RegisterClasses([
   // TByteItem
-     TmDayNumber, TmRoutePreference, TmTransportationMode,
+    TmDayNumber, TmRoutePreference, TmTransportationMode,
   // TBooleanitem
-    TmPreserveTrackToRoute, TmIsDisplayable, TmAvoidancesChanged, TmIsRoundTrip, TmOptimized,
-    TmImported, TmPartOfSplitRoute, TmIsDFSPoint, TmisTravelapseDestination, TmPreserveTrackToRoute,
+    TmPreserveTrackToRoute, TmIsDisplayable, TmAvoidancesChanged, TmIsRoundTrip,
+    TmOptimized, TmImported, TmPartOfSplitRoute,
+    TmIsDFSPoint, TmIsTravelapseDestination, TmPreserveTrackToRoute,
   // TCardinalItem
-    TmParentTripId, TmTripDate, TmTotalTripTime, TmAttr, TmDuration, TmArrival, TmShapingRadius,
+    TmParentTripId, TmTripDate, TmTotalTripTime, TmAttr, TmDuration, TmArrival,
+    TmShapingRadius,
   // TSingleItem,
     TmTotalTripDistance,
   // Specialized Type 08
@@ -6226,8 +6328,16 @@ begin
     TmLocations,
   // TmAllRoutes
     TmAllRoutes,
-  // XT2
+  // XT2, XT3, Tread 2
+    TmShowLastStopAsShapingPoint,
+    TmVehicleProfileTruckType,
+    TmVehicleProfileHash,
+    TmVehicleId,
+    TmVehicleProfileGuid,
+    TmVehicleProfileName,
+    TmIsDeviceRoute,
     TmExploreUuid,
+    TmShapingCenter,
     TmAvoidancesChangedTimeAtSave,
     TmRoutePreferences,
     TmRoutePreferencesAdventurousHillsAndCurves,
@@ -6235,6 +6345,13 @@ begin
     TmRoutePreferencesAdventurousMode,
     TmRoutePreferencesAdventurousPopularPaths,
     TmTrackToRouteInfoMap,
+    TmGreatRidesInfoMap,
+  // XT3
+    TmSerializedRoutePrefRoundTripRoadType,
+    TmSerializedRoutePrefRoundTripDirection,
+    TmSerializedRoutePrefRoundTripMethod,
+    TmSerializedRoutePrefRoundTripUnits,
+    TmSerializedRoutePrefRoundTripLength,
   // Zumo3x0, 590
     TmShaping, TmPhoneNumber,
   // Nuvi2595

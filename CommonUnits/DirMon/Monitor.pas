@@ -14,7 +14,7 @@ const
 
 type
   TActionToWatch = (awChangeFileName, awChangeDirName, awChangeAttributes, awChangeSize, awChangeLastWrite,
-    awChangeLastAccess, awChangeCreation, awChangeSecurity);
+                    awChangeLastAccess, awChangeCreation, awChangeSecurity);
   TActionsToWatch = set of TActionToWatch;
   TDirectoryMonitorAction = (daUnknown, daFileAdded, daFileRemoved, daFileModified, daFileRenamedOldName, daFileRenamedNewName);
   TDirectoryChangeEvent = procedure(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString) of object;
@@ -96,8 +96,10 @@ begin
   FSubdirectories := Owner.Subdirectories;
   FActions := Owner.FActions;
   FOwnerHandle := Owner.Handle;
-  FDirHandle := CreateFile(PChar(FDirectory), FILE_LIST_DIRECTORY, FILE_SHARE_READ or FILE_SHARE_WRITE or
-    FILE_SHARE_DELETE, nil, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS or FILE_FLAG_OVERLAPPED, 0);
+  FDirHandle := CreateFile(PChar(FDirectory),
+                           FILE_LIST_DIRECTORY,
+                           FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE, nil, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS or FILE_FLAG_OVERLAPPED,
+                           0);
   FChangeHandle := CreateEvent(nil, False, False, nil);
   FShutdownHandle := CreateEvent(nil, False, False, nil);
 end;
@@ -155,11 +157,7 @@ var
   FileNamePtr: PChar;
 begin
   if (FDirHandle = INVALID_HANDLE_VALUE) then
-  begin
-    AllocConsole;
-    Writeln('FDirHandle = INVALID_HANDLE_VALUE');
-    exit;
-  end;
+    raise Exception.Create('FDirHandle = INVALID_HANDLE_VALUE');
   Overlap := Default(TOverlapped);
   Overlap.hEvent := FChangeHandle;
   Events[0] := FChangeHandle;
@@ -167,13 +165,8 @@ begin
 
   while not Terminated do
   begin
-
     if not ReadDirectoryChangesW(FDirHandle, @Buffer[0], BUFFER_SIZE, FSubdirectories, GetNotifyMask, @BytesRead, @Overlap, nil) then
-    begin
-      AllocConsole;
-      Writeln('ReadDirectoryChangesW:', SysErrorMessage(GetLastError));
-      exit;
-    end;
+      raise Exception.Create(Format('ReadDirectoryChangesW: %s', [SysErrorMessage(GetLastError)]));
 
     WaitResult := WaitForMultipleObjects(2, @Events[0], False, INFINITE);
     if WaitResult <> WAIT_OBJECT_0 then

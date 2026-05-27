@@ -391,7 +391,7 @@ begin
   SaveRecNo := CdsRoutePoints.RecNo;
   CdsRoutePoints.DisableControls;
   try
-    Locations := TmLocations(TTripList(FTripList).GetItem('mLocations'));
+    Locations := TmLocations(TTripList(FTripList).GetItem(TmLocations.GetKey));
     if not (Assigned(Locations)) then
       exit;
 
@@ -421,24 +421,24 @@ begin
 
     if (CdsRoute.State = dsBrowse) then
     begin
-      ANItem := TTripList(FTripList).GetItem('mTripName');
+      ANItem := TTripList(FTripList).GetItem(TmTripName.GetKey);
       if (ANItem <> nil) then
         TmTripName(ANItem).AsString := CdsRouteTripName.AsString;
 
       case TTripList(FTripList).TripModel of
         TTripModel.Nuvi2595:
         begin
-          Links := TmAllLinks(TTripList(FTripList).GetItem('mAllLinks'));
+          Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
           Links.DefRoutePref := TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString);
           Links.DefTransportMode := TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString);
         end
         else
         begin
-          ANItem := TTripList(FTripList).GetItem('mRoutePreference');
+          ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
           if (ANItem <> nil) then
             TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
 
-          ANItem := TTripList(FTripList).GetItem('mTransportationMode');
+          ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
           if (ANItem <> nil) then
             TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
         end;
@@ -452,7 +452,7 @@ begin
         P := FUuidList.IndexOfName(CdsRouteTripName.AsString);
         if (P > -1) then
         begin
-          ANItem := TTripList(FTripList).GetItem('mExploreUuid');
+          ANItem := TTripList(FTripList).GetItem(TmExploreUuid.GetKey);
           if (ANItem <> nil) then
             TmExploreUuid(ANItem).AsString := FUuidList.ValueFromIndex[P];
         end;
@@ -523,7 +523,7 @@ begin
     case TTripList(FTripList).TripModel of
       TTripModel.Nuvi2595:
       begin
-        Links := TmAllLinks(TTripList(FTripList).GetItem('mAllLinks'));
+        Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
         for Link in Links.Links do
         begin
           for ANItem in Tlink(Link).Items do
@@ -538,10 +538,10 @@ begin
       end
       else
       begin
-        ANItem := TTripList(FTripList).GetItem('mRoutePreference');
+        ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
         if (ANItem = nil) then
         begin
-          ANItem := TTripList(FTripList).GetItem('mRoutePreferences');
+          ANItem := TTripList(FTripList).GetItem(TmRoutePreferences.GetKey);
           if (ANItem <> nil) then
           begin
             IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePreferenceMap);
@@ -551,7 +551,7 @@ begin
         else
           CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
 
-        ANItem := TTripList(FTripList).GetItem('mTransportationMode');
+        ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
         if (ANItem <> nil) then
           CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
       end;
@@ -566,7 +566,7 @@ begin
     CdsRoutePoints.CreateDataSet;
     CdsRoutePoints.LogChanges := false;
 
-    Locations := TmLocations(TTripList(FTripList).GetItem('mLocations'));
+    Locations := TmLocations(TTripList(FTripList).GetItem(TmLocations.GetKey));
     if not (Assigned(Locations)) or
        (Locations.LocationCount = 0) then
       exit;

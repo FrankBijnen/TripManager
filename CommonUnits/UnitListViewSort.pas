@@ -2,8 +2,11 @@ unit UnitListViewSort;
 
 interface
 
-uses System.SysUtils, System.Classes, Winapi.Windows,
-     Vcl.ComCtrls, Winapi.CommCtrl, System.Math, System.DateUtils;
+uses
+  System.SysUtils, System.Classes, System.Math, System.DateUtils,
+  Winapi.Windows,
+  Vcl.ComCtrls, Winapi.CommCtrl;
+
 type
   TSortSpecification = record
     Column: TListColumn;

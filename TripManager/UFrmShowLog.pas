@@ -213,12 +213,12 @@ begin
   OldTripList.Assign(FixedTripList);
 
   // Source locations
-  OldLocations := TmLocations(OldTripList.GetItem('mLocations'));
+  OldLocations := TmLocations(OldTripList.GetItem(TmLocations.GetKey));
   if not Assigned(OldLocations) then
     exit;
 
   // New locations
-  NewLocations := TmLocations(FixedTripList.GetItem('mLocations'));
+  NewLocations := TmLocations(FixedTripList.GetItem(TmLocations.GetKey));
   if not Assigned(NewLocations) then
     exit;
   NewLocations.Clear;

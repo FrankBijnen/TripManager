@@ -840,6 +840,9 @@ begin
   Assign(MainRec);
 
   S.Read(Id, SizeOf(Id));
+
+  // Handle bigger records
+  S.Seek(MainRec.Length - SizeOf(Id), TSeekOrigin.soCurrent);
 end;
 
 function TPoiBitmapRef.Size: Integer;
@@ -1535,7 +1538,6 @@ begin
         $04:
           begin
             PoiBitmapRef.Read(S, MainRec);
-//TODO: Handle lengths 2,4,6,10 etc.
             GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Symbol := TGPXString(IntToStr(PoiBitmapRef.Id));
             continue;

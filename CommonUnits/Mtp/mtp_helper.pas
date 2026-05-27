@@ -375,7 +375,7 @@ function MTP_RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: W
 function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
                                      NewName: WideString = ''): WideString;
 function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
-procedure MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil);
+function MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil): boolean;
 function MTP_ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 
 implementation
@@ -867,7 +867,7 @@ begin
   EnumSupportedCommands(Capabilities);
 end;
 
-procedure MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil);
+function MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil): boolean;
 var
   PMan: IPortableDeviceManager;
   DevFriendlyName: WideString;
@@ -877,13 +877,14 @@ var
   Index: Integer;
   ABase_Device: TBase_Device;
 begin
+  result := true;
   try
     PMan := CoPortableDeviceManager.Create;
     if (PMan = nil) or
        (PMan.RefreshDeviceList <> S_OK) then
-      exit;
+      exit(false);
   except
-    exit;
+    exit(false);
   end;
 
   // Determine how many WPD devices are connected

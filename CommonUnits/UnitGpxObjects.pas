@@ -266,8 +266,9 @@ begin
 end;
 
 function TGPXfile.DebugCoords(Coords: TXmlVSAttributeList): string;
-var LastSub, Hex, LatLon: string;
-    Coord: TCoords;
+var
+  LastSub, Hex, LatLon: string;
+  Coord: TCoords;
 begin
   Coord.FromAttributes(Coords);
   Hex := IntToHex(Float2Coord(Coord.Lat), 8);
@@ -535,14 +536,13 @@ end;
 
 function TGPXfile.MapSegFromSubClass(const CalculatedSubclass: string): integer;
 var
-  ErrCode: DWORD;
   Reversed: string;
 begin
   Reversed := '$' + Copy(CalculatedSubclass, 7, 2) +
                     Copy(CalculatedSubclass, 5, 2) +
                     Copy(CalculatedSubclass, 3, 2) +
                     Copy(CalculatedSubclass, 1, 2);
-  Val(Reversed, result, ErrCode);
+  result := StrToIntDef(Reversed, 0);
 end;
 
 procedure TGPXfile.ComputeDistance(RptNode: TXmlVSNode);
@@ -667,7 +667,7 @@ end;
 procedure TGPXfile.ReplaceCategory(const ExtensionsNode: TXmlVsNode; const NS, Category: string);
 var
   AnExtensionsNode, CategoriesNode: TXmlVsNode;
-  CatPos:integer;
+  CatPos: integer;
 begin
   if (ExtensionsNode = nil) then
     exit;
@@ -932,16 +932,15 @@ begin
     CloneNode(RptNode, TrackPoint)
   else
   begin
-    // Use Departure from (Start) point as time for route poins
+    // Use Departure from (Start) point as time for route points
     if (ExtensionNode = nil) then
       exit;
     RtePtViaPoint := ExtensionNode.Find('trp:ViaPoint');
     if (RtePtViaPoint = nil) then
       exit;
     SubNodeValue := FindSubNodeValue(RtePtViaPoint,'trp:DepartureTime');
-    if (SubNodeValue = '') then
-      exit;
-    TrackPoint.AddChild('time').NodeValue := SubNodeValue;
+    if (SubNodeValue <> '') then
+      TrackPoint.AddChild('time').NodeValue := SubNodeValue;
   end;
 end;
 
@@ -1377,8 +1376,7 @@ begin
   AllXml := ReplaceAll(AllXml,
     ['</extensions><rte>', '</extensions></gpx>'],
     ['</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte><rte>',
-     '</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte></gpx>'],
-    [rfReplaceAll]);
+     '</extensions><rtept lat="0" lon="0"><name>Begin</name></rtept><rtept lat="0" lon="0"><name>End</name></rtept></rte></gpx>']);
   TFile.WriteAllText(FGPXFile, AllXml);
 end;
 
@@ -2026,8 +2024,8 @@ begin
       end;
     end;
 
-  // Create Way points, from Via, or Shaping points in routes.
-  // Create a file per route/track
+    // Create Way points, from Via, or Shaping points in routes.
+    // Create a file per route/track
     RoutesProcessed := GetSelectedRoutes;
     try
       if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
@@ -2750,13 +2748,13 @@ var
 begin
   if (ProcessOptions.AllowGrouping) and
      (ProcessOptions.TripModel in [TTripModel.XT, TTripModel.Drive66]) then
-    (FTripList.GetItem('mParentTripId') as TmParentTripId).AsCardinal := ParentTripId;
+    (FTripList.GetItem(TmParentTripId.GetKey) as TmParentTripId).AsCardinal := ParentTripId;
 
-  mParentTripName := FTripList.GetItem('mParentTripName') as TmParentTripName;
+  mParentTripName := FTripList.GetItem(TmParentTripName.GetKey) as TmParentTripName;
   if (Assigned(mParentTripName)) then
     mParentTripName.AsString := FBaseFile;
 
-  Locations := FTripList.GetItem('mLocations') as TmLocations;
+  Locations := FTripList.GetItem(TmLocations.GetKey) as TmLocations;
   CreateLocations(Locations, RtePts);
 
   if (Assigned(ProcessOptions.ExploreUUIDList)) and
@@ -2765,7 +2763,7 @@ begin
     KnownExploreUuid := ProcessOptions.ExploreUUIDList.Values[TripName];
     if (KnownExploreUuid <> '') then
     begin
-      mExploreUuid := FTripList.GetItem('mExploreUuid') as TmExploreUuid;
+      mExploreUuid := FTripList.GetItem(TmExploreUuid.GetKey) as TmExploreUuid;
       if (Assigned(mExploreUuid)) then
         mExploreUuid.AsString := KnownExploreUuid;
     end;

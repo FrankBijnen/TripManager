@@ -54,7 +54,7 @@ begin
   ProcessOptions := TProcessOptions.Create;
   RoutePointList := TList<TLocation>.Create;
   try
-    Locations := TTripList(CurTripList).GetItem('mLocations') as TmLocations;
+    Locations := TTripList(CurTripList).GetItem(TmLocations.GetKey) as TmLocations;
     for ViaPt := 1 to Locations.ViaPointCount -1 do
     begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);
@@ -116,7 +116,7 @@ begin
 
   try
     VlRoutePrefs.Strings.Clear;
-    Locations := TTripList(CurTripList).GetItem('mLocations') as TmLocations;
+    Locations := TTripList(CurTripList).GetItem(TmLocations.GetKey) as TmLocations;
     for ViaPt := 1 to Locations.ViaPointCount do
     begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);

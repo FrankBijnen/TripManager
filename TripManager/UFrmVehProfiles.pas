@@ -63,8 +63,7 @@ type
     VehicleProfile: TVehicleProfile;
   end;
 
-//var
-//  FrmVehProfiles: TFrmVehProfiles;
+//var FrmVehProfiles: TFrmVehProfiles;
 
 implementation
 

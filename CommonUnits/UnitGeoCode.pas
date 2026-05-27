@@ -229,7 +229,8 @@ begin
 end;
 
 procedure Throttle(const Delay: Int64);
-var Diff: Int64;
+var
+  Diff: Int64;
 begin
   Diff := Delay - MilliSecondsBetween(Now, LastQuery);
   if (Diff > 0) then
@@ -324,9 +325,10 @@ begin
 end;
 
 function GetPlaceOfCoords(const Lat, Lon: string; hWnd: HWND = 0; Msg: UINT = 0; UseCache: boolean = true): TPlace;
-var CoordsKey: string;
-    LatP, LonP: string;
-    CrWait, CrNormal: HCURSOR;
+var
+  CoordsKey: string;
+  LatP, LonP: string;
+  CrWait, CrNormal: HCURSOR;
 begin
   result := nil;
   if (GeoSettings.GeoCodeApiKey = '') then

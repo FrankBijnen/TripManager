@@ -2,14 +2,11 @@
 
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
+{.$DEFINE HASHDEBUG}
 {$ELSE}
+// Installing hooks when debugging is not a good idea.
 {.$DEFINE HOOK_MOUSE}      // For detecting Left/Right mouse button when dropping
 {$ENDIF}
-{.$DEFINE WINEHACKS}
-
-//TODO Add level for RoutePoints?
-{$DEFINE ROUTEPOINTSLEVEL}
-{.$DEFINE HASHDEBUG}
 
 interface
 
@@ -375,6 +372,7 @@ type
 {$IFDEF HASHDEBUG}
     HashDebugList: TStringList;
 {$ENDIF}
+    HasPortableDeviceApi: boolean;
     CurrentDevice: TBase_Device;
     FSavedParent: WideString;
     FSavedFolderId: WideString;
@@ -758,9 +756,8 @@ end;
 
 procedure TFrmTripManager.ReAlignEdgeBrowser;
 begin
-{$IFDEF WINEHACKS}
-  EdgeBrowser1.AlignWithMargins := not EdgeBrowser1.AlignWithMargins;
-{$ENDIF}
+  if not HasPortableDeviceApi then
+    EdgeBrowser1.AlignWithMargins := not EdgeBrowser1.AlignWithMargins;
 end;
 
 procedure TFrmTripManager.BgDeviceClick(Sender: TObject);
@@ -1531,7 +1528,7 @@ var
   Index: integer;
 begin
   if (ATripList = nil) or
-    (ATripList.GetItem('mAllRoutes') = nil) then
+    (ATripList.GetItem(TmAllRoutes.GetKey) = nil) then
     exit;
 
   // Handlers
@@ -2277,11 +2274,7 @@ begin
   // Get updated devicelist
   FreeDevices;
 
-{$IFDEF WINEHACKS}
-  TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device, TGarminDrv_Device);
-{$ELSE}
-  TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device);
-{$ENDIF}
+  HasPortableDeviceApi := TBase_Device.GetDeviceList(DeviceList, TMTP_Data, TGarminMTP_Device, TGarminDrv_Device);
 
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
@@ -2802,7 +2795,7 @@ begin
 
       LocalFile := IncludeTrailingPathDelimiter(CreatedTempPath) + AnITem.SubItems[1];
       TmpTriplist.LoadFromFile(LocalFile);
-      mExploreUuid := TmpTriplist.GetItem('mExploreUuid') as TmExploreUuid;
+      mExploreUuid := TmpTriplist.GetItem(TmExploreUuid.GetKey) as TmExploreUuid;
       if (mExploreUuid = nil) then
         continue;
 
@@ -3009,7 +3002,7 @@ begin
 
     CurrentTrip.CreateOSMPoints(OsmTrack, OSMColor(GetRegistry(Reg_TripColor_Key, Reg_TripColor_Val)));
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
-    TrackToRouteInfoMap := CurrentTrip.GetItem('mTrackToRouteInfoMap') as TmTrackToRouteInfoMap;
+    TrackToRouteInfoMap := CurrentTrip.GetItem(TmTrackToRouteInfoMap.GetKey) as TmTrackToRouteInfoMap;
     if (Assigned(TrackToRouteInfoMap)) and
        (TrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt > 0)  then
     begin
@@ -3080,7 +3073,7 @@ function TFrmTripManager.CheckTrip(const AListItem: TListItem; const ALocalFile:
 var
   TmpTripList: TTripList;
   LocalFile: string;
-  Imported: TBooleanItem;
+  Imported: TmImported;
   AMTP_Data: TMTP_Data;
   TmpHash: cardinal;
 begin
@@ -3114,7 +3107,7 @@ begin
     TmpTripList.LoadFromFile(LocalFile);
 
     // Check Imported/Saved
-    Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
+    Imported := TmImported(TmpTripList.GetItem(TmImported.GetKey));
     AMTP_Data.IsNotSavedTrip := (Imported <> nil) and
                                 Imported.AsBoolean;
     SetCheckMark(AListItem, not AMTP_Data.IsNotSavedTrip);
@@ -3521,7 +3514,7 @@ var
       Offset := (ARoutePreferences.SelEnd - ARoutePreferences.SelStart - ARoutePreferences.LenValue) +
                 SizeOf(biInitiator);
       if (ARoutePreferences is TmRoutePreferencesAdventurousMode) then
-        Segments.Text := ARoutePreferences.GetRoutePrefs(ATripList.GetItem('mRoutePreferences'))
+        Segments.Text := ARoutePreferences.GetRoutePrefs(ATripList.GetItem(TmRoutePreferences.GetKey))
       else
         Segments.Text := ARoutePreferences.GetRoutePrefs;
       VlTripInfo.Strings.AddObject(Format('%s #Segments', [ARoutePreferences.Name]) +
@@ -4148,14 +4141,8 @@ begin
   if (Node.Data <> nil) and
      (TObject(Node.Data) is TUdbDir) then
   begin
-{$IFDEF ROUTEPOINTSLEVEL}
     if (TUdbDir(Node.Data).IsTurn) then
       Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
-{$ELSE}
-    if (TUdbDir(Node.Data).UdbDirValue.SubClass.IsKnownRoutePoint) or
-       (TUdbDir(Node.Data).IsTurn) then
-      Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
-{$ENDIF}
     case TUdbDir(Node.Data).Status of
       TUdbDirStatus.udsRoutePointNOK:
         Sender.Canvas.Brush.Color := clWebAqua;
@@ -4563,7 +4550,7 @@ begin
         // reload trip, and change mFilename
         TripFilename := CopyFileToTmp(AnItem);  // First copy to tmp
         TmpTripList.LoadFromFile(TripFilename);
-        TmFileName(TmpTripList.GetItem('mFileName')).AsString := Format('0:/.System/Trips/%s.trip', [TripName]);
+        TmFileName(TmpTripList.GetItem(TmFileName.GetKey)).AsString := Format('0:/.System/Trips/%s.trip', [TripName]);
         TmpTripList.SaveToFile(TripFilename);
 
         // Write back to dev
@@ -4634,7 +4621,7 @@ begin
         TmpTripList.LoadFromFile(TripFilename);
 
         // Set mParentTripName
-        mParentTripName := TmpTripList.GetItem('mParentTripName') as TmParentTripName;
+        mParentTripName := TmpTripList.GetItem(TmParentTripName.GetKey) as TmParentTripName;
         if not Assigned(mParentTripName) then
           continue;
         if (Group) then
@@ -4643,7 +4630,7 @@ begin
           mParentTripName.AsString := TmpTripList.TripName;
 
         // Set mParentTripId
-        mParentTripId := TmpTripList.GetItem('mParentTripId') as TmParentTripId;
+        mParentTripId := TmpTripList.GetItem(TmParentTripId.GetKey) as TmParentTripId;
         if not Assigned(mParentTripId) then
           continue;
         mParentTripId.AsCardinal := ParentId;
@@ -4710,7 +4697,7 @@ begin
         TmpTripList.LoadFromFile(TripFilename);
 
         // AllLinks (nuvi2595)
-        AllLinks := TmAllLinks(TmpTripList.GetItem('mAllLinks'));
+        AllLinks := TmAllLinks(TmpTripList.GetItem(TmAllLinks.GetKey));
         if (Assigned(AllLinks)) then
         begin
           case ARouteParm of
@@ -4726,9 +4713,9 @@ begin
           ARouteParmItem := nil;
           case ARouteParm of
             TRouteParm.TransportMode:
-              ARouteParmItem := TByteItem(TmpTripList.GetItem('mTransportationMode'));
+              ARouteParmItem := TByteItem(TmpTripList.GetItem(TmTransportationMode.GetKey));
             TRouteParm.RoutePref:
-              ARouteParmItem := TByteItem(TmpTripList.GetItem('mRoutePreference'));
+              ARouteParmItem := TByteItem(TmpTripList.GetItem(TmRoutePreference.GetKey));
           end;
           if (Assigned(ARouteParmItem)) then
             ARouteParmItem.AsByte := Value;
@@ -5022,7 +5009,7 @@ var
     mLocations: TmLocations;
   begin
     RoutePoints := Tlist<TLocation>.Create;
-    mLocations := TmLocations(ALinkList.TripList.GetItem('mLocations'));
+    mLocations := TmLocations(ALinkList.TripList.GetItem(TmLocations.GetKey));
     if (Assigned(mLocations)) then
       mLocations.GetRoutePoints(RoutePoints);
     try
@@ -5077,7 +5064,6 @@ var
     AParentNode.Expand(false);
   end;
 
-{$IFDEF ROUTEPOINTSLEVEL}
   procedure AddRoutes(AParentNode: TTreeNode; ARouteList: TmAllRoutes);
   var
     AnUdbHandle: TmUdbDataHndl;
@@ -5099,22 +5085,6 @@ var
     end;
     AParentNode.Expand(false);
   end;
-{$ELSE}
-  procedure AddRoutes(AParentNode: TTreeNode; ARouteList: TmAllRoutes);
-  var
-    AnUdbHandle: TmUdbDataHndl;
-    AnUdbDir: TUdbDir;
-    CurrentUdbNode: TTreeNode;
-  begin
-    for AnUdbHandle in ARouteList.Items do
-    begin
-      CurrentUdbNode := TvTrip.Items.AddChildObject(AParentNode, AnUdbHandle.DisplayName, AnUdbHandle);
-      for AnUdbDir in AnUdbHandle.Items do
-        TvTrip.Items.AddChildObject(CurrentUdbNode, AnUdbDir.DisplayName, AnUdbDir);
-    end;
-    AParentNode.Expand(false);
-  end;
-{$ENDIF}
 
 begin
   // Prevent AV's in Compare when a new trip file is loaded.
@@ -5170,7 +5140,7 @@ begin
       PnlTripGpiInfo.Color := clAqua;
 
     TripName := ATripList.TripName;
-    ParentTripName := ATripList.GetValue('mParentTripName');
+    ParentTripName := ATripList.GetValue(TmParentTripName.GetKey);
 
     TripFileName := ExtractFileName(FileName);
     if SameText(ChangeFileExt(TripFileName, ''), TripName) then
@@ -5362,7 +5332,7 @@ var
   TmpTripList: TTripList;
   LocalFile: string;
   NewCheck: boolean;
-  Imported: TBooleanItem;
+  Imported: TmImported;
 begin
   NewCheck := NewValue;
   TmpTripList := TTripList.Create;
@@ -5374,7 +5344,7 @@ begin
 
     // Check mImported by loading tmp file
     TmpTripList.LoadFromFile(LocalFile);
-    Imported := TBooleanItem(TmpTripList.GetItem('mImported'));
+    Imported := TmImported(TmpTripList.GetItem(TmImported.GetKey));
     if (Imported <> nil) then
       Imported.AsBoolean := NewValue;
     TmpTripList.SaveToFile(LocalFile);

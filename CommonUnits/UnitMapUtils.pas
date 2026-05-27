@@ -8,8 +8,10 @@ uses
 
 function CreateLink(const PathObj, PathLink, Desc, Param: string): Boolean;
 function ResolveLink(const Path: string): string;
-procedure ListMapsRegistryKey(MapsList: TStringList; MapsKey: string);
-procedure ListMapsAppData(const BaseDir: string; MapsList: TStringList; IncludePath: boolean = false);
+procedure ListMapsRegistryKey(const MapsList: TStringList; const MapsKey: string);
+procedure ListMapsAppData(const BaseDir: string;
+                          const MapsList: TStringList;
+                          const IncludePath: boolean = false);
 function ListMaps(const BaseDir: string): TStringList;
 function DeleteLink(const Path: string): boolean;
 function GetMapFolder: string;
@@ -20,9 +22,9 @@ procedure ClearTileCache;
 implementation
 
 uses
-  Winapi.Windows, Winapi.ShlObj, Winapi.ActiveX, Winapi.ShellAPI, System.Win.ComObj, Winapi.KnownFolders,
-   System.Win.Registry, System.SysUtils, System.StrUtils,
-   UnitVerySimpleXml;
+  System.Win.Registry, System.SysUtils, System.StrUtils, System.Win.ComObj,
+  Winapi.Windows, Winapi.ShlObj, Winapi.ActiveX, Winapi.ShellAPI, Winapi.KnownFolders,
+  UnitVerySimpleXml;
 
 var
   InstalledMaps: TStringList;
@@ -72,7 +74,7 @@ end;
 
 function DeleteLink(const Path: string): boolean;
 begin
-  result := DeleteFile(Path);
+  result := System.SysUtils.DeleteFile(Path);
 end;
 
 type
@@ -156,7 +158,7 @@ begin
   end;
 end;
 
-procedure ListMdx(const MdxFile: string; MapSegments: TStringList);
+procedure ListMdx(const MdxFile: string; const MapSegments: TStringList);
 var
   F: File;
   SaveFileMode: byte;
@@ -204,7 +206,7 @@ begin
   end;
 end;
 
-procedure ListMapsRegistryKey(MapsList: TStringList; MapsKey: string);
+procedure ListMapsRegistryKey(const MapsList: TStringList; const MapsKey: string);
 var
   Maps, SubProducts, MapSegments: TStringList;
   Idx, Tdb, AMapKey, BMap: string;
@@ -277,7 +279,7 @@ begin
   end;
 end;
 
-procedure ListMapsRegistry(MapsList: TStringList);
+procedure ListMapsRegistry(const MapsList: TStringList);
 const
   MapsKey = 'SOFTWARE\Wow6432Node\Garmin\MapSource\Families';
   MapsKeyNT = 'SOFTWARE\Wow6432Node\Garmin\MapSource\FamiliesNT';
@@ -286,7 +288,9 @@ begin
   ListMapsRegistryKey(MapsList, MapsKeyNT);
 end;
 
-procedure ListMapsAppData(const BaseDir: string; MapsList: TStringList; IncludePath: boolean = false);
+procedure ListMapsAppData(const BaseDir: string;
+                          const MapsList: TStringList;
+                          const IncludePath: boolean = false);
 var
   Fs: TSearchRec;
   Rc: Integer;
@@ -307,9 +311,9 @@ begin
     while (True) do
     begin
       if (First) then
-        Rc := FindFirst(IncludeTrailingPathDelimiter(BaseDir) + '*.*', faSymLink, Fs)
+        Rc := System.SysUtils.FindFirst(IncludeTrailingPathDelimiter(BaseDir) + '*.*', faSymLink, Fs)
       else
-        Rc := FindNext(Fs);
+        Rc := System.SysUtils.FindNext(Fs);
       if (Rc <> 0) then
         break;
       First := false;
@@ -354,7 +358,7 @@ begin
       ProductNameRec := ScanTdb(Tdb);
       MapsList.AddObject(ProductNameRec.MapName, TStringList(MapSegments));
     end;
-    FindClose(Fs);
+    System.SysUtils.FindClose(Fs);
   finally
     XmlDoc.Free;
   end;
@@ -373,8 +377,9 @@ begin
 end;
 
 function LookupMap(const MapSegment: string): string;
-var Map, MapSeg: integer;
-    MapsegList: TStringList;
+var
+  Map, MapSeg: integer;
+  MapsegList: TStringList;
 begin
   result := '';
   if (InstalledMaps = nil) then
@@ -395,8 +400,10 @@ begin
 end;
 
 function GetKnownFolder(const Known: TGUID): string;
-var NameBuffer: PChar;
+var
+  NameBuffer: PChar;
 begin
+  result := '';
   if SUCCEEDED(SHGetKnownFolderPath(Known, 0, 0, NameBuffer)) then
     result := StrPas(NameBuffer);
   CoTaskMemFree(NameBuffer);
@@ -426,12 +433,13 @@ begin
 end;
 
 finalization
-var Indx: integer;
+var
+  Index: integer;
 begin
   if (InstalledMaps = nil) then
     exit;
-  for Indx := 0 to InstalledMaps.Count -1 do
-    TStringList(InstalledMaps.Objects[Indx]).Free;
+  for Index := 0 to InstalledMaps.Count -1 do
+    TStringList(InstalledMaps.Objects[Index]).Free;
   InstalledMaps.Free;
 end;
 
