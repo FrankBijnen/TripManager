@@ -72,15 +72,29 @@ const
   Hash_VehicleLegality             = 'Legal status';
 
   // Base hash values
-  // The Calculation method/Adventurous level, Traction and Clearance are used as to index.
+  // The Calculation method/Adventurous level, Traction and Clearance are used to index.
   XT3_Base_Hashes: array[0..6] of TKnownHash = (
-    (CM: cmFaster;             HashT2: $0A4F0000; HashT3: $0A1F0000; Hash2WD: $023F0000; Hash2WDHClear: $02000000; Hash4WD: $026F0000; Hash4WDHClear: $02700000),
-    (CM: cmShorter;            HashT2: $07E00000; HashT3: $07D00000; Hash2WD: $00300010; Hash2WDHClear: $002F0010; Hash4WD: $0FC00000; Hash4WDHClear: $0FFF0000),
-    (CM: cmStraight;           HashT2: $079B0000; HashT3: $07CB0000; Hash2WD: $002B0010; Hash2WDHClear: $002C0010; Hash4WD: $0FFB0000; Hash4WDHClear: $0FFC0000),
-    (CM: cmAdv; AdvLvl: advL1; HashT2: $0A4A0000; HashT3: $0A1A0000; Hash2WD: $023A0000; Hash2WDHClear: $02390000; Hash4WD: $026A0000; Hash4WDHClear: $02690000),
-    (CM: cmAdv; AdvLvl: advL2; HashT2: $0A7A0000; HashT3: $0A6A0000; Hash2WD: $020A0000; Hash2WDHClear: $02090000; Hash4WD: $021A0000; Hash4WDHClear: $02190000),
-    (CM: cmAdv; AdvLvl: advL3; HashT2: $0AAA0000; HashT3: $0A3A0000; Hash2WD: $021A0000; Hash2WDHClear: $02190000; Hash4WD: $020A0000; Hash4WDHClear: $02090000),
-    (CM: cmAdv; AdvLvl: advL4; HashT2: $0A5A0000; HashT3: $0A0A0000; Hash2WD: $026A0000; Hash2WDHClear: $02690000; Hash4WD: $023A0000; Hash4WDHClear: $02390000)
+    (CM: cmFaster;
+      HashT2: $0A4F0000;  HashT3: $0A1F0000;
+      Hash2WD: $023F0000; Hash2WDHClear: $02000000; Hash4WD: $026F0000; Hash4WDHClear: $02700000),
+    (CM: cmShorter;
+      HashT2: $07E00000;  HashT3: $07D00000;
+      Hash2WD: $00300010; Hash2WDHClear: $002F0010; Hash4WD: $0FC00000; Hash4WDHClear: $0FFF0000),
+    (CM: cmStraight;
+      HashT2: $079B0000;  HashT3: $07CB0000;
+      Hash2WD: $002B0010; Hash2WDHClear: $002C0010; Hash4WD: $0FFB0000; Hash4WDHClear: $0FFC0000),
+    (CM: cmAdv; AdvLvl: advL1;
+      HashT2: $0A4A0000;  HashT3: $0A1A0000;
+      Hash2WD: $023A0000; Hash2WDHClear: $02390000; Hash4WD: $026A0000; Hash4WDHClear: $02690000),
+    (CM: cmAdv; AdvLvl: advL2;
+      HashT2: $0A7A0000;  HashT3: $0A6A0000;
+      Hash2WD: $020A0000; Hash2WDHClear: $02090000; Hash4WD: $021A0000; Hash4WDHClear: $02190000),
+    (CM: cmAdv; AdvLvl: advL3;
+      HashT2: $0AAA0000;  HashT3: $0A3A0000;
+      Hash2WD: $021A0000; Hash2WDHClear: $02190000; Hash4WD: $020A0000; Hash4WDHClear: $02090000),
+    (CM: cmAdv; AdvLvl: advL4;
+      HashT2: $0A5A0000;  HashT3: $0A0A0000;
+      Hash2WD: $026A0000; Hash2WDHClear: $02690000; Hash4WD: $023A0000; Hash4WDHClear: $02390000)
   );
 
   // The high nibble of the Width, legality and Environments are used to index.
@@ -134,7 +148,7 @@ const
   // Car = false, Bike = true
   // Metric = false, Imperial = true
   Speed3Tab: array[boolean, boolean, 0..$f] of byte =
-  (
+    (
     (($1, $0, $3, $2, $5, $4, $7, $6, $9, $8, $b, $a, $d, $c, $f, $e),   //Car,  Metric
      ($d, $c, $f, $e, $9, $8, $b, $a, $5, $4, $7, $6, $1, $0, $3, $2)),  //Car,  Imperial
     (($2, $3, $0, $1, $6, $7, $4, $5, $a, $b, $8, $9, $e, $f, $c, $d),   //Bike, Metric
