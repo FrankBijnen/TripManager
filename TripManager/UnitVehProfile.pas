@@ -28,18 +28,8 @@ type
     function HashSpeed1(const ASpeed: cardinal): cardinal;
     function HashSpeed2(const AWidth: byte;
                         const ASpeed: cardinal): cardinal;
-    function HashSpeed3Bike(const ASpeed: cardinal;
-                            const AImperial: boolean): cardinal;
-    function HashSpeed2Bike(const AWidth: byte;
-                            const ASpeed: cardinal;
-                            const AImperial: boolean): cardinal;
-    function HashSpeed2Car(const AWidth: byte;
-                           const ASpeed: cardinal;
-                           const AImperial: boolean): cardinal;
-    function HashSpeed3Car(const ASpeed: cardinal;
-                           const AImperial: boolean): cardinal;
-    procedure Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
-    procedure Calculate_Proposed_Car_Hash(const Model: TGarminModel);
+    function HashSpeed3(const ASpeed: cardinal;
+                        const ABike: boolean): cardinal;
     procedure Calculate_Proposed_Hash(const Model: TGarminModel);
     procedure FromCds(const ACDS: TClientDataSet; const AModel: TGarminModel);
     procedure FromRegistry(const SubKey: string);
@@ -56,20 +46,20 @@ type
   TTraction        = (tr2WD = 1, tr4WD = 2, tr3Wheels = 3, tr2Wheels = 4);
   TVehicleTruckType= (ttMotorCycle = 7, ttCar = 11);
   TKnownHash = record
-    CM: TProfCalcMethod;
-    AdvLvl: TProfAdvLevel;
-    HashT2: cardinal;
-    HashT3: cardinal;
-    Hash2WD: cardinal;
-    Hash2WDHClear: cardinal;
-    Hash4WD: cardinal;
-    Hash4WDHClear: cardinal;
+    CM:             TProfCalcMethod; // Calc_method
+    AdvLvl:         TProfAdvLevel;   // Adventurous levevel
+    HashT2:         cardinal;        // Bike 2 wheels
+    HashT3:         cardinal;        // Bike 3 wheels
+    Hash2WD:        cardinal;        // Car 2WD
+    Hash2WDHClear:  cardinal;        // Car 2WD High Clearance
+    Hash4WD:        cardinal;        // Car 4WD
+    Hash4WDHClear:  cardinal;        // Car 4WD High Clearance
   end;
 
 var
   VehicleTruckTypeDesc: array[TVehicleTruckType] of string = ('MotorCycle', '' ,'' ,'', 'Car');
-  TractionDesc: array[TTraction] of string = ('2WD', '4WD' ,'3 Wheels' ,'2 Wheels');
-  ProfCalcMethodDesc: array[TProfCalcMethod] of string = ('Faster', 'Shorter', '', '', 'Straight', '', '', 'Adventurous');
+  TractionDesc:         array[TTraction] of string = ('2WD', '4WD' ,'3 Wheels' ,'2 Wheels');
+  ProfCalcMethodDesc:   array[TProfCalcMethod] of string = ('Faster', 'Shorter', '', '', 'Straight', '', '', 'Adventurous');
 
 const
   Hash_VehicleMaxSpeed             = 'Max Speed';
@@ -81,28 +71,16 @@ const
   Hash_VehicleTraction             = 'Traction';
   Hash_VehicleLegality             = 'Legal status';
 
-  // Base hash values for bikes
-  // The Calculation method/Adventurous level, and Traction are used as to index.
-  XT3_Motor_Hashes: array[0..6] of TKnownHash = (
-    (CM: cmFaster;              HashT2: $0A4F0000;  HashT3: $0A1F0000),
-    (CM: cmShorter;             HashT2: $07E00000;  HashT3: $07D00000),
-    (CM: cmStraight;            HashT2: $079B0000;  HashT3: $07CB0000),
-    (CM: cmAdv; AdvLvl: advL1;  HashT2: $0A4A0000;  HashT3: $0A1A0000),
-    (CM: cmAdv; AdvLvl: advL2;  HashT2: $0A7A0000;  HashT3: $0A6A0000),
-    (CM: cmAdv; AdvLvl: advL3;  HashT2: $0AAA0000;  HashT3: $0A3A0000),
-    (CM: cmAdv; AdvLvl: advL4;  HashT2: $0A5A0000;  HashT3: $0A0A0000)
-  );
-
-  // Base hash values for cars
+  // Base hash values
   // The Calculation method/Adventurous level, Traction and Clearance are used as to index.
-  XT3_Car_Hashes: array[0..6] of TKnownHash = (
-    (CM: cmFaster;              Hash2WD: $023F0000; Hash2WDHClear: $02000000; Hash4WD: $026F0000; Hash4WDHClear: $02700000),
-    (CM: cmShorter;             Hash2WD: $00300010; Hash2WDHClear: $002F0010; Hash4WD: $0FC00000; Hash4WDHClear: $0FFF0000),
-    (CM: cmStraight;            Hash2WD: $002B0010; Hash2WDHClear: $002C0010; Hash4WD: $0FFB0000; Hash4WDHClear: $0FFC0000),
-    (CM: cmAdv; AdvLvl: advL1;  Hash2WD: $023A0000; Hash2WDHClear: $02390000; Hash4WD: $026A0000; Hash4WDHClear: $02690000),
-    (CM: cmAdv; AdvLvl: advL2;  Hash2WD: $020A0000; Hash2WDHClear: $02090000; Hash4WD: $021A0000; Hash4WDHClear: $02190000),
-    (CM: cmAdv; AdvLvl: advL3;  Hash2WD: $021A0000; Hash2WDHClear: $02190000; Hash4WD: $020A0000; Hash4WDHClear: $02090000),
-    (CM: cmAdv; AdvLvl: advL4;  Hash2WD: $026A0000; Hash2WDHClear: $02690000; Hash4WD: $023A0000; Hash4WDHClear: $02390000)
+  XT3_Base_Hashes: array[0..6] of TKnownHash = (
+    (CM: cmFaster;             HashT2: $0A4F0000; HashT3: $0A1F0000; Hash2WD: $023F0000; Hash2WDHClear: $02000000; Hash4WD: $026F0000; Hash4WDHClear: $02700000),
+    (CM: cmShorter;            HashT2: $07E00000; HashT3: $07D00000; Hash2WD: $00300010; Hash2WDHClear: $002F0010; Hash4WD: $0FC00000; Hash4WDHClear: $0FFF0000),
+    (CM: cmStraight;           HashT2: $079B0000; HashT3: $07CB0000; Hash2WD: $002B0010; Hash2WDHClear: $002C0010; Hash4WD: $0FFB0000; Hash4WDHClear: $0FFC0000),
+    (CM: cmAdv; AdvLvl: advL1; HashT2: $0A4A0000; HashT3: $0A1A0000; Hash2WD: $023A0000; Hash2WDHClear: $02390000; Hash4WD: $026A0000; Hash4WDHClear: $02690000),
+    (CM: cmAdv; AdvLvl: advL2; HashT2: $0A7A0000; HashT3: $0A6A0000; Hash2WD: $020A0000; Hash2WDHClear: $02090000; Hash4WD: $021A0000; Hash4WDHClear: $02190000),
+    (CM: cmAdv; AdvLvl: advL3; HashT2: $0AAA0000; HashT3: $0A3A0000; Hash2WD: $021A0000; Hash2WDHClear: $02190000; Hash4WD: $020A0000; Hash4WDHClear: $02090000),
+    (CM: cmAdv; AdvLvl: advL4; HashT2: $0A5A0000; HashT3: $0A0A0000; Hash2WD: $026A0000; Hash2WDHClear: $02690000; Hash4WD: $023A0000; Hash4WDHClear: $02390000)
   );
 
   // The high nibble of the Width, legality and Environments are used to index.
@@ -125,15 +103,15 @@ const
       ( ($0000, $0000, $0000),  ($4000, $5000, $6000), ($7000, $6000, $5000) ), // b
       ( ($0000, $0000, $0000),  ($3000, $2000, $1000), ($0000, $1000, $2000) ), // c
       ( ($0000, $0000, $0000),  ($2000, $3000, $0000), ($1000, $0000, $3000) ), // d
-      ( ($0000, $0000, $0000),  ($1000, $0000, $3000), ($2000, $3000, $0000) ), // e
+      ( ($0000, $0000, $0000),  ($1000, $0000, $3000), ($2000, $3000, $0000) ), // e only for Cars
       ( ($0000, $0000, $0000),  ($0000, $0000, $0000), ($0000, $0000, $0000) )  // f Not implemented
     );
 
   // The low nibble of the width, and the high nibble of the low byte of speed are used to index.
-  // Speed2Tab is added to the base hash.
+  // Speed2Tab is added to the base hash. (nibble: 6 = shl 8)
   Speed2Tab: array[0..$f, 0..$f] of byte =
     (
-      ($7  ,$6  ,$5  ,$4  ,$3  ,$2  ,$1  ,$0  ,$f  ,$e  ,$d  ,$c  ,$b  ,$a  ,$9  ,$8),   // 0x90  =144
+      ($7  ,$6  ,$5  ,$4  ,$3  ,$2  ,$1  ,$0  ,$f  ,$e  ,$d  ,$c  ,$b  ,$a  ,$9  ,$8),   // 0x90  = 144
       ($6  ,$7  ,$4  ,$5  ,$2  ,$3  ,$0  ,$1  ,$e  ,$f  ,$c  ,$d  ,$a  ,$b  ,$8  ,$9),   // 0x91
       ($5  ,$4  ,$7  ,$6  ,$1  ,$0  ,$3  ,$2  ,$d  ,$c  ,$f  ,$e  ,$9  ,$8  ,$b  ,$a),   // 0x92
       ($4  ,$5  ,$6  ,$7  ,$0  ,$1  ,$2  ,$3  ,$c  ,$d  ,$e  ,$f  ,$8  ,$9  ,$a  ,$b),   // 0x93
@@ -151,19 +129,17 @@ const
       ($8  ,$9  ,$a  ,$b  ,$c  ,$d  ,$e  ,$f  ,$0  ,$1  ,$2  ,$3  ,$4  ,$5  ,$6  ,$7)    // 0x9f = 159
     );
 
-  // The value found in one of these 4 tables is added to the base hash.
+  // The value found is added to the base hash. (nibble: 7 = shl 4)
   // The low nibble of the low byte of speed is used to index.
-  BikeSpeed3TabImperial: array[0..$f] of byte =
-    ($e, $f, $c, $d, $a, $b, $8, $9, $6, $7, $4, $5, $2, $3, $0, $1);
-  BikeSpeed3TabMetric: array[0..$f] of byte =
-    ($2, $3, $0, $1, $6, $7, $4, $5, $a, $b, $8, $9, $e, $f, $c, $d);
-
-  //TODO only element 0, 5, $e have been verified.
-  CarSpeed3TabImperial: array[0..$f] of byte =
-    ($d, $c, $f, $e, $9, $8, $b, $a, $5, $4, $7, $6, $1, $0, $3, $2);
-  CarSpeed3TabMetric: array[0..$f] of byte =
-    ($1, $0, $3, $2, $5, $4, $7, $6, $9, $8, $b, $a, $d, $c, $f, $e);
-
+  // Car = false, Bike = true
+  // Metric = false, Imperial = true
+  Speed3Tab: array[boolean, boolean, 0..$f] of byte =
+  (
+    (($1, $0, $3, $2, $5, $4, $7, $6, $9, $8, $b, $a, $d, $c, $f, $e),   //Car,  Metric
+     ($d, $c, $f, $e, $9, $8, $b, $a, $5, $4, $7, $6, $1, $0, $3, $2)),  //Car,  Imperial
+    (($2, $3, $0, $1, $6, $7, $4, $5, $a, $b, $8, $9, $e, $f, $c, $d),   //Bike, Metric
+     ($e, $f, $c, $d, $a, $b, $8, $9, $6, $7, $4, $5, $2, $3, $0, $1))   //Bike, Imperial
+    );
 implementation
 
 uses
@@ -172,10 +148,10 @@ uses
   UnitRegistry, UnitRegistryKeys;
 
 const
-  Max_Vehicle_Speed_Supported = 768; // 768 dm/s = 27648 km/h!
-  Min_Width                   = 96;  // $60
-  Max_Width_Bike              = 223; // $df
-  Max_Width_Car               = 239; // $ef
+  Max_Vehicle_Speed_Supported       = 768;    // 768 dm/s = 27648 km/h!
+  Min_Width                         = 96;     // $60
+  Max_Width: array[boolean] of byte = (239,   // $ef Car
+                                       223);  // $df Bike
 
 function TVehicleProfile.HashSpeed1(const ASpeed: cardinal): cardinal;
 begin
@@ -188,66 +164,44 @@ begin
   result := (Speed2Tab[Byte(AWidth) and $0f, (ASpeed and $000000f0) shr 4]) shl 8;
 end;
 
-function TVehicleProfile.HashSpeed2Bike(const AWidth: byte;
-                                        const ASpeed: cardinal;
-                                        const AImperial: boolean): cardinal;
+function TVehicleProfile.HashSpeed3(const ASpeed: cardinal;
+                                    const ABike: boolean): cardinal;
 begin
-  result := HashSpeed2(AWidth, ASpeed) + HashSpeed3Bike(ASpeed, AImperial);
+  result := (Speed3Tab[ABike, Imperial, ASpeed and $0000000f]) shl 4;
 end;
 
-function TVehicleProfile.HashSpeed2Car(const AWidth: byte;
-                                       const ASpeed: cardinal;
-                                       const AImperial: boolean): cardinal;
-begin
-  result := HashSpeed2(AWidth, ASpeed) + HashSpeed3Car(ASpeed, AImperial);
-end;
-
-function TVehicleProfile.HashSpeed3Bike(const ASpeed: cardinal;
-                                        const AImperial: boolean): cardinal;
-begin
-  if (AImperial) then
-    result := (BikeSpeed3TabImperial[ASpeed and $0000000f]) shl 4
-  else
-    result := (BikeSpeed3TabMetric[ASpeed and $0000000f]) shl 4;
-end;
-
-function TVehicleProfile.HashSpeed3Car(const ASpeed: cardinal;
-                                       const AImperial: boolean): cardinal;
-begin
-  if (AImperial) then
-    result := (CarSpeed3TabImperial[ASpeed and $0000000f]) shl 4
-  else
-    result := (CarSpeed3TabMetric[ASpeed and $0000000f]) shl 4;
-end;
-
-procedure TVehicleProfile.Calculate_Proposed_Motor_Hash(const Model: TGarminModel);
+procedure TVehicleProfile.Calculate_Proposed_Hash(const Model: TGarminModel);
 var
   Index: integer;
 begin
+  Proposed_Hash := 0;
+
   // Check Speed
   if (Max_Vehicle_Speed > Max_Vehicle_Speed_Supported) then
     exit;
 
   // Only 2, or 3 Wheels traction
-  if not (Traction in [Ord(TTraction.tr3Wheels),        // 3 Wheels
-                       Ord(TTraction.tr2Wheels)]) then  // 2 Wheels
+  if not (TTraction(Traction) in [TTraction.tr3Wheels,        // 3 Wheels Bike
+                                  TTraction.tr2Wheels,        // 2 Wheels Bike
+                                  TTraction.tr2WD,            // 2WD      Car
+                                  TTraction.tr4WD]) then      // 3WD      Car
     exit;
 
   // Check width
-  if (Width < Min_Width) then       // min width 96
+  if (Width < Min_Width) then
     exit;
-  if (Width > Max_Width_Bike) then  // max width 223
+  if (Width > Max_Width[Truck_Type = Ord(TVehicleTruckType.ttMotorCycle)]) then
     exit;
 
   // Valid Environmental value
-  if not (Environmental in [Ord(TProfEnvironment.enAvoid),
-                            Ord(TProfEnvironment.enAllow),
-                            Ord(TProfEnvironment.enAsk)]) then
+  if not (TProfEnvironment(Environmental) in [TProfEnvironment.enAvoid,
+                                              TProfEnvironment.enAllow,
+                                              TProfEnvironment.enAsk]) then
     exit;
 
   // Valid Legality
-  if not (Road_Legality in [Ord(TRoadLegality.rlNoHighway),
-                            Ord(TRoadLegality.rlLegal)]) then
+  if not (TRoadLegality(Road_Legality) in [TRoadLegality.rlNoHighway,
+                                           TRoadLegality.rlLegal]) then
     exit;
 
   case Model of
@@ -258,119 +212,39 @@ begin
         Proposed_Hash := $0815F480;
     TGarminModel.XT3:
       begin
-        for Index := Low(XT3_Motor_Hashes) to High(XT3_Motor_Hashes) do
+        for Index := Low(XT3_Base_Hashes) to High(XT3_Base_Hashes) do
         begin
-          if (TProfCalcMethod(Calc_Method) <> XT3_Motor_Hashes[Index].CM) then
+          if (TProfCalcMethod(Calc_Method) <> XT3_Base_Hashes[Index].CM) then
             continue;
           if (TProfCalcMethod(Calc_Method) = TProfCalcMethod.cmAdv) and
-             (TProfAdvLevel(Adventurous_Route_Mode) <> XT3_Motor_Hashes[Index].AdvLvl) then
+             (TProfAdvLevel(Adventurous_Route_Mode) <> XT3_Base_Hashes[Index].AdvLvl) then
             continue;
 
-          if (Traction = Ord(TTraction.tr2Wheels)) then // 2 Wheels
-            Proposed_Hash := XT3_Motor_Hashes[Index].HashT2 +
-                                XT3_Legal_Environments[(Width and $f0) shr 4,
-                                                        TRoadLegality(Road_Legality),
-                                                        TProfEnvironment(Environmental)]
-          else                                          // 3 Wheels
-            Proposed_Hash := XT3_Motor_Hashes[Index].HashT3 +
-                                XT3_Legal_Environments[(Width and $f0) shr 4,
-                                                        TRoadLegality(Road_Legality),
-                                                        TProfEnvironment(Environmental)];
-
-          Proposed_Hash := Proposed_Hash + HashSpeed1(Max_Vehicle_Speed);
-          Proposed_Hash := Proposed_Hash + HashSpeed2Bike(Width, Max_Vehicle_Speed, Imperial);
-          break;
-        end;
-      end;
-  end;
-end;
-
-procedure TVehicleProfile.Calculate_Proposed_Car_Hash(const Model: TGarminModel);
-var
-  Index: integer;
-begin
-  // Check Speed
-  if (Max_Vehicle_Speed > Max_Vehicle_Speed_Supported) then
-    exit;
-
-  // Only 2WD and 4WD, 2 Axles
-  if not (Traction in [Ord(TTraction.tr2WD),
-                       Ord(TTraction.tr4WD)]) then
-    exit;
-
-  // Check width
-  if (Width < Min_Width) then       // min width 96
-    exit;
-  if (Width > Max_Width_Car) then   // max width 239
-    exit;
-
-  // Valid Environmental value
-  if not (Environmental in [Ord(TProfEnvironment.enAvoid),
-                            Ord(TProfEnvironment.enAllow),
-                            Ord(TProfEnvironment.enAsk)]) then
-    exit;
-
-  // Valid Legality
-  if not (Road_Legality in [Ord(TRoadLegality.rlNoHighway),
-                            Ord(TRoadLegality.rlLegal)]) then
-    exit;
-
-  case Model of
-    TGarminModel.XT2:     // The XT2 has only one motorcycle profile. Not used.
-      Proposed_Hash := 0;
-    TGarminModel.XT3:
-      begin
-        for Index := Low(XT3_Car_Hashes) to High(XT3_Car_Hashes) do
-        begin
-          if (TProfCalcMethod(Calc_Method) <> XT3_Car_Hashes[Index].CM) then
-            continue;
-          if (TProfCalcMethod(Calc_Method) = TProfCalcMethod.cmAdv) and
-             (TProfAdvLevel(Adventurous_Route_Mode) <> XT3_Car_Hashes[Index].AdvLvl) then
-            continue;
-
-          if (High_Clearance) then
-          begin
-            if (Traction = Ord(TTraction.tr4WD)) then // 4WD
-              Proposed_Hash := XT3_Car_Hashes[Index].Hash4WDhClear +
-                                XT3_Legal_Environments[(Width and $f0) shr 4,
-                                                       TRoadLegality(Road_Legality),
-                                                       TProfEnvironment(Environmental)]
-            else                                      // 2WD
-              Proposed_Hash := XT3_Car_Hashes[Index].Hash2WDhClear +
-                                  XT3_Legal_Environments[(Width and $f0) shr 4,
-                                                          TRoadLegality(Road_Legality),
-                                                          TProfEnvironment(Environmental)];
-          end
-          else
-          begin
-            if (Traction = Ord(TTraction.tr4WD)) then // 4WD
-              Proposed_Hash := XT3_Car_Hashes[Index].Hash4WD +
-                                XT3_Legal_Environments[(Width and $f0) shr 4,
-                                                        TRoadLegality(Road_Legality),
-                                                        TProfEnvironment(Environmental)]
-            else                                      // 2WD
-              Proposed_Hash := XT3_Car_Hashes[Index].Hash2WD +
-                                XT3_Legal_Environments[(Width and $f0) shr 4,
-                                                       TRoadLegality(Road_Legality),
-                                                       TProfEnvironment(Environmental)];
+          case (TTraction(Traction)) of
+            TTraction.tr2Wheels:
+              Proposed_Hash := XT3_Base_Hashes[Index].HashT2;
+            TTraction.tr3Wheels:
+              Proposed_Hash := XT3_Base_Hashes[Index].HashT3;
+            TTraction.tr2WD:
+              if (High_Clearance) then
+                Proposed_Hash := XT3_Base_Hashes[Index].Hash2WDHClear
+              else
+                Proposed_Hash := XT3_Base_Hashes[Index].Hash2WD;
+            TTraction.tr4WD:
+              if (High_Clearance) then
+                Proposed_Hash := XT3_Base_Hashes[Index].Hash4WDHClear
+              else
+                Proposed_Hash := XT3_Base_Hashes[Index].Hash4WD;
           end;
-          Proposed_Hash := Proposed_Hash + HashSpeed1(Max_Vehicle_Speed);
-          Proposed_Hash := Proposed_Hash + HashSpeed2Car(Width, Max_Vehicle_Speed, Imperial);
+          Proposed_Hash := Proposed_Hash + XT3_Legal_Environments[(Width and $f0) shr 4,
+                                                                  TRoadLegality(Road_Legality),
+                                                                  TProfEnvironment(Environmental)];
+          Proposed_Hash := Proposed_Hash + HashSpeed1(Max_Vehicle_Speed) +
+                                           HashSpeed2(Width, Max_Vehicle_Speed) +
+                                           HashSpeed3(Max_Vehicle_Speed, TVehicleTruckType(Truck_Type) = TVehicleTruckType.ttMotorCycle);
           break;
         end;
       end;
-  end;
-end;
-
-procedure TVehicleProfile.Calculate_Proposed_Hash(const Model: TGarminModel);
-begin
-  Proposed_Hash := 0;
-
-  case Truck_Type of
-    Ord(TVehicleTruckType.ttCar):
-      Calculate_Proposed_Car_Hash(Model);
-    Ord(TVehicleTruckType.ttMotorCycle):
-      Calculate_Proposed_Motor_Hash(Model);
   end;
 end;
 
