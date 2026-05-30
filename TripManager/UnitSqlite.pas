@@ -253,7 +253,7 @@ begin
         QTab.Next;
       end;
     finally
-      QTab.Free
+      QTab.Free;
     end;
   finally
     DB.Free;

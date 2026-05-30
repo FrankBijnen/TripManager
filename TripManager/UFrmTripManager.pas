@@ -3253,6 +3253,8 @@ end;
 procedure TFrmTripManager.ClearDeviceDbFiles;
 begin
   ExploreList.Clear;
+  CdsDeviceDb.Close;
+  TsSQlite.TabVisible := false;
   DeleteTempFiles(GetDeviceTmp, '*.db');
 end;
 
