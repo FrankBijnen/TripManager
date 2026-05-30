@@ -1395,7 +1395,8 @@ begin
       FFileStream := TFileStream.Create(IncludeTrailingPathDelimiter(SSaveTo) + NFile, fmCreate);
       try
         //read source stream using buffer
-        repeat
+        while (true) do
+        begin
           HR := FDevStream.Read(@Buf[0], ITransferSize, @IReadBytes);
           if not (HR in [S_OK, S_False]) then // S_False is returned when not all bytes are read. => Last part of file.
             raise Exception.Create(Format('Error: %s reading file: %s', [IntToHex(HR, 8), NFile]));
@@ -1403,7 +1404,7 @@ begin
             break;
 
           FFileStream.Write(Buf[0], IReadBytes);
-        until (true);
+        end;
 
         Result := True;
       finally
@@ -1572,7 +1573,8 @@ begin
 
     //transfer to dev. stream
     //read source stream using buffer
-    repeat
+    while (true) do
+    begin
       IReadBytes := FFileStream.Read(Buf[0], ITransferSize);
       if (IReadBytes = 0) then
         break;
@@ -1580,7 +1582,7 @@ begin
       HR := FDevStream.Write(@Buf[0], IReadBytes, @IWritten);
       if (HR <> S_OK) then
         raise Exception.Create(Format('Error: %s writing file: %s', [IntToHex(HR, 8), NameOnDev]));
-    until (true);
+    end;
 
     //commit saving to stream
     if (FDevStream.Commit(STGC_DEFAULT) = S_OK) then
