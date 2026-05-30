@@ -1397,12 +1397,13 @@ begin
         //read source stream using buffer
         repeat
           HR := FDevStream.Read(@Buf[0], ITransferSize, @IReadBytes);
-          if not (HR in [S_OK, S_False]) then // S_False is returnd for EOF
-            raise Exception.Create(Format('Error %s reading file %s', [IntToHex(HR, 8), NFile]));
+          if not (HR in [S_OK, S_False]) then // S_False is returned when not all bytes are read. => Last part of file.
+            raise Exception.Create(Format('Error: %s reading file: %s', [IntToHex(HR, 8), NFile]));
+          if (IReadBytes = 0) then
+            break;
 
-          if (IReadBytes > 0) then
-            FFileStream.Write(Buf[0], IReadBytes);
-        until (IReadBytes = 0);
+          FFileStream.Write(Buf[0], IReadBytes);
+        until (true);
 
         Result := True;
       finally
@@ -1573,18 +1574,16 @@ begin
     //read source stream using buffer
     repeat
       IReadBytes := FFileStream.Read(Buf[0], ITransferSize);
+      if (IReadBytes = 0) then
+        break;
 
-      if (IReadBytes > 0) then
-      begin
-        HR := FDevStream.Write(@Buf[0], IReadBytes, @IWritten);
-        if not (HR in [S_OK]) then
-          raise Exception.Create(Format('Error %s writing file %s', [IntToHex(HR, 8), NameOnDev]));
-      end;
-    until (IReadBytes = 0) or
-          (Hr <> S_OK);
+      HR := FDevStream.Write(@Buf[0], IReadBytes, @IWritten);
+      if (HR <> S_OK) then
+        raise Exception.Create(Format('Error: %s writing file: %s', [IntToHex(HR, 8), NameOnDev]));
+    until (true);
 
     //commit saving to stream
-    if (FDevStream.Commit(0) = S_OK) then
+    if (FDevStream.Commit(STGC_DEFAULT) = S_OK) then
     begin
       // Get newly created Object Id
       FDevStream.QueryInterface(CLASS_IPortableDeviceDataStream, PortableStream);
