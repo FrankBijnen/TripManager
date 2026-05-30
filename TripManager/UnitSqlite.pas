@@ -358,17 +358,17 @@ begin
         begin
           case Acds.Fields[Index].DataType of
             TFieldType.ftInteger:
-              Acds.Fields[Index].AsInteger := Qtab.FieldAsInteger(Index);
+              ACds.Fields[Index].AsInteger := QTab.FieldAsInteger(Index);
             TFieldType.ftFloat:
-              Acds.Fields[Index].AsFloat := Qtab.FieldAsDouble(Index);
+              ACds.Fields[Index].AsFloat := QTab.FieldAsDouble(Index);
             TFieldType.ftBlob:
               begin
-                AMemStream := Qtab.FieldAsBlobBytes(Index);
-                Acds.Fields[Index].AsBytes := AMemStream.Bytes;
+                AMemStream := QTab.FieldAsBlobBytes(Index);
+                ACds.Fields[Index].AsBytes := AMemStream.Bytes;
                 AMemStream.Free;
               end
             else
-              Acds.Fields[Index].Value := string(Qtab.FieldAsStringUnicode(Index));
+              ACds.Fields[Index].Value := string(QTab.FieldAsStringUnicode(Index));
           end;
         end;
         ACds.Post;

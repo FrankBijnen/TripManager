@@ -1373,6 +1373,7 @@ var
   FFileStream: TFileStream;
   Buf: array of Byte;
   CrNormal,CrWait: HCURSOR;
+  HR: HResult;
 begin
   Result := False;
   CrWait := LoadCursor(0,IDC_WAIT);
@@ -1395,8 +1396,11 @@ begin
       try
         //read source stream using buffer
         repeat
-          FDevStream.Read(@Buf[0], ITransferSize, @IReadBytes);
-          if IReadBytes > 0 then
+          HR := FDevStream.Read(@Buf[0], ITransferSize, @IReadBytes);
+          if not (HR in [S_OK, S_False]) then // S_False is returnd for EOF
+            raise Exception.Create(Format('Error %s reading file %s', [IntToHex(HR, 8), NFile]));
+
+          if (IReadBytes > 0) then
             FFileStream.Write(Buf[0], IReadBytes);
         until (IReadBytes = 0);
 
@@ -1478,7 +1482,6 @@ begin
   Dev_Val.fmtid := WPD_OBJECT_DATE_MODIFIED_FMTID;
   Dev_Val.pid := WPD_OBJECT_DATE_MODIFIED_PID;
   PPObjectProperties.SetValue(Dev_Val, PropVar);
-
 end;
 
 // Additionally sets the type to folder.
@@ -1496,7 +1499,6 @@ begin
   Dev_Val.pid := WPD_OBJECT_CONTENT_TYPE_PID;
   Dev_Guid := WPD_CONTENT_TYPE_FOLDER;
   PPObjectProperties.SetGuidValue(Dev_Val, Dev_Guid);
-
 end;
 
 function MTP_CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
@@ -1571,8 +1573,13 @@ begin
     //read source stream using buffer
     repeat
       IReadBytes := FFileStream.Read(Buf[0], ITransferSize);
-      if IReadBytes > 0 then
-        Hr := FDevStream.Write(@Buf[0], IReadBytes, @IWritten);
+
+      if (IReadBytes > 0) then
+      begin
+        HR := FDevStream.Write(@Buf[0], IReadBytes, @IWritten);
+        if not (HR in [S_OK]) then
+          raise Exception.Create(Format('Error %s writing file %s', [IntToHex(HR, 8), NameOnDev]));
+      end;
     until (IReadBytes = 0) or
           (Hr <> S_OK);
 
