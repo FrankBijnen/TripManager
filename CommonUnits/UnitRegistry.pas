@@ -11,14 +11,14 @@ const
 
 function GetRegistry(const Name: string; const Default: string = ''; const SubKey: string = ''): string; overload;
 function GetRegistry(const Name: string; const Default: boolean; const SubKey: string = ''): boolean; overload;
-function GetRegistry(const Name: string; const Default: integer; const SubKey: string = ''): integer; overload;
+function GetRegistry(const Name: string; const Default: int64; const SubKey: string = ''): int64; overload;
 function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo; const SubKey: string = ''): integer; overload;
 {$IFNDEF VER350}
 function GetRegistry(const Name: string; const Default: TArray<string>; const SubKey: string = ''): TArray<string>; overload;
 {$ENDIF}
 procedure SetRegistry(const Name, Value: string; const SubKey: string = ''); overload;
 procedure SetRegistry(const Name: string; Value: boolean; const SubKey: string = ''); overload;
-procedure SetRegistry(const Name: string; Value: integer; const SubKey: string = ''); overload;
+procedure SetRegistry(const Name: string; Value: int64; const SubKey: string = ''); overload;
 {$IFNDEF VER350}
 procedure SetRegistry(const Name: string; Value: TArray<string>; const SubKey: string = ''); overload;
 {$ENDIF}
@@ -70,9 +70,9 @@ begin
   result := SameText(GetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, BooleanValues[Default]), BooleanValues[True]);
 end;
 
-function GetRegistry(const Name: string; const Default: integer; const SubKey: string = ''): integer;
+function GetRegistry(const Name: string; const Default: int64; const SubKey: string = ''): int64;
 begin
-  result := StrToIntDef(GetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, IntToStr(Default)), 0);
+  result := StrToInt64Def(GetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, IntToStr(Default)), 0);
 end;
 
 function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo; const SubKey: string = ''): integer;
@@ -123,7 +123,7 @@ begin
   SetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, BooleanValues[Value]);
 end;
 
-procedure SetRegistry(const Name: string; Value: integer; const SubKey: string = '');
+procedure SetRegistry(const Name: string; Value: int64; const SubKey: string = '');
 begin
   SetRegistryValue(HKEY_CURRENT_USER, SubApplicationKey(SubKey), Name, IntToStr(Value));
 end;

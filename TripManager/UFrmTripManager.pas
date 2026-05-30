@@ -2,7 +2,6 @@
 
 {$IFDEF DEBUG}
 {.$DEFINE DEBUG_TRANSFER}  // Creates the files in temp, but does not transfer.
-{.$DEFINE HASHDEBUG}
 {$ELSE}
 // Installing hooks when debugging is not a good idea.
 {.$DEFINE HOOK_MOUSE}      // For detecting Left/Right mouse button when dropping
@@ -368,9 +367,6 @@ type
     HexEditFile: string;
     SqlFile: string;
     ExploreList: TStringList;
-{$IFDEF HASHDEBUG}
-    HashDebugList: TStringList;
-{$ENDIF}
     HasPortableDeviceApi: boolean;
     CurrentDevice: TBase_Device;
     FSavedParent: WideString;
@@ -2100,11 +2096,6 @@ begin
   TsExplore.TabVisible := false;
 
   ReadSettings;
-{$IFDEF HASHDEBUG}
-  HashDebugList := TStringList.Create;
-  HashDebugList.Sorted := true;
-  HashDebugList.Duplicates := TDuplicates.dupIgnore;
-{$ENDIF}
   ATripList := TTripList.Create;
   APOIList := TPOIList.Create;
   AFitInfo := TStringList.Create;
@@ -2137,9 +2128,6 @@ begin
   DirectoryMonitor.Free;
   ModifiedList.Free;
   ExploreList.Free;
-{$IFDEF HASHDEBUG}
-  HashDebugList.Free;
-{$ENDIF}
 
   if not USBEvent.UnRegisterUSBHandler then
     ShowMessage('Failed to unregister USB Events');
@@ -3067,6 +3055,7 @@ var
   LocalFile: string;
   Imported: TmImported;
   AMTP_Data: TMTP_Data;
+  TmpModified: cardinal;
   TmpHash: cardinal;
   SubKey: string;
 begin
@@ -3083,8 +3072,6 @@ begin
 
   if (AMTP_Data.IsFolder) then
     exit;
-
-  SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
 
   TmpTripList := TTripList.Create;
   try
@@ -3115,15 +3102,31 @@ begin
     // Save Explore UUID
     AMTP_Data.ExploreUUID := TmpTripList.ExploreUUID;
 
-    // Save ProfileHashList
-    TmpHash := TmpTripList.VehicleHash;
-    if (TmpHash <> 0) and
-       (SubKey <> '') then
+    // Save ProfileHashList in registry
+    if (HasTMTPDevice(CurrentDevice)) and
+       (TModelConv.ReadVehicleDB(TGarminMTP_Device(CurrentDevice).GarminDevice.GarminModel)) then
     begin
-      SetRegistry(TmpTripList.VehicleGUID, TmpHash, SubKey + '\' + Reg_VehicleProfileHashList);
-{$IFDEF HASHDEBUG}
-      HashDebugList.AddObject(TmpTripList.VehicleProfileName + #9 + TmpTripList.TripName, TObject(TmpHash));
-{$ENDIF}
+      SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0)) + '\' +
+                  Reg_VehicleProfileHashList + '\' ;
+      TmpHash := TmpTripList.VehicleHash;
+      TmpModified := TmpTripList.AvoidancesChangedTimeAtSave;
+      if (TmpHash <> 0) then
+      begin
+        if (TmpModified > GetRegistry(Reg_VehicleProfileModifiedDate,
+                                      0,
+                                      SubKey + TmpTripList.VehicleGUID)) then
+        begin
+          SetRegistry(Reg_VehicleProfileHash,
+                      TmpHash,
+                      SubKey + TmpTripList.VehicleGUID);
+          SetRegistry(Reg_VehicleProfileName,
+                      TmpTripList.VehicleProfileName,
+                      SubKey + TmpTripList.VehicleGUID);
+          SetRegistry(Reg_VehicleProfileModifiedDate,
+                      TmpModified,
+                      SubKey + TmpTripList.VehicleGUID);
+        end;
+      end;
     end;
     // Show trip name
     AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
@@ -3140,10 +3143,6 @@ var
   AListItem: TListItem;
   CrNormal,CrWait: HCURSOR;
   CanUseStatusBar, TripChecked: boolean;
-{$IFDEF HASHDEBUG}
-  Index: integer;
-  F: TextFile;
-{$ENDIF}
 begin
   if (GetRegistry(Reg_EnableTripFuncs, false) = false) then
     exit;
@@ -3158,9 +3157,6 @@ begin
   if (CanUseStatusBar) then
     SbPostProcess.Panels[1].Text := 'Trip file checked';
 
-{$IFDEF HASHDEBUG}
-  HashDebugList.Clear;
-{$ENDIF}
   try
     for AListItem in LstFiles.Items do
     begin
@@ -3178,18 +3174,6 @@ begin
     StatusTimer.Enabled := false;
     StatusTimer.Enabled := true;
   end;
-
-{$IFDEF HASHDEBUG}
-  AssignFile(F, 'c:\temp\hashes.txt');
-  Rewrite(F);
-  for Index := 0 to HashDebugList .Count -1 do
-  begin
-    Writeln(F, Integer(HashDebugList.Objects[Index]),
-               #9, '0x', IntTohex(integer(HashDebugList.Objects[Index]), 8),
-               #9, HashDebugList[Index]);
-  end;
-  CloseFile(F);
-{$ENDIF}
 end;
 
 procedure TFrmTripManager.RecreateTrips;

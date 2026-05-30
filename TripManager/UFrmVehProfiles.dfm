@@ -30,11 +30,13 @@ object FrmVehProfiles: TFrmVehProfiles
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 716
+    ExplicitWidth = 843
     DesignSize = (
       849
       31)
     object BtnOK: TButton
-      Left = 638
+      Left = 679
       Top = 3
       Width = 75
       Height = 25
@@ -44,7 +46,7 @@ object FrmVehProfiles: TFrmVehProfiles
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 725
+      Left = 766
       Top = 3
       Width = 75
       Height = 25
@@ -82,6 +84,8 @@ object FrmVehProfiles: TFrmVehProfiles
     ActivePage = TabAllProfiles
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 843
+    ExplicitHeight = 716
     object TabAllProfiles: TTabSheet
       Caption = 'All Profiles'
       object SpltGridDetail: TSplitter
@@ -153,8 +157,8 @@ object FrmVehProfiles: TFrmVehProfiles
         ActivePage = TabTripFiles
         Align = alClient
         TabOrder = 1
-        ExplicitTop = 139
-        ExplicitHeight = 561
+        ExplicitWidth = 835
+        ExplicitHeight = 542
         object TabTripFiles: TTabSheet
           Caption = 'Trip file items'
           object GridProfile: TStringGrid
@@ -178,7 +182,8 @@ object FrmVehProfiles: TFrmVehProfiles
             TabOrder = 0
             StyleElements = []
             OnKeyPress = GridProfileKeyPress
-            ExplicitHeight = 531
+            ExplicitWidth = 827
+            ExplicitHeight = 512
             RowHeights = (
               24
               24

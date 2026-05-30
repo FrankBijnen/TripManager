@@ -70,7 +70,7 @@ type
     procedure SaveSettings;
   public
     { Public declarations }
-    CurrentDevice: Tobject;
+    CurrentDevice: TObject;
     SampleLat: string;
     SampleLon: string;
   end;
@@ -82,9 +82,8 @@ implementation
 
 uses
   System.UITypes, System.StrUtils, System.Math,
-  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitModelConv, UnitProcessOptions, UnitTripDefs, UnitTripObjects, UnitGpi,
-  UnitGeoCode, UnitOSMMap,
-  TripManager_Grid,
+  UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitModelConv, UnitProcessOptions,
+  UnitTripDefs, UnitGeoCode, UnitOSMMap, TripManager_Grid,
   UFrmVehProfiles;
 
 {$R *.dfm}
@@ -635,14 +634,10 @@ procedure TFrmAdvSettings.FormShow(Sender: TObject);
 begin
   SamplePlace := nil;
   MemoResult.Lines.Clear;
-
   LoadSettings;
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   MemoAddressFormatChange(MemoAddressFormat);
-
-  BtnVehProfile.Enabled := TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0))) and
-                           FileExists(GetDeviceTmp + ProfileDb);
-
+  BtnVehProfile.Enabled := (FileExists(GetDeviceTmp + ProfileDb));
 end;
 
 end.

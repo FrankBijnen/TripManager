@@ -1008,6 +1008,7 @@ type
     function GetExploreUUID: string;
     function GetVehicleProfileName: string;
     function GetVehicleGUID: string;
+    function GetAvoidancesChangedTimeAtSave: cardinal;
     function GetVehicleHash: cardinal;
     function GetTripModel: TTripModel;
     procedure SetTripModel(ATripModel: TTripModel);
@@ -1098,6 +1099,7 @@ type
     property ExploreUUID: string read GetExploreUUID;
     property VehicleGUID: string read GetVehicleGUID;
     property VehicleProfileName: string read GetVehicleProfileName;
+    property AvoidancesChangedTimeAtSave: cardinal read GetAvoidancesChangedTimeAtSave;
     property VehicleHash: cardinal read GetVehicleHash;
     property TripModel: TTripModel read FTripModel write SetTripModel;
     property ModelDescription: string read FModelDescription;
@@ -5720,6 +5722,16 @@ end;
 function TTripList.GetVehicleGUID: string;
 begin
   result := GetValue(TmVehicleProfileGuid.GetKey);
+end;
+
+function TTripList.GetAvoidancesChangedTimeAtSave: cardinal;
+var
+  AnItem: TmAvoidancesChangedTimeAtSave;
+begin
+  result := 0;
+  AnItem := GetItem(TmAvoidancesChangedTimeAtSave.GetKey) as TmAvoidancesChangedTimeAtSave;
+  if (AnItem <> nil) then
+    result := AnItem.AsCardinal;
 end;
 
 function TTripList.GetVehicleHash: cardinal;

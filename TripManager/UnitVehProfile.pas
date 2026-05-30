@@ -323,7 +323,9 @@ end;
 
 function TVehicleProfile.HashFromHashList(const SubKey: string): cardinal;
 begin
-  result := GetRegistry(GUID, 0, SubKey + '\' +  Reg_VehicleProfileHashList);
+  result := GetRegistry(Reg_VehicleProfileHash, 0, SubKey + '\' +
+                                                   Reg_VehicleProfileHashList  + '\' +
+                                                   GUID);
 end;
 
 procedure TVehicleProfile.UpdateFromHashList(const SubKey: string);
