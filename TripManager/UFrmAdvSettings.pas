@@ -33,7 +33,7 @@ type
     TabDevice: TTabSheet;
     GridDeviceSettings: TStringGrid;
     PnlZumoFuncs: TPanel;
-    BtnCurrent: TButton;
+    BtnVehProfile: TButton;
     TabTripOverview: TTabSheet;
     GridTripOverview: TStringGrid;
     TabKurviger: TTabSheet;
@@ -50,7 +50,7 @@ type
     procedure AddTag(Sender: TObject);
     procedure BtnValidateClick(Sender: TObject);
     procedure BtnClearCoordCacheClick(Sender: TObject);
-    procedure BtnCurrentClick(Sender: TObject);
+    procedure BtnVehProfileClick(Sender: TObject);
     procedure PctMainResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
@@ -70,7 +70,6 @@ type
     procedure SaveSettings;
   public
     { Public declarations }
-    ProfileHashList: TStringList;
     CurrentDevice: Tobject;
     SampleLat: string;
     SampleLon: string;
@@ -591,20 +590,18 @@ begin
   ValidateApiKey;
 end;
 
-procedure TFrmAdvSettings.BtnCurrentClick(Sender: TObject);
+procedure TFrmAdvSettings.BtnVehProfileClick(Sender: TObject);
 var
   F: TFrmVehProfiles;
-  SubKey: string;
 begin
   SaveSettings;
 
   F := TFrmVehProfiles.Create(nil);
   try
-    F.ProfileHashList := ProfileHashList;
+    F.SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
     if (F.ShowModal = idOK) then
     begin
-      SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
-      F.VehicleProfile.ToRegistry(SubKey);
+      F.VehicleProfile.ToRegistry(F.SubKey);
     end;
  finally
     F.Free;
@@ -643,8 +640,8 @@ begin
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   MemoAddressFormatChange(MemoAddressFormat);
 
-  BtnCurrent.Enabled := TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0))) and
-                        FileExists(GetDeviceTmp + ProfileDb);
+  BtnVehProfile.Enabled := TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0))) and
+                           FileExists(GetDeviceTmp + ProfileDb);
 
 end;
 

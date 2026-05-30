@@ -30,6 +30,8 @@ namespace Unitstringutils
 //-- type declarations -------------------------------------------------------
 typedef System::StaticArray<System::Byte, 4> T4Bytes;
 
+typedef System::DynamicArray<int> TDynArrayType;
+
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::UnicodeString CreatedTempPath;
 extern DELPHI_PACKAGE System::UnicodeString App_Prefix;
@@ -66,10 +68,15 @@ extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeDQuote(const System
 extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeHtml(const System::UnicodeString HTML);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeUrl(const System::UnicodeString URL);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall EscapeFileName(System::UnicodeString InFile);
+extern DELPHI_PACKAGE System::UnicodeString __fastcall CombinePath(const System::UnicodeString APath, const System::UnicodeString AFile);
+extern DELPHI_PACKAGE bool __fastcall RemovePath(const System::UnicodeString ADir, const System::Word AFlags = (System::Word)(0x614), int Retries = 0x3);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GPX2HTMLColor(System::UnicodeString GPXColor);
 extern DELPHI_PACKAGE System::Sysutils::TFormatSettings __fastcall GetLocaleSetting();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall VerInfo(bool IncludeCompany = false);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall UserAgent();
+extern DELPHI_PACKAGE bool __fastcall SelectDirectory(const System::UnicodeString ACaption, System::UnicodeString &ADirectory);
+extern DELPHI_PACKAGE bool __fastcall SelectDirectoryOrFile(const System::UnicodeString ACaption, const System::WideString ARoot, System::UnicodeString &APath);
+extern DELPHI_PACKAGE TDynArrayType __fastcall DynArray(const int *ConstArray, const System::NativeInt ConstArray_High);
 }	/* namespace Unitstringutils */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITSTRINGUTILS)
 using namespace Unitstringutils;

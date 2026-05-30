@@ -153,14 +153,14 @@ object FrmAdvSettings: TFrmAdvSettings
         Align = alTop
         TabOrder = 1
         ExplicitWidth = 601
-        object BtnCurrent: TButton
+        object BtnVehProfile: TButton
           Left = 0
           Top = 2
           Width = 153
           Height = 25
           Caption = 'Load profile from DB'
           TabOrder = 0
-          OnClick = BtnCurrentClick
+          OnClick = BtnVehProfileClick
         end
       end
     end

@@ -34,8 +34,8 @@ type
     procedure FromCds(const ACDS: TClientDataSet; const AModel: TGarminModel);
     procedure FromRegistry(const SubKey: string);
     procedure ToRegistry(const SubKey: string);
-    function HashFromHashList(const ProfileHashList: TStringList): cardinal;
-    procedure UpdateFromHashList(const SubKey: string; const ProfileHashList: TStringList);
+    function HashFromHashList(const SubKey: string): cardinal;
+    procedure UpdateFromHashList(const SubKey: string);
     function Changed(IVehicleProfile: TVehicleProfile): boolean;
   end;
 
@@ -321,17 +321,12 @@ begin
   SetRegistry(Reg_VehicleProfileHash,         Proposed_Hash, SubKey);
 end;
 
-function TVehicleProfile.HashFromHashList(const ProfileHashList: TStringList): cardinal;
-var
-  Index: integer;
+function TVehicleProfile.HashFromHashList(const SubKey: string): cardinal;
 begin
-  result := 0;
-  Index := ProfileHashList.IndexOf(GUID);
-  if (Index > -1) then
-    result := cardinal(ProfileHashList.Objects[Index]);
+  result := GetRegistry(GUID, 0, SubKey + '\' +  Reg_VehicleProfileHashList);
 end;
 
-procedure TVehicleProfile.UpdateFromHashList(const SubKey: string; const ProfileHashList: TStringList);
+procedure TVehicleProfile.UpdateFromHashList(const SubKey: string);
 begin
   Self := Default(TVehicleProfile);
 
@@ -339,7 +334,7 @@ begin
   if (Proposed_Hash <> 0) then // Already have a hash ?
     exit;
 
-  Proposed_Hash := HashFromHashList(ProfileHashList);
+  Proposed_Hash := HashFromHashList(SubKey);
   if (Proposed_Hash <> 0) then // Lookup worked? Store in Registry
     ToRegistry(SubKey);
 end;

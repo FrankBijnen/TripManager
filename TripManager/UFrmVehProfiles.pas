@@ -59,7 +59,7 @@ type
     procedure LoadProfile;
   public
     { Public declarations }
-    ProfileHashList: TStringList;
+    SubKey: string;
     VehicleProfile: TVehicleProfile;
   end;
 
@@ -604,7 +604,7 @@ begin
   TmpProfile.FromCds(TClientDataset(DataSet), AModel);
   Dataset.FieldByName('Proposed_Hash').AsInteger := TmpProfile.Proposed_Hash;
   if (TmpProfile.Proposed_Hash = 0) then
-    Dataset.FieldByName('Overridden_Hash').AsInteger := TmpProfile.HashFromHashList(ProfileHashList);
+    Dataset.FieldByName('Overridden_Hash').AsInteger := TmpProfile.HashFromHashList(SubKey);
 end;
 
 procedure TFrmVehProfiles.FormClose(Sender: TObject; var Action: TCloseAction);

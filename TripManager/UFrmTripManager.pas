@@ -368,7 +368,6 @@ type
     HexEditFile: string;
     SqlFile: string;
     ExploreList: TStringList;
-    ProfileHashList: TStringList;
 {$IFDEF HASHDEBUG}
     HashDebugList: TStringList;
 {$ENDIF}
@@ -723,7 +722,6 @@ procedure TFrmTripManager.ActSettingsExecute(Sender: TObject);
 begin
   ParseLatLon(EditMapCoords.Text, FrmAdvSettings.SampleLat, FrmAdvSettings.SampleLon);
   FrmAdvSettings.CurrentDevice := CurrentDevice;
-  FrmAdvSettings.ProfileHashList := ProfileHashList;
 
   if (Sender is TMenuItem) then
     FrmAdvSettings.PctMain.ActivePage := FrmAdvSettings.TabDevice;
@@ -2102,16 +2100,11 @@ begin
   TsExplore.TabVisible := false;
 
   ReadSettings;
-  ProfileHashList := TStringList.Create;
-  ProfileHashList.Sorted := true;
-  ProfileHashList.Duplicates := TDuplicates.dupIgnore;
-
 {$IFDEF HASHDEBUG}
   HashDebugList := TStringList.Create;
   HashDebugList.Sorted := true;
   HashDebugList.Duplicates := TDuplicates.dupIgnore;
 {$ENDIF}
-
   ATripList := TTripList.Create;
   APOIList := TPOIList.Create;
   AFitInfo := TStringList.Create;
@@ -2144,7 +2137,6 @@ begin
   DirectoryMonitor.Free;
   ModifiedList.Free;
   ExploreList.Free;
-  ProfileHashList.Free;
 {$IFDEF HASHDEBUG}
   HashDebugList.Free;
 {$ENDIF}
@@ -3076,6 +3068,7 @@ var
   Imported: TmImported;
   AMTP_Data: TMTP_Data;
   TmpHash: cardinal;
+  SubKey: string;
 begin
   result := false;
 
@@ -3090,6 +3083,8 @@ begin
 
   if (AMTP_Data.IsFolder) then
     exit;
+
+  SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
 
   TmpTripList := TTripList.Create;
   try
@@ -3122,9 +3117,10 @@ begin
 
     // Save ProfileHashList
     TmpHash := TmpTripList.VehicleHash;
-    if (TmpHash <> 0) then
+    if (TmpHash <> 0) and
+       (SubKey <> '') then
     begin
-      ProfileHashList.AddObject(TmpTripList.VehicleGUID, TObject(TmpHash));
+      SetRegistry(TmpTripList.VehicleGUID, TmpHash, SubKey + '\' + Reg_VehicleProfileHashList);
 {$IFDEF HASHDEBUG}
       HashDebugList.AddObject(TmpTripList.VehicleProfileName + #9 + TmpTripList.TripName, TObject(TmpHash));
 {$ENDIF}
@@ -3144,9 +3140,6 @@ var
   AListItem: TListItem;
   CrNormal,CrWait: HCURSOR;
   CanUseStatusBar, TripChecked: boolean;
-  ModelIndex: integer;
-  SubKey: string;
-  VehicleProfile: TVehicleProfile;
 {$IFDEF HASHDEBUG}
   Index: integer;
   F: TextFile;
@@ -3165,7 +3158,6 @@ begin
   if (CanUseStatusBar) then
     SbPostProcess.Panels[1].Text := 'Trip file checked';
 
-  ProfileHashList.Clear;
 {$IFDEF HASHDEBUG}
   HashDebugList.Clear;
 {$ENDIF}
@@ -3179,13 +3171,6 @@ begin
         SbPostProcess.Panels[0].Text := AListItem.Caption;
         SbPostProcess.Update;
       end;
-    end;
-
-    ModelIndex := GetRegistry(Reg_CurrentModel, 0);
-    if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(ModelIndex))) then
-    begin
-      SubKey := TModelConv.GetDefaultDevice(ModelIndex);
-      VehicleProfile.UpdateFromHashList(SubKey, ProfileHashList);
     end;
 
   finally

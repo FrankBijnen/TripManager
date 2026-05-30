@@ -32,6 +32,7 @@ const
   Reg_VehicleProfileTruckType     = 'VehicleProfileTruckType';
   Reg_VehicleProfileName          = 'VehicleProfileName';
   Reg_VehicleProfileModifiedDate  = 'VehicleProfileModifiedDate';
+  Reg_VehicleProfileHashList      = 'VehicleProfileHashList';  // SubKey
 
   // Post Processing
   Reg_ProcessBegin                = 'ProcessBegin';
