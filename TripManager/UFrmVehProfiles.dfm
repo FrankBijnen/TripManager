@@ -153,6 +153,7 @@ object FrmVehProfiles: TFrmVehProfiles
         ActivePage = TabTripFiles
         Align = alClient
         TabOrder = 1
+        OnChange = PctDetailsChange
         object TabTripFiles: TTabSheet
           Caption = 'Trip file items'
           object GridProfile: TStringGrid
@@ -230,8 +231,6 @@ object FrmVehProfiles: TFrmVehProfiles
             TabOrder = 0
             StyleElements = []
             OnSelectCell = GridHashListSelectCell
-            ExplicitTop = 0
-            ExplicitHeight = 526
             RowHeights = (
               24
               24
@@ -246,8 +245,6 @@ object FrmVehProfiles: TFrmVehProfiles
             Height = 33
             Align = alTop
             TabOrder = 1
-            ExplicitLeft = -8
-            ExplicitTop = -20
             object BtnDeleteHashList: TButton
               Left = 0
               Top = 2
