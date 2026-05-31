@@ -30,8 +30,6 @@ object FrmVehProfiles: TFrmVehProfiles
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 716
-    ExplicitWidth = 843
     DesignSize = (
       849
       31)
@@ -84,8 +82,6 @@ object FrmVehProfiles: TFrmVehProfiles
     ActivePage = TabAllProfiles
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 843
-    ExplicitHeight = 716
     object TabAllProfiles: TTabSheet
       Caption = 'All Profiles'
       object SpltGridDetail: TSplitter
@@ -157,8 +153,6 @@ object FrmVehProfiles: TFrmVehProfiles
         ActivePage = TabTripFiles
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 835
-        ExplicitHeight = 542
         object TabTripFiles: TTabSheet
           Caption = 'Trip file items'
           object GridProfile: TStringGrid
@@ -181,9 +175,6 @@ object FrmVehProfiles: TFrmVehProfiles
             ParentFont = False
             TabOrder = 0
             StyleElements = []
-            OnKeyPress = GridProfileKeyPress
-            ExplicitWidth = 827
-            ExplicitHeight = 512
             RowHeights = (
               24
               24
@@ -215,6 +206,68 @@ object FrmVehProfiles: TFrmVehProfiles
             end
           end
         end
+        object TabHashList: TTabSheet
+          Caption = 'Trip file Hashes'
+          ImageIndex = 2
+          object GridHashList: TStringGrid
+            Left = 0
+            Top = 33
+            Width = 833
+            Height = 493
+            Align = alClient
+            ColCount = 3
+            DefaultColWidth = 230
+            DrawingStyle = gdsGradient
+            FixedCols = 2
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -12
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            GradientEndColor = clMoneyGreen
+            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
+            ParentFont = False
+            TabOrder = 0
+            StyleElements = []
+            OnSelectCell = GridHashListSelectCell
+            ExplicitTop = 0
+            ExplicitHeight = 526
+            RowHeights = (
+              24
+              24
+              24
+              23
+              24)
+          end
+          object PnlHashFunc: TPanel
+            Left = 0
+            Top = 0
+            Width = 833
+            Height = 33
+            Align = alTop
+            TabOrder = 1
+            ExplicitLeft = -8
+            ExplicitTop = -20
+            object BtnDeleteHashList: TButton
+              Left = 0
+              Top = 2
+              Width = 75
+              Height = 25
+              Caption = 'Delete'
+              TabOrder = 0
+              OnClick = BtnDeleteHashListClick
+            end
+            object BtnSaveHash: TButton
+              Left = 81
+              Top = 2
+              Width = 75
+              Height = 25
+              Caption = 'Save'
+              TabOrder = 1
+              OnClick = BtnSaveHashClick
+            end
+          end
+        end
       end
     end
   end
@@ -236,7 +289,7 @@ object FrmVehProfiles: TFrmVehProfiles
   object SaveUnitTestDialog: TSaveDialog
     DefaultExt = 'txt'
     Filter = '*.txt|*.txt'
-    Left = 196
+    Left = 308
     Top = 162
   end
 end

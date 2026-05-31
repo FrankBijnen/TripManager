@@ -55,7 +55,7 @@ object FrmAdvSettings: TFrmAdvSettings
     Top = 0
     Width = 615
     Height = 644
-    ActivePage = TabZumo
+    ActivePage = TabDevice
     Align = alClient
     TabHeight = 25
     TabOrder = 1

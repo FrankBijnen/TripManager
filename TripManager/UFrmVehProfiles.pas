@@ -29,6 +29,11 @@ type
     BtnLookupHash: TButton;
     SaveUnitTestDialog: TSaveDialog;
     SpltGridDetail: TSplitter;
+    TabHashList: TTabSheet;
+    GridHashList: TStringGrid;
+    PnlHashFunc: TPanel;
+    BtnDeleteHashList: TButton;
+    BtnSaveHash: TButton;
     procedure FormShow(Sender: TObject);
     procedure CDSVehProfileAfterScroll(DataSet: TDataSet);
     procedure FormResize(Sender: TObject);
@@ -46,16 +51,21 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure GridProfileKeyPress(Sender: TObject; var Key: Char);
     procedure GrdVehProfileTitleClick(Column: TColumn);
+    procedure BtnDeleteHashListClick(Sender: TObject);
+    procedure GridHashListSelectCell(Sender: TObject; ACol, ARow: LongInt; var CanSelect: Boolean);
+    procedure BtnSaveHashClick(Sender: TObject);
   private
     { Private declarations }
     InScroll: boolean;
     FDSFields: TDSFields;
-    AModel: TGarminModel;
+    CurModel: TGarminModel;
     OrderBy: string;
     AscDesc: string;
+    procedure GridModified(Sender: TObject; ACol, ARow: LongInt; var Value: string);
     procedure SetOverridden_Hash(const NewHash: cardinal);
     procedure GrdModified(Sender: TObject; ACol, ARow: Longint; var Value: string);
     procedure LoadProfiles;
+    procedure LoadHashList;
     procedure LoadProfile;
   public
     { Public declarations }
@@ -82,6 +92,7 @@ const
 
 procedure TFrmVehProfiles.BtnUnitTestClick(Sender: TObject);
 var
+  AModel: TGarminModel;
   P: TVehicleProfile;
   F: TextFile;
 
@@ -538,6 +549,17 @@ begin
   end;
 end;
 
+procedure TFrmVehProfiles.GridModified(Sender: TObject; ACol, ARow: LongInt; var Value: string);
+begin
+  if (TStringGrid(Sender).Cells[0, ARow] = '') then
+    TStringGrid(Sender).Cells[2, ARow] := ''
+  else if (Copy(TStringGrid(Sender).Cells[0, ARow], 1, 1) <> '*') then
+  begin
+    TStringGrid(Sender).Cells[0, ARow] := '*' + TStringGrid(Sender).Cells[0, ARow];
+    BtnSaveHash.Enabled := true;
+  end;
+end;
+
 procedure TFrmVehProfiles.SetOverridden_Hash(const NewHash: cardinal);
 begin
   if not (CDSVehProfile.State in [dsEdit, dsInsert]) then
@@ -546,6 +568,18 @@ begin
   CDSVehProfile.Post;
   LoadProfile;
   ShowMessage(Format('Hash set to %d for profile: %s', [NewHash, CDSVehProfile.FieldByName('Name').AsString]));
+end;
+
+procedure TFrmVehProfiles.BtnDeleteHashListClick(Sender: TObject);
+begin
+  try
+    if (GridHashList.Row > 1) and
+       (GridHashList.Row < GridHashList.RowCount) and
+       (GridHashList.Cells[0, GridHashList.Row] <> '') then
+      DeleteRegistryKey(SubKey + '\' + Reg_VehicleProfileHashList + '\' + GridHashList.Cells[0, GridHashList.Row]);
+  finally
+    LoadHashList;
+  end;
 end;
 
 procedure TFrmVehProfiles.BtnLookupHashClick(Sender: TObject);
@@ -591,6 +625,24 @@ begin
     ShowMessage('No suitable trips found!')
 end;
 
+procedure TFrmVehProfiles.BtnSaveHashClick(Sender: TObject);
+var
+  Index: integer;
+  VehSubKey: string;
+begin
+  try
+    for Index := GridHashList.FixedRows to GridHashList.RowCount do
+    begin
+      if (Copy(GridHashList.Cells[0, Index], 1, 1) <> '*') then
+        continue;
+      VehSubKey := SubKey + '\' + Reg_VehicleProfileHashList + '\' + Copy(GridHashList.Cells[0, Index], 2);
+      SetRegistry(Reg_VehicleProfileHash, GridHashList.Cells[2, Index], VehSubKey);
+    end;
+  finally
+    LoadHashList;
+  end;
+end;
+
 procedure TFrmVehProfiles.CDSVehProfileAfterScroll(DataSet: TDataSet);
 begin
   if (Dataset.state in [dsBrowse]) then
@@ -601,7 +653,7 @@ procedure TFrmVehProfiles.CDSVehProfileBeforePost(DataSet: TDataSet);
 var
   TmpProfile: TVehicleProfile;
 begin
-  TmpProfile.FromCds(TClientDataset(DataSet), AModel);
+  TmpProfile.FromCds(TClientDataset(DataSet), CurModel);
   Dataset.FieldByName('Proposed_Hash').AsInteger := TmpProfile.Proposed_Hash;
   if (TmpProfile.Proposed_Hash = 0) then
     Dataset.FieldByName('Overridden_Hash').AsInteger := TmpProfile.HashFromHashList(SubKey);
@@ -699,6 +751,14 @@ begin
   LoadProfiles;
 end;
 
+procedure TFrmVehProfiles.GridHashListSelectCell(Sender: TObject; ACol, ARow: LongInt; var CanSelect: Boolean);
+begin
+  BtnDeleteHashList.Enabled :=
+       (ARow > 1) and
+       (ARow < GridHashList.RowCount) and
+       (GridHashList.Cells[0, ARow] <> '');
+end;
+
 procedure TFrmVehProfiles.GridProfileKeyPress(Sender: TObject; var Key: Char);
 var
   Sg: TStringGrid;
@@ -714,14 +774,17 @@ end;
 
 procedure TFrmVehProfiles.LoadProfiles;
 begin
-  AModel := TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0));
-  if not (TModelConv.ReadVehicleDB(AModel)) then
+  CurModel := TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0));
+  if not (TModelConv.ReadVehicleDB(CurModel)) then
     exit;
+
+  LoadHashList;
+
 
   if not (FileExists(GetDeviceTmp + ProfileDb)) then
     exit;
   CDSVehProfile.AfterOpen := FCDSEvents.AfterOpen;
-  CDSFromQuery(GetDeviceTmp + ProfileDb, GetVehicleProfilesQuery(AModel, Format('%s %s', [OrderBy, AscDesc])), CDSVehProfile);
+  CDSFromQuery(GetDeviceTmp + ProfileDb, GetVehicleProfilesQuery(CurModel, Format('%s %s', [OrderBy, AscDesc])), CDSVehProfile);
 end;
 
 procedure TFrmVehProfiles.PnlAllFieldsMouseEnter(Sender: TObject);
@@ -734,6 +797,45 @@ begin
   InScroll := false;
 end;
 
+procedure TFrmVehProfiles.LoadHashList;
+var
+  CurRow: integer;
+  HashList: TStringList;
+  AProfile: string;
+  VehSubKey: string;
+begin
+  GridHashList.OnModified := GridModified;
+  GridHashList.RowCount := GridHashList.FixedRows +1;
+  GridHashList.BeginUpdate;
+  try
+    CurRow := 1;
+    HashList := TStringList.Create;
+    try
+      VehSubKey := SubKey + '\' + Reg_VehicleProfileHashList;
+      AddGridValueLine(GridHashList, CurRow, VehSubKey, '', '-Trip file Hashes saved in registry-');
+      AddGridValueLine(GridHashList, CurRow, '', '', '');
+
+      GetRegistryList(VehSubKey, HashList);
+      for AProfile in HashList do
+      begin
+        AddGridValueLine(GridHashList, CurRow, AProfile,
+                                               GetRegistry(Reg_VehicleProfileHash, 0, VehSubKey + '\' + AProfile),
+                                               GetRegistry(Reg_VehicleProfileName, '', VehSubKey + '\' + AProfile));
+      end;
+    finally
+      HashList.Free;
+    end;
+
+    GridHashList.RowCount := CurRow;
+    AddGridHeader(GridHashList);
+
+  finally
+    GridHashList.EndUpdate;
+    BtnDeleteHashList.Enabled := false;
+    BtnSaveHash.Enabled := false;
+  end;
+end;
+
 procedure TFrmVehProfiles.LoadProfile;
 var
   CurRow: integer;
@@ -742,7 +844,7 @@ begin
   if not Assigned(FDSFields) then
     FDSFields := TDSFields.Create(PnlAllFields, DsVehProfile);
 
-  VehicleProfile.FromCds(CDSVehProfile, AModel);
+  VehicleProfile.FromCds(CDSVehProfile, CurModel);
   OverriddenHash := CDSVehProfile.FieldByName('Overridden_Hash').AsInteger;
   if (OverriddenHash <> 0) then
     VehicleProfile.Proposed_Hash := OverriddenHash;

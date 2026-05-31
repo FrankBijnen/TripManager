@@ -3,7 +3,7 @@ unit UnitRegistry;
 interface
 
 uses
-  System.Win.Registry, System.TypInfo,
+  System.TypInfo, System.Classes,
   Winapi.Windows;
 
 const
@@ -13,6 +13,7 @@ function GetRegistry(const Name: string; const Default: string = ''; const SubKe
 function GetRegistry(const Name: string; const Default: boolean; const SubKey: string = ''): boolean; overload;
 function GetRegistry(const Name: string; const Default: int64; const SubKey: string = ''): int64; overload;
 function GetRegistry(const Name: string; const Default: integer; AType: PTypeInfo; const SubKey: string = ''): integer; overload;
+procedure GetRegistryList(const KeyName: string; const KeyList: TStrings); overload;
 {$IFNDEF VER350}
 function GetRegistry(const Name: string; const Default: TArray<string>; const SubKey: string = ''): TArray<string>; overload;
 {$ENDIF}
@@ -22,12 +23,13 @@ procedure SetRegistry(const Name: string; Value: int64; const SubKey: string = '
 {$IFNDEF VER350}
 procedure SetRegistry(const Name: string; Value: TArray<string>; const SubKey: string = ''); overload;
 {$ENDIF}
+function DeleteRegistryKey(const KeyName: string): boolean; overload;
 
 implementation
 
 uses
   Vcl.Forms,
-  System.SysUtils,
+  System.Win.Registry, System.SysUtils,
   UnitStringUtils;
 
 function ApplicationKey: string;
@@ -40,6 +42,26 @@ begin
   result := ApplicationKey;
   if (SubKey <> '') then
     result := result + '\' + ReplaceAll(SubKey, [':\'],  ['']);
+end;
+
+procedure GetRegistryList(const ARootKey: HKEY; const KeyName: string; const KeyList: TStrings); overload;
+var
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create(KEY_READ);
+  try
+    Registry.RootKey := ARootKey;
+    // False because we do not want to create it if it doesn't exist
+    if (Registry.OpenKey(KeyName, False)) then
+      Registry.GetKeyNames(KeyList);
+  finally
+    Registry.Free;
+  end;
+end;
+
+procedure GetRegistryList(const KeyName: string; const KeyList: TStrings);
+begin
+  GetRegistryList(HKEY_CURRENT_USER, SubApplicationKey(KeyName), KeyList);
 end;
 
 function GetRegistryValue(const ARootKey: HKEY; const KeyName, Name: string; const Default: string = ''): string;
@@ -143,5 +165,23 @@ begin
   end;
 end;
 {$ENDIF}
+
+function DeleteRegistryKey(const ARootKey: HKEY; const KeyName: string): boolean; overload;
+var
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create(KEY_ALL_ACCESS);
+  try
+    Registry.RootKey := ARootKey;
+    result := Registry.DeleteKey(KeyName);
+  finally
+    Registry.Free;
+  end;
+end;
+
+function DeleteRegistryKey(const KeyName: string): boolean;
+begin
+  result := DeleteRegistryKey(HKEY_CURRENT_USER, SubApplicationKey(KeyName));
+end;
 
 end.
