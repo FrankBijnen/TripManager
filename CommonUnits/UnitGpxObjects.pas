@@ -1623,7 +1623,10 @@ begin
         begin
           if (TrackPoint.Name <> 'trkpt') then
             continue;
-          TrackDate := LeftStr(GPSLocalTime(FindSubNodeValue(TrackPoint, 'time')), 10);
+          TrackDate := FindSubNodeValue(TrackPoint, 'time');
+          if (TrackDate = '') then
+            continue;
+          TrackDate := LeftStr(GPSLocalTime(TrackDate), 10);
           if (DayList.ContainsKey(TrackDate)) then
             CurrentDayList := DayList[TrackDate]
           else
@@ -1636,6 +1639,12 @@ begin
       end;
     finally
       TracksProcessed.Free;
+    end;
+
+    if (DayList.Count = 0) then
+    begin
+      ShowMessage('Selected GPX file(s) have no date/time');
+      exit;
     end;
 
     for TrackDate in DayList.Keys do
