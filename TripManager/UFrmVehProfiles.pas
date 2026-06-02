@@ -34,6 +34,7 @@ type
     PnlHashFunc: TPanel;
     BtnDeleteHashList: TButton;
     BtnSaveHash: TButton;
+    BtnCleanUp: TButton;
     procedure FormShow(Sender: TObject);
     procedure CDSVehProfileAfterScroll(DataSet: TDataSet);
     procedure FormResize(Sender: TObject);
@@ -51,9 +52,11 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure GrdVehProfileTitleClick(Column: TColumn);
     procedure BtnDeleteHashListClick(Sender: TObject);
-    procedure GridHashListSelectCell(Sender: TObject; ACol, ARow: LongInt; var CanSelect: Boolean);
     procedure BtnSaveHashClick(Sender: TObject);
     procedure PctDetailsChange(Sender: TObject);
+    procedure GridHashListSelectCell(Sender: TObject; ACol, ARow: {$IFDEF VER350}Integer{$ELSE}Longint{$ENDIF};
+      var CanSelect: Boolean);
+    procedure BtnCleanUpClick(Sender: TObject);
   private
     { Private declarations }
     ManualUpdate: boolean;
@@ -62,6 +65,7 @@ type
     CurModel: TGarminModel;
     OrderBy: string;
     AscDesc: string;
+    function ExistProfile(const FieldName, FieldValue: string): boolean;
     procedure RefreshRecord;
     procedure GridModified(Sender: TObject; ACol, ARow: LongInt; var Value: string);
     procedure SetOverridden_Hash(const NewHash: cardinal);
@@ -551,6 +555,55 @@ begin
   end;
 end;
 
+// Cant use fieldtype of GUID (Blob) in locate
+function TFrmVehProfiles.ExistProfile(const FieldName, FieldValue: string): boolean;
+var
+  SavedRecNo: integer;
+begin
+  result := false;
+
+  CDSVehProfile.DisableControls;
+  SavedRecNo := CDSVehProfile.RecNo;
+  try
+    CDSVehProfile.First;
+    while not (result) and
+          not (CDSVehProfile.Eof) do
+    begin
+      if (SameText(CDSVehProfile.FieldByName(FieldName).DisplayText, FieldValue)) then
+        exit(true);
+      CDSVehProfile.Next;
+    end;
+  finally
+    CDSVehProfile.RecNo := SavedRecNo;
+    CDSVehProfile.EnableControls;
+  end;
+end;
+
+procedure TFrmVehProfiles.BtnCleanUpClick(Sender: TObject);
+var
+  Index: integer;
+begin
+  for Index := GridHashList.RowCount -1 downto 2 do // High => Low
+  begin
+    if (GridHashList.Cells[0, Index] = '') then
+      continue;
+    if (ExistProfile('GUID', GridHashList.Cells[0, Index])) then
+      continue;
+         
+    DeleteRegistryKey(SubKey + '\' + Reg_VehicleProfileHashList + '\' + GridHashList.Cells[0, Index]);
+  end;
+  LoadHashList;
+end;
+
+procedure TFrmVehProfiles.GridHashListSelectCell(Sender: TObject; ACol, ARow: {$IFDEF VER350}Integer{$ELSE}Longint{$ENDIF};
+      var CanSelect: Boolean);
+begin
+  BtnDeleteHashList.Enabled :=
+       (ARow > 1) and
+       (ARow < GridHashList.RowCount) and
+       (GridHashList.Cells[0, ARow] <> '');
+end;
+
 procedure TFrmVehProfiles.GridModified(Sender: TObject; ACol, ARow: LongInt; var Value: string);
 begin
   if (TStringGrid(Sender).Cells[0, ARow] = '') then
@@ -771,14 +824,6 @@ begin
   else
     Column.Title.Caption := Column.Title.Caption + ' ' + Arrow_Down;
   LoadProfiles;
-end;
-
-procedure TFrmVehProfiles.GridHashListSelectCell(Sender: TObject; ACol, ARow: LongInt; var CanSelect: Boolean);
-begin
-  BtnDeleteHashList.Enabled :=
-       (ARow > 1) and
-       (ARow < GridHashList.RowCount) and
-       (GridHashList.Cells[0, ARow] <> '');
 end;
 
 procedure TFrmVehProfiles.LoadProfiles;

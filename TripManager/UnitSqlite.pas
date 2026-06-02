@@ -444,6 +444,7 @@ begin
   case Model of
     TGarminModel.Tread2,
     TGarminModel.XT3:
+      // SchemaVersion = 49
       result :=
         'select' + CRLF +
         '(select act."description:1" from properties_dbg act where act.value = v.vehicle_id and act."description:1" = ''active_profile'' ) as Status, ' + CRLF +
@@ -457,6 +458,7 @@ begin
         'join properties_dbg e on (e.key_id = g.key_id and e."description:1" like ''environmental%'')' + CRLF +
         'order by ' + OrderBy;
     else
+      // SchemaVersion = 39
       result :=
         'select' + CRLF +
         '(select ''active_profile'' from active_vehicle a where a.vehicle_id = v.vehicle_id) as Status, ' + CRLF +

@@ -34,7 +34,7 @@ object FrmVehProfiles: TFrmVehProfiles
       849
       31)
     object BtnOK: TButton
-      Left = 679
+      Left = 661
       Top = 3
       Width = 75
       Height = 25
@@ -44,7 +44,7 @@ object FrmVehProfiles: TFrmVehProfiles
       TabOrder = 0
     end
     object BtnCancel: TButton
-      Left = 766
+      Left = 748
       Top = 3
       Width = 75
       Height = 25
@@ -246,22 +246,37 @@ object FrmVehProfiles: TFrmVehProfiles
             Align = alTop
             TabOrder = 1
             object BtnDeleteHashList: TButton
-              Left = 0
-              Top = 2
+              AlignWithMargins = True
+              Left = 103
+              Top = 4
               Width = 75
               Height = 25
+              Align = alLeft
               Caption = 'Delete'
               TabOrder = 0
               OnClick = BtnDeleteHashListClick
             end
             object BtnSaveHash: TButton
-              Left = 81
-              Top = 2
+              AlignWithMargins = True
+              Left = 184
+              Top = 4
               Width = 75
               Height = 25
+              Align = alLeft
               Caption = 'Save'
               TabOrder = 1
               OnClick = BtnSaveHashClick
+            end
+            object BtnCleanUp: TButton
+              AlignWithMargins = True
+              Left = 4
+              Top = 4
+              Width = 93
+              Height = 25
+              Align = alLeft
+              Caption = 'Clean up'
+              TabOrder = 2
+              OnClick = BtnCleanUpClick
             end
           end
         end
