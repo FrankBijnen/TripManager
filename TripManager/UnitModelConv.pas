@@ -35,7 +35,7 @@ const
   DefActivitiesPath                 = 'Activities';
   DefUnusedDesc                     = 'Unused';
 
-  // Device names
+  // Device names and part numbers
   Zumo_Name                         = 'z' + #0363 + 'mo'; // Dont need to save as UTF8
 
   // XT
@@ -141,6 +141,7 @@ uses
 type
   TGarminModel_Rec = record
     DeviceName:  string;
+    PartNumber:  string;
     TripModel:   TTripModel;
     Safe:        boolean;
     Displayable: boolean;
@@ -149,46 +150,25 @@ type
     ExploreDB:   boolean;
     Application: string;
   end;
-  TParts_Rec = record
-    PartNumber:  string;
-    DeviceName:  string;
-  end;
 
 const
 
   Model_Tab: array[TGarminModel] of TGarminModel_Rec =
   (
-    (DeviceName: XT_Name;         TripModel: TTripModel.XT;       Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: XT2_Name;        TripModel: TTripModel.XT2;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: XT3_Name;        TripModel: TTripModel.XT3;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: Tread2_Name;     TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
-    (DeviceName: Zumo595_Name;    TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
-    (DeviceName: Zumo590_Name;    TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
-    (DeviceName: Zumo3x0_Name;    TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
-    (DeviceName: Drive51_Name;    TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
-    (DeviceName: Drive66_Name;    TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
-    (DeviceName: Nuvi2595_Name;   TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
-    (DeviceName: Edge_Name;       TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
-    (DeviceName: ForeRunner_Name; TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
-    (DeviceName: Garmin_Name;     TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'GPX,POI'),
-    (DeviceName: Unknown_Name;    TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false)
-  );
-
-// Mapping from PartNumber to DeviceName
-// Used as a fallback when the Description in GarminDevice.XML is not as expected. E.G. Zumo 590 upgraded to Zumo 595
-
-  PartsList: array[0..9] of TParts_Rec =
-  (
-    (PartNumber: Nuvi2595_PartNumber; DeviceName: Nuvi2595_Name),
-    (PartNumber: Drive51_PartNumber;  DeviceName: Drive51_Name),
-    (PartNumber: Drive66_PartNumber;  DeviceName: Drive66_Name),
-    (PartNumber: Zumo3x0_PartNumber;  DeviceName: Zumo3x0_Name),
-    (PartNumber: Zumo590_PartNumber;  DeviceName: Zumo590_Name),
-    (PartNumber: Zumo595_PartNumber;  DeviceName: Zumo595_Name),
-    (PartNumber: XT_PartNumber;       DeviceName: XT_Name),
-    (PartNumber: XT2_PartNumber;      DeviceName: XT2_Name),
-    (PartNumber: XT3_PartNumber;      DeviceName: XT3_Name),
-    (PartNumber: Tread2_PartNumber;   DeviceName: Tread2_Name)
+    (DeviceName: XT_Name;         PartNumber: XT_PartNumber;        TripModel: TTripModel.XT;       Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: XT2_Name;        PartNumber: XT2_PartNumber;       TripModel: TTripModel.XT2;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: XT3_Name;        PartNumber: XT3_PartNumber;       TripModel: TTripModel.XT3;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Tread2_Name;     PartNumber: Tread2_PartNumber;    TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Zumo595_Name;    PartNumber: Zumo595_PartNumber;   TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Zumo590_Name;    PartNumber: Zumo590_PartNumber;   TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Zumo3x0_Name;    PartNumber: Zumo3x0_PartNumber;   TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Drive51_Name;    PartNumber: Drive51_PartNumber;   TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
+    (DeviceName: Drive66_Name;    PartNumber: Drive66_PartNumber;   TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Nuvi2595_Name;   PartNumber: Nuvi2595_PartNumber;  TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Edge_Name;                                         TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
+    (DeviceName: ForeRunner_Name;                                   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
+    (DeviceName: Garmin_Name;                                       TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'GPX,POI'),
+    (DeviceName: Unknown_Name;                                      TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false)
   );
 
 var
@@ -287,35 +267,33 @@ end;
 
 class function TModelConv.GetModelFromGarminDevice(const GarminDevice: TGarminDevice): TGarminModel;
 var
-  ZumoId: integer;
   AGarminModel: TGarminModel;
   DevIndex: integer;
 begin
   result := TGarminModel.Unknown;
 
-  // Device name overridden?
   for DevIndex := 0 to KnownDevices.Count -1 do
-    if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
-      exit(TGarminModel(KnownDevices.Objects[DevIndex]));
-
-  // Check for known partnumbers
-  for ZumoId := Low(PartsList) to High(PartsList) do
   begin
-    if (GarminDevice.PartNumber = PartsList[ZumoId].PartNumber) then
-    begin
-      GarminDevice.ModelDescription := PartsList[ZumoId].DeviceName;
-      for DevIndex := 0 to KnownDevices.Count -1 do
-        if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
-          exit(TGarminModel(KnownDevices.Objects[DevIndex]));
-    end;
+    AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
+
+    // Check possibly overriden Device Name
+    if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
+      exit(AGarminModel);
+
+    // Check for known PartNumbers
+    if (Model_Tab[AGarminModel].PartNumber <> '') and
+       (SameText(GarminDevice.PartNumber, Model_Tab[AGarminModel].PartNumber)) then
+      exit(AGarminModel);
   end;
 
-  // Look for default Device names
-  // High -> Low, XT Contains XT2
-  for AGarminModel := High(TGarminModel) downto Low(TGarminModel) do
+  // Check for known Device Name. If the PartNumber did not match.
+  // EG: Garmin Generic, Edge, ForeRunner etc.
+  // High to Low, because of ContainsText. Dont Identify the XT3, XT2 as XT
+  for DevIndex := KnownDevices.Count -1 downto 0 do
   begin
-    if (Model_Tab[AGarminModel].Displayable) and
-       (ContainsText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
+    AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
+
+    if (ContainsText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
       exit(AGarminModel);
   end;
 

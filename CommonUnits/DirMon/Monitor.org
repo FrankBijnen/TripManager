@@ -4,20 +4,20 @@ unit Monitor;
 interface
 
 uses
-  System.SysUtils,
-  System.Classes,
-  Winapi.Windows,
-  Winapi.Messages;
+  SysUtils,
+  Classes,
+  Windows,
+  Messages;
 
 const
   WMUSER_DIRECTORYCHANGED = WM_USER + 1;
 
 type
   TActionToWatch = (awChangeFileName, awChangeDirName, awChangeAttributes, awChangeSize, awChangeLastWrite,
-                    awChangeLastAccess, awChangeCreation, awChangeSecurity);
+    awChangeLastAccess, awChangeCreation, awChangeSecurity);
   TActionsToWatch = set of TActionToWatch;
   TDirectoryMonitorAction = (daUnknown, daFileAdded, daFileRemoved, daFileModified, daFileRenamedOldName, daFileRenamedNewName);
-  TDirectoryChangeEvent = procedure(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: WideString) of object;
+  TDirectoryChangeEvent = procedure(Sender: TObject; Action: TDirectoryMonitorAction; const FileName: string) of object;
 
 const
   AllActions = [Low(TActionToWatch) .. High(TActionToWatch)];
@@ -41,7 +41,7 @@ type
     procedure SetSubdirectories(const Value: Boolean);
   protected
     procedure WndProc(var Msg: TMessage); virtual;
-    procedure DoChange(Action: TDirectoryMonitorAction; const FileName: WideString); virtual;
+    procedure DoChange(Action: TDirectoryMonitorAction; const FileName: string); virtual;
     property Handle: THandle read FHandle;
   public
     constructor Create;
@@ -74,19 +74,6 @@ type
     destructor Destroy; override;
   end;
 
-  TMouseButtonHook = record
-    hMouseHook: HHOOK;
-    Left_Button: boolean;
-    Middle_Button: boolean;
-    Right_Button: boolean;
-  end;
-
-procedure EnableMouseHook;
-procedure DisableMouseHook;
-
-var
-  MouseButtonHook: TMouseButtonHook;
-
 implementation
 
 constructor TDirectoryMonitorWorkerThread.Create(Owner: TDirectoryMonitor);
@@ -96,10 +83,8 @@ begin
   FSubdirectories := Owner.Subdirectories;
   FActions := Owner.FActions;
   FOwnerHandle := Owner.Handle;
-  FDirHandle := CreateFile(PChar(FDirectory),
-                           FILE_LIST_DIRECTORY,
-                           FILE_SHARE_READ or FILE_SHARE_WRITE or FILE_SHARE_DELETE, nil, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS or FILE_FLAG_OVERLAPPED,
-                           0);
+  FDirHandle := CreateFile(PChar(FDirectory), FILE_LIST_DIRECTORY, FILE_SHARE_READ or FILE_SHARE_WRITE or
+    FILE_SHARE_DELETE, nil, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS or FILE_FLAG_OVERLAPPED, 0);
   FChangeHandle := CreateEvent(nil, False, False, nil);
   FShutdownHandle := CreateEvent(nil, False, False, nil);
 end;
@@ -142,51 +127,51 @@ type
     FileNameLength: DWORD;
     FileName: array [0 .. MAX_PATH] of WCHAR;
   end;
-  PFileNotifyInformation = ^TFileNotifyInformation;
 
+  PFileNotifyInformation = ^TFileNotifyInformation;
 const
   BUFFER_SIZE = 65536;
-
 var
-  WaitResult, BytesRead, WStrLen: DWORD;
+  WaitResult, BytesRead: DWORD;
   Info: PFileNotifyInformation;
   Buffer: array [0 .. BUFFER_SIZE - 1] of byte;
   Events: array [0 .. 1] of THandle;
   Overlap: TOverlapped;
   Action: TDirectoryMonitorAction;
+  FileName: string;
   FileNamePtr: PChar;
 begin
-  if (FDirHandle = INVALID_HANDLE_VALUE) then
-    raise Exception.Create('FDirHandle = INVALID_HANDLE_VALUE');
-  Overlap := Default(TOverlapped);
-  Overlap.hEvent := FChangeHandle;
-  Events[0] := FChangeHandle;
-  Events[1] := FShutdownHandle;
-
-  while not Terminated do
+  if FDirHandle <> INVALID_HANDLE_VALUE then
   begin
-    ZeroMemory(@Buffer[0], SizeOf(Buffer));
-    if not ReadDirectoryChangesW(FDirHandle, @Buffer[0], BUFFER_SIZE, FSubdirectories, GetNotifyMask, @BytesRead, @Overlap, nil) then
-      raise Exception.Create(Format('ReadDirectoryChangesW: %s', [SysErrorMessage(GetLastError)]));
+    FillChar(Overlap, SizeOf(Overlap), 0);
+    Overlap.hEvent := FChangeHandle;
+    Events[0] := FChangeHandle;
+    Events[1] := FShutdownHandle;
+    while not Terminated do
+    begin
+      if ReadDirectoryChangesW(FDirHandle, @Buffer[0], BUFFER_SIZE, FSubdirectories, GetNotifyMask, @BytesRead,
+        @Overlap, nil) then
+      begin
+        WaitResult := WaitForMultipleObjects(2, @Events[0], False, INFINITE);
 
-    WaitResult := WaitForMultipleObjects(2, @Events[0], False, INFINITE);
-    if WaitResult <> WAIT_OBJECT_0 then
-      exit;
-
-    Info := @Buffer[0];
-    repeat
-      Action := GetNotifyAction(Info^.Action);
-      WStrLen := (Info^.FileNameLength div SizeOf(WChar));
-      FileNamePtr := StrMove(WideStrAlloc(WStrLen +1), Info^.FileName, WStrLen);
-      FileNamePtr[WStrLen] := #0;
-      if not PostMessage(FOwnerHandle, WMUSER_DIRECTORYCHANGED, WPARAM(Action), LPARAM(FileNamePtr)) then
-        StrDispose(FileNamePtr);
-      if Info.NextEntryOffset = 0 then
-        Break
-      else
-        Inc(PByte(Info), Info.NextEntryOffset);
-    until Terminated;
-
+        if WaitResult = WAIT_OBJECT_0 then
+        begin
+          Info := @Buffer[0];
+          repeat
+            Action := GetNotifyAction(Info^.Action);
+            FileName := WideCharLenToString(@Info^.FileName[0], Info^.FileNameLength);
+            FileName := FDirectory + string(PChar(FileName));
+            FileNamePtr := StrNew(PChar(FileName));
+            if not PostMessage(FOwnerHandle, WMUSER_DIRECTORYCHANGED, WPARAM(Action), LPARAM(FileNamePtr)) then
+              StrDispose(FileNamePtr);
+            if Info.NextEntryOffset = 0 then
+              Break
+            else
+              Inc(PByte(Info), Info.NextEntryOffset);
+          until Terminated;
+        end;
+      end;
+    end;
   end;
 end;
 
@@ -236,7 +221,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TDirectoryMonitor.DoChange(Action: TDirectoryMonitorAction; const FileName: WideString);
+procedure TDirectoryMonitor.DoChange(Action: TDirectoryMonitorAction; const FileName: string);
 begin
   if Assigned(OnChange) then
     OnChange(Self, Action, FileName);
@@ -297,79 +282,17 @@ end;
 procedure TDirectoryMonitor.WndProc(var Msg: TMessage);
 var
   Action: TDirectoryMonitorAction;
-  FileNamePtr: PWideChar;
+  FileName: string;
+  FileNamePtr: PChar;
 begin
   if Msg.Msg = WMUSER_DIRECTORYCHANGED then
   begin
     Action := TDirectoryMonitorAction(Msg.WPARAM);
-    FileNamePtr := PWideChar(Msg.LPARAM);
-    DoChange(Action, FileNamePtr);
+    FileNamePtr := PChar(Msg.LPARAM);
+    FileName := string(FileNamePtr);
     StrDispose(FileNamePtr);
+    DoChange(Action, FileName);
   end;
 end;
-
-function MouseHookProc(nCode: Integer; wParam: WPARAM; lParam: LPARAM): LResult; stdcall;
-begin
-  // If nCode is less than zero, the hook procedure must return the value returned by CallNextHookEx.
-  if nCode < 0 then
-  begin
-    Result := CallNextHookEx(MouseButtonHook.hMouseHook, nCode, wParam, lParam);
-    Exit;
-  end;
-
-  // Process specific mouse events here
-  if nCode = HC_ACTION then
-  begin
-    case wParam of
-      WM_LBUTTONDOWN:
-      begin
-        MouseButtonHook.Left_Button := true;
-        MouseButtonHook.Middle_Button := false;
-        MouseButtonHook.Right_Button := false;
-      end;
-      WM_RBUTTONDOWN:
-      begin
-        MouseButtonHook.Left_Button := false;
-        MouseButtonHook.Middle_Button := false;
-        MouseButtonHook.Right_Button := true;
-      end;
-      WM_MBUTTONDOWN:
-      begin
-        MouseButtonHook.Left_Button := false;
-        MouseButtonHook.Middle_Button := true;
-        MouseButtonHook.Right_Button := false;
-      end;
-    end;
-  end;
-
-  // Pass the event down the Windows hook chain
-  Result := CallNextHookEx(MouseButtonHook.hMouseHook, nCode, wParam, lParam);
-end;
-
-procedure EnableMouseHook;
-begin
-  if MouseButtonHook.hMouseHook = 0 then
-  begin
-    MouseButtonHook.hMouseHook := SetWindowsHookEx(
-      WH_MOUSE_LL,           // Type of hook
-      @MouseHookProc,        // Pointer to your callback function
-      HInstance,             // Handle to the application instance
-      0                      // 0 indicates a global system-wide hook
-    );
-  end;
-end;
-
-procedure DisableMouseHook;
-begin
-  if (MouseButtonHook.hMouseHook <> 0) then
-    UnhookWindowsHookEx(MouseButtonHook.hMouseHook);
-  MouseButtonHook.hMouseHook := 0;
-end;
-
-initialization
-  MouseButtonHook := Default(TMouseButtonHook);
-
-finalization
-  DisableMouseHook;
 
 end.

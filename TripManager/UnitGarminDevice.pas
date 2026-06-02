@@ -355,8 +355,8 @@ begin
 end;
 
 function TGarminMTP_Device.ReadGarminDevice(const AModelDescription: string;
-                                      const ADeviceList: Tlist;
-                                      const SelectManufacturer: string = '*'): boolean;
+                                            const ADeviceList: Tlist;
+                                            const SelectManufacturer: string = '*'): boolean;
 begin
   result := true;
   if (MatchesMask(Manufacturer, SelectManufacturer)) then
@@ -622,9 +622,7 @@ end;
 
 function TGarminDrv_Device.GetFriendlyPath(APath: string): string;
 begin
-  result := ReplaceAll(APath, ['?:\'], [Device]);
-  if not System.SysUtils.DirectoryExists(result) then
-    result := '';
+  result := GetPathId(APath);
 end;
 
 function TGarminDrv_Device.CheckDevice: boolean;
@@ -634,7 +632,7 @@ end;
 
 function TGarminDrv_Device.GetManufacturer: PWideChar;
 begin
-  result := PwideChar(Description);
+  result := PWideChar(Description);
 end;
 
 function TGarminDrv_Device.GetFileInfo(const APath, AFile: string;
