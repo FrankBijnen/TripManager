@@ -2223,7 +2223,7 @@ begin
   TrackStringList.Clear;
   DisplayColor := FrmSelectGpx.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
   if (DisplayColor = '') then
-  	exit;
+    exit;
 
   for TrackPoint in Track.ChildNodes do
   begin
@@ -2714,8 +2714,8 @@ begin
       begin
         RtePtCalculationMode := RtePtViaPoint.Find('trp:CalculationMode');
         if (RtePtCalculationMode <> nil) then
-          Location2Add.RoutePref := TmRoutePreference.RoutePreference(RtePtCalculationMode.NodeValue);
-        if (Location2Add.RoutePref = TRoutePreference.rmCurvyRoads) then
+          Location2Add.RoutePref := TmRoutePreference.RoutePreference(RtePtCalculationMode.NodeValue, ProcessOptions.TripModel);
+        if (Location2Add.RoutePref = TRoutePreference.rmAdventurous) then
         begin
           Location2Add.AdvLevel := TAdvlevel.advNA;
           RtePtAdvLevel := RtePtViaPoint.Find('trp:AdventurousLevel');
@@ -2814,7 +2814,7 @@ begin
   if (RtePts = nil) then // No route points, no trip
     exit;
 
-  FTripList := TTripList.Create(TripVersion[ProcessOptions.TripModel]);
+  FTripList := TTripList.Create(ProcessOptions.TripModel);
   try
     FTripList.RouteCnt := RouteCnt;
     TripName := FindSubNodeValue(RteNode, 'name');
@@ -2845,8 +2845,7 @@ begin
           break;
       end;
     end;
-    FTripList.CreateTemplate(ProcessOptions.TripModel,
-                             TripName, CalculationMode, TransportMode);
+    FTripList.CreateTemplate(TripName, CalculationMode, TransportMode);
 
     UpdateTemplate(TripName, RouteCnt, ParentTripId, RtePts);
 

@@ -17,7 +17,7 @@ const
   dtBoolean       = 7;
   dtVersion       = 8;
   dtPosn          = 8;
-  dt3x0RoutePref  = 8;
+  dtDWordRoutePref= 8;
   dtLctnPref      = 10;
   dtLinkPref      = 10;
   dtUdbPref       = 10;
@@ -25,6 +25,9 @@ const
   dtRaw           = 12;
   dtString        = 14;
   dtList          = 128;
+
+  // Override length for Word size route prefs.
+  LenDtDWordRoutePref  = 5;
 
   biInitiator: AnsiChar = #$09;
 
@@ -37,20 +40,30 @@ const
   MinRoutePreferenceUserConfig = 0; // Only these are available to the user.
   MaxRoutePreferenceUserConfig = 3;
   RoutePreferenceAdventurous = 3;
-  RoutePreferenceMap : array[0..12] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),
-                                                          (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),
-                                                          (Value: Ord(rmDirect);            Name: 'Direct'),
-                                                          (Value: Ord(rmCurvyRoads);        Name: 'Adventurous'),
-                                                          (Value: Ord(rmCurvyRoads);        Name: 'CurvyRoads'),
-                                                          (Value: Ord(rmOffRoad);           Name: 'OffRoad'),
-                                                          (Value: Ord(rmEco);               Name: 'Eco'),
-                                                          (Value: Ord(rmTripTrack);         Name: 'TripTrack'),
-                                                          (Value: Ord(rmHills);             Name: 'Hills'),
-                                                          (Value: Ord(rmPopular);           Name: 'Popular'),
-                                                          (Value: Ord(rmNoShape);           Name: 'No Shape'),
-                                                          (Value: Ord(rmScenic);            Name: 'Scenic'),
+
+  RoutePreferenceMap : array[0..12] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),        // $00
+                                                          (Value: Ord(rmOffRoad);           Name: 'OffRoad'),           // $04
+                                                          (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),   // $01
+                                                          (Value: Ord(rmAdventurous);       Name: 'Adventurous'),       // $07 595, xt1-3
+                                                          (Value: Ord(rmDirect);            Name: 'Direct'),            // $04
+                                                          (Value: Ord(rmEco);               Name: 'Eco'),               // $02 nuvi 57
+                                                          (Value: Ord(rmCurvy);             Name: 'CurvyRoads'),        // $05 590
+                                                          (Value: Ord(rmTripTrack);         Name: 'TripTrack'),         // $09
+                                                          (Value: Ord(rmHills);             Name: 'Hills'),             // $1a
+                                                          (Value: Ord(rmPopular);           Name: 'Popular'),           // $ef
+                                                          (Value: Ord(rmNoShape);           Name: 'No Shape'),          // $58 ????
+                                                          (Value: Ord(rmScenic);            Name: 'Scenic'),            // $be
                                                           (Value: Ord(rmNA);                Name: NotApplicable)
                                                         );
+
+  // Mapping for models that store the value as 2 bytes. Zumo3x0, nuvi2595
+  RoutePrefDWordMap : array[0..4] of TIdentMapEntry =   ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),        // $0100
+                                                          (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),   // $0101
+                                                          (Value: Ord(rmDWordOffRoad);      Name: 'OffRoad'),           // $0102
+                                                          (Value: Ord(rmDWordEco);          Name: 'Eco'),               // $0103 nuvi 2595
+                                                          (Value: Ord(rmDWordDirect);       Name: 'Direct')             // $0102
+                                                        );
+
 
   MinAdvLevelUserConfig = 1; // Only these are available to the user.
   MaxAdvLevelUserConfig = 4;
@@ -420,9 +433,9 @@ type
     function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
   public
-    constructor Create(AValue: TRoutePreference = rmFasterTime; ALenValue: Cardinal = 1; ADataType: byte = dtByte);
+    constructor Create(AValue: TRoutePreference = rmFasterTime; ADataType: byte = dtByte);
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
-    class function RoutePreference(AValue: string): TRoutePreference;
+    class function RoutePreference(AValue: string; AModel: TTripmodel): TRoutePreference;
     class function AdvLevel(AValue: string): TAdvlevel;
     class function ModelEditMode(AModel: TTripmodel): TItemEditMode;
     class function ModelPickList(AModel: TTripmodel): string;
@@ -1010,10 +1023,12 @@ type
     function GetVehicleGUID: string;
     function GetAvoidancesChangedTimeAtSave: cardinal;
     function GetVehicleHash: cardinal;
+    function GetTripModelFromUDB: TTripModel;
     function GetTripModel: TTripModel;
     procedure SetTripModel(ATripModel: TTripModel);
     function GetCalculationModel(AModel: TTripModel): TTripModel;
-    procedure GetTripFileVersion(AStream: TStream);
+    procedure SetTripFileVersionFromTrip(AStream: TStream);
+    procedure SetTripFileVersion(ATripFileVersion: TTripVersion);
     function InitAllLinks: TBaseItem;
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
@@ -1040,6 +1055,8 @@ type
                                   const Location2Add: TLocation2Add);
     procedure AddLocation_nuvi2595(const Locations: TmLocations;
                                    const Location2Add: TLocation2Add);
+    procedure AddLocation_nuvi57(const Locations: TmLocations;
+                                 const Location2Add: TLocation2Add);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT3(const TripName, CalculationMode, TransportMode: string);
@@ -1050,12 +1067,13 @@ type
     procedure CreateTemplate_Drive66(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_nuvi2595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_nuvi57(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
     procedure UpdLocsFromRoutePrefs;
     procedure UpdLocsFromAllLinks;
   public
     constructor Create; overload;
-    constructor Create(ATripVersion: TTripVersion); overload;
+    constructor Create(AModel: TTripModel); overload;
     destructor Destroy; override;
     procedure Clear;
     procedure SetHeader(AHeader: THeader);
@@ -1086,8 +1104,7 @@ type
                         const GpxDist: double = 0);
     procedure SaveCalculated(const AModel: TTripModel;
                             const RtePts: TObject);
-    procedure CreateTemplate(const AModel: TTripModel;
-                             const TripName: string;
+    procedure CreateTemplate(const TripName: string;
                              const CalculationMode: string = '';
                              const TransportMode: string = '');
     procedure SaveAsGPX(const GPXFile: string; IncludeTrack: boolean = true);
@@ -1101,9 +1118,9 @@ type
     property VehicleProfileName: string read GetVehicleProfileName;
     property AvoidancesChangedTimeAtSave: cardinal read GetAvoidancesChangedTimeAtSave;
     property VehicleHash: cardinal read GetVehicleHash;
-    property TripModel: TTripModel read FTripModel write SetTripModel;
+    property TripModel: TTripModel read GetTripModel write SetTripModel;
     property ModelDescription: string read FModelDescription;
-    property TripFileVersion: TTripVersion read FTripFileVersion write FTripFileVersion;
+    property TripFileVersion: TTripVersion read FTripFileVersion write SetTripFileVersion;
     property RouteCnt: Cardinal read FRouteCnt write FRouteCnt;
   end;
 
@@ -2225,15 +2242,15 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
-constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; ALenValue: Cardinal = 1; ADataType: byte = dtByte);
+constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; ADataType: byte = dtByte);
 begin
   inherited Create(GetKey, Ord(AValue));
 
   // Zumo 3x0, nuvi2595
-  if (ADataType <> dtByte) then
+  if (ADataType = dtDWordRoutePref) then
   begin
     FDataType := ADataType;
-    FLenValue := ALenValue;
+    FLenValue := LenDtDWordRoutePref;
     SetLength(FBytes, FLenValue);
     FBytes[3] := $01;
     FBytes[4] := Ord(AValue);
@@ -2248,7 +2265,7 @@ begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
 
   // Zumo 3x0, nuvi2595
-  if (FDataType = dt3x0RoutePref) then
+  if (FDataType = dtDWordRoutePref) then
   begin
     SetLength(FBytes, FLenValue);
     AStream.Seek(SavePos, TSeekOrigin.soBeginning);
@@ -2257,14 +2274,31 @@ begin
   end;
 end;
 
-class function TmRoutePreference.RoutePreference(AValue: string): TRoutePreference;
+class function TmRoutePreference.RoutePreference(AValue: string; AModel: TTripmodel): TRoutePreference;
 var
   RoutePreference: integer;
+  KnownRoutePref: boolean;
 begin
-  if not (IdentToInt(AValue, RoutePreference, RoutePreferenceMap)) then
-    result := TRoutePreference.rmFasterTime
+  result := TRoutePreference.rmFasterTime;
+
+  if (RoutePrefDWordSize[AModel]) then
+    KnownRoutePref := IdentToInt(AValue, RoutePreference, RoutePrefDWordMap)
   else
+    KnownRoutePref := IdentToInt(AValue, RoutePreference, RoutePreferenceMap);
+
+  if KnownRoutePref then
+  begin
     result := TRoutePreference(RoutePreference);
+    // For XT etc. map Curvy to Adventurous, for Automotive to Eco
+    if (result = TRoutePreference.rmCurvy) and
+       not (TRoutePreference.rmCurvy in RoutePrefsSuppported[AModel]) then
+    begin
+      if (TRoutePreference.rmAdventurous in RoutePrefsSuppported[AModel]) then
+        result := TRoutePreference.rmAdventurous
+      else if (TRoutePreference.rmEco in RoutePrefsSuppported[AModel]) then
+        result := TRoutePreference.rmEco;
+    end;
+  end;
 end;
 
 class function TmRoutePreference.AdvLevel(AValue: string): TAdvlevel;
@@ -2289,8 +2323,14 @@ begin
 end;
 
 function TmRoutePreference.GetValue: string;
+var
+  KnownRoutePref: boolean;
 begin
-  if not (IntToIdent(FValue, result, RoutePreferenceMap)) then
+  if (Length(FBytes) = 0) then
+    KnownRoutePref := IntToIdent(FValue, result, RoutePreferenceMap)
+  else
+    KnownRoutePref := IntToIdent(FValue, result, RoutePrefDWordMap);
+  if not (KnownRoutePref) then
     result := NotApplicable;
 end;
 
@@ -2298,7 +2338,7 @@ procedure TmRoutePreference.SetByte(AByte: byte);
 begin
   FValue := AByte;
 
-  if (FDataType = dt3x0RoutePref) then
+  if (FDataType = dtDWordRoutePref) then
   begin
     SetLength(FBytes, 5);
     ZeroMemory(@FBytes[0], Length(FBytes));
@@ -2309,7 +2349,9 @@ end;
 
 procedure TmRoutePreference.SetValue(AValue: string);
 begin
-  AsByte := Ord(TmRoutePreference.RoutePreference(AValue));
+  if (TripList = nil) then
+    raise exception.Create('TmRoutePreference.SetValue called, but no Triplist');
+  AsByte := Ord(TmRoutePreference.RoutePreference(AValue, TripList.TripModel));
 end;
 
 class function TmRoutePreference.ModelEditMode(AModel: TTripmodel): TItemEditMode;
@@ -2331,21 +2373,19 @@ end;
 
 class function TmRoutePreference.ModelPickList(AModel: TTripmodel): string;
 var
-  Index: integer;
+  ARoutePref: TRoutePreference;
+  ADesc: string;
+  KnownRoutePref: boolean;
 begin
-  case AModel of
-    TTripModel.Nuvi2595:
-        result := RoutePreferenceMap[0].Name + #10 +
-                  RoutePreferenceMap[1].Name + #10 +
-                  RoutePreferenceMap[5].Name + #10 +
-                  RoutePreferenceMap[6].Name;
-    TTripModel.Zumo3x0:
-        result := RoutePreferenceMap[0].Name + #10 +
-                  RoutePreferenceMap[1].Name + #10 +
-                  RoutePreferenceMap[5].Name;
+  result := '';
+  for ARoutePref in RoutePrefsSuppported[AModel] do
+  begin
+    if (RoutePrefDWordSize[AModel]) then
+      KnownRoutePref := IntToIdent(Ord(ARoutePref), ADesc, RoutePrefDWordMap)
     else
-      for Index := MinRoutePreferenceUserConfig to MaxRoutePreferenceUserConfig do
-        result := result + RoutePreferenceMap[Index].Name + #10;
+      KnownRoutePref := IntToIdent(Ord(ARoutePref), ADesc, RoutePreferenceMap);
+    if (KnownRoutePref) then
+      result := result + ADesc + #10;
   end;
 end;
 
@@ -2605,7 +2645,7 @@ begin
       if (RoutePreference <> nil) then
       begin
         BaseRoutePrefByte := TmRoutePreferences(RoutePreference).GetRoutePrefByte(SegmentNr);
-        if (TRoutePreference(BaseRoutePrefByte) <> TRoutePreference.rmCurvyRoads) then
+        if (TRoutePreference(BaseRoutePrefByte) <> TRoutePreference.rmAdventurous) then
         begin
           result := result + Format('%s (0x%s)', [AdvLevelMap[0].Name, IntTohex(RoutePref, 4)]) + #10;
           continue;
@@ -2949,7 +2989,7 @@ constructor TLink.Create(ARoutePref: TRoutePreference;
                          ATransportMode: TTransportMode);
 begin
   Create;
-  Add(TmRoutePreference.Create(ARoutePref, 5, dt3x0RoutePref));
+  Add(TmRoutePreference.Create(ARoutePref, dtDWordRoutePref));
   Add(TmTransportationMode.Create(ATransportMode));
 end;
 
@@ -4036,7 +4076,7 @@ var
 
   UdbDirCnt, RtePtCnt: integer;
   PrevUdbDir, RtePtUdbDir, AnUdbDir: TUdbDir;
-  SelModel, AModel: TTripModel;
+  AModel: TTripModel;
   Diff: Int64;
   TripData: TTripInfoData;
   TripKey: TTripInfoKey;
@@ -4073,9 +4113,7 @@ begin
     AStream.Read(AnUdbHandle.FValue.CalcStatus, SizeOf(AnUdbHandle.FValue.CalcStatus));
 
     // Check for Calculation Magic and known unknown3 size
-    // Need to compute.
     SavePosCalcMagic := AStream.Position;
-    SelModel := TTripModel.Unknown;                       // Default to Unknown
     for AModel := Low(TTripModel) to High(TTripModel) do
     begin
       if (CalculationMagic[AModel] <> CalcUndef) and
@@ -4083,15 +4121,19 @@ begin
          (AnUdbHandle.FValue.CalcStatus <> CalculationMagic[AModel]) then
         continue;
 
-      AStream.Seek(SavePosCalcMagic, TSeekOrigin.soBeginning);         // reposition after CalculationMagic
-      SelModel := ModelFromUnknown3Size(AModel, AnUdbHandle, AStream); // Now we have the UdbDirCount, we can compute the size.
-      if (SelModel = AModel) then
+      // Reposition stream
+      AStream.Seek(SavePosCalcMagic, TSeekOrigin.soBeginning);
+
+      // Does the calculation match this model?
+      if (AModel = ModelFromUnknown3Size(AModel, AnUdbHandle, AStream)) then
+      begin
+        if (TripList.TripModel = TTripModel.Unknown) and
+           (AModel <> TTripModel.Unknown) then
+          TripList.TripModel := AModel;
         break;
+      end;
     end;
     AnUdbHandle.FValue.SwapCardinals;
-
-    if (TripList.TripModel = TTripModel.Unknown) then
-      TripList.TripModel := SelModel;
 
     PrevUdbDir := nil;
     RtePtUdbDir := nil;
@@ -4101,9 +4143,9 @@ begin
       AnUdbDir := TUdbDir.Create('');
       AnUdbDir.SetTripList(TripList);
       AStream.Read(AnUdbDir.FValue, SizeOf(AnUdbDir.FValue));
-      SetLength(AnUdbDir.FUnknown2, TripVersion[SelModel].UdbDirUnknown2Size);
+      SetLength(AnUdbDir.FUnknown2, TripList.TripFileVersion.UdbDirUnknown2Size);
       AStream.Read(AnUdbDir.FUnknown2[0], Length(AnUdbDir.FUnknown2));
-      SetLength(AnUdbDir.FUdbDirName, UdbDirNameSize[SelModel]);
+      SetLength(AnUdbDir.FUdbDirName, UdbDirNameSize[TripList.TripModel]);
       AStream.Read(AnUdbDir.FUdbDirName[0], Length(AnUdbDir.FUdbDirName));
       AnUdbDir.FValue.SwapCardinals;
 
@@ -4111,7 +4153,6 @@ begin
 
       if (PrevUdbDir <> nil) then
       begin
-
         TripData := Default(TTripInfoData);
         if (PrevUdbDir.FValue.SubClass.IsKnownRoutePoint) then
         begin
@@ -4150,10 +4191,14 @@ begin
       continue;
     end;
 
-    // Should not occur
+    // Should not occur for known models
     if (Diff <> 0) then
     begin
       BreakPoint;
+      // Adjust Unknown3 so the next UdbHandle starts at the expected offset.
+      // Model Unknown has zeroes for UdbDirNameSize and Unknown3, so expect > 0
+      if (Length(AnUdbHandle.FValue.Unknown3) + Diff > 0) then
+        SetLength(AnUdbHandle.FValue.Unknown3, (Length(AnUdbHandle.FValue.Unknown3) + Diff));
       AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
     end;
   end;
@@ -4214,10 +4259,10 @@ begin
   TripModel := TTripModel.Unknown;
 end;
 
-constructor TTripList.Create(ATripVersion: TTripVersion);
+constructor TTripList.Create(AModel: TTripModel);
 begin
   Create;
-  TripFileVersion := ATripVersion;
+  TripModel := AModel;
 end;
 
 destructor TTripList.Destroy;
@@ -4245,6 +4290,7 @@ begin
 
   if (Assigned(Header)) then
     FreeAndNil(Header);
+
 end;
 
 procedure TTripList.SetHeader(AHeader: THeader);
@@ -4267,7 +4313,7 @@ var
   AnUdbDir: TbaseItem;
 begin
 
-  TripModel := GetTripModel;
+  TripModel := GetTripModelFromUDB;
 
   for ANItem in ItemList do
   begin
@@ -4353,7 +4399,7 @@ begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
       Location.RoutePref := RoutePreferences.GetRoutePref(ViaPt);
-      if (Location.RoutePref = TRoutePreference.rmCurvyRoads) then
+      if (Location.RoutePref = TRoutePreference.rmAdventurous) then
         Location.AdvLevel := RoutePreferencesAdventurousMode.GetRoutePref(ViaPt)
       else
         Location.AdvLevel := TAdvlevel.advNA;
@@ -4396,7 +4442,7 @@ begin
       for AnItem in Link.Items do
       begin
         if (AnItem is TmRoutePreference) then
-          Location.RoutePref := TmRoutePreference.RoutePreference(TmRoutePreference(AnItem).AsString);
+          Location.RoutePref := TmRoutePreference.RoutePreference(TmRoutePreference(AnItem).AsString, TripModel);
         if (AnItem is TmTransportationMode) then
           Location.TransportMode := TmTransportationMode.TransPortMethod(TmTransportationMode(AnItem).AsString);
       end;
@@ -4506,7 +4552,7 @@ begin
   end;
 end;
 
-procedure TTripList.GetTripFileVersion(AStream: TStream);
+procedure TTripList.SetTripFileVersionFromTrip(AStream: TStream);
 var
   mVersionNumber: TmVersionNumber;
 begin
@@ -4522,6 +4568,11 @@ begin
   end;
 end;
 
+procedure TTripList.SetTripFileVersion(ATripFileVersion: TTripVersion);
+begin
+  FTripFileVersion := ATripFileVersion;
+end;
+
 function TTripList.LoadFromStream(AStream: TStream): boolean;
 var
   AHeader: THeaderValue;
@@ -4535,6 +4586,7 @@ var
   ABaseItem: TBaseItem;
 begin
   Clear;
+  TripModel := TTripModel.Unknown;
 
   AStream.Position := 0;
   BytesRead := AStream.Read(AHeader, SizeOf(AHeader));
@@ -4548,7 +4600,7 @@ begin
   Header.FValue := AHeader;
 
   // Scan stream for mVersionNumber. Needed to correctly set UCS4 and Unknown2Size
-  GetTripFileVersion(AStream);
+  SetTripFileVersionFromTrip(AStream);
 
   while true do
   begin
@@ -4841,7 +4893,7 @@ begin
       Location := RoutePointList[0];
       RoutePreferences[ViaPt] := Swap(DefRoutePref + Ord(Location.RoutePref));
       case (Location.RoutePref) of
-        TRoutePreference.rmCurvyRoads:
+        TRoutePreference.rmAdventurous:
           begin
             if (Location.AdvLevel = TAdvlevel.advNA) then
               Location.AdvLevel := TProcessOptions(ProcessOptions).DefAdvLevel;
@@ -4858,7 +4910,7 @@ begin
     end;
 
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
-    SetRoutePref(TmRoutePreferences.GetKey,TmpStream);
+    SetRoutePref(TmRoutePreferences.GetKey, TmpStream);
 
     // RoutePrefs from Adventurous
     PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurous);
@@ -5091,8 +5143,7 @@ procedure TTripList.AddLocation_Drive66(const Locations: TmLocations;
                                         const Location2Add: TLocation2Add);
 
 begin
- Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
-
+  Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
   Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
@@ -5128,6 +5179,18 @@ begin
   Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi2595]));
 end;
 
+procedure TTripList.AddLocation_nuvi57(const Locations: TmLocations;
+                                       const Location2Add: TLocation2Add);
+begin
+  Locations.AddLocation(TLocation.Create(Location2Add.RoutePref));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+  Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmName.Create(Location2Add.Name));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi57]));
+end;
+
 procedure TTripList.AddLocation(const Location2Add: TLocation2Add);
 var
   Locations: TmLocations;
@@ -5154,6 +5217,8 @@ begin
       AddLocation_Zumo3x0(Locations, Location2Add);
     TTripModel.Nuvi2595:
       AddLocation_nuvi2595(Locations, Location2Add);
+    TTripModel.Nuvi57:
+      AddLocation_nuvi57(Locations, Location2Add);
     else
       raise exception.Create('AddLocation. Model not supported');
   end;
@@ -5638,7 +5703,7 @@ end;
 
 // Get the model by checking the magic number, or the size.
 // This function reports the model even if not calculated.
-function TTripList.GetTripModel: TTripModel;
+function TTripList.GetTripModelFromUDB: TTripModel;
 var
   AnUdbHandle: TmUdbDataHndl;
 begin
@@ -5674,8 +5739,13 @@ end;
 procedure TTripList.SetTripModel(ATripModel: TTripModel);
 begin
   FTripModel := ATripModel;
-  FModelDescription := GetEnumName(TypeInfo(TTripModel), Ord(TripModel));
-  FTripFileVersion := TripVersion[FTripModel];
+  FModelDescription := GetEnumName(TypeInfo(TTripModel), Ord(FTripModel));
+  TripFileVersion := TripVersion[FTripModel];
+end;
+
+function TTripList.GetTripModel: TTripModel;
+begin
+  result := FTripModel;
 end;
 
 // Is the TripList calculated?
@@ -5744,7 +5814,7 @@ begin
   result := AModel;
   if (result < Low(TTripModel)) or
      (result > Pred(High(TTripModel))) then
-    result := GetTripModel;
+    result := GetTripModelFromUDB;
 end;
 
 function TTripList.InitAllLinks: TBaseItem;
@@ -5792,7 +5862,7 @@ begin
   Add(TmOptimized.Create);
   Add(TmTotalTripTime.Create);
   Add(TmImported.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTotalTripDistance.Create);
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
@@ -5851,7 +5921,7 @@ begin
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmPartOfSplitRoute.Create);
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmShowLastStopAsShapingPoint.Create);
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
@@ -5905,7 +5975,7 @@ begin
     Add(TmIsRoundTrip.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmSerializedRoutePrefRoundTripLength.Create);
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
@@ -5964,7 +6034,7 @@ begin
     Add(TmImported.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmIsRoundTrip.Create);
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
@@ -5993,7 +6063,7 @@ begin
   SetHeader(THeader.Create);
 
   Add(TmTotalTripDistance.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmAllRoutes.Create);
   Add(TmTripDate.Create);
   Add(TmParentTripId.Create(0));
@@ -6025,7 +6095,7 @@ begin
   Add(TmIsRoundTrip.Create);
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5));
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6047,7 +6117,7 @@ begin
   Add(TmImported.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmAvoidancesChanged.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode)));
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
@@ -6108,7 +6178,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode), 5, dt3x0RoutePref));
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel), dtDWordRoutePref));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6132,14 +6202,31 @@ begin
   ForceRecalc(TTripModel.Nuvi2595, 2);
 end;
 
-procedure TTripList.CreateTemplate(const AModel: TTripModel;
-                                   const TripName: string;
+procedure TTripList.CreateTemplate_nuvi57(const TripName, CalculationMode, TransportMode: string);
+begin
+  SetHeader(THeader.Create);
+  Add(TmAllRoutes.Create);
+  Add(TmAvoidancesChanged.Create);
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmLocations.Create);
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+  Add(TmTripName.Create(TripName));
+  Add(TmVersionNumber.Create(TripFileVersion));
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Nuvi57, 2);
+end;
+
+procedure TTripList.CreateTemplate(const TripName: string;
                                    const CalculationMode: string = '';
                                    const TransportMode: string = '');
 begin
   Clear;
-
-  case AModel of
+  case TripModel of
+    TTripModel.XT:
+      CreateTemplate_XT(TripName, CalculationMode, TransportMode);
     TTripModel.XT2:
       CreateTemplate_XT2(TripName, CalculationMode, TransportMode);
     TTripModel.XT3:
@@ -6158,8 +6245,10 @@ begin
       CreateTemplate_Zumo3x0(TripName, CalculationMode, TransportMode);
     TTripModel.Nuvi2595:
       CreateTemplate_nuvi2595(TripName, CalculationMode, TransportMode);
+    TTripModel.Nuvi57:
+      CreateTemplate_nuvi57(TripName, CalculationMode, TransportMode);
     else
-      CreateTemplate_XT(TripName, CalculationMode, TransportMode);
+      raise exception.Create('Create template. Model not supported');
   end;
 end;
 

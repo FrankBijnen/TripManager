@@ -180,7 +180,9 @@ end;
 procedure TDmRoutePoints.CdsRoutePointsAfterInsert(DataSet: TDataSet);
 begin
   CdsRoutePointsId.AsInteger := IdToInsert;
-  CdsRoutePointsRoutePref.AsInteger := Ord(TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString)) shl 8;
+  CdsRoutePointsRoutePref.AsInteger := Ord(TmRoutePreference.RoutePreference(
+                                            CdsRouteRoutePreference.AsString,
+                                            TTripList(FTripList).TripModel)) shl 8;
   if (DataSet.ControlsDisabled) then
     exit;
 
@@ -429,7 +431,9 @@ begin
         TTripModel.Nuvi2595:
         begin
           Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
-          Links.DefRoutePref := TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString);
+          Links.DefRoutePref := TmRoutePreference.RoutePreference(
+                                  CdsRouteRoutePreference.AsString,
+                                  TTripList(FTripList).TripModel);
           Links.DefTransportMode := TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString);
         end
         else
@@ -437,7 +441,6 @@ begin
           ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
           if (ANItem <> nil) then
             TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
-
           ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
           if (ANItem <> nil) then
             TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
@@ -539,12 +542,15 @@ begin
       else
       begin
         ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
-        if (ANItem = nil) then
+        if (ANItem = nil) then  // DriveSmart 66
         begin
-          ANItem := TTripList(FTripList).GetItem(TmRoutePreferences.GetKey);
+          ANItem := TTripList(FTripList).GetItem('mRoutePreferences');
           if (ANItem <> nil) then
           begin
-            IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePreferenceMap);
+            if (RoutePrefDWordSize[TTripList(FTripList).TripModel]) then
+              IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePrefDWordMap)
+            else
+              IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePreferenceMap);
             CdsRouteRoutePreference.AsString := CalculationMode;
           end;
         end

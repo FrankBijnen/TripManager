@@ -78,6 +78,9 @@ const
   Nuvi2595_Name                     = 'n' + #0252 + 'vi 2595';
   Nuvi2595_PartNumber               = '006-B1371-00';
 
+  Nuvi57_Name                       = 'n' + #0252 + 'vi 57';
+  Nuvi57_PartNumber                 = '006-B2087-00';
+
   // Unknown
   Unknown_Name                      = 'Unknown';
 
@@ -165,6 +168,7 @@ const
     (DeviceName: Drive51_Name;    PartNumber: Drive51_PartNumber;   TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
     (DeviceName: Drive66_Name;    PartNumber: Drive66_PartNumber;   TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
     (DeviceName: Nuvi2595_Name;   PartNumber: Nuvi2595_PartNumber;  TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
+    (DeviceName: Nuvi57_Name;     PartNumber: Nuvi57_PartNumber;    TripModel: TTripModel.Nuvi57;   Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
     (DeviceName: Edge_Name;                                         TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
     (DeviceName: ForeRunner_Name;                                   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Fit, GPX'),
     (DeviceName: Garmin_Name;                                       TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'GPX,POI'),
@@ -326,7 +330,8 @@ begin
       end;
     TGarminModel.Zumo590,
     TGarminModel.Zumo595,
-    TGarminModel.Drive51:
+    TGarminModel.Drive51,
+    TGarminModel.Nuvi57:
       case PathId of
         0: result := GarminDevice.TripsPath;
       end;

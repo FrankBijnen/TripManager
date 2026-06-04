@@ -1228,9 +1228,9 @@ begin
 // Create new empty triplist?
   TripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
   if not Assigned(ATripList) then
-    ATripList := TTripList.Create(TripVersion[TripModel]);
+    ATripList := TTripList.Create(TripModel);
   if (NewFile) then
-    ATripList.CreateTemplate(TripModel, FrmNewTrip.EdNewTrip.Text);
+    ATripList.CreateTemplate(FrmNewTrip.EdNewTrip.Text);
 
 // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
@@ -3286,7 +3286,7 @@ begin
     begin
       ASubMenuItem := TMenuItem.Create(MnuSetRoutePref);
       ASubMenuItem.Caption  := ALine;
-      ASubMenuItem.Tag      := Ord(TmRoutePreference.RoutePreference(ALine));
+      ASubMenuItem.Tag      := Ord(TmRoutePreference.RoutePreference(ALine, ATripModel));
       ASubMenuItem.OnClick  := RoutePreferenceClick;
       MnuSetRoutePref.Add(ASubMenuItem);
     end;
@@ -3554,6 +3554,7 @@ var
   var
     ANitem: TBaseItem;
     LocationName, GpsCoords, RoutePreference, AdventurousLevel: string;
+    KnownRoutePref: boolean;
   begin
     LocationName := ALocation.LocationTmName.AsString;
     GpsCoords := ALocation.LocationTmScPosn.MapCoords;
@@ -3583,10 +3584,15 @@ var
                                  TGridSelItem.Create(ALocation,
                                                      SizeOf(LocationValue.Count),
                                                      OffsetInRecord(LocationValue, LocationValue.Count) ));
-      if (IntToIdent(Ord(ALocation.RoutePref), RoutePreference, RoutePreferenceMap)) then
+
+      if (RoutePrefDWordSize[ATripList.TripModel]) then
+        KnownRoutePref := IntToIdent(Ord(ALocation.RoutePref), RoutePreference, RoutePrefDWordMap)
+      else
+        KnownRoutePref := IntToIdent(Ord(ALocation.RoutePref), RoutePreference, RoutePreferenceMap);
+      if (KnownRoutePref) then
       begin
         AdventurousLevel := '';
-        if (ALocation.RoutePref = TRoutePreference.rmCurvyRoads) then
+        if (ALocation.RoutePref = TRoutePreference.rmAdventurous) then
            IntToIdent(Ord(ALocation.AdvLevel), AdventurousLevel, AdvLevelMap);
 
         VlTripInfo.Strings.AddPair('RoutePref', Format('%s %s', [RoutePreference, AdventurousLevel]),
@@ -5643,64 +5649,6 @@ begin
   PostMessage(Self.Handle, WM_DIRCHANGED, 0, 0);
 end;
 
-procedure TFrmTripManager.WaitForAllInsertedDevices(const TmpInserted: TStringList;
-                                                    const CurDevice: TBase_Device);
-const
-  MaxTries = 5;
-var
-  Retries: integer;
-  AllDevicesReady: boolean;
-  InsertedDevice: string;
-begin
-  Retries := MaxTries;
-  AllDevicesReady := false;
-  while (Retries > 0) and
-        not AllDevicesReady do
-  begin
-    Dec(Retries);
-    AllDevicesReady := true;
-    GetDeviceList(CurDevice);
-
-    for InsertedDevice in TmpInserted do
-    begin
-      if (TBase_Device.DeviceIdInList(InsertedDevice, DeviceList) = -1) then
-      begin
-        AllDevicesReady := false;
-        Sleep(250);
-        break;
-      end;
-    end;
-  end;
-end;
-
-procedure TFrmTripManager.ProcessInsertedDevices;
-var
-  CurDevice, SelDevice: TBase_Device;
-begin
-  // Save currently selected device
-  CurDevice := TBase_Device.Clone(CurrentDevice);
-  try
-    // Edge in VirtualBox
-    WaitForAllInsertedDevices(InsertedDevices, CurDevice);
-
-    SelDevice := TModelConv.GetPreferredDevice(InsertedDevices, DeviceList);
-    InsertedDevices.Clear;
-
-     if (SelDevice = nil) then
-      exit;
-
-    if (CurDevice.Device = '') or
-       ((CurDevice.Serial = SelDevice.Serial) and (SelDevice.PartitionPrio > CurDevice.PartitionPrio)) then
-    begin
-      ConnectedDeviceChanged(SelDevice.DisplayedDevice, 'Connected');
-      CmbDevices.ItemIndex := SelDevice.ID;
-      CmbDevicesChange(CmbDevices);
-    end;
-  finally
-    CurDevice.Free;
-  end;
-end;
-
 procedure TFrmTripManager.ProcessTrackLogs(var Msg: TMessage);
 var
   GPXFile: TGPXFile;
@@ -5769,6 +5717,64 @@ begin
     PostMessage(Handle, WM_PROCESSTRACKS, 0, 0);
   finally
     SetCursor(CRNormal);
+  end;
+end;
+
+procedure TFrmTripManager.WaitForAllInsertedDevices(const TmpInserted: TStringList;
+                                                    const CurDevice: TBase_Device);
+const
+  MaxTries = 5;
+var
+  Retries: integer;
+  AllDevicesReady: boolean;
+  InsertedDevice: string;
+begin
+  Retries := MaxTries;
+  AllDevicesReady := false;
+  while (Retries > 0) and
+        not AllDevicesReady do
+  begin
+    Dec(Retries);
+    AllDevicesReady := true;
+    GetDeviceList(CurDevice);
+
+    for InsertedDevice in TmpInserted do
+    begin
+      if (TBase_Device.DeviceIdInList(InsertedDevice, DeviceList) = -1) then
+      begin
+        AllDevicesReady := false;
+        Sleep(250);
+        break;
+      end;
+    end;
+  end;
+end;
+
+procedure TFrmTripManager.ProcessInsertedDevices;
+var
+  CurDevice, SelDevice: TBase_Device;
+begin
+  // Save currently selected device
+  CurDevice := TBase_Device.Clone(CurrentDevice);
+  try
+    // Edge in VirtualBox
+    WaitForAllInsertedDevices(InsertedDevices, CurDevice);
+
+    SelDevice := TModelConv.GetPreferredDevice(InsertedDevices, DeviceList);
+    InsertedDevices.Clear;
+
+     if (SelDevice = nil) then
+      exit;
+
+    if (CurDevice.Device = '') or
+       ((CurDevice.Serial = SelDevice.Serial) and (SelDevice.PartitionPrio > CurDevice.PartitionPrio)) then
+    begin
+      ConnectedDeviceChanged(SelDevice.DisplayedDevice, 'Connected');
+      CmbDevices.ItemIndex := SelDevice.ID;
+      CmbDevicesChange(CmbDevices);
+    end;
+  finally
+    CurDevice.Free;
   end;
 end;
 

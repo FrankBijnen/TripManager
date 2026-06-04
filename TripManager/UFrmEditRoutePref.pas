@@ -67,7 +67,7 @@ begin
       if (LookUp > -1) then
       begin
         Location.RoutePref := TRoutePreference(Hi(Word(PickList.Objects[LookUp])));
-        if (Location.RoutePref = TRoutePreference.rmCurvyRoads) then
+        if (Location.RoutePref = TRoutePreference.rmAdventurous) then
           Location.AdvLevel := TAdvlevel(Lo(Word(PickList.Objects[LookUp])))
         else
           Location.AdvLevel := TAdvlevel.advNA;
@@ -113,7 +113,6 @@ var
 begin
   RoutePointList := TList<TLocation>.Create;
   VlRoutePrefs.Strings.BeginUpdate;
-
   try
     VlRoutePrefs.Strings.Clear;
     Locations := TTripList(CurTripList).GetItem(TmLocations.GetKey) as TmLocations;
@@ -125,7 +124,7 @@ begin
       begin
         FormatString := '%s%s';
         AdventurousLevel := '';
-        if (Location.RoutePref = TRoutePreference.rmCurvyRoads) then
+        if (Location.RoutePref = TRoutePreference.rmAdventurous) then
         begin
           if IntToIdent(Ord(Location.AdvLevel), AdventurousLevel, AdvLevelMap) then
             FormatString := '%s %s';
