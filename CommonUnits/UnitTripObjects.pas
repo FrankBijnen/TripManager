@@ -2226,7 +2226,6 @@ end;
 
 function TmRoutePreference.GetValue: string;
 begin
-//TODO
   if (TripList = nil) then
     raise exception.Create('TmRoutePreference.GetValue called, but no Triplist');
   result := RoutePref2Desc(TroutePreference(FValue), TripList.TripModel);
@@ -2580,7 +2579,6 @@ function TmRoutePreferences.GetIntToIdent(const Value: word): string;
 var
   ARoutePref: TRoutePrefRec;
 begin
-//TODO
   for ARoutePref in RoutePrefRecs do
   begin
     if (ARoutePref.DwSize = false) and
@@ -6216,8 +6214,6 @@ begin
   if (Assigned(ANItem)) then
     TransportMode := TmTransportationMode(ANItem).AsString;
 
-//TODO
-//  IntToIdent(Ord(TRoutePreference.rmFasterTime), CalculationMode, RoutePreferenceMap);
   CalculationMode := RoutePrefRecs[cmFasterTime].Desc;
   ANItem := GetItem(TmRoutePreference.GetKey);
   if (Assigned(ANItem)) then
@@ -6285,7 +6281,6 @@ begin
       begin
         if (Arrival <> '') then
           RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
-//TODO Preferences per segment
         RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
       end;
     end;

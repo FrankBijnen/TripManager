@@ -26,7 +26,7 @@ type
   // ttTripTrackLocPrefs  = Trip from a track with locations and routepreferences
   TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
 
-  // Values is Trip files
+  // Values in Trip files
   TRoutePreference  = (rmFasterTime           = $00,
                        rmDWordFasterTime      = $00,
                        rmShorterDistance      = $01,
@@ -190,15 +190,15 @@ const
         (Sel: true;  DwSize: false;         Rm: rmFasterTime;           Desc: 'FasterTime'),
         (Sel: true;  DwSize: false;         Rm: rmShorterDistance;      Desc: 'ShorterDistance'),
         (Sel: true;  DwSize: false;         Rm: rmStraight;             Desc: 'Straight'),
-        (Sel: true;  DwSize: false;         Rm: rmAdventurous;          Desc: 'Adventurous'),
+        (Sel: false; DwSize: false;         Rm: rmAdventurous;          Desc: 'Adventurous'),
 
         (Sel: false; DwSize: false;         Rm: rmOffRoad;              Desc: 'OffRoad'),
         (Sel: false; DwSize: false;         Rm: rmDirect;               Desc: 'Direct'),
         (Sel: false; DwSize: false;         Rm: rmCurvyRoads;           Desc: 'CurvyRoads'),
         (Sel: false; DwSize: false;         Rm: rmEco;                  Desc: 'Eco'),
 
-        (Sel: true;  DwSize: true;          Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
-        (Sel: true;  DwSize: true;          Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
+        (Sel: false; DwSize: true;          Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
+        (Sel: false; DwSize: true;          Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
         (Sel: false; DwSize: true;          Rm: rmDWordOffRoad;         Desc: 'OffRoad'),
         (Sel: false; DwSize: true;          Rm: rmDWordEco;             Desc: 'Eco'),
 
@@ -209,7 +209,6 @@ const
         (Sel: false; DwSize: false;         Rm: rmPopular;              Desc: 'Popular'),
         (Sel: false; DwSize: false;         Rm: rmNA;                   Desc: NotApplicable)
       );
-
 
   UdbDirNameSize: array[TTripModel] of integer = (
       121 * 4,              // XT
@@ -459,10 +458,7 @@ end;
 function TTripVersion.HandleTrailer: boolean;
 begin
   result := false;
-  if (Major = 1) and
-//TODO Zumo 346
-//     (Minor < 4) then
-     (Minor <= 6) then
+  if (Major <= 1) then // Haven't see trailers for all Major=1 devices. But shouldn't hurt.
     result := true;
 end;
 

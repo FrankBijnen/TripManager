@@ -541,12 +541,11 @@ begin
       end
       else
       begin
-//TODO
         ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
         if (ANItem <> nil) then
           CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString
         else
-          CdsRouteRoutePreference.AsString := RoutePrefRecs[TCalcMode.cmFasterTime].Desc;   // DriveSmart 66
+          CdsRouteRoutePreference.AsString := RoutePrefRecs[TCalcMode.cmFasterTime].Desc; // E.G. DriveSmart 66
 
         ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
         if (ANItem <> nil) then

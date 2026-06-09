@@ -3584,7 +3584,7 @@ var
                                  TGridSelItem.Create(ALocation,
                                                      SizeOf(LocationValue.Count),
                                                      OffsetInRecord(LocationValue, LocationValue.Count) ));
-//TODO
+
       RoutePreference := RoutePref2Desc(ALocation.RoutePref, ATripList.TripModel);
       AdventurousLevel := '';
       if (ALocation.RoutePref = TRoutePreference.rmAdventurous) then

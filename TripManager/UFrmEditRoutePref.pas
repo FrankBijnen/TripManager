@@ -86,20 +86,20 @@ var
   ARoutePref, ARoutePrefAdv: TRoutePrefRec;
   W: word;
 begin
-  ARoutePrefAdv := Default(TRoutePrefRec);
   PickList := TStringList.Create;
-//TODO
+
+  // Basic CalcModes Faster, Short, Straight
   for ARoutePref in RoutePrefRecs do
   begin
     if (ARoutePref.Sel = false) then
       continue;
 
     W := (Ord(ARoutePref.Rm) shl 8) + Ord(TAdvlevel.advNA);
-    if (ARoutePref.Rm = TRoutePreference.rmAdventurous) then
-      ARoutePrefAdv := ARoutePref;
     PickList.AddObject(ARoutePref.Desc, TObject(W));
   end;
 
+  // Adventurous
+  ARoutePrefAdv := RoutePrefRecs[cmAdventurous];
   for Index := MinAdvLevelUserConfig to High(AdvLevelMap) do
   begin
     W := (Ord(ARoutePrefAdv.Rm) shl 8)  + AdvLevelMap[Index].Value;
@@ -129,7 +129,6 @@ begin
     begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
-//TODO
       RoutePreference := RoutePref2Desc(Location.RoutePref, TTripList(CurTripList).TripModel);
       FormatString := '%s';
       AdventurousLevel := '';
