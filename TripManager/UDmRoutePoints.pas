@@ -503,7 +503,7 @@ var
   Links: TmAllLinks;
   Link: TBaseItem;
   Location, ANItem: TBaseItem;
-  LatLon, CalculationMode: string;
+  LatLon: string;
 begin
   FTripList := ATripList;
 
@@ -541,21 +541,12 @@ begin
       end
       else
       begin
+//TODO
         ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
-        if (ANItem = nil) then  // DriveSmart 66
-        begin
-          ANItem := TTripList(FTripList).GetItem('mRoutePreferences');
-          if (ANItem <> nil) then
-          begin
-            if (RoutePrefDWordSize[TTripList(FTripList).TripModel]) then
-              IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePrefDWordMap)
-            else
-              IntToIdent(Ord(TmRoutePreferences(ANItem).GetRoutePref(1)), CalculationMode, RoutePreferenceMap);
-            CdsRouteRoutePreference.AsString := CalculationMode;
-          end;
-        end
+        if (ANItem <> nil) then
+          CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString
         else
-          CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
+          CdsRouteRoutePreference.AsString := RoutePrefRecs[TCalcMode.cmFasterTime].Desc;   // DriveSmart 66
 
         ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
         if (ANItem <> nil) then

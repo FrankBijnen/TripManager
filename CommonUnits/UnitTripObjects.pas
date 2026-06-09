@@ -8,90 +8,9 @@ uses
   Winapi.Windows,
   UnitTripOverview, UnitTripDefs, UnitGpxDefs;
 
-const
-
-{ Elementary data types }
-  dtByte          = 1;
-  dtCardinal      = 3;
-  dtSingle        = 4;
-  dtBoolean       = 7;
-  dtVersion       = 8;
-  dtPosn          = 8;
-  dtDWordRoutePref= 8;
-  dtLctnPref      = 10;
-  dtLinkPref      = 10;
-  dtUdbPref       = 10;
-  dtUdbHandle     = 11;
-  dtRaw           = 12;
-  dtString        = 14;
-  dtList          = 128;
-
-  // Override length for Word size route prefs.
-  LenDtDWordRoutePref  = 5;
-
-  biInitiator: AnsiChar = #$09;
-
-  BooleanMap : array[0..1] of TIdentMapEntry =          ( (Value: Ord(False);               Name: 'False'),
-                                                          (Value: Ord(True);                Name: 'True')
-                                                        );
-  DefRoutePref: word = $0100;
-  DefRoutePrefAdv: word = $0101;
-  DefRoutePrefHillsAndCurves: word = $0164;
-  MinRoutePreferenceUserConfig = 0; // Only these are available to the user.
-  MaxRoutePreferenceUserConfig = 3;
-  RoutePreferenceAdventurous = 3;
-
-  RoutePreferenceMap : array[0..12] of TIdentMapEntry = ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),        // $00
-                                                          (Value: Ord(rmOffRoad);           Name: 'OffRoad'),           // $04
-                                                          (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),   // $01
-                                                          (Value: Ord(rmAdventurous);       Name: 'Adventurous'),       // $07 595, xt1-3
-                                                          (Value: Ord(rmDirect);            Name: 'Direct'),            // $04
-                                                          (Value: Ord(rmEco);               Name: 'Eco'),               // $02 nuvi 57
-                                                          (Value: Ord(rmCurvy);             Name: 'CurvyRoads'),        // $05 590
-                                                          (Value: Ord(rmTripTrack);         Name: 'TripTrack'),         // $09
-                                                          (Value: Ord(rmHills);             Name: 'Hills'),             // $1a
-                                                          (Value: Ord(rmPopular);           Name: 'Popular'),           // $ef
-                                                          (Value: Ord(rmNoShape);           Name: 'No Shape'),          // $58 ????
-                                                          (Value: Ord(rmScenic);            Name: 'Scenic'),            // $be
-                                                          (Value: Ord(rmNA);                Name: NotApplicable)
-                                                        );
-
-  // Mapping for models that store the value as 2 bytes. Zumo3x0, nuvi2595
-  RoutePrefDWordMap : array[0..4] of TIdentMapEntry =   ( (Value: Ord(rmFasterTime);        Name: 'FasterTime'),        // $0100
-                                                          (Value: Ord(rmShorterDistance);   Name: 'ShorterDistance'),   // $0101
-                                                          (Value: Ord(rmDWordOffRoad);      Name: 'OffRoad'),           // $0102
-                                                          (Value: Ord(rmDWordEco);          Name: 'Eco'),               // $0103 nuvi 2595
-                                                          (Value: Ord(rmDWordDirect);       Name: 'Direct')             // $0102
-                                                        );
-
-
-  MinAdvLevelUserConfig = 1; // Only these are available to the user.
-  MaxAdvLevelUserConfig = 4;
-  AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: NotApplicable),
-                                                          (Value: Ord(advLevel1);           Name: 'Faster'),
-                                                          (Value: Ord(advLevel2);           Name: 'FastAndAdventurous'),
-                                                          (Value: Ord(advLevel3);           Name: 'Adventurous'),
-                                                          (Value: Ord(advLevel4);           Name: 'ExtraAdventurous')
-                                                        );
-
-  TransportModeMap : array[0..4] of TIdentMapEntry =    ( (Value: Ord(tmDriving);           Name: 'Driving'),
-                                                          (Value: Ord(tmAutoMotive);        Name: 'Automotive'),
-                                                          (Value: Ord(tmPedestrian);        Name: 'Pedestrian'),
-                                                          (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
-                                                          (Value: Ord(tmOffRoad);           Name: 'OffRoad')
-                                                        );
-
-  RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
-                                                          (Value: Ord(rpShaping);           Name: 'Shaping point'),
-                                                          (Value: Ord(rpExtShaping);        Name: 'Extended Shaping point')
-                                                        );
 type
 
   TTripList = class;
-  TOSMRoutePoint = record
-    Name: string;
-    MapCoords: string;
-  end;
 
   TBaseItem = class(TPersistent)
   private
@@ -1043,6 +962,8 @@ type
                               const Location2Add: TLocation2Add);
     procedure AddLocation_Tread2(const Locations: TmLocations;
                                  const Location2Add: TLocation2Add);
+    procedure AddLocation_Zumo346(const Locations: TmLocations;
+                                  const Location2Add: TLocation2Add);
     procedure AddLocation_Zumo595(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
     procedure AddLocation_Zumo590(const Locations: TmLocations;
@@ -1061,6 +982,7 @@ type
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT3(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo346(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
@@ -1139,6 +1061,8 @@ const
   TripFileName                        = '0:/.System/Trips/%s.trip';
   UdbDirTurn                          = 'Turn';
   UdbDirMagic: Cardinal               = $51590469;
+  // Override length for Word size route prefs.
+  LenDtDWordRoutePref                 = 5;
 
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
@@ -2275,30 +2199,8 @@ begin
 end;
 
 class function TmRoutePreference.RoutePreference(AValue: string; AModel: TTripmodel): TRoutePreference;
-var
-  RoutePreference: integer;
-  KnownRoutePref: boolean;
 begin
-  result := TRoutePreference.rmFasterTime;
-
-  if (RoutePrefDWordSize[AModel]) then
-    KnownRoutePref := IdentToInt(AValue, RoutePreference, RoutePrefDWordMap)
-  else
-    KnownRoutePref := IdentToInt(AValue, RoutePreference, RoutePreferenceMap);
-
-  if KnownRoutePref then
-  begin
-    result := TRoutePreference(RoutePreference);
-    // For XT etc. map Curvy to Adventurous, for Automotive to Eco
-    if (result = TRoutePreference.rmCurvy) and
-       not (TRoutePreference.rmCurvy in RoutePrefsSuppported[AModel]) then
-    begin
-      if (TRoutePreference.rmAdventurous in RoutePrefsSuppported[AModel]) then
-        result := TRoutePreference.rmAdventurous
-      else if (TRoutePreference.rmEco in RoutePrefsSuppported[AModel]) then
-        result := TRoutePreference.rmEco;
-    end;
-  end;
+  result := Desc2RoutePref(AValue, AModel);
 end;
 
 class function TmRoutePreference.AdvLevel(AValue: string): TAdvlevel;
@@ -2323,15 +2225,11 @@ begin
 end;
 
 function TmRoutePreference.GetValue: string;
-var
-  KnownRoutePref: boolean;
 begin
-  if (Length(FBytes) = 0) then
-    KnownRoutePref := IntToIdent(FValue, result, RoutePreferenceMap)
-  else
-    KnownRoutePref := IntToIdent(FValue, result, RoutePrefDWordMap);
-  if not (KnownRoutePref) then
-    result := NotApplicable;
+//TODO
+  if (TripList = nil) then
+    raise exception.Create('TmRoutePreference.GetValue called, but no Triplist');
+  result := RoutePref2Desc(TroutePreference(FValue), TripList.TripModel);
 end;
 
 procedure TmRoutePreference.SetByte(AByte: byte);
@@ -2373,20 +2271,11 @@ end;
 
 class function TmRoutePreference.ModelPickList(AModel: TTripmodel): string;
 var
-  ARoutePref: TRoutePreference;
-  ADesc: string;
-  KnownRoutePref: boolean;
+  ACalcMode: TCalcMode;
 begin
   result := '';
-  for ARoutePref in RoutePrefsSuppported[AModel] do
-  begin
-    if (RoutePrefDWordSize[AModel]) then
-      KnownRoutePref := IntToIdent(Ord(ARoutePref), ADesc, RoutePrefDWordMap)
-    else
-      KnownRoutePref := IntToIdent(Ord(ARoutePref), ADesc, RoutePreferenceMap);
-    if (KnownRoutePref) then
-      result := result + ADesc + #10;
-  end;
+  for ACalcMode in CalcModesSuppported[AModel] do
+    result := result + RoutePrefRecs[ACalcMode].Desc + #10;
 end;
 
 function TmRoutePreference.GetPickList: string;
@@ -2688,11 +2577,17 @@ begin
 end;
 
 function TmRoutePreferences.GetIntToIdent(const Value: word): string;
+var
+  ARoutePref: TRoutePrefRec;
 begin
-  if (IntToIdent(Value and $ff, result, RoutePreferenceMap)) then
-    result := result + Format(' (0x%s)', [IntTohex(Value, 4)])
-  else
-    result := inherited GetIntToIdent(Value);
+//TODO
+  for ARoutePref in RoutePrefRecs do
+  begin
+    if (ARoutePref.DwSize = false) and
+       (Ord(ARoutePref.Rm) = (Value and $ff)) then
+    exit(ARoutePref.Desc + Format(' (0x%s)', [IntTohex(Value, 4)]));
+  end;
+  result := inherited GetIntToIdent(Value);
 end;
 
 function TmRoutePreferences.GetItemEditMode: TItemEditMode;
@@ -3970,15 +3865,25 @@ end;
 function TmUdbDataHndl.GetModel: TTripModel;
 var
   AModel: TTripModel;
+  FirstUdbDirNameSize: integer;
 begin
   result := TTripModel.Unknown;
 
-  // Does the Calculation Magic match, and is the size of Unknown3 a known size of a model?
+  FirstUdbDirNameSize := 0;
+  if (Items.Count > 0) then
+    FirstUdbDirNameSize := Length(Items[0].FUdbDirName);
+
+  // Does the Calculation Magic match?
+  // Is the size of Unknown3 a known size of a model?
+  // Is the size of UdbDirNameSize a known size of a model?
   for AModel := Low(TTripModel) to High(TTripModel) do
   begin
-    if (CalculationMagic[AModel] <> CalcUndef) and
+    if (CalculationMagic[AModel] <> CalcUndef) and // Dont check zeroes
        (FValue.CalcStatus <> CalcUndef) and
        (FValue.CalcStatus <> CalculationMagic[AModel]) then
+      continue;
+
+    if (FirstUdbDirNameSize <> UdbDirNameSize[AModel]) then
       continue;
 
     if (Length(FValue.Unknown3) = Unknown3Size[AModel]) then
@@ -5097,6 +5002,22 @@ begin
   end;
 end;
 
+procedure TTripList.AddLocation_Zumo346(const Locations: TmLocations;
+                                        const Location2Add: TLocation2Add);
+begin
+  Locations.AddLocation(TLocation.Create);
+
+  Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
+  Locations.Add(TmIsDFSPoint.Create);
+  Locations.Add(TmDuration.Create);
+  Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo346]));
+  Locations.Add(TmAddress.Create(Location2Add.Address));
+  Locations.Add(TmIsTravelapseDestination.Create);
+  Locations.Add(TmShapingRadius.Create);
+  Locations.Add(TmName.Create(Location2Add.Name));
+end;
+
 procedure TTripList.AddLocation_Zumo595(const Locations: TmLocations;
                                         const Location2Add: TLocation2Add);
 begin
@@ -5205,6 +5126,8 @@ begin
       AddLocation_XT3(Locations, Location2Add);
     TTripModel.Tread2:
       AddLocation_Tread2(Locations, Location2Add);
+    TTripModel.Zumo346:
+      AddLocation_Zumo346(Locations, Location2Add);
     TTripModel.Zumo595:
       AddLocation_Zumo595(Locations, Location2Add);
     TTripModel.Zumo590:
@@ -6057,6 +5980,33 @@ begin
   end;
 end;
 
+procedure TTripList.CreateTemplate_Zumo346(const TripName, CalculationMode, TransportMode: string);
+begin
+  SetHeader(THeader.Create);
+
+  Add(TmOptimized.Create);
+  Add(TmImported.Create);
+  Add(TmParentTripId.Create(0));
+  Add(TmTripName.Create(TripName));
+  Add(TmDayNumber.Create);
+  Add(TmTripDate.Create);
+  Add(TmVersionNumber.Create(TripFileVersion));
+  Add(TmIsRoundTrip.Create);
+  Add(TmParentTripName.Create(TripName));
+  Add(TmTotalTripTime.Create);
+  Add(TmAvoidancesChanged.Create);
+  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
+  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmLocations.Create);
+  Add(TmPartOfSplitRoute.Create);
+  Add(TmTotalTripDistance.Create);
+  Add(TmAllRoutes.Create);
+
+  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
+  ForceRecalc(TTripModel.Zumo346, 2);
+end;
+
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
 procedure TTripList.CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
 begin
@@ -6235,6 +6185,8 @@ begin
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo595:
       CreateTemplate_Zumo595(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo346:
+      CreateTemplate_Zumo346(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo590:
       CreateTemplate_Zumo590(TripName, CalculationMode, TransportMode);
     TTripModel.Drive51:
@@ -6264,7 +6216,9 @@ begin
   if (Assigned(ANItem)) then
     TransportMode := TmTransportationMode(ANItem).AsString;
 
-  IntToIdent(Ord(TRoutePreference.rmFasterTime), CalculationMode, RoutePreferenceMap);
+//TODO
+//  IntToIdent(Ord(TRoutePreference.rmFasterTime), CalculationMode, RoutePreferenceMap);
+  CalculationMode := RoutePrefRecs[cmFasterTime].Desc;
   ANItem := GetItem(TmRoutePreference.GetKey);
   if (Assigned(ANItem)) then
     CalculationMode := TmRoutePreference(ANItem).AsString;
@@ -6331,6 +6285,7 @@ begin
       begin
         if (Arrival <> '') then
           RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
+//TODO Preferences per segment
         RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
       end;
     end;

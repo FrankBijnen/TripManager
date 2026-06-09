@@ -83,18 +83,27 @@ end;
 procedure TFrmEditRoutePref.FormCreate(Sender: TObject);
 var
   Index: integer;
+  ARoutePref, ARoutePrefAdv: TRoutePrefRec;
   W: word;
 begin
+  ARoutePrefAdv := Default(TRoutePrefRec);
   PickList := TStringList.Create;
-  for Index := MinRoutePreferenceUserConfig to RoutePreferenceAdventurous -1 do
+//TODO
+  for ARoutePref in RoutePrefRecs do
   begin
-    W := (RoutePreferenceMap[Index].Value shl 8) + Ord(TAdvlevel.advNA);
-    PickList.AddObject(RoutePreferenceMap[Index].Name, TObject(W));
+    if (ARoutePref.Sel = false) then
+      continue;
+
+    W := (Ord(ARoutePref.Rm) shl 8) + Ord(TAdvlevel.advNA);
+    if (ARoutePref.Rm = TRoutePreference.rmAdventurous) then
+      ARoutePrefAdv := ARoutePref;
+    PickList.AddObject(ARoutePref.Desc, TObject(W));
   end;
-  for Index := MinAdvLevelUserConfig to MaxAdvLevelUserConfig do
+
+  for Index := MinAdvLevelUserConfig to High(AdvLevelMap) do
   begin
-    W := (RoutePreferenceMap[RoutePreferenceAdventurous].Value shl 8) + AdvLevelMap[Index].Value;
-    PickList.AddObject(RoutePreferenceMap[RoutePreferenceAdventurous].Name + ' ' + AdvLevelMap[Index].Name, TObject(W));
+    W := (Ord(ARoutePrefAdv.Rm) shl 8)  + AdvLevelMap[Index].Value;
+    PickList.AddObject(ARoutePrefAdv.Desc + ' ' + AdvLevelMap[Index].Name, TObject(W));
   end;
 end;
 
@@ -120,15 +129,14 @@ begin
     begin
       Locations.GetSegmentPoints(ViaPt, RoutePointList);
       Location := RoutePointList[0];
-      if (IntToIdent(Ord(Location.RoutePref), RoutePreference, RoutePreferenceMap)) then
+//TODO
+      RoutePreference := RoutePref2Desc(Location.RoutePref, TTripList(CurTripList).TripModel);
+      FormatString := '%s';
+      AdventurousLevel := '';
+      if (Location.RoutePref = TRoutePreference.rmAdventurous) then
       begin
-        FormatString := '%s%s';
-        AdventurousLevel := '';
-        if (Location.RoutePref = TRoutePreference.rmAdventurous) then
-        begin
-          if IntToIdent(Ord(Location.AdvLevel), AdventurousLevel, AdvLevelMap) then
-            FormatString := '%s %s';
-        end;
+        IntToIdent(Ord(Location.AdvLevel), AdventurousLevel, AdvLevelMap);
+        FormatString := '%s %s';
       end;
       VlRoutePrefs.Strings.AddPair(Location.LocationTmName.AsString, Format(FormatString, [RoutePreference, AdventurousLevel]));
     end;

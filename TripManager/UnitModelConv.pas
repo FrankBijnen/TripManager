@@ -60,6 +60,9 @@ const
   ForeRunner_Name                   = 'ForeRunner';
 
   // Older models
+  Zumo346_Name                      = Zumo_Name + ' 346';
+  Zumo346_PartNumber                = '006-B3033-00';
+
   Zumo595_Name                      = Zumo_Name + ' 595';
   Zumo595_PartNumber                = '006-B2436-00';
 
@@ -162,6 +165,7 @@ const
     (DeviceName: XT2_Name;        PartNumber: XT2_PartNumber;       TripModel: TTripModel.XT2;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
     (DeviceName: XT3_Name;        PartNumber: XT3_PartNumber;       TripModel: TTripModel.XT3;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
     (DeviceName: Tread2_Name;     PartNumber: Tread2_PartNumber;    TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  Application: 'Trips,GPX,POI'),
+    (DeviceName: Zumo346_Name;    PartNumber: Zumo346_PartNumber;   TripModel: TTripModel.Zumo346;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
     (DeviceName: Zumo595_Name;    PartNumber: Zumo595_PartNumber;   TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
     (DeviceName: Zumo590_Name;    PartNumber: Zumo590_PartNumber;   TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips'),
     (DeviceName: Zumo3x0_Name;    PartNumber: Zumo3x0_PartNumber;   TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; Application: 'Trips,GPX,POI'),
@@ -328,8 +332,9 @@ begin
         1: result := GarminDevice.GPXPath;
         2: result := GarminDevice.GpiPath;
       end;
-    TGarminModel.Zumo590,
+    TGarminModel.Zumo346,
     TGarminModel.Zumo595,
+    TGarminModel.Zumo590,
     TGarminModel.Drive51,
     TGarminModel.Nuvi57:
       case PathId of

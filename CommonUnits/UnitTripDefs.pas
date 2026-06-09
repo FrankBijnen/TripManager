@@ -2,40 +2,71 @@ unit UnitTripDefs;
 
 interface
 
+uses
+  System.Classes;
+
 type
-  TTripModel    = (XT,
-                   XT2,
-                   XT3,
-                   Tread2,
-                   Zumo595,
-                   Zumo590,
-                   Zumo3x0, // Works for models 340, 350 and 390
-                   Drive51,
-                   Drive66,
-                   Nuvi2595,
-                   Nuvi57,
-                   Unknown);
+
+  TTripModel        = (XT,
+                       XT2,
+                       XT3,
+                       Tread2,
+                       Zumo346,
+                       Zumo595,
+                       Zumo590,
+                       Zumo3x0, // Works for models 340, 350 and 390
+                       Drive51,
+                       Drive66,
+                       Nuvi2595,
+                       Nuvi57,
+                       Unknown);
 
   // Not available to the user:
   // ttTripTrackLoc       = Trip from a track with locations
   // ttTripTrackLocPrefs  = Trip from a track with locations and routepreferences
-  TTripOption   = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
-  TRoutePreference  = (rmFasterTime       = $00,
-                       rmShorterDistance  = $01,
-                       rmEco              = $02,
-                       rmDWordOffRoad     = $02,
-                       rmDWordDirect      = $02,
-                       rmDWordEco         = $03,
-                       rmOffRoad          = $04,
-                       rmDirect           = $04,
-                       rmCurvy            = $05,
-                       rmAdventurous      = $07,
-                       rmTripTrack        = $09,
-                       rmHills            = $1a,
-                       rmNoShape          = $58,
-                       rmScenic           = $be,
-                       rmPopular          = $ef,
-                       rmNA               = $ff);
+  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
+
+  // Values is Trip files
+  TRoutePreference  = (rmFasterTime           = $00,
+                       rmDWordFasterTime      = $00,
+                       rmShorterDistance      = $01,
+                       rmDWordShorterDistance = $01,
+                       rmEco                  = $02,
+                       rmDWordOffRoad         = $02,
+                       rmDWordDirect          = $02,
+                       rmDWordEco             = $03,
+                       rmStraight             = $04,
+                       rmOffRoad              = $04,
+                       rmDirect               = $04,
+                       rmCurvyRoads           = $05,
+                       rmAdventurous          = $07,
+                       rmTripTrack            = $09,
+                       rmHills                = $1a,
+                       rmNoShape              = $58,
+                       rmScenic               = $be,
+                       rmPopular              = $ef,
+                       rmNA                   = $ff);
+
+  // Supported by device
+  TCalcMode         = (cmFasterTime,
+                       cmShorterDistance,
+                       cmStraight,
+                       cmAdventurous,
+                       cmOffRoad,
+                       cmDirect,
+                       cmCurvyRoads,
+                       cmEco,
+                       cmDWordFasterTime,
+                       cmDWordShorterDistance,
+                       cmDWordOffRoad,
+                       cmDWordEco,
+                       cmTripTrack,
+                       cmHills,
+                       cmNoShape,
+                       cmScenic,
+                       cmPopular,
+                       cmNA);
+
   TAdvlevel         = (advLevel1          = $00,
                        advLevel2          = $01,
                        advLevel3          = $02,
@@ -52,10 +83,11 @@ type
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
 
-  TUnixDateConv = class
-    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
-    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
-    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
+  TRoutePrefRec = record
+    Sel: boolean;
+    DwSize: boolean;
+    Rm: TRoutePreference;
+    Desc: string;
   end;
 
   TLocation2Add = record
@@ -82,7 +114,67 @@ type
     function CanCheckSystemTrips: boolean;
   end;
 
+  TOSMRoutePoint = record
+    Name: string;
+    MapCoords: string;
+  end;
+
+  TUnixDateConv = class
+    class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
+    class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;
+    class function CardinalAsDateTimeString(ACardinal: Cardinal): string;
+  end;
+
 const
+
+{ Elementary data types }
+  dtByte          = 1;
+  dtCardinal      = 3;
+  dtSingle        = 4;
+  dtBoolean       = 7;
+  dtVersion       = 8;
+  dtPosn          = 8;
+  dtDWordRoutePref= 8;
+  dtLctnPref      = 10;
+  dtLinkPref      = 10;
+  dtUdbPref       = 10;
+  dtUdbHandle     = 11;
+  dtRaw           = 12;
+  dtString        = 14;
+  dtList          = 128;
+
+
+  biInitiator: AnsiChar = #$09;
+
+  BooleanMap : array[0..1] of TIdentMapEntry =          ( (Value: Ord(False);               Name: 'False'),
+                                                          (Value: Ord(True);                Name: 'True')
+                                                        );
+
+  TransportModeMap : array[0..4] of TIdentMapEntry =    ( (Value: Ord(tmDriving);           Name: 'Driving'),
+                                                          (Value: Ord(tmAutoMotive);        Name: 'Automotive'),
+                                                          (Value: Ord(tmPedestrian);        Name: 'Pedestrian'),
+                                                          (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
+                                                          (Value: Ord(tmOffRoad);           Name: 'OffRoad')
+                                                        );
+
+  RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
+                                                          (Value: Ord(rpShaping);           Name: 'Shaping point'),
+                                                          (Value: Ord(rpExtShaping);        Name: 'Extended Shaping point')
+                                                        );
+
+  DefRoutePref: word                = $0100;
+  DefRoutePrefAdv: word             = $0101;
+  DefRoutePrefHillsAndCurves: word  = $0164;
+  NotApplicable                     = 'N/A';
+
+  MinAdvLevelUserConfig = 1; // Only these are available to the user.
+  AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: NotApplicable),
+                                                          (Value: Ord(advLevel1);           Name: 'Faster'),
+                                                          (Value: Ord(advLevel2);           Name: 'FastAndAdventurous'),
+                                                          (Value: Ord(advLevel3);           Name: 'Adventurous'),
+                                                          (Value: Ord(advLevel4);           Name: 'ExtraAdventurous')
+                                                        );
+
   TripExtension           = '.trip';
   TripMask                = '*' + TripExtension;
 
@@ -93,11 +185,38 @@ const
   PosnNorm                = 12;
   PosnLarge               = 16;
 
+  RoutePrefRecs : array[TCalcMode] of TRoutePrefRec
+    = (
+        (Sel: true;  DwSize: false;         Rm: rmFasterTime;           Desc: 'FasterTime'),
+        (Sel: true;  DwSize: false;         Rm: rmShorterDistance;      Desc: 'ShorterDistance'),
+        (Sel: true;  DwSize: false;         Rm: rmStraight;             Desc: 'Straight'),
+        (Sel: true;  DwSize: false;         Rm: rmAdventurous;          Desc: 'Adventurous'),
+
+        (Sel: false; DwSize: false;         Rm: rmOffRoad;              Desc: 'OffRoad'),
+        (Sel: false; DwSize: false;         Rm: rmDirect;               Desc: 'Direct'),
+        (Sel: false; DwSize: false;         Rm: rmCurvyRoads;           Desc: 'CurvyRoads'),
+        (Sel: false; DwSize: false;         Rm: rmEco;                  Desc: 'Eco'),
+
+        (Sel: true;  DwSize: true;          Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
+        (Sel: true;  DwSize: true;          Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
+        (Sel: false; DwSize: true;          Rm: rmDWordOffRoad;         Desc: 'OffRoad'),
+        (Sel: false; DwSize: true;          Rm: rmDWordEco;             Desc: 'Eco'),
+
+        (Sel: false; DwSize: false;         Rm: rmTripTrack;            Desc: 'TripTrack'),
+        (Sel: false; DwSize: false;         Rm: rmHills;                Desc: 'Hills'),
+        (Sel: false; DwSize: false;         Rm: rmNoShape;              Desc: 'NoShape'),
+        (Sel: false; DwSize: false;         Rm: rmScenic;               Desc: 'Scenic'),
+        (Sel: false; DwSize: false;         Rm: rmPopular;              Desc: 'Popular'),
+        (Sel: false; DwSize: false;         Rm: rmNA;                   Desc: NotApplicable)
+      );
+
+
   UdbDirNameSize: array[TTripModel] of integer = (
       121 * 4,              // XT
       121 * 4,              // XT2
       121 * 4,              // XT3
       121 * 4,              // Tread 2
+      122 * 2,              // Zumo 346
        32 * 2,              // Zumo 595
        32 * 2,              // Zumo 590
        66 * 2,              // Zumo 3x0
@@ -113,6 +232,7 @@ const
       1448,                 // XT2
       1452,                 // XT3
       1348,                 // Tread 2
+       294,                 // Zumo 346
        294,                 // Zumo 595
        254,                 // Zumo 590
        130,                 // Zumo 3x0
@@ -128,6 +248,7 @@ const
       $05d8feff,            // XT2
       $05d8feff,            // XT3
       $0574feff,            // Tread 2
+      $0170feff,            // Zumo 346
       $0170feff,            // Zumo 595
       CalcUndef,            // Zumo 590
       CalcUndef,            // Zumo 3x0
@@ -142,6 +263,7 @@ const
       PosnNorm,             // XT2
       PosnLarge,            // XT3
       PosnLarge,            // Tread 2
+      PosnNorm,             // Zumo 346
       PosnNorm,             // Zumo 595
       PosnSmall,            // Zumo 590
       PosnSmall,            // Zumo 3x0
@@ -158,6 +280,7 @@ const
       false,                // XT2
       false,                // XT3
       false,                // Tread 2
+      false,                // Zumo 346
       false,                // Zumo 595
       false,                // Zumo 590
       true,                 // Zumo 3x0
@@ -167,12 +290,28 @@ const
       false,                // Nuvi 57
       false);               // Unknown
 
+  SupportsGrouping: array[TTripModel] of boolean = (
+      true,                 // XT
+      false,                // XT2
+      false,                // XT3
+      false,                // Tread 2
+      true,                 // Zumo 346
+      true,                 // Zumo 595
+      false,                // Zumo 590
+      false,                // Zumo 3x0
+      false,                // Drive 51
+      true,                 // Drive 66
+      false,                // Nuvi 2595
+      false,                // Nuvi 57
+      false);               // Unknown
+
 // The trip version defines many parameters. See record TTripVersion
   TripVersion: array[TTripModel] of TTripVersion = (
       (Major:4; Minor: 7),  // XT
       (Major:4; Minor:16),  // XT2
       (Major:4; Minor:16),  // XT3
       (Major:4; Minor:16),  // Tread 2
+      (Major:1; Minor: 6),  // Zumo 346
       (Major:1; Minor: 6),  // Zumo 595
       (Major:1; Minor: 3),  // Zumo 590
       (Major:1; Minor: 3),  // Zumo 3x0
@@ -189,6 +328,7 @@ const
       false,                // XT2
       false,                // XT3
       false,                // Tread 2
+      false,                // Zumo 346
       false,                // Zumo 595
       false,                // Zumo 590
       true,                 // Zumo 3x0
@@ -198,25 +338,29 @@ const
       false,                // Nuvi 57
       false);               // Unknown
 
-  RoutePrefsSuppported: array[TTripModel] of set of TRoutePreference = (
-    [rmFasterTime, rmShorterDistance, rmOffRoad, rmAdventurous],    // XT
-    [rmFasterTime, rmShorterDistance, rmOffRoad, rmAdventurous],    // XT2
-    [rmFasterTime, rmShorterDistance, rmOffRoad, rmAdventurous],    // XT3
-    [rmFasterTime, rmShorterDistance, rmOffRoad, rmAdventurous],    // Tread 2
-    [rmFasterTime, rmShorterDistance, rmOffRoad, rmAdventurous],    // Zumo 595
-    [rmFasterTime, rmShorterDistance, rmOffRoad, rmCurvy],          // Zumo 590
-    [rmFasterTime, rmDWordOffRoad, rmShorterDistance],              // Zumo 3x0
-    [rmFasterTime, rmShorterDistance, rmOffRoad],                   // Drive 51
-    [rmFasterTime, rmOffRoad],                                      // Drive 66
-    [rmFasterTime, rmShorterDistance, rmDWordEco, rmDWordOffRoad],  // Nuvi 2595
-    [rmFasterTime, rmShorterDistance, rmEco, rmOffRoad],            // Nuvi 57
-    [rmFasterTime]                                                  // Unknown
+  CalcModesSuppported: array[TTripModel] of set of TCalcMode = (
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT2
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT3
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // Tread 2
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 346
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 595
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmCurvyRoads],    // Zumo 590
+    [cmDWordFasterTime, cmDWordOffRoad,         cmDWordShorterDistance],                  // Zumo 3x0
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad],                               // Drive 51
+    [cmFasterTime,      cmOffRoad],                                                       // Drive 66
+    [cmDWordFasterTime, cmDWordShorterDistance, cmDWordEco,             cmDWordOffRoad],  // Nuvi 2595
+    [cmFasterTime,      cmShorterDistance,      cmEco,                  cmOffRoad],       // Nuvi 57
+    [cmFasterTime]                                                                        // Unknown
   );
+
+function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): string;
+function Desc2RoutePref(ADesc: string; AModel: TTripModel): TRoutePreference;
 
 implementation
 
 uses
-  System.SysUtils, System.DateUtils,
+  System.SysUtils, System.DateUtils, System.StrUtils,
   UnitRegistry;
 
 class function TUnixDateConv.DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
@@ -316,13 +460,58 @@ function TTripVersion.HandleTrailer: boolean;
 begin
   result := false;
   if (Major = 1) and
-     (Minor < 4) then
+//TODO Zumo 346
+//     (Minor < 4) then
+     (Minor <= 6) then
     result := true;
 end;
 
 function TTripVersion.CanCheckSystemTrips: boolean;
 begin
   result := (Major >= 4);
+end;
+
+function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): string;
+var
+  ModelCalcMode: TCalcMode;
+begin
+  result := RoutePrefRecs[cmNA].Desc;
+  for ModelCalcMode in CalcModesSuppported[AModel] do
+  begin
+    if (RoutePrefRecs[ModelCalcMode].DwSize <> RoutePrefDWordSize[AModel]) then
+      continue;
+    if (RoutePrefRecs[ModelCalcMode].Rm = ARoutePref) then
+      exit(RoutePrefRecs[ModelCalcMode].Desc);
+  end;
+end;
+
+function GpxDesc2TripDesc(ADesc: string): string;
+begin
+  result := '';
+  if (SameText(ADesc, 'Direct')) then
+    result := #9 + 'Straight' + #9 + 'OffRoad';
+  if (SameText(ADesc, 'CurvyRoads')) then
+    result := #9 + 'Adventurous' + #9 + 'Eco';
+end;
+
+function Desc2RoutePref(ADesc: string; AModel: TTripModel): TRoutePreference;
+var
+  ModelCalcMode: TCalcMode;
+  Aliases: string;
+begin
+  // Default to FasterTime
+  if (RoutePrefDWordSize[AModel]) then
+    result := TRoutePreference.rmDWordFasterTime
+  else
+    result := TRoutePreference.rmFasterTime;
+
+  Aliases := GpxDesc2TripDesc(ADesc);
+  for ModelCalcMode in CalcModesSuppported[AModel] do
+  begin
+    if (SameText(RoutePrefRecs[ModelCalcMode].Desc, ADesc)) or
+       (ContainsText(Aliases, #9 + RoutePrefRecs[ModelCalcMode].Desc)) then
+      exit(RoutePrefRecs[ModelCalcMode].Rm);
+  end;
 end;
 
 end.

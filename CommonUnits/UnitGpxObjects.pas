@@ -2749,15 +2749,20 @@ procedure TGPXFile.UpdateTemplate(const TripName: string; RouteCnt, ParentTripId
 var
   HasSubClasses:    boolean;
   Locations:        TmLocations;
+  mParentTripId:    TmParentTripId;
   mParentTripName:  TmParentTripName;
   RouteNode:        TXmlVSNode;
   GpxDistance:      double;
   mExploreUuid:     TmExploreUuid;
   KnownExploreUuid: string;
 begin
-  if (ProcessOptions.AllowGrouping) and
-     (ProcessOptions.TripModel in [TTripModel.XT, TTripModel.Drive66]) then
-    (FTripList.GetItem(TmParentTripId.GetKey) as TmParentTripId).AsCardinal := ParentTripId;
+  if (SupportsGrouping[ProcessOptions.TripModel]) and
+     (ProcessOptions.AllowGrouping) then
+  begin
+    mParentTripId := FTripList.GetItem(TmParentTripId.GetKey) as TmParentTripId;
+    if (Assigned(mParentTripId)) then
+      mParentTripId.AsCardinal := ParentTripId;
+  end;
 
   mParentTripName := FTripList.GetItem(TmParentTripName.GetKey) as TmParentTripName;
   if (Assigned(mParentTripName)) then

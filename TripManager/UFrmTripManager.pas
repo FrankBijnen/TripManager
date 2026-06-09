@@ -2437,6 +2437,7 @@ begin
   BgDevice.Items[1].Caption := DefGPXPath;
   BgDevice.Items[2].Caption := DefPOIDesc;
   case GarminModel of
+    TGarminModel.Zumo346,
     TGarminModel.Zumo595,
     TGarminModel.Drive51:
       begin
@@ -3554,7 +3555,6 @@ var
   var
     ANitem: TBaseItem;
     LocationName, GpsCoords, RoutePreference, AdventurousLevel: string;
-    KnownRoutePref: boolean;
   begin
     LocationName := ALocation.LocationTmName.AsString;
     GpsCoords := ALocation.LocationTmScPosn.MapCoords;
@@ -3584,21 +3584,15 @@ var
                                  TGridSelItem.Create(ALocation,
                                                      SizeOf(LocationValue.Count),
                                                      OffsetInRecord(LocationValue, LocationValue.Count) ));
+//TODO
+      RoutePreference := RoutePref2Desc(ALocation.RoutePref, ATripList.TripModel);
+      AdventurousLevel := '';
+      if (ALocation.RoutePref = TRoutePreference.rmAdventurous) then
+         IntToIdent(Ord(ALocation.AdvLevel), AdventurousLevel, AdvLevelMap);
 
-      if (RoutePrefDWordSize[ATripList.TripModel]) then
-        KnownRoutePref := IntToIdent(Ord(ALocation.RoutePref), RoutePreference, RoutePrefDWordMap)
-      else
-        KnownRoutePref := IntToIdent(Ord(ALocation.RoutePref), RoutePreference, RoutePreferenceMap);
-      if (KnownRoutePref) then
-      begin
-        AdventurousLevel := '';
-        if (ALocation.RoutePref = TRoutePreference.rmAdventurous) then
-           IntToIdent(Ord(ALocation.AdvLevel), AdventurousLevel, AdvLevelMap);
+      VlTripInfo.Strings.AddPair('RoutePref', Format('%s %s', [RoutePreference, AdventurousLevel]),
+                                 TGridSelItem.Create(ALocation));
 
-        VlTripInfo.Strings.AddPair('RoutePref', Format('%s %s', [RoutePreference, AdventurousLevel]),
-                                   TGridSelItem.Create(ALocation));
-
-      end;
       VlTripInfo.Strings.AddPair('*** End location header', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ALocation, 1, ALocation.SelEnd - ALocation.SelStart -1 ));
     end;
