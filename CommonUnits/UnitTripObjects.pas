@@ -736,8 +736,8 @@ type
 |    UdbDir ..                        |     |                                |
 |    UdbDir UdbDirCount               |     |                                |
 +----------------------------------------------------------------------------+
-|Trailer                TBytes        |  var| Zumo 3x0, 590 and Nuvi2595 can |
-|                                     |     | have a trailer. 4..12 bytes    |
+|Trailer                TBytes        |  var| Major version 1 can have a     |
+|                                     |     | trailer. Usually 4..12 bytes   |
 |                                     |     | Must be < size UdbDir          |
 +----------------------------------------------------------------------------+
 
@@ -2253,12 +2253,10 @@ end;
 
 class function TmRoutePreference.ModelEditMode(AModel: TTripmodel): TItemEditMode;
 begin
-  case (AModel) of
-    TTripModel.Nuvi2595:
-      result := TItemEditMode.emNone;
-    else
-      result := TItemEditMode.emPickList;
-  end;
+  if (HasAllLinks[AModel]) then // Nuvi 2595
+    result := TItemEditMode.emNone
+  else
+    result := TItemEditMode.emPickList;
 end;
 
 function TmRoutePreference.GetItemEditMode: TItemEditMode;
@@ -2312,12 +2310,11 @@ end;
 
 class function TmTransportationMode.ModelEditMode(AModel: TTripmodel): TItemEditMode;
 begin
-  case (AModel) of
-    TTripModel.Nuvi2595:
-      result := TItemEditMode.emNone;
-    else
-      result := TItemEditMode.emPickList;
-  end;
+  // EditMode not used for AllLinks (Nuvi 2595)
+  if (HasAllLinks[AModel]) then
+    result := TItemEditMode.emNone
+  else
+    result := TItemEditMode.emPickList;
 end;
 
 function TmTransportationMode.GetItemEditMode: TItemEditMode;
@@ -2329,15 +2326,15 @@ begin
 end;
 
 class function TmTransportationMode.ModelPickList(AModel: TTripmodel): string;
+var
+  ATransportMode: TTransportMode;
+  ATransportIdent: string;
 begin
-  case AModel of
-    TTripModel.Nuvi2595:
-      result := TransportModeMap[1].Name + #10 +
-                TransportModeMap[2].Name + #10;
-    else
-      result := TransportModeMap[1].Name + #10 +
-                TransportModeMap[3].Name + #10 +
-                TransportModeMap[4].Name + #10;
+  result := '';
+  for ATransportMode in TransportModesSuppported[AModel] do
+  begin
+    if (IntToIdent(Ord(ATransportMode), ATransportIdent, TransportModeMap)) then
+      result := result + ATransportIdent + #10;
   end;
 end;
 
@@ -3122,23 +3119,23 @@ function TLocation.IsViaPoint: boolean;
 var
   ViaShapeObject: TObject;
 begin
-  case (TripList.TripModel) of
-    TTripModel.Nuvi2595:
-      result := true;
-    TTripModel.Zumo590,
-    TTripModel.Zumo3x0:
-      begin
-        ViaShapeObject := LocationTmShaping;
-        result := Assigned(ViaShapeObject) and
-                  not (TmShaping(ViaShapeObject).AsBoolean);
-      end;
-    else
-      begin
-        ViaShapeObject := LocationTmAttr;
-        result := Assigned(ViaShapeObject) and
-                  (TmAttr(ViaShapeObject).AsRoutePoint = TRoutePoint.rpVia);
-      end;
-  end;
+  result := false;
+
+  // Using AllLinks? Nuvi 2595
+  if (HasAllLinks[TripList.TripModel]) then
+    exit(true);
+
+  // Using TmShaping? Zumo 3x0, 590
+  ViaShapeObject := LocationTmShaping;
+  if Assigned(ViaShapeObject) and
+     not (TmShaping(ViaShapeObject).AsBoolean) then
+    exit(true);
+
+  // Using TmAttr? all others
+  ViaShapeObject := LocationTmAttr;
+  if Assigned(ViaShapeObject) and
+    (TmAttr(ViaShapeObject).AsRoutePoint = TRoutePoint.rpVia) then
+    exit(true);
 end;
 
 function TLocation.LocationTmName: TmName;
@@ -5740,7 +5737,7 @@ end;
 
 function TTripList.InitAllLinks: TBaseItem;
 begin
-  if (TripModel <> TTripModel.Nuvi2595) then
+  if (HasAllLinks[TripModel] = false) then
     exit(nil);
 
   result := GetItem(TmAllLinks.GetKey);

@@ -289,6 +289,21 @@ const
       false,                // Nuvi 57
       false);               // Unknown
 
+  HasAllLinks: array[TTripModel] of boolean = (
+      false,                // XT
+      false,                // XT2
+      false,                // XT3
+      false,                // Tread 2
+      false,                // Zumo 346
+      false,                // Zumo 595
+      false,                // Zumo 590
+      false,                // Zumo 3x0
+      false,                // Drive 51
+      false,                // Drive 66
+      true,                 // Nuvi 2595
+      false,                // Nuvi 57
+      false);               // Unknown
+
   SupportsGrouping: array[TTripModel] of boolean = (
       true,                 // XT
       false,                // XT2
@@ -350,7 +365,23 @@ const
     [cmFasterTime,      cmOffRoad],                                                       // Drive 66
     [cmDWordFasterTime, cmDWordShorterDistance, cmDWordEco,             cmDWordOffRoad],  // Nuvi 2595
     [cmFasterTime,      cmShorterDistance,      cmEco,                  cmOffRoad],       // Nuvi 57
-    [cmFasterTime]                                                                        // Unknown
+    []                                                                                    // Unknown
+  );
+
+  TransportModesSuppported: array[TTripModel] of set of TTransportMode = (
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT2        Profile overrides?
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT3        Profile overrides?
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Tread 2    Profile overrides?
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 346
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 595
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 590
+    [tmAutoMotive,      tmMotorcycling],                    // Zumo 3x0
+    [tmAutoMotive],                                         // Drive 51
+    [tmAutoMotive],                                         // Drive 66
+    [tmAutoMotive,      tmPedestrian],                      // Nuvi 2595
+    [tmAutoMotive],                                         // Nuvi 57
+    []                                                      // Unknown
   );
 
 function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): string;

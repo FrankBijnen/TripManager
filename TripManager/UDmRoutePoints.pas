@@ -427,24 +427,22 @@ begin
       if (ANItem <> nil) then
         TmTripName(ANItem).AsString := CdsRouteTripName.AsString;
 
-      case TTripList(FTripList).TripModel of
-        TTripModel.Nuvi2595:
-        begin
-          Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
-          Links.DefRoutePref := TmRoutePreference.RoutePreference(
-                                  CdsRouteRoutePreference.AsString,
-                                  TTripList(FTripList).TripModel);
-          Links.DefTransportMode := TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString);
-        end
-        else
-        begin
-          ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
-          if (ANItem <> nil) then
-            TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
-          ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
-          if (ANItem <> nil) then
-            TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
-        end;
+      if (HasAllLinks[TTripList(FTripList).TripModel]) then
+      begin
+        Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
+        Links.DefRoutePref := TmRoutePreference.RoutePreference(
+                                CdsRouteRoutePreference.AsString,
+                                TTripList(FTripList).TripModel);
+        Links.DefTransportMode := TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString);
+      end
+      else
+      begin
+        ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
+        if (ANItem <> nil) then
+          TmRoutePreference(ANItem).AsString := CdsRouteRoutePreference.AsString;
+        ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
+        if (ANItem <> nil) then
+          TmTransportationMode(ANItem).AsString := CdsRouteTransportationMode.AsString;
       end;
       ANItem := TTripList(FTripList).GetArrival;
       if (ANItem <> nil) then
@@ -523,34 +521,32 @@ begin
     CdsRoute.Insert;
     CdsRouteTripName.AsString := TTripList(FTripList).TripName;
 
-    case TTripList(FTripList).TripModel of
-      TTripModel.Nuvi2595:
+    if (HasAllLinks[TTripList(FTripList).TripModel]) then
+    begin
+      Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
+      for Link in Links.Links do
       begin
-        Links := TmAllLinks(TTripList(FTripList).GetItem(TmAllLinks.GetKey));
-        for Link in Links.Links do
+        for ANItem in Tlink(Link).Items do
         begin
-          for ANItem in Tlink(Link).Items do
-          begin
-            if (ANItem is TmRoutePreference) then
-              CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
-            if (ANItem is TmTransportationMode) then
-              CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
-          end;
-          break;
+          if (ANItem is TmRoutePreference) then
+            CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString;
+          if (ANItem is TmTransportationMode) then
+            CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
         end;
-      end
-      else
-      begin
-        ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
-        if (ANItem <> nil) then
-          CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString
-        else
-          CdsRouteRoutePreference.AsString := RoutePrefRecs[TCalcMode.cmFasterTime].Desc; // E.G. DriveSmart 66
-
-        ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
-        if (ANItem <> nil) then
-          CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
+        break;
       end;
+    end
+    else
+    begin
+      ANItem := TTripList(FTripList).GetItem(TmRoutePreference.GetKey);
+      if (ANItem <> nil) then
+        CdsRouteRoutePreference.AsString := TmRoutePreference(ANItem).AsString
+      else
+        CdsRouteRoutePreference.AsString := RoutePrefRecs[TCalcMode.cmFasterTime].Desc; // E.G. DriveSmart 66
+
+      ANItem := TTripList(FTripList).GetItem(TmTransportationMode.GetKey);
+      if (ANItem <> nil) then
+        CdsRouteTransportationMode.AsString := TmTransportationMode(ANItem).AsString;
     end;
 
     ANItem := TTripList(FTripList).GetArrival;

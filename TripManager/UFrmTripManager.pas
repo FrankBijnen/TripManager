@@ -780,7 +780,8 @@ end;
 
 procedure TFrmTripManager.BgDeviceItemsPoiClick(Sender: TObject);
 begin
-  if (GetRegistry(Reg_EnableGpiFuncs, false) = false) then
+  if (GetRegistry(Reg_EnableGpiFuncs, false) = false) and
+     (GetRegistry(Reg_EnableFitFuncs, false) = false) then
     Abort;
 end;
 
@@ -2210,7 +2211,7 @@ procedure TFrmTripManager.SetDeviceColumnWidths;
 var
   Index: integer;
   CurrentMTPDevice: TGarminMTP_Device;
-  GarminApplication: string;
+  GarminFmts: string;
 begin
   // Setup Column widths
   CmbDevices.SetColCount(9);
@@ -2220,13 +2221,13 @@ begin
       CurrentMTPDevice := TGarminMTP_Device(DeviceList[Index])
     else
       break;
-    GarminApplication := TModelConv.GarminApplication(CurrentMTPDevice.GarminDevice.GarminModel);
+    GarminFmts := TModelConv.GarminFmtsDesc(CurrentMTPDevice.GarminDevice.GarminModel);
 
     CmbDevices.SetColWidth(CurrentMTPDevice.FriendlyName,                  0);
     CmbDevices.SetColWidth(CurrentMTPDevice.Description,                   1);
     CmbDevices.SetColWidth(CurrentMTPDevice.Manufacturer,                  2);
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.ModelDescription, 3);
-    CmbDevices.SetColWidth(GarminApplication,                              4);
+    CmbDevices.SetColWidth(GarminFmts,                                     4);
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.SoftwareVersion,  5);
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.PartNumber,       6);
     CmbDevices.SetColWidth(CurrentMTPDevice.GarminDevice.SerialNumber,     7);
@@ -2237,8 +2238,8 @@ begin
   for Index := 0 to CmbModel.Items.Count - 1 do
   begin
     CmbModel.SetColWidth(CmbModel.Items[Index],           0);
-    GarminApplication := TModelConv.GarminApplication(TGarminModel(CmbModel.Items.Objects[Index]));
-    CmbModel.SetColWidth(GarminApplication,               1);
+    GarminFmts := TModelConv.GarminFmtsDesc(TGarminModel(CmbModel.Items.Objects[Index]));
+    CmbModel.SetColWidth(GarminFmts,                      1);
   end;
 end;
 
@@ -2374,7 +2375,7 @@ const
 var
   AMTP_Device: TGarminMTP_Device;
   AComboBox: TComboBox;
-  GarminApplication: string;
+  GarminFmts: string;
 begin
   AComboBox := TComboBox(Control);
   AComboBox.Canvas.FillRect(Rect);
@@ -2384,7 +2385,7 @@ begin
   else
   begin
     AMTP_Device := TGarminMTP_Device(AComboBox.Items.Objects[Index]);
-    GarminApplication := TModelConv.GarminApplication(AMTP_Device.GarminDevice.GarminModel);
+    GarminFmts := TModelConv.GarminFmtsDesc(AMTP_Device.GarminDevice.GarminModel);
 
     AComboBox.DrawCol(0, AMTP_Device.FriendlyName, Rect);
     AComboBox.DrawLine(0, Rect);
@@ -2398,7 +2399,7 @@ begin
     AComboBox.DrawCol(3, AMTP_Device.GarminDevice.ModelDescription, Rect);
     AComboBox.DrawLine(3, Rect);
 
-    AComboBox.DrawCol(4, GarminApplication, Rect);
+    AComboBox.DrawCol(4, GarminFmts, Rect);
     AComboBox.DrawLine(4, Rect);
 
     AComboBox.DrawCol(5, AMTP_Device.GarminDevice.SoftwareVersion, Rect);
@@ -2431,39 +2432,38 @@ var
 begin
   ModelIndex := CmbModel.ItemIndex;
   GarminModel := TModelConv.Display2Garmin(ModelIndex);
-  BgDevice.ItemIndex := 0; // Default to trips
+  BgDevice.ItemIndex := 0; // Default to trips/courses
 
-  BgDevice.Items[0].Caption := DefTripsDesc;
-  BgDevice.Items[1].Caption := DefGPXPath;
-  BgDevice.Items[2].Caption := DefPOIDesc;
-  case GarminModel of
-    TGarminModel.Zumo346,
-    TGarminModel.Zumo595,
-    TGarminModel.Drive51:
-      begin
-        BgDevice.Items[1].Caption := DefUnusedDesc;
-        BgDevice.Items[2].Caption := DefUnusedDesc;
-      end;
-    TGarminModel.GarminForeRunner,
-    TGarminModel.GarminEdge:
-      begin
-        BgDevice.Items[0].Caption := DefCoursesPath;
-        BgDevice.Items[1].Caption := DefNewFilesPath;
-        BgDevice.Items[2].Caption := DefActivitiesPath;
-      end;
-    TGarminModel.GarminGeneric,
-    TGarminModel.Unknown:
-      begin
-        BgDevice.Items[0].Caption := DefUnusedDesc;
-        BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
-      end;
+  if (TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaFit)) then
+  begin
+    BgDevice.Items[0].Caption := DefCoursesPath;
+    BgDevice.Items[1].Caption := DefNewFilesPath;
+    BgDevice.Items[2].Caption := DefActivitiesPath;
+  end
+  else
+  begin
+    if (TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaTrips)) then
+      BgDevice.Items[0].Caption := DefTripsDesc
+    else
+    begin
+      BgDevice.Items[0].Caption := DefUnusedDesc;
+      BgDevice.ItemIndex := 1  // Default to GPX, if not trips capable
+    end;
+    if (TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaGPX)) then
+      BgDevice.Items[1].Caption := DefGPXPath
+     else
+      BgDevice.Items[1].Caption := DefUnusedDesc;
+    if (TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaPOI)) then
+      BgDevice.Items[2].Caption := DefPOIDesc
+     else
+      BgDevice.Items[2].Caption := DefUnusedDesc;
   end;
-
   SetRegistry(Reg_CurrentModel, ModelIndex);
-  SetRegistry(Reg_EnableTripFuncs, TModelConv.Display2Trip(ModelIndex) <> TTripModel.Unknown);
-  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.GetKnownPath(GarminModel, 1) <> '');
-  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.GetKnownPath(GarminModel, 2) <> '');
-  SetRegistry(Reg_EnableFitFuncs,  (GarminModel in [TGarminModel.GarminEdge, TGarminModel.GarminForeRunner]));
+  SetRegistry(Reg_EnableTripFuncs, TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaTrips));
+  SetRegistry(Reg_EnableGpxFuncs,  TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaGPX));
+  SetRegistry(Reg_EnableGpiFuncs,  TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaPOI) or
+                                   TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaFit));
+  SetRegistry(Reg_EnableFitFuncs,  TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaFit));
 
   ReadDefaultFolders;
 
@@ -2488,7 +2488,7 @@ end;
 procedure TFrmTripManager.CmbModelDrawItem(Control: TWinControl; Index: Integer;
   Rect: TRect; State: TOwnerDrawState);
 var
-  GarminApplication: string;
+  GarminFmts: string;
   AComboBox: TComboBox;
 begin
   AComboBox := TComboBox(Control);
@@ -2497,8 +2497,8 @@ begin
   AComboBox.DrawCol(0, AComboBox.Items[Index], Rect);
   AComboBox.DrawLine(0, Rect);
 
-  GarminApplication := TModelConv.GarminApplication(TGarminModel(AComboBox.Items.Objects[Index]));
-  AComboBox.DrawCol(1, GarminApplication, Rect);
+  GarminFmts := TModelConv.GarminFmtsDesc(TGarminModel(AComboBox.Items.Objects[Index]));
+  AComboBox.DrawCol(1, GarminFmts, Rect);
 end;
 
 procedure TFrmTripManager.CmbModelDropDown(Sender: TObject);
