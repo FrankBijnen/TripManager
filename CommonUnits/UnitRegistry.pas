@@ -38,10 +38,11 @@ uses
   UnitStringUtils;
 
 const
-  ControlTop    = '.Top';
-  ControlLeft   = '.Left';
-  ControlHeight = '.Heigth';
-  ControlWidth  = '.Width';
+  ControlTop      = '.Top';
+  ControlLeft     = '.Left';
+  ControlHeight   = '.Heigth';
+  ControlWidth    = '.Width';
+  ControlDefault  = $ffff;
 
 function ApplicationKey: string;
 begin
@@ -209,18 +210,18 @@ end;
 
 procedure ReadControlPosition(const RegKey: string; const AControl: TWinControl);
 begin
-  if (GetRegistry(AControl.Name + ControlTop, 0, RegKey) <> 0) then
-    AControl.Top := GetRegistry(AControl.Name + ControlTop, 0, RegKey);
-  if (GetRegistry(AControl.Name + ControlLeft, 0, RegKey) <> 0) then
-    AControl.Left := GetRegistry(AControl.Name + ControlLeft, 0, RegKey);
+  if (GetRegistry(AControl.Name + ControlTop, ControlDefault, RegKey) <> ControlDefault) then
+    AControl.Top := GetRegistry(AControl.Name + ControlTop, ControlDefault, RegKey);
+  if (GetRegistry(AControl.Name + ControlLeft, ControlDefault, RegKey) <> ControlDefault) then
+    AControl.Left := GetRegistry(AControl.Name + ControlLeft, ControlDefault, RegKey);
 end;
 
 procedure ReadControlSize(const RegKey: string; const AControl: TWinControl);
 begin
-  if (GetRegistry(AControl.Name + ControlHeight, 0, RegKey) <> 0) then
-    AControl.Height := GetRegistry(AControl.Name + ControlHeight, 0, RegKey);
-  if (GetRegistry(AControl.Name + ControlWidth, 0, RegKey) <> 0) then
-    AControl.Width := GetRegistry(AControl.Name + ControlWidth, 0, RegKey);
+  if (GetRegistry(AControl.Name + ControlHeight, ControlDefault, RegKey) <> ControlDefault) then
+    AControl.Height := GetRegistry(AControl.Name + ControlHeight, ControlDefault, RegKey);
+  if (GetRegistry(AControl.Name + ControlWidth, ControlDefault, RegKey) <> ControlDefault) then
+    AControl.Width := GetRegistry(AControl.Name + ControlWidth, ControlDefault, RegKey);
 end;
 
 end.

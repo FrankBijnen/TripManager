@@ -1056,8 +1056,7 @@ uses
 const
   Coord_Decimals                      = '%1.6f';
   StringLoaded: word                  = $ffff;
-  TurnMagicUcs4: array[0..3] of byte  = ($47, $4E, $00, $00); // UCS4
-  TurnMagicWide: array[0..3] of byte  = ($01, $00, $47, $4E); // WideChar
+  TurnMagic: array[0..1] of byte      = ($47, $4E);
   TripFileName                        = '0:/.System/Trips/%s.trip';
   UdbDirTurn                          = 'Turn';
   UdbDirMagic: Cardinal               = $51590469;
@@ -3700,13 +3699,13 @@ end;
 
 function TUdbDir.IsTurn: boolean;
 const
-  OffsWide = 0;
+  OffsWide = 2;
   OffsUcs4 = 4;
 begin
-  if (Length(FUdbDirName) < Max(OffsWide + SizeOf(TurnMagicWide), OffsUcs4 + SizeOf(TurnMagicUcs4))) then
+  if (Length(FUdbDirName) < OffsUcs4 + SizeOf(TurnMagic)) then
     exit(false);
-  result := CompareMem(@TurnMagicUcs4[0], @FUdbDirName[OffsUcs4], SizeOf(TurnMagicUcs4)) or
-            CompareMem(@TurnMagicWide[0], @FUdbDirName[OffsWide], SizeOf(TurnMagicWide));
+  result := CompareMem(@TurnMagic[0], @FUdbDirName[OffsUcs4], SizeOf(TurnMagic)) or
+            CompareMem(@TurnMagic[0], @FUdbDirName[OffsWide], SizeOf(TurnMagic));
 end;
 
 {*** UdbPref *** }
