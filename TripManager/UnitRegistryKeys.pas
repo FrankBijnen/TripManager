@@ -105,6 +105,9 @@ const
   Reg_Trk2RtExportPerc_Key        = 'Trk2RtExportPerc';
   Reg_Trk2RtExportPerc_Val        = 10;
 
+  Reg_RememberLayout              = 'RememberLayout';
+  Reg_SavedLayout                 = 'SavedLayout';
+
 // See SendToItems.txt for item texts
 const
   IdTrip          = 0;

@@ -463,6 +463,8 @@ type
     procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
     procedure SetDeviceListColumns;
+    procedure ReadFormLayout;
+    procedure WriteFormLayout;
     procedure ReadColumnSettings;
     procedure WriteColumnSettings;
     procedure OnSetPostProcessPrefs(Sender: TObject);
@@ -1224,14 +1226,18 @@ end;
 
 procedure TFrmTripManager.EditTrip(NewFile: boolean);
 var
-  TripModel: TTripModel;
+  ATripModel: TTripModel;
 begin
 // Create new empty triplist?
-  TripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
+  ATripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
   if not Assigned(ATripList) then
-    ATripList := TTripList.Create(TripModel);
+    ATripList := TTripList.Create(ATripModel);
+
   if (NewFile) then
+  begin
+    ATripList.TripModel := ATripModel;
     ATripList.CreateTemplate(FrmNewTrip.EdNewTrip.Text);
+  end;
 
 // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
@@ -2047,12 +2053,15 @@ begin
 
   CloseDevice;
   WriteColumnSettings;
+  WriteFormLayout;
 end;
 
 procedure TFrmTripManager.FormCreate(Sender: TObject);
 var
   AFilePath: string;
 begin
+  ReadFormLayout;
+
   FStyleServices := TStyleManager.ActiveStyle;
 
   DirectoryMonitor := TDirectoryMonitor.Create;
@@ -5412,6 +5421,16 @@ begin
   SetRegistry(Reg_WidthColumns_Key, ColWidths);
 end;
 
+procedure TFrmTripManager.WriteFormLayout;
+begin
+  SaveControlPosition(Reg_SavedLayout, Self);
+  SaveControlSize(Reg_SavedLayout, Self);
+  SaveControlSize(Reg_SavedLayout, TvTrip);
+  SaveControlSize(Reg_SavedLayout, PnlXTLeft);
+  SaveControlSize(Reg_SavedLayout, PCTTripInfo);
+  SaveControlSize(Reg_SavedLayout, PnlXTAndFileSys);
+end;
+
 procedure TFrmTripManager.OnSetPostProcessPrefs(Sender: TObject);
 begin
   SetProcessOptions.SetPostProcessPrefs(Sender);
@@ -5431,6 +5450,21 @@ begin
   with Sender as TProcessOptions do
   begin
     ExploreUUIDList := ExploreList;
+  end;
+end;
+
+procedure TFrmTripManager.ReadFormLayout;
+begin
+  Self.Position := poScreenCenter;
+  if (GetRegistry(Reg_RememberLayout, false) = true) then
+  begin
+    Self.Position := poDesigned;
+    ReadControlPosition(Reg_SavedLayout, Self);
+    ReadControlSize(Reg_SavedLayout, Self);
+    ReadControlSize(Reg_SavedLayout, TvTrip);
+    ReadControlSize(Reg_SavedLayout, PnlXTLeft);
+    ReadControlSize(Reg_SavedLayout, PCTTripInfo);
+    ReadControlSize(Reg_SavedLayout, PnlXTAndFileSys);
   end;
 end;
 

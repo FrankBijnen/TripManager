@@ -117,6 +117,9 @@ begin
     AddGridLine(GridGeneralSettings, CurRow,  Reg_Maximized_Key,
                                               'False',
                                               'Start TripManager maximized');
+    AddGridLine(GridGeneralSettings, CurRow,  Reg_RememberLayout,
+                                              'False',
+                                              'Remember layout of form and panels');
     AddGridLine(GridGeneralSettings, CurRow,  '', '');
 
     AddGridLine(GridGeneralSettings, CurRow,  '', '', '-Tracks-');

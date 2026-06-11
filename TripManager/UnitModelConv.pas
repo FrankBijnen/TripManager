@@ -160,35 +160,158 @@ type
   TGarminFmts = (gfTripsGPXPOI, gfTrips, gfFitGPX, gfGPXPOI);
 
 const
-  TripsGPXPOIApps  = 'Trips,GPX,POI';
-  TripsApps        = 'Trips';
-  FitGPXApps       = 'Fit,GPX';
-  GPXPOIApps       = 'GPX,POI';
+  TripsGPXPOIFmts  = 'Trips,GPX,POI';
+  TripsFmts        = 'Trips';
+  FitGPXFmts       = 'Fit,GPX';
+  GPXPOIFmts       = 'GPX,POI';
 
-  GarminFmtsMap : array[0..3] of TIdentMapEntry = ( (Value: Ord(gfTripsGPXPOI); Name: TripsGPXPOIApps),
-                                                    (Value: Ord(gfTrips);       Name: TripsApps),
-                                                    (Value: Ord(gfFitGPX);      Name: FitGPXApps),
-                                                    (Value: Ord(gfGPXPOI);      Name: GPXPOIApps)
+  GarminFmtsMap : array[0..3] of TIdentMapEntry = ( (Value: Ord(gfTripsGPXPOI); Name: TripsGPXPOIFmts),
+                                                    (Value: Ord(gfTrips);       Name: TripsFmts),
+                                                    (Value: Ord(gfFitGPX);      Name: FitGPXFmts),
+                                                    (Value: Ord(gfGPXPOI);      Name: GPXPOIFmts)
                                                   );
 
   Model_Tab: array[TGarminModel] of TGarminModel_Rec =
   (
-    (DeviceName: XT_Name;         PartNumber: XT_PartNumber;        TripModel: TTripModel.XT;       Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: true;  GarminFmts: TripsGPXPOIApps),
-    (DeviceName: XT2_Name;        PartNumber: XT2_PartNumber;       TripModel: TTripModel.XT2;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  GarminFmts: TripsGPXPOIApps),
-    (DeviceName: XT3_Name;        PartNumber: XT3_PartNumber;       TripModel: TTripModel.XT3;      Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  GarminFmts: TripsGPXPOIApps),
-    (DeviceName: Tread2_Name;     PartNumber: Tread2_PartNumber;    TripModel: TTripModel.Tread2;   Safe: true;   Displayable: true;  DevDB: true;  VehicleDB: true;  ExploreDB: true;  GarminFmts: TripsGPXPOIApps),
-    (DeviceName: Zumo346_Name;    PartNumber: Zumo346_PartNumber;   TripModel: TTripModel.Zumo346;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsApps),
-    (DeviceName: Zumo595_Name;    PartNumber: Zumo595_PartNumber;   TripModel: TTripModel.Zumo595;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsApps),
-    (DeviceName: Zumo590_Name;    PartNumber: Zumo590_PartNumber;   TripModel: TTripModel.Zumo590;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsApps),
-    (DeviceName: Zumo3x0_Name;    PartNumber: Zumo3x0_PartNumber;   TripModel: TTripModel.Zumo3x0;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsGPXPOIApps),
-    (DeviceName: Drive51_Name;    PartNumber: Drive51_PartNumber;   TripModel: TTripModel.Drive51;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsApps),
-    (DeviceName: Drive66_Name;    PartNumber: Drive66_PartNumber;   TripModel: TTripModel.Drive66;  Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsGPXPOIApps),
-    (DeviceName: Nuvi2595_Name;   PartNumber: Nuvi2595_PartNumber;  TripModel: TTripModel.Nuvi2595; Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsGPXPOIApps),
-    (DeviceName: Nuvi57_Name;     PartNumber: Nuvi57_PartNumber;    TripModel: TTripModel.Nuvi57;   Safe: false;  Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: TripsApps),
-    (DeviceName: Edge_Name;                                         TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: FitGPXApps),
-    (DeviceName: ForeRunner_Name;                                   TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: FitGPXApps),
-    (DeviceName: Garmin_Name;                                       TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false; GarminFmts: GPXPOIApps),
-    (DeviceName: Unknown_Name;                                      TripModel: TTripModel.Unknown;  Safe: true;   Displayable: true;  DevDB: false; VehicleDB: false; ExploreDB: false)
+    (DeviceName: XT_Name;
+        PartNumber: XT_PartNumber;
+        TripModel: TTripModel.XT;
+        Safe: true;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: true;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: XT2_Name;
+        PartNumber: XT2_PartNumber;
+        TripModel: TTripModel.XT2;
+        Safe: true;
+        Displayable: true;
+        DevDB: true;
+        VehicleDB: true;
+        ExploreDB: true;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: XT3_Name;
+        PartNumber: XT3_PartNumber;
+        TripModel: TTripModel.XT3;
+        Safe: true;
+        Displayable: true;
+        DevDB: true;
+        VehicleDB: true;
+        ExploreDB: true;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: Tread2_Name;
+        PartNumber: Tread2_PartNumber;
+        TripModel: TTripModel.Tread2;
+        Safe: true;
+        Displayable: true;
+        DevDB: true;
+        VehicleDB: true;
+        ExploreDB: true;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: Zumo346_Name;
+        PartNumber: Zumo346_PartNumber;
+        TripModel: TTripModel.Zumo346;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts),
+    (DeviceName: Zumo595_Name;
+        PartNumber: Zumo595_PartNumber;
+        TripModel: TTripModel.Zumo595;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts),
+    (DeviceName: Zumo590_Name;
+        PartNumber: Zumo590_PartNumber;
+        TripModel: TTripModel.Zumo590;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts),
+    (DeviceName: Zumo3x0_Name;
+        PartNumber: Zumo3x0_PartNumber;
+        TripModel: TTripModel.Zumo3x0;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: Drive51_Name;
+        PartNumber: Drive51_PartNumber;
+        TripModel: TTripModel.Drive51;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts),
+    (DeviceName: Drive66_Name;
+        PartNumber: Drive66_PartNumber;
+        TripModel: TTripModel.Drive66;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: Nuvi2595_Name;
+        PartNumber: Nuvi2595_PartNumber;
+        TripModel: TTripModel.Nuvi2595;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: Nuvi57_Name;
+        PartNumber: Nuvi57_PartNumber;
+        TripModel: TTripModel.Nuvi57;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts),
+    (DeviceName: Edge_Name;
+        TripModel: TTripModel.Unknown;
+        Safe: true;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: FitGPXFmts),
+    (DeviceName: ForeRunner_Name;
+        TripModel: TTripModel.Unknown;
+        Safe: true;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: FitGPXFmts),
+    (DeviceName: Garmin_Name;
+        TripModel: TTripModel.Unknown;
+        Safe: true;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: GPXPOIFmts),
+    (DeviceName: Unknown_Name;
+        TripModel: TTripModel.Unknown;
+        Safe: true;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false)
   );
 
 var

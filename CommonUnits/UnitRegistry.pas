@@ -4,7 +4,8 @@ interface
 
 uses
   System.TypInfo, System.Classes,
-  Winapi.Windows;
+  Winapi.Windows,
+  Vcl.Controls;
 
 const
   BooleanValues: array[boolean] of string = ('False', 'True');
@@ -24,6 +25,10 @@ procedure SetRegistry(const Name: string; Value: int64; const SubKey: string = '
 procedure SetRegistry(const Name: string; Value: TArray<string>; const SubKey: string = ''); overload;
 {$ENDIF}
 function DeleteRegistryKey(const KeyName: string): boolean; overload;
+procedure SaveControlPosition(const RegKey: string; const AControl: TWinControl);
+procedure SaveControlSize(const RegKey: string; const AControl: TWinControl);
+procedure ReadControlPosition(const RegKey: string; const AControl: TWinControl);
+procedure ReadControlSize(const RegKey: string; const AControl: TWinControl);
 
 implementation
 
@@ -31,6 +36,12 @@ uses
   Vcl.Forms,
   System.Win.Registry, System.SysUtils,
   UnitStringUtils;
+
+const
+  ControlTop    = '.Top';
+  ControlLeft   = '.Left';
+  ControlHeight = '.Heigth';
+  ControlWidth  = '.Width';
 
 function ApplicationKey: string;
 begin
@@ -182,6 +193,34 @@ end;
 function DeleteRegistryKey(const KeyName: string): boolean;
 begin
   result := DeleteRegistryKey(HKEY_CURRENT_USER, SubApplicationKey(KeyName));
+end;
+
+procedure SaveControlPosition(const RegKey: string; const AControl: TWinControl);
+begin
+  SetRegistry(AControl.Name + ControlTop, AControl.Top, RegKey);
+  SetRegistry(AControl.Name + ControlLeft, AControl.Left, RegKey);
+end;
+
+procedure SaveControlSize(const RegKey: string; const AControl: TWinControl);
+begin
+  SetRegistry(AControl.Name + ControlWidth, AControl.Width, RegKey);
+  SetRegistry(AControl.Name + ControlHeight, AControl.Height, RegKey);
+end;
+
+procedure ReadControlPosition(const RegKey: string; const AControl: TWinControl);
+begin
+  if (GetRegistry(AControl.Name + ControlTop, 0, RegKey) <> 0) then
+    AControl.Top := GetRegistry(AControl.Name + ControlTop, 0, RegKey);
+  if (GetRegistry(AControl.Name + ControlLeft, 0, RegKey) <> 0) then
+    AControl.Left := GetRegistry(AControl.Name + ControlLeft, 0, RegKey);
+end;
+
+procedure ReadControlSize(const RegKey: string; const AControl: TWinControl);
+begin
+  if (GetRegistry(AControl.Name + ControlHeight, 0, RegKey) <> 0) then
+    AControl.Height := GetRegistry(AControl.Name + ControlHeight, 0, RegKey);
+  if (GetRegistry(AControl.Name + ControlWidth, 0, RegKey) <> 0) then
+    AControl.Width := GetRegistry(AControl.Name + ControlWidth, 0, RegKey);
 end;
 
 end.
