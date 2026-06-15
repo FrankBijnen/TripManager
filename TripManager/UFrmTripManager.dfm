@@ -459,7 +459,6 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
-    ExplicitHeight = 403
     object TsHex: TTabSheet
       Caption = 'Hexadecimal display'
       object HexPanel: TPanel
@@ -641,7 +640,6 @@ object FrmTripManager: TFrmTripManager
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitTop = 345
         object LblBounds: TLabel
           AlignWithMargins = True
           Left = 116
@@ -703,7 +701,6 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
-        ExplicitHeight = 315
       end
     end
     object TsSQlite: TTabSheet
@@ -998,7 +995,6 @@ object FrmTripManager: TFrmTripManager
     Align = alLeft
     TabOrder = 2
     OnResize = PCTTripInfoResize
-    ExplicitHeight = 403
     object TsTripGpiInfo: TTabSheet
       Caption = 'Trip info'
       object VSplitterTree_Grid: TSplitter
@@ -1044,7 +1040,6 @@ object FrmTripManager: TFrmTripManager
         StyleElements = [seFont, seBorder]
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
-        ExplicitHeight = 334
       end
       object PnlVlTripInfo: TPanel
         Left = 246
@@ -1053,7 +1048,6 @@ object FrmTripManager: TFrmTripManager
         Height = 389
         Align = alClient
         TabOrder = 1
-        ExplicitHeight = 334
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
@@ -1067,7 +1061,6 @@ object FrmTripManager: TFrmTripManager
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
           OnStringsChange = VlTripInfoStringsChange
-          ExplicitHeight = 306
           ColWidths = (
             150
             208)
@@ -1114,7 +1107,6 @@ object FrmTripManager: TFrmTripManager
           item
             Width = 50
           end>
-        ExplicitTop = 356
       end
     end
   end
@@ -1123,7 +1115,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1348
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1131,7 +1122,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

@@ -150,7 +150,7 @@ object FrmVehProfiles: TFrmVehProfiles
         Top = 144
         Width = 841
         Height = 556
-        ActivePage = TabTripFiles
+        ActivePage = TabHashList
         Align = alClient
         TabOrder = 1
         OnChange = PctDetailsChange
@@ -216,7 +216,7 @@ object FrmVehProfiles: TFrmVehProfiles
             Width = 833
             Height = 493
             Align = alClient
-            ColCount = 3
+            ColCount = 4
             DefaultColWidth = 230
             DrawingStyle = gdsGradient
             FixedCols = 2
