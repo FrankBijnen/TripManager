@@ -472,6 +472,10 @@ type
     function GetRoutePrefs(RoutePreference: TObject = nil): string; virtual;
     property Count: Cardinal read GetCount;
   end;
+  TBaseAdvRoutePreferences = class(TBaseRoutePreferences)
+  private
+    function GetIntToIdent(const Value: word): string; override;
+  end;
 
   TmRoutePreferences = class(TBaseRoutePreferences)
   private
@@ -481,14 +485,6 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     function GetRoutePref(ViaPt: cardinal): TRoutePreference;
   end;
-  TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseRoutePreferences)
-  public
-    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
-  end;
-  TmRoutePreferencesAdventurousScenicRoads = class(TBaseRoutePreferences)
-  public
-    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
-  end;
   TmRoutePreferencesAdventurousMode = class(TBaseRoutePreferences)
   private
     function GetIntToIdent(const Value: word): string; override;
@@ -497,7 +493,15 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     function GetRoutePref(ViaPt: cardinal): TAdvlevel;
   end;
-  TmRoutePreferencesAdventurousPopularPaths = class(TBaseRoutePreferences)
+  TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseAdvRoutePreferences)
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+  end;
+  TmRoutePreferencesAdventurousScenicRoads = class(TBaseAdvRoutePreferences)
+  public
+    constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
+  end;
+  TmRoutePreferencesAdventurousPopularPaths = class(TBaseAdvRoutePreferences)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
@@ -2566,6 +2570,18 @@ begin
 end;
 {$HINTS ON}
 
+function TBaseAdvRoutePreferences.GetIntToIdent(const Value: word): string;
+begin
+  case Value of
+    DefRoutePref:
+      Result := '';
+    DefRoutePrefInclMaps:
+      Result := 'Selected';
+    else
+      result := Format('TBD (0x%s)', [IntTohex(Value, 4)]);
+  end;
+end;
+
 constructor TmRoutePreferences.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
   inherited Create(GetKey, 0 , $80);
@@ -2594,21 +2610,6 @@ begin
   result := TRoutePreference(GetRoutePrefByte(ViaPt));
 end;
 
-constructor TmRoutePreferencesAdventurousHillsAndCurves.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
-begin
-  inherited Create(GetKey, 0 , $80);
-end;
-
-constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
-begin
-  inherited Create(GetKey, 0 , $80);
-end;
-
-constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
-begin
-  inherited Create(GetKey, 0 , $80);
-end;
-
 function TmRoutePreferencesAdventurousMode.GetIntToIdent(const Value: word): string;
 begin
   if (IntToIdent(Value and $ff, result, AdvLevelMap)) then
@@ -2625,6 +2626,21 @@ end;
 function TmRoutePreferencesAdventurousMode.GetRoutePref(ViaPt: cardinal): TAdvlevel;
 begin
   result := TAdvlevel(GetRoutePrefByte(ViaPt));
+end;
+
+constructor TmRoutePreferencesAdventurousHillsAndCurves.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create(GetKey, 0 , $80);
+end;
+
+constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create(GetKey, 0 , $80);
+end;
+
+constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create(GetKey, 0 , $80);
 end;
 
 constructor TmRoutePreferencesAdventurousPopularPaths.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
@@ -4766,8 +4782,8 @@ var
   ViaPt, SegmentCount: integer;
   RoutePreferences: array of WORD;
   RoutePreferencesAdventurous: array of WORD;
-  RoutePreferencesAdventurousHillsAndCurves: array of WORD;
-  TmpStream: TMemoryStream;
+  RoutePreferencesAdventurousInclMap: array of WORD;
+  TmpStream, TmpMapStream: TMemoryStream;
   RoutePointList: TList<TLocation>;
   Location: TLocation;
 begin
@@ -4780,10 +4796,11 @@ begin
 
   RoutePointList := TList<TLocation>.Create;
   TmpStream := TMemoryStream.Create;
+  TmpMapStream := TMemoryStream.Create;
   try
     SetLength(RoutePreferences, SegmentCount);
     SetLength(RoutePreferencesAdventurous, SegmentCount);
-    SetLength(RoutePreferencesAdventurousHillsAndCurves, SegmentCount);
+    SetLength(RoutePreferencesAdventurousInclMap, SegmentCount);
 
     // Set RoutePrefs from location
     for ViaPt := 0 to SegmentCount -1 do
@@ -4798,12 +4815,12 @@ begin
               Location.AdvLevel := TProcessOptions(ProcessOptions).DefAdvLevel;
 
             RoutePreferencesAdventurous[ViaPt] := Swap(DefRoutePref + Ord(Location.AdvLevel));
-            RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap(DefRoutePrefHillsAndCurves);
+            RoutePreferencesAdventurousInclMap[ViaPt] := Swap(DefRoutePrefInclMaps);
           end;
         else
           begin
             RoutePreferencesAdventurous[ViaPt] := Swap(DefRoutePrefAdv);
-            RoutePreferencesAdventurousHillsAndCurves[ViaPt] := Swap(DefRoutePref);
+            RoutePreferencesAdventurousInclMap[ViaPt] := Swap(DefRoutePref);
           end;
       end;
     end;
@@ -4811,22 +4828,38 @@ begin
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
     SetRoutePref(TmRoutePreferences.GetKey, TmpStream);
 
-    // RoutePrefs from Adventurous
+    // RoutePrefs AdventurousMode
     PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurous);
     SetRoutePref(TmRoutePreferencesAdventurousMode.GetKey, TmpStream);
 
-    // RoutePrefs from Adventurous Hills and Curves
-    PrepStream(TmpStream, SegmentCount, RoutePreferencesAdventurousHillsAndCurves);
-    SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpStream);
-
-    // All others
+    // RoutePrefs not Included maps
     for ViaPt := 0 to High(RoutePreferences) do
       RoutePreferences[ViaPt] := Swap(DefRoutePref);
     PrepStream(TmpStream, SegmentCount, RoutePreferences);
-    SetRoutePref(TmRoutePreferencesAdventurousScenicRoads.GetKey, TmpStream);
-    SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpStream);
+
+    // RoutePrefs Included maps
+    PrepStream(TmpMapStream, SegmentCount, RoutePreferencesAdventurousInclMap);
+
+    // Hills and Curves
+    if (TProcessOptions(ProcessOptions).AdvInclHills) then
+      SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpMapStream)
+    else
+      SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpStream);
+
+    // Michelin Scenic
+    if (TProcessOptions(ProcessOptions).AdvInclScenic) then
+      SetRoutePref(TmRoutePreferencesAdventurousScenicRoads.GetKey, TmpMapStream)
+    else
+      SetRoutePref(TmRoutePreferencesAdventurousScenicRoads.GetKey, TmpStream);
+
+    // Popular Paths
+    if (TProcessOptions(ProcessOptions).AdvInclPopular) then
+      SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpMapStream)
+    else
+      SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpStream);
   finally
     TmpStream.Free;
+    TmpMapStream.Free;
     RoutePointList.Free;
   end;
 

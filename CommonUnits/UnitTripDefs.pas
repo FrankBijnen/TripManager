@@ -41,10 +41,10 @@ type
                        rmCurvyRoads           = $05,
                        rmAdventurous          = $07,
                        rmTripTrack            = $09,
-                       rmHills                = $1a,
-                       rmNoShape              = $58,
-                       rmScenic               = $be,
-                       rmPopular              = $ef,
+//                       rmHills                = $1a,
+//                       rmNoShape              = $58,
+//                       rmScenic               = $be,
+//                       rmPopular              = $ef,
                        rmNA                   = $ff);
 
   // Supported by device
@@ -61,10 +61,10 @@ type
                        cmDWordOffRoad,
                        cmDWordEco,
                        cmTripTrack,
-                       cmHills,
-                       cmNoShape,
-                       cmScenic,
-                       cmPopular,
+//                       cmHills,
+//                       cmNoShape,
+//                       cmScenic,
+//                       cmPopular,
                        cmNA);
 
   TAdvlevel         = (advLevel1          = $00,
@@ -162,10 +162,10 @@ const
                                                           (Value: Ord(rpExtShaping);        Name: 'Extended Shaping point')
                                                         );
 
-  DefRoutePref: word                = $0100;
-  DefRoutePrefAdv: word             = $0101;
-  DefRoutePrefHillsAndCurves: word  = $0164;
-  NotApplicable                     = 'N/A';
+  DefRoutePref                = $0100;
+  DefRoutePrefAdv             = $0101;
+  DefRoutePrefInclMaps        = $0164;
+  NotApplicable               = 'N/A';
 
   MinAdvLevelUserConfig = 1; // Only these are available to the user.
   AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: NotApplicable),
@@ -203,10 +203,10 @@ const
         (Sel: false; DwSize: true;          Rm: rmDWordEco;             Desc: 'Eco'),
 
         (Sel: false; DwSize: false;         Rm: rmTripTrack;            Desc: 'TripTrack'),
-        (Sel: false; DwSize: false;         Rm: rmHills;                Desc: 'Hills'),
-        (Sel: false; DwSize: false;         Rm: rmNoShape;              Desc: 'NoShape'),
-        (Sel: false; DwSize: false;         Rm: rmScenic;               Desc: 'Scenic'),
-        (Sel: false; DwSize: false;         Rm: rmPopular;              Desc: 'Popular'),
+//        (Sel: false; DwSize: false;         Rm: rmHills;                Desc: 'Hills'),
+//        (Sel: false; DwSize: false;         Rm: rmNoShape;              Desc: 'NoShape'),
+//        (Sel: false; DwSize: false;         Rm: rmScenic;               Desc: 'Scenic'),
+//        (Sel: false; DwSize: false;         Rm: rmPopular;              Desc: 'Popular'),
         (Sel: false; DwSize: false;         Rm: rmNA;                   Desc: NotApplicable)
       );
 
@@ -354,9 +354,12 @@ const
 
   CalcModesSuppported: array[TTripModel] of set of TCalcMode = (
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT
-    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT2
-    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT3
-    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // Tread 2
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous,    // XT2
+     cmTripTrack],
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous,    // XT3
+     cmTripTrack],
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous,    // Tread 2
+     cmTripTrack],
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 346
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 595
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmCurvyRoads],    // Zumo 590
@@ -502,7 +505,10 @@ function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): strin
 var
   ModelCalcMode: TCalcMode;
 begin
-  result := RoutePrefRecs[cmNA].Desc;
+  if (ARoutePref = TRoutePreference.rmNA) then
+    result := RoutePrefRecs[cmNA].Desc
+  else
+    result := Format('TBD (0x%s)', [IntTohex(Ord(ARoutePref), 2)]);
   for ModelCalcMode in CalcModesSuppported[AModel] do
   begin
     if (RoutePrefRecs[ModelCalcMode].DwSize <> RoutePrefDWordSize[AModel]) then

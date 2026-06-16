@@ -18,13 +18,16 @@ const
 
   // XT1 and XT2 and XT3 and Tread 2
   Reg_TripOption                  = 'TripOption';
-  Reg_DefAdvLevel                 = 'DefAdvLevel';
   Reg_MaxViaPoints_Key            = 'MaxViaPoints';
   Reg_MaxViaPoints_Val            = 31;
 
   // XT2 and XT3 and Tread 2
   Reg_LoadActiveProfile           = 'LoadActiveProfile';
   Reg_AvoidancesChangedTimeAtSave = 'AvoidancesChangedTimeAtSave';
+  Reg_DefAdvLevel                 = 'DefAdvLevel';
+  Reg_AdvInclHills                = 'AdvInclHills';
+  Reg_AdvInclScenic               = 'AdvInclScenic';
+  Reg_AdvInclPopular              = 'AdvInclPopular';
 
   Reg_VehicleProfileGuid          = 'VehicleProfileGuid';
   Reg_VehicleProfileHash          = 'VehicleProfileHash';
@@ -210,6 +213,9 @@ begin
     AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
                                                                       TUnixDateConv.DateTimeAsCardinal(IncYear(Now, -1)));
     DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2), SubKey) -1);
+    AdvInclHills := GetRegistry(Reg_AdvInclHills, true, SubKey);
+    AdvInclScenic := GetRegistry(Reg_AdvInclScenic, false, SubKey);
+    AdvInclPopular := GetRegistry(Reg_AdvInclPopular, false, SubKey);
 
     // GPI defaults
     GpiSymbolsDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '80x80'));

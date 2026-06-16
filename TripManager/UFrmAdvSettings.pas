@@ -284,7 +284,7 @@ begin
                                             '',
                                             'Date: ');
     AddGridLine(GridZumoSettings, CurRow,   '', '');
-    if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0)))) then
+    if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0)))) then
     begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
                                               'True', 'Load active profile automatically');
@@ -302,6 +302,15 @@ begin
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_DefAdvLevel,
                                               IntToStr(Ord(TAdvlevel.advLevel2)),
                                               'Default Adventurous Level (1-4)');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclHills,
+                                              'True',
+                                              'Find routes using Hills and Curves');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclScenic,
+                                              'False',
+                                              'Find routes using Michelin Scenic Roads');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclPopular,
+                                              'False',
+                                              'Find routes using Popular Paths (Moto)');
     end;
     GridZumoSettings.RowCount := CurRow;
 
