@@ -2093,6 +2093,7 @@ begin
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
 
   TModelConv.CmbModelDevices(CmbModel.Items);
+  CmbModel.DropDownCount := CmbModel.Items.Count;
   CmbModel.AdjustWidth;
   if (GetRegistry(Reg_UnsafeModels, false)) then
   begin
@@ -2269,6 +2270,7 @@ begin
   // Add to ComboBox
   for Index := 0 to DeviceList.Count - 1 do
     CmbDevices.Items.AddObject(TBase_Device(DeviceList[Index]).DisplayedDevice, TBase_Device(DeviceList[Index]));
+  CmbDevices.DropDownCount := CmbDevices.Items.Count;
 
   SetDeviceColumnWidths;
 

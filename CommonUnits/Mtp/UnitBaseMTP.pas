@@ -16,6 +16,8 @@ const
   USB_BUSENUM         = 'swd#wpdbusenum'; // For (Garmin's) in Mass Storage Mode
   MTP_ID              = 'MTP';
   MSM_ID              = 'MSM';
+  NonMTPRoot          = '?:\';
+  RelativePath        = '.';
 
 type
   TMediaType = (mtMTP, mtMSM, mtDRV);
@@ -402,7 +404,7 @@ end;
 
 class function TBase_Device.GetMediaType(const DeviceName: string): TMediaType;
 begin
-  if (MatchesMask(DeviceName, '?:\')) then
+  if (MatchesMask(DeviceName, NonMTPRoot)) then
     result := TMediaType.mtDRV
   else
     result := TMediaType.mtMTP;

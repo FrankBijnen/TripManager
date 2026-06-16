@@ -387,9 +387,9 @@ begin
   ReadGarminDevice(GarminDevice.ModelDescription, DeviceList, Garmin_Name);
 
   if (FMediaType = TMediaType.mtMSM) and
-     (MatchesMask(FriendlyName, '?:\') = false) then
+     (MatchesMask(FriendlyName, NonMTPRoot) = false) then
     // Add the root path to friendlyname. Example: SD Cards of Zumo
-    FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath['?:\.']), FriendlyName]);
+    FriendlyName := Format('%s %s', [IncludeTrailingPathDelimiter(FriendlyPath[NonMTPRoot + RelativePath]), FriendlyName]);
 end;
 
 function TGarminMTP_Device.GetDbPath: string;
@@ -495,9 +495,9 @@ begin
                           'Trip functions are not enabled. Using %s as Generic Garmin%s' +
                           'Open online help how to ''Show .System''?',
                           [#10, FriendlyName, #10]),
-                    TMsgDlgType.mtWarning,
-                    [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
-                    0, TMsgDlgBtn.mbNo) = MrYes) then
+                     TMsgDlgType.mtWarning,
+                     [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
+                     0, TMsgDlgBtn.mbNo) = MrYes) then
         ShellExecute(0, 'Open', InstallHelp, '','', SW_SHOWNORMAL);
     exit;
   end;
@@ -608,7 +608,7 @@ end;
 
 function TGarminDrv_Device.GetPathId(APath: string): string;
 begin
-  result := ReplaceAll(APath, ['?:\'], [Device]);
+  result := ReplaceAll(APath, [NonMTPRoot], [Device]);
   if not System.SysUtils.DirectoryExists(result) then
     result := '';
 end;
@@ -667,7 +667,7 @@ end;
 function TGarminDrv_Device.GetFriendlyIdForPath(const SPath: string;
                                                 var FriendlyPath: string): string;
 begin
-  FriendlyPath := ReplaceAll(SPath, ['?:\'], [Device]);
+  FriendlyPath := ReplaceAll(SPath, [NonMTPRoot], [Device]);
   result := FriendlyPath;
 end;
 

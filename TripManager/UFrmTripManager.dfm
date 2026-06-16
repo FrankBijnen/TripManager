@@ -170,7 +170,6 @@ object FrmTripManager: TFrmTripManager
           Margins.Right = 1
           Align = alRight
           Style = csDropDownList
-          DropDownCount = 15
           DropDownWidth = 150
           TabOrder = 3
           OnChange = CmbModelChange
@@ -465,7 +464,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 715
-        Height = 375
+        Height = 430
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
@@ -860,7 +859,6 @@ object FrmTripManager: TFrmTripManager
         ScrollBars = ssVertical
         TabOrder = 2
         OnDblClick = DBMemoDblClick
-        ExplicitTop = 285
       end
     end
     object TsExplore: TTabSheet
@@ -870,7 +868,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 28
         Width = 715
-        Height = 347
+        Height = 402
         Align = alClient
         Columns = <
           item

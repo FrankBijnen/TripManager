@@ -49,7 +49,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure BtnLookupHashClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure GrdVehProfileTitleClick(Column: TColumn);
     procedure BtnDeleteHashListClick(Sender: TObject);
     procedure BtnSaveHashClick(Sender: TObject);
@@ -728,13 +727,6 @@ begin
   Dataset.FieldByName('Proposed_Hash').AsInteger := TmpProfile.Proposed_Hash;
   if (TmpProfile.Proposed_Hash = 0) then
     Dataset.FieldByName('Overridden_Hash').AsInteger := TmpProfile.HashFromHashList(SubKey);
-end;
-
-procedure TFrmVehProfiles.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  if (ModalResult = IdOK) and
-     (VehicleProfile.Proposed_Hash = 0) then
-    ShowMessage('Warning. VehicleProfileHash is 0!');
 end;
 
 procedure TFrmVehProfiles.FormCreate(Sender: TObject);

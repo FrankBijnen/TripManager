@@ -14,7 +14,6 @@ object FrmVehProfiles: TFrmVehProfiles
   Font.Style = []
   KeyPreview = True
   Position = poMainFormCenter
-  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress

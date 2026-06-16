@@ -13,7 +13,6 @@ const
   DefTripsDesc                      = 'Trips';
   SystemPath                        = '.System';
   SystemTripsPath                   = SystemPath + '\' + DefTripsPath;
-  NonMTPRoot                        = '?:\';
   DefGarminPath                     = 'Garmin';
   DefSQLitePath                     = '\SQlite';
   SystemDb                          = 'system.db';
@@ -517,11 +516,21 @@ begin
   result  := GetRegistry(RegKey,
                          GetKnownPath(CurrentDevice, PathId),
                          SubKey);
-  if (result <> '') and
-     (Assigned(CurrentDevice)) and
-     (CurrentDevice is TGarminMTP_Device) and
-     (TGarminMTP_Device(CurrentDevice).PathId[result] = '') then
+
+  if (Assigned(CurrentDevice)) and
+     (CurrentDevice is TGarminMTP_Device) then
+  begin
+    // Relative path?
+    if (StartsText(RelativePath, result)) then
+    begin
+      Delete(result, 1, Length(RelativePath)); // 1st Position
+      result := GetKnownPath(TGarminMTP_Device(CurrentDevice).GarminDevice, PathId) + result;
+    end;
+
+    if (result <> '') and
+       (TGarminMTP_Device(CurrentDevice).PathId[result] = '') then
       result := GetKnownPath(TGarminMTP_Device(CurrentDevice).GarminDevice, PathId);
+  end;
 end;
 
 class function TModelConv.Display2Garmin(const CmbIndex: integer): TGarminModel;

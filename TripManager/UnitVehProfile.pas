@@ -157,7 +157,9 @@ const
 implementation
 
 uses
-  System.Variants, System.SysUtils, System.StrUtils,
+  System.Variants, System.SysUtils, System.StrUtils, System.UITypes,
+  Winapi.Windows, Winapi.ShellAPI,
+  Vcl.Dialogs,
   Data.DB,
   UnitRegistry, UnitRegistryKeys;
 
@@ -166,6 +168,8 @@ const
   Min_Width                         = 96;     // $60
   Max_Width: array[boolean] of byte = (239,   // $ef Car
                                        223);  // $df Bike
+//TODO
+  ProfileHelp     = 'https://frankbijnen.github.io/TripManager/1initialtasks.html#showsys';
 
 function TVehicleProfile.HashSpeed1(const ASpeed: cardinal): cardinal;
 begin
@@ -313,6 +317,17 @@ end;
 
 procedure TVehicleProfile.ToRegistry(const SubKey: string);
 begin
+  if (Proposed_Hash = 0) then
+  begin
+    if (MessageDlg(Format('Warning. VehicleProfileHash is 0!%s' +
+                          'Open online help how to set up a vehicle profile?',
+                          [#10]),
+                     TMsgDlgType.mtWarning,
+                     [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
+                     0, TMsgDlgBtn.mbNo) = MrYes) then
+      ShellExecute(0, 'Open', ProfileHelp, '','', SW_SHOWNORMAL);
+  end;
+
   SetRegistry(Reg_VehicleProfileGuid,         GUID, SubKey);
   SetRegistry(Reg_VehicleId,                  Vehicle_Id, SubKey);
   SetRegistry(Reg_VehicleProfileTruckType,    Truck_Type, SubKey);
