@@ -475,6 +475,7 @@ type
   TBaseAdvRoutePreferences = class(TBaseRoutePreferences)
   private
     function GetIntToIdent(const Value: word): string; override;
+    function GetItemEditMode: TItemEditMode; override;
   end;
 
   TmRoutePreferences = class(TBaseRoutePreferences)
@@ -1022,6 +1023,9 @@ type
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
     procedure AddLocation(const Location2Add: TLocation2Add); overload;
     procedure SetSegmentRoutePrefs(Locations: TmLocations; ProcessOptions: TObject);
+    function GetSegmentInclRoads(var Popular: boolean;
+                                  var Scenic: boolean;
+                                  var Hills: boolean): boolean;
     procedure SetRoundTripPrefs(Locations: TmLocations; ProcessOptions: TObject);
     procedure ForceRecalc(const AModel: TTripModel = TTripModel.Unknown; ViaPointCount: integer = 0);
     procedure TripTrack(const AModel: TTripModel;
@@ -2580,6 +2584,11 @@ begin
     else
       result := Format('TBD (0x%s)', [IntTohex(Value, 4)]);
   end;
+end;
+
+function TBaseAdvRoutePreferences.GetItemEditMode: TItemEditMode;
+begin
+  result := TItemEditMode.emButton;
 end;
 
 constructor TmRoutePreferences.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
@@ -4786,6 +4795,8 @@ var
   TmpStream, TmpMapStream: TMemoryStream;
   RoutePointList: TList<TLocation>;
   Location: TLocation;
+  InclRoadsExists: boolean;
+  Popular, Scenic, Hills: boolean;
 begin
   if (GetItem(TmRoutePreferences.GetKey) = nil) then
     exit;
@@ -4793,6 +4804,16 @@ begin
   SegmentCount := Locations.ViaPointCount -1;
   if (SegmentCount < 1) then
     exit;
+  InclRoadsExists := GetSegmentInclRoads(Popular, Scenic, Hills);
+  // If no Including roads exists (CreateTemplate)
+  // or setting from FrmEditRoutePref
+  if (InclRoadsExists = false) or
+     (TProcessOptions(ProcessOptions).AdvSetPrefRoads) then
+  begin
+    Popular := TProcessOptions(ProcessOptions).AdvInclPopular;
+    Scenic := TProcessOptions(ProcessOptions).AdvInclScenic;
+    Hills := TProcessOptions(ProcessOptions).AdvInclHills;
+  end;
 
   RoutePointList := TList<TLocation>.Create;
   TmpStream := TMemoryStream.Create;
@@ -4840,23 +4861,24 @@ begin
     // RoutePrefs Included maps
     PrepStream(TmpMapStream, SegmentCount, RoutePreferencesAdventurousInclMap);
 
-    // Hills and Curves
-    if (TProcessOptions(ProcessOptions).AdvInclHills) then
-      SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpMapStream)
+    // Popular Paths
+    if (Popular) then
+      SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpMapStream)
     else
-      SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpStream);
+      SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpStream);
 
     // Michelin Scenic
-    if (TProcessOptions(ProcessOptions).AdvInclScenic) then
+    if (Scenic) then
       SetRoutePref(TmRoutePreferencesAdventurousScenicRoads.GetKey, TmpMapStream)
     else
       SetRoutePref(TmRoutePreferencesAdventurousScenicRoads.GetKey, TmpStream);
 
-    // Popular Paths
-    if (TProcessOptions(ProcessOptions).AdvInclPopular) then
-      SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpMapStream)
+    // Hills and Curves
+    if (Hills) then
+      SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpMapStream)
     else
-      SetRoutePref(TmRoutePreferencesAdventurousPopularPaths.GetKey, TmpStream);
+      SetRoutePref(TmRoutePreferencesAdventurousHillsAndCurves.GetKey, TmpStream);
+
   finally
     TmpStream.Free;
     TmpMapStream.Free;
@@ -4864,6 +4886,50 @@ begin
   end;
 
   SetRoundTripPrefs(Locations, ProcessOptions); // XT3
+end;
+
+function TTripList.GetSegmentInclRoads(var Popular: boolean;
+                                      var Scenic: boolean;
+                                      var Hills: boolean): boolean;
+var
+  Segment, SegmentCount: Cardinal;
+  Locations: TmLocations;
+  mRoutePrefs: TmRoutePreferences;
+  mPopular: TmRoutePreferencesAdventurousPopularPaths;
+  mScenic: TmRoutePreferencesAdventurousScenicRoads;
+  mHills: TmRoutePreferencesAdventurousHillsAndCurves;
+begin
+  result := false;
+  Popular := false;
+  Scenic := false;
+  Hills := false;
+
+  Locations := GetItem(TmLocations.GetKey) as TmLocations;
+  SegmentCount := Locations.ViaPointCount -1;
+  mRoutePrefs := GetItem(TmRoutePreferences.GetKey) as TmRoutePreferences;
+  if (mRoutePrefs = nil) then
+    exit;
+
+  mPopular := GetItem(TmRoutePreferencesAdventurousPopularPaths.GetKey) as TmRoutePreferencesAdventurousPopularPaths;
+  if (mPopular = nil) or
+     (mPopular.Count < SegmentCount) then
+    exit;
+  mScenic := GetItem(TmRoutePreferencesAdventurousScenicRoads.GetKey) as TmRoutePreferencesAdventurousScenicRoads;
+  if (mScenic = nil) or
+     (mScenic.Count < SegmentCount) then
+    exit;
+  mHills := GetItem(TmRoutePreferencesAdventurousHillsAndCurves.GetKey) as TmRoutePreferencesAdventurousHillsAndCurves;
+  if (mHills = nil) or
+     (mHills.Count < SegmentCount) then
+    exit;
+
+  for Segment := 1 to SegmentCount do
+  begin
+    result := result or (mRoutePrefs.GetRoutePref(Segment) = TRoutePreference.rmAdventurous);
+    Popular := Popular or (mPopular.GetRoutePrefByte(Segment) <> 0);
+    Scenic := Scenic or (mScenic.GetRoutePrefByte(Segment) <> 0);
+    Hills := Hills or (mHills.GetRoutePrefByte(Segment) <> 0);
+  end;
 end;
 
 procedure TTripList.SetRoundTripPrefs(Locations: TmLocations; ProcessOptions: TObject);
@@ -5186,7 +5252,7 @@ var
   AnUdbHandle: TmUdbDataHndl;
   ProcessOptions: TProcessOptions;
 begin
-  // If the model is not supplied, try to get it from the data
+  // TripModel to use
   TripModel := GetCalculationModel(AModel);
 
   // All Links
@@ -5349,7 +5415,7 @@ begin
   if not Assigned(Locations) then
     exit;
 
-  // If the model is not supplied, try to get it from the data
+  // TripModel to use
   TripModel := GetCalculationModel(AModel);
 
   // All Links
@@ -5463,7 +5529,7 @@ begin
   TotalTime := 0;
   TotalDist := 0;
 
-  // If the model is not supplied, try to get it from the data
+  // TripModel to use
   TripModel := GetCalculationModel(AModel);
 
   // All Routes
@@ -5762,9 +5828,17 @@ end;
 function TTripList.GetCalculationModel(AModel: TTripModel): TTripModel;
 begin
   result := AModel;
-  if (result < Low(TTripModel)) or
-     (result > Pred(High(TTripModel))) then
-    result := GetTripModelFromUDB;
+
+  // Is the model Unknown?
+  if (result = TTripModel.Unknown) then
+  begin
+    // Use the current setting
+    result := TripModel;
+
+    // Try to get it from the UDB
+    if (result = TTripModel.Unknown) then
+      result := GetTripModelFromUDB;
+  end;
 end;
 
 function TTripList.InitAllLinks: TBaseItem;

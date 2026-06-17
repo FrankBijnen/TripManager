@@ -41,10 +41,6 @@ type
                        rmCurvyRoads           = $05,
                        rmAdventurous          = $07,
                        rmTripTrack            = $09,
-//                       rmHills                = $1a,
-//                       rmNoShape              = $58,
-//                       rmScenic               = $be,
-//                       rmPopular              = $ef,
                        rmNA                   = $ff);
 
   // Supported by device
@@ -61,10 +57,6 @@ type
                        cmDWordOffRoad,
                        cmDWordEco,
                        cmTripTrack,
-//                       cmHills,
-//                       cmNoShape,
-//                       cmScenic,
-//                       cmPopular,
                        cmNA);
 
   TAdvlevel         = (advLevel1          = $00,
@@ -178,7 +170,7 @@ const
   TripExtension           = '.trip';
   TripMask                = '*' + TripExtension;
 
-// Model specific values
+  // Model specific values
   CalcUndef               = $00000000;
   CalcNA                  = $ffffffff;
   PosnSmall               =  8;
@@ -203,13 +195,10 @@ const
         (Sel: false; DwSize: true;          Rm: rmDWordEco;             Desc: 'Eco'),
 
         (Sel: false; DwSize: false;         Rm: rmTripTrack;            Desc: 'TripTrack'),
-//        (Sel: false; DwSize: false;         Rm: rmHills;                Desc: 'Hills'),
-//        (Sel: false; DwSize: false;         Rm: rmNoShape;              Desc: 'NoShape'),
-//        (Sel: false; DwSize: false;         Rm: rmScenic;               Desc: 'Scenic'),
-//        (Sel: false; DwSize: false;         Rm: rmPopular;              Desc: 'Popular'),
         (Sel: false; DwSize: false;         Rm: rmNA;                   Desc: NotApplicable)
       );
 
+  // Keep 0 for model Unknown
   UdbDirNameSize: array[TTripModel] of integer = (
       121 * 4,              // XT
       121 * 4,              // XT2
@@ -225,7 +214,7 @@ const
        32 * 2,              // Nuvi 57
             0);             // Unknown
 
-// Keep 0 for model Unknown
+  // Keep 0 for model Unknown
   Unknown3Size: array[TTripModel] of integer = (
       1288,                 // XT
       1448,                 // XT2
@@ -241,7 +230,7 @@ const
        258,                 // Nuvi 57
          0);                // Unknown
 
-// The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
+  // The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
   CalculationMagic: array[TTripModel] of Cardinal = (
       $0538feff,            // XT
       $05d8feff,            // XT2
@@ -272,8 +261,8 @@ const
       PosnNorm,             // Nuvi 57
       PosnSmall);           // Unknown
 
-// The Zum3x0 and Nuvi2595 need recreating .System\Trips
-// Otherwise trips can get duplicated, causing long time to boot up.
+  // The Zumo 3x0 and Nuvi 2595 need recreating .System\Trips
+  // Otherwise trips can get duplicated, causing long time to boot up.
   NeedRecreateTrips: array[TTripModel] of boolean = (
       false,                // XT
       false,                // XT2
@@ -289,6 +278,7 @@ const
       false,                // Nuvi 57
       false);               // Unknown
 
+  // Only seen on the nuvi 2595.
   HasAllLinks: array[TTripModel] of boolean = (
       false,                // XT
       false,                // XT2
@@ -304,6 +294,8 @@ const
       false,                // Nuvi 57
       false);               // Unknown
 
+  // Need mParentTripId and mParentTripName.
+  // Not avail if using Collections
   SupportsGrouping: array[TTripModel] of boolean = (
       true,                 // XT
       false,                // XT2
@@ -313,13 +305,13 @@ const
       true,                 // Zumo 595
       false,                // Zumo 590
       false,                // Zumo 3x0
-      false,                // Drive 51
+      true,                 // Drive 51
       true,                 // Drive 66
       false,                // Nuvi 2595
       false,                // Nuvi 57
       false);               // Unknown
 
-// The trip version defines many parameters. See record TTripVersion
+  // The trip version defines many parameters. See record TTripVersion
   TripVersion: array[TTripModel] of TTripVersion = (
       (Major:4; Minor: 7),  // XT
       (Major:4; Minor:16),  // XT2
@@ -335,8 +327,8 @@ const
       (Major:1; Minor: 4),  // Nuvi 57
       (Major:0; Minor: 0)); // Unknown
 
-// False TmRoutePreference has dtByte (1)
-// True  TmRoutePreference has dtWordRoutePref (8)
+  // False TmRoutePreference has dtByte (1)
+  // True  TmRoutePreference has dtWordRoutePref (8)
   RoutePrefDWordSize: array[TTripModel] of boolean = (
       false,                // XT
       false,                // XT2
@@ -354,12 +346,9 @@ const
 
   CalcModesSuppported: array[TTripModel] of set of TCalcMode = (
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT
-    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous,    // XT2
-     cmTripTrack],
-    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous,    // XT3
-     cmTripTrack],
-    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous,    // Tread 2
-     cmTripTrack],
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT2
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT3
+    [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // Tread 2
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 346
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 595
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmCurvyRoads],    // Zumo 590
@@ -393,8 +382,7 @@ function Desc2RoutePref(ADesc: string; AModel: TTripModel): TRoutePreference;
 implementation
 
 uses
-  System.SysUtils, System.DateUtils, System.StrUtils,
-  UnitRegistry;
+  System.SysUtils, System.DateUtils, System.StrUtils;
 
 class function TUnixDateConv.DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
 var

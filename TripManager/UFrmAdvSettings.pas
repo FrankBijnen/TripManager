@@ -302,15 +302,15 @@ begin
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_DefAdvLevel,
                                               IntToStr(Ord(TAdvlevel.advLevel2)),
                                               'Default Adventurous Level (1-4)');
-      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclHills,
-                                              'True',
-                                              'Find routes using Hills and Curves');
-      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclScenic,
-                                              'False',
-                                              'Find routes using Michelin Scenic Roads');
       AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclPopular,
                                               'False',
                                               'Find routes using Popular Paths (Moto)');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclScenic,
+                                              'False',
+                                              'Find routes using Michelin Scenic Roads');
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AdvInclHills,
+                                              'True',
+                                              'Find routes using Hills and Curves');
     end;
     GridZumoSettings.RowCount := CurRow;
 

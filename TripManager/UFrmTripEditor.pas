@@ -363,7 +363,7 @@ begin
 
   FrmEditRoutePref.CurTripList := CurTripList;
   if (FrmEditRoutePref.ShowModal = IDOK) and
-      (FrmEditRoutePref.VlModified) then
+      (FrmEditRoutePref.PrefsModified) then
     DmRoutePoints.LoadTrip(CurTripList);
 end;
 

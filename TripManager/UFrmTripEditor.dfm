@@ -4,8 +4,8 @@ object FrmTripEditor: TFrmTripEditor
   ActiveControl = DBGRoutePoints
   BorderIcons = [biMinimize, biMaximize]
   Caption = 'Trip Editor'
-  ClientHeight = 549
-  ClientWidth = 547
+  ClientHeight = 545
+  ClientWidth = 545
   Color = clBtnFace
   CustomTitleBar.CaptionAlignment = taCenter
   Font.Charset = DEFAULT_CHARSET
@@ -21,16 +21,18 @@ object FrmTripEditor: TFrmTripEditor
   TextHeight = 13
   object PnlBottom: TPanel
     Left = 0
-    Top = 520
-    Width = 547
+    Top = 516
+    Width = 545
     Height = 29
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 520
+    ExplicitWidth = 547
     DesignSize = (
-      547
+      545
       29)
     object BtnCancel: TBitBtn
-      Left = 437
+      Left = 433
       Top = 2
       Width = 75
       Height = 25
@@ -39,9 +41,10 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnCancelClick
+      ExplicitLeft = 437
     end
     object BtnOK: TBitBtn
-      Left = 351
+      Left = 347
       Top = 2
       Width = 75
       Height = 25
@@ -50,13 +53,14 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 1
       OnClick = BtnOkClick
+      ExplicitLeft = 351
     end
   end
   object DBGRoutePoints: TDBGrid
     Left = 0
     Top = 123
-    Width = 515
-    Height = 397
+    Width = 513
+    Height = 393
     Align = alClient
     Constraints.MinWidth = 512
     DataSource = DmRoutePoints.DsRoutePoints
@@ -112,12 +116,14 @@ object FrmTripEditor: TFrmTripEditor
       end>
   end
   object PnlRoutePointsButtons: TPanel
-    Left = 515
+    Left = 513
     Top = 123
     Width = 32
-    Height = 397
+    Height = 393
     Align = alRight
     TabOrder = 0
+    ExplicitLeft = 515
+    ExplicitHeight = 397
     object TBBRoutePoints: TToolBar
       Left = 1
       Top = 21
@@ -214,11 +220,12 @@ object FrmTripEditor: TFrmTripEditor
   object PnlRoute: TPanel
     Left = 0
     Top = 0
-    Width = 547
+    Width = 545
     Height = 123
     Align = alTop
     TabOrder = 3
     OnResize = PnlRouteResize
+    ExplicitWidth = 547
     object GrpRoute: TGroupBox
       Left = 0
       Top = 6

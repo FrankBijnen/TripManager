@@ -12,18 +12,24 @@ type
     BtnCancel: TBitBtn;
     BtnOK: TBitBtn;
     VlRoutePrefs: TValueListEditor;
+    PnlIncludeRoads: TPanel;
+    GrpIncludeRoads: TGroupBox;
+    ChkInclHills: TCheckBox;
+    ChkInclScenic: TCheckBox;
+    ChkInclPopular: TCheckBox;
     procedure VlRoutePrefsGetPickList(Sender: TObject; const KeyName: string; Values: TStrings);
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure VlRoutePrefsStringsChange(Sender: TObject);
+    procedure ChkInclRoadsClick(Sender: TObject);
   private
     { Private declarations }
     PickList: TStringList;
   public
     { Public declarations }
-    VlModified: boolean;
+    PrefsModified: boolean;
     CurTripList: TObject;
   end;
 
@@ -37,6 +43,11 @@ uses
   UnitProcessOptions, UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
+
+procedure TFrmEditRoutePref.ChkInclRoadsClick(Sender: TObject);
+begin
+  PrefsModified := true;
+end;
 
 procedure TFrmEditRoutePref.FormClose(Sender: TObject; var Action: TCloseAction);
 var
@@ -52,6 +63,11 @@ begin
     exit;
 
   ProcessOptions := TProcessOptions.Create;
+  Processoptions.AdvSetPrefRoads := true;
+  ProcessOptions.AdvInclPopular := ChkInclPopular.Checked;
+  ProcessOptions.AdvInclScenic := ChkInclScenic.Checked;
+  ProcessOptions.AdvInclHills := ChkInclHills.Checked;
+
   RoutePointList := TList<TLocation>.Create;
   try
     Locations := TTripList(CurTripList).GetItem(TmLocations.GetKey) as TmLocations;
@@ -119,7 +135,21 @@ var
   RoutePointList : TList<TLocation>;
   ViaPt: integer;
   RoutePreference, AdventurousLevel, FormatString: string;
+  ProcessOptions: TProcessOptions;
+  DefPopular, DefScenic, DefHills: boolean;
 begin
+  ProcessOptions := TProcessOptions.Create;
+
+  if (TTripList(CurTripList).GetSegmentInclRoads(DefPopular, DefScenic, DefHills) = false) then
+  begin
+    DefPopular := ProcessOptions.AdvInclPopular;
+    DefScenic := ProcessOptions.AdvInclScenic;
+    DefHills := ProcessOptions.AdvInclHills;
+  end;
+  ChkInclPopular.Checked := DefPopular;
+  ChkInclScenic.Checked := DefScenic;
+  ChkInclHills.Checked := DefHills;
+
   RoutePointList := TList<TLocation>.Create;
   VlRoutePrefs.Strings.BeginUpdate;
   try
@@ -140,9 +170,10 @@ begin
       VlRoutePrefs.Strings.AddPair(Location.LocationTmName.AsString, Format(FormatString, [RoutePreference, AdventurousLevel]));
     end;
   finally
-    RoutePointList.free;
+    RoutePointList.Free;
+    ProcessOptions.Free;
     VlRoutePrefs.Strings.EndUpdate;
-    VlModified := false;
+    PrefsModified := false;
   end;
 end;
 
@@ -153,7 +184,7 @@ end;
 
 procedure TFrmEditRoutePref.VlRoutePrefsStringsChange(Sender: TObject);
 begin
-  VlModified := true;
+  PrefsModified := true;
 end;
 
 end.

@@ -2086,7 +2086,6 @@ begin
   HexEdit.OnKeyDown := HexEditKeyDown;
   VlTripInfo.OnSelectionMoved := VlTripInfoSelectionMoved;
   VlTripInfo.OnBeforeDrawCell := VlTripInfoBeforeDrawCell;
-
   ShellTreeView1.OnCustomDrawItem := ShellTreeView1CustomDrawItem;
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
@@ -2764,8 +2763,17 @@ end;
 procedure TFrmTripManager.ShellTreeView1CustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState;
   var DefaultDraw: Boolean);
 begin
+// Artifacts on the Treeview with Rad11
+{$IFDEF VER350}
+  Sender.Canvas.Brush.Color := clWhite;
+{$ENDIF}
   if Node.Selected then
-    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
+    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold]
+{$IFDEF VER350}
+  else
+    Sender.Canvas.FillRect(Node.DisplayRect(true));
+  Sender.Canvas.Brush.Color := TTreeView(Sender).Color;
+{$ENDIF}
 end;
 
 procedure TFrmTripManager.SpbCorrectUuidClick(Sender: TObject);
@@ -4180,11 +4188,12 @@ begin
     exit;
 
   if (ABaseDataItem is TmRoutePreferences) or
+     (ABaseDataItem is TBaseAdvRoutePreferences) or
      (ABaseDataItem is TmRoutePreferencesAdventurousMode) then
   begin
     FrmEditRoutePref.CurTripList := ATripList;
     if (FrmEditRoutePref.ShowModal = IDOK) and
-        (FrmEditRoutePref.VlModified) then
+        (FrmEditRoutePref.PrefsModified) then
     begin
       BtnSaveTripValues.Enabled := true;
       TvTripChange(TvTrip, TvTrip.Selected);

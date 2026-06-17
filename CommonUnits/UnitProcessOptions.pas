@@ -153,6 +153,10 @@ type
     TripOption: TTripOption;                  // XT1 and XT2
     EnableTripOverview: boolean;              // XT1 and XT2
     DefAdvLevel: TAdvlevel;                   // XT2,XT3
+    AdvSetPrefRoads: boolean;                 // XT2,XT3  Only from EditRoutePrefs
+    AdvInclPopular: boolean;                  // XT2,XT3
+    AdvInclScenic: boolean;                   // XT2,XT3
+    AdvInclHills: boolean;                    // XT2,XT3
     DefRoadSpeed: integer;                    // XT1,XT2,XT3
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
     ExploreUUIDList: TStrings;                // XT2,XT3
@@ -316,6 +320,10 @@ begin
   RoadSpeedMap[11].Value := 15;  RoadSpeedMap[11].Name := '0C';
   DefRoadSpeed := 25;
   DefAdvLevel := TAdvlevel.advLevel1;
+  AdvSetPrefRoads := false;
+  AdvInclHills := true;
+  AdvInclPopular := true;
+  AdvInclScenic := true;
   ExploreUUIDList := nil;
 {$ENDIF}
 
