@@ -10,13 +10,11 @@
   body {
   background-color: #FFFFFF;
   }
-  span.c35 {font-family: Symbol; font-size: 120%}
-  span.c34 {color: #010101; font-family: Symbol; font-size: 12pt}
-  span.c33 {font-family: Symbol; font-size: 12pt}
-  span.c32 {font-size:14pt;background:#ffff00}
-  span.c31 {font-size:14pt}
-  span.c30 {color: #010101; font-family: Courier New; font-size: 11pt}
-  span.c29 {color: #010101; font-family: Courier New; font-size: 10pt}
+  span.c33 {font-family: Courier New; font-size: 70%}
+  span.c32 {font-family: Symbol; font-size: 120%}
+  span.c31 {font-family: Symbol; font-size: 12pt}
+  span.c30 {font-size:14pt;background:#ffff00}
+  span.c29 {font-size:14pt}
   span.c28 {font-family: Courier New; font-size: 11pt}
   span.c27 {font-family: Calibri; font-size: 11pt; font-weight: bold}
   span.c26 {font-family: Courier New; font-size: 10pt}
@@ -36,9 +34,9 @@
   td.c12 {border: solid #010101 1px;}
   span.c11 {font-family: Calibri; font-size: 120%; font-weight: bold}
   span.c10 {color: #010101; font-family: Calibri; font-size: 120%}
-  a.c9 {color: #0000FF; font-family: Calibri; font-size: 120%}
-  span.c8 {font-size: 14pt; text-decoration: underline}
-  div.c7 {margin-left:13mm; margin-right:0mm; text-indent:-6mm;}
+  div.c9 {margin-left:13mm; margin-right:0mm; text-indent:-6mm;}
+  a.c8 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c7 {font-size: 14pt; text-decoration: underline}
   span.c6 {font-family: Arial; font-size: 12pt}
   span.c5 {font-family: Calibri; font-size: 120%}
   table.c4 {background-color: #FFFFFF}
@@ -67,23 +65,30 @@
   <div align="left">
     <span class="c5">Notes:</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class=
     "c6">-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="c5">For
-    all people that can read Pascal, have a look at unit
-    ‘UnitTripObjects.pas’, that implements this format.</span>
+    all people that can read Pascal, have a look at units</span>
+    <a class="c8" href=
+    "https://github.com/FrankBijnen/TripManager/blob/main/CommonUnits/UnitTripDefs.pas/"
+    target="_blank"><span class="c7">UnitTripDefs.pas</span></a>
+    <span class="c5">and</span> <a class="c8" href=
+    "https://github.com/FrankBijnen/TripManager/blob/main/CommonUnits/UnitTripObjects.pas/"
+    target="_blank"><span class=
+    "c7">UnitTripObjects.pas</span></a><span class="c5">, that
+    implement this format.</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class=
     "c6">-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class=
     "c5">‘0x’ is used for Hexadecimal notation. E.G. 0x0A =
     10</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class=
     "c6">-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class=
-    "c5">Refer to</span> <a class="c9" href=
-    "subclass.html"><span class="c8">Subclass field</span></a>
+    "c5">Refer to</span> <a class="c8" href=
+    "subclass.html"><span class="c7">Subclass field</span></a>
     <span class="c10">for details on the Subclass.</span>
   </div>
   <div align="left">
@@ -689,7 +694,7 @@
         </div>
         <div align="left">
           <span class="c5"><b>Version</b>: 0x0700 0000 for XT,
-          0x1000 0000 for XT2 and Tread 2</span>
+          0x1000 0000 for XT(2)(3) and Tread 2</span>
         </div>
       </td>
     </tr>
@@ -1007,7 +1012,7 @@
         <div align="left">
           <span class="c5">Type used for strings. Strings are
           stored as UCS4 chars. 4 bytes for every character for
-          newer models like XT, XT2 and Tread2. Older models (3x0,
+          newer models like XT(2)(3) and Tread2. Older models (3x0,
           590, 595 etc.) use 2 bytes per character.</span>
         </div>
         <div align="left">
@@ -1047,10 +1052,10 @@
           <br>
         </div>
         <div align="left">
-          <span class="c5">More info:</span> <a class="c9" href=
+          <span class="c5">More info:</span> <a class="c8" href=
           "https://docwiki.embarcadero.com/Libraries/Athens/en/System.UCS4Char"
           target="blank"><span class=
-          "c8">https://docwiki.embarcadero.com/Libraries/Athens/en/System.UCS4Char</span></a>
+          "c7">https://docwiki.embarcadero.com/Libraries/Athens/en/System.UCS4Char</span></a>
         </div>
       </td>
     </tr>
@@ -1201,20 +1206,20 @@
   <div align="left">
     <br>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">1)&nbsp;&nbsp;</span><span class="c5">Convert
     the Hexadecimal value to Decimal =&nbsp; 573802501 (Using
     Windows calculator in Programmer mode)</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">2)&nbsp;&nbsp;</span><span class="c5">Divide
     by&nbsp; 4294967296 (2^32) = 0.13359880563803</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">3)&nbsp;&nbsp;</span><span class=
     "c5">Multiply by 360 = 48.0955700296909</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">4)&nbsp;&nbsp;</span><span class="c5">Round
     to 6 digits = 48.09557</span>
   </div>
@@ -1227,19 +1232,19 @@
   <div align="left">
     <br>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">1)&nbsp;&nbsp;</span><span class="c5">Convert
     the Hexadecimal value to Decimal =&nbsp; 97918716</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">2)&nbsp;&nbsp;</span> <span class="c5">Divide
     by&nbsp; 4294967296 (2^32) = 0,0227984776720405</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">3)&nbsp;&nbsp;</span><span class=
     "c5">Multiply by 360 = 8.20745196193457</span>
   </div>
-  <div align="left" class="c7">
+  <div align="left" class="c9">
     <span class="c20">4)&nbsp;&nbsp;</span><span class="c5">Round
     to 6 digits = 8.20745</span>
   </div>
@@ -1358,9 +1363,9 @@
   </div>
   <div align="left">
     <span class="c5">For converting seconds to date time you can
-    use the website:</span> <a class="c9" href=
+    use the website:</span> <a class="c8" href=
     "https://www.epochconverter.com/"><span class=
-    "c8">https://www.epochconverter.com/</span></a>
+    "c7">https://www.epochconverter.com/</span></a>
   </div>
   <div align="left">
     <br>
@@ -2602,8 +2607,8 @@
     0001 0001 0001 0001</b> 0001 = Faster time, 0002 = Shorter
     distance etc.? It appears these items are used when trips are
     created/modified with the Tread app. See the XLSX file:</span>
-    <a class="c9" href="Route%20Preferences.xlsx"><span class=
-    "c8">Route Preferences.xlsx</span></a> <span class="c5">for an
+    <a class="c8" href="Route%20Preferences.xlsx"><span class=
+    "c7">Route Preferences.xlsx</span></a> <span class="c5">for an
     overview of the values found for the various route preferences
     set up. The default values used when creating trip files are
     accepted by the XT2.</span>
@@ -2663,17 +2668,30 @@
           <span class="c27">XT2</span>
         </div>
         <div align="left">
-          <span class="c28">select v.vehicle_id, v.truck_type,
-          v.name, Hex(v.guid_data), v.vehicle_type,
-          v.transport_mode, v.adventurous_route_mode from
-          active_vehicle a</span>
+          <span class="c28">select</span>
         </div>
         <div align="left">
-          <span class="c28">join vehicle_profile v on (a.vehicle_id
-          = v.vehicle_id)</span>
+          <span class="c28">(select 'active_profile' from
+          active_vehicle a where a.vehicle_id = v.vehicle_id) as
+          Status,</span>
         </div>
         <div align="left">
-          <span class="c28">limit 1;</span>
+          <span class="c28">v.Guid_Data as GUID,</span>
+        </div>
+        <div align="left">
+          <span class="c28">0 as Environmental,</span>
+        </div>
+        <div align="left">
+          <span class="c28">0 as Proposed_Hash,</span>
+        </div>
+        <div align="left">
+          <span class="c28">0 as Overridden_Hash,</span>
+        </div>
+        <div align="left">
+          <span class="c28">v.*</span>
+        </div>
+        <div align="left">
+          <span class="c28">from vehicle_profile v</span>
         </div>
         <div align="left">
           <br>
@@ -2682,46 +2700,44 @@
           <span class="c27">XT3, Tread 2</span>
         </div>
         <div align="left">
-          <span class="c26">select v.vehicle_id, v.truck_type,
-          v.name,</span>
+          <span class="c28">select</span>
         </div>
         <div align="left">
-          <span class="c26">Hex(g.description) as Guid_Data,</span>
+          <span class="c28">(select act."description:1" from
+          properties_dbg act where act.value = v.vehicle_id and
+          act."description:1" = 'active_profile' ) as
+          Status,</span>
         </div>
         <div align="left">
-          <span class="c26">v.vehicle_type, v.transport_mode,
-          v.adventurous_route_mode,</span>
+          <span class="c28">Hex(g.description) as GUID,</span>
         </div>
         <div align="left">
-          <span class="c26">e.value as Env_Data,</span>
+          <span class="c28">e.value as Environmental,</span>
         </div>
         <div align="left">
-          <span class="c26">v.calc_method, v.max_vehicle_speed,
-          v.traction, v.width, v.width_metric</span>
+          <span class="c28">0 as Proposed_Hash,</span>
         </div>
         <div align="left">
-          <span class="c26">from properties_dbg act</span>
+          <span class="c28">0 as Overridden_Hash,</span>
         </div>
         <div align="left">
-          <span class="c26">join vehicle_profile v on (v.vehicle_id
-          = act.value)</span>
+          <span class="c28">v.*</span>
         </div>
         <div align="left">
-          <span class="c26">join properties_dbg g on (g.value =
-          act.value and g."description:1" = 'guid')</span>
+          <span class="c28">from vehicle_profile v</span>
         </div>
         <div align="left">
-          <span class="c26">join properties_dbg e on (e.key_id =
+          <span class="c28">join properties_dbg g on (g.value =
+          v.vehicle_id and g."description:1" = 'guid')</span>
+        </div>
+        <div align="left">
+          <span class="c28">join properties_dbg e on (e.key_id =
           g.key_id and e."description:1" like
           'environmental%')</span>
         </div>
         <div align="left">
-          <span class="c26">where act."description:1" =
-          'active_profile'</span>
-        </div>
-        <div align="left">
-          <span class="c29">limit</span> <span class=
-          "c30">1;</span>
+          <span class="c28">order by Status desc, v.vehicle_id
+          asc</span>
         </div>
         <div align="left"></div>
       </td>
@@ -2938,8 +2954,8 @@
     380 DataType: 0x0A, Count: 0x0000 0009</span>
   </div>
   <div align="left">
-    <span class="c5"><span class="c31">Next a list of ‘Count = 9’
-    items:</span> <span class="c32">(For XT2 the count is usually
+    <span class="c5"><span class="c29">Next a list of ‘Count = 9’
+    items:</span> <span class="c30">(For XT2 the count is usually
     10)</span></span>
   </div>
   <table border="1" width="638" cellpadding="7" cellspacing="0"
@@ -3001,8 +3017,8 @@
           <span class="c5">0x0000 0001 = Shaping Point</span>
         </div>
         <div align="left">
-          <span class="c5">0x0000 0002 = Shaping Point XT(2) (Shape
-          route/Tread app)</span>
+          <span class="c5">0x0000 0002 = Extended Shaping Point
+          (Shape route/Tread app)</span>
         </div>
       </td>
     </tr>
@@ -3105,12 +3121,12 @@
           <span class="c5">A known issue is that Via/Shaping
           sometimes get renamed on the XT. Possible fixes:</span>
         </div>
-        <div align="left" class="c7">
+        <div align="left" class="c9">
           <span class=
           "c6">-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class=
           "c5">Setting the subclass in the GPX to 0x00ff</span>
         </div>
-        <div align="left" class="c7">
+        <div align="left" class="c9">
           <span class=
           "c6">-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class=
           "c5">Setting a value for this item.</span>
@@ -3172,21 +3188,21 @@
     routes is not available.</span>
   </div>
   <div align="left" class="c25">
-    <span class="c33">·&nbsp;&nbsp;&nbsp;</span><span class="c5">If
+    <span class="c31">·&nbsp;&nbsp;&nbsp;</span><span class="c5">If
     a calculated route from Basecamp is sent to the XT(2)(3) then
     this list contains the unmodified route. Provided a few
     conditions are met, like the same map, same transportation mode
     etc.</span>
   </div>
   <div align="left" class="c25">
-    <span class="c33">·&nbsp;&nbsp;&nbsp;</span><span class="c5">If
+    <span class="c31">·&nbsp;&nbsp;&nbsp;</span><span class="c5">If
     a route is sent without all the Ghost Points, Subclasses etc.
     the XT(2)(3) will recalculate the route upon importing, and
     this list will contain the result of the calculation. For
     example routes created by MRA.</span>
   </div>
   <div align="left" class="c25">
-    <span class="c33">·&nbsp;&nbsp;&nbsp;</span><span class=
+    <span class="c31">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c5">If, for some reason, the XT(2)(3) recalculates the route,
     the result will likely not be the same as initially created in
     BaseCamp/MRA.</span>
@@ -3282,7 +3298,7 @@
   <div align="left">
     <span class="c5"><b>Calculation status</b>:</span>
   </div>
-  <table border="1" width="832" cellpadding="4" cellspacing="0"
+  <table border="1" width="624" cellpadding="4" cellspacing="0"
   class="c13">
     <tr>
       <td valign="top" width="199" class="c12">
@@ -3298,11 +3314,6 @@
       <td valign="top" width="199" class="c12">
         <div align="left">
           <span class="c11">Size Unknown3</span>
-        </div>
-      </td>
-      <td valign="top" width="199" class="c12">
-        <div align="left">
-          <span class="c11">Difference</span>
         </div>
       </td>
     </tr>
@@ -3322,11 +3333,6 @@
           <span class="c5">1288</span>
         </div>
       </td>
-      <td valign="top" width="199" class="c12">
-        <div align="left">
-          <span class="c5">0X0538 - 1288 =48</span>
-        </div>
-      </td>
     </tr>
     <tr>
       <td valign="top" width="199" class="c12">
@@ -3344,10 +3350,21 @@
           <span class="c5">1448</span>
         </div>
       </td>
+    </tr>
+    <tr>
       <td valign="top" width="199" class="c12">
         <div align="left">
-          <span class="c10">0X05D8 - 1448 =</span><span class=
-          "c5">48</span>
+          <span class="c5">XT3</span>
+        </div>
+      </td>
+      <td valign="top" width="199" class="c12">
+        <div align="left">
+          <span class="c5">0X05D8FEFF</span>
+        </div>
+      </td>
+      <td valign="top" width="199" class="c12">
+        <div align="left">
+          <span class="c5">1452</span>
         </div>
       </td>
     </tr>
@@ -3367,12 +3384,6 @@
           <span class="c5">1348</span>
         </div>
       </td>
-      <td valign="top" width="199" class="c12">
-        <div align="left">
-          <span class="c10">0X0574 - 1348 =</span><span class=
-          "c5">48</span>
-        </div>
-      </td>
     </tr>
   </table>
   <div align="left">
@@ -3382,12 +3393,7 @@
     <span class="c5">Notes:</span>
   </div>
   <div align="left" class="c25">
-    <span class="c34">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c10">It could be that this field defines a length. See column
-    Difference</span>
-  </div>
-  <div align="left" class="c25">
-    <span class="c33">·&nbsp;&nbsp;&nbsp;</span><span class=
+    <span class="c31">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c5">When creating a trip file, this field can remain zero, but
     the correct size for Unknown3 must be allocated.</span>
   </div>
@@ -3395,7 +3401,7 @@
     <br>
   </div>
   <div align="left">
-    <span class="c5"><b>Unkown2</b>: 150 bytes.</span>
+    <span class="c5"><b>Unknown2</b>: 150 bytes.</span>
   </div>
   <div align="left">
     <span class="c5"><b>UdbDir count</b>: 0x0354=852</span>
@@ -3500,6 +3506,10 @@
     <span class="c5">Note:</span>
   </div>
   <div align="left">
+    <span class="c5">See TripVersion in UnitTripDefs.pas for
+    offsets per version.</span>
+  </div>
+  <div align="left">
     <span class="c5">The Distance, Time and ShapeBitmap are
     required for trip files that dont need calculating. If Distance
     and Time are set to zeroes the ETA will not be correct. If
@@ -3551,8 +3561,8 @@
         <div align="left">
           <span class="c5">The subclass as can be found in the GPX.
           The first 2 bytes (RoadClass) are omitted. See</span>
-          <a class="c9" href="subclass.html"><span class=
-          "c8">Subclass for RoutePoints in Garmin GPX</span></a>
+          <a class="c8" href="subclass.html"><span class=
+          "c7">Subclass for RoutePoints in Garmin GPX</span></a>
         </div>
       </td>
     </tr>
@@ -3595,7 +3605,7 @@
     <tr>
       <td valign="top" width="159" height="31" class="c12">
         <div align="left">
-          <span class="c5">Unknown1</span>
+          <span class="c5">UdbDirMagic</span>
         </div>
       </td>
       <td valign="top" width="105" height="31" class="c12">
@@ -3617,31 +3627,13 @@
       </td>
       <td valign="top" width="105" height="24" class="c12">
         <div align="left">
-          <span class="c5">1</span>
+          <span class="c5">2</span>
         </div>
       </td>
       <td valign="top" width="843" height="24" class="c12">
         <div align="left">
           <span class="c5">Time in seconds for this UdbDir. Always
-          0xFF for SubClass.PointType = 0x03 (=Route point)</span>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td valign="top" width="159" height="24" class="c12">
-        <div align="left">
-          <span class="c5">Border</span>
-        </div>
-      </td>
-      <td valign="top" width="105" height="24" class="c12">
-        <div align="left">
-          <span class="c5">1</span>
-        </div>
-      </td>
-      <td valign="top" width="843" height="24" class="c12">
-        <div align="left">
-          <span class="c5">0x01 = A border is crossed, else 0x00.
-          Always 0xFF for SubClass.PointType = 0x03 (=Route
+          0xFFFF for SubClass.PointType = 0x03 (=Route
           point)</span>
         </div>
       </td>
@@ -3659,8 +3651,8 @@
       </td>
       <td valign="top" width="843" class="c12">
         <div align="left">
-          <span class="c5">See UdbDirUnknown2Size[TTripModel] in
-          Layout UdbDataHndl</span>
+          <span class="c5">See TripFileVersion.UdbDirUnknown2Size
+          in Layout UdbDataHndl</span>
         </div>
       </td>
     </tr>
@@ -3682,7 +3674,7 @@
         </div>
         <div align="left">
           <span class="c5">A special value indicates a turn:
-          0x474E0000</span>
+          0x474E</span>
         </div>
         <div align="left">
           <span class="c5">See UdbDirNameSize[TTripModel] in Layout
@@ -3698,13 +3690,13 @@
     <span class="c5">Notes:</span>
   </div>
   <div align="left" class="c25">
-    <span class="c35">·&nbsp;&nbsp;&nbsp;</span><span class=
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c5">Mapsegment, RoadId, Direction and PointType are taken from
-    the</span> <a class="c9" href="subclass.html"><span class=
-    "c8">SubClass.</span></a>
+    the</span> <a class="c8" href="subclass.html"><span class=
+    "c7">SubClass.</span></a>
   </div>
   <div align="left" class="c25">
-    <span class="c35">·&nbsp;&nbsp;&nbsp;</span><span class=
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c5">Sizes shown are for the XT(2)(3) and Tread 2. See
     <b>Layout UdbDataHndl</b> for known sizes per model.</span>
   </div>
@@ -3733,483 +3725,392 @@
     <br>
   </div>
   <div align="left">
-    <span class="c26">Memory layout
+    <span class="c33">Memory layout
     UdbDataHndl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Size&nbsp;&nbsp; Pascal constant</span>
+    Size&nbsp;&nbsp; Pascal constant UnitTripDefs.pas</span>
   </div>
   <div align="left">
     <span class=
-    "c26">+----------------------------------------------------------------------------+</span>
+    "c33">+---------------------------------------------------------------------------------+</span>
   </div>
   <div align="left">
-    <span class="c26">|Fixed part
+    <span class="c33">|Fixed part
     UdbHandle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    "c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;
-    13|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    13|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     unknown&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     DataType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Byte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp; 1|
-    0x0a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    0x0a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     HandleId&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Initiator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp; 1| Tab
-    0x09&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    0x09&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     NameLen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     string&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp; 12|
-    'mUdbDataHndl'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    'mUdbDataHndl'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Datatype&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     byte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp; 1|
-    0x0b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    0x0b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     UdbHandleSize:&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     CalcStatus:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp; 4| CalculationMagic[TTripModel]&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp; 4|
+    CalculationMagic[TTripModel]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|----------------------------------------------------------------------------|</span>
+    "c33">|---------------------------------------------------------------------------------|</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Unknown2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp; |
-    Unknown2Size[TTripModel]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    TripFileVersion.Unknown2Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|----------------------------------------------------------------------------|</span>
+    "c33">|---------------------------------------------------------------------------------|</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     UDbDirCount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     WORD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    2|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    2|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Unknown3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;
     var|
-    Unknown3Size[TTripModel]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3Size[TTripModel]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|----------------------------------------------------------------------------|</span>
+    "c33">|---------------------------------------------------------------------------------|</span>
   </div>
   <div align="left">
-    <span class="c26">|Identified fields of
+    <span class="c33">|Identified fields of
     Unknown3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Unknown3Dist:&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp; 4| Unknown3DistOffset[TTripModel] |</span>
+    |&nbsp;&nbsp;&nbsp; 4| TripFileVersion.Unknown3DistOffset&nbsp;
+    |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Unknown3Time:&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp; 4| Unknown3TimeOffset[TTripModel] |</span>
+    |&nbsp;&nbsp;&nbsp; 4| TripFileVersion.Unknown3TimeOffset&nbsp;
+    |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Unknown3Shape:
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;
-    var| Unknown3ShapeOffset[TTripModel]|</span>
+    var| TripFileVersion.Unknown3ShapeOffset |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|----------------------------------------------------------------------------|</span>
+    "c33">|---------------------------------------------------------------------------------|</span>
   </div>
   <div align="left">
-    <span class="c26">|Variable part
+    <span class="c33">|Variable part
     UdbHandle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp; UdbDir
+    <span class="c33">|&nbsp;&nbsp;&nbsp; UdbDir
     1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp; UdbDir
+    <span class="c33">|&nbsp;&nbsp;&nbsp; UdbDir
     ..&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp; UdbDir
+    <span class="c33">|&nbsp;&nbsp;&nbsp; UdbDir
     UdbDirCount&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">+----------------------------------------------------------------------------+</span>
+    "c33">+---------------------------------------------------------------------------------+</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|Trailer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    "c33">|Trailer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp; var|
-    Zumo 3x0, 590 and Nuvi2595 can |</span>
-  </div>
-  <div align="left">
-    <span class=
-    "c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp; | have a trailer. 4..12
-    bytes&nbsp;&nbsp;&nbsp; |</span>
-  </div>
-  <div align="left">
-    <span class=
-    "c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp; | Must be &lt; size
-    UdbDir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Major version 1 can have
+    a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">+----------------------------------------------------------------------------+</span><span class="c15"><br clear="all"
-    class="c14"></span>
+    "c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp; | trailer. Usually 4..12
+    bytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">+----------------------------------------------------------------------------+</span>
+    "c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp; | Must be &lt; size
+    UdbDir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
   </div>
   <div align="left">
-    <span class="c26">|Fixed part
+    <span class=
+    "c33">+---------------------------------------------------------------------------------+</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class=
+    "c33">+---------------------------------------------------------------------------------+</span>
+  </div>
+  <div align="left">
+    <span class="c33">|Fixed part
     UdbDir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    "c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp; TUdbDirFixedValue = packed
+    <span class="c33">|&nbsp;&nbsp; TUdbDirFixedValue = packed
     record |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
     SubClass:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TSubClass&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;
-    30|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    30|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
     Lat:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
     Lon:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     integer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;
-    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
-    Unknown1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
+    UdbDirMagic:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp; 4|
-    UdbDirMagic
-    ($51590469)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |</span>
+    $51590469&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
     Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     WORD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
-    2|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    2|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|----------------------------------------------------------------------------|</span>
+    "c33">|---------------------------------------------------------------------------------|</span>
   </div>
   <div align="left">
-    <span class="c26">|Variable part
+    <span class="c33">|Variable part
     UdbDir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    "c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
     FUnknown2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp; var|
-    UdbDirUnknown2Size[TTripModel] |</span>
+    TripFileVersion.UdbDirUnknown2Size&nbsp; |</span>
   </div>
   <div align="left">
-    <span class="c26">|&nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;
     FName:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp; var|
-    UdbDirNameSize[TTripModel]&nbsp;&nbsp;&nbsp;&nbsp; |</span>
+    UdbDirNameSize[TTripModel]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
   </div>
   <div align="left">
     <span class=
-    "c26">+----------------------------------------------------------------------------+</span><span class="c15"><br clear="all"
-    class="c14"></span>
+    "c33">+---------------------------------------------------------------------------------+<br clear="all"
+    class="c14">
+    <br></span>
   </div>
   <div align="left">
-    <span class="c26">// Model specific
-    values&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    XT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    XT2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; XT3 Tread 2&nbsp;&nbsp;
-    Zumo 595&nbsp; Zumo 590&nbsp; Zumo 3x0&nbsp; Drive 51&nbsp;
-    Drive 66&nbsp; nuvi 2595 Unknown</span>
+    <span class="c3">Model specific values</span>
   </div>
   <div align="left">
-    <span class="c26">&nbsp; NeedRecreateTrips:&nbsp;
-    array[TTripModel] of boolean&nbsp; =(false,&nbsp;&nbsp;&nbsp;
-    false, false,&nbsp;&nbsp;&nbsp; false,&nbsp;&nbsp;&nbsp;
-    false,&nbsp;&nbsp;&nbsp; false,&nbsp;&nbsp;&nbsp;
-    true,&nbsp;&nbsp;&nbsp;&nbsp; false,&nbsp;&nbsp;&nbsp;
-    false,&nbsp;&nbsp;&nbsp; true, false);</span>
+    <br>
   </div>
   <div align="left">
-    <span class="c26">&nbsp;
-    UdbDirNameSize:&nbsp;&nbsp;&nbsp;&nbsp; array[TTripModel] of
-    integer&nbsp; =(121 * 4,&nbsp; 121 * 4,&nbsp; 121 * 4,&nbsp;
-    121 * 4,&nbsp; 32 * 2,&nbsp;&nbsp; 32 * 2,&nbsp;&nbsp; 66 *
-    2,&nbsp;&nbsp; 32 * 2,&nbsp;&nbsp; 121 * 4,&nbsp; 21 *
-    2,&nbsp;&nbsp; 64 * 2);</span>
+    <span class="c5">These model specific values can be found in
+    'UnitTripDefs.pas'.</span>
   </div>
   <div align="left">
-    <span class="c26">&nbsp; UdbDirUnknown2Size: array[TTripModel]
-    of integer&nbsp; =(18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 18,
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    16,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20);</span>
+    <br>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp;
-    Unknown3Size:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    array[TTripModel] of integer&nbsp;
-    =(1288,&nbsp;&nbsp;&nbsp;&nbsp; 1448,
-    1452,&nbsp;&nbsp;&nbsp;&nbsp; 1348,&nbsp;&nbsp;&nbsp;&nbsp;
-    294,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    254,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    130,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    294,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    1348,&nbsp;&nbsp;&nbsp;&nbsp; 134, 512);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">CalcModesSuppported. The Calculation modes supported. EG.
+    FasterTime, ShorterDistance etc.</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp; UdbHandleTrailer:&nbsp;&nbsp;
-    array[TTripModel] of boolean&nbsp; =(false,&nbsp;&nbsp;&nbsp;
-    false, false,&nbsp;&nbsp;&nbsp; false,&nbsp;&nbsp;&nbsp;
-    false,&nbsp;&nbsp;&nbsp; true,&nbsp;&nbsp;&nbsp;&nbsp;
-    true,&nbsp;&nbsp;&nbsp;&nbsp; false,&nbsp;&nbsp;&nbsp;
-    false,&nbsp;&nbsp;&nbsp; true, false);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">ScPosnSize. Size of the item mScnPosn in the
+    Location.</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp; CalculationMagic:&nbsp;&nbsp;
-    array[TTripModel] of Cardinal
-    =($0538feff,$05d8feff,$05d8feff,$0574feff,$0170feff,CalcUndef,CalcUndef,$0170feff,$0574feff,CalcUndef,CalcNA);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">NeedRecreateTrips. Does the model require that the Trips
+    folder needs to be recreated? (Zumo 3x0, Nuvi 2595)</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp; Unknown3ShapeOffset:array[TTripModel]
-    of Cardinal =($90,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $c0,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $c0,
-    $c0,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $8e,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $66,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $66,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $8e,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $c0,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $00,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $c0);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">HasAllLinks. Does the model use mAllLinks? (Nuvi
+    2595)</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp; Unknown3DistOffset: array[TTripModel]
-    of Cardinal =($14,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $14,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $14,
-    $14,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $12,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $12,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $12,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $12,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $14,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $12,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $14);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">SupportsGrouping. Can trips be grouped in the Trip
+    planner?</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp; Unknown3TimeOffset: array[TTripModel]
-    of Cardinal =($18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $18,
-    $18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $16,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $16,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $16,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $16,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $18,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    $16,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $18);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">TripVersion. The version of the trip file.</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp;
-    ScPosnSize:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    array[TTripModel] of integer&nbsp; =(PosnNorm, PosnNorm,
-    PosnLarge,PosnLarge,PosnNorm, PosnSmall,PosnSmall,PosnNorm,
-    PosnNorm, PosnSmall,PosnSmall);</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">RoutePrefDWordSize. Is the RoutePreference stored as a
+    byte, or a DWord?</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp;
-    TripVersion:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    array[TTripModel] of TTripVersion =</span>
+  <div align="left" class="c25">
+    <span class="c32">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">TransportModesSuppported. EG. MotorCycling, Driving
+    etc.</span>
   </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp; ((Major:4;
-    Minor:7),&nbsp;&nbsp;&nbsp; // XT</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:4;
-    Minor:16),&nbsp;&nbsp; // XT2</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:4;
-    Minor:16),&nbsp;&nbsp; // XT3</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:4;
-    Minor:16),&nbsp;&nbsp; // Tread 2</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:1;
-    Minor:6),&nbsp;&nbsp;&nbsp; // Zumo 595</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:1;
-    Minor:3),&nbsp;&nbsp;&nbsp; // Zumo 590</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:1;
-    Minor:3),&nbsp;&nbsp;&nbsp; // Zumo 3x0</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:1;
-    Minor:6),&nbsp;&nbsp;&nbsp; // Drive 51</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:4;
-    Minor:9),&nbsp;&nbsp;&nbsp; // Drive 66</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:1;
-    Minor:1),&nbsp;&nbsp;&nbsp; // Nuvi 2595</span>
-  </div>
-  <div align="left">
-    <span class="c26">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Major:0;
-    Minor:0));&nbsp;&nbsp; // Unknown</span>
-  </div>
+  <div align="left"></div>
   <div align="left"></div>
 </body>
 </html>
