@@ -441,11 +441,12 @@ begin
     LoadActive := GetRegistry(Reg_LoadActiveProfile, true);
     NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb,
                                             TModelConv.Display2Garmin(ModelIndex),
+                                            SubKey,
                                             LoadActive,
                                             GetRegistry(Reg_VehicleProfileName, '', SubKey));
 
     if (NewVehicle_Profile.Valid) and
-       ( (LoadActive) or (NewVehicle_Profile.Changed(OldVehicle_Profile))) then
+       ( (LoadActive) or (NewVehicle_Profile.MustUpdate(OldVehicle_Profile))) then
     begin
       // Update Vehicle profile
       NewVehicle_Profile.ToRegistry(SubKey);

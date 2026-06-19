@@ -36,7 +36,7 @@ type
     procedure ToRegistry(const SubKey: string);
     function HashFromHashList(const SubKey: string): cardinal;
     procedure UpdateFromHashList(const SubKey: string);
-    function Changed(IVehicleProfile: TVehicleProfile): boolean;
+    function MustUpdate(Old_VehicleProfile: TVehicleProfile): boolean;
   end;
 
   TProfCalcMethod  = (cmFaster = 0, cmShorter = 1, cmStraight = 4, cmAdv = 7);
@@ -169,7 +169,7 @@ const
   Max_Width: array[boolean] of byte = (239,   // $ef Car
                                        223);  // $df Bike
 //TODO
-  ProfileHelp     = 'https://frankbijnen.github.io/TripManager/1initialtasks.html#showsys';
+  ProfileHelp     = 'https://frankbijnen.github.io/TripManager/1initialtasks.html#setup_profile';
 
 function TVehicleProfile.HashSpeed1(const ASpeed: cardinal): cardinal;
 begin
@@ -319,9 +319,9 @@ procedure TVehicleProfile.ToRegistry(const SubKey: string);
 begin
   if (Proposed_Hash = 0) then
   begin
-    if (MessageDlg(Format('Warning. VehicleProfileHash is 0!%s' +
+    if (MessageDlg(Format('Warning! VehicleProfileHash=0 for profile: %s.%s' +
                           'Open online help how to set up a vehicle profile?',
-                          [#10]),
+                          [Name, #10]),
                      TMsgDlgType.mtWarning,
                      [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo],
                      0, TMsgDlgBtn.mbNo) = MrYes) then
@@ -356,11 +356,12 @@ begin
     ToRegistry(SubKey);
 end;
 
-function TVehicleProfile.Changed(IVehicleProfile: TVehicleProfile): boolean;
+function TVehicleProfile.MustUpdate(Old_VehicleProfile: TVehicleProfile): boolean;
 begin
-  result := (Name <> IVehicleProfile.Name) or
-            (GUID <> IVehicleProfile.GUID) or
-            (Modified_Date <> IVehicleProfile.Modified_Date);
+  result := (Old_VehicleProfile.Proposed_Hash = 0) or
+            (Name <> Old_VehicleProfile.Name) or
+            (GUID <> Old_VehicleProfile.GUID) or
+            (Modified_Date <> Old_VehicleProfile.Modified_Date);
 end;
 
 end.

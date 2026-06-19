@@ -711,56 +711,56 @@ type
 (*
 
  Memory layout UdbDataHndl              Size   Pascal constant
-+----------------------------------------------------------------------------+
-|Fixed part UdbHandle                 |     |                                |
-|                                     |     |                                |
-|    Prefix                           |   13|                                |
-|      unknown         Cardinal       |    4|                                |
-|      Size            Cardinal       |    4|                                |
-|      DataType        Byte           |    1| 0x0a                           |
-|      HandleId        Cardinal       |    4|                                |
-|    Initiator         Char           |    1| Tab 0x09                       |
-|    NameLen           Cardinal       |    4|                                |
-|    Name              string         |   12| 'mUdbDataHndl'                 |
-|    Datatype          byte           |    1| 0x0b                           |
-|    UdbHandleSize:    Cardinal       |    4|                                |
-|    CalcStatus:       Cardinal       |    4| CalculationMagic[TTripModel]   |
-|----------------------------------------------------------------------------|
-|    Unknown2:         TBytes         |     | TripFileVersion.Unknown2Size   |
-|----------------------------------------------------------------------------|
-|    UDbDirCount:      WORD           |    2|                                |
-|    Unknown3:         TBytes         |  var| Unknown3Size[TTripModel]       |
-|----------------------------------------------------------------------------|
-|Identified fields of Unknown3        |     |                                |
-|       Unknown3Dist:  Cardinal       |    4| Unknown3DistOffset[TTripModel] |
-|       Unknown3Time:  Cardinal       |    4| Unknown3TimeOffset[TTripModel] |
-|       Unknown3Shape: TBytes         |  var| Unknown3ShapeOffset[TTripModel]|
-|----------------------------------------------------------------------------|
-|Variable part UdbHandle              |     |                                |
-|    UdbDir 1                         |     |                                |
-|    UdbDir ..                        |     |                                |
-|    UdbDir UdbDirCount               |     |                                |
-+----------------------------------------------------------------------------+
-|Trailer                TBytes        |  var| Major version 1 can have a     |
-|                                     |     | trailer. Usually 4..12 bytes   |
-|                                     |     | Must be < size UdbDir          |
-+----------------------------------------------------------------------------+
++---------------------------------------------------------------------------------+
+|Fixed part UdbHandle                 |     |                                     |
+|                                     |     |                                     |
+|    Prefix                           |   13|                                     |
+|      unknown         Cardinal       |    4|                                     |
+|      Size            Cardinal       |    4|                                     |
+|      DataType        Byte           |    1| 0x0a                                |
+|      HandleId        Cardinal       |    4|                                     |
+|    Initiator         Char           |    1| Tab 0x09                            |
+|    NameLen           Cardinal       |    4|                                     |
+|    Name              string         |   12| 'mUdbDataHndl'                      |
+|    Datatype          byte           |    1| 0x0b                                |
+|    UdbHandleSize:    Cardinal       |    4|                                     |
+|    CalcStatus:       Cardinal       |    4| CalculationMagic[TTripModel]        |
+|---------------------------------------------------------------------------------|
+|    Unknown2:         TBytes         |     | TripFileVersion.Unknown2Size        |
+|---------------------------------------------------------------------------------|
+|    UDbDirCount:      WORD           |    2|                                     |
+|    Unknown3:         TBytes         |  var| Unknown3Size[TTripModel]            |
+|---------------------------------------------------------------------------------|
+|Identified fields of Unknown3        |     |                                     |
+|       Unknown3Dist:  Cardinal       |    4| TripFileVersion.Unknown3DistOffset  |
+|       Unknown3Time:  Cardinal       |    4| TripFileVersion.Unknown3TimeOffset  | 
+|       Unknown3Shape: TBytes         |  var| TripFileVersion.Unknown3ShapeOffset |
+|---------------------------------------------------------------------------------|
+|Variable part UdbHandle              |     |                                     |
+|    UdbDir 1                         |     |                                     |
+|    UdbDir ..                        |     |                                     |
+|    UdbDir UdbDirCount               |     |                                     |
++---------------------------------------------------------------------------------+
+|Trailer                TBytes        |  var| Major version 1 can have a          |
+|                                     |     | trailer. Usually 4..12 bytes        |
+|                                     |     | Must be < size UdbDir               |
++---------------------------------------------------------------------------------+
 
-+----------------------------------------------------------------------------+
-|Fixed part UdbDir                    |     |                                |
-|                                     |     |                                |
-|   TUdbDirFixedValue = packed record |     |                                |
-|     SubClass:         TSubClass     |   30|                                |
-|     Lat:              integer       |    4|                                |
-|     Lon:              integer       |    4|                                |
-|     UdbDirMagic:      Cardinal      |    4| $51590469                      |
-|     Time:             WORD          |    2|                                |
-|----------------------------------------------------------------------------|
-|Variable part UdbDir                 |     |                                |
-|                                     |     |                                |
-|     FUnknown2:         TBytes       |  var| UdbDirUnknown2Size[TTripModel] |
-|     FName:             TBytes       |  var| UdbDirAddressSize[TTripModel]  |
-+----------------------------------------------------------------------------+
++---------------------------------------------------------------------------------+
+|Fixed part UdbDir                    |     |                                     |
+|                                     |     |                                     |
+|   TUdbDirFixedValue = packed record |     |                                     |
+|     SubClass:         TSubClass     |   30|                                     |
+|     Lat:              integer       |    4|                                     |
+|     Lon:              integer       |    4|                                     |
+|     UdbDirMagic:      Cardinal      |    4| $51590469                           |
+|     Time:             WORD          |    2|                                     |
+|---------------------------------------------------------------------------------|
+|Variable part UdbDir                 |     |                                     |
+|                                     |     |                                     |
+|     FUnknown2:         TBytes       |  var| TripFileVersion.UdbDirUnknown2Size  |
+|     FName:             TBytes       |  var| UdbDirNameSize[TTripModel]          |
++---------------------------------------------------------------------------------+
 
 *)
 

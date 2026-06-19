@@ -509,6 +509,8 @@ end;
 procedure TFrmTripEditor.TbInsertPointClick(Sender: TObject);
 begin
   DBGRoutePoints.SelectedRows.Clear;
+  if (DmRoutePoints.CdsRoute.State in [dsInsert, dsEdit]) then
+    DmRoutePoints.CdsRoute.Post;
   DmRoutePoints.CdsRoutePoints.Insert;
   DmRoutePoints.CdsRoutePoints.Post;
 end;

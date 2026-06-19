@@ -4193,7 +4193,7 @@ begin
   begin
     FrmEditRoutePref.CurTripList := ATripList;
     if (FrmEditRoutePref.ShowModal = IDOK) and
-        (FrmEditRoutePref.PrefsModified) then
+       (FrmEditRoutePref.PrefsModified) then
     begin
       BtnSaveTripValues.Enabled := true;
       TvTripChange(TvTrip, TvTrip.Selected);

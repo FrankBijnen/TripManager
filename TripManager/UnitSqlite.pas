@@ -50,6 +50,7 @@ function GetVehicleProfilesQuery(const Model: TGarminModel;
                                  const OrderBy: string): string;
 function GetVehicleProfile(const DbName: string;
                            const Model: TGarminModel;
+                           const SubKey: string;
                            const OnlyActive: boolean;
                            const ProfileName: string): TVehicleProfile;
 
@@ -463,6 +464,7 @@ begin
         'select' + CRLF +
         '(select ''active_profile'' from active_vehicle a where a.vehicle_id = v.vehicle_id) as Status, ' + CRLF +
         'v.Guid_Data as GUID, ' + CRLF +
+        '0 as Environmental,' + CRLF +
         '0 as Proposed_Hash,' + CRLF +
         '0 as Overridden_Hash,' + CRLF +
         'v.*' + CRLF +
@@ -472,6 +474,7 @@ end;
 
 function GetVehicleProfile(const DbName: string;
                            const Model: TGarminModel;
+                           const SubKey: string;
                            const OnlyActive: boolean;
                            const ProfileName: string): TVehicleProfile;
 var
@@ -499,6 +502,8 @@ begin
       ACds.Next;
     end;
   finally
+    if (result.Proposed_Hash = 0) then
+      result.Proposed_Hash := result.HashFromHashList(SubKey);
     ACds.Free;
   end;
 end;
