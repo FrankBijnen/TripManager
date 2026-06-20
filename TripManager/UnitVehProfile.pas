@@ -168,8 +168,7 @@ const
   Min_Width                         = 96;     // $60
   Max_Width: array[boolean] of byte = (239,   // $ef Car
                                        223);  // $df Bike
-//TODO
-  ProfileHelp     = 'https://frankbijnen.github.io/TripManager/1initialtasks.html#setup_profile';
+  ProfileHelp                       = 'https://frankbijnen.github.io/TripManager/1initialtasks.html#setup_profile';
 
 function TVehicleProfile.HashSpeed1(const ASpeed: cardinal): cardinal;
 begin
@@ -198,11 +197,12 @@ begin
   if (Max_Vehicle_Speed > Max_Vehicle_Speed_Supported) then
     exit;
 
-  // Only 2, or 3 Wheels traction
+  // Only 2, or 3 Wheels for Bikes
+  // 2WD, or 4WD for Cars
   if not (TTraction(Traction) in [TTraction.tr3Wheels,        // 3 Wheels Bike
                                   TTraction.tr2Wheels,        // 2 Wheels Bike
                                   TTraction.tr2WD,            // 2WD      Car
-                                  TTraction.tr4WD]) then      // 3WD      Car
+                                  TTraction.tr4WD]) then      // 4WD      Car
     exit;
 
   // Check width
@@ -285,7 +285,7 @@ procedure TVehicleProfile.FromCds(const ACDS: TClientDataSet; const AModel: TGar
 
 begin
   Self := Default(TVehicleProfile);
-  Vehicle_Id := CDSField('Vehicle_id');
+  Vehicle_Id := CDSField('vehicle_id');
   Name := CDSField('name');
   GUID := CDSField('guid');
   Imperial := (CDSField('width_metric') = 0);
