@@ -1741,18 +1741,22 @@ end;
 procedure TGPI.SaveGpx(const GPXFile: string; const APOIGroupList: TPOIGroupList; const SymbolCat: string);
 var
   Xml: TXmlVSDocument;
-  XMLRoot, AWpt, AExtensions, AAddress: TXmlVSNode;
-  APOIList: TPOIList;
+  XMLRoot, AWpt, AExtensions, AAddress, ACategories: TXmlVSNode;
+  APOIGroupData: TPOIGroupData;
   AWayPt: TGPXWayPoint;
   Symbol, Category: string;
 begin
   XML := TXmlVSDocument.Create;
   try
     XMLRoot := InitGarminGpx(XML);
-    for APOIList in APOIGroupList do
+    for APOIGroupData in APOIGroupList do
     begin
-      for AWayPt in APOIList do
+      for AWayPt in APOIGroupData do
       begin
+        if (AWayPt.Lat = '') or
+           (AWayPt.Lon = '') then
+          continue;
+
         AWpt := XMLRoot.AddChild('wpt');
         Awpt.AttributeList.Add('lat').Value := string(AWayPt.Lat);
         Awpt.AttributeList.Add('lon').Value := string(AWayPt.Lon);
@@ -1771,7 +1775,9 @@ begin
         if (AWayPt.Proximity <> 0) then
           AExtensions.AddChild('gpxx:Proximity').NodeValue := IntToStr(AWayPt.Proximity);
         AExtensions.AddChild('gpxx:DisplayMode').NodeValue := 'SymbolAndName';
-        AExtensions.AddChild('gpxx:Categories').AddChild('gpxx:Category').NodeValue := string(AWayPt.Category);
+        ACategories := AExtensions.AddChild('gpxx:Categories');
+        ACategories.AddChild('gpxx:Category').NodeValue := string(APOIGroupData.Name);
+        ACategories.AddChild('gpxx:Category').NodeValue := string(AWayPt.Category);
         AAddress := AExtensions.AddChild('gpxx:Address');
         AAddress.AddChild('gpxx:StreetAddress').NodeValue := string(AWayPt.Street);
         AAddress.AddChild('gpxx:City').NodeValue := string(AWayPt.City);
