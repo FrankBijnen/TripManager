@@ -38,17 +38,30 @@ type
     City: TGPXString;
     Street: TGPXString;
     HouseNbr: TGPXString;
+    PoiId: integer;
+    PoiGroup: TGPXString;
     Category: TGPXString;
     Speed: Word;
     Proximity: Word;
+    AlertType: byte; // 0=360, 1=along road, 3=Tour guide
+    SoundNbr: byte;  // 0=Beep, 1=Tone,2= 3x Beep,3=Silence,4=Plung,5=Double Plung
     BitmapId: integer;
     CategoryId: integer;
-    SelStart: int64;
-    SelLength: int64;
+    SelStart: array[0..$12] of int64;
+    SelLength: array[0..$12] of int64;
     constructor Create;
     destructor Destroy; override;
   end;
   TPOIList = TObjectlist<TGPXWayPoint>;
+  TPOIGroupData = class(TPOIList)
+    SelStart: int64;
+    SelLength: int64;
+    SelStartArea: int64;
+    SelLengthArea: int64;
+    Id: integer;
+    Name: TGPXString;
+  end;
+  TPOIGroupList = TObjectlist<TPOIGroupData>;
 
   TGPXCategory = class
     Category: TGPXString;
@@ -326,8 +339,8 @@ type
     procedure WriteHeader(S: TBufferedFileStream);
     function CreatePOIGroup(Category: TGPXString): TPOIGroup;
     procedure WriteEnd(S: TBufferedFileStream);
-    procedure Read(S: TBufferedFileStream; APOIList: TPOIList; ImageDir: string = '');
-    procedure SaveGpx(const GPXFile: string; const APOIList: TPOIList; const SymbolCat: string);
+    procedure Read(S: TBufferedFileStream; APOIGroupList: TPOIGroupList; ImageDir: string = '');
+    procedure SaveGpx(const GPXFile: string; const APOIGroupList: TPOIGroupList; const SymbolCat: string);
   end;
 
 const HasPhone:   Word = $0001;
@@ -355,14 +368,16 @@ const
 var
   FormatSettings: TFormatSettings;
 
-// Need separate class
 constructor TGPXWayPoint.Create;
 begin
+  inherited;
+
   BitmapId := -1;
   CategoryId := -1;
   Proximity := 0;
   Speed := 0;
-  inherited;
+  AlertType := 0;
+  SoundNbr := 0;
 end;
 
 destructor TGPXWayPoint.Destroy;
@@ -610,6 +625,8 @@ begin
   if (GrmRec <> 'GRMREC') then
     raise exception.Create('GPI format not supported! GRMREC not on expected location.');
   S.Read(Version, SizeOf(Version));
+  if (Version <> '00') then
+    raise exception.Create('GPI format not supported! Version must be ''00''.');
   S.Read(TimeStamp, SizeOf(TimeStamp));
   S.Read(Flag1, SizeOf(Flag1));
   S.Read(Flag2, SizeOf(Flag2));
@@ -727,8 +744,8 @@ begin
 
   S.Read(Lat, SizeOf(Lat));
   S.Read(Lon, SizeOf(Lon));
-  S.Read(Dummy1, Sizeof(Dummy1));
-  S.Read(HasAlert, Sizeof(HasAlert));
+  S.Read(Dummy1, SizeOf(Dummy1));
+  S.Read(HasAlert, SizeOf(HasAlert));
   Name.Read(S);
 end;
 
@@ -775,14 +792,9 @@ begin
   Dummy1 := $0100;
   Dummy2 := $0100;
   Alert := 1;
-  AlertType := 1;
-  SoundNbr := 0;
-  if (Proximity > 0) then
-    SoundNbr := 4
-  else
-    if (Speed > 0) then
-      SoundNbr := 5;
-  AudioAlert := $10;
+  AlertType := GPXWayPoint.AlertType;
+  SoundNbr := GPXWayPoint.SoundNbr;
+  AudioAlert := $10;  //0x10=Built in, 0x20=Custom
 end;
 
 procedure TAlert.Write(S: TBufferedFileStream);
@@ -1473,12 +1485,30 @@ begin
   Endx.Write(S);
 end;
 
-procedure TGPI.Read(S: TBufferedFileStream; APOIList: TPOIList; ImageDir: string = '');
+procedure TGPI.Read(S: TBufferedFileStream; APOIGroupList: TPOIGroupList; ImageDir: string = '');
+const
+  PoiGroupCat = 'PoiGroup';
+
+  WayPointTypes: set of byte = [$02,
+                                $03,  // Alert
+                                $04,  // Bitmap ref
+                                $06,  // Category ref
+                                $0a,  // Comment
+                                $0b,  // Address
+                                $0c,  // Contact
+                                $0d,  // Image (not used in TM)
+                                $0e]; // Description (not used in TM)
+
+  NonWayPointTypes: set of byte = [$05,  // Bitmap
+                                   $07,  // Media
+                                   $12]; // Category
+
 var
   Header1: THeader1;
   Header2: THeader2;
   MainRec: TMainRec;
   ExtraRec: TExtraRec;
+  PoiGroupData: TPOIGroupData;
   PoiGroup: TPOIGroup;
   Area: TArea;
   WayPt: TWayPt;
@@ -1494,7 +1524,6 @@ var
   PNGImage: Vcl.Imaging.pngimage.TPngImage;
   GPXWayPoint: TGPXWayPoint;
   CategoryList: TStringList;
-  BitMapList: TList;
   StartPos: int64;
 
   procedure ReadHeader(S: TbufferedFileStream);
@@ -1503,24 +1532,78 @@ var
     Header2.Read(S);
   end;
 
+  procedure AddNonGpxWayPoint(AName: UTF8String);
+  var
+    NonGPXWayPoint: TGPXWayPoint;
+  begin
+    NonGPXWayPoint := TGPXWayPoint.Create;
+    NonGPXWayPoint.Name := AName;
+    NonGPXWayPoint.SelStart[MainRec.RecType] := StartPos;
+    NonGPXWayPoint.SelLength[MainRec.RecType] := S.Position - StartPos;
+    NonGPXWayPoint.SelStart[0] := NonGPXWayPoint.SelStart[MainRec.RecType];
+    NonGPXWayPoint.SelLength[0] := NonGPXWayPoint.SelLength[MainRec.RecType];
+    PoiGroupData.Add(NonGPXWayPoint);
+  end;
+
+  procedure UpdateCategories;
+  var
+    AGPXWayPoint: TGPXWayPoint;
+  begin
+    for AGPXWayPoint in PoiGroupData do
+    begin
+      // The name of the PoiGroup is also used as a category.
+      AGPXWayPoint.PoiGroup := TGPXString(CategoryList.Values[PoiGroupCat]);
+      if (AGPXWayPoint.CategoryId > -1) then
+        AGPXWayPoint.Category := TGPXString(CategoryList.Values[IntToStr(AGPXWayPoint.CategoryId)]);
+    end;
+    CategoryList.Clear;
+  end;
+
 begin
   ReadHeader(S);
   CategoryList := TStringList.Create;
-  BitMapList := TList.Create;
-  APOIList.Clear;
+  APOIGroupList.Clear;
+  PoiGroupData := nil;
   GPXWayPoint := nil;
 
   try
     repeat
       StartPos := S.Position;
+
+      // Update prev rec
+      if (Assigned(GPXWayPoint)) and
+         (MainRec.RecType <= High(GPXWayPoint.SelStart)) then
+      begin
+        if not (MainRec.RecType in NonWayPointTypes) then
+          GPXWayPoint.SelLength[MainRec.RecType] := S.Position - GPXWayPoint.SelStart[MainRec.RecType];
+        if (MainRec.RecType in WayPointTypes) and
+          (S.Position - GPXWayPoint.SelStart[0] > GPXWayPoint.SelLength[0]) then
+          GPXWayPoint.SelLength[0] := S.Position - GPXWayPoint.SelStart[0];
+      end;
+
       MainRec.Read(S, ExtraRec);
+
+      // New GPX WayPoint
+      if (MainRec.RecType = $02) then
+      begin
+        GPXWayPoint := TGPXWayPoint.Create;
+        PoiGroupData.Add(GPXWayPoint);
+
+        GPXWayPoint.PoiId := PoiGroupData.Id;
+        GPXWayPoint.SelStart[0] := StartPos;
+        GPXWayPoint.SelLength[0] := 0;
+      end;
+
+      if (Assigned(GPXWayPoint)) and
+         (MainRec.RecType in WayPointTypes) then
+      begin
+        GPXWayPoint.SelStart[MainRec.RecType] := StartPos;
+        GPXWayPoint.SelLength[MainRec.RecType] := 0;
+      end;
+
       case MainRec.RecType of
         $02:
           begin
-            GPXWayPoint := TGPXWayPoint.Create;
-            APOIList.Add(GPXWayPoint);
-            GPXWayPoint.SelStart := StartPos;
-
             WayPt.Read(S, MainRec, ExtraRec);
             GPXWayPoint.Name := ConvertToUtf8(WayPt.Name, Header2.CodePage);
             GPXWayPoint.Lat := Coord2Str(WayPt.Lat);
@@ -1530,33 +1613,31 @@ begin
         $03:
           begin
             Alert.Read(S, MainRec);
-            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Proximity := Alert.Proximity;
             GPXWayPoint.Speed := Round((Alert.Speed * 60 * 60) / 1000 / 100);
+            GPXWayPoint.AlertType := Alert.AlertType;
+            GPXWayPoint.SoundNbr := Alert.SoundNbr;
             continue;
           end;
         $04:
           begin
             PoiBitmapRef.Read(S, MainRec);
-            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Symbol := TGPXString(IntToStr(PoiBitmapRef.Id));
             continue;
           end;
         $05:
           begin
             PoiBitmap.Read(S, MainRec);
-
-            if (ImageDir <> '') and
-               (BitMapList.IndexOf(Pointer(PoiBitmap.Id)) = -1) then
+            if (ImageDir <> '') then
             begin
-              BitMapList.Add(Pointer(PoiBitmap.Id));
               Bitmap := PoiBitmap.Bitmap;
               try
                 PNGImage := TPngImage.Create;
                 try
                   PNGImage.Assign(BitMap);
                   PNGImage.TransparentColor := PoiBitmap.TranspCol;
-                  PNGImage.SaveToFile(Format(IncludeTrailingPathDelimiter(ImageDir) + '%d.png', [PoiBitmap.Id]));
+                  PNGImage.SaveToFile(Format(IncludeTrailingPathDelimiter(ImageDir) + '%d_%d.png',
+                                             [PoiGroupData.Id, PoiBitmap.Id]));
                 finally
                   PNGImage.Free;
                 end;
@@ -1564,13 +1645,12 @@ begin
                 Bitmap.Free;
               end;
             end;
-
+            AddNonGpxWayPoint(UTF8string(Format('Bitmap: %d_%d', [PoiGroupData.Id, PoiBitmap.Id])));
             continue;
           end;
         $06:
           begin
             CategoryRef.Read(S, MainRec);
-            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.CategoryId := CategoryRef.Id;
             continue;
           end;
@@ -1578,29 +1658,43 @@ begin
           begin
             Category.Read(S, MainRec);
             CategoryList.AddPair(IntToStr(Category.Id), ConvertToString(Category.Name, Header2.CodePage));
+            AddNonGpxWayPoint(UTF8string(Format('Category: %s', [ConvertToString(Category.Name, Header2.CodePage)])));
             continue;
           end;
         $08:
           begin
             Area.Read(S, ExtraRec);
+            if (Assigned(PoiGroupData)) then
+              PoiGroupData.SelLengthArea := S.Position - PoiGroupData.SelStartArea;
             continue;
           end;
         $09:
           begin
+            if (Assigned(PoiGroupData)) then
+              UpdateCategories;
             PoiGroup.Read(S, MainRec, ExtraRec);
+            PoiGroupData := TPOIGroupData.Create;
+            PoiGroupData.SelStart := StartPos;
+            if (PoiGroup.Extra) then
+              PoiGroupData.SelLength := ExtraRec.TotalLength + SizeOf(ExtraRec)
+            else
+              PoiGroupData.SelLength := MainRec.Length + SizeOf(MainRec);
+            PoiGroupData.SelStartArea := S.Position;
+            PoiGroupData.Name := ConvertToUtf8(PoiGroup.Name, Header2.CodePage);
+            PoiGroupData.Id := APOIGroupList.Count;
+            APOIGroupList.Add(PoiGroupData);
+            CategoryList.AddPair(PoiGroupCat, ConvertToString(PoiGroup.Name, Header2.CodePage));
             continue;
           end;
         $0a:
           begin
             Comment.Read(S, MainRec);
-            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Comment := ConvertToUtf8(Comment.Comment, Header2.CodePage);
             continue;
           end;
         $0b:
           begin
             Address.Read(S, MainRec);
-            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Country := ConvertToUtf8(Address.Country, Header2.CodePage);
             GPXWayPoint.State := ConvertToUtf8(Address.State, Header2.CodePage);
             GPXWayPoint.PostalCode := ConvertToUtf8(Address.PostalCode, Header2.CodePage);
@@ -1612,9 +1706,14 @@ begin
         $0c:
           begin
             Contact.Read(S, MainRec);
-            GPXWayPoint.SelLength := S.Position - GPXWayPoint.SelStart;
             GPXWayPoint.Phone := ConvertToUtf8(Contact.Phone, Header2.CodePage);
             GPXWayPoint.Email := ConvertToUtf8(Contact.Email, Header2.CodePage);
+            continue;
+          end;
+        $12: // Media. Not supported, but handle selections.
+          begin
+            S.Seek(MainRec.Length, TSeekOrigin.soCurrent);
+            AddNonGpxWayPoint('Media');
             continue;
           end;
         $ffff:
@@ -1631,55 +1730,56 @@ begin
 
     until (false);
 
-    for GPXWayPoint in APOIList do
-    begin
-      if (GPXWayPoint.CategoryId > -1) then
-        GPXWayPoint.Category := TGPXString(CategoryList.Values[IntToStr(GPXWayPoint.CategoryId)]);
-    end;
+    if (Assigned(PoiGroupData)) then
+      UpdateCategories;
+
   finally
     CategoryList.Free;
-    BitMapList.Free;
   end;
 end;
 
-procedure TGPI.SaveGpx(const GPXFile: string; const APOIList: TPOIList; const SymbolCat: string);
+procedure TGPI.SaveGpx(const GPXFile: string; const APOIGroupList: TPOIGroupList; const SymbolCat: string);
 var
   Xml: TXmlVSDocument;
   XMLRoot, AWpt, AExtensions, AAddress: TXmlVSNode;
+  APOIList: TPOIList;
   AWayPt: TGPXWayPoint;
   Symbol, Category: string;
 begin
   XML := TXmlVSDocument.Create;
   try
     XMLRoot := InitGarminGpx(XML);
-    for AWayPt in APOIList do
+    for APOIList in APOIGroupList do
     begin
-      AWpt := XMLRoot.AddChild('wpt');
-      Awpt.AttributeList.Add('lat').Value := string(AWayPt.Lat);
-      Awpt.AttributeList.Add('lon').Value := string(AWayPt.Lon);
-      AWpt.AddChild('time').NodeValue := DateToISO8601(TTimezone.Local.ToUniversalTime(Now), true);
-      AWpt.AddChild('name').NodeValue := string(AWayPt.Name);
-      AWpt.AddChild('cmt').NodeValue := string(AWayPt.Comment);
-      AWpt.AddChild('desc').NodeValue := string(AWayPt.Comment);
-      Category := string(AWayPt.Category);
-      Symbol := NextField(Category, ':');
-      if (SameText(Symbol, SymbolCat)) then
-        AWpt.AddChild('sym').NodeValue := Category
-      else
-        AWpt.AddChild('sym').NodeValue := string(AWayPt.Symbol);
-      AWpt.AddChild('type').NodeValue := 'user';
-      AExtensions := AWpt.AddChild('extensions').AddChild('gpxx:WaypointExtension');
-      if (AWayPt.Proximity <> 0) then
-        AExtensions.AddChild('gpxx:Proximity').NodeValue := IntToStr(AWayPt.Proximity);
-      AExtensions.AddChild('gpxx:DisplayMode').NodeValue := 'SymbolAndName';
-      AExtensions.AddChild('gpxx:Categories').AddChild('gpxx:Category').NodeValue := string(AWayPt.Category);
-      AAddress := AExtensions.AddChild('gpxx:Address');
-      AAddress.AddChild('gpxx:StreetAddress').NodeValue := string(AWayPt.Street);
-      AAddress.AddChild('gpxx:City').NodeValue := string(AWayPt.City);
-      AAddress.AddChild('gpxx:State').NodeValue := string(AWayPt.State);
-      AAddress.AddChild('gpxx:Country').NodeValue := string(AWayPt.Country);
-      AAddress.AddChild('gpxx:PostalCode').NodeValue := string(AWayPt.PostalCode);
-      AExtensions.AddChild('gpxx:PhoneNumber').NodeValue := string(AWayPt.Phone);
+      for AWayPt in APOIList do
+      begin
+        AWpt := XMLRoot.AddChild('wpt');
+        Awpt.AttributeList.Add('lat').Value := string(AWayPt.Lat);
+        Awpt.AttributeList.Add('lon').Value := string(AWayPt.Lon);
+        AWpt.AddChild('time').NodeValue := DateToISO8601(TTimezone.Local.ToUniversalTime(Now), true);
+        AWpt.AddChild('name').NodeValue := string(AWayPt.Name);
+        AWpt.AddChild('cmt').NodeValue := string(AWayPt.Comment);
+        AWpt.AddChild('desc').NodeValue := string(AWayPt.Comment);
+        Category := string(AWayPt.Category);
+        Symbol := NextField(Category, ':');
+        if (SameText(Symbol, SymbolCat)) then
+          AWpt.AddChild('sym').NodeValue := Category
+        else
+          AWpt.AddChild('sym').NodeValue := string(AWayPt.Symbol);
+        AWpt.AddChild('type').NodeValue := 'user';
+        AExtensions := AWpt.AddChild('extensions').AddChild('gpxx:WaypointExtension');
+        if (AWayPt.Proximity <> 0) then
+          AExtensions.AddChild('gpxx:Proximity').NodeValue := IntToStr(AWayPt.Proximity);
+        AExtensions.AddChild('gpxx:DisplayMode').NodeValue := 'SymbolAndName';
+        AExtensions.AddChild('gpxx:Categories').AddChild('gpxx:Category').NodeValue := string(AWayPt.Category);
+        AAddress := AExtensions.AddChild('gpxx:Address');
+        AAddress.AddChild('gpxx:StreetAddress').NodeValue := string(AWayPt.Street);
+        AAddress.AddChild('gpxx:City').NodeValue := string(AWayPt.City);
+        AAddress.AddChild('gpxx:State').NodeValue := string(AWayPt.State);
+        AAddress.AddChild('gpxx:Country').NodeValue := string(AWayPt.Country);
+        AAddress.AddChild('gpxx:PostalCode').NodeValue := string(AWayPt.PostalCode);
+        AExtensions.AddChild('gpxx:PhoneNumber').NodeValue := string(AWayPt.Phone);
+      end;
     end;
 
     XML.SaveToFile(GPXFile);

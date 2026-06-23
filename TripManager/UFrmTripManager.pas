@@ -378,7 +378,7 @@ type
     FSortSpecification: TSortSpecification;
     HexEdit: TBCHexEditor;
     ATripList: TTripList;
-    APOIList: TPOIList;
+    APOIGroupList: TPOIGroupList;
     AFitInfo: TStringList;
 
     WarnRecalc: integer;      // MrNone, MrYes, MrNo, mrIgnore
@@ -411,7 +411,7 @@ type
     procedure HexEditKeyPress(Sender: TObject; var Key: Char);
     procedure LoadHex(const FileName: string);
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
-    procedure LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
+    procedure LoadGpiOnMap(PoiGroupList: TPOIGroupList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     procedure AddToMap(FileName: string);
     procedure DeviceFilesOnMap(Tag: integer);
@@ -1372,9 +1372,9 @@ begin
       raise Exception.Create(OOutput + #10 + OError);
     TFile.WriteAllText(SaveTrip.FileName, OOutput, TEncoding.UTF8);
   end
-  else if (APOIList <> nil) and
-          (APOIList.Count > 0) then
-    GPIRec.SaveGpx(SaveTrip.FileName, APOIList, TProcessOptions.GetCatSymbol)
+  else if (APOIGroupList <> nil) and
+          (APOIGroupList.Count > 0) then
+    GPIRec.SaveGpx(SaveTrip.FileName, APOIGroupList, TProcessOptions.GetCatSymbol)
   else if (Assigned(ATripList) and
           (ATripList.ItemList.Count > 0)) then
     ATripList.SaveAsGPX(SaveTrip.FileName);
@@ -1702,7 +1702,7 @@ begin
   MnuCompareGpxRoute.Enabled := (ATripList <> nil) and (ATripList.ItemList.Count > 0);
   MnuCompareGpxTrack.Enabled := MnuCompareGpxRoute.Enabled;
   SaveGPX1.Enabled := ( MnuCompareGpxRoute.Enabled ) or
-                      ( (APOIList <> nil)  and (APOIList.Count > 0)) or
+                      ( (APOIGroupList <> nil)  and (APOIGroupList.Count > 0)) or
                       ( (AFitInfo <> nil)  and (AFitInfo.Count > 0));
 
   MnuPrevDiff.ShortCut := TextToShortCut('Alt+Up'); // Tshortcut(32806);
@@ -2107,7 +2107,7 @@ begin
 
   ReadSettings;
   ATripList := TTripList.Create;
-  APOIList := TPOIList.Create;
+  APOIGroupList := TPOIGroupList.Create;
   AFitInfo := TStringList.Create;
 
   try
@@ -2146,7 +2146,7 @@ begin
 
   ClearTripInfo;
   ATripList.Free;
-  APOIList.Free;
+  APOIGroupList.Free;
   AFitInfo.Free;
   FreeDevices;
   DeviceList.Free;
@@ -3017,28 +3017,36 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.LoadGpiOnMap(CurrentGpi: TPOIList; Id: string);
+procedure TFrmTripManager.LoadGpiOnMap(PoiGroupList: TPoiGroupList; Id: string);
 var
   OsmTrack: TStringList;
+  GroupData: TPOIGroupData;
   AGPXwayPoint: TGPXWayPoint;
   Category: string;
 begin
-  if not Assigned(CurrentGpi) then
+  if not Assigned(PoiGroupList) then
     exit;
   OsmTrack := TStringList.Create;
   try
-    for AGPXwayPoint in CurrentGpi do
+    for GroupData in PoiGroupList do
     begin
-      Category := Format('Poi Symbol: %s ', [AGPXwayPoint.Symbol]);
-      if (AGPXwayPoint.Category <> '') then
-        Category := Category + Format('Category: %s ', [AGPXwayPoint.Category]);
-      if (AGPXwayPoint.Speed <> 0) then
-        Category := Category + Format('Speed: %d ', [AGPXwayPoint.Speed]);
-      Category := EscapeDQuote(Category);
-      OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%s.png", "%s");',
-                          [EscapeDQuote(string(AGPXwayPoint.Name)),
-                           AGPXwayPoint.Lat, AGPXwayPoint.Lon,
-                           AGPXwayPoint.Symbol, Category] ));
+      for AGPXwayPoint in GroupData do
+      begin
+        if (AGPXwayPoint.Lat = '') or
+           (AGPXwayPoint.Lon = '') then
+          continue;
+        Category := Format('Poi Symbol: %s ', [AGPXwayPoint.Symbol]);
+        if (AGPXwayPoint.Category <> '') then
+          Category := Category + Format('Category: %s ', [AGPXwayPoint.Category]);
+        if (AGPXwayPoint.Speed <> 0) then
+          Category := Category + Format('Speed: %d ', [AGPXwayPoint.Speed]);
+        Category := EscapeDQuote(Category);
+        OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%d_%s.png", "%s");',
+                            [EscapeDQuote(string(AGPXwayPoint.Name)),
+                             AGPXwayPoint.Lat, AGPXwayPoint.Lon,
+                             GroupData.Id, AGPXwayPoint.Symbol,
+                             Category] ));
+      end;
     end;
     DeleteCompareFiles;
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
@@ -3367,19 +3375,19 @@ begin
     ANode := TGridSelItem(Sender).BaseItem;
     SelStart := TGridSelItem(Sender).SelStart;
     SelEnd := SelStart + TGridSelItem(Sender).SelLength;
-  end;
-
-  if (Sender is TBaseItem) then
+  end else if (Sender is TBaseItem) then
   begin
     ANode := TBaseItem(Sender);
     SelStart := ANode.SelStart;
     SelEnd := ANode.SelEnd;
-  end;
-
-  if (Sender is TGPXWayPoint) then
+  end else if (Sender is TPOIGroupData) then
   begin
-    SelStart := TGPXWayPoint(Sender).SelStart;
-    SelEnd := SelStart + TGPXWayPoint(Sender).SelLength;
+    SelStart := TPOIGroupData(Sender).SelStart;
+    SelEnd := SelStart + TPOIGroupData(Sender).SelLength;
+  end else if (Sender is TGPXWayPoint) then
+  begin
+    SelStart := TGPXWayPoint(Sender).SelStart[0];
+    SelEnd := SelStart + TGPXWayPoint(Sender).SelLength[0];
   end;
 
   if (ANode = nil) or
@@ -3962,51 +3970,105 @@ var
   end;
 
   procedure AddGPXWayPoint(AGPXWayPoint: TGPXWayPoint; ZoomRequest: boolean);
+  var
+    RecType: integer;
   begin
-    VlTripInfo.Strings.AddPair('Name', string(AGPXWayPoint.Name),
-      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Category <> '') then
+    RecType := 2;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      VlTripInfo.Strings.AddPair('Name', string(AGPXWayPoint.Name),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      VlTripInfo.Strings.AddPair('PoiGroup', string(AGPXWayPoint.PoiGroup),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
+
+    RecType := 6;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
       VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Category),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Symbol <> '') then
-      VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%s.png', [AGPXWayPoint.Symbol])),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
 
-    VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-      TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Speed <> 0) then
-      VlTripInfo.Strings.AddPair('Speed', Format('%d Km', [AGPXWayPoint.Speed]),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    RecType := 4;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%d_%s.png', [AGPXWayPoint.PoiId, AGPXWayPoint.Symbol])),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
 
-    if (AGPXWayPoint.Proximity <> 0) then
-      VlTripInfo.Strings.AddPair('Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+    RecType := 3;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      if (AGPXWayPoint.Speed <> 0) then
+        VlTripInfo.Strings.AddPair('Speed', Format('%d Km', [AGPXWayPoint.Speed]),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
 
-    if (AGPXWayPoint.Phone <> '') then
-      VlTripInfo.Strings.AddPair('Phone', string(AGPXWayPoint.Phone),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Email <> '') then
-      VlTripInfo.Strings.AddPair('Email', string(AGPXWayPoint.Email),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Comment <> '') then
+      if (AGPXWayPoint.Proximity <> 0) then
+        VlTripInfo.Strings.AddPair('Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+
+      VlTripInfo.Strings.AddPair('Alert type', Format('%d (0=360%s,1=Along road,2=Tour guide)', [AGPXWayPoint.AlertType, #$00b0]),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+
+      VlTripInfo.Strings.AddPair('Sound Nbr', Format('%d (0=Beep, 1=Tone,2=3x Beep,3=Silence,4=Plung,5=Double Plung)', [AGPXWayPoint.SoundNbr]),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
+
+    RecType := 10;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      RecType := 10;
       VlTripInfo.Strings.AddPair('Comment', ReplaceAll(string(AGPXWayPoint.Comment), [#10, #13], ['_','']),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Country <> '') then
-      VlTripInfo.Strings.AddPair('Country', string(AGPXWayPoint.Country),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.State <> '') then
-      VlTripInfo.Strings.AddPair('State', string(AGPXWayPoint.State),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.PostalCode <> '') then
-      VlTripInfo.Strings.AddPair('PostalCode', string(AGPXWayPoint.PostalCode),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.City <> '') then
-      VlTripInfo.Strings.AddPair('City', string(AGPXWayPoint.City),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
-    if (AGPXWayPoint.Street <> '') or
-       (AGPXWayPoint.HouseNbr <> '') then
-      VlTripInfo.Strings.AddPair('Street', string(Format('%s %s', [AGPXWayPoint.Street, AGPXWayPoint.HouseNbr])),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
+
+    RecType := 12;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      if (AGPXWayPoint.Phone <> '') then
+        VlTripInfo.Strings.AddPair('Phone', string(AGPXWayPoint.Phone),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      if (AGPXWayPoint.Email <> '') then
+        VlTripInfo.Strings.AddPair('Email', string(AGPXWayPoint.Email),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
+
+    RecType := 11;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      if (AGPXWayPoint.Country <> '') then
+        VlTripInfo.Strings.AddPair('Country', string(AGPXWayPoint.Country),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      if (AGPXWayPoint.State <> '') then
+        VlTripInfo.Strings.AddPair('State', string(AGPXWayPoint.State),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      if (AGPXWayPoint.PostalCode <> '') then
+        VlTripInfo.Strings.AddPair('PostalCode', string(AGPXWayPoint.PostalCode),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      if (AGPXWayPoint.City <> '') then
+        VlTripInfo.Strings.AddPair('City', string(AGPXWayPoint.City),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+      if (AGPXWayPoint.Street <> '') or
+         (AGPXWayPoint.HouseNbr <> '') then
+        VlTripInfo.Strings.AddPair('Street', string(Format('%s %s', [AGPXWayPoint.Street, AGPXWayPoint.HouseNbr])),
+          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
+
+    RecType := 5;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      VlTripInfo.Strings.AddPair('Bitmap', string(AGPXWayPoint.Name),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
+
+    RecType := 7;
+    if (AGPXWayPoint.SelLength[RecType] <> 0) then
+    begin
+      VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Name),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    end;
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
@@ -4020,10 +4082,30 @@ var
   begin
     for AGPXWayPoint in APOIList do
     begin
-      VlTripInfo.Strings.AddPair('*** Begin POI', DupeString('-', DupeCount),
-        TGridSelItem.Create(AGPXWayPoint.SelLength, AGPXWayPoint.SelStart));
+      VlTripInfo.Strings.AddPair(Format('*** POI %s', [AGPXWayPoint.Name]), DupeString('-', DupeCount),
+        TGridSelItem.Create(AGPXWayPoint.SelLength[0], AGPXWayPoint.SelStart[0]));
       AddGPXWayPoint(AGPXWayPoint, false);
     end;
+  end;
+
+  procedure AddPOIGroupData(APOIGroupData: TPOIGroupData);
+  begin
+    VlTripInfo.Strings.AddPair(Format('*** POI Group %s', [APOIGroupData.Name]), DupeString('-', DupeCount),
+      TGridSelItem.Create(APOIGroupData.SelLength, APOIGroupData.SelStart));
+    VlTripInfo.Strings.AddPair('*** Area''s', DupeString('-', DupeCount),
+      TGridSelItem.Create(APOIGroupData.SelLengthArea, APOIGroupData.SelStartArea));
+    AddPOIList(APOIGroupData);
+  end;
+
+  procedure AddPOIGroupList(APOIGroupList: TPOIGroupList);
+  var
+    APOIGroupData: TPOIGroupData;
+  begin
+    VlTripInfo.Strings.AddPair('*** Begin POI File', DupeString('-', DupeCount),
+      TGridSelItem.Create);
+
+    for APOIGroupData in APOIGroupList do
+      AddPOIGroupData(APOIGroupData);
   end;
 
   procedure AddStringList(AStringList: TStringList);
@@ -4079,6 +4161,10 @@ begin
     else if (TObject(Node.Data) is THeader) then
       AddHeader(THeader(Node.Data))
 // GPI data
+    else if (TObject(Node.Data) is TPOIGroupList) then
+      AddPOIGroupList(TPOIGroupList(Node.Data))
+    else if (TObject(Node.Data) is TPOIGroupData) then
+      AddPOIGroupData(TPOIGroupData(Node.Data))
     else if (TObject(Node.Data) is TPOIList) then
       AddPOIList(TPOIList(Node.Data))
     else if (TObject(Node.Data) is TGPXWayPoint) then
@@ -4119,6 +4205,8 @@ begin
   end;
   if (TObject(Node.Data) is TBaseItem) then
     SyncHexEdit(TBaseItem(Node.Data))
+  else if (TObject(Node.Data) is TPOIGroupData) then
+    SyncHexEdit(TPOIGroupData(Node.Data))
   else if (TObject(Node.Data) is TGPXWayPoint) then
     SyncHexEdit(TGPXWayPoint(Node.Data))
   else
@@ -5094,8 +5182,8 @@ begin
   TsTripGpiInfo.Caption := 'Trip info';
 
   ATripList.Clear;
-  if (Assigned(APOIList)) then
-    APOIList.Clear;
+  if (Assigned(APOIGroupList)) then
+    APOIGroupList.Clear;
   if (Assigned(AFitInfo)) then
     AFitInfo.Clear;
 
@@ -5184,7 +5272,8 @@ procedure TFrmTripManager.LoadGpiFile(const FileName: string; const FromDevice: 
 var
   AStream: TBufferedFileStream;
   AGPXWayPoint: TGPXWayPoint;
-  RootNode: TTreeNode;
+  APoiGroupData: TPOIGroupData;
+  RootNode, PoiGroupNode: TTreeNode;
   GPIRec: TGPI;
 begin
   TsSQlite.TabVisible := false;
@@ -5206,9 +5295,10 @@ begin
   MnuTripEdit.Enabled := false;
 
   try
-    GPIRec.Read(AStream, APOIList, GetOSMTemp);
+    DeleteTempFiles(GetOSMTemp, '*.png');
+    GPIRec.Read(AStream, APOIGroupList, GetOSMTemp);
 
-    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), APOIList);
+    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), APOIGroupList);
     TvTrip.ShowRoot := true;
 
     if (DeviceFile) then
@@ -5216,11 +5306,16 @@ begin
     else
       PnlTripGpiInfo.Color := clAqua;
     PnlTripGpiInfo.Caption := '';
-    for AGPXWayPoint in APOIList do
+    for APoiGroupData in APOIGroupList do
     begin
-      if (PnlTripGpiInfo.Caption = '') then
-        PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
-      TvTrip.Items.AddChildObject(RootNode, string(AGPXWayPoint.Name), AGPXWayPoint);
+      PoiGroupNode := TvTrip.Items.AddChildObject(RootNode, string(APoiGroupData.Name), APoiGroupData);
+      for AGPXWayPoint in APoiGroupData do
+      begin
+        if (PnlTripGpiInfo.Caption = '') then
+          PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
+        TvTrip.Items.AddChildObject(PoiGroupNode, string(AGPXWayPoint.Name), AGPXWayPoint);
+      end;
+      PoiGroupNode.Expand(false);
     end;
 
     RootNode.Expand(false);
@@ -5231,7 +5326,7 @@ begin
     AStream.Free;
   end;
   LoadHex(FileName);
-  LoadGpiOnMap(APOIList, CurrentMapItem);
+  LoadGpiOnMap(APOIGroupList, CurrentMapItem);
   RootNode.Selected := true;
   BtnSaveTripValues.Enabled := false;
   BtnSaveTripGpiFile.Enabled := false;
@@ -5247,8 +5342,8 @@ begin
   TsSQlite.TabVisible := false;
   if (Assigned(ATripList)) then
     ATripList.Clear;
-  if (Assigned(APOIList)) then
-    APOIList.Clear;
+  if (Assigned(APOIGroupList)) then
+    APOIGroupList.Clear;
 
   TsTripGpiInfo.Caption := 'Course(fit) info';
   TvTrip.LockDrawing;

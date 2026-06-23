@@ -1469,10 +1469,19 @@ begin
     if (ProcessOptions.DefaultProximityStr <> '') then
       Proximity := StrToInt(ProcessOptions.DefaultProximityStr);
     Speed       := GetSpeedFromName(string(result.Name));
+    if (Speed > 0) then
+      AlertType := 1
+    else
+      AlertType := 0;
 
     ExtensionsNode := WayPoint.Find('extensions');
     if (ExtensionsNode <> nil) then
+    begin
+      if (ExtensionsNode.Find('trp:ShapingPoint') <> nil) then
+        AlertType := 1;
       ExtensionsNode := ExtensionsNode.Find('gpxx:WaypointExtension');
+    end;
+
     if (ExtensionsNode <> nil) then
     begin
       Phone         := TGPXString(FindSubNodeValue(ExtensionsNode, 'gpxx:PhoneNumber'));
@@ -1490,6 +1499,12 @@ begin
         Street      := TGPXString(FindSubNodeValue(AddressNode, 'gpxx:StreetAddress'));  // Has HouseNbr
       end;
     end;
+
+    if (Speed > 0) then
+      SoundNbr := 5
+    else if (Proximity > 0) then
+      SoundNbr := 4;
+
     CategoryId := CatId;
     BitmapId := BmpId;
   end;
