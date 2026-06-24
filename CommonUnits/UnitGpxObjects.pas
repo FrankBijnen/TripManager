@@ -1463,6 +1463,7 @@ begin
   begin
     Name        := TGPXString(FindSubNodeValue(WayPoint, 'name'));
     Comment     := TGPXString(FindSubNodeValue(WayPoint, 'cmt'));
+    Description := TGPXString(FindSubNodeValue(WayPoint, 'desc'));
     Lat         := TGPXString(WayPoint.AttributeList.Find('lat').Value);
     Lon         := TGPXString(WayPoint.AttributeList.Find('lon').Value);
     Proximity   := 0;

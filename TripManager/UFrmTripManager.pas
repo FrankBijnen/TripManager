@@ -3970,105 +3970,58 @@ var
   end;
 
   procedure AddGPXWayPoint(AGPXWayPoint: TGPXWayPoint; ZoomRequest: boolean);
-  var
-    RecType: integer;
+
+    procedure AddItem(ARecType: integer; AKey, AValue: string);
+    begin
+      if (AGPXWayPoint.SelLength[ARecType] <> 0) then
+        VlTripInfo.Strings.AddPair(AKey, AValue,
+          TGridSelItem.Create(AGPXWayPoint.SelLength[ARecType], AGPXWayPoint.SelStart[ARecType]));
+    end;
+
   begin
-    RecType := 2;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      VlTripInfo.Strings.AddPair('Name', string(AGPXWayPoint.Name),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      VlTripInfo.Strings.AddPair('PoiGroup', string(AGPXWayPoint.PoiGroup),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(2, 'Name', string(AGPXWayPoint.Name));
+    AddItem(2, 'Lat, Lon', Format('%s, %s', [AGPXWayPoint.Lat, AGPXWayPoint.Lon]));
+    AddItem(2, 'PoiGroup', string(AGPXWayPoint.PoiGroup));
 
-    RecType := 6;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Category),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(6, 'Category', string(AGPXWayPoint.Category));
 
-    RecType := 4;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      VlTripInfo.Strings.AddPair('Symbol (Temp path)', string(Format('%d_%s.png', [AGPXWayPoint.PoiId, AGPXWayPoint.Symbol])),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(4, 'Symbol (Temp path)', string(Format('%d_%s.png', [AGPXWayPoint.PoiId, AGPXWayPoint.Symbol])));
 
-    RecType := 3;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      if (AGPXWayPoint.Speed <> 0) then
-        VlTripInfo.Strings.AddPair('Speed', Format('%d Km', [AGPXWayPoint.Speed]),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    if (AGPXWayPoint.Speed <> 0) then
+      AddItem(3, 'Speed', Format('%d Km', [AGPXWayPoint.Speed]));
+    if (AGPXWayPoint.Proximity <> 0) then
+      AddItem(3, 'Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]));
+    AddItem(3, 'Alert type', Format('%d (0=360%s,1=Along road,2=Tour guide)', [AGPXWayPoint.AlertType, #$00b0]));
+    AddItem(3, 'Sound Nbr', Format('%d (0=Beep, 1=Tone,2=3x Beep,3=Silence,4=Plung,5=Double Plung)', [AGPXWayPoint.SoundNbr]));
 
-      if (AGPXWayPoint.Proximity <> 0) then
-        VlTripInfo.Strings.AddPair('Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    AddItem(10, 'Comment', ReplaceAll(string(AGPXWayPoint.Comment), [#10, #13], ['_','']));
 
-      VlTripInfo.Strings.AddPair('Alert type', Format('%d (0=360%s,1=Along road,2=Tour guide)', [AGPXWayPoint.AlertType, #$00b0]),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
+    if (AGPXWayPoint.Phone <> '') then
+      AddItem(12, 'Phone', string(AGPXWayPoint.Phone));
+    if (AGPXWayPoint.Email <> '') then
+      AddItem(12, 'Email', string(AGPXWayPoint.Email));
 
-      VlTripInfo.Strings.AddPair('Sound Nbr', Format('%d (0=Beep, 1=Tone,2=3x Beep,3=Silence,4=Plung,5=Double Plung)', [AGPXWayPoint.SoundNbr]),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    if (AGPXWayPoint.Country <> '') then
+      AddItem(11, 'Country', string(AGPXWayPoint.Country));
+    if (AGPXWayPoint.State <> '') then
+      AddItem(11, 'State', string(AGPXWayPoint.State));
+    if (AGPXWayPoint.PostalCode <> '') then
+      AddItem(11, 'PostalCode', string(AGPXWayPoint.PostalCode));
+    if (AGPXWayPoint.City <> '') then
+      AddItem(11, 'City', string(AGPXWayPoint.City));
+    if (AGPXWayPoint.Street <> '') or
+       (AGPXWayPoint.HouseNbr <> '') then
+      AddItem(11, 'Street', string(Format('%s %s', [AGPXWayPoint.Street, AGPXWayPoint.HouseNbr])));
 
-    RecType := 10;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      RecType := 10;
-      VlTripInfo.Strings.AddPair('Comment', ReplaceAll(string(AGPXWayPoint.Comment), [#10, #13], ['_','']),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(13, 'Image', Format('Count: %d', [AGPXWayPoint.ImageCnt]));
 
-    RecType := 12;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      if (AGPXWayPoint.Phone <> '') then
-        VlTripInfo.Strings.AddPair('Phone', string(AGPXWayPoint.Phone),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      if (AGPXWayPoint.Email <> '') then
-        VlTripInfo.Strings.AddPair('Email', string(AGPXWayPoint.Email),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(14, 'Description', string(AGPXWayPoint.Description));
 
-    RecType := 11;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      if (AGPXWayPoint.Country <> '') then
-        VlTripInfo.Strings.AddPair('Country', string(AGPXWayPoint.Country),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      if (AGPXWayPoint.State <> '') then
-        VlTripInfo.Strings.AddPair('State', string(AGPXWayPoint.State),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      if (AGPXWayPoint.PostalCode <> '') then
-        VlTripInfo.Strings.AddPair('PostalCode', string(AGPXWayPoint.PostalCode),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      if (AGPXWayPoint.City <> '') then
-        VlTripInfo.Strings.AddPair('City', string(AGPXWayPoint.City),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-      if (AGPXWayPoint.Street <> '') or
-         (AGPXWayPoint.HouseNbr <> '') then
-        VlTripInfo.Strings.AddPair('Street', string(Format('%s %s', [AGPXWayPoint.Street, AGPXWayPoint.HouseNbr])),
-          TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(5, 'Bitmap', string(AGPXWayPoint.Name));
 
-    RecType := 5;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      VlTripInfo.Strings.AddPair('Bitmap', string(AGPXWayPoint.Name),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(7, 'Category', string(AGPXWayPoint.Name));
 
-    RecType := 7;
-    if (AGPXWayPoint.SelLength[RecType] <> 0) then
-    begin
-      VlTripInfo.Strings.AddPair('Category', string(AGPXWayPoint.Name),
-        TGridSelItem.Create(AGPXWayPoint.SelLength[RecType], AGPXWayPoint.SelStart[RecType]));
-    end;
+    AddItem(18, 'Media', string(AGPXWayPoint.Name));
 
     if (ZoomRequest) then
       MapRequest(Format('%s, %s',[AGPXWayPoint.Lat, AGPXWayPoint.Lon]),

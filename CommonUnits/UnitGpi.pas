@@ -32,6 +32,7 @@ type
     Phone: TGPXString;
     Email: TGPXString;
     Comment: TGPXString;
+    Description: TGPXString;
     Country: TGPXString;
     State: TGPXString;
     PostalCode: TGPXString;
@@ -46,6 +47,7 @@ type
     AlertType: byte; // 0=360, 1=along road, 3=Tour guide
     SoundNbr: byte;  // 0=Beep, 1=Tone,2= 3x Beep,3=Silence,4=Plung,5=Double Plung
     BitmapId: integer;
+    ImageCnt: integer;
     CategoryId: integer;
     SelStart: array[0..$12] of int64;
     SelLength: array[0..$12] of int64;
@@ -257,6 +259,19 @@ type
     procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
     function Size: integer;
   end;
+
+  TDescription = packed record
+    MainRec:    TMainRec;
+    Unknown16:  Byte;
+    Desc:       TPString;
+    DescL:      TPLString;
+    constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
+    function Size: integer;
+  end;
+
 // Until here
 
   TWayPt = packed record
@@ -272,6 +287,7 @@ type
     BitmapRef:  TPoiBitmapRef;
     Alert:      TAlert;
     Comment:    TComment;
+    Description:TDescription;
     Contact:    TContact;
     Address:    TAddress;
     constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
@@ -378,6 +394,7 @@ begin
   Speed := 0;
   AlertType := 0;
   SoundNbr := 0;
+  ImageCnt := 0;
 end;
 
 destructor TGPXWayPoint.Destroy;
@@ -699,6 +716,7 @@ begin
        (Alert.Speed > 0) then
        HasAlert := $0001;
     Comment.Create(AVersion, GPXWayPoint);
+    Description.Create(AVersion, GPXWayPoint);
     Contact.Create(AVersion, GPXWayPoint);
     Address.Create(AVersion, GPXWayPoint)
   end;
@@ -725,6 +743,8 @@ begin
       Alert.Write(S);
     if (Comment.Comment.LChars > 0) then
       Comment.Write(S);
+    if (Description.DescL.LChars > 0) then
+      Description.Write(S);
     if (Contact.Flags <> 0) then
       Contact.Write(S);
     if (Address.Flags <> 0) then
@@ -774,6 +794,8 @@ begin
       result := result + Sizeof(Alert);
     if (Comment.Comment.LChars > 0) then
       result := result + Comment.Size;
+    if (Description.DescL.LChars > 0) then
+      result := result + Description.Size;
     if (Contact.Flags <> 0) then
       result := result + Contact.Size;
     if (Address.Flags <> 0) then
@@ -1442,6 +1464,53 @@ begin
     result := result + Email.Size;
 end;
 
+// Recordtype 14
+constructor TDescription.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
+begin
+  MainRec.Create(AVersion, $0E);
+  Unknown16 := 1;
+  DescL.Create(GPXWayPoint.Description);
+end;
+
+procedure TDescription.Write(S: TBufferedFileStream);
+begin
+  MainRec.Write(S, Size);
+  S.Write(Unknown16, SizeOf(Unknown16));
+  case (Unknown16) of
+    6,7:
+      Desc.Write(S);
+    else
+      DescL.Write(S);
+  end;
+end;
+
+procedure TDescription.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TDescription.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+  S.Read(Unknown16, SizeOf(Unknown16));
+  case (Unknown16) of
+    6,7:
+      Desc.Read(S);
+    else
+      DescL.Read(S);
+  end;
+end;
+
+function TDescription.Size: integer;
+begin
+  case (Unknown16) of
+    6,7:
+      result := SizeOf(MainRec) + SizeOf(Unknown16) + Desc.Size;
+    else
+      result := SizeOf(MainRec) + SizeOf(Unknown16) + DescL.Size;
+  end;
+end;
+
 // RecordType -1
 constructor TEndx.Create(AVersion: Word);
 begin
@@ -1489,15 +1558,17 @@ procedure TGPI.Read(S: TBufferedFileStream; APOIGroupList: TPOIGroupList; ImageD
 const
   PoiGroupCat = 'PoiGroup';
 
-  WayPointTypes: set of byte = [$02,
-                                $03,  // Alert
-                                $04,  // Bitmap ref
-                                $06,  // Category ref
-                                $0a,  // Comment
-                                $0b,  // Address
-                                $0c,  // Contact
-                                $0d,  // Image (not used in TM)
-                                $0e]; // Description (not used in TM)
+  WayPointTypes: set of byte    = [$02,
+                                   $03,  // Alert
+                                   $04,  // Bitmap ref
+                                   $06,  // Category ref
+                                   $0a,  // Comment
+                                   $0b,  // Address
+                                   $0c,  // Contact
+                                   $0d,  // Image (not used in TM)
+                                   $0e]; // Description (not used in TM)
+
+  ImageTypes: set of byte       = [$0d]; // Image (not used in TM)
 
   NonWayPointTypes: set of byte = [$05,  // Bitmap
                                    $07,  // Media
@@ -1518,12 +1589,14 @@ var
   PoiBitmap: TPoiBitmap;
   PoiBitmapRef: TPoiBitmapRef;
   Comment: TComment;
+  Desciption: TDescription;
   Address: TAddress;
   Contact: TContact;
   BitMap: Vcl.Graphics.TBitmap;
   PNGImage: Vcl.Imaging.pngimage.TPngImage;
   GPXWayPoint: TGPXWayPoint;
   CategoryList: TStringList;
+  MediaId: Word;
   StartPos: int64;
 
   procedure ReadHeader(S: TbufferedFileStream);
@@ -1597,7 +1670,10 @@ begin
       if (Assigned(GPXWayPoint)) and
          (MainRec.RecType in WayPointTypes) then
       begin
-        GPXWayPoint.SelStart[MainRec.RecType] := StartPos;
+        if not (MainRec.RecType in ImageTypes) or
+           ((MainRec.RecType in ImageTypes) and
+            (GPXWayPoint.ImageCnt = 0)) then
+          GPXWayPoint.SelStart[MainRec.RecType] := StartPos;
         GPXWayPoint.SelLength[MainRec.RecType] := 0;
       end;
 
@@ -1710,10 +1786,28 @@ begin
             GPXWayPoint.Email := ConvertToUtf8(Contact.Email, Header2.CodePage);
             continue;
           end;
-        $12: // Media. Not supported, but handle selections.
+        $0d: // Image. Not supported, but handle selections.
           begin
             S.Seek(MainRec.Length, TSeekOrigin.soCurrent);
-            AddNonGpxWayPoint('Media');
+            GPXWayPoint.ImageCnt := GPXWayPoint.ImageCnt + 1;
+            continue;
+          end;
+        $0e: // Description. Not supported, but handle selections.
+          begin
+            Desciption.Read(S, MainRec);
+            case (Desciption.Unknown16) of
+              6,7:
+                GPXWayPoint.Description := ConvertToUtf8(Desciption.Desc, Header2.CodePage);
+              else
+                GPXWayPoint.Description := ConvertToUtf8(Desciption.DescL, Header2.CodePage);
+            end;
+            continue;
+          end;
+        $12: // Media. Not supported, but handle selections.
+          begin
+            S.Read(MediaId, SizeOf(MediaId));
+            S.Seek(MainRec.Length - SizeOf(MediaId), TSeekOrigin.soCurrent);
+            AddNonGpxWayPoint(TGPXString(Format('MediaId %d', [MediaId])));
             continue;
           end;
         $ffff:
