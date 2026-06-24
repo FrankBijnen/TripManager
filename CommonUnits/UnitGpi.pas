@@ -25,30 +25,32 @@ const
 type
 
   TGPXWayPoint = class
+// Possible Input Data
     Name: TGPXString;
-    Lat:  TGPXString;
-    Lon:  TGPXString;
-    Symbol: TGPXString;
-    Phone: TGPXString;
-    Email: TGPXString;
     Comment: TGPXString;
     Description: TGPXString;
+    Lat: TGPXString;
+    Lon: TGPXString;
+    Proximity: Word;
+    Speed: Word;
+    AlertType: byte;          // 0=360, 1=along road, 2=Tour guide
+    Phone: TGPXString;
+    Email: TGPXString;        // Not used in TM
     Country: TGPXString;
     State: TGPXString;
     PostalCode: TGPXString;
     City: TGPXString;
     Street: TGPXString;
     HouseNbr: TGPXString;
-    PoiId: integer;
-    PoiGroup: TGPXString;
     Category: TGPXString;
-    Speed: Word;
-    Proximity: Word;
-    AlertType: byte; // 0=360, 1=along road, 3=Tour guide
-    SoundNbr: byte;  // 0=Beep, 1=Tone,2= 3x Beep,3=Silence,4=Plung,5=Double Plung
-    BitmapId: integer;
-    ImageCnt: integer;
+    SoundNbr: byte;           // 0=Beep, 1=Tone,2= 3x Beep,3=Silence,4=Plung,5=Double Plung
     CategoryId: integer;
+    BitmapId: integer;
+// Only Output
+    PoiId: integer;           // Taken from the PoiGroup
+    PoiGroup: TGPXString;     // ""
+    MediaId: Word;            // E.G: Tour Guide Mp3
+    ImageCnt: integer;        // Count of images in WayPoint. Zumo displays only the 1st
     SelStart: array[0..$12] of int64;
     SelLength: array[0..$12] of int64;
     constructor Create;
@@ -394,6 +396,7 @@ begin
   Speed := 0;
   AlertType := 0;
   SoundNbr := 0;
+  MediaId := 0;
   ImageCnt := 0;
 end;
 
@@ -1643,7 +1646,7 @@ begin
     repeat
       StartPos := S.Position;
 
-      // Update prev rec
+      // Update Selection length in previous record
       if (Assigned(GPXWayPoint)) and
          (MainRec.RecType <= High(GPXWayPoint.SelStart)) then
       begin
@@ -1667,6 +1670,7 @@ begin
         GPXWayPoint.SelLength[0] := 0;
       end;
 
+      // Init selection position of new GPX WayPoint.
       if (Assigned(GPXWayPoint)) and
          (MainRec.RecType in WayPointTypes) then
       begin
@@ -1693,12 +1697,15 @@ begin
             GPXWayPoint.Speed := Round((Alert.Speed * 60 * 60) / 1000 / 100);
             GPXWayPoint.AlertType := Alert.AlertType;
             GPXWayPoint.SoundNbr := Alert.SoundNbr;
+            if (Alert.AlertType = $02) and
+               (Alert.AudioAlert = $20) then
+              GPXWayPoint.MediaId := (Alert.AudioAlert * $100) + Alert.SoundNbr;
             continue;
           end;
         $04:
           begin
             PoiBitmapRef.Read(S, MainRec);
-            GPXWayPoint.Symbol := TGPXString(IntToStr(PoiBitmapRef.Id));
+            GPXWayPoint.BitmapId := PoiBitmapRef.Id;
             continue;
           end;
         $05:
@@ -1792,7 +1799,7 @@ begin
             GPXWayPoint.ImageCnt := GPXWayPoint.ImageCnt + 1;
             continue;
           end;
-        $0e: // Description. Not supported, but handle selections.
+        $0e:
           begin
             Desciption.Read(S, MainRec);
             case (Desciption.Unknown16) of
@@ -1863,7 +1870,7 @@ begin
         if (SameText(Symbol, SymbolCat)) then
           AWpt.AddChild('sym').NodeValue := Category
         else
-          AWpt.AddChild('sym').NodeValue := string(AWayPt.Symbol);
+          AWpt.AddChild('sym').NodeValue := IntToStr(AWayPt.BitmapId);
         AWpt.AddChild('type').NodeValue := 'user';
         AExtensions := AWpt.AddChild('extensions').AddChild('gpxx:WaypointExtension');
         if (AWayPt.Proximity <> 0) then
@@ -1892,5 +1899,3 @@ initialization
   FormatSettings := GetLocaleSetting;
 
 end.
-
-

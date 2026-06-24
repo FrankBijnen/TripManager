@@ -3035,16 +3035,16 @@ begin
         if (AGPXwayPoint.Lat = '') or
            (AGPXwayPoint.Lon = '') then
           continue;
-        Category := Format('Poi Symbol: %s ', [AGPXwayPoint.Symbol]);
+        Category := Format('Poi Symbol: %d ', [AGPXwayPoint.BitmapId]);
         if (AGPXwayPoint.Category <> '') then
           Category := Category + Format('Category: %s ', [AGPXwayPoint.Category]);
         if (AGPXwayPoint.Speed <> 0) then
           Category := Category + Format('Speed: %d ', [AGPXwayPoint.Speed]);
         Category := EscapeDQuote(Category);
-        OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%d_%s.png", "%s");',
+        OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%d_%d.png", "%s");',
                             [EscapeDQuote(string(AGPXwayPoint.Name)),
                              AGPXwayPoint.Lat, AGPXwayPoint.Lon,
-                             GroupData.Id, AGPXwayPoint.Symbol,
+                             GroupData.Id, AGPXwayPoint.BitmapId,
                              Category] ));
       end;
     end;
@@ -3985,7 +3985,7 @@ var
 
     AddItem(6, 'Category', string(AGPXWayPoint.Category));
 
-    AddItem(4, 'Symbol (Temp path)', string(Format('%d_%s.png', [AGPXWayPoint.PoiId, AGPXWayPoint.Symbol])));
+    AddItem(4, 'Symbol (Temp path)', string(Format('%d_%d.png', [AGPXWayPoint.PoiId, AGPXWayPoint.BitmapId])));
 
     if (AGPXWayPoint.Speed <> 0) then
       AddItem(3, 'Speed', Format('%d Km', [AGPXWayPoint.Speed]));
@@ -3993,6 +3993,8 @@ var
       AddItem(3, 'Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]));
     AddItem(3, 'Alert type', Format('%d (0=360%s,1=Along road,2=Tour guide)', [AGPXWayPoint.AlertType, #$00b0]));
     AddItem(3, 'Sound Nbr', Format('%d (0=Beep, 1=Tone,2=3x Beep,3=Silence,4=Plung,5=Double Plung)', [AGPXWayPoint.SoundNbr]));
+    if (AGPXWayPoint.MediaId <> 0) then
+      AddItem(3, 'Media Id', Format('%d', [AGPXWayPoint.MediaId]));
 
     AddItem(10, 'Comment', ReplaceAll(string(AGPXWayPoint.Comment), [#10, #13], ['_','']));
 
