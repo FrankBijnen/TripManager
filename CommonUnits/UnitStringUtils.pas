@@ -10,7 +10,16 @@ uses
 type
   T4Bytes = array[0..3] of byte;
   TDynArrayType = array of integer;
+  TStringObject = class
+  private
+    FValue: string;
+  public
+    constructor Create(AValue: string);
+    destructor Destroy; override;
+    property Value: string read FValue write FValue;
+  end;
 
+procedure BreakPoint;
 function SenSize(const S: int64): string;
 function Intd(const N: Integer; const D: Integer): string;
 function Spc(const Cnt: integer): string;
@@ -82,6 +91,25 @@ const
   RoutesDir         = 'Routes\';
   DeviceDir         = 'Device\';
 
+constructor TStringObject.Create(AValue: string);
+begin
+  inherited Create;
+  FValue := AValue;
+end;
+
+destructor TStringObject.Destroy;
+begin
+  FValue := '';
+  inherited;
+end;
+
+procedure BreakPoint;
+{$IFDEF DEBUG}
+asm int 3
+{$ELSE}
+begin
+{$ENDIF}
+end;
 
 function SenSize(const S: int64): string;
 var

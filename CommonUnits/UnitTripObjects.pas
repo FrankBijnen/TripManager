@@ -1074,14 +1074,6 @@ const
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
 
-procedure BreakPoint;
-{$IFDEF DEBUG}
-asm int 3
-{$ELSE}
-begin
-{$ENDIF}
-end;
-
 procedure WriteSwap(AStream: TMemoryStream; I: smallint);
 var
   Tmp: smallint;

@@ -1032,6 +1032,15 @@ begin
     if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
     begin
       CheckDevice;
+
+      // Should not occur
+      // ExploreDb was read in ExploreList, but CheckTrip not called
+      if (GetRegistry(Reg_EnableTripFuncs, false)) and
+         (GetRegistry(Reg_FuncTrip, false)) and
+         (HasTMTPDevice(CurrentDevice)) and
+         (TGarminMTP_Device(CurrentDevice).ExploreCheckNeeded) then
+        BreakPoint;
+
       SetDeviceListColumns;
       SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
     end;
@@ -2103,6 +2112,7 @@ begin
   ExploreList.NameValueSeparator := #9;
   ExploreList.Sorted := true;
   ExploreList.Duplicates := TDuplicates.dupIgnore;
+  ExploreList.OwnsObjects := true;
   TsExplore.TabVisible := false;
 
   ReadSettings;
@@ -3086,6 +3096,7 @@ var
   TmpModified: cardinal;
   TmpHash: cardinal;
   SubKey: string;
+  ExploreIndex: integer;
 begin
   result := false;
 
@@ -3127,8 +3138,19 @@ begin
     if (AMTP_Data.IsCalculated = false) then
       AListItem.ImageIndex := 2;
 
-    // Save Explore UUID
+    // Save Explore UUID, TripName and FileName
     AMTP_Data.ExploreUUID := TmpTripList.ExploreUUID;
+    ExploreIndex := ExploreList.IndexOfName(TmpTripList.TripName);
+    if (ExploreIndex > -1) and
+       (SameText(AMTP_Data.ExploreUUID, ExploreList.ValueFromIndex[ExploreIndex])) then  // Guid must also match
+    begin
+      // Save filename in Explorelist
+      if (ExploreList.Objects[ExploreIndex] <> nil) and
+         (ExploreList.Objects[ExploreIndex] is TStringObject) then
+        TStringObject(ExploreList.Objects[ExploreIndex]).Value := AListItem.Caption
+      else
+        ExploreList.Objects[ExploreIndex] := TStringObject.Create(AListItem.Caption);
+    end;
 
     // Save ProfileHashList in registry
     if (HasTMTPDevice(CurrentDevice)) and
@@ -3196,7 +3218,8 @@ begin
         SbPostProcess.Update;
       end;
     end;
-
+    if (HasTMTPDevice(CurrentDevice)) then
+      TGarminMTP_Device(CurrentDevice).ExploreCheckNeeded := false;
   finally
     SetCursor(CrNormal);
     StatusTimer.Enabled := false;
@@ -5056,10 +5079,10 @@ var
           if (LinkCnt < RoutePoints.Count) then
             LinkName := RoutePoints[LinkCnt].LocationTmName.AsString;
           TvTrip.Items.AddChildObject(AParentNode, LinkName, ANItem);
+          AParentNode.Expand(false);
         end;
         Inc(LinkCnt);
       end;
-      AParentNode.Expand(false);
     finally
       RoutePoints.Free;
     end;
@@ -5078,6 +5101,7 @@ var
       if ANItem is TLocation then
       begin
         CurrentLocation := TvTrip.Items.AddChildObject(AParentNode, string(TLocation(ANItem).LocationValue.id), ANItem);
+        AParentNode.Expand(false);
         continue;
       end;
       if (ANItem is TBaseDataItem) and
@@ -5095,7 +5119,6 @@ var
           CurrentLocation.Text := CurrentLocation.Text + ' (' + TmName(ANItem).AsString + ')';
       end;
     end;
-    AParentNode.Expand(false);
   end;
 
   procedure AddRoutes(AParentNode: TTreeNode; ARouteList: TmAllRoutes);
@@ -5107,6 +5130,7 @@ var
     for AnUdbHandle in ARouteList.Items do
     begin
       CurrentUdbNode := TvTrip.Items.AddChildObject(AParentNode, AnUdbHandle.DisplayName, AnUdbHandle);
+      AParentNode.Expand(false);
       CurrentRTPNode := nil;
       for AnUdbDir in AnUdbHandle.Items do
       begin
@@ -5117,7 +5141,6 @@ var
           TvTrip.Items.AddChildObject(CurrentRTPNode, AnUdbDir.DisplayName, AnUdbDir);
       end;
     end;
-    AParentNode.Expand(false);
   end;
 
 begin
@@ -5191,6 +5214,7 @@ begin
     TvTrip.Items.AddChildObject(RootNode,
                                 Format('%s (%s)', [ATripList.Header.ClassName, ATripList.ModelDescription]),
                                 ATripList.Header);
+    RootNode.Expand(false);
 
     for ANItem in ATripList.ItemList do
     begin
@@ -5199,6 +5223,8 @@ begin
         with TBaseDataItem(ANItem) do
         begin
           CurrentNode := TvTrip.Items.AddChildObject(RootNode, DisplayName + '=' + AsString, ANItem);
+          RootNode.Expand(false);
+
           if (ANItem is TmAllLinks) then
             AddLinks(CurrentNode, TmAllLinks(AnItem));
           if (ANItem is TmLocations) then
@@ -5210,7 +5236,6 @@ begin
     end;
 
     RootNode.Selected := true;
-    RootNode.Expand(false);
   finally
     VlTripInfo.Strings.EndUpdate;
     TvTrip.Items.EndUpdate;
@@ -5225,66 +5250,72 @@ end;
 
 procedure TFrmTripManager.LoadGpiFile(const FileName: string; const FromDevice: boolean);
 var
+  CrWait, CrNormal: HCURSOR;
   AStream: TBufferedFileStream;
   AGPXWayPoint: TGPXWayPoint;
   APoiGroupData: TPOIGroupData;
   RootNode, PoiGroupNode: TTreeNode;
   GPIRec: TGPI;
 begin
-  TsSQlite.TabVisible := false;
-  if (Assigned(ATripList)) then
-    ATripList.Clear;
-  if (Assigned(AFitInfo)) then
-    AFitInfo.Clear;
-
-  TsTripGpiInfo.Caption := 'POI(gpi) info';
-  AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
-
-  TvTrip.LockDrawing;
-  TvTrip.items.BeginUpdate;
-  TvTrip.Items.Clear;
-  VlTripInfo.Strings.BeginUpdate;
-  ClearTripInfo;
-  DeviceFile := FromDevice;
-  HexEditFile := FileName;
-  MnuTripEdit.Enabled := false;
-
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CRNormal := SetCursor(CrWait);
   try
-    DeleteTempFiles(GetOSMTemp, '*.png');
-    GPIRec.Read(AStream, APOIGroupList, GetOSMTemp);
+    TsSQlite.TabVisible := false;
+    if (Assigned(ATripList)) then
+      ATripList.Clear;
+    if (Assigned(AFitInfo)) then
+      AFitInfo.Clear;
 
-    RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), APOIGroupList);
-    TvTrip.ShowRoot := true;
+    TsTripGpiInfo.Caption := 'POI(gpi) info';
+    AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
 
-    if (DeviceFile) then
-      PnlTripGpiInfo.Color := clLime
-    else
-      PnlTripGpiInfo.Color := clAqua;
-    PnlTripGpiInfo.Caption := '';
-    for APoiGroupData in APOIGroupList do
-    begin
-      PoiGroupNode := TvTrip.Items.AddChildObject(RootNode, string(APoiGroupData.Name), APoiGroupData);
-      for AGPXWayPoint in APoiGroupData do
+    TvTrip.LockDrawing;
+    TvTrip.items.BeginUpdate;
+    TvTrip.Items.Clear;
+    VlTripInfo.Strings.BeginUpdate;
+    ClearTripInfo;
+    DeviceFile := FromDevice;
+    HexEditFile := FileName;
+    MnuTripEdit.Enabled := false;
+
+    try
+      DeleteTempFiles(GetOSMTemp, '*.png');
+      GPIRec.Read(AStream, APOIGroupList, GetOSMTemp);
+
+      RootNode := TvTrip.Items.AddObject(nil, ExtractFileName(FileName), APOIGroupList);
+      TvTrip.ShowRoot := true;
+
+      if (DeviceFile) then
+        PnlTripGpiInfo.Color := clLime
+      else
+        PnlTripGpiInfo.Color := clAqua;
+      PnlTripGpiInfo.Caption := '';
+      for APoiGroupData in APOIGroupList do
       begin
-        if (PnlTripGpiInfo.Caption = '') then
-          PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
-        TvTrip.Items.AddChildObject(PoiGroupNode, string(AGPXWayPoint.Name), AGPXWayPoint);
+        PoiGroupNode := TvTrip.Items.AddChildObject(RootNode, string(APoiGroupData.Name), APoiGroupData);
+        RootNode.Expand(false);
+        for AGPXWayPoint in APoiGroupData do
+        begin
+          if (PnlTripGpiInfo.Caption = '') then
+            PnlTripGpiInfo.Caption := string(AGPXWayPoint.Category);
+          TvTrip.Items.AddChildObject(PoiGroupNode, string(AGPXWayPoint.Name), AGPXWayPoint);
+          PoiGroupNode.Expand(false);
+        end;
       end;
-      PoiGroupNode.Expand(false);
+    finally
+      TvTrip.Items.EndUpdate;
+      TvTrip.UnlockDrawing;
+      VlTripInfo.Strings.EndUpdate;
+      AStream.Free;
     end;
-
-    RootNode.Expand(false);
+    LoadHex(FileName);
+    LoadGpiOnMap(APOIGroupList, CurrentMapItem);
+    RootNode.Selected := true;
+    BtnSaveTripValues.Enabled := false;
+    BtnSaveTripGpiFile.Enabled := false;
   finally
-    TvTrip.Items.EndUpdate;
-    TvTrip.UnlockDrawing;
-    VlTripInfo.Strings.EndUpdate;
-    AStream.Free;
+    SetCursor(CrNormal);
   end;
-  LoadHex(FileName);
-  LoadGpiOnMap(APOIGroupList, CurrentMapItem);
-  RootNode.Selected := true;
-  BtnSaveTripValues.Enabled := false;
-  BtnSaveTripGpiFile.Enabled := false;
 end;
 
 procedure TFrmTripManager.LoadFitFile(const FileName: string; const FromDevice: boolean);

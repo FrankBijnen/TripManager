@@ -38,6 +38,8 @@ type
   end;
 
   TGarminMTP_Device = class(TBase_Device)
+  private
+    FExploreCheckNeeded: boolean;
   public
     GarminDevice: TGarminDevice;
     constructor Create; virtual;
@@ -55,6 +57,7 @@ type
     function CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
     function RecreateTrips(const SystemTripsPath: string;
                            const LstItems: TListItems): boolean;
+    property ExploreCheckNeeded: boolean read FExploreCheckNeeded write FExploreCheckNeeded;
   end;
 
   TGarminDrv_Device = class(TGarminMTP_Device)
@@ -300,6 +303,7 @@ end;
 
 procedure TGarminMTP_Device.Init;
 begin
+  FExploreCheckNeeded := true;
   GarminDevice := TGarminDevice.Create;
   GarminDevice.Init;
 end;
@@ -462,7 +466,10 @@ begin
   if (GetRegistry(Reg_EnableExploreFuncs, false)) and
      (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
+  begin
+    ExploreCheckNeeded := true;
     GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
+  end;
 end;
 
 function TGarminMTP_Device.CheckSystemTripsFolder(const SystemTripsPath: string): boolean;

@@ -2830,6 +2830,7 @@ var
   TripName, OutFile: string;
   CalculationMode, TransportMode: string;
   RteExtensions, RteTrpPoint, RtePtExtensions, RtePtNode, RtePtViaPoint: TXmlVSNode;
+  KnownExploreIndex: integer;
 begin
   RtePts := RteNode.FindNodes('rtept');
   if (RtePts = nil) then // No route points, no trip
@@ -2840,6 +2841,16 @@ begin
     FTripList.RouteCnt := RouteCnt;
     TripName := FindSubNodeValue(RteNode, 'name');
     OutFile := Format('%s%s%s', [FOutDir, EscapeFileName(TripName), '.trip']);
+
+    if (Assigned(ProcessOptions.ExploreUUIDList)) and
+       (ProcessOptions.ExploreUUIDList.Count > 0) then
+    begin
+      KnownExploreIndex := ProcessOptions.ExploreUUIDList.IndexOfName(TripName);
+      if (KnownExploreIndex > -1) and
+         (ProcessOptions.ExploreUUIDList.Objects[KnownExploreIndex] <> nil) and
+         (ProcessOptions.ExploreUUIDList.Objects[KnownExploreIndex] is TStringObject) then
+        OutFile := Format('%s%s', [FOutDir, TStringObject(ProcessOptions.ExploreUUIDList.Objects[KnownExploreIndex]).Value]);
+    end;
 
     // Get TransportationMode
     TransportMode := '';
@@ -2977,7 +2988,9 @@ begin
         CreateTracks:
           SubCaption := AddSubCaption(SubCaption, 'Tracks');
         CreatePOI:
-          SubCaption := AddSubCaption(SubCaption, 'POI');
+          if (GpxFileObj.ProcessOptions.ProcessViaPtsInGpi) or
+             (GpxFileObj.ProcessOptions.ProcessShapePtsInGpi) then
+            SubCaption := AddSubCaption(SubCaption, 'POI');
         CreateKML:
           SubCaption := AddSubCaption(SubCaption, 'Kml');
         CreateHTML:
@@ -2992,7 +3005,6 @@ begin
           SubCaption := AddSubCaption(SubCaption, 'Trip');
       end;
     end;
-
     if (SubCaption <> '') then
     begin
       if (not GpxFileObj.ShowSelectTracks(TTagsToShow.RteTrk,
