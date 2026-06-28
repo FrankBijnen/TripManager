@@ -46,10 +46,10 @@ type
     SoundNbr: byte;           // 0=Beep, 1=Tone,2= 3x Beep,3=Silence,4=Plung,5=Double Plung
     CategoryId: integer;
     BitmapId: integer;
+    AudioAlert: byte;
 // Only Output
     PoiId: integer;           // Taken from the PoiGroup
     PoiGroup: TGPXString;     // ""
-    MediaId: Word;            // E.G: Tour Guide Mp3
     ImageCnt: integer;        // Count of images in WayPoint. Zumo displays only the 1st
     SelStart: array[0..$12] of int64;
     SelLength: array[0..$12] of int64;
@@ -79,6 +79,16 @@ type
     BitmapId: Word;
     GpiSymbolsDir: TGPXString;
     constructor Create(SymbolsDir: TGPXString = DefGpiSmallSymbolsDir);
+    destructor Destroy; override;
+  end;
+
+  TGPXMedia = class
+    JpgFile: string;
+    Mp3File: string;
+    MediaId: byte;
+    JpgSize: int64;
+    Mp3Size: int64;
+    constructor Create(MediaDir: string);
     destructor Destroy; override;
   end;
 
@@ -125,8 +135,8 @@ type
   end;
 
   TCategoryRef = packed record
-    MainRec:  TMainRec;
-    Id:       SmallInt;
+    MainRec:    TMainRec;
+    Id:         SmallInt;
     constructor Create(AVersion: Word; AId: SmallInt);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec);
@@ -135,9 +145,9 @@ type
   end;
 
   TCategory = packed record
-    MainRec:  TMainRec;
-    Id:       SmallInt;
-    Name:     TPLString;
+    MainRec:    TMainRec;
+    Id:         SmallInt;
+    Name:       TPLString;
     constructor Create(AVersion: Word; GPXCategory: TGPXCategory);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec);
@@ -146,8 +156,8 @@ type
   end;
 
   TPoiBitmapRef = packed record
-    MainRec:  TMainRec;
-    Id:       SmallInt;
+    MainRec:    TMainRec;
+    Id:         SmallInt;
     constructor Create(AVersion: Word; AId: SmallInt);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec);
@@ -156,21 +166,21 @@ type
   end;
 
   TPoiBitmap = packed record
-    MainRec:  TMainRec;
-    Id:       SmallInt;
-    Height:   SmallInt;
-    Width:    SmallInt;
-    LineSize: SmallInt;
-    BPP:      SmallInt;
-    Dummy1:   SmallInt;
-    ImageSize:DWord;
-    Dummy2:   DWord;
-    CntColPat:DWord;
-    TranspCol:DWord;
-    Flags2:   DWord;
-    Dummy3:   DWord;
-    ScanLines:array of byte;
-    ColPat:   array of byte;
+    MainRec:    TMainRec;
+    Id:         SmallInt;
+    Height:     SmallInt;
+    Width:      SmallInt;
+    LineSize:   SmallInt;
+    BPP:        SmallInt;
+    Dummy1:     SmallInt;
+    ImageSize:  DWord;
+    Dummy2:     DWord;
+    CntColPat:  DWord;
+    TranspCol:  DWord;
+    Flags2:     DWord;
+    Dummy3:     DWord;
+    ScanLines:  array of byte;
+    ColPat:     array of byte;
     BitMapRd: TBitMapReader;
     constructor Create(AVersion: Word; GPXBitMap: TGPXBitmap);
     procedure Write(S: TBufferedFileStream);
@@ -262,6 +272,18 @@ type
     function Size: integer;
   end;
 
+  TImage = packed record
+    MainRec:    TMainRec;
+    Dummy1:     Byte;
+    ImageSize:  DWord;
+    Image:      TBytes;
+    constructor Create(AVersion: Word; AGPXMedia: TGPXMedia);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
+    function Size: integer;
+  end;
+
   TDescription = packed record
     MainRec:    TMainRec;
     Unknown16:  Byte;
@@ -289,10 +311,11 @@ type
     BitmapRef:  TPoiBitmapRef;
     Alert:      TAlert;
     Comment:    TComment;
-    Description:TDescription;
-    Contact:    TContact;
     Address:    TAddress;
-    constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
+    Contact:    TContact;
+    Description:TDescription;
+    Image:      TImage;
+    constructor Create(AVersion: Word; AGPXWayPoint: TGPXWayPoint; AGPXMedia: TGPXMedia; AExtra: boolean);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
     procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
@@ -312,12 +335,32 @@ type
     Dummy2:     Word;
     Alert:      Byte;
     WayPts:     TObjectlist<TGPXWayPoint>; // Internal variable, dont write
-    constructor Create(AVersion: Word; AExtra: boolean);
+    Medias:     TObjectList<TGPXMedia>;    // Copy of PoiGroup;
+    constructor Create(AVersion: Word; AMedias: TObjectList<TGPXMedia>; AExtra: boolean);
     procedure AddWpt(GPXWayPt: TGPXWayPoint);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(ExtraRec: TExtraRec);
     procedure Read(S: TBufferedFileStream; ExtraRec: TExtraRec);
     function Size: integer;
+  end;
+
+  TMedia = packed record
+    Extra:      boolean;  // Internal variable, dont write
+    ExtraRec:   TExtraRec;
+    MainRec:    TMainRec;
+    MediaId:    Byte;
+    AudioType:  Byte;    // $10=Builtin $20=Custom Audio
+    AudioFormat:Byte;    // $00=Wav, $01=Mp3
+    TotalLength:DWord;
+    Locale:     array[0..1] of AnsiChar;
+    MediaLength:DWord;
+    Media:      Tbytes;
+    constructor Create(AVersion: Word; AMedia: TGPXMedia; Simulate: boolean; AExtra: boolean = true);
+    procedure Write(S: TBufferedFileStream);
+    procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
+    function Size: integer;
+    function ExtraSize: integer;
   end;
 
   TEndx = packed record
@@ -334,12 +377,14 @@ type
     ExtraRec:   TExtraRec;
     Name:       TPLString;
     Area:       TArea;
-    Categories: TObjectlist<TGPXCategory>; // Internal variable, dont write
-    BitMaps: TObjectlist<TGPXBitmap>; // Internal variable, dont write
+    Categories: TObjectlist<TGPXCategory>;  // Internal variable, dont write
+    BitMaps:    TObjectlist<TGPXBitmap>;    // Internal variable, dont write
+    Medias:     TObjectlist<TGPXMedia>;     // Internal variable, dont write
     constructor Create(AVersion: Word; AName: TGPXString; AExtra: boolean = true);
     procedure AddWpt(GPXWayPt: TGPXWayPoint);
     function AddCat(GPXCategory: TGPXCategory): integer;
     function AddBmp(GPXBitMap: TGPXBitMap): integer;
+    function AddMedia(AMediaDir: string): integer;
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
     procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
@@ -396,8 +441,9 @@ begin
   Speed := 0;
   AlertType := 0;
   SoundNbr := 0;
-  MediaId := 0;
+//  MediaId := 0;
   ImageCnt := 0;
+  AudioAlert := $10;
 end;
 
 destructor TGPXWayPoint.Destroy;
@@ -412,19 +458,48 @@ end;
 
 destructor TGPXCategory.Destroy;
 begin
-  Category := '';
   inherited;
+  Category := '';
 end;
 
 constructor TGPXBitmap.Create(SymbolsDir: TGPXString = DefGpiSmallSymbolsDir);
 begin
-  GpiSymbolsDir := SymbolsDir;
   inherited Create;
+  GpiSymbolsDir := SymbolsDir;
 end;
 
 destructor TGPXBitmap.Destroy;
 begin
   Bitmap := '';
+  inherited;
+end;
+
+constructor TGPXMedia.Create(MediaDir: string);
+var
+  Fs: TSearchRec;
+  Rc: integer;
+begin
+  inherited Create;
+
+  Rc := System.SysUtils.FindFirst(MediaDir + '*.mp3', faAnyFile, Fs);
+  if (Rc = 0) then
+  begin
+    Mp3File := MediaDir + Fs.Name;
+    Mp3Size := Fs.Size;
+    System.SysUtils.FindClose(Fs);
+  end;
+
+  Rc := System.SysUtils.FindFirst(MediaDir + '*.jpg', faAnyFile, Fs);
+  if (Rc = 0) then
+  begin
+    JpgFile := MediaDir + Fs.Name;
+    JpgSize := Fs.Size;
+    System.SysUtils.FindClose(Fs);
+  end;
+end;
+
+destructor TGPXMedia.Destroy;
+begin
   inherited;
 end;
 
@@ -462,7 +537,8 @@ end;
 
 //Relies on formatsettings with a decimal point
 function Str2Coord(ACoord: TGPXString): LongInt;
-var HCoord: Double;
+var
+  HCoord: Double;
 begin
   try
     HCoord := StrToFloat(String(ACoord), FormatSettings);
@@ -474,7 +550,8 @@ begin
 end;
 
 function Coord2Str(ACoord: LongInt): TGPXString;
-var HCoord: Double;
+var
+  HCoord: Double;
 begin
   try
     HCoord := SimpleRoundTo(ACoord / 4294967296 * 360, -6);
@@ -697,7 +774,7 @@ begin
 end;
 
 // Recordtype 2
-constructor TWayPt.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
+constructor TWayPt.Create(AVersion: Word; AGPXWayPoint: TGPXWayPoint; AGPXMedia: TGPXMedia; AExtra: boolean);
 begin
   Extra := AExtra;
   if (Extra) then
@@ -705,24 +782,29 @@ begin
   else
     MainRec.Create(AVersion, $0002);
 
-  Name.Create(GPXWayPoint.Name);
-  Lat := Str2Coord(GPXWayPoint.Lat);
-  Lon := Str2Coord(GPXWayPoint.Lon);
+  Name.Create(AGPXWayPoint.Name);
+  Lat := Str2Coord(AGPXWayPoint.Lat);
+  Lon := Str2Coord(AGPXWayPoint.Lon);
   Dummy1 := 1;
   HasAlert := 0;
   if (Extra) then
   begin
-    CategoryRef.Create(AVersion, GPXWayPoint.CategoryId); // Can be -1
-    BitmapRef.Create(AVersion, GPXWayPoint.BitmapId);     // Can be -1
-    Alert.Create(AVersion, GPXWayPoint);
+    CategoryRef.Create(AVersion, AGPXWayPoint.CategoryId); // Can be -1
+    BitmapRef.Create(AVersion, AGPXWayPoint.BitmapId);     // Can be -1
+    Alert.Create(AVersion, AGPXWayPoint);
     if (Alert.Proximity > 0) or
        (Alert.Speed > 0) then
        HasAlert := $0001;
-    Comment.Create(AVersion, GPXWayPoint);
-    Description.Create(AVersion, GPXWayPoint);
-    Contact.Create(AVersion, GPXWayPoint);
-    Address.Create(AVersion, GPXWayPoint)
+    Comment.Create(AVersion, AGPXWayPoint);
+    Address.Create(AVersion, AGPXWayPoint);
+    Contact.Create(AVersion, AGPXWayPoint);
+    Description.Create(AVersion, AGPXWayPoint);
   end;
+
+  Image := Default(TImage);
+  if (AGPXWayPoint.AudioAlert = $20) and
+     (AGPXMedia.JpgSize > 0) then
+    Image.Create(GpiVersion, AGPXMedia);
 end;
 
 procedure TWayPt.Write(S: TBufferedFileStream);
@@ -746,12 +828,14 @@ begin
       Alert.Write(S);
     if (Comment.Comment.LChars > 0) then
       Comment.Write(S);
-    if (Description.DescL.LChars > 0) then
-      Description.Write(S);
-    if (Contact.Flags <> 0) then
-      Contact.Write(S);
     if (Address.Flags <> 0) then
       Address.Write(S);
+    if (Contact.Flags <> 0) then
+      Contact.Write(S);
+    if (Image.ImageSize > 0) then
+      Image.Write(S);
+    if (Description.DescL.LChars > 0) then
+      Description.Write(S);
   end;
 end;
 
@@ -771,7 +855,6 @@ begin
   S.Read(HasAlert, SizeOf(HasAlert));
   Name.Read(S);
 end;
-
 
 function TWayPt.Size: integer;
 begin
@@ -797,18 +880,21 @@ begin
       result := result + Sizeof(Alert);
     if (Comment.Comment.LChars > 0) then
       result := result + Comment.Size;
-    if (Description.DescL.LChars > 0) then
-      result := result + Description.Size;
-    if (Contact.Flags <> 0) then
-      result := result + Contact.Size;
     if (Address.Flags <> 0) then
       result := result + Address.Size;
+    if (Contact.Flags <> 0) then
+      result := result + Contact.Size;
+    if (Image.ImageSize > 0) then
+      result := result + Image.Size;
+    if (Description.DescL.LChars > 0) then
+      result := result + Description.Size;
   end;
 end;
 
 // Recordtype 3
 constructor TAlert.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
-var MPS: double;
+var
+  MPS: double;
 begin
   MainRec.Create(AVersion, $0003);
   Proximity := GPXWayPoint.Proximity;
@@ -819,7 +905,7 @@ begin
   Alert := 1;
   AlertType := GPXWayPoint.AlertType;
   SoundNbr := GPXWayPoint.SoundNbr;
-  AudioAlert := $10;  //0x10=Built in, 0x20=Custom
+  AudioAlert := GPXWayPoint.AudioAlert;   // 0x10=BuiltIn 0x20=Custom
 end;
 
 procedure TAlert.Write(S: TBufferedFileStream);
@@ -1085,7 +1171,7 @@ begin
 end;
 
 // Recordtype 8
-constructor TArea.Create(AVersion: Word; AExtra: boolean);
+constructor TArea.Create(AVersion: Word; AMedias: TObjectList<TGPXMedia>; AExtra: boolean);
 begin
   Extra := AExtra; // Extra fields for members, TArea is always extra
   ExtraRec.Create(AVersion, $0008);
@@ -1098,13 +1184,20 @@ begin
   Dummy1 := 0;
   Dummy2 := 1;
   WayPts := TObjectlist<TGPXWayPoint>.Create(true);
+  Medias := AMedias;
 end;
 
 procedure TArea.AddWpt(GPXWayPt: TGPXWayPoint);
-var WayPt: TWayPt;
+var
+  WayPt: TWayPt;
+  AMedia: TGPXMedia;
 begin
-  WayPt.Create(GPIVersion, GPXWayPt, Extra);  // Just temporary, to calculate
-  ExtraSize := ExtraSize + WayPt.Size;        // If waypoint has extra records like area, this is computed
+  AMedia := nil;
+  if (GPXWayPt.AudioAlert = $20) and
+     (GPXWayPt.SoundNbr <= Medias.Count) then
+    AMedia := Medias[GPXWayPt.SoundNbr -1];
+  WayPt.Create(GPIVersion, GPXWayPt, AMedia, Extra);  // Just temporary, to calculate
+  ExtraSize := ExtraSize + WayPt.Size;                // If waypoint has extra records like area, this is computed
   if (WayPt.Lat > MaxLat) then
     MaxLat := WayPt.Lat;
   if (WayPt.Lat < MinLat) then
@@ -1120,8 +1213,10 @@ begin
 end;
 
 procedure TArea.Write(S: TBufferedFileStream);
-var GPXWayPt: TGPXWayPoint;
-    WayPt: TWayPt;
+var
+  GPXWayPt: TGPXWayPoint;
+  WayPt: TWayPt;
+  AMedia: TGPXMedia;
 begin
   ExtraRec.Write(S, Size, ExtraSize);
   S.Write(MaxLat, SizeOf(MaxLat));
@@ -1133,7 +1228,11 @@ begin
   S.Write(Alert, Sizeof(Alert));
   for GPXWayPt in WayPts do
   begin
-    WayPt.Create(GPIVersion, GPXWayPt, Extra);
+    AMedia := nil;
+    if (GPXWayPt.AudioAlert = $20) and
+       (GPXWayPt.SoundNbr <= Medias.Count) then
+      AMedia := Medias[GPXWayPt.SoundNbr -1];
+    WayPt.Create(GPIVersion, GPXWayPt, AMedia, Extra);
     WayPt.Write(S);
   end;
   WayPts.Free;
@@ -1169,7 +1268,9 @@ begin
   Extra := AExtra;
   ExtraSize := 0;
   Name.Create(AName);
-  Area.Create(GPIVersion, Extra);
+  Medias := TObjectlist<TGPXMedia>.Create(true);
+
+  Area.Create(GPIVersion, Medias, Extra);
   if (Extra) then
   begin
     ExtraRec.Create(AVersion, $09);
@@ -1186,8 +1287,9 @@ begin
 end;
 
 function TPOIGroup.AddCat(GPXCategory: TGPXCategory): integer;
-var Category: TCategory;
-    AGPXCategory: TGPXCategory;
+var
+  Category: TCategory;
+  AGPXCategory: TGPXCategory;
 begin
   result := -1;
   if (Extra) then
@@ -1210,8 +1312,9 @@ begin
 end;
 
 function TPOIGroup.AddBmp(GPXBitMap: TGPXBitMap): integer;
-var BitMap: TPoiBitMap;
-    AGXBitMap: TGPXBitMap;
+var
+  BitMap: TPoiBitMap;
+  AGXBitMap: TGPXBitMap;
 begin
   result := -1;
   if (Extra) then
@@ -1233,11 +1336,26 @@ begin
   end;
 end;
 
+function TPOIGroup.AddMedia(AMediaDir: string): integer;
+var
+  AMedia: TMedia;
+  AGPXMedia: TGPXMedia;
+begin
+  AGPXMedia := TGPXMedia.Create(IncludeTrailingPathDelimiter(AMediaDir));
+  result := Medias.Add(AGPXMedia) +1;
+  Medias[result -1].MediaId := result;
+  AMedia.Create(GPIVersion, AGPXMedia, true); // Only simulate, no read;
+  ExtraSize := ExtraSize + AMedia.Size;
+end;
+
 procedure TPOIGroup.Write(S: TBufferedFileStream);
-var GPXCategory: TGPXCategory;
-    Category: TCategory;
-    GPXBitMap: TGPXBitMap;
-    PoiBitMap: TPoiBitMap;
+var
+  GPXCategory: TGPXCategory;
+  Category: TCategory;
+  GPXBitMap: TGPXBitMap;
+  PoiBitMap: TPoiBitMap;
+  AGPXMedia: TGPXMedia;
+  AMedia: TMedia;
 begin
   if (Extra) then
     ExtraRec.Write(S, Size, ExtraSize)
@@ -1260,6 +1378,13 @@ begin
       PoiBitMap.Write(S);
     end;
     Bitmaps.Free;
+
+    for AGPXMedia in Medias do
+    begin
+      AMedia.Create(GpiVersion, AGPXMedia, false);
+      AMedia.Write(S);
+    end;
+    Medias.Free;
   end;
 end;
 
@@ -1467,6 +1592,51 @@ begin
     result := result + Email.Size;
 end;
 
+// RecordType 13
+constructor TImage.Create(AVersion: Word; AGPXMedia: TGPXMedia);
+var
+  Stream: TBufferedFileStream;
+begin
+  MainRec.Create(AVersion, $0d);
+  Dummy1 := $00;
+  ImageSize := AGPXMedia.JpgSize;
+  SetLength(Image, ImageSize);
+  Stream := TBufferedFileStream.Create(AGPXMedia.JpgFile, fmOpenRead);
+  try
+    Stream.Read(Image[0], Stream.Size);
+  finally
+    Stream.Free;
+  end;
+end;
+
+procedure TImage.Write(S: TBufferedFileStream);
+begin
+  MainRec.Write(S, Size);
+  S.Write(Dummy1, SizeOf(Dummy1));
+  S.Write(ImageSize, SizeOf(ImageSize));
+  S.Write(Image[0], Length(Image));
+end;
+
+procedure TImage.Assign(MainRec: TMainRec);
+begin
+  MainRec.Assign(Self.MainRec);
+end;
+
+procedure TImage.Read(S: TBufferedFileStream; MainRec: TMainRec);
+begin
+  Assign(MainRec);
+
+  S.Read(Dummy1, SizeOf(Dummy1));
+  S.Read(ImageSize, SizeOf(ImageSize));
+  SetLength(Image, ImageSize);
+  S.Read(Image[0], Length(Image));
+end;
+
+function TImage.Size: integer;
+begin
+  result := SizeOf(MainRec) + SizeOf(Dummy1) + SizeOf(ImageSize) + Length(Image);
+end;
+
 // Recordtype 14
 constructor TDescription.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
 begin
@@ -1511,6 +1681,95 @@ begin
       result := SizeOf(MainRec) + SizeOf(Unknown16) + Desc.Size;
     else
       result := SizeOf(MainRec) + SizeOf(Unknown16) + DescL.Size;
+  end;
+end;
+
+// Recordtype 18
+constructor TMedia.Create(AVersion: Word; AMedia: TGPXMedia; Simulate: boolean; AExtra: boolean = true);
+var
+  Stream: TBufferedFileStream;
+begin
+  Extra := AExtra;
+  if (Extra) then
+    ExtraRec.Create(AVersion, $0012)
+  else
+    MainRec.Create(AVersion, $0012);
+  MediaId := AMedia.MediaId;
+  AudioType := $20;    // Custom Audio
+  AudioFormat := $01;  // Mp3
+  MediaLength := AMedia.Mp3Size;
+  SetLength(Media, MediaLength);
+  if (not Simulate) then
+  begin
+    Stream := TBufferedFileStream.Create(AMedia.Mp3File, fmOpenRead);
+    try
+      Stream.Read(Media[0], Stream.Size);
+    finally
+      Stream.Free;
+    end;
+  end;
+  Locale := 'EN';
+  TotalLength := SizeOf(Locale) + SizeOf(MediaLength);
+end;
+
+procedure TMedia.Write(S: TBufferedFileStream);
+begin
+  if (Extra) then
+    ExtraRec.Write(S, Size, ExtraSize)
+  else
+    MainRec.Write(S, Size);
+  S.Write(MediaId, SizeOf(MediaId));
+  S.Write(AudioType, SizeOf(AudioType));
+  S.Write(AudioFormat, SizeOf(AudioFormat));
+  S.Write(TotalLength, SizeOf(TotalLength));
+  S.Write(Locale, SizeOf(Locale));
+  S.Write(MediaLength, SizeOf(MediaLength));
+  S.Write(Media[0], Length(Media));
+end;
+
+procedure TMedia.Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+begin
+  MainRec.Assign(Self.MainRec);
+  Extra := ExtraRec.Assign(Self.ExtraRec);
+end;
+
+procedure TMedia.Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
+begin
+  Assign(MainRec, ExtraRec);
+
+  S.Read(MediaId, SizeOf(MediaId));
+  S.Read(AudioType, SizeOf(AudioType));
+  S.Read(AudioFormat, SizeOf(AudioFormat));
+  S.Read(TotalLength, SizeOf(TotalLength));
+  S.Read(Locale, SizeOf(Locale));
+  S.Read(MediaLength, SizeOf(MediaLength));
+  SetLength(Media, MediaLength);
+  S.Read(Media[0], Length(Media));
+end;
+
+function TMedia.Size: integer;
+begin
+  if (Extra) then
+    result := SizeOf(ExtraRec)
+  else
+    result := SizeOf(MainRec);
+  result := result +
+            SizeOf(MediaId) +
+            SizeOf(AudioType) +
+            SizeOf(AudioFormat);
+  result := result + ExtraSize;
+end;
+
+function TMedia.ExtraSize: integer;
+begin
+  result := 0;
+  if (Extra) then
+  begin
+    result := result +
+              SizeOf(TotalLength) +
+              SizeOf(Locale) +
+              SizeOf(MediaLength) +
+              Length(Media);
   end;
 end;
 
@@ -1592,14 +1851,15 @@ var
   PoiBitmap: TPoiBitmap;
   PoiBitmapRef: TPoiBitmapRef;
   Comment: TComment;
+  Image: TImage;
   Desciption: TDescription;
   Address: TAddress;
   Contact: TContact;
+  Media: TMedia;
   BitMap: Vcl.Graphics.TBitmap;
   PNGImage: Vcl.Imaging.pngimage.TPngImage;
   GPXWayPoint: TGPXWayPoint;
   CategoryList: TStringList;
-  MediaId: Word;
   StartPos: int64;
 
   procedure ReadHeader(S: TbufferedFileStream);
@@ -1697,9 +1957,7 @@ begin
             GPXWayPoint.Speed := Round((Alert.Speed * 60 * 60) / 1000 / 100);
             GPXWayPoint.AlertType := Alert.AlertType;
             GPXWayPoint.SoundNbr := Alert.SoundNbr;
-            if (Alert.AlertType = $02) and
-               (Alert.AudioAlert = $20) then
-              GPXWayPoint.MediaId := (Alert.AudioAlert * $100) + Alert.SoundNbr;
+            GPXWayPoint.AudioAlert := Alert.AudioAlert;
             continue;
           end;
         $04:
@@ -1795,7 +2053,7 @@ begin
           end;
         $0d: // Image. Not supported, but handle selections.
           begin
-            S.Seek(MainRec.Length, TSeekOrigin.soCurrent);
+            Image.Read(S, MainRec);
             GPXWayPoint.ImageCnt := GPXWayPoint.ImageCnt + 1;
             continue;
           end;
@@ -1812,9 +2070,8 @@ begin
           end;
         $12: // Media. Not supported, but handle selections.
           begin
-            S.Read(MediaId, SizeOf(MediaId));
-            S.Seek(MainRec.Length - SizeOf(MediaId), TSeekOrigin.soCurrent);
-            AddNonGpxWayPoint(TGPXString(Format('MediaId %d', [MediaId])));
+            Media.Read(S, MainRec, Extrarec);
+            AddNonGpxWayPoint(TGPXString(Format('MediaId %d', [Media.MediaId])));
             continue;
           end;
         $ffff:

@@ -70,7 +70,7 @@ type
     function MapSegFromSubClass(const CalculatedSubclass: string): integer;
     function WayPointNotProcessed(WayPoint: TXmlVSNode): boolean;
 {$IFDEF GPI}
-    function GPXWayPoint(CatId, BmpId: integer; WayPoint: TXmlVSNode): TGPXWayPoint;
+    function GPXWayPoint(ACatId, ABmpId, AMediaId: integer; AWayPoint: TXmlVSNode): TGPXWayPoint;
     function GetSpeedFromName(WptName: string): integer;
     function GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
     function GPXCategory(Category: string): TGPXCategory;
@@ -748,7 +748,7 @@ procedure TGpxFile.AddWptPoint(const ChildNode: TXmlVsNode;
                                const Symbol: string = '';
                                const Description: string = '');
 var
-  ExtensionsNode: TXmlVsNode;
+  ExtensionsNode, NewLink: TXmlVsNode;
   NewSymbol, WptTime, WptDesc, WptCmt: string;
 begin
   with ChildNode do
@@ -775,6 +775,12 @@ begin
     if (NewSymbol = '') then
       NewSymbol := ProcessOptions.DefWayPointSymbol;
     AddChild('sym').NodeValue := NewSymbol;
+
+    // Add link for TourGuide
+    NewLink := RtePtNode.Find('link');
+    if (NewLink <> nil) and
+       (NewLink.HasAttribute('href')) then
+      AddChild('link').SetAttribute('href', NewLink.Attributes['href']);
   end;
 
   if (ProcessOptions.ProcessWpt) and
@@ -1452,7 +1458,7 @@ begin
   end;
 end;
 
-function TGPXfile.GPXWayPoint(CatId, BmpId: integer; WayPoint: TXmlVSNode): TGPXWayPoint;
+function TGPXfile.GPXWayPoint(ACatId, ABmpId, AMediaId: integer; AWayPoint: TXmlVSNode): TGPXWayPoint;
 var
   ExtensionsNode, AddressNode: TXmlVSNode;
   ProximityStr: TGPXString;
@@ -1461,11 +1467,11 @@ begin
   result := TGPXWayPoint.Create;
   with result do
   begin
-    Name        := TGPXString(FindSubNodeValue(WayPoint, 'name'));
-    Comment     := TGPXString(FindSubNodeValue(WayPoint, 'cmt'));
-    Description := TGPXString(FindSubNodeValue(WayPoint, 'desc'));
-    Lat         := TGPXString(WayPoint.AttributeList.Find('lat').Value);
-    Lon         := TGPXString(WayPoint.AttributeList.Find('lon').Value);
+    Name        := TGPXString(FindSubNodeValue(AWayPoint, 'name'));
+    Comment     := TGPXString(FindSubNodeValue(AWayPoint, 'cmt'));
+    Description := TGPXString(FindSubNodeValue(AWayPoint, 'desc'));
+    Lat         := TGPXString(AWayPoint.AttributeList.Find('lat').Value);
+    Lon         := TGPXString(AWayPoint.AttributeList.Find('lon').Value);
     Proximity   := 0;
     if (ProcessOptions.DefaultProximityStr <> '') then
       Proximity := StrToInt(ProcessOptions.DefaultProximityStr);
@@ -1475,7 +1481,7 @@ begin
     else
       AlertType := 0;
 
-    ExtensionsNode := WayPoint.Find('extensions');
+    ExtensionsNode := AWayPoint.Find('extensions');
     if (ExtensionsNode <> nil) then
     begin
       if (ExtensionsNode.Find('trp:ShapingPoint') <> nil) then
@@ -1502,12 +1508,20 @@ begin
     end;
 
     if (Speed > 0) then
-      SoundNbr := 5
+      SoundNbr := 5       // Double plung
     else if (Proximity > 0) then
-      SoundNbr := 4;
+      SoundNbr := 4;      // Plung
 
-    CategoryId := CatId;
-    BitmapId := BmpId;
+    CategoryId := ACatId;
+    BitmapId := ABmpId;
+    AudioAlert := $10;
+
+    if (AMediaId > -1) then
+    begin
+      AudioAlert := $20;        // Custom Audio
+      AlertType  := $02;        // Tour Guide
+      SoundNbr   := AMediaId;   // Media Id
+    end;
   end;
 end;
 
@@ -2017,14 +2031,17 @@ procedure TGPXFile.DoCreatePOI;
 {$IFDEF GPI}
 var
   OutFile: string;
+  TourGuideDir: string;
   RouteWayPoints, WayPoint: TXmlVSNode;
   GPIFile: TGPI;
   POIGroup: TPOIGroup;
   S: TBufferedFileStream;
   CatId: integer;
   BmpId: integer;
+  MediaId: smallint;
   IsViaPt: boolean;
   ExtensionsNode: TXmlVSNode;
+  LinkNode: TXmlVSNode;
   RoutesProcessed: TXmlVSNodeList;
 {$ENDIF}
 begin
@@ -2044,7 +2061,18 @@ begin
         begin
           CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
           BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-          PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+
+          // MediaId for TourGuide. Only use the SubDir
+          MediaId := -1;
+          LinkNode := WayPoint.Find('link');
+          if (LinkNode <> nil) and
+             (LinkNode.HasAttribute('href')) then
+          begin
+            TourGuideDir := ReplaceAll(LinkNode.Attributes['href'], ['/', '%20'], ['\', ' ']);
+            TourGuideDir := ExtractFileName(ExtractFileDir(TourGuideDir)); // Get Subdir
+            MediaId := PoiGroup.AddMedia(ExtractFilePath(FGPXFile) + TourGuideDir);
+          end;
+          PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, MediaId, WayPoint));
         end;
       end;
     end;
@@ -2075,7 +2103,7 @@ begin
                  ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
               begin
                 BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-                PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, WayPoint));
+                PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, -1, WayPoint));
               end;
             end;
           end;
@@ -2928,7 +2956,7 @@ begin
 end;
 
 class procedure TGPXFile.PerformFunctions(const AllFuncs: array of TGPXFunc;
-                                          const GPXFile:string;
+                                          const GPXFile: string;
                                           const FunctionPrefs, SavePrefs: TNotifyEvent;
                                           const ForceOutDir: string = '';
                                           const OutStringList: TStringList = nil;

@@ -4015,10 +4015,10 @@ var
     if (AGPXWayPoint.Proximity <> 0) then
       AddItem(3, 'Proximity', Format('%d Mtr.', [AGPXWayPoint.Proximity]));
     AddItem(3, 'Alert type', Format('%d (0=360%s,1=Along road,2=Tour guide)', [AGPXWayPoint.AlertType, #$00b0]));
-    AddItem(3, 'Sound Nbr', Format('%d (0=Beep, 1=Tone,2=3x Beep,3=Silence,4=Plung,5=Double Plung)', [AGPXWayPoint.SoundNbr]));
-    if (AGPXWayPoint.MediaId <> 0) then
-      AddItem(3, 'Media Id', Format('%d', [AGPXWayPoint.MediaId]));
-
+    case (AGPXWayPoint.AudioAlert) of
+      $10: AddItem(3, 'Sound Nbr', Format('%d (0=Beep, 1=Tone,2=3x Beep,3=Silence,4=Plung,5=Double Plung)', [AGPXWayPoint.SoundNbr]));
+      $20: AddItem(3, 'Custom Media', Format('%d', [AGPXWayPoint.SoundNbr]));
+    end;
     AddItem(10, 'Comment', ReplaceAll(string(AGPXWayPoint.Comment), [#10, #13], ['_','']));
 
     if (AGPXWayPoint.Phone <> '') then
