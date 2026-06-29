@@ -245,6 +245,8 @@ type
   end;
 
   TAddress = packed record
+    Extra:      boolean;                    // Internal variable, dont write
+    ExtraRec:   TExtraRec;
     MainRec:    TMainRec;
     Flags:      Word;
     City:       TPLString;
@@ -253,23 +255,27 @@ type
     PostalCode: TPString;
     Street:     TPLString;
     HouseNbr:   TPString;
-    constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
+    constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
     procedure Write(S: TBufferedFileStream);
-    procedure Assign(MainRec: TMainRec);
-    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
+    procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
     function Size: integer;
+    function ExtraSize: integer;
   end;
 
   TContact = packed record
+    Extra:      boolean;                    // Internal variable, dont write
+    ExtraRec:   TExtraRec;
     MainRec:    TMainRec;
     Flags:      Word;
     Phone:      TPString;
     Email:      TPString;
-    constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
+    constructor Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
     procedure Write(S: TBufferedFileStream);
-    procedure Assign(MainRec: TMainRec);
-    procedure Read(S: TBufferedFileStream; MainRec: TMainRec);
+    procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
+    procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
     function Size: integer;
+    function ExtraSize: integer;
   end;
 
   TImage = packed record
@@ -441,7 +447,6 @@ begin
   Speed := 0;
   AlertType := 0;
   SoundNbr := 0;
-//  MediaId := 0;
   ImageCnt := 0;
   AudioAlert := $10;
 end;
@@ -796,8 +801,8 @@ begin
        (Alert.Speed > 0) then
        HasAlert := $0001;
     Comment.Create(AVersion, AGPXWayPoint);
-    Address.Create(AVersion, AGPXWayPoint);
-    Contact.Create(AVersion, AGPXWayPoint);
+    Address.Create(AVersion, AGPXWayPoint, true);
+    Contact.Create(AVersion, AGPXWayPoint, true);
     Description.Create(AVersion, AGPXWayPoint);
   end;
 
@@ -1225,7 +1230,7 @@ begin
   S.Write(MinLon, SizeOf(MinLon));
   S.Write(Dummy1, Sizeof(Dummy1));
   S.Write(Dummy2, Sizeof(Dummy2));
-  S.Write(Alert, Sizeof(Alert));
+  S.Write(Alert, SizeOf(Alert));
   for GPXWayPt in WayPts do
   begin
     AMedia := nil;
@@ -1443,9 +1448,13 @@ begin
 end;
 
 // RecordType 11
-constructor TAddress.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
+constructor TAddress.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
 begin
-  MainRec.Create(AVersion, $0b);
+  Extra := AExtra;
+  if (Extra) then
+    ExtraRec.Create(AVersion, $000b)
+  else
+    MainRec.Create(AVersion, $000b);
   Flags := $0000;     //bit 0=phone, 1=phone2, 2=fax, 3=email, 4=link
                       // Email would be nice, but is not in GPX
   if (GPXWayPoint.City <> '') then
@@ -1482,7 +1491,10 @@ end;
 
 procedure TAddress.Write(S: TBufferedFileStream);
 begin
-  MainRec.Write(S, Size);
+  if (Extra) then
+    ExtraRec.Write(S, Size, ExtraSize)
+  else
+    MainRec.Write(S, Size);
   S.Write(Flags, SizeOf(Flags));
   if (Flags and HasCity <> 0) then
     City.Write(S);
@@ -1498,14 +1510,15 @@ begin
     HouseNbr.Write(S);
 end;
 
-procedure TAddress.Assign(MainRec: TMainRec);
+procedure TAddress.Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
 begin
   MainRec.Assign(Self.MainRec);
+  Extra := ExtraRec.Assign(Self.ExtraRec);
 end;
 
-procedure TAddress.Read(S: TBufferedFileStream; MainRec: TMainRec);
+procedure TAddress.Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
 begin
-  Assign(MainRec);
+  Assign(MainRec, ExtraRec);
 
   S.Read(Flags, SizeOf(Flags));
   if (Flags and HasCity <> 0) then
@@ -1524,7 +1537,17 @@ end;
 
 function TAddress.Size: integer;
 begin
-  result := SizeOf(MainRec) +  SizeOf(Flags);
+  if (Extra) then
+    result := SizeOf(ExtraRec)
+  else
+    result := SizeOf(MainRec);
+  result := result + SizeOf(Flags);
+  result := result + ExtraSize;
+end;
+
+function TAddress.ExtraSize: integer;
+begin
+  result := 0;
   if (Flags and HasCity <> 0) then
     result := result + City.Size;
   if (Flags and HasCountry <> 0) then
@@ -1540,9 +1563,13 @@ begin
 end;
 
 // RecordType 12
-constructor TContact.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint);
+constructor TContact.Create(AVersion: Word; GPXWayPoint: TGPXWayPoint; AExtra: boolean);
 begin
-  MainRec.Create(AVersion, $0c);
+  Extra := AExtra;
+  if (Extra) then
+    ExtraRec.Create(AVersion, $000c)
+  else
+    MainRec.Create(AVersion, $000c);
   Flags := $0000;     //bit 0=phone, 1=phone2, 2=fax, 3=email, 4=link
                       // Email would be nice, but is not in GPX
   if (GPXWayPoint.Phone <> '') then
@@ -1559,7 +1586,10 @@ end;
 
 procedure TContact.Write(S: TBufferedFileStream);
 begin
-  MainRec.Write(S, Size);
+  if (Extra) then
+    ExtraRec.Write(S, Size, ExtraSize)
+  else
+    MainRec.Write(S, Size);
   S.Write(Flags, SizeOf(Flags));
   if (Flags and HasPhone <> 0) then
     Phone.Write(S);
@@ -1567,14 +1597,15 @@ begin
     Email.Write(S);
 end;
 
-procedure TContact.Assign(MainRec: TMainRec);
+procedure TContact.Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
 begin
   MainRec.Assign(Self.MainRec);
+  Extra := ExtraRec.Assign(Self.ExtraRec);
 end;
 
-procedure TContact.Read(S: TBufferedFileStream; MainRec: TMainRec);
+procedure TContact.Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
 begin
-  Assign(MainRec);
+  Assign(MainRec, ExtraRec);
 
   S.Read(Flags, SizeOf(Flags));
   if (Flags and HasPhone <> 0) then
@@ -1585,7 +1616,17 @@ end;
 
 function TContact.Size: integer;
 begin
-  result := SizeOf(MainRec) +  SizeOf(Flags);
+  if (Extra) then
+    result := SizeOf(ExtraRec)
+  else
+    result := SizeOf(MainRec);
+  result := result + SizeOf(Flags);
+  result := result + ExtraSize;
+end;
+
+function TContact.ExtraSize: integer;
+begin
+  result := 0;
   if (Flags and HasPhone <> 0) then
     result := result + Phone.Size;
   if (Flags and HasEmail <> 0) then
@@ -1827,10 +1868,10 @@ const
                                    $0a,  // Comment
                                    $0b,  // Address
                                    $0c,  // Contact
-                                   $0d,  // Image (not used in TM)
-                                   $0e]; // Description (not used in TM)
+                                   $0d,  // Image
+                                   $0e]; // Description
 
-  ImageTypes: set of byte       = [$0d]; // Image (not used in TM)
+  ImageTypes: set of byte       = [$0d]; // Image
 
   NonWayPointTypes: set of byte = [$05,  // Bitmap
                                    $07,  // Media
@@ -1942,7 +1983,7 @@ begin
       end;
 
       case MainRec.RecType of
-        $02:
+        $02: // Waypoint
           begin
             WayPt.Read(S, MainRec, ExtraRec);
             GPXWayPoint.Name := ConvertToUtf8(WayPt.Name, Header2.CodePage);
@@ -1950,7 +1991,7 @@ begin
             GPXWayPoint.Lon := Coord2Str(WayPt.Lon);
             continue;
           end;
-        $03:
+        $03: // Alert
           begin
             Alert.Read(S, MainRec);
             GPXWayPoint.Proximity := Alert.Proximity;
@@ -1960,13 +2001,13 @@ begin
             GPXWayPoint.AudioAlert := Alert.AudioAlert;
             continue;
           end;
-        $04:
+        $04: // BitmapRef
           begin
             PoiBitmapRef.Read(S, MainRec);
             GPXWayPoint.BitmapId := PoiBitmapRef.Id;
             continue;
           end;
-        $05:
+        $05: // Bitmap
           begin
             PoiBitmap.Read(S, MainRec);
             if (ImageDir <> '') then
@@ -1989,27 +2030,27 @@ begin
             AddNonGpxWayPoint(UTF8string(Format('Bitmap: %d_%d', [PoiGroupData.Id, PoiBitmap.Id])));
             continue;
           end;
-        $06:
+        $06: // CategoryRef
           begin
             CategoryRef.Read(S, MainRec);
             GPXWayPoint.CategoryId := CategoryRef.Id;
             continue;
           end;
-        $07:
+        $07: // Category
           begin
             Category.Read(S, MainRec);
             CategoryList.AddPair(IntToStr(Category.Id), ConvertToString(Category.Name, Header2.CodePage));
             AddNonGpxWayPoint(UTF8string(Format('Category: %s', [ConvertToString(Category.Name, Header2.CodePage)])));
             continue;
           end;
-        $08:
+        $08: // Area
           begin
             Area.Read(S, ExtraRec);
             if (Assigned(PoiGroupData)) then
               PoiGroupData.SelLengthArea := S.Position - PoiGroupData.SelStartArea;
             continue;
           end;
-        $09:
+        $09: // PoiGroup
           begin
             if (Assigned(PoiGroupData)) then
               UpdateCategories;
@@ -2027,15 +2068,15 @@ begin
             CategoryList.AddPair(PoiGroupCat, ConvertToString(PoiGroup.Name, Header2.CodePage));
             continue;
           end;
-        $0a:
+        $0a: // Comment
           begin
             Comment.Read(S, MainRec);
             GPXWayPoint.Comment := ConvertToUtf8(Comment.Comment, Header2.CodePage);
             continue;
           end;
-        $0b:
+        $0b: // Address
           begin
-            Address.Read(S, MainRec);
+            Address.Read(S, MainRec, ExtraRec);
             GPXWayPoint.Country := ConvertToUtf8(Address.Country, Header2.CodePage);
             GPXWayPoint.State := ConvertToUtf8(Address.State, Header2.CodePage);
             GPXWayPoint.PostalCode := ConvertToUtf8(Address.PostalCode, Header2.CodePage);
@@ -2044,20 +2085,20 @@ begin
             GPXWayPoint.HouseNbr := ConvertToUtf8(Address.HouseNbr, Header2.CodePage);
             continue;
           end;
-        $0c:
+        $0c: // COntact
           begin
-            Contact.Read(S, MainRec);
+            Contact.Read(S, MainRec, ExtraRec);
             GPXWayPoint.Phone := ConvertToUtf8(Contact.Phone, Header2.CodePage);
             GPXWayPoint.Email := ConvertToUtf8(Contact.Email, Header2.CodePage);
             continue;
           end;
-        $0d: // Image. Not supported, but handle selections.
+        $0d: // Image
           begin
             Image.Read(S, MainRec);
             GPXWayPoint.ImageCnt := GPXWayPoint.ImageCnt + 1;
             continue;
           end;
-        $0e:
+        $0e: // Description
           begin
             Desciption.Read(S, MainRec);
             case (Desciption.Unknown16) of
@@ -2068,7 +2109,7 @@ begin
             end;
             continue;
           end;
-        $12: // Media. Not supported, but handle selections.
+        $12: // Media
           begin
             Media.Read(S, MainRec, Extrarec);
             AddNonGpxWayPoint(TGPXString(Format('MediaId %d', [Media.MediaId])));
