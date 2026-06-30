@@ -19,6 +19,7 @@ const
   GPIExtension                = '.gpi';
   GPIMask                     = '*' + GPIExtension;
   UnlExtension                = '.unl';
+  DefLocale                   = 'EN';
 
 type
   TGPXString = UTF8String;
@@ -82,13 +83,20 @@ type
   end;
 
   TGPXMedia = class
+  private
+    function CheckMedia(const AMediaPath: string; var NewMedia: string): int64;
+  public
+    MediaDir: string;
     JpgFile: string;
     Mp3File: string;
     MediaId: byte;
     JpgSize: int64;
     Mp3Size: int64;
-    constructor Create(MediaDir: string);
+    constructor Create;
     destructor Destroy; override;
+    procedure AddMediaFromDir;
+    function AddMp3Media(AMP3Media: string): boolean;
+    function AddJpgMedia(AJpgMedia: string): boolean;
   end;
 
   TPString = packed record
@@ -386,10 +394,11 @@ type
     BitMaps:    TObjectlist<TGPXBitmap>;    // Internal variable, dont write
     Medias:     TObjectlist<TGPXMedia>;     // Internal variable, dont write
     constructor Create(AVersion: Word; AName: TGPXString; AExtra: boolean = true);
-    procedure AddWpt(GPXWayPt: TGPXWayPoint);
+    procedure AddWpt(GPXWayPt: TGPXWayPoint; MediaId: integer = -1);
     function AddCat(GPXCategory: TGPXCategory): integer;
     function AddBmp(GPXBitMap: TGPXBitMap): integer;
-    function AddMedia(AMediaDir: string): integer;
+    function AddGPXMedia: integer;
+    procedure AddMedia(MediaId: integer; AGPXDir, ATourGuidePath: string);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
     procedure Read(S: TBufferedFileStream; MainRec: TMainRec; ExtraRec: TExtraRec);
@@ -476,28 +485,52 @@ begin
   inherited;
 end;
 
-constructor TGPXMedia.Create(MediaDir: string);
+constructor TGPXMedia.Create;
+begin
+  inherited Create;
+  MediaDir := '';
+  JpgFile := '';
+  JpgSize := -1;
+  Mp3File := '';
+  Mp3Size := -1;
+end;
+
+function TGPXMedia.CheckMedia(const AMediaPath: string; var NewMedia: string): int64;
 var
   Fs: TSearchRec;
   Rc: integer;
 begin
-  inherited Create;
-
-  Rc := System.SysUtils.FindFirst(MediaDir + '*.mp3', faAnyFile, Fs);
+  result := -1;
+  NewMedia := '';
+  Rc := System.SysUtils.FindFirst(AMediaPath, faAnyFile, Fs);
   if (Rc = 0) then
   begin
-    Mp3File := MediaDir + Fs.Name;
-    Mp3Size := Fs.Size;
+    result := Fs.Size;
+    NewMedia := ExtractFilePath(AMediaPath) + Fs.Name;
     System.SysUtils.FindClose(Fs);
   end;
+end;
 
-  Rc := System.SysUtils.FindFirst(MediaDir + '*.jpg', faAnyFile, Fs);
-  if (Rc = 0) then
-  begin
-    JpgFile := MediaDir + Fs.Name;
-    JpgSize := Fs.Size;
-    System.SysUtils.FindClose(Fs);
-  end;
+procedure TGPXMedia.AddMediaFromDir;
+begin
+  if (Mp3Size < 0) then
+    Mp3Size := CheckMedia(MediaDir + '*.mp3', Mp3File);
+  if (JpgSize < 0) then
+    JpgSize := CheckMedia(MediaDir + '*.jpg', JpgFile);
+end;
+
+function TGPXMedia.AddMp3Media(AMP3Media: string): boolean;
+begin
+  MediaDir := ExtractFilePath(AMP3Media);
+  Mp3Size := CheckMedia(AMP3Media, Mp3File);
+  result := (Mp3Size > -1);
+end;
+
+function TGPXMedia.AddJpgMedia(AJpgMedia: string): boolean;
+begin
+  MediaDir := ExtractFilePath(AJpgMedia);
+  JpgSize := CheckMedia(AJpgMedia, JpgFile);
+  result := (JpgSize > -1);
 end;
 
 destructor TGPXMedia.Destroy;
@@ -591,7 +624,7 @@ end;
 constructor TPLString.Create(AChars: TGPXString);
 begin
   LCountry := SizeOf(LChars) + Length(AChars) +  SizeOf(Country);
-  Country := 'EN';
+  Country := DefLocale;
   LChars := Length(AChars);
   SetLength(Chars, LChars);
   Move(Achars[1], Chars[0], LChars);
@@ -1283,8 +1316,29 @@ begin
     MainRec.Create(AVersion, $09); // Length will be recalculated by adding wpt
 end;
 
-procedure TPOIGroup.AddWpt(GPXWayPt: TGPXWayPoint);
+procedure TPOIGroup.AddWpt(GPXWayPt: TGPXWayPoint; MediaId: integer = -1);
+var
+  AMedia: TMedia;
+  AGPXMedia: TGPXMedia;
 begin
+  // TourGuide media requested?
+  if (MediaId > -1) then
+  begin
+    AGPXMedia := Medias[MediaId -1];
+
+    // Try to add media from MediaDir, if not found
+    if (AGPXMedia.MediaDir <> '') and
+       ((AGPXMedia.Mp3Size < 0) or (AGPXMedia.JpgSize < 0)) then
+      AGPXMedia.AddMediaFromDir;
+
+    // Need an MP3 file, Jpg is optional.
+    if (AGPXMedia.Mp3Size > -1) then
+    begin
+      AMedia.Create(GPIVersion, AGPXMedia, true); // Only simulate, no read.
+      ExtraSize := ExtraSize + AMedia.Size;
+    end;
+  end;
+
   Area.AddWpt(GPXWayPt);
 end;
 
@@ -1338,16 +1392,39 @@ begin
   end;
 end;
 
-function TPOIGroup.AddMedia(AMediaDir: string): integer;
+function TPOIGroup.AddGPXMedia: integer;
 var
-  AMedia: TMedia;
   AGPXMedia: TGPXMedia;
 begin
-  AGPXMedia := TGPXMedia.Create(IncludeTrailingPathDelimiter(AMediaDir));
+  AGPXMedia := TGPXMedia.Create;
   result := Medias.Add(AGPXMedia) +1;
   Medias[result -1].MediaId := result;
-  AMedia.Create(GPIVersion, AGPXMedia, true); // Only simulate, no read;
-  ExtraSize := ExtraSize + AMedia.Size;
+end;
+
+procedure TPOIGroup.AddMedia(MediaId: integer; AGpxDir, ATourGuidePath: string);
+var
+  AGPXMedia: TGPXMedia;
+  MediaAvail: boolean;
+begin
+  MediaAvail := false;
+  AGPXMedia := Medias[MediaId -1];
+
+  // Mp3, or Jpg specified found. Use it.
+  if (SameText(ExtractFileExt(ATourGuidePath), '.mp3')) then
+    MediaAvail := AGPXMedia.AddMp3Media(ATourGuidePath)
+  else if (SameText(ExtractFileExt(ATourGuidePath), '.jpg')) then
+    MediaAvail := AGPXMedia.AddJpgMedia(ATourGuidePath);
+
+  // If MediaAvail then AGPXMedia.MediaDir contains path. If not try to guess it.
+  if (MediaAvail = false) then
+  begin
+    if (FileExists(ATourGuidePath)) then
+      // Linked a TXT, or BMP file for example
+     AGPXMedia.MediaDir := ExtractFilePath(ATourGuidePath)
+    else
+      // Subdir of GPX file
+      AGPXMedia.MediaDir := IncludeTrailingPathDelimiter(AGpxDir + ExtractFileName(ExtractFileDir(ATourGuidePath)));
+  end;
 end;
 
 procedure TPOIGroup.Write(S: TBufferedFileStream);
@@ -1383,6 +1460,8 @@ begin
 
     for AGPXMedia in Medias do
     begin
+      if (AGPXMedia.Mp3Size < 0) then
+        continue;
       AMedia.Create(GpiVersion, AGPXMedia, false);
       AMedia.Write(S);
     end;
@@ -1746,7 +1825,7 @@ begin
       Stream.Free;
     end;
   end;
-  Locale := 'EN';
+  Locale := DefLocale;
   TotalLength := SizeOf(Locale) + SizeOf(MediaLength);
 end;
 

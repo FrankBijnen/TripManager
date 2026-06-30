@@ -749,6 +749,7 @@ procedure TGpxFile.AddWptPoint(const ChildNode: TXmlVsNode;
                                const Symbol: string = '';
                                const Description: string = '');
 var
+  LinkNodes: TXmlVSNodeList;
   ExtensionsNode, NewLink: TXmlVsNode;
   NewSymbol, WptTime, WptDesc, WptCmt: string;
 begin
@@ -778,10 +779,16 @@ begin
     AddChild('sym').NodeValue := NewSymbol;
 
     // Add link for TourGuide
-    NewLink := RtePtNode.Find('link');
-    if (NewLink <> nil) and
-       (NewLink.HasAttribute('href')) then
-      AddChild('link').SetAttribute('href', NewLink.Attributes['href']);
+    LinkNodes := RtePtNode.FindNodes('link');
+    try
+      for NewLink in LinkNodes do
+      begin
+        if (NewLink.HasAttribute('href')) then
+          AddChild('link').SetAttribute('href', NewLink.Attributes['href']);
+      end;
+    finally
+      LinkNodes.Free;
+    end;
   end;
 
   if (ProcessOptions.ProcessWpt) and
@@ -2032,7 +2039,7 @@ procedure TGPXFile.DoCreatePOI;
 {$IFDEF GPI}
 var
   OutFile: string;
-  TourGuideDir: string;
+  TourGuidePath: string;
   RouteWayPoints, WayPoint: TXmlVSNode;
   GPIFile: TGPI;
   POIGroup: TPOIGroup;
@@ -2044,80 +2051,91 @@ var
   ExtensionsNode: TXmlVSNode;
   LinkNode: TXmlVSNode;
   RoutesProcessed: TXmlVSNodeList;
+  LinkNodes: TXmlVsNodeList;
 {$ENDIF}
 begin
 {$IFDEF GPI}
   OutFile := ChangeFileExt(FOutDir + FBaseFile, '.gpi');
   try
     S := TBufferedFileStream.Create(OutFile, fmCreate);
-    GPIFile := TGPI.Create(GPIVersion);
-    GPIFile.WriteHeader(S);
-    PoiGroup := GPIFile.CreatePOIGroup(TGPXString(ProcessOptions.CatGPX + FBaseFile));
+    try
+      GPIFile := TGPI.Create(GPIVersion);
+      GPIFile.WriteHeader(S);
+      PoiGroup := GPIFile.CreatePOIGroup(TGPXString(ProcessOptions.CatGPX + FBaseFile));
 
-    if (ProcessOptions.ProcessWayPtsInGpi) then
-    begin
-      for WayPoint in FWayPointList do
+      if (ProcessOptions.ProcessWayPtsInGpi) then
       begin
-        if (WayPointNotProcessed(WayPoint)) then
+        for WayPoint in FWayPointList do
         begin
-          CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
-          BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-
-          // MediaId for TourGuide. Only use the SubDir
-          MediaId := -1;
-          LinkNode := WayPoint.Find('link');
-          if (LinkNode <> nil) and
-             (LinkNode.HasAttribute('href')) then
+          if (WayPointNotProcessed(WayPoint)) then
           begin
-            TourGuideDir := ReplaceAll(LinkNode.Attributes['href'], ['/', '%20'], ['\', ' ']);
-            TourGuideDir := ExtractFileName(ExtractFileDir(TourGuideDir)); // Get Subdir
-            MediaId := PoiGroup.AddMedia(ExtractFilePath(FGPXFile) + TourGuideDir);
+            CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
+            BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+
+            // MediaId for TourGuide.
+            // Use either fully qualified names, or subdir of GPX
+            LinkNodes := WayPoint.FindNodes('link');
+            try
+              MediaId := -1;
+              for LinkNode in LinkNodes do
+              begin
+                TourGuidePath := ReplaceAll(LinkNode.Attributes['href'], ['/', '%20'], ['\', ' ']);
+                if (MediaId < 0) then
+                  MediaId := PoiGroup.AddGPXMedia;
+                PoiGroup.AddMedia(MediaId, ExtractFilePath(FGPXFile), TourGuidePath);
+              end;
+            finally
+              LinkNodes.Free;
+            end;
+
+            // Add WPt
+            PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, MediaId, WayPoint), MediaId);
           end;
-          PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, MediaId, WayPoint));
         end;
       end;
-    end;
 
-    // Create Way points, from Via, or Shaping points in routes.
-    // Create a file per route/track
-    RoutesProcessed := GetSelectedRoutes;
-    try
-      if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
-         (ProcessOptions.ProcessWayPtsFromRoute) then
-      begin
-        for RouteWayPoints in FWayPointFromRouteList do
+      // Create Way points, from Via, or Shaping points in routes.
+      // Create a file per route/track
+      RoutesProcessed := GetSelectedRoutes;
+      try
+        if ((ProcessOptions.ProcessViaPtsInGpi) or (ProcessOptions.ProcessShapePtsInGpi)) and
+           (ProcessOptions.ProcessWayPtsFromRoute) then
         begin
-          if (RoutesProcessed.Find(RouteWayPoints.Name) = nil) then
-            continue;
-          CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
-
-          for WayPoint in RouteWayPoints.ChildNodes do
+          for RouteWayPoints in FWayPointFromRouteList do
           begin
-            if (WayPointNotProcessed(WayPoint)) then
-            begin
-              IsViaPt := false;
-              ExtensionsNode := WayPoint.find('extensions');
-              if (ExtensionsNode <> nil) then
-                IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+            if (RoutesProcessed.Find(RouteWayPoints.Name) = nil) then
+              continue;
+            CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
 
-              if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
-                 ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
+            for WayPoint in RouteWayPoints.ChildNodes do
+            begin
+              if (WayPointNotProcessed(WayPoint)) then
               begin
-                BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-                PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, -1, WayPoint));
+                IsViaPt := false;
+                ExtensionsNode := WayPoint.find('extensions');
+                if (ExtensionsNode <> nil) then
+                  IsViaPt := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+
+                if ((IsViaPt) and (ProcessOptions.ProcessViaPtsInGpi)) or
+                   ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
+                begin
+                  BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+                  PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, -1, WayPoint));
+                end;
               end;
             end;
+
           end;
-
         end;
+      finally
+        RoutesProcessed.Free;
       end;
-    finally
-      RoutesProcessed.Free;
-    end;
 
-    POIGroup.Write(S);
-    GPIFile.WriteEnd(S);
-    S.Free;
+      POIGroup.Write(S);
+      GPIFile.WriteEnd(S);
+    finally
+      S.Free;
+    end;
   except
     on E:Exception do
       MessageDlg(e.Message, TMsgDlgType.mtError, [TMsgDlgBtn.mbOK], 0);
