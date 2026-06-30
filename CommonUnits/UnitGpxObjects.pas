@@ -4,11 +4,9 @@ unit UnitGPXObjects;
 interface
 
 uses
-  System.Classes, System.SysUtils, System.Math,
-  System.Generics.Defaults, System.Generics.Collections,
-  WinApi.Windows,
-  Xml.XMLIntf, UnitVerySimpleXml,
+  System.Classes,
   Vcl.ComCtrls,
+  UnitVerySimpleXml,
 {$IFDEF KML}
   kml_helper,
 {$ENDIF}
@@ -20,11 +18,11 @@ uses
   UnitGeoCode,
 {$ENDIF}
 {$IFDEF GPI}
-  UnitGPI, UnitBMP,
+  UnitGPI,
 {$ENDIF}
   UnitGpxDefs,
   UnitProcessOptions,
-  UfrmSelectGpx;
+  UFrmSelectGpx;
 
 type
   TGPXFiles = array of string;
@@ -213,15 +211,18 @@ end;
 implementation
 
 uses
-  System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils, System.UITypes,
+  System.SysUtils, System.TypInfo, System.DateUtils, System.StrUtils, System.IOUtils, System.UITypes,
+  System.Math,
+  System.Generics.Defaults, System.Generics.Collections,
+  Xml.XMLIntf,
+
+  Winapi.Windows,
+
   Vcl.Dialogs,
-  Xml.VerySimple,
 {$IFDEF OSMMAP}
   UnitOSMMap,
 {$ENDIF}
-{$IFDEF REGISTRYKEYS}
-  UnitRegistryKeys,
-  UnitRegistry,
+{$IFDEF TRIPOBJECTS}
   UnitModelConv,
 {$ENDIF}
   UnitRedirect,
@@ -3171,9 +3172,7 @@ begin
         Writeln;
         Writeln('Processing started for: ', GPXMask);
 {$IFDEF TRIPOBJECTS}
-{$IFDEF REGISTRYKEYS}
-        Writeln('Selected model: ', TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0)));
-{$ENDIF}
+        Writeln('Selected model: ', TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice));
 {$ENDIF}
         Write('Selected functions:');
         for AFunc in Funcs do

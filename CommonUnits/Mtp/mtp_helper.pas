@@ -381,7 +381,7 @@ function MTP_ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice;
 implementation
 
 uses
-  System.SysUtils, System.Variants, System.DateUtils, System.Masks, System.StrUtils, System.Win.ComObj,
+  System.SysUtils, System.Variants, System.Masks, System.Win.ComObj,
   Winapi.Windows, Winapi.ActiveX,
   UnitStringUtils;
 

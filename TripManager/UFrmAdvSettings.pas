@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids, Vcl.ComCtrls, Vcl.Menus,
-  UnitStringGrid;
+  TripManager_StringGrid;
 
 type
   TFrmAdvSettings = class(TForm)
@@ -23,21 +23,21 @@ type
     PnlAddressFormat: TPanel;
     BtnBuilder: TButton;
     TabGeneral: TTabSheet;
-    GridGeneralSettings: TStringGrid;
-    GridZumoSettings: TStringGrid;
+    GridGeneralSettings: TripManager_StringGrid.TStringGrid;
+    GridZumoSettings: TripManager_StringGrid.TStringGrid;
     PopupBuilder: TPopupMenu;
-    GridGeoCodeSettings: TStringGrid;
+    GridGeoCodeSettings: TripManager_StringGrid.TStringGrid;
     PnlGeoCodeFuncs: TPanel;
     BtnValidate: TButton;
     BtnClearCoordCache: TButton;
     TabDevice: TTabSheet;
-    GridDeviceSettings: TStringGrid;
+    GridDeviceSettings: TripManager_StringGrid.TStringGrid;
     PnlZumoFuncs: TPanel;
     BtnVehProfile: TButton;
     TabTripOverview: TTabSheet;
-    GridTripOverview: TStringGrid;
+    GridTripOverview: TripManager_StringGrid.TStringGrid;
     TabKurviger: TTabSheet;
-    GridKurviger: TStringGrid;
+    GridKurviger: TripManager_StringGrid.TStringGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -83,7 +83,7 @@ implementation
 uses
   System.UITypes, System.StrUtils, System.Math,
   UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitModelConv, UnitProcessOptions,
-  UnitTripDefs, UnitGeoCode, UnitOSMMap, TripManager_Grid,
+  UnitTripDefs, UnitGeoCode, UnitOSMMap,
   UFrmVehProfiles;
 
 {$R *.dfm}
@@ -185,7 +185,7 @@ begin
   GridDeviceSettings.RowCount := GridDeviceSettings.FixedRows +1;
   GridDeviceSettings.BeginUpdate;
   try
-    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+    SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice);
 
     CurRow := 1;
 
@@ -268,7 +268,7 @@ begin
   GridZumoSettings.BeginUpdate;
   try
 
-    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+    SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice);
 
     CurRow := 1;
 
@@ -284,7 +284,7 @@ begin
                                             '',
                                             'Date: ');
     AddGridLine(GridZumoSettings, CurRow,   '', '');
-    if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0)))) then
+    if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(TModelConv.GetCurrentDevice))) then
     begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
                                               'True', 'Load active profile automatically');
@@ -609,7 +609,7 @@ begin
 
   F := TFrmVehProfiles.Create(nil);
   try
-    F.SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+    F.SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice);
     if (F.ShowModal = idOK) then
     begin
       F.VehicleProfile.ToRegistry(F.SubKey);

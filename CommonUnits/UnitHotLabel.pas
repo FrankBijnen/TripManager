@@ -5,8 +5,7 @@ interface
 uses
   System.Classes,
   Winapi.Messages,
-  Vcl.DBCtrls, Vcl.Controls, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Graphics,
-  Data.DB;
+  Vcl.Controls, Vcl.StdCtrls, Vcl.Graphics;
 
 type
 

@@ -153,7 +153,9 @@ implementation
 uses
   System.SysUtils, System.StrUtils, System.DateUtils, System.TypInfo,
   Vcl.ComCtrls,
-  UnitTripDefs, UnitRegistry, UnitProcessOptions, UnitGpi, UnitModelConv;
+  UnitTripDefs, UnitRegistry, UnitProcessOptions,
+  UnitGpi,
+  UnitModelConv;
 
 procedure TSetProcessOptions.SetFixedPrefs(Sender: Tobject);
 var
@@ -170,8 +172,8 @@ begin
     MinDistTrackPoint := GetRegistry(Reg_MinDistTrackPoints, 0);  // No filter
 
     // CurrentModel has entries not valid for Trips. UnitTripObjects should check, and correct.
-    TripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
-    SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0));
+    TripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
+    SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice);
 
     EnableTripOverview := GetRegistry(Reg_EnableTripOverview, false);
     DefRoadSpeed := GetRegistry(Reg_RoadSpeed_Key, 25);

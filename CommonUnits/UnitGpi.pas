@@ -4,14 +4,12 @@ unit UnitGpi;
 interface
 
 uses
-  System.Classes, System.Types, System.SysUtils, System.AnsiStrings, System.DateUtils, System.Generics.Collections,
-  Vcl.Dialogs, Vcl.Graphics, UnitBmp;
-
-type
-  TGPXString = UTF8String;
+  System.Classes, System.Types, System.SysUtils, System.DateUtils, System.Generics.Collections,
+  Vcl.Graphics,
+  UnitBmp;
 
 const
-  GpiName: TGPXString         = 'my.gpi';
+  GpiName                     = 'my.gpi';
   GpiVersion: Word            = 0;
   DefTransparentColor: DWORD  = $00ff00ff;
   DefGpiSymbolsDir            = 'Symbols\';
@@ -23,6 +21,7 @@ const
   UnlExtension                = '.unl';
 
 type
+  TGPXString = UTF8String;
 
   TGPXWayPoint = class
 // Possible Input Data
@@ -424,12 +423,10 @@ const HasPhone:   Word = $0001;
 implementation
 
 uses
-  System.Math,
-  System.WideStrUtils,
+  System.Math, System.WideStrUtils,
   Winapi.Windows,
-  Vcl.Imaging.pngimage,
-  UnitVerySimpleXml,
-  UnitStringUtils;
+  Vcl.Dialogs, Vcl.Imaging.pngimage,
+  UnitVerySimpleXml, UnitStringUtils;
 
 const
   Coord_Decimals = '%1.6f';
@@ -568,7 +565,7 @@ end;
 
 constructor TPString.Create(AChars: TGPXString);
 begin
-  LChars := length(AChars);
+  LChars := Length(AChars);
   SetLength(Chars, LChars);
   Move(Achars[1], Chars[0], LChars);
 end;

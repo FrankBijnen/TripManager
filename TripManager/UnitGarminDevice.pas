@@ -403,7 +403,7 @@ var
   LDelim: integer;
 begin
   // Location of SQLite. Normally Internal Storage\.System\SQlite but taken from settings
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  ModelIndex := TModelConv.GetCurrentDevice;
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
   DbPath := ExcludeTrailingPathDelimiter(GetRegistry(Reg_PrefDevTripsFolder_Key,
                                          TModelConv.GetKnownPath(self, 0),
@@ -429,7 +429,7 @@ begin
     exit;
 
   // Needed for checking if the connected Device needs reading SQlite
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  ModelIndex := TModelConv.GetCurrentDevice;
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
 
   // Copy settings.db, Update Avoidances changed

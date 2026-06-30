@@ -7,14 +7,15 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Datasnap.DBClient, Vcl.Grids,
   Vcl.DBGrids, Vcl.StdCtrls, Vcl.Mask, Vcl.ExtCtrls,
   UnitGpxDefs, Vcl.ComCtrls,
-  UnitDSFields, UnitSqlite, UnitVehProfile, UnitStringGrid;
+  TripManager_StringGrid,
+  UnitDSFields, UnitSqlite, UnitVehProfile;
 
 type
   TFrmVehProfiles = class(TForm)
     CDSVehProfile: TClientDataSet;
     DsVehProfile: TDataSource;
     GrdVehProfile: TDBGrid;
-    GridProfile: UnitStringGrid.TStringGrid;
+    GridProfile: TripManager_StringGrid.TStringGrid;
     PnlBottom: TPanel;
     BtnOK: TButton;
     BtnCancel: TButton;
@@ -30,7 +31,7 @@ type
     SaveUnitTestDialog: TSaveDialog;
     SpltGridDetail: TSplitter;
     TabHashList: TTabSheet;
-    GridHashList: TStringGrid;
+    GridHashList: TripManager_StringGrid.TStringGrid;
     PnlHashFunc: TPanel;
     BtnDeleteHashList: TButton;
     BtnSaveHash: TButton;
@@ -85,7 +86,7 @@ implementation
 uses
   System.StrUtils, System.TypInfo,
   UnitStringUtils, UnitModelConv, UnitRegistry, UnitregistryKeys,
-  UnitTripDefs, UnitTripObjects, TripManager_Grid;
+  UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
 
@@ -819,7 +820,7 @@ end;
 
 procedure TFrmVehProfiles.LoadProfiles;
 begin
-  CurModel := TModelConv.Display2Garmin(GetRegistry(Reg_CurrentModel, 0));
+  CurModel := TModelConv.Display2Garmin(TModelConv.GetCurrentDevice);
   if not (TModelConv.ReadVehicleDB(CurModel)) then
     exit;
 

@@ -107,6 +107,8 @@ type
   public
     class procedure SetupKnownDevices;
     class procedure CmbModelDevices(const Devices: TStrings);
+    class procedure SetCurrentDevice(DevIndex: integer);
+    class function GetCurrentDevice: integer;
     class function GetKnownDevice(const DevIndex: integer): string;
     class function GetDefaultDevice(const DevIndex: integer): string;
     class function GetTripModel(const TripModel: TTripModel): string;
@@ -360,6 +362,16 @@ end;
 class procedure TModelConv.CmbModelDevices(const Devices: TStrings);
 begin
   Devices.Assign(DefaultDevices);
+end;
+
+class procedure TModelConv.SetCurrentDevice(DevIndex: integer);
+begin
+  SetRegistry(Reg_CurrentModel, DevIndex);
+end;
+
+class function TModelConv.GetCurrentDevice: integer;
+begin
+  result := GetRegistry(Reg_CurrentModel, 0);
 end;
 
 class function TModelConv.GetKnownDevice(const DevIndex: integer): string;

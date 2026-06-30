@@ -3,8 +3,8 @@ unit UFrmSelectGPX;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  System.SysUtils, System.Classes,
+  Winapi.Windows, Winapi.Messages, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls,
   Vcl.StdCtrls, Vcl.Buttons, Vcl.Menus,
   UnitGpxDefs, Vcl.Samples.Spin;

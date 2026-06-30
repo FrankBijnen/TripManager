@@ -64,7 +64,8 @@ implementation
 
 uses
   System.Types, System.StrUtils, system.Generics.Collections, System.UITypes,
-  UnitGpxDefs, UnitGpxObjects, UnitTripDefs, UnitTripObjects, UnitGpxTripCompare,
+  UnitGpxDefs, UnitGpxTripCompare,
+  UnitTripDefs, UnitTripObjects,
   UFrmTripEditor,
   UnitVerySimpleXml, UnitProcessOptions, UnitStringUtils;
 

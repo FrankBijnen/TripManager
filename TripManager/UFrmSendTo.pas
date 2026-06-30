@@ -144,14 +144,14 @@ begin
   GrpModel.Visible := TvSelections.Items[IdTrip].Checked;
 
   // Update texts
-  LblModel.Caption := TModelConv.GetTripModel(TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0)));
+  LblModel.Caption := TModelConv.GetTripModel(TModelConv.Display2Trip(TModelConv.GetCurrentDevice));
   CmbTripOption.Items.Text := TripOptions;
   CmbTripOption.ItemIndex := Min(CmbTripOption.Items.Count -1, Ord(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc))));
 
   case PCTDestination.ActivePageIndex of
     0:begin
         SendToDest := TSendToDest.stDevice;
-        ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+        ModelIndex := TModelConv.GetCurrentDevice;
         SubKey := TModelConv.GetDefaultDevice(ModelIndex);
         LblDestinations.Caption :=
           Format('Device:%s %s%s',        [#9, TBase_Device(CurrentDevice).DisplayedDevice, #10#10]);

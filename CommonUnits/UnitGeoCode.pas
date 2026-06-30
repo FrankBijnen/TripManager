@@ -3,7 +3,7 @@ unit UnitGeoCode;
 interface
 
 uses
-  System.Classes, System.SysUtils, System.Generics.Collections, System.IniFiles,
+  System.Classes, System.SysUtils, System.Generics.Collections,
   Winapi.Windows,
   Vcl.Edge;
 

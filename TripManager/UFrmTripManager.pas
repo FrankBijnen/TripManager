@@ -585,7 +585,7 @@ begin
   CmbModel.ItemIndex := ModelIndex;
   ModelChanged;
 
-  SetRegistry(Reg_CurrentModel, ModelIndex);
+  TModelConv.SetCurrentDevice(ModelIndex);
 end;
 
 // No need to close manually.
@@ -1238,7 +1238,7 @@ var
   ATripModel: TTripModel;
 begin
 // Create new empty triplist?
-  ATripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
+  ATripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
   if not Assigned(ATripList) then
     ATripList := TTripList.Create(ATripModel);
 
@@ -2324,7 +2324,7 @@ begin
   GuessModel(CurrentDevice.DisplayedDevice);
 
   // Refresh Trips folder? (Zumo 3x0)
-  if (NeedRecreateTrips[TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0))]) then
+  if (NeedRecreateTrips[TModelConv.Display2Trip(TModelConv.GetCurrentDevice)]) then
     RecreateTrips;
 
   // Need to set the folder?
@@ -2478,7 +2478,7 @@ begin
      else
       BgDevice.Items[2].Caption := DefUnusedDesc;
   end;
-  SetRegistry(Reg_CurrentModel, ModelIndex);
+  TModelConv.SetCurrentDevice(ModelIndex);
   SetRegistry(Reg_EnableTripFuncs, TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaTrips));
   SetRegistry(Reg_EnableGpxFuncs,  TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaGPX));
   SetRegistry(Reg_EnableGpiFuncs,  TModelConv.SupportsGarminFormat(GarminModel, TGarminFmt.gaPOI) or
@@ -3156,7 +3156,7 @@ begin
     if (HasTMTPDevice(CurrentDevice)) and
        (TModelConv.ReadVehicleDB(TGarminMTP_Device(CurrentDevice).GarminDevice.GarminModel)) then
     begin
-      SubKey := TModelConv.GetDefaultDevice(GetRegistry(Reg_CurrentModel, 0)) + '\' +
+      SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice) + '\' +
                   Reg_VehicleProfileHashList + '\' ;
       TmpHash := TmpTripList.VehicleHash;
       TmpModified := TmpTripList.AvoidancesChangedTimeAtSave;
@@ -3318,7 +3318,7 @@ var
 begin
   PickList := TStringList.Create;
   try
-    ATripModel := TModelConv.Display2Trip(GetRegistry(Reg_CurrentModel, 0));
+    ATripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
 
     MnuSetTransportMode.Clear;
     PickList.Text := TmTransportationMode.ModelPickList(ATripModel);
@@ -5434,7 +5434,7 @@ var
   ModelIndex: integer;
   SubKey: string;
 begin
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  ModelIndex := TModelConv.GetCurrentDevice;
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
   DeviceFolder[0] := TModelConv.GetKnownGarminPath(CurrentDevice,
                                                    Reg_PrefDevTripsFolder_Key,
@@ -5567,7 +5567,7 @@ begin
   TSetProcessOptions.CheckSymbolsDir;
 
   TModelConv.SetupKnownDevices;
-  ModelIndex := GetRegistry(Reg_CurrentModel, 0);
+  ModelIndex := TModelConv.GetCurrentDevice;
   if (Assigned(CurrentDevice)) then
     GuessModel(CurrentDevice.DisplayedDevice)
   else
