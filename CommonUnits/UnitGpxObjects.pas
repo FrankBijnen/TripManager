@@ -68,7 +68,7 @@ type
     function MapSegFromSubClass(const CalculatedSubclass: string): integer;
     function WayPointNotProcessed(WayPoint: TXmlVSNode): boolean;
 {$IFDEF GPI}
-    function GPXWayPoint(ACatId, ABmpId, AMediaId: integer; AWayPoint: TXmlVSNode): TGPXWayPoint;
+    function GPXWayPoint(ACatId, ABmpId, AMediaId, AMp3Id: integer; AWayPoint: TXmlVSNode): TGPXWayPoint;
     function GetSpeedFromName(WptName: string): integer;
     function GPXBitMap(WayPoint: TXmlVSNode): TGPXBitmap;
     function GPXCategory(Category: string): TGPXCategory;
@@ -1466,7 +1466,7 @@ begin
   end;
 end;
 
-function TGPXfile.GPXWayPoint(ACatId, ABmpId, AMediaId: integer; AWayPoint: TXmlVSNode): TGPXWayPoint;
+function TGPXfile.GPXWayPoint(ACatId, ABmpId, AMediaId, AMp3Id: integer; AWayPoint: TXmlVSNode): TGPXWayPoint;
 var
   ExtensionsNode, AddressNode: TXmlVSNode;
   ProximityStr: TGPXString;
@@ -1523,12 +1523,15 @@ begin
     CategoryId := ACatId;
     BitmapId := ABmpId;
     AudioAlert := $10;
+    MediaId := AMediaId;
 
-    if (AMediaId > -1) then
+    // TourGuide?
+    if (AMediaId > -1) and
+       (AMp3Id > -1)  then
     begin
       AudioAlert := $20;        // Custom Audio
       AlertType  := $02;        // Tour Guide
-      SoundNbr   := AMediaId;   // Media Id
+      SoundNbr   := AMp3Id;     // Media Id
     end;
   end;
 end;
@@ -2046,6 +2049,7 @@ var
   S: TBufferedFileStream;
   CatId: integer;
   BmpId: integer;
+  Mp3Id: integer;
   MediaId: smallint;
   IsViaPt: boolean;
   ExtensionsNode: TXmlVSNode;
@@ -2070,7 +2074,6 @@ begin
           if (WayPointNotProcessed(WayPoint)) then
           begin
             CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatSymbol + FindSubNodeValue(WayPoint, 'sym'))); // Symbol
-            BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
 
             // MediaId for TourGuide.
             // Use either fully qualified names, or subdir of GPX
@@ -2088,8 +2091,17 @@ begin
               LinkNodes.Free;
             end;
 
+            // Check media.
+            // Returns BmpId to use if not specified. EG from <sym>
+            // Returns Mp3Id. Usually MediaId, but if duplicate found uses original
+            POIGroup.CheckTourGuideMedia(MediaId, BmpId, Mp3Id);
+
+            // If no Media requested, or no Bmp in Media, use the symbol as bitmap
+            if (BmpId < 0) then
+              BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
+
             // Add WPt
-            PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, MediaId, WayPoint), MediaId);
+            PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, MediaId, Mp3Id, WayPoint));
           end;
         end;
       end;
@@ -2120,7 +2132,7 @@ begin
                    ((IsViaPt = false) and (ProcessOptions.ProcessShapePtsInGpi)) then
                 begin
                   BmpId := PoiGroup.AddBmp(GPXBitMap(WayPoint));
-                  PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, -1, WayPoint));
+                  PoiGroup.AddWpt(GPXWayPoint(CatId, BmpId, -1, -1, WayPoint));
                 end;
               end;
             end;

@@ -43,6 +43,7 @@ type
     Street: TGPXString;
     HouseNbr: TGPXString;
     Category: TGPXString;
+    MediaId: byte;
     SoundNbr: byte;           // 0=Beep, 1=Tone,2= 3x Beep,3=Silence,4=Plung,5=Double Plung
     CategoryId: integer;
     BitmapId: integer;
@@ -87,15 +88,21 @@ type
     function CheckMedia(const AMediaPath: string; var NewMedia: string): int64;
   public
     MediaDir: string;
+    BmpFile: string;
     JpgFile: string;
     Mp3File: string;
     MediaId: byte;
+    Mp3Id: byte;
+    Mp3Dup: boolean;
+    BmpSize: int64;
     JpgSize: int64;
     Mp3Size: int64;
     constructor Create;
     destructor Destroy; override;
     procedure AddMediaFromDir;
-    function AddMp3Media(AMP3Media: string): boolean;
+    function HaveAllSizes: boolean;
+    function AddBmpMedia(ABmpMedia: string): boolean;
+    function AddMp3Media(AMp3Media: string): boolean;
     function AddJpgMedia(AJpgMedia: string): boolean;
   end;
 
@@ -394,10 +401,11 @@ type
     BitMaps:    TObjectlist<TGPXBitmap>;    // Internal variable, dont write
     Medias:     TObjectlist<TGPXMedia>;     // Internal variable, dont write
     constructor Create(AVersion: Word; AName: TGPXString; AExtra: boolean = true);
-    procedure AddWpt(GPXWayPt: TGPXWayPoint; MediaId: integer = -1);
+    procedure AddWpt(GPXWayPt: TGPXWayPoint);
     function AddCat(GPXCategory: TGPXCategory): integer;
     function AddBmp(GPXBitMap: TGPXBitMap): integer;
     function AddGPXMedia: integer;
+    procedure CheckTourGuideMedia(MediaId: integer; var BmpId: integer; var Mp3Id: integer);
     procedure AddMedia(MediaId: integer; AGPXDir, ATourGuidePath: string);
     procedure Write(S: TBufferedFileStream);
     procedure Assign(MainRec: TMainRec; ExtraRec: TExtraRec);
@@ -452,6 +460,7 @@ begin
   Proximity := 0;
   Speed := 0;
   AlertType := 0;
+  MediaId := 0;
   SoundNbr := 0;
   ImageCnt := 0;
   AudioAlert := $10;
@@ -488,11 +497,23 @@ end;
 constructor TGPXMedia.Create;
 begin
   inherited Create;
+  MediaId := 0;
+  MP3Id := 0;
   MediaDir := '';
+  BmpFile := '';
+  BmpSize := -1;
   JpgFile := '';
   JpgSize := -1;
   Mp3File := '';
   Mp3Size := -1;
+  Mp3Dup := false;
+end;
+
+function TGPXMedia.HaveAllSizes: boolean;
+begin
+  result := (BmpSize > -1) and
+            (JpgSize > -1) and
+            (Mp3Size > -1);
 end;
 
 function TGPXMedia.CheckMedia(const AMediaPath: string; var NewMedia: string): int64;
@@ -517,12 +538,21 @@ begin
     Mp3Size := CheckMedia(MediaDir + '*.mp3', Mp3File);
   if (JpgSize < 0) then
     JpgSize := CheckMedia(MediaDir + '*.jpg', JpgFile);
+  if (BmpSize < 0) then
+    BmpSize := CheckMedia(MediaDir + '*.bmp', BmpFile);
 end;
 
-function TGPXMedia.AddMp3Media(AMP3Media: string): boolean;
+function TGPXMedia.AddBmpMedia(ABmpMedia: string): boolean;
 begin
-  MediaDir := ExtractFilePath(AMP3Media);
-  Mp3Size := CheckMedia(AMP3Media, Mp3File);
+  MediaDir := ExtractFilePath(ABmpMedia);
+  BmpSize := CheckMedia(ABmpMedia, BmpFile);
+  result := (BmpSize > -1);
+end;
+
+function TGPXMedia.AddMp3Media(AMp3Media: string): boolean;
+begin
+  MediaDir := ExtractFilePath(AMp3Media);
+  Mp3Size := CheckMedia(AMp3Media, Mp3File);
   result := (Mp3Size > -1);
 end;
 
@@ -1229,8 +1259,8 @@ var
 begin
   AMedia := nil;
   if (GPXWayPt.AudioAlert = $20) and
-     (GPXWayPt.SoundNbr <= Medias.Count) then
-    AMedia := Medias[GPXWayPt.SoundNbr -1];
+     (GPXWayPt.MediaId <= Medias.Count) then
+    AMedia := Medias[GPXWayPt.MediaId -1];
   WayPt.Create(GPIVersion, GPXWayPt, AMedia, Extra);  // Just temporary, to calculate
   ExtraSize := ExtraSize + WayPt.Size;                // If waypoint has extra records like area, this is computed
   if (WayPt.Lat > MaxLat) then
@@ -1265,8 +1295,8 @@ begin
   begin
     AMedia := nil;
     if (GPXWayPt.AudioAlert = $20) and
-       (GPXWayPt.SoundNbr <= Medias.Count) then
-      AMedia := Medias[GPXWayPt.SoundNbr -1];
+       (GPXWayPt.MediaId <= Medias.Count) then
+      AMedia := Medias[GPXWayPt.MediaId -1];
     WayPt.Create(GPIVersion, GPXWayPt, AMedia, Extra);
     WayPt.Write(S);
   end;
@@ -1316,29 +1346,61 @@ begin
     MainRec.Create(AVersion, $09); // Length will be recalculated by adding wpt
 end;
 
-procedure TPOIGroup.AddWpt(GPXWayPt: TGPXWayPoint; MediaId: integer = -1);
+procedure TPOIGroup.CheckTourGuideMedia(MediaId: integer; var BmpId: integer; var Mp3Id: integer);
 var
   AMedia: TMedia;
+  AllGPXMedia: TGPXMedia;
   AGPXMedia: TGPXMedia;
+  AGPXBitmap: TGPXBitmap;
 begin
+  BmpId := -1;
+  Mp3Id := -1;
+
   // TourGuide media requested?
-  if (MediaId > -1) then
+  if (MediaId < 0) then
+    exit;
+  AGPXMedia := Medias[MediaId -1];
+
+  // Try to add media from MediaDir, if not found
+  if (AGPXMedia.MediaDir <> '') and
+     (AGPXMedia.HaveAllSizes = false) then
+    AGPXMedia.AddMediaFromDir;
+
+  // Bmp file specified. Use that and not the one from <symbol>
+  if (AGPXMedia.BmpSize > -1) then
   begin
-    AGPXMedia := Medias[MediaId -1];
+    AGPXBitmap := TGPXBitmap.Create(TGPXString(ExtractFilePath(AGPXMedia.BmpFile)));
+    AGPXBitmap.Bitmap := TGPXString(ChangeFileExt(ExtractFileName(AGPXMedia.BmpFile), ''));
+    BmpId := AddBmp(AGPXBitmap);
+  end;
 
-    // Try to add media from MediaDir, if not found
-    if (AGPXMedia.MediaDir <> '') and
-       ((AGPXMedia.Mp3Size < 0) or (AGPXMedia.JpgSize < 0)) then
-      AGPXMedia.AddMediaFromDir;
+  // Handle duplicate MP3
+  for AllGPXMedia in Medias do
+  begin
+    if (AGPXMedia.Mp3Id <> AllGPXMedia.Mp3Id) and
+       (SameText(AllGPXMedia.Mp3File, AGPXMedia.Mp3File)) then
+    begin
+      AGPXMedia.Mp3Id := AllGPXMedia.Mp3Id;
+      AGPXMedia.Mp3Dup := true;
+      break;
+    end;
+  end;
 
-    // Need an MP3 file, Jpg is optional.
-    if (AGPXMedia.Mp3Size > -1) then
+  // Need an MP3 file, Jpg is optional.
+  if (AGPXMedia.Mp3Size > -1) then
+  begin
+    Mp3Id := AGPXMedia.Mp3Id;
+    if (AGPXMedia.Mp3Dup = false) then
     begin
       AMedia.Create(GPIVersion, AGPXMedia, true); // Only simulate, no read.
       ExtraSize := ExtraSize + AMedia.Size;
     end;
   end;
+//TODO Message if not MP3, Jpg found?
+end;
 
+procedure TPOIGroup.AddWpt(GPXWayPt: TGPXWayPoint);
+begin
   Area.AddWpt(GPXWayPt);
 end;
 
@@ -1398,7 +1460,7 @@ var
 begin
   AGPXMedia := TGPXMedia.Create;
   result := Medias.Add(AGPXMedia) +1;
-  Medias[result -1].MediaId := result;
+  Medias[result -1].Mp3Id := result;
 end;
 
 procedure TPOIGroup.AddMedia(MediaId: integer; AGpxDir, ATourGuidePath: string);
@@ -1409,8 +1471,10 @@ begin
   MediaAvail := false;
   AGPXMedia := Medias[MediaId -1];
 
-  // Mp3, or Jpg specified found. Use it.
-  if (SameText(ExtractFileExt(ATourGuidePath), '.mp3')) then
+  // Bmp, Mp3, or Jpg specified found. Use it.
+  if (SameText(ExtractFileExt(ATourGuidePath), '.bmp')) then
+    MediaAvail := AGPXMedia.AddBmpMedia(ATourGuidePath)
+  else if (SameText(ExtractFileExt(ATourGuidePath), '.mp3')) then
     MediaAvail := AGPXMedia.AddMp3Media(ATourGuidePath)
   else if (SameText(ExtractFileExt(ATourGuidePath), '.jpg')) then
     MediaAvail := AGPXMedia.AddJpgMedia(ATourGuidePath);
@@ -1419,7 +1483,7 @@ begin
   if (MediaAvail = false) then
   begin
     if (FileExists(ATourGuidePath)) then
-      // Linked a TXT, or BMP file for example
+      // Linked a txt file for example
      AGPXMedia.MediaDir := ExtractFilePath(ATourGuidePath)
     else
       // Subdir of GPX file
@@ -1458,9 +1522,11 @@ begin
     end;
     Bitmaps.Free;
 
+//todo handle dups
     for AGPXMedia in Medias do
     begin
-      if (AGPXMedia.Mp3Size < 0) then
+      if (AGPXMedia.Mp3Dup = true) or
+         (AGPXMedia.Mp3Size < 0) then
         continue;
       AMedia.Create(GpiVersion, AGPXMedia, false);
       AMedia.Write(S);
@@ -1811,7 +1877,7 @@ begin
     ExtraRec.Create(AVersion, $0012)
   else
     MainRec.Create(AVersion, $0012);
-  MediaId := AMedia.MediaId;
+  MediaId := AMedia.Mp3Id;
   AudioType := $20;    // Custom Audio
   AudioFormat := $01;  // Mp3
   MediaLength := AMedia.Mp3Size;
