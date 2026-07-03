@@ -981,7 +981,7 @@ type
                                   const Location2Add: TLocation2Add);
     procedure AddLocation_nuvi2595(const Locations: TmLocations;
                                    const Location2Add: TLocation2Add);
-    procedure AddLocation_nuvi57(const Locations: TmLocations;
+    procedure AddLocation_nuvi2599_57(const Locations: TmLocations;
                                  const Location2Add: TLocation2Add);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
@@ -994,7 +994,7 @@ type
     procedure CreateTemplate_Drive66(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo3x0(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_nuvi2595(const TripName, CalculationMode, TransportMode: string);
-    procedure CreateTemplate_nuvi57(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_nuvi2599_57(const TripName, CalculationMode, TransportMode: string);
     procedure SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);
     procedure UpdLocsFromRoutePrefs;
     procedure UpdLocsFromAllLinks;
@@ -5185,7 +5185,7 @@ begin
   Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi2595]));
 end;
 
-procedure TTripList.AddLocation_nuvi57(const Locations: TmLocations;
+procedure TTripList.AddLocation_nuvi2599_57(const Locations: TmLocations;
                                        const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create(Location2Add.RoutePref));
@@ -5194,7 +5194,7 @@ begin
   Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi57]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi2599_57]));
 end;
 
 procedure TTripList.AddLocation(const Location2Add: TLocation2Add);
@@ -5225,8 +5225,8 @@ begin
       AddLocation_Zumo3x0(Locations, Location2Add);
     TTripModel.Nuvi2595:
       AddLocation_nuvi2595(Locations, Location2Add);
-    TTripModel.Nuvi57:
-      AddLocation_nuvi57(Locations, Location2Add);
+    TTripModel.Nuvi2599_57:
+      AddLocation_nuvi2599_57(Locations, Location2Add);
     else
       raise exception.Create('AddLocation. Model not supported');
   end;
@@ -6245,7 +6245,7 @@ begin
   ForceRecalc(TTripModel.Nuvi2595, 2);
 end;
 
-procedure TTripList.CreateTemplate_nuvi57(const TripName, CalculationMode, TransportMode: string);
+procedure TTripList.CreateTemplate_nuvi2599_57(const TripName, CalculationMode, TransportMode: string);
 begin
   SetHeader(THeader.Create);
   Add(TmAllRoutes.Create);
@@ -6259,7 +6259,7 @@ begin
   Add(TmVersionNumber.Create(TripFileVersion));
 
   // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Nuvi57, 2);
+  ForceRecalc(TTripModel.Nuvi2599_57, 2);
 end;
 
 procedure TTripList.CreateTemplate(const TripName: string;
@@ -6290,8 +6290,8 @@ begin
       CreateTemplate_Zumo3x0(TripName, CalculationMode, TransportMode);
     TTripModel.Nuvi2595:
       CreateTemplate_nuvi2595(TripName, CalculationMode, TransportMode);
-    TTripModel.Nuvi57:
-      CreateTemplate_nuvi57(TripName, CalculationMode, TransportMode);
+    TTripModel.Nuvi2599_57:
+      CreateTemplate_nuvi2599_57(TripName, CalculationMode, TransportMode);
     else
       raise exception.Create('Create template. Model not supported');
   end;

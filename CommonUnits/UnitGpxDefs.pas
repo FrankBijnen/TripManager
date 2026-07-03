@@ -39,7 +39,11 @@ type
   TGPXFuncArray = array of TGPXFunc;
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: See TModelConv for mapping to TripModel
-  TGarminModel  = (XT, XT2, XT3, Tread2, Zumo346, Zumo595, Zumo590, Zumo3x0, Drive51, Drive66, Nuvi2595, Nuvi57, GarminEdge, GarminForeRunner, GarminGeneric, Unknown);
+  TGarminModel  = (XT, XT2, XT3, Tread2,
+                   Zumo346, Zumo595, Zumo590, Zumo3x0,
+                   Drive51, Drive66, Nuvi2595, Nuvi2599, Nuvi57,
+                   GarminEdge, GarminForeRunner,
+                   GarminGeneric, Unknown);
 
   TTagsToShow = (WptRte = 1, WptTrk = 2, WptRteTrk = 3, RteTrk = 10, Rte = 20, Trk = 30);
   THtmlOutput = (OSM, Kurviger, Both);

@@ -80,6 +80,9 @@ const
   Nuvi2595_Name                     = 'n' + #0252 + 'vi 2595';
   Nuvi2595_PartNumber               = '006-B1371-00';
 
+  Nuvi2599_Name                     = 'n' + #0252 + 'vi 2599';
+  Nuvi2599_PartNumber               = '006-B1947-00';
+
   Nuvi57_Name                       = 'n' + #0252 + 'vi 57';
   Nuvi57_PartNumber                 = '006-B2087-00';
 
@@ -273,9 +276,18 @@ const
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsGPXPOIFmts),
+    (DeviceName: Nuvi2599_Name;
+        PartNumber: Nuvi2599_PartNumber;
+        TripModel: TTripModel.Nuvi2599_57;
+        Safe: false;
+        Displayable: true;
+        DevDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts),
     (DeviceName: Nuvi57_Name;
         PartNumber: Nuvi57_PartNumber;
-        TripModel: TTripModel.Nuvi57;
+        TripModel: TTripModel.Nuvi2599_57;
         Safe: false;
         Displayable: true;
         DevDB: false;

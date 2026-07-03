@@ -18,7 +18,7 @@ type
                        Drive51,
                        Drive66,
                        Nuvi2595,
-                       Nuvi57,
+                       Nuvi2599_57,
                        Unknown);
 
   // Not available to the user:
