@@ -3924,10 +3924,10 @@ var
                                  TGridSelItem.Create(AHeader,
                                                      SizeOf(SubLength),
                                                      OffsetInRecord(HeaderValue, SubLength) ));
-      VlTripInfo.Strings.AddPair('Datatype',      Format('%d', [HeaderLength]),
+      VlTripInfo.Strings.AddPair('Datatype',      Format('%d', [DataType]),
                                  TGridSelItem.Create(AHeader,
-                                                     SizeOf(HeaderLength),
-                                                     OffsetInRecord(HeaderValue, HeaderLength) ));
+                                                     SizeOf(DataType),
+                                                     OffsetInRecord(HeaderValue, DataType) ));
       VlTripInfo.Strings.AddPair('Item count',    Format('%d', [TotalItems]),
                                  TGridSelItem.Create(AHeader,
                                                      SizeOf(TotalItems),

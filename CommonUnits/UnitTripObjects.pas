@@ -587,7 +587,7 @@ type
   THeaderValue = packed record
     Id:               array[0..3] of AnsiChar;  // 'TRPL'
     SubLength:        Cardinal;
-    HeaderLength:     byte;                     // 10
+    DataType:         byte;                     // 10
     TotalItems:       Cardinal;
     procedure SwapCardinals;
   end;
@@ -2848,7 +2848,7 @@ begin
   inherited Create;
   FValue.Id := 'TRPL';
   FValue.SubLength := 0;
-  FValue.HeaderLength := SizeOf(FValue) - SizeOf(FValue.Id) + SizeOf(FInitiator);// = 10
+  FValue.DataType := dtHeaderPref;
   FValue.TotalItems := 0;
 end;
 
@@ -2865,7 +2865,7 @@ end;
 procedure THeader.UpdateFromTripList(ItemCount, ASubLength: Cardinal);
 begin
   FValue.TotalItems := ItemCount;
-  FValue.SubLength := ASubLength - SizeOf(FInitiator);
+  FValue.SubLength := ASubLength + SizeOf(FValue.DataType) + SizeOf(FValue.TotalItems);
 end;
 
 procedure THeader.WriteValue(AStream: TMemoryStream);
@@ -4261,7 +4261,7 @@ begin
   // Be sure to recalculate all items.
   ResetCalculation;
 
-  FSubLength := 6; //We need to add 6, but can't figure out why.
+  FSubLength := 0;
   for ANItem in ItemList do
   begin
     if (ANItem is TBaseItem) then
