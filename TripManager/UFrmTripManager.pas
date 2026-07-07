@@ -1032,15 +1032,6 @@ begin
     if (FrmSendTo.SendToDest = TSendToDest.stDevice) then
     begin
       CheckDevice;
-
-      // Should not occur
-      // ExploreDb was read in ExploreList, but CheckTrip not called
-      if (GetRegistry(Reg_EnableTripFuncs, false)) and
-         (GetRegistry(Reg_FuncTrip, false)) and
-         (HasTMTPDevice(CurrentDevice)) and
-         (TGarminMTP_Device(CurrentDevice).ExploreCheckNeeded) then
-        BreakPoint;
-
       SetDeviceListColumns;
       SetCurrentPath(DeviceFolder[BgDevice.ItemIndex]);
     end;
@@ -3093,9 +3084,6 @@ var
   LocalFile: string;
   Imported: TmImported;
   AMTP_Data: TMTP_Data;
-  TmpModified: cardinal;
-  TmpHash: cardinal;
-  SubKey: string;
   ExploreIndex: integer;
 begin
   result := false;
@@ -3152,32 +3140,6 @@ begin
         ExploreList.Objects[ExploreIndex] := TStringObject.Create(AListItem.Caption);
     end;
 
-    // Save ProfileHashList in registry
-    if (HasTMTPDevice(CurrentDevice)) and
-       (TModelConv.ReadVehicleDB(TGarminMTP_Device(CurrentDevice).GarminDevice.GarminModel)) then
-    begin
-      SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice) + '\' +
-                  Reg_VehicleProfileHashList + '\' ;
-      TmpHash := TmpTripList.VehicleHash;
-      TmpModified := TmpTripList.AvoidancesChangedTimeAtSave;
-      if (TmpHash <> 0) then
-      begin
-        if (TmpModified > GetRegistry(Reg_VehicleProfileModifiedDate,
-                                      0,
-                                      SubKey + TmpTripList.VehicleGUID)) then
-        begin
-          SetRegistry(Reg_VehicleProfileHash,
-                      TmpHash,
-                      SubKey + TmpTripList.VehicleGUID);
-          SetRegistry(Reg_VehicleProfileName,
-                      TmpTripList.VehicleProfileName,
-                      SubKey + TmpTripList.VehicleGUID);
-          SetRegistry(Reg_VehicleProfileModifiedDate,
-                      TmpModified,
-                      SubKey + TmpTripList.VehicleGUID);
-        end;
-      end;
-    end;
     // Show trip name
     AListItem.SubItems[TripNameCol -1] := TmpTripList.TripName;
 
@@ -3218,8 +3180,6 @@ begin
         SbPostProcess.Update;
       end;
     end;
-    if (HasTMTPDevice(CurrentDevice)) then
-      TGarminMTP_Device(CurrentDevice).ExploreCheckNeeded := false;
   finally
     SetCursor(CrNormal);
     StatusTimer.Enabled := false;

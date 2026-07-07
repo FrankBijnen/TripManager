@@ -4,7 +4,7 @@ unit UnitGarminDevice;
 interface
 
 uses
-  System.Classes,
+  System.Classes, System.JSON,
   Vcl.ComCtrls,
   UnitGpxDefs, UnitBaseMTP;
 
@@ -39,7 +39,8 @@ type
 
   TGarminMTP_Device = class(TBase_Device)
   private
-    FExploreCheckNeeded: boolean;
+    JSONObject: TJSONObject;
+    procedure ExploreMetaDataCallBack(const JSONMetaData: string);
   public
     GarminDevice: TGarminDevice;
     constructor Create; virtual;
@@ -57,7 +58,6 @@ type
     function CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
     function RecreateTrips(const SystemTripsPath: string;
                            const LstItems: TListItems): boolean;
-    property ExploreCheckNeeded: boolean read FExploreCheckNeeded write FExploreCheckNeeded;
   end;
 
   TGarminDrv_Device = class(TGarminMTP_Device)
@@ -98,8 +98,8 @@ var
 implementation
 
 uses
-  Winapi.Windows, Winapi.ShellAPI,
   System.SysUtils, System.StrUtils, System.Masks, System.IOUtils, System.UITypes,
+  Winapi.Windows, Winapi.ShellAPI,
   Vcl.Dialogs,
   UnitRegistry, UnitRegistryKeys,
   UnitTripDefs, UnitModelConv, UnitStringUtils, UnitVerySimpleXml, UnitSqlite, UnitVehProfile;
@@ -205,7 +205,7 @@ begin
 
   // Copy and read GarminDevice.xml
   CurDevId := CurrentDevice.Id;
-  DeleteFile(GetDeviceTmp + NFile);
+  System.SysUtils.DeleteFile(GetDeviceTmp + NFile);
 
   if not (CurrentDevice.CopyDeviceFile(NonMTPRoot + DefGarminPath, NFile, GetDeviceTmp)) and
      not (CurrentDevice.CopyDeviceFile(InternalStorage + DefGarminPath, NFile, GetDeviceTmp)) then
@@ -299,11 +299,11 @@ end;
 constructor TGarminMTP_Device.Create;
 begin
   inherited Create;
+  JSONObject := TJSONObject.Create;
 end;
 
 procedure TGarminMTP_Device.Init;
 begin
-  FExploreCheckNeeded := true;
   GarminDevice := TGarminDevice.Create;
   GarminDevice.Init;
 end;
@@ -312,6 +312,7 @@ destructor TGarminMTP_Device.Destroy;
 begin
   inherited Destroy;
   GarminDevice.Free;
+  JSONObject.Free;
 end;
 
 function TGarminMTP_Device.CopyFileToTmp(const AListItem: TListItem): string;
@@ -415,6 +416,54 @@ begin
     result := '';
 end;
 
+// Save ProfileHashList in registry, from explore.db
+procedure TGarminMTP_Device.ExploreMetaDataCallBack(const JSONMetaData: string);
+var
+  SubKey: string;
+  JSONGuid: string;
+  JSONProfileName: string;
+  JSONModified: Cardinal;
+  JSONHash: Cardinal;
+  JSONProfile, JSONVAlue: TJSONValue;
+begin
+  if (TModelConv.ReadVehicleDB(GarminDevice.GarminModel) = false) then
+    exit;
+
+  SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice) + '\' +
+              Reg_VehicleProfileHashList + '\' ;
+  try
+    JSONVAlue := JSONObject.ParseJSONValue(JSONMetaData);
+    try
+      JSONProfile := JSONVAlue.FindValue('VehicleProfileData');
+      JSONGuid := JSONProfile.FindValue('VehicleProfileGuid').GetValue<string>;
+      JSONHash := JSONProfile.FindValue('VehicleProfileHash').GetValue<cardinal>;
+      JSONModified := JSONProfile.FindValue('ModifiedDate').GetValue<cardinal>;
+      JSONProfileName := JSONProfile.FindValue('VehicleProfileName').GetValue<string>;
+    finally
+      JSONVAlue.Free;
+    end;
+  except
+    BreakPoint; // Should not occur. Debugger break
+    exit;
+  end;
+
+  if (JSONHash <> 0) and
+     (JSONModified > GetRegistry(Reg_VehicleProfileModifiedDate,
+                                 0,
+                                 SubKey + JSONGuid)) then
+  begin
+    SetRegistry(Reg_VehicleProfileHash,
+                JSONHash,
+                SubKey + JSONGuid);
+    SetRegistry(Reg_VehicleProfileName,
+                JSONProfileName,
+                SubKey + JSONGuid);
+    SetRegistry(Reg_VehicleProfileModifiedDate,
+                JSONModified,
+                SubKey + JSONGuid);
+  end;
+end;
+
 procedure TGarminMTP_Device.ReadDeviceDB(const ExploreList: TStringList);
 var
   NewVehicle_Profile, OldVehicle_Profile: TVehicleProfile;
@@ -436,6 +485,13 @@ begin
   if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(ModelIndex))) and
      (CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
     SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
+
+  // Copy explore.db
+  // Get ProfileHashes from explore.db
+  if (GetRegistry(Reg_EnableExploreFuncs, false)) and
+     (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
+     (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
+    GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList, ExploreMetaDataCallBack);
 
   // Copy vehicle_profile.db
   if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(ModelIndex))) and
@@ -462,14 +518,6 @@ begin
     end;
   end;
 
-  // Copy explore.db
-  if (GetRegistry(Reg_EnableExploreFuncs, false)) and
-     (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
-     (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
-  begin
-    ExploreCheckNeeded := true;
-    GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
-  end;
 end;
 
 function TGarminMTP_Device.CheckSystemTripsFolder(const SystemTripsPath: string): boolean;
@@ -582,7 +630,7 @@ begin
                                   [LastRefreshFile, DisplayedDevice]));
 
   // Copy trip files to device
-  Rc := FindFirst(CreatedTempPath + TripMask, faAnyFile - faDirectory, Fs);
+  Rc := System.SysUtils.FindFirst(CreatedTempPath + TripMask, faAnyFile - faDirectory, Fs);
   while (Rc = 0) do
   begin
     // Transfer
@@ -592,9 +640,9 @@ begin
     if (TransferNewFile(TempFile, SystemTripsPathId) = '') then
       raise Exception.Create(Format('Could not overwrite file: %s on %s',
                                     [ExtractFileName(TempFile), DisplayedDevice]));
-    Rc := FindNext(Fs);
+    Rc := System.SysUtils.FindNext(Fs);
   end;
-  FindClose(Fs);
+  System.SysUtils.FindClose(Fs);
 
   result := true;
 end;

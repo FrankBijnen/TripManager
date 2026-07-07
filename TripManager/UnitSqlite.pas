@@ -12,6 +12,8 @@ const
   VehicleProfileOrder = 'Status desc, v.vehicle_id asc';
 
 type
+  TExploreMetaDataCallBack = procedure(const JSONMetaData: string) of object;
+
   TCDSEvents = class(TObject)
   public
     procedure GetBlob(Sender: TField; var Text: string; DisplayText: Boolean);
@@ -45,7 +47,8 @@ function CDSFromQuery(const DbName: string;
                       const ACds: TClientDataSet): integer;
 function GetAvoidancesChanged(const DbName: string): string;
 procedure GetExploreList(const DBName: string;
-                         const ExploreList: TStrings);
+                         const ExploreList: TStrings;
+                         const ExploreMetaDataCallBack: TExploreMetaDataCallBack);
 function GetVehicleProfilesQuery(const Model: TGarminModel;
                                  const OrderBy: string): string;
 function GetVehicleProfile(const DbName: string;
@@ -417,7 +420,9 @@ begin
   end;
 end;
 
-procedure GetExploreList(const DbName: string; const ExploreList: TStrings);
+procedure GetExploreList(const DbName: string;
+                         const ExploreList: TStrings;
+                         const ExploreMetaDataCallBack: TExploreMetaDataCallBack);
 var
   SqlResults: TSqlResults;
   SqlResult: TSqlResult;
@@ -427,10 +432,14 @@ begin
   try
     try
       ExecSqlQuery(DbName,
-                   'Select Name, hex(UUID) from items where type = 4',
+                   'Select Name, hex(UUID), MetaData from items where type = 4',
                    SqlResults);
       for SqlResult in SqlResults do
+      begin
         ExploreList.AddPair(SqlResult[0], MkGuid(SqlResult[1]));
+        if (Assigned(ExploreMetaDataCallBack)) then
+          ExploreMetaDataCallBack(SqlResult[2]);
+      end;
     finally
       SqlResults.Free;
     end;
