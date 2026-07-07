@@ -48,7 +48,7 @@ function CDSFromQuery(const DbName: string;
 function GetAvoidancesChanged(const DbName: string): string;
 procedure GetExploreList(const DBName: string;
                          const ExploreList: TStrings;
-                         const ExploreMetaDataCallBack: TExploreMetaDataCallBack);
+                         const ExploreMetaDataCallBack: TExploreMetaDataCallBack = nil);
 function GetVehicleProfilesQuery(const Model: TGarminModel;
                                  const OrderBy: string): string;
 function GetVehicleProfile(const DbName: string;
@@ -422,17 +422,21 @@ end;
 
 procedure GetExploreList(const DbName: string;
                          const ExploreList: TStrings;
-                         const ExploreMetaDataCallBack: TExploreMetaDataCallBack);
+                         const ExploreMetaDataCallBack: TExploreMetaDataCallBack = nil);
 var
   SqlResults: TSqlResults;
   SqlResult: TSqlResult;
+  FieldList: string;
 begin
   ExploreList.Clear;
   SqlResults := TSqlResults.Create;
   try
     try
+      FieldList := 'Name, hex(UUID)';
+      if (Assigned(ExploreMetaDataCallBack)) then
+        FieldList := FieldList + ', MetaData';
       ExecSqlQuery(DbName,
-                   'Select Name, hex(UUID), MetaData from items where type = 4',
+                   Format('Select %s from items where type = 4', [FieldList]),
                    SqlResults);
       for SqlResult in SqlResults do
       begin

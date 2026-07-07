@@ -411,7 +411,7 @@ begin
     result := '';
 end;
 
-// Save ProfileHashList in registry, from explore.db
+// Save ProfileHashList in registry, from Explore.db
 procedure TGarminMTP_Device.ExploreMetaDataCallBack(const JSONMetaData: string);
 var
   SubKey: string;
@@ -466,6 +466,7 @@ var
   SubKey: string;
   DBPath: string;
   LoadActive: boolean;
+  GarminModel: TGarminModel;
 begin
   // SQLite path
   DBPath := GetDbPath;
@@ -475,27 +476,33 @@ begin
   // Needed for checking if the connected Device needs reading SQlite
   ModelIndex := TModelConv.GetCurrentDevice;
   SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+  GarminModel := TModelConv.Display2Garmin(ModelIndex);
 
   // Copy settings.db, Update Avoidances changed
-  if (TModelConv.ReadDeviceDB(TModelConv.Display2Garmin(ModelIndex))) and
+  if (TModelConv.ReadSettingsDB(GarminModel)) and
      (CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
     SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
 
   // Copy explore.db
   // Get ProfileHashes from explore.db
   if (GetRegistry(Reg_EnableExploreFuncs, false)) and
-     (TModelConv.ReadExploreDB(TModelConv.Display2Garmin(ModelIndex))) and
+     (TModelConv.ReadExploreDB(GarminModel)) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
-    GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList, ExploreMetaDataCallBack);
+  begin
+    if (TModelConv.ReadVehicleDB(GarminModel)) then // Need ProfileHash from Explore.db
+      GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList, ExploreMetaDataCallBack)
+    else
+      GetExploreList(IncludeTrailingPathDelimiter(GetDeviceTmp) + ExploreDb, ExploreList);
+  end;
 
   // Copy vehicle_profile.db
-  if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(ModelIndex))) and
+  if (TModelConv.ReadVehicleDB(GarminModel)) and
      (CopyDeviceFile(DBPath, ProfileDb, GetDeviceTmp)) then
   begin
     OldVehicle_Profile.FromRegistry(SubKey);
     LoadActive := GetRegistry(Reg_LoadActiveProfile, true);
     NewVehicle_Profile := GetVehicleProfile(GetDeviceTmp + ProfileDb,
-                                            TModelConv.Display2Garmin(ModelIndex),
+                                            GarminModel,
                                             SubKey,
                                             LoadActive,
                                             GetRegistry(Reg_VehicleProfileName, '', SubKey));

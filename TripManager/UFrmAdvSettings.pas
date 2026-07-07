@@ -279,11 +279,14 @@ begin
                                             'True',
                                             'Group trips from the same GPX');
     AddGridLine(GridZumoSettings, CurRow,   '', '');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2/XT3 trips-');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
-                                            '',
-                                            'Date: ');
-    AddGridLine(GridZumoSettings, CurRow,   '', '');
+    if (TModelConv.ReadSettingsDB(TModelConv.Display2Garmin(TModelConv.GetCurrentDevice))) then
+    begin
+      AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2/XT3 trips-');
+      AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
+                                              '',
+                                              'Date: ');
+      AddGridLine(GridZumoSettings, CurRow,   '', '');
+    end;
     if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(TModelConv.GetCurrentDevice))) then
     begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
@@ -650,6 +653,7 @@ begin
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   MemoAddressFormatChange(MemoAddressFormat);
   BtnVehProfile.Enabled := (FileExists(GetDeviceTmp + ProfileDb));
+  PctMainResize(PctMain);
 end;
 
 end.

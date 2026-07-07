@@ -130,7 +130,7 @@ type
     class function Garmin2Trip(const Garmin: TGarminModel): TTripModel;
     class function GarminFmtsDesc(const Garmin: TGarminModel): string;
     class function SupportsGarminFormat(const Garmin: TGarminModel; const Fmt: TGarminFmt): boolean;
-    class function ReadDeviceDB(const Garmin: TGarminModel): boolean;
+    class function ReadSettingsDB(const Garmin: TGarminModel): boolean;
     class function ReadVehicleDB(const Garmin: TGarminModel): boolean;
     class function ReadExploreDB(const Garmin: TGarminModel): boolean;
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
@@ -156,7 +156,7 @@ type
     TripModel:   TTripModel;
     Safe:        boolean;
     Displayable: boolean;
-    DevDB:       boolean;
+    SettingsDB:  boolean;
     VehicleDB:   boolean;
     ExploreDB:   boolean;
     GarminFmts:  string;
@@ -182,7 +182,7 @@ const
         TripModel: TTripModel.XT;
         Safe: true;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: true;
         GarminFmts: TripsGPXPOIFmts),
@@ -191,7 +191,7 @@ const
         TripModel: TTripModel.XT2;
         Safe: true;
         Displayable: true;
-        DevDB: true;
+        SettingsDB: true;
         VehicleDB: true;
         ExploreDB: true;
         GarminFmts: TripsGPXPOIFmts),
@@ -200,7 +200,7 @@ const
         TripModel: TTripModel.XT3;
         Safe: true;
         Displayable: true;
-        DevDB: true;
+        SettingsDB: true;
         VehicleDB: true;
         ExploreDB: true;
         GarminFmts: TripsGPXPOIFmts),
@@ -209,7 +209,7 @@ const
         TripModel: TTripModel.Tread2;
         Safe: true;
         Displayable: true;
-        DevDB: true;
+        SettingsDB: true;
         VehicleDB: true;
         ExploreDB: true;
         GarminFmts: TripsGPXPOIFmts),
@@ -218,7 +218,7 @@ const
         TripModel: TTripModel.Zumo346;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsFmts),
@@ -227,7 +227,7 @@ const
         TripModel: TTripModel.Zumo595;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsFmts),
@@ -236,7 +236,7 @@ const
         TripModel: TTripModel.Zumo590;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsFmts),
@@ -245,7 +245,7 @@ const
         TripModel: TTripModel.Zumo3x0;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsGPXPOIFmts),
@@ -254,7 +254,7 @@ const
         TripModel: TTripModel.Drive51;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsFmts),
@@ -263,7 +263,7 @@ const
         TripModel: TTripModel.Drive66;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsGPXPOIFmts),
@@ -272,7 +272,7 @@ const
         TripModel: TTripModel.Nuvi2595;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsGPXPOIFmts),
@@ -281,7 +281,7 @@ const
         TripModel: TTripModel.Nuvi2599_57;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsFmts),
@@ -290,7 +290,7 @@ const
         TripModel: TTripModel.Nuvi2599_57;
         Safe: false;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: TripsFmts),
@@ -298,7 +298,7 @@ const
         TripModel: TTripModel.Unknown;
         Safe: true;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: FitGPXFmts),
@@ -306,7 +306,7 @@ const
         TripModel: TTripModel.Unknown;
         Safe: true;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: FitGPXFmts),
@@ -314,7 +314,7 @@ const
         TripModel: TTripModel.Unknown;
         Safe: true;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
         GarminFmts: GPXPOIFmts),
@@ -322,7 +322,7 @@ const
         TripModel: TTripModel.Unknown;
         Safe: true;
         Displayable: true;
-        DevDB: false;
+        SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false)
   );
@@ -623,9 +623,9 @@ begin
   end;
 end;
 
-class function TModelConv.ReadDeviceDB(const Garmin: TGarminModel): boolean;
+class function TModelConv.ReadSettingsDB(const Garmin: TGarminModel): boolean;
 begin
-  result := Model_Tab[Garmin].DevDB;
+  result := Model_Tab[Garmin].SettingsDB;
 end;
 
 class function TModelConv.ReadVehicleDB(const Garmin: TGarminModel): boolean;
