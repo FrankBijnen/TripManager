@@ -238,6 +238,9 @@ type
     PopupDropped: TPopupMenu;
     MnuPostprocessDropped: TMenuItem;
     MnuSendToDropped: TMenuItem;
+    PopupDBMemo: TPopupMenu;
+    DbMemoSavetoFile: TMenuItem;
+    DBMemoFormatJSON: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -327,7 +330,6 @@ type
     procedure CmbSQliteTabsChange(Sender: TObject);
     procedure CdsDeviceDbAfterScroll(DataSet: TDataSet);
     procedure DbgDeviceDbColEnter(Sender: TObject);
-    procedure DBMemoDblClick(Sender: TObject);
     procedure BitBtnSQLGoClick(Sender: TObject);
     procedure MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ActInstalledDocExecute(Sender: TObject);
@@ -360,6 +362,8 @@ type
     procedure PnlTripGpiInfoDblClick(Sender: TObject);
     procedure MnuPostprocessDroppedClick(Sender: TObject);
     procedure MnuSendToDroppedClick(Sender: TObject);
+    procedure DbMemoSavetoFileClick(Sender: TObject);
+    procedure DBMemoFormatJSONClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -501,6 +505,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils, System.Generics.Collections,
+  System.JSON,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
   MsgLoop, UnitGarminDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
@@ -601,6 +606,7 @@ var
   Index: integer;
   TmpText: string;
 begin
+  DBMemo.PopupMenu := nil;
   if (Dataset.ControlsDisabled) then
     exit;
 
@@ -610,7 +616,7 @@ begin
     TmpText := Format('%sChars (Max. 1024):%s%s%s', [#10, #10, AField.DisplayText, #10]);
 
     B := AField.AsBytes;
-    TmpText := Format('Blob size: %d (Double Click to save to file)%sHex Dump:%s', [Length(B), TmpText, #10]);
+    TmpText := Format('Blob size: %d (Right Click for more options)%sHex Dump:%s', [Length(B), TmpText, #10]);
     for Index := 0 to Length(B) -1 do
     begin
       TmpText := TmpText + IntToHex(B[Index], 2);
@@ -618,20 +624,10 @@ begin
         TmpText := TmpText + ' ';
     end;
     DBMemo.Lines.Text := TmpText;
+    DBMemo.PopupMenu := PopupDBMemo;
   end
   else
     DBMemo.Lines.Text := Afield.DisplayText;
-end;
-
-procedure TFrmTripManager.DBMemoDblClick(Sender: TObject);
-var
-  AField: TField;
-begin
-  SaveBlob.InitialDir := ShellTreeView1.Path;
-  AField := CdsDeviceDb.FieldByName(DbgDeviceDb.Columns[DbgDeviceDb.Col -1].FieldName);
-  SaveBlob.FileName := Afield.FieldName;
-  if (SaveBlob.Execute) then
-    TFile.WriteAllBytes(SaveBlob.FileName, AField.AsBytes);
 end;
 
 procedure TFrmTripManager.CheckandFixcurrentgpx1Click(Sender: TObject);
@@ -1378,6 +1374,32 @@ begin
   else if (Assigned(ATripList) and
           (ATripList.ItemList.Count > 0)) then
     ATripList.SaveAsGPX(SaveTrip.FileName);
+end;
+
+procedure TFrmTripManager.DbMemoSavetoFileClick(Sender: TObject);
+var
+  AField: TField;
+begin
+  AField := CdsDeviceDb.FieldByName(DbgDeviceDb.Columns[DbgDeviceDb.Col -1].FieldName);
+  SaveBlob.InitialDir := ShellTreeView1.Path;
+  SaveBlob.FileName := AField.FieldName;
+  if (SaveBlob.Execute) then
+    TFile.WriteAllBytes(SaveBlob.FileName, AField.AsBytes);
+end;
+
+procedure TFrmTripManager.DBMemoFormatJSONClick(Sender: TObject);
+var
+  AField: TField;
+  JSONVAlue: TJSONValue;
+begin
+  AField := CdsDeviceDb.FieldByName(DbgDeviceDb.Columns[DbgDeviceDb.Col -1].FieldName);
+  JSONVAlue := TJSONObject.ParseJSONValue(AField.AsString);
+  try
+    if (Assigned(JSONVAlue)) then
+      DBMemo.Text := JSONVAlue.Format;
+  finally
+    JSONVAlue.Free;
+  end;
 end;
 
 procedure TFrmTripManager.CompareEploredbwithTrips1Click(Sender: TObject);

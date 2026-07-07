@@ -855,10 +855,10 @@ object FrmTripManager: TFrmTripManager
         Font.Name = 'Consolas'
         Font.Style = []
         ParentFont = False
+        PopupMenu = PopupDBMemo
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 2
-        OnDblClick = DBMemoDblClick
       end
     end
     object TsExplore: TTabSheet
@@ -3659,6 +3659,18 @@ object FrmTripManager: TFrmTripManager
     object MnuSendToDropped: TMenuItem
       Caption = 'Send To'
       OnClick = MnuSendToDroppedClick
+    end
+  end
+  object PopupDBMemo: TPopupMenu
+    Left = 685
+    Top = 667
+    object DbMemoSavetoFile: TMenuItem
+      Caption = 'Save to File'
+      OnClick = DbMemoSavetoFileClick
+    end
+    object DBMemoFormatJSON: TMenuItem
+      Caption = 'Format JSON'
+      OnClick = DBMemoFormatJSONClick
     end
   end
 end

@@ -39,7 +39,6 @@ type
 
   TGarminMTP_Device = class(TBase_Device)
   private
-    JSONObject: TJSONObject;
     procedure ExploreMetaDataCallBack(const JSONMetaData: string);
   public
     GarminDevice: TGarminDevice;
@@ -298,7 +297,6 @@ end;
 // Additional objects need to be created here.
 procedure TGarminMTP_Device.Init;
 begin
-  JSONObject := TJSONObject.Create;
   GarminDevice := TGarminDevice.Create;
   GarminDevice.Init;
 end;
@@ -307,7 +305,6 @@ destructor TGarminMTP_Device.Destroy;
 begin
   inherited Destroy;
   GarminDevice.Free;
-  JSONObject.Free;
 end;
 
 function TGarminMTP_Device.CopyFileToTmp(const AListItem: TListItem): string;
@@ -427,7 +424,7 @@ begin
   SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice) + '\' +
               Reg_VehicleProfileHashList + '\' ;
   try
-    JSONVAlue := JSONObject.ParseJSONValue(JSONMetaData);
+    JSONVAlue := TJSONObject.ParseJSONValue(JSONMetaData);
     try
       JSONProfile := JSONVAlue.FindValue('VehicleProfileData');
       JSONGuid := JSONProfile.FindValue('VehicleProfileGuid').GetValue<string>;
