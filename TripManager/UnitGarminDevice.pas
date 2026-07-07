@@ -43,7 +43,6 @@ type
     procedure ExploreMetaDataCallBack(const JSONMetaData: string);
   public
     GarminDevice: TGarminDevice;
-    constructor Create; virtual;
     procedure Init; override;
     destructor Destroy; override;
     function CopyFileToTmp(const AListItem: TListItem): string;
@@ -296,14 +295,10 @@ begin
   end;
 end;
 
-constructor TGarminMTP_Device.Create;
-begin
-  inherited Create;
-  JSONObject := TJSONObject.Create;
-end;
-
+// Additional objects need to be created here.
 procedure TGarminMTP_Device.Init;
 begin
+  JSONObject := TJSONObject.Create;
   GarminDevice := TGarminDevice.Create;
   GarminDevice.Init;
 end;
