@@ -241,6 +241,7 @@ type
     PopupDBMemo: TPopupMenu;
     DbMemoSavetoFile: TMenuItem;
     DBMemoFormatJSON: TMenuItem;
+    PnlHideGrid: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -364,6 +365,7 @@ type
     procedure MnuSendToDroppedClick(Sender: TObject);
     procedure DbMemoSavetoFileClick(Sender: TObject);
     procedure DBMemoFormatJSONClick(Sender: TObject);
+    procedure PnlHideGridClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -1690,6 +1692,20 @@ begin
     PostProcessClick(BtnPostProcess);
 end;
 
+procedure TFrmTripManager.PnlHideGridClick(Sender: TObject);
+begin
+  if (PCTTripInfo.Width < TvTrip.Width + VSplitterTree_Grid.Width + VlTripInfo.Width) then
+  begin
+    PnlHideGrid.Caption := '<';
+    PCTTripInfo.Width := TvTrip.Width + VSplitterTree_Grid.Width + VlTripInfo.Width;
+  end
+  else
+  begin
+    PnlHideGrid.Caption := '>';
+    PCTTripInfo.Width := TvTrip.Width;
+  end;
+end;
+
 procedure TFrmTripManager.PctHexOsmChange(Sender: TObject);
 begin
   ReAlignEdgeBrowser;
@@ -1708,10 +1724,7 @@ end;
 
 procedure TFrmTripManager.PnlTripGpiInfoDblClick(Sender: TObject);
 begin
-  if (PCTTripInfo.Width < TvTrip.Width + VSplitterTree_Grid.Width + VlTripInfo.Width) then
-    PCTTripInfo.Width := TvTrip.Width + VSplitterTree_Grid.Width + VlTripInfo.Width
-  else
-    PCTTripInfo.Width := TvTrip.Width;
+  PnlHideGridClick(Sender);
 end;
 
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
@@ -3820,6 +3833,13 @@ var
                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3),
                                                    AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) ));
 
+    VlTripInfo.Strings.AddPair('Unknown3 Bounds', Format('%s', [AnUdbhandle.GetBounds]),
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Cardinal) * 4,
+                                                   AnUdbhandle.OffsetValue + LUnknown2 +
+                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
+                                                     AnUdbhandle.BoundsOffset[0]));
+
     VlTripInfo.Strings.AddPair('Unknown3 dist', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal),
@@ -3833,6 +3853,21 @@ var
                                                    AnUdbhandle.OffsetValue + LUnknown2 +
                                                      OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
                                                      AnUdbhandle.TimeOffset));
+
+    VlTripInfo.Strings.AddPair('Unknown3 9 Floats', AnUdbhandle.NineFloats,
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Single) * 9,
+                                                   AnUdbhandle.OffsetValue + LUnknown2 +
+                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
+                                                     AnUdbhandle.FloatOffset));
+
+    if (AnUdbhandle.MagicOffset <> 0) then
+      VlTripInfo.Strings.AddPair('Unknown3 Magic', Format('0x%s', [IntToHex(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.MagicOffset), 8)]),
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     SizeOf(Cardinal),
+                                                     AnUdbhandle.OffsetValue + LUnknown2 +
+                                                       OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
+                                                       IntPtr(AnUdbhandle.MagicOffset)));
 
     if (AnUdbhandle.ShapeOffset <> 0) then
       VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', DupeString('-', DupeCount),

@@ -887,15 +887,22 @@ type
     procedure EndWrite(AStream: TMemoryStream); override;
     function ComputeUnknown3Size(AModel: TTripModel): integer;
     function GetModel: TTripModel;
+    function GetBounds1: string;
+    function GetBounds2: string;
     function GetDistOffset: integer;
     function GetTimeOffset: integer;
     function GetShapeOffset: integer;
+    function GetMagicOffset: integer;
+    function GetBoundsOffset(Index: Integer): integer;
+    function GetFloatOffset: integer;
   public
     constructor Create(AHandleId: Cardinal;
                        AModel: TTripModel = TTripModel.Unknown;
                        ForceRecalc: boolean = true); reintroduce;
     destructor Destroy; override;
     procedure Add(AnUdbDir: TUdbDir);
+    function GetBounds: string;
+    function NineFloats: string;
     property HandleId: Cardinal read FUdbHandleId;
     property PrefValue: TUdbPrefValue read FUdbPrefValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
@@ -903,6 +910,9 @@ type
     property DistOffset: integer read GetDistOffset;
     property TimeOffset: integer read GetTimeOffset;
     property ShapeOffset: integer read GetShapeOffset;
+    property MagicOffset: integer read GetMagicOffset;
+    property BoundsOffset[Index: Integer]: integer read GetBoundsOffset;
+    property FloatOffset: integer read GetFloatOffset;
     property Trailer: TBytes read FTrailer;
   end;
   TUdbHandleList = Tlist<TmUdbDataHndl>;
@@ -3917,6 +3927,66 @@ begin
   result := TripList.TripFileVersion.Unknown3ShapeOffset;
 end;
 
+function TmUdbDataHndl.GetMagicOffset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3MagicOffset;
+end;
+
+function TmUdbDataHndl.GetBoundsOffset(Index: Integer): integer;
+begin
+  case TripList.TripFileVersion.Major of
+    1: result := 2 + (Index * SizeOf(Cardinal));
+  else
+    result := 4 + (Index * SizeOf(Cardinal));
+  end
+end;
+
+function TmUdbDataHndl.GetFloatOffset: integer;
+begin
+  case TripList.TripFileVersion.Minor of
+    1, 4: result := 12 + GetTimeOffset
+  else
+    result := 8 + GetTimeOffset;
+  end
+end;
+
+function TmUdbDataHndl.GetBounds1: string;
+begin
+  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
+                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
+end;
+
+function TmUdbDataHndl.GetBounds2: string;
+begin
+  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[2])),
+                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])));
+end;
+
+function TmUdbDataHndl.GetBounds: string;
+begin
+  result := Format('%s, %s', [GetBounds2, GetBounds1]);
+end;
+
+function TmUdbDataHndl.NineFloats: string;
+var
+  TmpFloats: array[0..8] of single;
+  Index: Integer;
+  Fmt: string;
+begin
+  result := '';
+  if (Length(FValue.Unknown3) < FloatOffset + SizeOf(TmpFloats)) then
+    exit;
+
+  CopyMemory(@TmpFloats[0], @FValue.Unknown3[FloatOffset], SizeOf(TmpFloats));
+  Fmt := '%1.6f';
+  for Index := Low(TmpFloats) to High(TmpFloats) do
+  begin
+    result := result + Format(Fmt, [TmpFloats[Index]]);
+    if (Index = Low(TmpFloats)) then
+      Fmt := ', ' + Fmt;
+  end;
+end;
+
 {*** AllRoutesList ***}
 procedure TmAllRoutesValue.SwapCardinals;
 begin
@@ -3958,7 +4028,9 @@ begin
   begin
     // Allow a trailer for the Zumo 3x0, 590 and nuvi 2595
     if (Diff < 0) or
-       (Diff > SizeOf(TUdbDirFixedValue)) then
+       (Diff > (SizeOf(TUdbDirFixedValue) +
+                TripList.TripFileVersion.Unknown2Size) +
+                UdbDirNameSize[AModel]) then
     exit(TTripModel.Unknown);
   end;
 

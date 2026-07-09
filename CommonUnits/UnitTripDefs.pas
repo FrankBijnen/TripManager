@@ -99,6 +99,7 @@ type
     function IsUcs4: boolean;
     function Unknown2Size: integer;
     function UdbDirUnknown2Size: integer;
+    function Unknown3MagicOffset: cardinal;
     function Unknown3ShapeOffset: cardinal;
     function Unknown3DistOffset: cardinal;
     function Unknown3TimeOffset: cardinal;
@@ -212,7 +213,7 @@ const
        32 * 2,              // Drive 51
       121 * 4,              // Drive 66
        21 * 2,              // Nuvi 2595
-       32 * 2,              // Nuvi 57
+       32 * 2,              // Nuvi 2599_57
             0);             // Unknown
 
   // Keep 0 for model Unknown
@@ -228,7 +229,7 @@ const
        294,                 // Drive 51
       1348,                 // Drive 66
        134,                 // Nuvi 2595
-       258,                 // Nuvi 57
+       258,                 // Nuvi 2599_57
          0);                // Unknown
 
   // The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
@@ -244,7 +245,7 @@ const
       $0170feff,            // Drive 51
       $0574feff,            // Drive 66
       CalcUndef,            // Nuvi 2595
-      CalcUndef,            // Nuvi 57
+      CalcUndef,            // Nuvi 2599_57
       CalcNA);              // Unknown
 
   ScPosnSize: array[TTripModel] of integer = (
@@ -259,7 +260,7 @@ const
       PosnNorm,             // Drive 51
       PosnNorm,             // Drive 66
       PosnSmall,            // Nuvi 2595
-      PosnNorm,             // Nuvi 57
+      PosnNorm,             // Nuvi 2599_57
       PosnSmall);           // Unknown
 
   // The Zumo 3x0 and Nuvi 2595 need recreating .System\Trips
@@ -276,7 +277,7 @@ const
       false,                // Drive 51
       false,                // Drive 66
       true,                 // Nuvi 2595
-      false,                // Nuvi 57
+      false,                // Nuvi 2599_57
       false);               // Unknown
 
   // Only seen on the nuvi 2595.
@@ -292,7 +293,7 @@ const
       false,                // Drive 51
       false,                // Drive 66
       true,                 // Nuvi 2595
-      false,                // Nuvi 57
+      false,                // Nuvi 2599_57
       false);               // Unknown
 
   // Need mParentTripId and mParentTripName.
@@ -309,7 +310,7 @@ const
       true,                 // Drive 51
       true,                 // Drive 66
       false,                // Nuvi 2595
-      false,                // Nuvi 57
+      false,                // Nuvi 2599_57
       false);               // Unknown
 
   // The trip version defines many parameters. See record TTripVersion
@@ -325,7 +326,7 @@ const
       (Major:1; Minor: 6),  // Drive 51
       (Major:4; Minor: 9),  // Drive 66
       (Major:1; Minor: 1),  // Nuvi 2595
-      (Major:1; Minor: 4),  // Nuvi 57
+      (Major:1; Minor: 4),  // Nuvi 2599_57
       (Major:0; Minor: 0)); // Unknown
 
   // False TmRoutePreference has dtByte (1)
@@ -342,7 +343,7 @@ const
       false,                // Drive 51
       false,                // Drive 66
       true,                 // Nuvi 2595
-      false,                // Nuvi 57
+      false,                // Nuvi 2599_57
       false);               // Unknown
 
   CalcModesSuppported: array[TTripModel] of set of TCalcMode = (
@@ -373,7 +374,7 @@ const
     [tmAutoMotive],                                         // Drive 51
     [tmAutoMotive],                                         // Drive 66
     [tmAutoMotive,      tmPedestrian],                      // Nuvi 2595
-    [tmAutoMotive],                                         // Nuvi 57
+    [tmAutoMotive],                                         // Nuvi 2599_57
     []                                                      // Unknown
   );
 
@@ -437,6 +438,27 @@ begin
   if (Major = 1) and
      (Minor < 3) then
     result := 16;
+end;
+
+//todo
+function TTripVersion.Unknown3MagicOffset: cardinal;
+begin
+  result := 0;
+  case (Major) of
+    1:begin
+        if (Minor < 2) then
+          result := $00    // Nuvi 2595
+        else if (Minor < 4) then
+          result := $56    // 590, 3x0
+        else if (Minor < 5) then
+          result := $5a   // Nuvi 2599_57
+        else
+          result := $56;  // 346, 595 (NOK), Drive 51 (NOK)
+      end;
+    4:begin
+        result := $58;    // XT, XT2, XT3, Tread2, Drive 66
+      end;
+  end;
 end;
 
 function TTripVersion.Unknown3ShapeOffset: cardinal;

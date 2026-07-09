@@ -1021,6 +1021,20 @@ object FrmTripManager: TFrmTripManager
         TabOrder = 2
         StyleElements = [seBorder]
         OnDblClick = PnlTripGpiInfoDblClick
+        object PnlHideGrid: TPanel
+          Left = 591
+          Top = 1
+          Width = 20
+          Height = 20
+          Align = alRight
+          BevelOuter = bvNone
+          Caption = '<'
+          Color = clGradientActiveCaption
+          ParentBackground = False
+          TabOrder = 0
+          OnClick = PnlHideGridClick
+          ExplicitLeft = 595
+        end
       end
       object TvTrip: TTreeView
         Left = 0
@@ -1113,6 +1127,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1348
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1120,7 +1135,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []
