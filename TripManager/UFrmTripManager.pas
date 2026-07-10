@@ -5580,11 +5580,14 @@ end;
 procedure TFrmTripManager.ReadSettings;
 var
   ModelIndex: integer;
+  SubKey: string;
 begin
-  TSetProcessOptions.CheckSymbolsDir;
-
   TModelConv.SetupKnownDevices;
   ModelIndex := TModelConv.GetCurrentDevice;
+  SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+
+  TSetProcessOptions.CheckSymbolsDir(Reg_GPISymbolSize, SubKey);
+
   if (Assigned(CurrentDevice)) then
     GuessModel(CurrentDevice.DisplayedDevice)
   else

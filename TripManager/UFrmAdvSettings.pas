@@ -83,7 +83,7 @@ implementation
 uses
   System.UITypes, System.StrUtils, System.Math,
   UnitStringUtils, UnitRegistry, UnitRegistryKeys, UnitModelConv, UnitProcessOptions,
-  UnitTripDefs, UnitGeoCode, UnitOSMMap,
+  UnitGpxDefs, UnitTripDefs, UnitGpi, UnitGeoCode, UnitOSMMap,
   UFrmVehProfiles;
 
 {$R *.dfm}
@@ -242,13 +242,6 @@ begin
     AddGridLine(GridDeviceSettings,   CurRow, Reg_FuncGpiShpPt,
                                       'False',
                                       'Add Shaping points from route');
-    AddGridLine(GridDeviceSettings,   CurRow, Reg_GPISymbolSize,
-                                      '80x80',
-                                      'Size of symbols (24x24, 48x48 or 80x80)');
-    AddGridLine(GridDeviceSettings,   CurRow, Reg_GPIProximity,
-                                      '500',
-                                      'Default proximity for alerts in meters');
-
     GridDeviceSettings.RowCount := CurRow;
 
     AddGridHeader(GridDeviceSettings);
@@ -260,34 +253,53 @@ end;
 
 procedure TFrmAdvSettings.LoadSettings_Zumo;
 var
+  CurrentDevice: integer;
   CurRow: integer;
   SubKey: string;
+  GarminModel: TGarminModel;
 begin
   GridZumoSettings.OnModified := GridModified;
   GridZumoSettings.RowCount := GridZumoSettings.FixedRows +1;
   GridZumoSettings.BeginUpdate;
   try
-
-    SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice);
-
+    CurrentDevice := TModelConv.GetCurrentDevice;
+    SubKey := TModelConv.GetDefaultDevice(CurrentDevice);
+    GarminModel := TModelConv.Display2Garmin(CurrentDevice);
     CurRow := 1;
 
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating trips-');
+    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating POI''s-');
+    AddGridLine(GridZumoSettings, CurRow, SubKey + '\' + Reg_GPISymbolSize,
+                                            TModelConv.DefGpiSymbolSize(CurrentDevice),
+                                            'Size of symbols (24x24, 48x48 or 80x80)');
+    AddGridLine(GridZumoSettings, CurRow, SubKey + '\' + Reg_GPIProximity,
+                                            DefGpiProximity,
+                                            'Default proximity for alerts in meters');
     AddGridLine(GridZumoSettings, CurRow,   '', '');
-    AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
-    AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
-                                            'True',
-                                            'Group trips from the same GPX');
-    AddGridLine(GridZumoSettings, CurRow,   '', '');
-    if (TModelConv.ReadSettingsDB(TModelConv.Display2Garmin(TModelConv.GetCurrentDevice))) then
+
+    if (SupportsGrouping[TModelConv.Display2Trip(CurrentDevice)]) then
+    begin
+      AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT1 trips-');
+      AddGridLine(GridZumoSettings, CurRow,   Reg_AllowGrouping,
+                                              'True',
+                                              'Group trips from the same GPX');
+      AddGridLine(GridZumoSettings, CurRow,   '', '');
+    end;
+
+    if (TModelConv.ReadSettingsDB(GarminModel)) or
+       (TModelConv.ReadVehicleDB(GarminModel)) then
     begin
       AddGridLine(GridZumoSettings, CurRow,   '', '', '-Defaults for creating XT2/XT3 trips-');
+    end;
+
+    if (TModelConv.ReadSettingsDB(GarminModel)) then
+    begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
                                               '',
                                               'Date: ');
       AddGridLine(GridZumoSettings, CurRow,   '', '');
     end;
-    if (TModelConv.ReadVehicleDB(TModelConv.Display2Garmin(TModelConv.GetCurrentDevice))) then
+
+    if (TModelConv.ReadVehicleDB(GarminModel)) then
     begin
       AddGridLine(GridZumoSettings, CurRow,   Reg_LoadActiveProfile,
                                               'True', 'Load active profile automatically');
@@ -565,6 +577,8 @@ begin
 end;
 
 procedure TFrmAdvSettings.SaveSettings;
+var
+  SubKey: string;
 begin
   SaveGrid(GridGeneralSettings);
   SaveGrid(GridDeviceSettings);
@@ -573,9 +587,11 @@ begin
   SaveGrid(GridTripOverview);
   SaveGrid(GridGeoCodeSettings);
 
-  TSetProcessOptions.CheckSymbolsDir;
+  SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice);
+  TSetProcessOptions.CheckSymbolsDir(Reg_GPISymbolSize, SubKey);
   if (GetRegistry(Reg_ValidGpiSymbols, false) = false) then
-    MessageDlg(Format('Selected symbol size: (%s) is not installed.%sGPI functions disabled.', [GetRegistry(Reg_GPISymbolSize, ''), #10]),
+    MessageDlg(Format('Selected symbol size: (%s) is not installed.%sGPI functions disabled.',
+                     [GetRegistry(Reg_GPISymbolSize, '', SubKey), #10]),
                TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
 
   SetRegistry(Reg_AddressFormat, ReplaceAll(MemoAddressFormat.Lines.Text, [#13#10], ['|'], [rfReplaceAll]));

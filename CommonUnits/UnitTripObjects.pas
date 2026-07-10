@@ -992,7 +992,7 @@ type
     procedure AddLocation_nuvi2595(const Locations: TmLocations;
                                    const Location2Add: TLocation2Add);
     procedure AddLocation_nuvi2599_57(const Locations: TmLocations;
-                                 const Location2Add: TLocation2Add);
+                                      const Location2Add: TLocation2Add);
     procedure CreateTemplate_XT(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT3(const TripName, CalculationMode, TransportMode: string);
@@ -1031,7 +1031,7 @@ type
     function OSMRoutePoint(RoutePointId: integer): TOSMRoutePoint;
     function GetArrival: TmArrival;
     procedure CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
-    procedure AddLocation(const Location2Add: TLocation2Add); overload;
+    procedure AddLocation(const Locations: TmLocations; const Location2Add: TLocation2Add); overload;
     procedure SetSegmentRoutePrefs(Locations: TmLocations; ProcessOptions: TObject);
     function GetSegmentInclRoads(var Popular: boolean;
                                   var Scenic: boolean;
@@ -5078,7 +5078,7 @@ begin
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
   Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
@@ -5100,7 +5100,7 @@ begin
     Locations.Add(TmIsDFSPoint.Create);
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT2]));
+    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
     Locations.Add(TmAddress.Create(Location2Add.Address));
     Locations.Add(TmIsTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
@@ -5126,7 +5126,7 @@ begin
     Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.XT3]));
+    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
     Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
     Locations.Add(TmAddress.Create(Location2Add.Address));
     Locations.Add(TmName.Create(Location2Add.Name));
@@ -5150,7 +5150,7 @@ begin
     Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Tread2]));
+    Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
     Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
     Locations.Add(TmAddress.Create(Location2Add.Address));
     Locations.Add(TmName.Create(Location2Add.Name));
@@ -5168,7 +5168,7 @@ begin
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo346]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
   Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
@@ -5179,7 +5179,7 @@ procedure TTripList.AddLocation_Zumo595(const Locations: TmLocations;
                                         const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo595]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
@@ -5199,7 +5199,7 @@ begin
   Locations.Add(TmIsDFSPoint.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo590]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmShaping.Create(Location2Add.RoutePoint <> TRoutePoint.rpVia));
 end;
 
@@ -5210,7 +5210,7 @@ begin
   Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Drive51]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
   Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
@@ -5225,7 +5225,7 @@ begin
   Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Drive66]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmAddress.Create(Location2Add.Address));
   Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
@@ -5241,7 +5241,7 @@ begin
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Zumo3x0]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
   Locations.Add(TmShaping.Create(Location2Add.RoutePoint <> TRoutePoint.rpVia));
 end;
 
@@ -5254,11 +5254,11 @@ begin
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
   Locations.Add(TmPhoneNumber.Create(''));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi2595]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
 end;
 
 procedure TTripList.AddLocation_nuvi2599_57(const Locations: TmLocations;
-                                       const Location2Add: TLocation2Add);
+                                            const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create(Location2Add.RoutePref));
   Locations.Add(TmAddress.Create(Location2Add.Address));
@@ -5266,15 +5266,12 @@ begin
   Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
   Locations.Add(TmDuration.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
-  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TTripModel.Nuvi2599_57]));
+  Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
 end;
 
-procedure TTripList.AddLocation(const Location2Add: TLocation2Add);
-var
-  Locations: TmLocations;
+procedure TTripList.AddLocation(const Locations: TmLocations; const Location2Add: TLocation2Add);
 begin
-  Locations := GetItem(TmLocations.GetKey) as TmLocations;
-  case Location2Add.TripModel of
+  case TripModel of
     TTripModel.XT:
       AddLocation_XT(Locations, Location2Add);
     TTripModel.XT2:
@@ -5841,7 +5838,7 @@ begin
   if not Assigned(AnUdbHandle) then
     exit;
 
-  // Need at least this sequence:
+  // Need at least 4 UdbDir's. This is the minimal sequence:
   // Route point 03
   // 2116 Start segment
   // 'Some other udbdir'
@@ -5959,9 +5956,6 @@ begin
   Add(TmVersionNumber.Create(TripFileVersion));
   Add(TmAllRoutes.Create);
   Add(TmTripName.Create(TripName));
-
-  // Create Dummy AllRoutes, to force recalc on the XT. Just an entry for every Via.
-  ForceRecalc(TTripModel.XT, 2);
 end;
 
 procedure TTripList.CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
@@ -6014,9 +6008,6 @@ begin
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmLocations.Create);
-
-    // Create dummy AllRoutes, and complete RoutePreferences
-    ForceRecalc(TTripModel.XT2, 2);
   finally
     TmpStream.Free;
     ProcessOptions.Free;
@@ -6077,9 +6068,6 @@ begin
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmVersionNumber.Create(TripFileVersion));
-
-    // Create dummy AllRoutes, and complete RoutePreferences
-    ForceRecalc(TTripModel.XT3, 2);
   finally
     TmpStream.Free;
     ProcessOptions.Free;
@@ -6136,9 +6124,6 @@ begin
     Add(TmTripName.Create(TripName));
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmVersionNumber.Create(TripFileVersion));
-
-    // Create dummy AllRoutes, and complete RoutePreferences
-    ForceRecalc(TTripModel.Tread2, 2);
   finally
     TmpStream.Free;
     ProcessOptions.Free;
@@ -6167,9 +6152,6 @@ begin
   Add(TmPartOfSplitRoute.Create);
   Add(TmTotalTripDistance.Create);
   Add(TmAllRoutes.Create);
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Zumo346, 2);
 end;
 
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
@@ -6195,9 +6177,6 @@ begin
   Add(TmVersionNumber.Create(TripFileVersion));
   Add(TmIsRoundTrip.Create);
   Add(TmOptimized.Create);
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Zumo595, 2);
 end;
 
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
@@ -6214,9 +6193,6 @@ begin
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Zumo590, 2);
 end;
 
 procedure TTripList.CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
@@ -6240,9 +6216,6 @@ begin
   Add(TmVersionNumber.Create(TripFileVersion));
   Add(TmAllRoutes.Create);
   Add(TmTripName.Create(TripName));
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Drive51, 2);
 end;
 
 procedure TTripList.CreateTemplate_Drive66(const TripName, CalculationMode, TransportMode: string);
@@ -6276,9 +6249,6 @@ begin
     Add(TmVersionNumber.Create(TripFileVersion));
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmTripName.Create(TripName));
-
-    // Create dummy AllRoutes, and complete RoutePreferences
-    ForceRecalc(TTripModel.Drive66, 2);
   finally
     TmpStream.Free;
     ProcessOptions.Free;
@@ -6297,9 +6267,6 @@ begin
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Zumo3x0, 2);
 end;
 
 procedure TTripList.CreateTemplate_nuvi2595(const TripName, CalculationMode, TransportMode: string);
@@ -6312,9 +6279,6 @@ begin
   Add(TmLocations.Create);
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Nuvi2595, 2);
 end;
 
 procedure TTripList.CreateTemplate_nuvi2599_57(const TripName, CalculationMode, TransportMode: string);
@@ -6329,9 +6293,6 @@ begin
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
-
-  // Create Dummy AllRoutes, to force recalc on the Zumo. Just an entry for every Via.
-  ForceRecalc(TTripModel.Nuvi2599_57, 2);
 end;
 
 procedure TTripList.CreateTemplate(const TripName: string;
@@ -6367,6 +6328,9 @@ begin
     else
       raise exception.Create('Create template. Model not supported');
   end;
+
+  // Create dummy AllRoutes, and complete RoutePreferences
+  ForceRecalc(TripModel, 2);
 end;
 
 procedure TTripList.Trip2XmlRte(Rte: TObject);

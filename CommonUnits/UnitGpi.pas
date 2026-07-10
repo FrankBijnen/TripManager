@@ -12,14 +12,15 @@ const
   GpiName                     = 'my.gpi';
   GpiVersion: Word            = 0;
   DefTransparentColor: DWORD  = $00ff00ff;
+  GpiLargeSymbols             = '80x80';
+  GpiMediumSymbols            = '48x48';
+  GpiSmallSymbols             = '24x24';
   DefGpiSymbolsDir            = 'Symbols\';
-  DefGpiSmallSymbolsDir       = DefGpiSymbolsDir + '24x24\';
-  Reg_GPISymbolSize           = 'GPISymbolsSize';
-  Reg_GPIProximity            = 'GPIProximity';
+  DefGpiSmallSymbolsDir       = DefGpiSymbolsDir + GpiSmallSymbols + '\';
+  DefGpiProximity             = '1000';  // Meter
   GPIExtension                = '.gpi';
   GPIMask                     = '*' + GPIExtension;
   UnlExtension                = '.unl';
-  DefLocale                   = 'EN';
 
 type
   TGPXString = UTF8String;
@@ -447,6 +448,7 @@ uses
 
 const
   Coord_Decimals = '%1.6f';
+  DefLocale      = 'EN';
 
 var
   FormatSettings: TFormatSettings;
@@ -1522,7 +1524,6 @@ begin
     end;
     Bitmaps.Free;
 
-//todo handle dups
     for AGPXMedia in Medias do
     begin
       if (AGPXMedia.Mp3Dup = true) or

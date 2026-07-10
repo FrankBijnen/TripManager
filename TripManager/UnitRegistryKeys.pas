@@ -9,6 +9,7 @@ uses
 const
   Reg_GPISymbolSize               = 'GPISymbolsSize';
   Reg_GPIProximity                = 'GPIProximity';
+
   Reg_TrackColor                  = 'TrackColor';         // User preferred track color
   Reg_MinDistTrackPoints          = 'MinDistTrackPoints'; // Used to filter trackpoints
   Reg_MinTimeTrackPoints          = 'MinTimeTrackPoints'; // Used to auto create waypoints from stops
@@ -142,7 +143,7 @@ type
     procedure SavePrefs(Sender: TObject);
     class procedure SetPrefs(TvSelections: TObject);
     class function StorePrefs(TvSelections: TObject): TGPXFuncArray;
-    class procedure CheckSymbolsDir;
+    class procedure CheckSymbolsDir(const RegKey, SubKey: string);
   end;
 
 var
@@ -220,8 +221,10 @@ begin
     AdvInclPopular := GetRegistry(Reg_AdvInclPopular, false, SubKey);
 
     // GPI defaults
-    GpiSymbolsDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '80x80'));
-    DefaultProximityStr := GetRegistry(Reg_GPIProximity, '500');
+    GpiSymbolsDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(
+                        ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir +
+                        GetRegistry(Reg_GPISymbolSize, TModelConv.DefGpiSymbolSize(TModelConv.GetCurrentDevice) , SubKey));
+    DefaultProximityStr := GetRegistry(Reg_GPIProximity, DefGpiProximity, SubKey);
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
     MinShapeDist := GetRegistry(Reg_MinShapeDist_Key, Reg_MinShapeDist_Val);
 
@@ -442,11 +445,11 @@ begin
   end;
 end;
 
-class procedure TSetProcessOptions.CheckSymbolsDir;
+class procedure TSetProcessOptions.CheckSymbolsDir(const RegKey, SubKey: string);
 var
   SymbolsDir: string;
 begin
-  SymbolsDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(Reg_GPISymbolSize, '');
+  SymbolsDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir + GetRegistry(RegKey, '', Subkey);
   SetRegistry(Reg_ValidGpiSymbols, DirectoryExists(SymbolsDir));
 end;
 

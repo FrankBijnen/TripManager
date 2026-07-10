@@ -402,7 +402,6 @@ begin
     while not CdsRoutePoints.Eof do
     begin
       Location2Add := Default(TLocation2Add);
-      Location2Add.TripModel := TTripList(FTripList).TripModel;
       if (CdsRoutePointsViaPoint.AsBoolean) or
          (CdsRoutePoints.RecNo = 1) or
          (CdsRoutePoints.RecNo = CdsRoutePoints.RecordCount) then
@@ -416,7 +415,7 @@ begin
       Location2Add.DepartureDate  := 0;
       Location2Add.Name           := CdsRoutePointsName.AsString;
       Location2Add.Address        := CdsRoutePointsAddress.AsString;
-      TTripList(FTripList).AddLocation(Location2Add);
+      TTripList(FTripList).AddLocation(Locations, Location2Add);
 
       CdsRoutePoints.Next;
     end;

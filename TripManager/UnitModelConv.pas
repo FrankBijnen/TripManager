@@ -133,6 +133,7 @@ type
     class function ReadSettingsDB(const Garmin: TGarminModel): boolean;
     class function ReadVehicleDB(const Garmin: TGarminModel): boolean;
     class function ReadExploreDB(const Garmin: TGarminModel): boolean;
+    class function DefGpiSymbolSize(const CmbIndex: integer): string;
     class function SafeModel2Write(const TripModel: TTripModel): boolean;
     class function SafeGarminModel(const Garmin: TGarminModel): boolean;
     class function DisplayableGarminModel(const Garmin: TGarminModel): boolean;
@@ -147,19 +148,20 @@ implementation
 uses
   System.StrUtils, System.Masks, System.Types,
   UnitVerySimpleXml, UnitStringUtils,
-  UnitProcessOptions, UnitRegistry, UnitRegistryKeys;
+  UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitGpi;
 
 type
   TGarminModel_Rec = record
-    DeviceName:  string;
-    PartNumber:  string;
-    TripModel:   TTripModel;
-    Safe:        boolean;
-    Displayable: boolean;
-    SettingsDB:  boolean;
-    VehicleDB:   boolean;
-    ExploreDB:   boolean;
-    GarminFmts:  string;
+    DeviceName:     string;
+    PartNumber:     string;
+    TripModel:      TTripModel;
+    Safe:           boolean;
+    Displayable:    boolean;
+    SettingsDB:     boolean;
+    VehicleDB:      boolean;
+    ExploreDB:      boolean;
+    GarminFmts:     string;
+    DefSymbolSize:  string;
   end;
   TGarminFmts = (gfTripsGPXPOI, gfTrips, gfFitGPX, gfGPXPOI);
 
@@ -185,7 +187,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: true;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiLargeSymbols),
     (DeviceName: XT2_Name;
         PartNumber: XT2_PartNumber;
         TripModel: TTripModel.XT2;
@@ -194,7 +197,8 @@ const
         SettingsDB: true;
         VehicleDB: true;
         ExploreDB: true;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiLargeSymbols),
     (DeviceName: XT3_Name;
         PartNumber: XT3_PartNumber;
         TripModel: TTripModel.XT3;
@@ -203,7 +207,8 @@ const
         SettingsDB: true;
         VehicleDB: true;
         ExploreDB: true;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiLargeSymbols),
     (DeviceName: Tread2_Name;
         PartNumber: Tread2_PartNumber;
         TripModel: TTripModel.Tread2;
@@ -212,7 +217,8 @@ const
         SettingsDB: true;
         VehicleDB: true;
         ExploreDB: true;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiLargeSymbols),
     (DeviceName: Zumo346_Name;
         PartNumber: Zumo346_PartNumber;
         TripModel: TTripModel.Zumo346;
@@ -221,7 +227,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsFmts),
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo595_Name;
         PartNumber: Zumo595_PartNumber;
         TripModel: TTripModel.Zumo595;
@@ -230,7 +237,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsFmts),
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo590_Name;
         PartNumber: Zumo590_PartNumber;
         TripModel: TTripModel.Zumo590;
@@ -239,7 +247,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsFmts),
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo3x0_Name;
         PartNumber: Zumo3x0_PartNumber;
         TripModel: TTripModel.Zumo3x0;
@@ -248,7 +257,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Drive51_Name;
         PartNumber: Drive51_PartNumber;
         TripModel: TTripModel.Drive51;
@@ -257,7 +267,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsFmts),
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Drive66_Name;
         PartNumber: Drive66_PartNumber;
         TripModel: TTripModel.Drive66;
@@ -266,7 +277,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Nuvi2595_Name;
         PartNumber: Nuvi2595_PartNumber;
         TripModel: TTripModel.Nuvi2595;
@@ -275,7 +287,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsGPXPOIFmts),
+        GarminFmts: TripsGPXPOIFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Nuvi2599_Name;
         PartNumber: Nuvi2599_PartNumber;
         TripModel: TTripModel.Nuvi2599_57;
@@ -284,7 +297,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsFmts),
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Nuvi57_Name;
         PartNumber: Nuvi57_PartNumber;
         TripModel: TTripModel.Nuvi2599_57;
@@ -293,7 +307,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: TripsFmts),
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Edge_Name;
         TripModel: TTripModel.Unknown;
         Safe: true;
@@ -317,7 +332,8 @@ const
         SettingsDB: false;
         VehicleDB: false;
         ExploreDB: false;
-        GarminFmts: GPXPOIFmts),
+        GarminFmts: GPXPOIFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Unknown_Name;
         TripModel: TTripModel.Unknown;
         Safe: true;
@@ -636,6 +652,11 @@ end;
 class function TModelConv.ReadExploreDB(const Garmin: TGarminModel): boolean;
 begin
   result := Model_Tab[Garmin].ExploreDB;
+end;
+
+class function TModelConv.DefGpiSymbolSize(const CmbIndex: integer): string;
+begin
+  result := Model_Tab[Display2Garmin(CmbIndex)].DefSymbolSize;
 end;
 
 class function TModelConv.SafeModel2Write(const TripModel: TTripModel): boolean;

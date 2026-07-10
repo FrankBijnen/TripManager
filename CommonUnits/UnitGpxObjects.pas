@@ -2748,8 +2748,6 @@ begin
   for RtePtNode in RtePts do
   begin
     Location2Add := Default(TLocation2Add); // RoutePref and AdvLevel are sensible defaults
-    Location2Add.TripModel := ProcessOptions.TripModel;
-
     Inc(PointCnt);
     Location2Add.AdvLevel := TAdvlevel.advNA;
     if (ProcessOptions.TripOption in [TTripOption.ttTripTrack]) then
@@ -2816,7 +2814,7 @@ begin
       Location2Add.DepartureDate := 0;
 
     // Have all we need. Create location
-    FTripList.AddLocation(Location2Add);
+    FTripList.AddLocation(Locations, Location2Add);
   end;
 end;
 

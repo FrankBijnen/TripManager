@@ -83,7 +83,6 @@ type
   end;
 
   TLocation2Add = record
-    TripModel: TTripModel;
     RoutePoint: TRoutePoint;
     RoutePref: TRoutePreference;
     AdvLevel: TAdvlevel;
@@ -440,7 +439,7 @@ begin
     result := 16;
 end;
 
-//todo
+//TODO. Not always in Trip files
 function TTripVersion.Unknown3MagicOffset: cardinal;
 begin
   result := 0;
