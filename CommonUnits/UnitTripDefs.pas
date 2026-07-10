@@ -511,13 +511,17 @@ end;
 
 function TTripVersion.Unknown3FloatOffset: integer;
 begin
-  result := 0;
   case (Version) of
-    1, 4:
-        result := $22; //$16 + $0c;
-    6:  result := $1e; //$16 + $08;
-    7, 9, 16:
-        result := $20; //$18 + $08;
+    1:
+        result := $22; // Nuvi 2595
+    2,3:
+        result := $1e; // 590, 3x0
+    4:
+        result := $22; // Nuvi 2599_57
+    5..6:
+        result := $1e; // 346, 595, Drive 51
+    else
+        result := $20; // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 

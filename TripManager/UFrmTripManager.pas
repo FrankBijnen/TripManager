@@ -3840,7 +3840,7 @@ var
                                                      OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
                                                      AnUdbhandle.BoundsOffset[0]));
 
-    VlTripInfo.Strings.AddPair('Unknown3 dist', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset)]),
+    VlTripInfo.Strings.AddPair('Unknown3 Distance', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal),
                                                    AnUdbhandle.OffsetValue + LUnknown2 +
