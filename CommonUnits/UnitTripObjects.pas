@@ -135,16 +135,16 @@ type
 
   // Type 08 (Version)
   TVersionValue = packed record
-    Major:            Cardinal;
+    Size:             Cardinal;
     case boolean of
     false:
-      (MinorB:        byte);
+      (VersionB:      byte);
     true:
-      (MinorC:        Cardinal);
+      (VersionC:      Cardinal);
   end;
   TmVersionNumber = class(TBaseDataItem)
   private
-    FValue:            TVersionValue;
+    FValue:           TVersionValue;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
   public
@@ -887,8 +887,8 @@ type
     procedure EndWrite(AStream: TMemoryStream); override;
     function ComputeUnknown3Size(AModel: TTripModel): integer;
     function GetModel: TTripModel;
-    function GetBounds1: string;
-    function GetBounds2: string;
+    function GetBoundsMin: string;
+    function GetBoundsMax: string;
     function GetDistOffset: integer;
     function GetTimeOffset: integer;
     function GetShapeOffset: integer;
@@ -1645,18 +1645,18 @@ end;
 {*** Version ***}
 constructor TmVersionNumber.Create(ATripVersion: TTripVersion);
 begin
-  case ATripVersion.Major of
+  case ATripVersion.Size of
     1:
       begin
-        inherited Create(GetKey, SizeOf(FValue.Major) + SizeOf(FValue.MinorB), dtVersion);
-        FValue.Major  := Swap32(ATripVersion.Major);
-        FValue.MinorB := ATripVersion.Minor;
+        inherited Create(GetKey, SizeOf(FValue.Size) + SizeOf(FValue.VersionB), dtVersion);
+        FValue.Size     := Swap32(ATripVersion.Size);
+        FValue.VersionB := ATripVersion.Version;
       end
     else
     begin
       inherited Create(GetKey, SizeOf(FValue), dtVersion);
-      FValue.Major  := Swap32(ATripVersion.Major);
-      FValue.MinorC := ATripVersion.Minor;
+      FValue.Size     := Swap32(ATripVersion.Size);
+      FValue.VersionC := ATripVersion.Version;
     end;
   end;
 end;
@@ -1664,11 +1664,11 @@ end;
 procedure TmVersionNumber.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
-  AStream.Read(FValue.Major, SizeOf(FValue.Major));
-  if (ALenValue = SizeOf(FValue.Major) + SizeOf(FValue.MinorB)) then
-    AStream.Read(FValue.MinorB, SizeOf(FValue.MinorB))
+  AStream.Read(FValue.Size, SizeOf(FValue.Size));
+  if (ALenValue = SizeOf(FValue.Size) + SizeOf(FValue.VersionB)) then
+    AStream.Read(FValue.VersionB, SizeOf(FValue.VersionB))
   else
-    AStream.Read(FValue.MinorC, SizeOf(FValue.MinorC));
+    AStream.Read(FValue.VersionC, SizeOf(FValue.VersionC));
 end;
 
 destructor TmVersionNumber.Destroy;
@@ -1678,19 +1678,19 @@ end;
 
 procedure TmVersionNumber.WriteValue(AStream: TMemoryStream);
 begin
-  AStream.Write(FValue.Major, SizeOf(FValue.Major));
-  if (FLenValue = SizeOf(FValue.Major) + SizeOf(FValue.MinorB)) then
-    AStream.Write(FValue.MinorB, SizeOf(FValue.MinorB))
+  AStream.Write(FValue.Size, SizeOf(FValue.Size));
+  if (FLenValue = SizeOf(FValue.Size) + SizeOf(FValue.VersionB)) then
+    AStream.Write(FValue.VersionB, SizeOf(FValue.VersionB))
   else
-    AStream.Write(FValue.MinorC, SizeOf(FValue.MinorC));
+    AStream.Write(FValue.VersionC, SizeOf(FValue.VersionC));
 end;
 
 function TmVersionNumber.GetValue: string;
 begin
-  if (FLenValue = SizeOf(FValue.Major) + SizeOf(FValue.MinorB)) then
-    result := Format('0x%s / 0x%s', [IntToHex(FValue.Major, 8), IntToHex(FValue.MinorB, 2)])
+  if (FLenValue = SizeOf(FValue.Size) + SizeOf(FValue.VersionB)) then
+    result := Format('0x%s / 0x%s', [IntToHex(FValue.Size, 8), IntToHex(FValue.VersionB, 2)])
   else
-    result := Format('0x%s / 0x%s', [IntToHex(FValue.Major, 8), IntToHex(FValue.MinorC, 8)]);
+    result := Format('0x%s / 0x%s', [IntToHex(FValue.Size, 8), IntToHex(FValue.VersionC, 8)]);
 end;
 
 {*** ScPosn ***}
@@ -3934,29 +3934,21 @@ end;
 
 function TmUdbDataHndl.GetBoundsOffset(Index: Integer): integer;
 begin
-  case TripList.TripFileVersion.Major of
-    1: result := 2 + (Index * SizeOf(Cardinal));
-  else
-    result := 4 + (Index * SizeOf(Cardinal));
-  end
+  result := TripList.TripFileVersion.Unknown3BoundsOffset + (Index * SizeOf(Cardinal));
 end;
 
 function TmUdbDataHndl.GetFloatOffset: integer;
 begin
-  case TripList.TripFileVersion.Minor of
-    1, 4: result := 12 + GetTimeOffset
-  else
-    result := 8 + GetTimeOffset;
-  end
+  result := TripList.TripFileVersion.Unknown3FloatOffset;
 end;
 
-function TmUdbDataHndl.GetBounds1: string;
+function TmUdbDataHndl.GetBoundsMin: string;
 begin
   result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
                             CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
 end;
 
-function TmUdbDataHndl.GetBounds2: string;
+function TmUdbDataHndl.GetBoundsMax: string;
 begin
   result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[2])),
                             CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])));
@@ -3964,7 +3956,7 @@ end;
 
 function TmUdbDataHndl.GetBounds: string;
 begin
-  result := Format('%s, %s', [GetBounds2, GetBounds1]);
+  result := Format('%s, %s', [GetBoundsMax, GetBoundsMin]);
 end;
 
 function TmUdbDataHndl.NineFloats: string;
@@ -4549,8 +4541,8 @@ begin
   if not Assigned(mVersionNumber) then
     exit;
   try
-    FTripFileVersion.Major := Swap32(mVersionNumber.FValue.Major);
-    FTripFileVersion.Minor := mVersionNumber.FValue.MinorB;
+    FTripFileVersion.Size     := Swap32(mVersionNumber.FValue.Size);
+    FTripFileVersion.Version  := mVersionNumber.FValue.VersionB;
   finally
     mVersionNumber.Free;
   end;

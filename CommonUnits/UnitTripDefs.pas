@@ -93,15 +93,17 @@ type
   end;
 
   TTripVersion = packed record
-    Major: Cardinal;
-    Minor: Cardinal;
+    Size: Cardinal;
+    Version: Cardinal;
     function IsUcs4: boolean;
     function Unknown2Size: integer;
     function UdbDirUnknown2Size: integer;
-    function Unknown3MagicOffset: cardinal;
-    function Unknown3ShapeOffset: cardinal;
-    function Unknown3DistOffset: cardinal;
-    function Unknown3TimeOffset: cardinal;
+    function Unknown3BoundsOffset: integer;
+    function Unknown3MagicOffset: integer;
+    function Unknown3ShapeOffset: integer;
+    function Unknown3DistOffset: integer;
+    function Unknown3TimeOffset: integer;
+    function Unknown3FloatOffset: integer;
     function HandleTrailer: boolean;
     function CanCheckSystemTrips: boolean;
   end;
@@ -314,19 +316,19 @@ const
 
   // The trip version defines many parameters. See record TTripVersion
   TripVersion: array[TTripModel] of TTripVersion = (
-      (Major:4; Minor: 7),  // XT
-      (Major:4; Minor:16),  // XT2
-      (Major:4; Minor:16),  // XT3
-      (Major:4; Minor:16),  // Tread 2
-      (Major:1; Minor: 6),  // Zumo 346
-      (Major:1; Minor: 6),  // Zumo 595
-      (Major:1; Minor: 3),  // Zumo 590
-      (Major:1; Minor: 3),  // Zumo 3x0
-      (Major:1; Minor: 6),  // Drive 51
-      (Major:4; Minor: 9),  // Drive 66
-      (Major:1; Minor: 1),  // Nuvi 2595
-      (Major:1; Minor: 4),  // Nuvi 2599_57
-      (Major:0; Minor: 0)); // Unknown
+      (Size:4; Version: 7),  // XT
+      (Size:4; Version:16),  // XT2
+      (Size:4; Version:16),  // XT3
+      (Size:4; Version:16),  // Tread 2
+      (Size:1; Version: 6),  // Zumo 346
+      (Size:1; Version: 6),  // Zumo 595
+      (Size:1; Version: 3),  // Zumo 590
+      (Size:1; Version: 3),  // Zumo 3x0
+      (Size:1; Version: 6),  // Drive 51
+      (Size:4; Version: 9),  // Drive 66
+      (Size:1; Version: 1),  // Nuvi 2595
+      (Size:1; Version: 4),  // Nuvi 2599_57
+      (Size:0; Version: 0)); // Unknown
 
   // False TmRoutePreference has dtByte (1)
   // True  TmRoutePreference has dtWordRoutePref (8)
@@ -414,101 +416,129 @@ end;
 
 function TTripVersion.IsUcs4: boolean;
 begin
-  result := (Major >= 4);
+  case (Version) of
+    1..6:
+      result := false;
+    else
+      result := true;
+  end;
 end;
 
 function TTripVersion.Unknown2Size: integer;
 begin
-  result := 0;    // Dummy value
-  case (Major) of
-   1: begin
-        if (Minor < 5) then
-          result := 72
-        else
-          result := 76;
-      end;
-   4: result := 150;
+  case (Version) of
+    1..4:
+      result := 72;
+    5..6:
+      result := 76;
+    else
+      result := 150;
   end;
 end;
 
 function TTripVersion.UdbDirUnknown2Size: integer;
 begin
-  result := 18;
-  if (Major = 1) and
-     (Minor < 3) then
-    result := 16;
+  case (Version) of
+    1..2:
+      result := 16;
+    else
+      result := 18;
+  end;
+end;
+
+function TTripVersion.Unknown3BoundsOffset: integer;
+begin
+  case (Version) of
+    1..6:
+      result := $02;
+    else
+      result := $04;
+  end;
 end;
 
 //TODO. Not always in Trip files
-function TTripVersion.Unknown3MagicOffset: cardinal;
+function TTripVersion.Unknown3MagicOffset: integer;
 begin
-  result := 0;
-  case (Major) of
-    1:begin
-        if (Minor < 2) then
-          result := $00    // Nuvi 2595
-        else if (Minor < 4) then
-          result := $56    // 590, 3x0
-        else if (Minor < 5) then
-          result := $5a   // Nuvi 2599_57
-        else
-          result := $56;  // 346, 595 (NOK), Drive 51 (NOK)
-      end;
-    4:begin
-        result := $58;    // XT, XT2, XT3, Tread2, Drive 66
-      end;
+  case (Version) of
+    1:
+      result := $00;  // Nuvi 2595
+    2..3:
+      result := $56;  // 590, 3x0
+    4:
+      result := $5a;  // Nuvi 2599_57
+    5..6:
+      result := $56;  // 346, 595, Drive 51
+    else
+      result := $58;  // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
-function TTripVersion.Unknown3ShapeOffset: cardinal;
+function TTripVersion.Unknown3ShapeOffset: integer;
 begin
-  result := 0;
-  case (Major) of
-    1:begin
-        if (Minor < 4) then
-          result := $66
-        else if (Minor < 5) then
-          result := $6a
-        else
-          result := $8e;
-      end;
-    4:begin
-        if (Minor < 9) then
-          result := $90
-        else
-          result := $c0;
-      end;
+  case (Version) of
+    1..3:
+      result := $66;
+    4:
+      result := $6a;
+    5..6:
+      result := $8e;
+    7..8:
+      result := $90;
+    else
+      result := $c0;
   end;
 end;
 
-function TTripVersion.Unknown3DistOffset: cardinal;
+function TTripVersion.Unknown3DistOffset: integer;
 begin
-  result := 0;
-  case (Major) of
-    1: result := $12;
-    4: result := $14;
+  case (Version) of
+    1..6:
+      result := $12;
+    else
+      result := $14;
   end;
 end;
 
-function TTripVersion.Unknown3TimeOffset: cardinal;
+function TTripVersion.Unknown3TimeOffset: integer;
+begin
+  case (Version) of
+    1..6:
+      result := $16;
+    else
+      result := $18;
+  end;
+end;
+
+function TTripVersion.Unknown3FloatOffset: integer;
 begin
   result := 0;
-  case (Major) of
-    1: result := $16;
-    4: result := $18;
+  case (Version) of
+    1, 4:
+        result := $22; //$16 + $0c;
+    6:  result := $1e; //$16 + $08;
+    7, 9, 16:
+        result := $20; //$18 + $08;
   end;
 end;
 
 function TTripVersion.HandleTrailer: boolean;
 begin
-  result := false;
-  if (Major <= 1) then // Haven't see trailers for all Major=1 devices. But shouldn't hurt.
-    result := true;
+  case (Version) of
+    1..6:
+      result := true; // Haven't see trailers for all these devices. But shouldn't hurt.
+    else
+      result := false;
+  end;
 end;
 
 function TTripVersion.CanCheckSystemTrips: boolean;
 begin
-  result := (Major >= 4);
+  case (Version) of
+    1..6:
+      result := false;
+    else
+      result := true;
+  end;
 end;
 
 function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): string;
