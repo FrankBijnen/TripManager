@@ -154,6 +154,7 @@ const
     (($2, $3, $0, $1, $6, $7, $4, $5, $a, $b, $8, $9, $e, $f, $c, $d),   //Bike, Metric
      ($e, $f, $c, $d, $a, $b, $8, $9, $6, $7, $4, $5, $2, $3, $0, $1))   //Bike, Imperial
     );
+
 implementation
 
 uses
@@ -199,11 +200,18 @@ begin
 
   // Only 2, or 3 Wheels for Bikes
   // 2WD, or 4WD for Cars
-  if not (TTraction(Traction) in [TTraction.tr3Wheels,        // 3 Wheels Bike
-                                  TTraction.tr2Wheels,        // 2 Wheels Bike
-                                  TTraction.tr2WD,            // 2WD      Car
-                                  TTraction.tr4WD]) then      // 4WD      Car
-    exit;
+  case (TVehicleTruckType(Truck_Type)) of
+    TVehicleTruckType.ttMotorCycle:
+      if not (TTraction(Traction) in [TTraction.tr2Wheels,        // 2 Wheels Bike
+                                      TTraction.tr3Wheels]) then  // 3 Wheels Bike
+        exit;
+    TVehicleTruckType.ttCar:
+      if not (TTraction(Traction) in [TTraction.tr2WD,            // 2WD      Car
+                                      TTraction.tr4WD]) then      // 4WD      Car
+        exit;
+    else
+      exit;
+  end;
 
   // Check width
   if (Width < Min_Width) then

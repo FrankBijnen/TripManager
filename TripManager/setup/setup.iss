@@ -325,6 +325,7 @@ begin
   RegDeleteValue(HKCU, RegKey, 'VehicleCalcMethod');
   RegDeleteValue(HKCU, RegKey, 'VehicleEnvironmental');
   RegDeleteValue(HKCU, RegKey, 'VehicleTraction');
-  RegDeleteValue(HKCU, RegKey, 'VehicleLegality');
-
+  RegDeleteValue(HKCU, RegKey, 'GPISymbolsSize');
+  RegDeleteValue(HKCU, RegKey, 'GPIProximity');
+ 
 end;
