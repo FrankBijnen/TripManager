@@ -9,6 +9,9 @@
         <Projects Include="hhcfix.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="ModelParams.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,17 +38,32 @@
     <Target Name="hhcfix:Make">
         <MSBuild Projects="hhcfix.dproj" Targets="Make"/>
     </Target>
+    <Target Name="ModelParams">
+        <MSBuild Projects="ModelParams.dproj"/>
+    </Target>
+    <Target Name="ModelParams:Clean">
+        <MSBuild Projects="ModelParams.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ModelParams:Make">
+        <MSBuild Projects="ModelParams.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="TripManager;hhcfix"/>
+        <CallTarget Targets="TripManager;hhcfix;ModelParams"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="TripManager:Clean;hhcfix:Clean"/>
+        <CallTarget Targets="TripManager:Clean;hhcfix:Clean;ModelParams:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="TripManager:Make;hhcfix:Make"/>
+        <CallTarget Targets="TripManager:Make;hhcfix:Make;ModelParams:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
     <ItemGroup Condition="'$(BuildGroup)'=='Release'">
+        <BuildGroupProject Include="ModelParams.dproj">
+            <ProjectGuid>{C579987A-B229-4AB6-A0F7-6BE234CBAB5F}</ProjectGuid>
+            <Configurations>Debug</Configurations>
+            <Platforms>Win32</Platforms>
+            <Enabled>False</Enabled>
+        </BuildGroupProject>
         <BuildGroupProject Include="TripManager.dproj">
             <ProjectGuid>{095A6A79-F6E2-4031-A167-AA991F0F7BA5}</ProjectGuid>
             <Configurations>Release</Configurations>
