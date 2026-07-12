@@ -874,6 +874,9 @@ type
     procedure AllocUnknown(AModel: TTripModel = TTripModel.Unknown);
     procedure UpdateUnknown3(const Offset: integer; const Value: Cardinal);
     function GetUnknown3(const Offset: integer): Cardinal;
+    function GetAvoidances(const Offset: integer): string;
+    function GetShapeBitMapLen(const Offset: integer): integer;
+    function GetShapeBitMap(const Offset: integer): string;
   end;
   TmUdbDataHndl = class(TBaseDataItem)
   private
@@ -893,6 +896,7 @@ type
     function GetTimeOffset: integer;
     function GetShapeOffset: integer;
     function GetMagicOffset: integer;
+    function GetAvoidancesOffset: integer;
     function GetBoundsOffset(Index: Integer): integer;
     function GetFloatOffset: integer;
   public
@@ -911,6 +915,7 @@ type
     property TimeOffset: integer read GetTimeOffset;
     property ShapeOffset: integer read GetShapeOffset;
     property MagicOffset: integer read GetMagicOffset;
+    property AvoidancesOffset: integer read GetAvoidancesOffset;
     property BoundsOffset[Index: Integer]: integer read GetBoundsOffset;
     property FloatOffset: integer read GetFloatOffset;
     property Trailer: TBytes read FTrailer;
@@ -3786,6 +3791,57 @@ begin
   result := PUpdVal^;
 end;
 
+function TUdbHandleValue.GetAvoidances(const Offset: integer): string;
+var
+  Avoidances: byte;
+  Avoidance: integer;
+begin
+  result := '';
+  try
+    Avoidances := Unknown3[Offset];
+    if ((Avoidances and Ord(avValid)) = 0) then
+      exit;
+
+    for Avoidance := Low(AvoidanceMap) to High(AvoidanceMap) do
+    begin
+      if ((Avoidances and AvoidanceMap[Avoidance].Value) = AvoidanceMap[Avoidance].Value) then
+      begin
+        if (result <> '') then
+          result := result + ', ';
+        result := result + AvoidanceMap[Avoidance].Name;
+      end;
+    end;
+
+  finally
+    if (result = '') then
+      result := DupeString('-', 10);
+  end;
+end;
+
+function TUdbHandleValue.GetShapeBitMapLen(const Offset: integer): integer;
+var
+  Index: integer;
+begin
+  result := 0;
+  Index := Offset;
+  while ((Index + SizeOf(byte)) < Length(Self.Unknown3)) do
+  begin
+    Inc(Index);
+    if (Unknown3[Index] = 0) then
+      exit(Index - Offset);
+  end;
+end;
+
+function TUdbHandleValue.GetShapeBitMap(const Offset: integer): string;
+var
+  Len: integer;
+begin
+  Len := GetShapeBitMapLen(Offset);
+  SetLength(result, Len * 2);
+  BinToHex(Unknown3[Offset], PChar(result), Len);
+  result := '0x' + result;
+end;
+
 constructor TmUdbDataHndl.Create(AHandleId: Cardinal;
                                  AModel: TTripModel = TTripModel.Unknown;
                                  ForceRecalc: boolean = true);
@@ -3930,6 +3986,11 @@ end;
 function TmUdbDataHndl.GetMagicOffset: integer;
 begin
   result := TripList.TripFileVersion.Unknown3MagicOffset;
+end;
+
+function TmUdbDataHndl.GetAvoidancesOffset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3MagicOffset + SizeOf(Cardinal);
 end;
 
 function TmUdbDataHndl.GetBoundsOffset(Index: Integer): integer;

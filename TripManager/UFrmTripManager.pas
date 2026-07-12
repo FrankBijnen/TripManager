@@ -3766,7 +3766,7 @@ var
   procedure AddUdbHandle(AnUdbhandle: TmUdbDataHndl);
   var
     ANitem: TBaseItem;
-    OffSetPref, LUnknown2: integer;
+    Unknown3Offset, OffSetPref, LUnknown2: integer;
   begin
     OffSetPref := - SizeOf(AnUdbhandle.PrefValue);
     VlTripInfo.Strings.AddPair('*** UdbPrefix', DupeString('-', DupeCount),
@@ -3828,56 +3828,52 @@ var
     VlTripInfo.Strings.AddPair('UdbDir count', Format('%d', [AnUdbhandle.UdbHandleValue.UDbDirCount]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(AnUdbhandle.UdbHandleValue.UDbDirCount),
-                                                   AnUdbhandle.OffsetValue + LUnknown2+ OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.UDbDirCount) ));
+                                                   AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.UDbDirCount) ));
 
+    Unknown3Offset := AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3);
     VlTripInfo.Strings.AddPair('Unknown3', Format('%d bytes', [Length(AnUdbhandle.UdbHandleValue.Unknown3)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3),
-                                                   AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) ));
+                                                   Unknown3Offset));
 
     VlTripInfo.Strings.AddPair('Unknown3 Bounds', Format('%s', [AnUdbhandle.GetBounds]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal) * 4,
-                                                   AnUdbhandle.OffsetValue + LUnknown2 +
-                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     AnUdbhandle.BoundsOffset[0]));
+                                                   Unknown3Offset + AnUdbhandle.BoundsOffset[0]));
 
     VlTripInfo.Strings.AddPair('Unknown3 Distance', Format('%d (meters)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal),
-                                                   AnUdbhandle.OffsetValue + LUnknown2 +
-                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     AnUdbhandle.DistOffset));
+                                                   Unknown3Offset + AnUdbhandle.DistOffset));
 
     VlTripInfo.Strings.AddPair('Unknown3 Time', Format('%d (seconds)', [AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal),
-                                                   AnUdbhandle.OffsetValue + LUnknown2 +
-                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     AnUdbhandle.TimeOffset));
+                                                   Unknown3Offset + AnUdbhandle.TimeOffset));
 
     VlTripInfo.Strings.AddPair('Unknown3 9 Floats', AnUdbhandle.NineFloats,
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Single) * 9,
-                                                   AnUdbhandle.OffsetValue + LUnknown2 +
-                                                     OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                     AnUdbhandle.FloatOffset));
+                                                   Unknown3Offset + AnUdbhandle.FloatOffset));
 
     if (AnUdbhandle.MagicOffset <> 0) then
+    begin
       VlTripInfo.Strings.AddPair('Unknown3 Magic', Format('0x%s', [IntToHex(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.MagicOffset), 8)]),
                                  TGridSelItem.Create(AnUdbhandle,
                                                      SizeOf(Cardinal),
-                                                     AnUdbhandle.OffsetValue + LUnknown2 +
-                                                       OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                       IntPtr(AnUdbhandle.MagicOffset)));
+                                                     Unknown3Offset + AnUdbhandle.MagicOffset));
 
-    if (AnUdbhandle.ShapeOffset <> 0) then
-      VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', DupeString('-', DupeCount),
+      VlTripInfo.Strings.AddPair('Unknown3 Avoidances', Format('%s', [AnUdbhandle.UdbHandleValue.GetAvoidances(AnUdbhandle.AvoidancesOffset)]),
                                  TGridSelItem.Create(AnUdbhandle,
                                                      SizeOf(Byte),
-                                                     AnUdbhandle.OffsetValue + LUnknown2 +
-                                                       OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3) +
-                                                       IntPtr(AnUdbhandle.ShapeOffset)));
+                                                     Unknown3Offset + AnUdbhandle.AvoidancesOffset));
+    end;
+
+    if (AnUdbhandle.ShapeOffset <> 0) then
+      VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', AnUdbhandle.UdbHandleValue.GetShapeBitmap(AnUdbhandle.ShapeOffset),
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     AnUdbhandle.UdbHandleValue.GetShapeBitmapLen(AnUdbhandle.ShapeOffset),
+                                                     Unknown3Offset + AnUdbhandle.ShapeOffset));
     for ANitem in AnUdbhandle.Items do
     begin
       if (ANitem is TUdbDir) then
