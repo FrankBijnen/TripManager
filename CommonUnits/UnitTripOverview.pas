@@ -201,7 +201,7 @@ begin
                           ATripInfo.Description,
                           ATripInfo.Coords,
                           DisplaySpeed(ATripInfo),
-                          Format('%f', [ATripInfo.Distance]),
+                          Format('%.3f', [ATripInfo.Distance]),
                           Format('%f', [ATripInfo.Time])]);
           Writer.WriteLine(Lst.DelimitedText);
 

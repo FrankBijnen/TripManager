@@ -2227,6 +2227,10 @@ end;
 
 procedure TFrmTripManager.FormShow(Sender: TObject);
 begin
+  if (PCTTripInfo.Width = TvTrip.Width) then
+    PnlHideGrid.Caption := '>'
+  else
+    PnlHideGrid.Caption := '<';
   PCTTripInfo.ActivePageIndex := 0;
   PctHexOsm.ActivePageIndex := 1;
   ReAlignEdgeBrowser;
