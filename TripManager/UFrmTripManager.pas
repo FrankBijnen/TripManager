@@ -242,6 +242,7 @@ type
     DbMemoSavetoFile: TMenuItem;
     DBMemoFormatJSON: TMenuItem;
     PnlHideGrid: TPanel;
+    ResetAvoidancesUpdProfile: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -366,6 +367,7 @@ type
     procedure DbMemoSavetoFileClick(Sender: TObject);
     procedure DBMemoFormatJSONClick(Sender: TObject);
     procedure PnlHideGridClick(Sender: TObject);
+    procedure ResetAvoidancesUpdProfileClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -4635,6 +4637,91 @@ begin
     end;
     PostReloadFileList;
   finally
+    SetCursor(CrNormal);
+  end;
+end;
+
+procedure TFrmTripManager.ResetAvoidancesUpdProfileClick(Sender: TObject);
+var
+  TripFileName: string;
+  AnItem: TListItem;
+  ABase_Data: TBase_Data;
+  TmpTripList: TTripList;
+  ProcessOptions: TProcessOptions;
+  mAvoidancesChanged: TmAvoidancesChanged;
+  mAvoidancesChangedTimeAtSave: TmAvoidancesChangedTimeAtSave;
+  mVehicleProfileTruckType: TmVehicleProfileTruckType;
+  mVehicleProfileName: TmVehicleProfileName;
+  mVehicleProfileHash: TmVehicleProfileHash;
+  mVehicleId: TmVehicleId;
+  mVehicleProfileGuid: TmVehicleProfileGuid;
+  CrWait, CrNormal: HCURSOR;
+begin
+  if (LstFiles.Selected = nil) then
+    exit;
+
+  CrWait := LoadCursor(0, IDC_WAIT);
+  CrNormal := SetCursor(CrWait);
+  ProcessOptions := TProcessOptions.Create;
+  try
+    TmpTripList := TTripList.Create;
+    try
+      for AnItem in LstFiles.Items do
+      begin
+        if (AnItem.Selected = false) then
+          continue;
+        ABase_Data := TBase_Data(AnItem.Data);
+        if (ABase_Data.IsFolder) then
+          continue;
+
+        // Get current trip name
+        TripFileName := IncludeTrailingPathDelimiter(CreatedTempPath) + AnItem.Caption;
+
+        // reload trip, and reset AvoidancesChanged
+        TmpTripList.LoadFromFile(TripFilename);
+
+        // Reset avoidances
+        mAvoidancesChanged := TmpTripList.GetItem(TmAvoidancesChanged.GetKey) as TmAvoidancesChanged;
+        if (mAvoidancesChanged <> nil) then
+          mAvoidancesChanged.AsBoolean := false;
+
+        mAvoidancesChangedTimeAtSave := TmpTripList.GetItem(TmAvoidancesChangedTimeAtSave.GetKey) as TmAvoidancesChangedTimeAtSave;
+        if (mAvoidancesChangedTimeAtSave <> nil) then
+          mAvoidancesChangedTimeAtSave.AsCardinal := ProcessOptions.AvoidancesChangedTimeAtSave;
+
+        // Reset Vehicle Prrofile
+        mVehicleProfileTruckType := TmpTripList.GetItem(TmVehicleProfileTruckType.GetKey) as TmVehicleProfileTruckType;
+        if (mVehicleProfileTruckType <> nil) then
+          mVehicleProfileTruckType.AsByte := ProcessOptions.VehicleProfileTruckType;
+
+        mVehicleProfileName := TmpTripList.GetItem(TmVehicleProfileName.GetKey) as TmVehicleProfileName;
+        if (mVehicleProfileName <> nil) then
+          mVehicleProfileName.AsString := ProcessOptions.VehicleProfileName;
+
+        mVehicleProfileHash := TmpTripList.GetItem(TmVehicleProfileHash.GetKey) as TmVehicleProfileHash;
+        if (mVehicleProfileHash <> nil) then
+          mVehicleProfileHash.AsCardinal := ProcessOptions.VehicleProfileHash;
+
+        mVehicleId := TmpTripList.GetItem(TmVehicleId.GetKey) as TmVehicleId;
+        if (mVehicleId <> nil) then
+          mVehicleId.AsCardinal := ProcessOptions.VehicleId;
+
+        mVehicleProfileGuid := TmpTripList.GetItem(TmVehicleProfileGuid.GetKey) as TmVehicleProfileGuid;
+        if (mVehicleProfileGuid <> nil) then
+          mVehicleProfileGuid.AsString := ProcessOptions.VehicleProfileGuid;
+
+        // Save to tmp
+        TmpTripList.SaveToFile(TripFilename);
+
+        // Write to dev
+        CopyFileFromTmp(TripFilename, AnItem);
+      end;
+    finally
+      TmpTripList.Free;
+    end;
+    PostReloadFileList;
+  finally
+    ProcessOptions.Free;
     SetCursor(CrNormal);
   end;
 end;

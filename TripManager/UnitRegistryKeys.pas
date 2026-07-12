@@ -213,7 +213,7 @@ begin
     VehicleId := GetRegistry(Reg_VehicleId, DEF_VehicleId, SubKey);
     VehicleProfileTruckType := GetRegistry(Reg_VehicleProfileTruckType, DEF_VehicleProfileTruckType, SubKey);
     VehicleProfileName := GetRegistry(Reg_VehicleProfileName, DEF_VehicleProfileName, SubKey);
-    AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, ''), 3),
+    AvoidancesChangedTimeAtSave := StrToIntDef('$' + Copy(GetRegistry(Reg_AvoidancesChangedTimeAtSave, '', SubKey), 3),
                                                                       TUnixDateConv.DateTimeAsCardinal(IncYear(Now, -1)));
     DefAdvLevel := TAdvLevel(GetRegistry(Reg_DefAdvLevel, Ord(TAdvlevel.advLevel2), SubKey) -1);
     AdvInclHills := GetRegistry(Reg_AdvInclHills, true, SubKey);

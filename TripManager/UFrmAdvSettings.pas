@@ -293,7 +293,7 @@ begin
 
     if (TModelConv.ReadSettingsDB(GarminModel)) then
     begin
-      AddGridLine(GridZumoSettings, CurRow,   Reg_AvoidancesChangedTimeAtSave,
+      AddGridLine(GridZumoSettings, CurRow,   SubKey + '\' + Reg_AvoidancesChangedTimeAtSave,
                                               '',
                                               'Date: ');
       AddGridLine(GridZumoSettings, CurRow,   '', '');

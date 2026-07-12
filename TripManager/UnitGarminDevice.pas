@@ -478,7 +478,7 @@ begin
   // Copy settings.db, Update Avoidances changed
   if (TModelConv.ReadSettingsDB(GarminModel)) and
      (CopyDeviceFile(DBPath, SettingsDb, GetDeviceTmp)) then
-    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb));
+    SetRegistry(Reg_AvoidancesChangedTimeAtSave, GetAvoidancesChanged(GetDeviceTmp + SettingsDb), SubKey);
 
   // Copy explore.db
   // Get ProfileHashes from explore.db
