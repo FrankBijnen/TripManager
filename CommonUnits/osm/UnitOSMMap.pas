@@ -26,6 +26,9 @@ type TMapTilerLayer = record
 end;
 
 const
+  Track_Width       = '5';
+  Bounds_Width      = '2';
+  Bounds_Color      = 'Black';
   Coord_Decimals    = 6;
   Place_Decimals    = 4;
   OSMCtrlClick      = 'Ctrl Click';
@@ -149,10 +152,12 @@ begin
   Html.Add('var POILayer;');
   Html.Add('var allpoints;');       // Needed for CreateExtent
   Html.Add('var routepoints;');     // All route points
+  Html.Add('var TrackLayer;');
   Html.Add('var trackpoints;');     // Trackpoints
   Html.Add('var poipoints;');       // All POIs
   Html.Add('var timeoutId = null;');
   Html.Add('var popup = null;');
+  Html.Add('var boundsbounds;');
   Html.Add('var style;');
   Html.Add('var defTileSize;');     // Default tileSize = (256, 256)
 
@@ -258,7 +263,9 @@ begin
   Html.Add('     RtePts = new Array();');
   Html.Add('     RoutePointsLayer = new Array();');
   Html.Add('     POILayer = new Array();');
+  Html.Add('     TrackLayer = new Array();');
   Html.Add('     poipoints = new Array();');
+  Html.Add('     boundsbounds = new Array();');
   Html.Add('');
   Html.Add('     AddTrackPoints();');
   Html.Add('     CreateExtent(map.getNumZoomLevels() * 0.66);');
@@ -288,8 +295,8 @@ begin
   Html.Add('     allpoints = allpoints.concat(poipoints);');
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(allpoints);');
   Html.Add('     allpoints = new Array();'); // Remove from memory
-  Html.Add('     var bounds = new OpenLayers.Bounds();');
   Html.Add('     line_string.calculateBounds();');
+  Html.Add('     var bounds = new OpenLayers.Bounds();');
   Html.Add('     bounds.extend(line_string.bounds);');
   Html.Add('     map.zoomToExtent(bounds);');
   Html.Add('     if (map.getZoom() > MaxZoomLevel){');
@@ -311,6 +318,12 @@ begin
 
   Html.Add('  function RemovePopup(){');
   Html.Add('     if (popup) { map.removePopup(popup); popup = null};');
+  Html.Add('     for (let x in TrackLayer) {');
+  Html.Add('        if (TrackLayer[x].features.length > 0 &&');
+  Html.Add('            TrackLayer[x].features[0].style.strokeDashstyle == "dashdot") {');
+  Html.Add('          TrackLayer[x].setVisibility(false);');
+  Html.Add('        }');
+  Html.Add('     }');
   Html.Add('  }');
 
   Html.Add('  function AddRoutePoint(IdLayer, LayerName, RoutePointName, PointLat, PointLon, Color){');
@@ -358,13 +371,35 @@ begin
   Html.Add('     trackpoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
   Html.Add('  }');
 
-  Html.Add('  function CreateTrack(linename, color){');
-  Html.Add('     linelayer = new OpenLayers.Layer.Vector(linename);');
-  Html.Add('     style = {strokeColor: color, strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: 5};');
+  Html.Add('  function ShowBounds(linename){');
+  Html.Add('     map.zoomToExtent(boundsbounds[linename]);');
+  Html.Add('     TrackLayer[linename].setVisibility(true);');
+  Html.Add('  }');
+
+  Html.Add('  function CreateTrack(linename, color, isBounds = false){');
+  Html.Add('     var width = ' + Track_Width + ';');
+  Html.Add('     var dash = "solid";');
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(trackpoints);');
-  Html.Add('     var linefeature = new OpenLayers.Feature.Vector(line_string, null, style);');
-  Html.Add('     linelayer.addFeatures([linefeature]);');
-  Html.Add('     map.addLayer(linelayer);');
+  Html.Add('     var linefeature;');
+
+  Html.Add('     if (!TrackLayer[linename]) {');
+  Html.Add('        TrackLayer[linename] = new OpenLayers.Layer.Vector(linename);');
+  Html.Add('        map.addLayer(TrackLayer[linename]);');
+  Html.Add('     }');
+  Html.Add('     if (isBounds) {');
+  Html.Add('        line_string.calculateBounds();');
+  Html.Add('        if (!boundsbounds[linename]) {');
+  Html.Add('            boundsbounds[linename] = new OpenLayers.Bounds();');
+  Html.Add('        }');
+  Html.Add('        boundsbounds[linename].extend(line_string.bounds);');
+  Html.Add('        TrackLayer[linename].setVisibility(false);');
+  Html.Add('        TrackLayer[linename].displayInLayerSwitcher = false;');
+  Html.Add('        width = ' + Bounds_Width + ';');
+  Html.Add('        dash = "dashdot";');
+  Html.Add('     }');
+  Html.Add('     style = {strokeColor: color, strokeDashstyle: dash, strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: width};');
+  Html.Add('     linefeature = new OpenLayers.Feature.Vector(line_string, null, style);');
+  Html.Add('     TrackLayer[linename].addFeatures([linefeature]);');
 
   // Add trackpoints to allpoints. Needed for CreateExtent
   Html.Add('     allpoints = allpoints.concat(trackpoints);');

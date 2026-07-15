@@ -905,6 +905,7 @@ type
                        ForceRecalc: boolean = true); reintroduce;
     destructor Destroy; override;
     procedure Add(AnUdbDir: TUdbDir);
+    function GetBoundsTopLeft: string;
     function GetBounds: string;
     function NineFloats: string;
     property HandleId: Cardinal read FUdbHandleId;
@@ -1074,6 +1075,9 @@ implementation
 uses
   System.Math, System.DateUtils, System.StrUtils, System.TypInfo, System.UITypes,
   Vcl.Dialogs,
+{$IFDEF OSMMAP}
+  UnitOSMMap,
+{$ENDIF}
   UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
 
 const
@@ -3699,10 +3703,14 @@ begin
       result := 'Turn Left';
     25:
       result := 'Turn Right';
+    26:
+      result := 'Tunnel entry';
     29, 34, 35, 36:
       result := 'Route point';
     79:
       result := 'Exit Roundabout';
+    90:
+      result := 'Tunnel exit';
     else
       result := 'Unknown';
   end;
@@ -4005,19 +4013,25 @@ end;
 
 function TmUdbDataHndl.GetBoundsMin: string;
 begin
-  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
-                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
-end;
-
-function TmUdbDataHndl.GetBoundsMax: string;
-begin
   result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[2])),
                             CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])));
 end;
 
+function TmUdbDataHndl.GetBoundsMax: string;
+begin
+  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
+                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
+end;
+
+function TmUdbDataHndl.GetBoundsTopLeft: string;
+begin
+  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
+                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])))
+end;
+
 function TmUdbDataHndl.GetBounds: string;
 begin
-  result := Format('%s, %s', [GetBoundsMax, GetBoundsMin]);
+  result := Format('%s, %s', [GetBoundsMin, GetBoundsMax]);
 end;
 
 function TmUdbDataHndl.NineFloats: string;
@@ -4817,6 +4831,7 @@ begin
 end;
 
 procedure TTripList.CreateOSMPoints(const OutStringList: TStringList; const HTMLColor: string);
+{$IFDEF OSMMAP}
 var
   Coords, Color, LayerName, RoutePointName: string;
   EscapedTripName: string;
@@ -4828,7 +4843,11 @@ var
   Location: TBaseItem;
   ANItem: TBaseItem;
   HasUdbs: boolean;
+  LatMin, LonMin: double;
+  LatMax, LonMax: double;
+{$ENDIF}
 begin
+{$IFDEF OSMMAP}
   OutStringList.Clear;
   EscapedTripName := EscapeDQuote(TripName);
   HasUdbs := false;
@@ -4836,6 +4855,25 @@ begin
   AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if (Assigned(AllRoutes)) then
   begin
+    for UdbDataHndl in AllRoutes.Items do
+    begin
+      LatMin := CoordAsDec(UdbDataHndl.FValue.GetUnknown3(UdbDataHndl.GetBoundsOffset(0)));
+      LonMin := CoordAsDec(UdbDataHndl.FValue.GetUnknown3(UdbDataHndl.GetBoundsOffset(1)));
+      LatMax := CoordAsDec(UdbDataHndl.FValue.GetUnknown3(UdbDataHndl.GetBoundsOffset(2)));
+      LonMax := CoordAsDec(UdbDataHndl.FValue.GetUnknown3(UdbDataHndl.GetBoundsOffset(3)));
+      if (LatMin <> 0) and
+         (LonMin <> 0) and
+         (LatMax <> 0) and
+         (LatMax <> 0) then
+      begin
+        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
+        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMax)]) );
+        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMax)]) );
+        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMin)]) );
+        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
+        OutStringList.Add(Format('    CreateTrack("Bounds %s", ''%s'', true);', [EscapedTripName, Bounds_Color]));
+      end;
+    end;
     for UdbDataHndl in AllRoutes.Items do
     begin
       HasUdbs := HasUdbs or (UdbDataHndl.Items.Count > 0);
@@ -4887,8 +4925,8 @@ begin
       end;
     end;
     OutStringList.Add(Format('    CreateTrack("%s", ''%s'');', [EscapedTripName, HTMLColor]));
-
   end;
+{$ENDIF}
 end;
 
 procedure TTripList.SetRoutePref(AKey: ShortString; TmpStream: TMemoryStream);

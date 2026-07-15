@@ -3767,7 +3767,7 @@ var
   end;
 
 
-  procedure AddUdbHandle(AnUdbhandle: TmUdbDataHndl);
+  procedure AddUdbHandle(AnUdbhandle: TmUdbDataHndl; ShowBounds: boolean);
   var
     ANitem: TBaseItem;
     Unknown3Offset, OffSetPref, LUnknown2: integer;
@@ -3892,6 +3892,11 @@ var
 
     VlTripInfo.Strings.AddPair('*** End UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle, 1, AnUdbhandle.SelEnd - AnUdbhandle.SelStart -1));
+    if (ShowBounds) then
+    begin
+      EdgeBrowser1.ExecuteScript('ShowBounds("Bounds ' + ATripList.TripName +'");');
+      MapRequest(AnUdbhandle.GetBoundsTopLeft, ATripList.TripName, RoutePointTimeOut, 'false');
+    end;
   end;
 
   procedure AddAllRoutes(AmAllRoutes: TmAllRoutes);
@@ -3919,7 +3924,7 @@ var
     for ANitem in AmAllRoutes.Items do
     begin
       if (ANitem is TmUdbDataHndl) then
-        AddUdbHandle(TmUdbDataHndl(ANitem));
+        AddUdbHandle(TmUdbDataHndl(ANitem), false);
     end;
 
     VlTripInfo.Strings.AddPair('*** End AllRoutes', DupeString('-', DupeCount),
@@ -3974,7 +3979,7 @@ var
 
       if (ANitem is TmUdbDataHndl) then
       begin
-        AddUdbHandle(TmUdbDataHndl(ANitem));
+        AddUdbHandle(TmUdbDataHndl(ANitem), false);
         continue;
       end;
 
@@ -4129,7 +4134,7 @@ begin
       AddAllRoutes(TmAllRoutes(Node.Data))
 
     else if (TObject(Node.Data) is TmUdbDataHndl) then
-      AddUdbHandle(TmUdbDataHndl(Node.Data))
+      AddUdbHandle(TmUdbDataHndl(Node.Data), true)
 
     else if (TObject(Node.Data) is TUdbDir) then
       AddUdbDir(TUdbDir(Node.Data), true)
@@ -5100,10 +5105,15 @@ procedure TFrmTripManager.MapRequest(const Coords, Desc, TimeOut: string;
 begin
   FMapReq.Coords := Coords;
   FMapReq.Desc := Desc;
-  FMapReq.Zoom := ZoomLevel;
-  if (FMapReq.Zoom = '') and
-     (ChkZoomToPoint.Checked) then
-    FMapReq.Zoom := 'true';
+  if (ZoomLevel = '') then // Default to use setting
+  begin
+    if (ChkZoomToPoint.Checked) then
+      FMapReq.Zoom := 'true'
+    else
+      FMapReq.Zoom := 'false';
+  end
+  else
+    FMapReq.Zoom := ZoomLevel;
   FMapReq.TimeOut := TimeOut;
   MapTimer.Enabled := false;
   MapTimer.Enabled := true;
@@ -5112,7 +5122,7 @@ end;
 procedure TFrmTripManager.MapTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
-  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, "%s", %s);', [FMapReq.Desc, FMapReq.Coords, FMapReq.Zoom, FMapReq.TimeOut]));
+  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, %s, %s);', [FMapReq.Desc, FMapReq.Coords, FMapReq.Zoom, FMapReq.TimeOut]));
 end;
 
 procedure TFrmTripManager.MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
