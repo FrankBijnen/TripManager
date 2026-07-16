@@ -769,6 +769,7 @@ type
     RoadId:           Cardinal;
     PointType:        byte;
     procedure Init(const GPXSubClass: string);
+    function Serialize: string;
     function IsKnownRoutePoint: boolean;
     function IsKnownComprLatLon: boolean;
     function IsKnownStartEndSegment: boolean;
@@ -3423,6 +3424,18 @@ begin
     ComprLatLon[Indx] := StrToUInt('$' + Copy(GPXSubClass, 19 + (Indx * 2), 2));
 end;
 
+function TSubClass.Serialize: string;
+var
+  Index: integer;
+begin
+  result := '0000' + // roadclass
+            IntToHex(Swap32(MapSegment), 8) +
+            IntToHex(Swap32(RoadId), 8) +
+            IntToHex(PointType, 2);
+  for Index := Low(ComprLatLon) to High(ComprLatLon) do
+    result := result + IntToHex(ComprLatLon[Index], 2);
+end;
+
 function TSubClass.IsKnownRoutePoint: boolean;
 begin
   case PointType of
@@ -3670,50 +3683,8 @@ end;
 
 function TUdbDir.GetDirection: string;
 begin
-  result := '';
-  if (FValue.SubClass.IsKnownRoutePoint) then
-    exit;
-
-  case FValue.SubClass.Direction of
-    0:
-      result := 'Continue';
-    2, 15, 18:
-      result := 'Right';
-    3:
-      result := 'Sharp Right';
-    4:
-      result := 'U-Turn';
-    5:
-      result := 'Sharp Left';
-    6, 16, 19:
-      result := 'Left';
-    8, 11, 13, 17, 20, 21:
-      result := 'Ahead';
-    10:
-      result := 'Turn Right';
-    12:
-      result := 'Ferry';
-    14:
-      result := 'Roundabout';
-    22:
-      result := 'Leave route point';
-    23:
-      result := 'Approach route point';
-    24:
-      result := 'Turn Left';
-    25:
-      result := 'Turn Right';
-    26:
-      result := 'Tunnel entry';
-    29, 34, 35, 36:
-      result := 'Route point';
-    79:
-      result := 'Exit Roundabout';
-    90:
-      result := 'Tunnel exit';
-    else
-      result := 'Unknown';
-  end;
+  if not (IntToIdent(FValue.SubClass.Direction, result, DirectionMap)) then
+    result := 'Unknown';
   result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.Direction, 2)]);
 end;
 
@@ -5800,7 +5771,7 @@ begin
                                                       TripKey,
                                                       TripData);
 
-              // Totals for the UdbHdandle
+              // Totals for the UdbHandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;
               UdbDist := UdbDist + (CurDist * 1000);
             end;
@@ -6426,86 +6397,158 @@ end;
 
 procedure TTripList.Trip2XmlRte(Rte: TObject);
 var
-  RtePt, RoutePt: TXmlVSNode;
+  RtePt, RoutePt, RoutePtExt, RoutePtRteExt, RoutePtRteTMExt, RoutePtRteTMrpt: TXmlVSNode;
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
   ViaPointType, Arrival, TransportMode, CalculationMode, PointName, Lat, Lon, Address: string;
-begin
-  IntToIdent(Ord(TTransportMode.tmMotorcycling), TransportMode, TransportModeMap);
-  ANItem := GetItem(TmTransportationMode.GetKey);
-  if (Assigned(ANItem)) then
-    TransportMode := TmTransportationMode(ANItem).AsString;
+  AllRoutes: TmAllRoutes;
+  AnUdbHandle: TmUdbDataHndl;
+  UdbHndleCnt: integer;
+  UdbDirCnt: integer;
+  TimeLst: Tlist;
+  TimeCnt: integer;
 
-  CalculationMode := RoutePrefRecs[cmFasterTime].Desc;
-  ANItem := GetItem(TmRoutePreference.GetKey);
-  if (Assigned(ANItem)) then
-    CalculationMode := TmRoutePreference(ANItem).AsString;
-
-  TXmlVSNode(Rte).AddChild('name').NodeValue := TripName;
-  TXmlVSNode(Rte).AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
-
-  Locations := TmLocations(GetItem(TmLocations.GetKey));
-  if not (Assigned(Locations)) then
-    exit;
-
-  for Location in Locations.Locations do
+  procedure WriteUdb(AnUdbDir: TUdbDir);
+  var
+    GpxxRpt, GpxxSubClass: TXmlVSNode;
+    Coords: TCoords;
+    OLat, OLon: string;
   begin
-    if (Location is TLocation) then
+    Coords := AnUdbDir.Coords;
+    Coords.FormatLatLon(OLat, OLon);
+    GpxxRpt := RoutePtRteExt.AddChild('gpxx:rpt');
+    GpxxRpt.AttributeList.Add('lat').Value := OLat;
+    GpxxRpt.AttributeList.Add('lon').Value := OLon;
+    GpxxSubClass := GpxxRpt.AddChild('gpxx:Subclass');
+    GpxxSubClass.NodeValue := AnUdbDir.FValue.SubClass.Serialize;
+    TimeLst.Add(Pointer(AnUdbDir.FValue.Time));
+  end;
+
+begin
+  TimeLst := TList.Create;
+  try
+    IntToIdent(Ord(TTransportMode.tmMotorcycling), TransportMode, TransportModeMap);
+    ANItem := GetItem(TmTransportationMode.GetKey);
+    if (Assigned(ANItem)) then
+      TransportMode := TmTransportationMode(ANItem).AsString;
+
+    CalculationMode := RoutePrefRecs[cmFasterTime].Desc;
+    ANItem := GetItem(TmRoutePreference.GetKey);
+    if (Assigned(ANItem)) then
+      CalculationMode := TmRoutePreference(ANItem).AsString;
+
+    TXmlVSNode(Rte).AddChild('name').NodeValue := TripName;
+    TXmlVSNode(Rte).AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
+
+    Locations := TmLocations(GetItem(TmLocations.GetKey));
+    if not (Assigned(Locations)) then
+      exit;
+
+    UdbHndleCnt := -1;
+    UdbDirCnt := -1;
+    AllRoutes := GetItem(TmAllRoutes.GetKey) as TmAllRoutes;
+
+    for Location in Locations.Locations do
     begin
-      RtePt := TXmlVSNode(Rte).AddChild('rtept');
-
-      // Point Type
-      Arrival := '';
-      ViaPointType := 'trp:ShapingPoint';
-      if (TLocation(Location).IsViaPoint) then
+      if (Location is TLocation) then
       begin
-        ViaPointType := 'trp:ViaPoint';
+        RtePt := TXmlVSNode(Rte).AddChild('rtept');
 
-        // Arrival
-        ANItem := TLocation(Location).LocationTmArrival;
-        if (Assigned(ANItem)) and
-           (TmArrival(ANItem).AsCardinal <> 0) then
-          Arrival := DateToISO8601(TUnixDateConv.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
-      end;
+        // Point Type
+        Arrival := '';
+        ViaPointType := 'trp:ShapingPoint';
+        if (TLocation(Location).IsViaPoint) then
+        begin
+          ViaPointType := 'trp:ViaPoint';
 
-      // Point Name
-      PointName := '';
-      ANItem := TLocation(Location).LocationTmName;
-      if (Assigned(ANItem)) then
-         PointName := TmName(ANItem).AsString;
+          // Arrival
+          ANItem := TLocation(Location).LocationTmArrival;
+          if (Assigned(ANItem)) and
+             (TmArrival(ANItem).AsCardinal <> 0) then
+            Arrival := DateToISO8601(TUnixDateConv.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
 
-      // Lat Lon
-      Lat := '';
-      Lon := '';
-      ANItem := TLocation(Location).LocationTmScPosn;
-      if (Assigned(ANItem)) then
-      begin
-        Lon := TmScPosn(ANItem).MapCoords;
-        Lat := Trim(NextField(Lon, ','));
-        Lon := Trim(Lon);
-      end;
+          if Assigned(AllRoutes) then
+          begin
+            Inc(UdbHndleCnt);
+            UdbDirCnt := 0;
+          end;
+        end;
 
-      // Address
-      Address := '';
-      ANItem := TLocation(Location).LocationTmAddress;
-      if (Assigned(ANItem)) then
-        Address := TmAddress(ANItem).AsString;
+        // Point Name
+        PointName := '';
+        ANItem := TLocation(Location).LocationTmName;
+        if (Assigned(ANItem)) then
+           PointName := TmName(ANItem).AsString;
 
-      // Write to XML
-      RtePt.Attributes['lat'] := Lat;
-      RtePt.Attributes['lon'] := Lon;
-      RtePt.AddChild('name').NodeValue := PointName;
-      RtePt.AddChild('cmt').NodeValue := Address;
-      RtePt.AddChild('desc').NodeValue := Address;
-      RoutePt := RtePt.AddChild('extensions').AddChild(ViaPointType);
-      if (Assigned(RoutePt)) and
-         (ViaPointType = 'trp:ViaPoint') then
-      begin
-        if (Arrival <> '') then
-          RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
-        RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
+        // Lat Lon
+        Lat := '';
+        Lon := '';
+        ANItem := TLocation(Location).LocationTmScPosn;
+        if (Assigned(ANItem)) then
+        begin
+          Lon := TmScPosn(ANItem).MapCoords;
+          Lat := Trim(NextField(Lon, ','));
+          Lon := Trim(Lon);
+        end;
+
+        // Address
+        Address := '';
+        ANItem := TLocation(Location).LocationTmAddress;
+        if (Assigned(ANItem)) then
+          Address := TmAddress(ANItem).AsString;
+
+        // Write to XML
+        RtePt.Attributes['lat'] := Lat;
+        RtePt.Attributes['lon'] := Lon;
+        RtePt.AddChild('name').NodeValue := PointName;
+        RtePt.AddChild('cmt').NodeValue := Address;
+        RtePt.AddChild('desc').NodeValue := Address;
+        RoutePtExt := RtePt.AddChild('extensions');
+        RoutePt := RoutePtExt.AddChild(ViaPointType);
+        if (Assigned(RoutePt)) and
+           (ViaPointType = 'trp:ViaPoint') then
+        begin
+          if (Arrival <> '') then
+            RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
+          RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
+        end;
+
+        if Assigned(AllRoutes) then
+        begin
+          if (UdbHndleCnt > -1) and
+             (UdbHndleCnt < AllRoutes.Items.Count) then
+          begin
+            RoutePtRteExt := RoutePtExt.AddChild('gpxx:RoutePointExtension');
+            RoutePtRteExt.AddChild('gpxx:Subclass').NodeValue := '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
+            AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
+            Inc(UdbDirCnt);
+            while (UdbDirCnt < AnUdbHandle.Items.Count) and
+                  (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
+            begin
+              WriteUdb(AnUdbHandle.Items[UdbDirCnt]);
+              Inc(UdbDirCnt);
+            end;
+          end;
+
+          if (RoutePtRteExt <> nil) and
+             (TimeLst.Count > 0) then
+          begin
+            RoutePtRteTMExt := RoutePtRteExt.AddChild('gpxx:Extensions');
+            for TimeCnt := 0 to TimeLst.Count -1 do
+            begin
+              RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rpt');
+              RoutePtRteTMrpt.AttributeList.Add('lat').Value := lat;
+              RoutePtRteTMrpt.AttributeList.Add('lon').Value := lon;
+              RoutePtRteTMrpt.AddChild('tm:time').NodeValue := IntToStr(Word(TimeLst[TimeCnt]));
+            end;
+          end;
+          TimeLst.Clear;
+
+        end;
       end;
     end;
+  finally
+    TimeLst.Free;
   end;
 end;
 

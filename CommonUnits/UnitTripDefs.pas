@@ -165,6 +165,45 @@ const
                                                           (Value: Ord(avHighWays);          Name: 'Highways')
                                                         );
 
+  DirectionMap : array[0..36] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
+                                                          (Value: $02;                      Name: 'Right'),
+                                                          (Value: $03;                      Name: 'Sharp Right'),
+                                                          (Value: $04;                      Name: 'U-Turn'),
+                                                          (Value: $05;                      Name: 'Sharp Left'),
+                                                          (Value: $06;                      Name: 'Left'),
+                                                          (Value: $08;                      Name: 'Ahead'),
+                                                          (Value: $0A;                      Name: 'Take right lane'),
+                                                          (Value: $0B;                      Name: 'Merge'),
+                                                          (Value: $0C;                      Name: 'Enter ferry'),
+                                                          (Value: $0D;                      Name: 'Leave ferry'),
+                                                          (Value: $0E;                      Name: 'Enter roundabout'),
+                                                          (Value: $0F;                      Name: 'Leave roundabout 1st exit'),
+                                                          (Value: $10;                      Name: 'Take left lane'),
+                                                          (Value: $11;                      Name: 'Ahead'),
+                                                          (Value: $12;                      Name: 'Right'),
+                                                          (Value: $13;                      Name: 'Left'),
+                                                          (Value: $14;                      Name: 'Ahead (Next segment)'),
+                                                          (Value: $15;                      Name: 'Ahead'),
+                                                          (Value: $16;                      Name: 'Leave route point'),
+                                                          (Value: $17;                      Name: 'Approach route point'),
+                                                          (Value: $18;                      Name: 'Continue main road right'),
+                                                          (Value: $19;                      Name: 'Turn Right'),
+                                                          (Value: $1A;                      Name: 'Enter tunnel'),
+                                                          (Value: $1D;                      Name: 'Route point'),
+                                                          (Value: $1F;                      Name: 'Leave roundabout 1st exit'),
+                                                          (Value: $22;                      Name: 'Route point'),
+                                                          (Value: $23;                      Name: 'Route point'),
+                                                          (Value: $24;                      Name: 'Route point'),
+                                                          (Value: $2F;                      Name: 'Leave roundabout 1st exit'),
+                                                          (Value: $4F;                      Name: 'Leave roundabout at 2nd exit'),
+                                                          (Value: $5A;                      Name: 'Leave tunnel'),
+                                                          (Value: $6F;                      Name: 'Leave roundabout at 2nd exit'),
+                                                          (Value: $8A;                      Name: 'Leave highway'),
+                                                          (Value: $8F;                      Name: 'Leave roundabout at 3rd exit'),
+                                                          (Value: $AF;                      Name: 'Leave roundabout at 3rd exit'),
+                                                          (Value: $CF;                      Name: 'Leave roundabout at 4th exit')
+                                                        );
+
   DefRoutePref                = $0100;
   DefRoutePrefAdv             = $0101;
   DefRoutePrefInclMaps        = $0164;
