@@ -171,7 +171,7 @@ const
                                                           (Value: Ord(avHighWays);          Name: 'Highways')
                                                         );
 
-  DirectionMap : array[0..39] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
+  DirectionMap : array[0..40] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
                                                           (Value: $02;                      Name: 'Right'),
                                                           (Value: $03;                      Name: 'Sharp right'),
                                                           (Value: $04;                      Name: 'U-Turn'),
@@ -198,9 +198,10 @@ const
                                                           (Value: $1A;                      Name: 'Enter tunnel'),
                                                           (Value: $1D;                      Name: 'Route point'),
                                                           (Value: $1F;                      Name: 'Leave roundabout 1st exit'),
-                                                          (Value: $22;                      Name: 'Route point'),
+                                                          (Value: $22;                      Name: 'Turn right'),
                                                           (Value: $23;                      Name: 'Route point'),
                                                           (Value: $24;                      Name: 'Route point'),
+                                                          (Value: $26;                      Name: 'Turn left'),
                                                           (Value: $2F;                      Name: 'Leave roundabout 1st exit'),
                                                           (Value: $4A;                      Name: 'Take ramp turning left'),
                                                           (Value: $4F;                      Name: 'Leave roundabout at 2nd exit'),

@@ -3671,6 +3671,8 @@ begin
     $05,
     $0D:
       result := 'Route point';
+    $14:
+      result := 'Point of interest';
     $1F:
       result := 'Intermediate';
     $21:
