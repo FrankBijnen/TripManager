@@ -432,14 +432,24 @@ end;
 class function TModelConv.GetTripModels: TStringList;
 var
   AGarminModel: TGarminModel;
+  TripIndex, UnknownIndex: integer;
 begin
   result := TStringList.Create;
+  UnknownIndex := Ord(High(TTripModel));
+  result.Text := DupeString(#10, UnknownIndex +1); // Create empty lines
+  result[UnknownIndex] := Unknown_Name;
+
   for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
   begin
-    if (Model_Tab[AGarminModel].TripModel <> TTripModel.Unknown) then
-      result.Add(Model_Tab[AGarminModel].DeviceName)
+    TripIndex := Ord(Model_Tab[AGarminModel].TripModel);
+    if (TripIndex = UnknownIndex) then
+      continue;
+
+    if (result[TripIndex] = '') then
+      result[TripIndex] := Device2Display(Model_Tab[AGarminModel].DeviceName)
+    else
+      result[TripIndex] := result[TripIndex] + ', ' + Device2Display(Model_Tab[AGarminModel].DeviceName);
   end;
-  result.Add(Unknown_Name);
 end;
 
 class procedure TModelConv.CmbTripDevices(const Devices: TStrings);
