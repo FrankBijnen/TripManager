@@ -3892,7 +3892,8 @@ var
 
     VlTripInfo.Strings.AddPair('*** End UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle, 1, AnUdbhandle.SelEnd - AnUdbhandle.SelStart -1));
-    if (ShowBounds) then
+    if (ShowBounds) and
+       (AnUdbhandle.GetBoundsTopLeft <> '') then
     begin
       EdgeBrowser1.ExecuteScript('ShowBounds("Bounds ' + ATripList.TripName +'");');
       MapRequest(AnUdbhandle.GetBoundsTopLeft, ATripList.TripName, RoutePointTimeOut, 'false');

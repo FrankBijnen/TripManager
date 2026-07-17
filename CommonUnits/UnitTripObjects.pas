@@ -2808,7 +2808,7 @@ begin
       Coords.FromAttributes(RtePtNode.AttributeList);
       WriteCoords;
 
-      GpxxRptNode := GetFirstExtensionsNode(RtePtNode);
+      GpxxRptNode := GetFirstGpxxRptNode(RtePtNode);
       while (GpxxRptNode <> nil) do
       begin
         Coords.FromAttributes(GpxxRptNode.AttributeList);
@@ -3996,6 +3996,10 @@ end;
 
 function TmUdbDataHndl.GetBoundsTopLeft: string;
 begin
+  if (FValue.GetUnknown3(BoundsOffset[0]) = 0) and
+     (FValue.GetUnknown3(BoundsOffset[3]) = 0) then
+    exit('');
+
   result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
                             CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])))
 end;
@@ -5640,7 +5644,7 @@ var
   Locations: TBaseItem;
   AnUdbHandle: TmUdbDataHndl;
   AnUdbDir, PrevUdbDir, RtePtUdbDir: TUdbDir;
-  FirstRtePt, ScanRtePt, ScanGpxxRptNode: TXmlVSNode;
+  FirstRtePt, ScanRtePt, ScanGpxxRptNode, TMExtensions, TMRtePt, TMrpt, TMPrevrpt: TXmlVSNode;
   CMapSegRoad: string;
   PrevCoords, Coords: TCoords;
   TotalDist, UdbDist, CurDist: double;
@@ -5688,6 +5692,9 @@ begin
       UdbTime := 0;
       ScanRtePt := FirstRtePt;
 
+      // TM Extensions?
+      TMExtensions := nil;
+
       // Add udb's for all Via and Shaping found in Locations.
       // Add Subclasses from <gpxx:rpt>. Will be named RoadClass MapSegment RoadId
       TmLocations(Locations).GetSegmentPoints(SegmentId, RoutePointList);
@@ -5717,6 +5724,7 @@ begin
             break;
           ScanRtePt := ScanRtePt.NextSibling;
         end;
+
         if (ScanRtePt = nil) then // Should not occur.
         begin
           BreakPoint;
@@ -5724,9 +5732,16 @@ begin
         end;
         FirstRtePt := ScanRtePt; // restart next search in GPX here
 
+        // TM Extensions?
+        TMrpt := nil;
+        TMPrevrpt := nil;
+        TMExtensions := GetTMExtensionsNode(FirstRtePt);
+        if (Assigned(TMExtensions)) then
+          TMrpt := TMExtensions.Find('tm:rpt');
+
         // Init PrevCoords
         PrevCoords := Default(TCoords);
-        ScanGpxxRptNode := GetFirstExtensionsNode(ScanRtePt);
+        ScanGpxxRptNode := GetFirstGpxxRptNode(ScanRtePt);
         if (ScanGpxxRptNode <> nil) then
           PrevCoords.FromAttributes(ScanGpxxRptNode.AttributeList);
 
@@ -5770,6 +5785,9 @@ begin
               PrevUdbDir.FValue.Time := AddToTripInfo(FTripInfoList,
                                                       TripKey,
                                                       TripData);
+              // TM Extensions?
+              if (Assigned(TMPrevrpt)) then
+                PrevUdbDir.FValue.Time := StrToIntDef(TMPrevrpt.Attributes['time'], 0);
 
               // Totals for the UdbHandle
               UdbTime := UdbTime + PrevUdbDir.FValue.Time;
@@ -5779,9 +5797,15 @@ begin
             // Reset Distance
             CurDist := 0;
             PrevUdbDir := AnUdbDir;
+            // TM Extensions?
+            TMPrevrpt := TMrpt;
           end;
 
           ScanGpxxRptNode := ScanGpxxRptNode.NextSibling;
+
+          // TM Extensions?
+          if (Assigned(TMrpt)) then
+            TMrpt := TMrpt.NextSibling;
         end;
 
         // Totals for the UdbHdandle
@@ -5802,6 +5826,16 @@ begin
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, UdbTime);
       AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, Round(UdbDist));
 
+      // Overrule by TM?
+      if (Assigned(TMExtensions)) then
+      begin
+        TMRtePt := TMExtensions.Find('tm:rtept');
+        if Assigned(TMRtePt) then
+        begin
+          AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.TimeOffset, StrToIntDef(TMRtePt.Attributes['time'], 0));
+          AnUdbHandle.FValue.UpdateUnknown3(AnUdbHandle.DistOffset, StrToIntDef(TMRtePt.Attributes['dist'], 0));
+        end;
+      end;
       // Add to Allroutes
       TmAllRoutes(AllRoutes).AddUdbHandle(AnUdbHandle);
 

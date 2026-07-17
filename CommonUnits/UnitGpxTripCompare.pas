@@ -557,7 +557,7 @@ begin
             NoMatchRoutePoint(Messages, CoordTrip, FRtePt, ThisDist);
 
           // Init GpxxRptNode
-          GpxxRptNode := GetFirstExtensionsNode(FRtePt);
+          GpxxRptNode := GetFirstGpxxRptNode(FRtePt);
 
           // Build known subclasses for this <rtept>
           BuildSubClasses(FRtePt, FDistOKKms, [scCompare]);

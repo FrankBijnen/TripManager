@@ -52,8 +52,9 @@ type
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;
 function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
-function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
-function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function GetFirstGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function GetLastGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function GetTMExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 function RecalcSubClass(ASubClass: string): string;
 
 implementation
@@ -145,32 +146,47 @@ begin
     result := EarthRadiusKm * C;
 end;
 
-function GetExtensionsNode(const ARtePt: TXmlVSNode; const LastChild: boolean): TXmlVSNode;
+function GetRoutePointExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 var
-  ExtensionsNode, RoutePointExtensionNode: TXmlVSNode;
+  ExtensionsNode: TXmlVSNode;
 begin
   ExtensionsNode := ARtePt.Find('extensions');
   if (ExtensionsNode = nil) then
     exit(nil);
 
-  RoutePointExtensionNode := ExtensionsNode.Find('gpxx:RoutePointExtension');
-  if (RoutePointExtensionNode = nil) then
+  result := ExtensionsNode.Find('gpxx:RoutePointExtension');
+end;
+
+function GetFirstGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+begin
+  result := GetRoutePointExtensionsNode(ARtePt);
+  if (result = nil) then
     exit(nil);
 
-  if (LastChild) then
-    exit(RoutePointExtensionNode.LastChild);  // Should be a 'gpxx:rpt'. Need to check?
-
-  result := RoutePointExtensionNode.Find('gpxx:rpt')
+  result := result.Find('gpxx:rpt');
 end;
 
-function GetFirstExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function GetLastGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 begin
-  result := GetExtensionsNode(ARtePt, false);
+  result := GetRoutePointExtensionsNode(ARtePt);
+  if (result = nil) then
+    exit(nil);
+
+  result := result.LastChild;
+
+  // Should be a 'gpxx:rpt'. Need to check.
+  while (result.Name <> 'gpxx:rpt') and
+        (result.PreviousSibling <> nil) do
+    result := result.PreviousSibling;
 end;
 
-function GetLastExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
+function GetTMExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 begin
-  result := GetExtensionsNode(ARtePt, true);
+  result := GetRoutePointExtensionsNode(ARtePt);
+  if (result = nil) then
+    exit(nil);
+
+  result := result.Find('gpxx:Extensions');
 end;
 
 function RecalcSubClass(ASubClass: string): string;

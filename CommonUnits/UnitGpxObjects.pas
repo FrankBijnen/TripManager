@@ -379,7 +379,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
       exit;
 
     RtePtCoord.FromAttributes(ARtePt.AttributeList);
-    ScanGpxxRptNode := GetLastExtensionsNode(PrevRtePt);
+    ScanGpxxRptNode := GetLastGpxxRptNode(PrevRtePt);
     while (ScanGpxxRptNode <> nil) do
     begin
       GpxxRptCoord.FromAttributes(ScanGpxxRptNode.AttributeList);
@@ -399,7 +399,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
     SegmentCnt: integer;
     CurType: TSubClassType;
   begin
-    ScanGpxxRptNode := GetFirstExtensionsNode(ARtePt);
+    ScanGpxxRptNode := GetFirstGpxxRptNode(ARtePt);
     SegmentCnt := 0;
     while (ScanGpxxRptNode <> nil) do
     begin
@@ -429,7 +429,7 @@ procedure TGPXfile.BuildSubClasses(const ARtePt: TXmlVSNode;
       exit;
 
     RtePtCoord.FromAttributes(NextRtePt.AttributeList);
-    ScanGpxxRptNode := GetFirstExtensionsNode(NextRtePt);
+    ScanGpxxRptNode := GetFirstGpxxRptNode(NextRtePt);
     while (ScanGpxxRptNode <> nil) do
     begin
       GpxxRptCoord.FromAttributes(ScanGpxxRptNode.AttributeList);
