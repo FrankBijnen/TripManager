@@ -115,6 +115,12 @@ type
     MapCoords: string;
   end;
 
+  TLatLonDist = class
+    Lat:  string;
+    Lon:  string;
+    Dist: string;
+  end;
+
   TUnixDateConv = class
     class function DateTimeAsCardinal(ADateTime: TDateTime): Cardinal;
     class function CardinalAsDateTime(ACardinal: Cardinal): TDateTime;

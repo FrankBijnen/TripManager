@@ -10,6 +10,7 @@ const
   EarthRadiusMi: Double       = 3958.761;
   ProcessCategoryPick: string = 'None' + #10 + 'Symbol' + #10 + 'GPX filename' + #10 + 'Symbol + GPX filename';
   LatLonFormat                = '%1.5f';
+  DirectRoutingClass          = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
   RecalcMapSeg                = 'FFFFFFFF';          // Mapseg and RoadId forcing a recalc
   RecalcRoad                  = 'FFFFFFFF';          // Mapseg and RoadId forcing a recalc
   RecalcMapSegAndRoad         = RecalcMapSeg + RecalcRoad ;
@@ -30,7 +31,7 @@ type
   TCoords = record
     Lat: double;
     Lon: double;
-    procedure FormatLatLon(var OLat: string; var OLon: string);
+    procedure FormatLatLon(var OLat: string; var OLon: string; const FormatStr: string = '');
     procedure FromAttributes(Attributes: TObject);
   end;
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
@@ -64,10 +65,16 @@ uses
 var
   FormatSettings: TFormatSettings;
 
-procedure TCoords.FormatLatLon(var OLat: string; var OLon: string);
+procedure TCoords.FormatLatLon(var OLat: string; var OLon: string; const FormatStr: string = '');
+var
+  Fmt: string;
 begin
-  OLat := Format(LatLonFormat, [Lat], FormatSettings);
-  OLon := Format(LatLonFormat, [Lon], FormatSettings);
+  if (FormatStr <> '') then
+    Fmt := FormatStr
+  else
+    Fmt := LatLonFormat;
+  OLat := Format(Fmt, [Lat], FormatSettings);
+  OLon := Format(Fmt, [Lon], FormatSettings);
 end;
 
 procedure TCoords.FromAttributes(Attributes: TObject);

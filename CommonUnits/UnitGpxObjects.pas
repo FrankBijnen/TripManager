@@ -243,7 +243,6 @@ const
   UniqueTracks: boolean = true;
   DeleteWayPtsInRoute: boolean = true;    // Remove Waypoints from stripped routes
   DeleteTracksInRoute: boolean = true;    // Remove Tracks from stripped routes
-  DirectRoutingClass = '000000000000FFFFFFFFFFFFFFFFFFFFFFFF';
   UnglitchTreshold: double = 0.0005;      // In Km. ==> 50 Cm
 
 var

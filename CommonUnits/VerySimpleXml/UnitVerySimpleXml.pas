@@ -62,6 +62,7 @@ begin
   result.SetAttribute('xmlns:wptx1', 'http://www.garmin.com/xmlschemas/WaypointExtension/v1');
   result.SetAttribute('xmlns:ctx',   'http://www.garmin.com/xmlschemas/CreationTimeExtension/v1');
   result.SetAttribute('xmlns:trp',   'http://www.garmin.com/xmlschemas/TripExtensions/v1');
+  result.SetAttribute('xmlns:tm',    'http://TripManager');
 
   result.SetAttribute('creator', 'TDBWare');
   result.SetAttribute('version', '1.1');
