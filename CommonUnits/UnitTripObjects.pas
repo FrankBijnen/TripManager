@@ -6545,21 +6545,22 @@ begin
         RoutePtExt := RtePt.AddChild('extensions');
         RoutePt := RoutePtExt.AddChild(ViaPointType);
 
-        if (Assigned(RoutePt)) and
-           (ViaPointType = 'trp:ViaPoint') then
+        if (ViaPointType = 'trp:ViaPoint') then
         begin
           if (Arrival <> '') then
             RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
           RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
         end;
 
-        if (Assigned(AllRoutes)) and
+        // Write RoutePointExtension
+        RoutePtRteExt := RoutePtExt.AddChild('gpxx:RoutePointExtension');
+        RoutePtRteExt.AddChild('gpxx:Subclass').NodeValue := DirectRoutingClass;
+
+        if (Assigned(AllRoutes)) and // Dont write TM extensions for last RtePt
            (UdbHndleCnt > -1) and
            (UdbHndleCnt < AllRoutes.Items.Count) then
         begin
           AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
-          RoutePtRteExt := RoutePtExt.AddChild('gpxx:RoutePointExtension');
-          RoutePtRteExt.AddChild('gpxx:Subclass').NodeValue := DirectRoutingClass;
           Inc(UdbDirCnt);
           while (UdbDirCnt < AnUdbHandle.Items.Count) and
                 (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
