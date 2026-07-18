@@ -6438,6 +6438,7 @@ var
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
   ViaPointType, Arrival, TransportMode, CalculationMode, PointName, Lat, Lon, Address: string;
+  WriteTMExtensions: boolean;
   AllRoutes: TmAllRoutes;
   AnUdbHandle: TmUdbDataHndl;
   UdbHndleCnt: integer;
@@ -6486,6 +6487,8 @@ begin
     UdbHndleCnt := -1;
     UdbDirCnt := -1;
     AllRoutes := GetItem(TmAllRoutes.GetKey) as TmAllRoutes;
+    WriteTMExtensions := Assigned(AllRoutes) and // Can we write the TM Extensions. <time> <dist>
+                         IsCalculated;
 
     for Location in Locations.Locations do
     begin
@@ -6506,11 +6509,9 @@ begin
              (TmArrival(ANItem).AsCardinal <> 0) then
             Arrival := DateToISO8601(TUnixDateConv.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
 
-          if Assigned(AllRoutes) then
-          begin
-            Inc(UdbHndleCnt);
-            UdbDirCnt := 0;
-          end;
+          // Counters for TM Extensions
+          Inc(UdbHndleCnt);
+          UdbDirCnt := 0;
         end;
 
         // Point Name
@@ -6556,11 +6557,13 @@ begin
         RoutePtRteExt := RoutePtExt.AddChild('gpxx:RoutePointExtension');
         RoutePtRteExt.AddChild('gpxx:Subclass').NodeValue := DirectRoutingClass;
 
-        if (Assigned(AllRoutes)) and // Dont write TM extensions for last RtePt
+        if (WriteTMExtensions) and
            (UdbHndleCnt > -1) and
-           (UdbHndleCnt < AllRoutes.Items.Count) then
+           (UdbHndleCnt < AllRoutes.Items.Count) then // Dont write TM extensions for last RtePt
         begin
           AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
+
+          // Need to skip the first, last and routepoint Udb. Have Time=$ffff
           Inc(UdbDirCnt);
           while (UdbDirCnt < AnUdbHandle.Items.Count) and
                 (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
@@ -6569,25 +6572,22 @@ begin
             Inc(UdbDirCnt);
           end;
 
-          if (RoutePtRteExt <> nil) then
+          RoutePtRteTMExt := RoutePtRteExt.AddChild('gpxx:Extensions');
+          if (ViaPointType = 'trp:ViaPoint') then
           begin
-            RoutePtRteTMExt := RoutePtRteExt.AddChild('gpxx:Extensions');
-
-            if (ViaPointType = 'trp:ViaPoint') then
-            begin
-              RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rtept');
-              RoutePtRteTMrpt.AttributeList.Add('dist').Value := IntToStr(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset));
-              RoutePtRteTMrpt.AttributeList.Add('time').Value := IntToStr(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset));
-            end;
-
-            for LatLonDist in TimeLst do
-            begin
-              RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rpt');
-              RoutePtRteTMrpt.AttributeList.Add('lat').Value := LatLonDist.Lat;
-              RoutePtRteTMrpt.AttributeList.Add('lon').Value := LatLonDist.Lon;
-              RoutePtRteTMrpt.AttributeList.Add('time').Value := LatLonDist.Dist;
-            end;
+            RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rtept');
+            RoutePtRteTMrpt.AttributeList.Add('dist').Value := IntToStr(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset));
+            RoutePtRteTMrpt.AttributeList.Add('time').Value := IntToStr(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset));
           end;
+
+          for LatLonDist in TimeLst do
+          begin
+            RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rpt');
+            RoutePtRteTMrpt.AttributeList.Add('lat').Value := LatLonDist.Lat;
+            RoutePtRteTMrpt.AttributeList.Add('lon').Value := LatLonDist.Lon;
+            RoutePtRteTMrpt.AttributeList.Add('time').Value := LatLonDist.Dist;
+          end;
+
           TimeLst.Clear;
         end;
       end;
