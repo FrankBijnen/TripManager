@@ -115,10 +115,10 @@ type
     MapCoords: string;
   end;
 
-  TLatLonDist = class
+  TLatLonTime = class
     Lat:  string;
     Lon:  string;
-    Dist: string;
+    Time: string;
   end;
 
   TUnixDateConv = class

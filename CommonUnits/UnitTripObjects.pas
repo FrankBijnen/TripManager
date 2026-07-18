@@ -6,7 +6,7 @@ interface
 uses
   System.SysUtils, System.Variants, System.Classes, System.Generics.Collections,
   Winapi.Windows,
-  UnitTripOverview, UnitTripDefs, UnitGpxDefs;
+  UnitVerySimpleXml, UnitTripOverview, UnitTripDefs, UnitGpxDefs;
 
 type
 
@@ -974,8 +974,11 @@ type
     function InitAllRoutes: TBaseItem;
     procedure SetPreserveTrackToRoute(const RtePts: TObject);
     procedure UpdateDistAndTime(TotalDist: single; TotalTime: Cardinal);
+    procedure AddUdbDir2Xml(AnUdbDir: TUdbDir; RoutePtRteExt: TXmlVSNode; TimeLst: TObjectlist<TLatLonTime>);
+    procedure AddTMExtension(RoutePtRteExt: TXmlVSNode; IsViaPoint: boolean;
+                             Dist, Time: Cardinal;
+                             TimeLst: TObjectlist<TLatLonTime>);
     procedure Trip2XmlRte(Rte: TObject);
-    procedure Trip2XmlTrk(Trk: TObject);
     procedure AddLocation_XT(const Locations: TmLocations;
                              const Location2Add: TLocation2Add);
     procedure AddLocation_XT2(const Locations: TmLocations;
@@ -1054,7 +1057,7 @@ type
     procedure CreateTemplate(const TripName: string;
                              const CalculationMode: string = '';
                              const TransportMode: string = '');
-    procedure SaveAsGPX(const GPXFile: string; IncludeTrack: boolean = true);
+    procedure SaveAsGPX(const GPXFile: string);
     function KurvigerUrl: string;
     property Header: THeader read FHeader;
     property ItemList: TItemList read FItemList;
@@ -1079,7 +1082,7 @@ uses
 {$IFDEF OSMMAP}
   UnitOSMMap,
 {$ENDIF}
-  UnitStringUtils, UnitVerySimpleXml, UnitProcessOptions;
+  UnitStringUtils, UnitProcessOptions;
 
 const
   Coord_Decimals                      = '%1.6f';
@@ -6431,41 +6434,64 @@ begin
   ForceRecalc(TripModel, 2);
 end;
 
+procedure TTripList.AddUdbDir2Xml(AnUdbDir: TUdbDir; RoutePtRteExt: TXmlVSNode; TimeLst: TObjectlist<TLatLonTime>);
+var
+  GpxxRpt, GpxxSubClass: TXmlVSNode;
+  Coords: TCoords;
+  LatLonTime: TLatLonTime;
+begin
+  LatLonTime := TLatLonTime.Create;
+  Coords := AnUdbDir.Coords;
+  Coords.FormatLatLon(LatLonTime.Lat, LatLonTime.Lon, Coord_Decimals);
+  GpxxRpt := RoutePtRteExt.AddChild('gpxx:rpt');
+  GpxxRpt.AttributeList.Add('lat').Value := LatLonTime.Lat;
+  GpxxRpt.AttributeList.Add('lon').Value := LatLonTime.Lon;
+  GpxxSubClass := GpxxRpt.AddChild('gpxx:Subclass');
+  GpxxSubClass.NodeValue := AnUdbDir.FValue.SubClass.Serialize;
+  LatLonTime.Time := IntToStr(AnUdbDir.FValue.Time);
+  TimeLst.Add(LatLonTime);
+end;
+
+procedure TTripList.AddTMExtension(RoutePtRteExt: TXmlVSNode; IsViaPoint: boolean;
+                                   Dist, Time: Cardinal;
+                                   TimeLst: TObjectlist<TLatLonTime>);
+var
+  RoutePtRteTMExt, RoutePtRteTMrpt: TXmlVSNode;
+  LatLonTime: TLatLonTime;
+begin
+  RoutePtRteTMExt := RoutePtRteExt.AddChild('gpxx:Extensions');
+  if (IsViaPoint) then
+  begin
+    RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rtept');
+    RoutePtRteTMrpt.AttributeList.Add('dist').Value := IntToStr(Dist);
+    RoutePtRteTMrpt.AttributeList.Add('time').Value := IntToStr(Time);
+  end;
+
+  for LatLonTime in TimeLst do
+  begin
+    RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rpt');
+    RoutePtRteTMrpt.AttributeList.Add('lat').Value := LatLonTime.Lat;
+    RoutePtRteTMrpt.AttributeList.Add('lon').Value := LatLonTime.Lon;
+    RoutePtRteTMrpt.AttributeList.Add('time').Value := LatLonTime.Time;
+  end;
+
+  TimeLst.Clear;
+end;
+
 procedure TTripList.Trip2XmlRte(Rte: TObject);
 var
   RtePt, RoutePt, RoutePtExt, RoutePtRteExt: TXmlVSNode;
-  RoutePtRteTMExt, RoutePtRteTMrpt: TXmlVSNode;
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
   ViaPointType, Arrival, TransportMode, CalculationMode, PointName, Lat, Lon, Address: string;
-  WriteTMExtensions: boolean;
+  IsViaPoint, WriteTMExtensions: boolean;
   AllRoutes: TmAllRoutes;
   AnUdbHandle: TmUdbDataHndl;
   UdbHndleCnt: integer;
   UdbDirCnt: integer;
-  TimeLst: TObjectlist<TLatLonDist>;
-  LatLonDist: TLatLonDist;
-
-  procedure WriteUdb(AnUdbDir: TUdbDir);
-  var
-    GpxxRpt, GpxxSubClass: TXmlVSNode;
-    Coords: TCoords;
-    LatLonDist: TLatLonDist;
-  begin
-    LatLonDist := TLatLonDist.Create;
-    Coords := AnUdbDir.Coords;
-    Coords.FormatLatLon(LatLonDist.Lat, LatLonDist.Lon, Coord_Decimals);
-    GpxxRpt := RoutePtRteExt.AddChild('gpxx:rpt');
-    GpxxRpt.AttributeList.Add('lat').Value := LatLonDist.Lat;
-    GpxxRpt.AttributeList.Add('lon').Value := LatLonDist.Lon;
-    GpxxSubClass := GpxxRpt.AddChild('gpxx:Subclass');
-    GpxxSubClass.NodeValue := AnUdbDir.FValue.SubClass.Serialize;
-    LatLonDist.Dist := IntToStr(AnUdbDir.FValue.Time);
-    TimeLst.Add(LatLonDist);
-  end;
-
+  TimeLst: TObjectlist<TLatLonTime>;
 begin
-  TimeLst := TObjectlist<TLatLonDist>.Create(true);
+  TimeLst := TObjectlist<TLatLonTime>.Create(true);
   try
     IntToIdent(Ord(TTransportMode.tmMotorcycling), TransportMode, TransportModeMap);
     ANItem := GetItem(TmTransportationMode.GetKey);
@@ -6497,9 +6523,10 @@ begin
         RtePt := TXmlVSNode(Rte).AddChild('rtept');
 
         // Point Type
+        IsViaPoint := TLocation(Location).IsViaPoint;
         Arrival := '';
         ViaPointType := 'trp:ShapingPoint';
-        if (TLocation(Location).IsViaPoint) then
+        if (IsViaPoint) then
         begin
           ViaPointType := 'trp:ViaPoint';
 
@@ -6546,7 +6573,7 @@ begin
         RoutePtExt := RtePt.AddChild('extensions');
         RoutePt := RoutePtExt.AddChild(ViaPointType);
 
-        if (ViaPointType = 'trp:ViaPoint') then
+        if (IsViaPoint) then
         begin
           if (Arrival <> '') then
             RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
@@ -6563,32 +6590,20 @@ begin
         begin
           AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
 
-          // Need to skip the first, last and routepoint Udb. Have Time=$ffff
+          // Need to skip the First, last and RoutePoint Udb. Have time=$ffff
           Inc(UdbDirCnt);
           while (UdbDirCnt < AnUdbHandle.Items.Count) and
                 (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
           begin
-            WriteUdb(AnUdbHandle.Items[UdbDirCnt]);
+            AddUdbDir2Xml(AnUdbHandle.Items[UdbDirCnt], RoutePtRteExt, TimeLst);
             Inc(UdbDirCnt);
           end;
 
-          RoutePtRteTMExt := RoutePtRteExt.AddChild('gpxx:Extensions');
-          if (ViaPointType = 'trp:ViaPoint') then
-          begin
-            RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rtept');
-            RoutePtRteTMrpt.AttributeList.Add('dist').Value := IntToStr(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset));
-            RoutePtRteTMrpt.AttributeList.Add('time').Value := IntToStr(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset));
-          end;
-
-          for LatLonDist in TimeLst do
-          begin
-            RoutePtRteTMrpt := RoutePtRteTMExt.AddChild('tm:rpt');
-            RoutePtRteTMrpt.AttributeList.Add('lat').Value := LatLonDist.Lat;
-            RoutePtRteTMrpt.AttributeList.Add('lon').Value := LatLonDist.Lon;
-            RoutePtRteTMrpt.AttributeList.Add('time').Value := LatLonDist.Dist;
-          end;
-
-          TimeLst.Clear;
+          AddTMExtension(RoutePtRteExt,
+                         IsViaPoint,
+                         AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset),
+                         AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset),
+                         TimeLst);
         end;
       end;
     end;
@@ -6597,38 +6612,8 @@ begin
   end;
 end;
 
-procedure TTripList.Trip2XmlTrk(Trk: TObject);
-var
-  TrkSeg, TrkPt: TXmlVSNode;
-  AllRoutes: TmAllRoutes;
-  AnUdbHandle: TmUdbDataHndl;
-  ANUdbDir: TUdbDir;
-  Coords: TCoords;
-  Lat, Lon: string;
-begin
-  TXmlVSNode(Trk).AddChild('name').NodeValue := TripName;
 
-  AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
-  if not Assigned(AllRoutes) then
-    exit;
-
-  begin
-    for AnUdbHandle in AllRoutes.Items do
-    begin
-      TrkSeg := TXmlVSNode(Trk).AddChild('trkseg');
-      for ANUdbDir in AnUdbHandle.Items do
-      begin
-        TrkPt := TrkSeg.AddChild('trkpt');
-        Coords := ANUdbDir.Coords;
-        Coords.FormatLatLon(Lat, Lon, Coord_Decimals);
-        TrkPt.Attributes['lat'] := Lat;
-        TrkPt.Attributes['lon'] := Lon;
-      end;
-    end;
-  end;
-end;
-
-procedure TTripList.SaveAsGPX(const GPXFile: string; IncludeTrack: boolean = true);
+procedure TTripList.SaveAsGPX(const GPXFile: string);
 var
   Xml: TXmlVSDocument;
   XMLRoot: TXmlVSNode;
@@ -6637,9 +6622,6 @@ begin
   try
     XMLRoot := InitGarminGpx(XML);
     Trip2XmlRte(XMLRoot.AddChild('rte'));
-
-    if IncludeTrack then
-      Trip2XmlTrk(XMLRoot.AddChild('trk'));
 
     XML.SaveToFile(GPXFile);
   finally

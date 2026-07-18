@@ -104,7 +104,7 @@ begin
     exit;
 
   FixTripList;
-  ATripList.SaveAsGPX(SaveTrip.FileName, false);
+  ATripList.SaveAsGPX(SaveTrip.FileName);
 
   Close;
 end;

@@ -66,6 +66,7 @@ function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
 function UserAgent: string;
 function DynArray(const ConstArray: array of integer): TDynArrayType;
+procedure CheckSurrogate(const AWideString: string);
 
 var
   CreatedTempPath: string;
@@ -424,7 +425,8 @@ begin
 
   for Indx := 1 to Length(result) do
   begin
-    if (CharInSet(result[Indx], InvalidChars)) then
+    if (CharInSet(result[Indx], InvalidChars)) or
+       (IsLeadChar(result[Indx])) then
       result[Indx] := '_';
   end;
 end;
@@ -597,6 +599,15 @@ function DynArray(const ConstArray: array of integer): TDynArrayType;
 begin
   SetLength(result, Length(ConstArray));
   MoveMemory(@result[0], @ConstArray, SizeOf(ConstArray));
+end;
+
+procedure CheckSurrogate(const AWideString: string);
+var
+  AWideChar: Char;
+begin
+  for AWideChar in AWideString do
+    if (IsLeadChar(AWideChar)) then
+      raise Exception.Create(Format('Invalid characters for file name: %s', [AWideString]));
 end;
 
 initialization

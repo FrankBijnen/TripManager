@@ -42,7 +42,7 @@ object DmRoutePoints: TDmRoutePoints
     object CdsRoutePointsLon: TStringField
       FieldName = 'Lon'
     end
-    object CdsRoutePointsAddress: TStringField
+    object CdsRoutePointsAddress: TWideStringField
       DisplayWidth = 64
       FieldName = 'Address'
       Size = 512
@@ -61,7 +61,7 @@ object DmRoutePoints: TDmRoutePoints
     Params = <>
     Left = 50
     Top = 28
-    object CdsRouteTripName: TStringField
+    object CdsRouteTripName: TWideStringField
       FieldName = 'TripName'
       Size = 128
     end

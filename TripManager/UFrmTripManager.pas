@@ -4622,11 +4622,10 @@ begin
           raise exception.Create(Format('File %s exists!', [TripFilename]));
 
         // Rename
-        AnItem.Caption := TripFilename; // Change caption
-
         if not CurrentDevice.RenameFile(ABase_Data.ObjectId, TripFilename) then
           raise exception.Create('Rename failed on device');
 
+        AnItem.Caption := TripFilename; // Change caption
         CurrentDevice.GetListInfo(FSavedFolderId, TripFilename, AnItem); // Get modified data
 
         // reload trip, and change mFilename

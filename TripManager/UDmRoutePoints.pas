@@ -18,11 +18,11 @@ type
     CdsRoutePointsViaPoint: TBooleanField;
     CdsRoutePointsLat: TStringField;
     CdsRoutePointsLon: TStringField;
-    CdsRoutePointsAddress: TStringField;
+    CdsRoutePointsAddress: TWideStringField;
     CdsRoutePointsCoords: TStringField;
     CdsRoute: TClientDataSet;
     DsRoute: TDataSource;
-    CdsRouteTripName: TStringField;
+    CdsRouteTripName: TWideStringField;
     CdsRouteRoutePreference: TStringField;
     CdsRouteTransportationMode: TStringField;
     CdsRouteDepartureDate: TDateTimeField;
