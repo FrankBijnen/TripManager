@@ -6581,29 +6581,30 @@ begin
         end;
 
         // Write RoutePointExtension
-        RoutePtRteExt := RoutePtExt.AddChild('gpxx:RoutePointExtension');
-        RoutePtRteExt.AddChild('gpxx:Subclass').NodeValue := DirectRoutingClass;
-
-        if (WriteTMExtensions) and
-           (UdbHndleCnt > -1) and
-           (UdbHndleCnt < AllRoutes.Items.Count) then // Dont write TM extensions for last RtePt
+        if (WriteTMExtensions) then
         begin
-          AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
-
-          // Need to skip the First, last and RoutePoint Udb. Have time=$ffff
-          Inc(UdbDirCnt);
-          while (UdbDirCnt < AnUdbHandle.Items.Count) and
-                (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
+          RoutePtRteExt := RoutePtExt.AddChild('gpxx:RoutePointExtension');
+          RoutePtRteExt.AddChild('gpxx:Subclass').NodeValue := DirectRoutingClass;
+          if (UdbHndleCnt > -1) and
+             (UdbHndleCnt < AllRoutes.Items.Count) then // Dont write TM extensions for last RtePt
           begin
-            AddUdbDir2Xml(AnUdbHandle.Items[UdbDirCnt], RoutePtRteExt, TimeLst);
-            Inc(UdbDirCnt);
-          end;
+            AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
 
-          AddTMExtension(RoutePtRteExt,
-                         IsViaPoint,
-                         AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset),
-                         AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset),
-                         TimeLst);
+            // Need to skip the First, last and RoutePoint Udb. Have time=$ffff
+            Inc(UdbDirCnt);
+            while (UdbDirCnt < AnUdbHandle.Items.Count) and
+                  (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
+            begin
+              AddUdbDir2Xml(AnUdbHandle.Items[UdbDirCnt], RoutePtRteExt, TimeLst);
+              Inc(UdbDirCnt);
+            end;
+
+            AddTMExtension(RoutePtRteExt,
+                           IsViaPoint,
+                           AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset),
+                           AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeOffset),
+                           TimeLst);
+          end;
         end;
       end;
     end;
