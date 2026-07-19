@@ -74,7 +74,7 @@ type
                        rpExtShaping       = 2);
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
-  TAvoidances       = (avValid = $01, avCarpool = $02, avFerries = $04, avUnpaved = $20, avU_Turns = $40, avHighWays = $80);
+  TAvoidances       = (avValid = $01, avCarpool = $02, avFerries = $04, avToll = $10, avUnpaved = $20, avU_Turns = $40, avHighWays = $80);
   PAvoidances       = ^ TAvoidances;
 
   TRoutePrefRec = record
@@ -164,8 +164,9 @@ const
                                                           (Value: Ord(rpExtShaping);        Name: 'Extended Shaping point')
                                                         );
 
-  AvoidanceMap : array[0..4] of TIdentMapEntry =       (  (Value: Ord(avCarpool);           Name: 'Carpool Lanes'),
+  AvoidanceMap : array[0..5] of TIdentMapEntry =       (  (Value: Ord(avCarpool);           Name: 'Carpool Lanes'),
                                                           (Value: Ord(avFerries);           Name: 'Ferries'),
+                                                          (Value: Ord(avToll);              Name: 'Tolls and Fees'),
                                                           (Value: Ord(avUnpaved);           Name: 'Unpaved Roads'),
                                                           (Value: Ord(avU_Turns);           Name: 'U-Turns'),
                                                           (Value: Ord(avHighWays);          Name: 'Highways')
