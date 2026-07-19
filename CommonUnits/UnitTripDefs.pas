@@ -229,7 +229,7 @@ const
 
   TripExtension           = '.trip';
   TripMask                = '*' + TripExtension;
-
+  SubClassDistFact        = 2.39;
   // Model specific values
   CalcUndef               = $00000000;
   CalcNA                  = $ffffffff;

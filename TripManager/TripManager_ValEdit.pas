@@ -55,6 +55,7 @@ begin
     try
       Lst.QuoteChar := '"';
       Lst.Delimiter := ';';
+      Lst.StrictDelimiter := true;
 
       Lst.AddStrings(['Key', 'Value']);
       Writer.WriteLine(Lst.DelimitedText);

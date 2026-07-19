@@ -783,8 +783,9 @@ type
         B2_3Lat:          word;
         B2_3Lon:          word);
     3: (Direction2:       byte;
-        Time:             word;
-        Unknown2:         array[0..1] of word);
+        Unknown2:         array[0..1] of byte;
+        Unknown3:         word;
+        Distance:         word) // multiply by 2.39 to get meters
   end;
   TUdbDirFixedValue = packed record
     SubClass:         TSubClass;

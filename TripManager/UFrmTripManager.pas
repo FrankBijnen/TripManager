@@ -3723,14 +3723,21 @@ var
                                                       SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
                                                       OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
 
-      VlTripInfo.Strings.AddPair('Subclass Unknown1', Format('%s %s %s',
-                                                         [IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Time), 4),
-                                                          IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Unknown2[0]), 4),
-                                                          IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Unknown2[1]), 4)]
+      VlTripInfo.Strings.AddPair('Subclass Unknown2', Format('%s %s %s',
+                                                         [IntToHex(AnUdbDir.UdbDirValue.SubClass.Unknown2[0], 2),
+                                                          IntToHex(AnUdbDir.UdbDirValue.SubClass.Unknown2[1], 2),
+                                                          IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Unknown3), 4)]
                                                         ),
                                 TGridSelItem.Create(AnUdbDir,
-                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown1),
-                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown1)));
+                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown2) + SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown3),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown2)));
+
+      VlTripInfo.Strings.AddPair(Format('Subclass Distance ( *%1.2f Mtr)', [SubClassDistFact]), Format('%1f',
+                                                         [AnUdbDir.UdbDirValue.SubClass.Distance * SubClassDistFact]
+                                                        ),
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Distance),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Distance)));
     end;
     VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s', [AnUdbDir.MapCoords]),
                               TGridSelItem.Create(AnUdbDir,
