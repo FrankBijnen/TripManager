@@ -132,7 +132,7 @@ begin
   end
   else
   begin
-    ModelDescription := Unknown_Name;
+    ModelDescription := StrUnknown;
     Init(TGarminModel.Unknown);
   end;
 end;

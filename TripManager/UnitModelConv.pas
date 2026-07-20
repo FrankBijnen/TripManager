@@ -86,9 +86,6 @@ const
   Nuvi57_Name                       = 'n' + #0252 + 'vi 57';
   Nuvi57_PartNumber                 = '006-B2087-00';
 
-  // Unknown
-  Unknown_Name                      = 'Unknown';
-
   // Defaults vehicle profile
   DEF_VehicleProfileGuid            = '00000000-0000-0000-0000-000000000000';
   DEF_VehicleId                     = 1;
@@ -334,7 +331,7 @@ const
         ExploreDB: false;
         GarminFmts: GPXPOIFmts;
         DefSymbolSize: GpiSmallSymbols),
-    (DeviceName: Unknown_Name;
+    (DeviceName: StrUnknown;
         TripModel: TTripModel.Unknown;
         Safe: true;
         Displayable: true;
@@ -424,7 +421,7 @@ class function TModelConv.GetTripModel(const TripModel: TTripModel): string;
 begin
   if (Ord(TripModel) < 0) or
      (Ord(TripModel) > TripModels.Count -1) then
-    exit(Unknown_Name);
+    exit(StrUnknown);
 
   result := TripModels[Ord(TripModel)];
 end;
@@ -437,7 +434,7 @@ begin
   result := TStringList.Create;
   UnknownIndex := Ord(High(TTripModel));
   result.Text := DupeString(#10, UnknownIndex +1); // Create empty lines
-  result[UnknownIndex] := Unknown_Name;
+  result[UnknownIndex] := StrUnknown;
 
   for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
   begin

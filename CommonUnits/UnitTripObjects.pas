@@ -3442,26 +3442,12 @@ end;
 
 function TSubClass.IsKnownRoutePoint: boolean;
 begin
-  case PointType of
-    $01,
-    $03,
-    $05,
-    $0D:
-      result := true;
-    else
-      result := false;
-  end;
+  result := (PointType in RoutePointsKnown);
 end;
 
 function TSubClass.IsKnownComprLatLon: boolean;
 begin
-  case PointType of
-    $03,
-    $0D:
-      result := true;
-    else
-      result := false;
-  end;
+  result := (PointType in RoutePointComprLatLon);
 end;
 
 function TSubClass.IsKnownStartEndSegment: boolean;
@@ -3492,6 +3478,10 @@ begin
   inherited Create;
   FValue := Default(TUdbDirFixedValue);
   SetLength(FUnknown2, TripVersion[AModel].UdbDirUnknown2Size);
+{$IFDEF TM_EXTENSIONS}
+  FUnknown2[6] := Ord('T');
+  FUnknown2[7] := Ord('M');
+{$ENDIF}
   SetLength(FUdbDirName, UdbDirNameSize[AModel]);
 
   // Copy Name
@@ -3669,28 +3659,15 @@ end;
 
 function TUdbDir.GetPointType: string;
 begin
-  case FValue.SubClass.PointType of
-    $01,
-    $03,
-    $05,
-    $0D:
-      result := 'Route point';
-    $14:
-      result := 'Point of interest';
-    $1F:
-      result := 'Intermediate';
-    $21:
-      result := 'Begin or end segment';
-    else
-     result := 'Unknown';
-  end;
+  if not (IntToIdent(FValue.SubClass.PointType, result, UdbDirTypeMap)) then
+    result := StrUnknown;
   result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.PointType, 2)]);
 end;
 
 function TUdbDir.GetDirection: string;
 begin
   if not (IntToIdent(FValue.SubClass.Direction, result, DirectionMap)) then
-    result := 'Unknown';
+    result := StrUnknown;
   result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.Direction, 2)]);
 end;
 
@@ -5155,6 +5132,9 @@ begin
   Locations.Add(TmIsTravelapseDestination.Create);
   Locations.Add(TmShapingRadius.Create);
   Locations.Add(TmName.Create(Location2Add.Name));
+{$IFDEF TM_EXTENSIONS}
+  Locations.Add(TBooleanItem.Create('mTM_Flag1', true));
+{$ENDIF}
 end;
 
 procedure TTripList.AddLocation_XT2(const Locations: TmLocations;
@@ -6058,6 +6038,9 @@ begin
   Add(TmVersionNumber.Create(TripFileVersion));
   Add(TmAllRoutes.Create);
   Add(TmTripName.Create(TripName));
+{$IFDEF TM_EXTENSIONS}
+  Add(TBooleanItem.Create('mTM_Flag1', true));
+{$ENDIF}
 end;
 
 procedure TTripList.CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);

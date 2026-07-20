@@ -3785,7 +3785,7 @@ var
                                                    SizeOf(AnUdbhandle.PrefValue),
                                                    OffSetPref));
 
-    VlTripInfo.Strings.AddPair('Unknown', Format('0x%s', [IntToHex(AnUdbhandle.PrefValue.Unknown1)]),
+    VlTripInfo.Strings.AddPair(StrUnknown, Format('0x%s', [IntToHex(AnUdbhandle.PrefValue.Unknown1)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(AnUdbhandle.PrefValue.Unknown1),
                                                    OffSetPref));

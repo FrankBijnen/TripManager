@@ -5,6 +5,9 @@ interface
 uses
   System.Classes;
 
+const
+  StrUnknown        = 'Unknown';
+
 type
 
   TTripModel        = (XT,
@@ -158,6 +161,19 @@ const
                                                           (Value: Ord(tmMotorcycling);      Name: 'Motorcycling'),
                                                           (Value: Ord(tmOffRoad);           Name: 'OffRoad')
                                                         );
+
+  UdbDirTypeMap : array[0..7] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Route point'),
+                                                          (Value: $01;                      Name: 'Route point'),
+                                                          (Value: $03;                      Name: 'Route point'),
+                                                          (Value: $05;                      Name: 'Route point Center'),
+                                                          (Value: $0D;                      Name: 'Route point'),
+                                                          (Value: $14;                      Name: 'Point of interest'),
+                                                          (Value: $1F;                      Name: 'Intermediate'),
+                                                          (Value: $21;                      Name: 'Begin or end segment')
+                                                        );
+
+  RoutePointsKnown = [$00, $01, $03, $05, $0D];
+  RoutePointComprLatLon = [$03, $0D];
 
   RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
                                                           (Value: Ord(rpShaping);           Name: 'Shaping point'),
