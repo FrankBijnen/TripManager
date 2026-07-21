@@ -965,9 +965,9 @@ begin
       end;
     end;
 
-    EdFileSysFolder.Text := ShellTreeView1.Path;
     PostReloadFileList;
   finally
+    EdFileSysFolder.Text := ShellTreeView1.Path;
     SetCursor(CrNormal);
   end;
 end;

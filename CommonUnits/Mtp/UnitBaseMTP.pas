@@ -87,9 +87,8 @@ type
     function GetFile(const SFile, SSaveTo, NFile: string): boolean; virtual;
     function DelFile(const SFile: string; const Recurse: boolean = false): boolean; virtual;
     function RenameFile(const ObjectId, NewName: string): boolean; virtual;
-    function TransferNewFile(const SFile, SSaveTo: string;
-                             const NewName: WideString = ''): string; virtual;
-    function TransferExistingFile(const SFile, SSaveTo: string;
+    function TransferNewFile(const SourceFile, DirOnDev: string): string; virtual;
+    function TransferExistingFile(const SourceFile, DirOnDev: string;
                                   const AListItem: TListItem): boolean; virtual;
     function CreatePath(const Parent, DirName: string): boolean; virtual;
     function ReadFiles(const Lst: TListItems;
@@ -306,26 +305,32 @@ end;
 
 function TBase_Device.RenameFile(const ObjectId, NewName: string): boolean;
 begin
+  CheckSurrogate(NewName);
   result := MTP_RenameDeviceFile(PortableDev, ObjectId, NewName);
 end;
 
-function TBase_Device.TransferNewFile(const SFile, SSaveTo: string;
-                                      const NewName: WideString = ''): string;
+function TBase_Device.TransferNewFile(const SourceFile, DirOnDev: string): string;
+var
+  NameOnDev: string;
 begin
-  result := MTP_TransferNewFileToDevice(PortableDev, SFile, SSaveTo, NewName);
+  NameOnDev := ExtractFileName(SourceFile);
+  CheckSurrogate(NameOnDev);
+  result := MTP_TransferNewFileToDevice(PortableDev, SourceFile, DirOnDev, NameOnDev);
 end;
 
-function TBase_Device.TransferExistingFile(const SFile, SSaveTo: string;
+function TBase_Device.TransferExistingFile(const SourceFile, DirOnDev: string;
                                            const AListItem: TListItem): boolean;
 begin
   if not Assigned(AListItem) then
     raise exception.Create('No item selected.');
 
-  result := MTP_TransferExistingFileToDevice(PortableDev, SFile, SSaveTo, AListItem);
+  CheckSurrogate(AListItem.Caption);
+  result := MTP_TransferExistingFileToDevice(PortableDev, SourceFile, DirOnDev, AListItem);
 end;
 
 function TBase_Device.CreatePath(const Parent, DirName: string): boolean;
 begin
+  CheckSurrogate(DirName);
   result := MTP_CreateDevicePath(PortableDev, Parent, DirName);
 end;
 

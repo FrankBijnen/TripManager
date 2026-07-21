@@ -372,9 +372,11 @@ function MTP_GetFileFromDevice(PortableDev: IPortableDevice; SFile, SSaveTo, NFi
 function MTP_DelFromDevice(PortableDev: IPortableDevice; SFile: WideString; const Recurse: boolean = false): boolean;
 function MTP_CreateDevicePath(PortableDev: IPortableDevice; Parent, DirName: WideString): boolean;
 function MTP_RenameDeviceFile(PortableDev: IPortableDevice; ObjectId, NewName: WideString): boolean;
-function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
-                                     NewName: WideString = ''): WideString;
-function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
+function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice;
+                                     SourceFile, DirOnDev, NameOnDev: WideString): WideString;
+function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice;
+                                          SourceFile, DirOnDev: WideString;
+                                          AListItem: TListItem): boolean;
 function MTP_GetDevices(const DeviceList: TList; const DeviceClass: TPersistentClass = nil): boolean;
 function MTP_ConnectToDevice(SDev: WideString; var PortableDev: IPortableDevice; Readonly: boolean = false): boolean;
 
@@ -1293,9 +1295,9 @@ begin
 end;
 
 function MTP_GetIdForFile(PortableDev: IPortableDevice;
-                      SPath: WideString;
-                      SFile: WideString;
-                      AListItem: TListItem): string;
+                          SPath: WideString;
+                          SFile: WideString;
+                          AListItem: TListItem): string;
 var
   Prop: IPortableDeviceProperties;
 begin
@@ -1529,8 +1531,8 @@ end;
 
 // See for more info
 //https://learn.microsoft.com/en-us/windows/win32/wpd_sdk/transferring-an-image-or-music-file-to-the-device
-function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString;
-                                     NewName: WideString = ''): WideString;
+function MTP_TransferNewFileToDevice(PortableDev: IPortableDevice;
+                                     SourceFile, DirOnDev, NameOnDev: WideString): WideString;
 var
   Content: IPortableDeviceContent;
   PortableStream:  IPortableDeviceDataStream;
@@ -1539,12 +1541,12 @@ var
   PValues: IPortableDeviceValues;
   FFileStream: TFileStream;
   Buf: array of Byte;
-  NameOnDev: WideString;
   PPszCookie: PWideChar;
   ppszObjectID: PWideChar;
   HR: HResult;
 begin
-  Result := '';
+  result := '';
+
   if PortableDev.Content(Content) <> S_OK then
     exit;
 
@@ -1553,13 +1555,9 @@ begin
   if VarIsClear(PValues) then
     exit;
 
-  FFileStream := TFileStream.Create(SFile, fmOpenRead);
+  FFileStream := TFileStream.Create(SourceFile, fmOpenRead);
   try
-    NameOnDev := NewName;
-    if (NameOnDev = '') then
-      NameOnDev := ExtractFileName(SFile);
-
-    GetRequiredPropertiesForContent(SSaveTo, NameOnDev, FFileStream.Size, PValues);
+    GetRequiredPropertiesForContent(DirOnDev, NameOnDev, FFileStream.Size, PValues);
 
     //create dest. stream
     ITransferSize := 0;
@@ -1603,11 +1601,12 @@ end;
 // - Transfer file to device with a temporary name.
 // - Delete the old file
 // - Rename temporary to original name.
-
 const
-  TempExtension = '.tmp';
+  TmpExtension = '.tmp';
 
-function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice; SFile, SSaveTo: WideString; AListItem: TListItem): boolean;
+function MTP_TransferExistingFileToDevice(PortableDev: IPortableDevice;
+                                          SourceFile, DirOnDev: WideString;
+                                          AListItem: TListItem): boolean;
 var
   BASE_Data: TBase_Data;
   Content: IPortableDeviceContent;
@@ -1616,12 +1615,14 @@ var
   TempName: WideString;
   NewObjectId: WideString;
   OldObjectId: WideString;
+  Guid: TGUID;
 begin
   result := false;
 
   // Need ListItem
   if (AListItem.Data = nil) then
     exit;
+
   BASE_Data := TBase_Data(AListItem.Data);
   OldObjectId := BASE_Data.ObjectId;
 
@@ -1633,11 +1634,12 @@ begin
     exit;
 
 // Set filenames
-  OriginalName := ExtractFileName(SFile);
-  TempName := ChangeFileExt(OriginalName, TempExtension);
+  OriginalName := ExtractFileName(SourceFile);
+  CheckHRGuid(CreateGUID(Guid)); // A Guid should be unique. ALthough on MTP devices filenames dont need to be unique.
+  TempName := ReplaceAll(LowerCase(GuidToString(Guid)) + TmpExtension, ['{','}'], ['',''], [rfReplaceAll]);
 
 // Copy File to Device. The Filename will exist (shortly) twice.
-  NewObjectId := MTP_TransferNewFileToDevice(PortableDev, SFile, SSaveTo, TempName);
+  NewObjectId := MTP_TransferNewFileToDevice(PortableDev, SourceFile, DirOnDev, TempName);
   if (NewObjectId = '') then
     exit;
 
@@ -1647,12 +1649,11 @@ begin
     exit;
 
 // Rename back to original file
-
   if not MTP_RenameDeviceFile(PortableDev, NewObjectId, OriginalName) then
     exit;
 
 // And get properties
-  MTP_GetIdForFile(PortableDev, SSaveTo, OriginalName, AListItem);
+  MTP_GetIdForFile(PortableDev, DirOnDev, OriginalName, AListItem);
 
   result := true;
 end;

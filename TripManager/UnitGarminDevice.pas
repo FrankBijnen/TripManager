@@ -78,8 +78,7 @@ type
     function GetFile(const SFile, SSaveTo, NFile: string): boolean; override;
     function DelFile(const SFile: string; const Recurse: boolean = false): boolean; override;
     function RenameFile(const ObjectId, NewName: string): boolean; override;
-    function TransferNewFile(const SFile, SSaveTo: string;
-                             const NewName: WideString = ''): string; override;
+    function TransferNewFile(const SourceFile, DirOnDev: string): string; override;
     function TransferExistingFile(const SFile, SSaveTo: string;
                                   const AListItem: TListItem): boolean; override;
     function CreatePath(const Parent, DirName: string): boolean; override;
@@ -749,11 +748,10 @@ begin
   result := RenameFile(Pchar(ObjectId), Pchar(NewName));
 end;
 
-function TGarminDrv_Device.TransferNewFile(const SFile, SSaveTo: string;
-                                           const NewName: WideString = ''): string;
+function TGarminDrv_Device.TransferNewFile(const SourceFile, DirOnDev: string): string;
 begin
-  result := CombinePath(SSaveTo, ExtractFileName(SFile));
-  if not CopyFile(Pchar(SFile), PChar(result), true) then
+  result := CombinePath(DirOnDev, ExtractFileName(SourceFile));
+  if not CopyFile(Pchar(SourceFile), PChar(result), true) then
     exit('');
 end;
 
