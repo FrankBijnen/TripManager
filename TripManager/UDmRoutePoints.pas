@@ -480,7 +480,7 @@ end;
 
 procedure TDmRoutePoints.SetPickLists(ATripList: TObject);
 begin
-  with TmRoutePreference.Create(TRoutePreference.rmFasterTime) do
+  with TmRoutePreference.Create(dtByte, TRoutePreference.rmFasterTime) do
   begin
     SetTripList(TTripList(ATripList));
     FRoutePickList := PickList;

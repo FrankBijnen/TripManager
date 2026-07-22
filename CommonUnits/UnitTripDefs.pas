@@ -82,7 +82,7 @@ type
 
   TRoutePrefRec = record
     Sel: boolean;
-    DwSize: boolean;
+    Dt: byte;
     Rm: TRoutePreference;
     Desc: string;
   end;
@@ -133,21 +133,21 @@ type
 const
 
 { Elementary data types }
-  dtByte          = 1;
-  dtCardinal      = 3;
-  dtSingle        = 4;
-  dtBoolean       = 7;
-  dtVersion       = 8;
-  dtPosn          = 8;
-  dtDWordRoutePref= 8;
-  dtHeaderPref    = 10;
-  dtLctnPref      = 10;
-  dtLinkPref      = 10;
-  dtUdbPref       = 10;
-  dtUdbHandle     = 11;
-  dtRaw           = 12;
-  dtString        = 14;
-  dtList          = 128;
+  dtByte            = 1;
+  dtCardinal        = 3;
+  dtSingle          = 4;
+  dtBoolean         = 7;
+  dtVersion         = 8;
+  dtPosn            = 8;
+  dtDWordRoutePref  = 8;
+  dtHeaderPref      = 10;
+  dtLctnPref        = 10;
+  dtLinkPref        = 10;
+  dtUdbPref         = 10;
+  dtUdbHandle       = 11;
+  dtRaw             = 12;
+  dtString          = 14;
+  dtList            = 128;
 
   biInitiator: AnsiChar = #$09;
 
@@ -256,23 +256,23 @@ const
 
   RoutePrefRecs : array[TCalcMode] of TRoutePrefRec
     = (
-        (Sel: true;  DwSize: false;         Rm: rmFasterTime;           Desc: 'FasterTime'),
-        (Sel: true;  DwSize: false;         Rm: rmShorterDistance;      Desc: 'ShorterDistance'),
-        (Sel: true;  DwSize: false;         Rm: rmStraight;             Desc: 'Straight'),
-        (Sel: false; DwSize: false;         Rm: rmAdventurous;          Desc: 'Adventurous'),
+        (Sel: true;  Dt: dtByte;            Rm: rmFasterTime;           Desc: 'FasterTime'),
+        (Sel: true;  Dt: dtByte;            Rm: rmShorterDistance;      Desc: 'ShorterDistance'),
+        (Sel: true;  Dt: dtByte;            Rm: rmStraight;             Desc: 'Straight'),
+        (Sel: false; Dt: dtByte;            Rm: rmAdventurous;          Desc: 'Adventurous'),
 
-        (Sel: false; DwSize: false;         Rm: rmOffRoad;              Desc: 'OffRoad'),
-        (Sel: false; DwSize: false;         Rm: rmDirect;               Desc: 'Direct'),
-        (Sel: false; DwSize: false;         Rm: rmCurvyRoads;           Desc: 'CurvyRoads'),
-        (Sel: false; DwSize: false;         Rm: rmEco;                  Desc: 'Eco'),
+        (Sel: false; Dt: dtByte;            Rm: rmOffRoad;              Desc: 'OffRoad'),
+        (Sel: false; Dt: dtByte;            Rm: rmDirect;               Desc: 'Direct'),
+        (Sel: false; Dt: dtByte;            Rm: rmCurvyRoads;           Desc: 'CurvyRoads'),
+        (Sel: false; Dt: dtByte;            Rm: rmEco;                  Desc: 'Eco'),
 
-        (Sel: false; DwSize: true;          Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
-        (Sel: false; DwSize: true;          Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
-        (Sel: false; DwSize: true;          Rm: rmDWordOffRoad;         Desc: 'OffRoad'),
-        (Sel: false; DwSize: true;          Rm: rmDWordEco;             Desc: 'Eco'),
+        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
+        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
+        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordOffRoad;         Desc: 'OffRoad'),
+        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordEco;             Desc: 'Eco'),
 
-        (Sel: false; DwSize: false;         Rm: rmTripTrack;            Desc: 'TripTrack'),
-        (Sel: false; DwSize: false;         Rm: rmNA;                   Desc: NotApplicable)
+        (Sel: false; Dt: dtByte;            Rm: rmTripTrack;            Desc: 'TripTrack'),
+        (Sel: false; Dt: dtByte;            Rm: rmNA;                   Desc: NotApplicable)
       );
 
   // Keep 0 for model Unknown
@@ -404,22 +404,20 @@ const
       (Size:1; Version: 4),  // Nuvi 2599_57
       (Size:0; Version: 0)); // Unknown
 
-  // False TmRoutePreference has dtByte (1)
-  // True  TmRoutePreference has dtWordRoutePref (8)
-  RoutePrefDWordSize: array[TTripModel] of boolean = (
-      false,                // XT
-      false,                // XT2
-      false,                // XT3
-      false,                // Tread 2
-      false,                // Zumo 346
-      false,                // Zumo 595
-      false,                // Zumo 590
-      true,                 // Zumo 3x0
-      false,                // Drive 51
-      false,                // Drive 66
-      true,                 // Nuvi 2595
-      false,                // Nuvi 2599_57
-      false);               // Unknown
+  RoutePrefType: array[TTripModel] of byte = (
+      dtByte,               // XT
+      dtByte,               // XT2
+      dtByte,               // XT3
+      dtByte,               // Tread 2
+      dtByte,               // Zumo 346
+      dtByte,               // Zumo 595
+      dtByte,               // Zumo 590
+      dtDWordRoutePref,     // Zumo 3x0
+      dtByte,               // Drive 51
+      dtByte,               // Drive 66
+      dtDWordRoutePref,     // Nuvi 2595
+      dtByte,               // Nuvi 2599_57
+      dtByte);              // Unknown
 
   CalcModesSuppported: array[TTripModel] of set of TCalcMode = (
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT
@@ -488,13 +486,14 @@ begin
   result := Format('%s', [DateTimeToStr(CardinalAsDateTime(ACardinal))]);
 end;
 
+{*** TTripVersion ***}
 function TTripVersion.IsUcs4: boolean;
 begin
   case (Version) of
     1..6:
-      result := false;
+      result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := true;
+      result := true;   // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -502,11 +501,11 @@ function TTripVersion.Unknown2Size: integer;
 begin
   case (Version) of
     1..4:
-      result := 72;
+      result := 72;     // Nuvi 2595, 2599_57, 3x0, 590
     5..6:
-      result := 76;
+      result := 76;     // Drive 51, 346, 595
     else
-      result := 150;
+      result := 150;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -514,9 +513,9 @@ function TTripVersion.UdbDirUnknown2Size: integer;
 begin
   case (Version) of
     1..2:
-      result := 16;
+      result := 16;     // Nuvi 2595
     else
-      result := 18;
+      result := 18;     // Nuvi 2599_57, Drive 51, Drive 66, 3x0, 590, 346, 595, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -524,42 +523,43 @@ function TTripVersion.Unknown3BoundsOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $02;
+      result := $02;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := $04;
+      result := $04;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
-//TODO. Not always in Trip files
 function TTripVersion.Unknown3MagicOffset: integer;
 begin
   case (Version) of
     1:
-      result := $00;  // Nuvi 2595
+      result := $00;    // Nuvi 2595
     2..3:
-      result := $56;  // 590, 3x0
+      result := $56;    // 590, 3x0
     4:
-      result := $5a;  // Nuvi 2599_57
+      result := $5a;    // Nuvi 2599_57
     5..6:
-      result := $56;  // 346, 595, Drive 51
+      result := $56;    // 346, 595, Drive 51
     else
-      result := $58;  // XT, XT2, XT3, Tread2, Drive 66
+      result := $58;    // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
 function TTripVersion.Unknown3ShapeOffset: integer;
 begin
   case (Version) of
-    1..3:
-      result := $66;
+    1:
+      result := $00;    // Nuvi 2595
+    2..3:
+      result := $66;    // 590, 3x0
     4:
-      result := $6a;
+      result := $6a;    // Nuvi 2599_57
     5..6:
-      result := $8e;
+      result := $8e;    // 346, 595, Drive 51
     7..8:
-      result := $90;
+      result := $90;    // XT
     else
-      result := $c0;
+      result := $c0;    // XT2, XT3, Tread2, Drive 66
   end;
 end;
 
@@ -567,9 +567,9 @@ function TTripVersion.Unknown3DistOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $12;
+      result := $12;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := $14;
+      result := $14;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -577,9 +577,9 @@ function TTripVersion.Unknown3TimeOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $16;
+      result := $16;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := $18;
+      result := $18;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -587,25 +587,25 @@ function TTripVersion.Unknown3FloatOffset: integer;
 begin
   case (Version) of
     1:
-        result := $22; // Nuvi 2595
+        result := $22;  // Nuvi 2595
     2,3:
-        result := $1e; // 590, 3x0
+        result := $1e;  // 590, 3x0
     4:
-        result := $22; // Nuvi 2599_57
+        result := $22;  // Nuvi 2599_57
     5..6:
-        result := $1e; // 346, 595, Drive 51
+        result := $1e;  // 346, 595, Drive 51
     else
-        result := $20; // XT, XT2, XT3, Tread2, Drive 66
+        result := $20;  // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
 function TTripVersion.HandleTrailer: boolean;
 begin
   case (Version) of
-    1..6:
-      result := true; // Haven't see trailers for all these devices. But shouldn't hurt.
+    1..6:               // Haven't see trailers for all these devices. But shouldn't hurt.
+      result := true;   // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := false;
+      result := false;  // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -613,9 +613,9 @@ function TTripVersion.CanCheckSystemTrips: boolean;
 begin
   case (Version) of
     1..6:
-      result := false;
+      result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := true;
+      result := true;   // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -629,7 +629,7 @@ begin
     result := Format('TBD (0x%s)', [IntTohex(Ord(ARoutePref), 2)]);
   for ModelCalcMode in CalcModesSuppported[AModel] do
   begin
-    if (RoutePrefRecs[ModelCalcMode].DwSize <> RoutePrefDWordSize[AModel]) then
+    if (RoutePrefRecs[ModelCalcMode].Dt <> RoutePrefType[AModel]) then
       continue;
     if (RoutePrefRecs[ModelCalcMode].Rm = ARoutePref) then
       exit(RoutePrefRecs[ModelCalcMode].Desc);
@@ -651,7 +651,7 @@ var
   Aliases: string;
 begin
   // Default to FasterTime
-  if (RoutePrefDWordSize[AModel]) then
+  if (RoutePrefType[AModel] = dtDWordRoutePref) then
     result := TRoutePreference.rmDWordFasterTime
   else
     result := TRoutePreference.rmFasterTime;

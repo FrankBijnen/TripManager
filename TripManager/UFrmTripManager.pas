@@ -2806,15 +2806,9 @@ procedure TFrmTripManager.ShellTreeView1CustomDrawItem(Sender: TCustomTreeView; 
   var DefaultDraw: Boolean);
 begin
 // Artifacts on the Treeview with Rad11
-{$IFDEF VER350}
-  Sender.Canvas.Brush.Color := clWhite;
-{$ENDIF}
+{$IFNDEF VER350}
   if Node.Selected then
-    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold]
-{$IFDEF VER350}
-  else
-    Sender.Canvas.FillRect(Node.DisplayRect(true));
-  Sender.Canvas.Brush.Color := TTreeView(Sender).Color;
+    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
 {$ENDIF}
 end;
 

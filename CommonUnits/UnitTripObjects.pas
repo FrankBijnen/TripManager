@@ -352,7 +352,7 @@ type
     function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
   public
-    constructor Create(AValue: TRoutePreference = rmFasterTime; ADataType: byte = dtByte);
+    constructor Create(ADataType: byte; AValue: TRoutePreference = rmFasterTime);
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     class function RoutePreference(AValue: string; AModel: TTripmodel): TRoutePreference;
     class function AdvLevel(AValue: string): TAdvlevel;
@@ -2189,7 +2189,7 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
-constructor TmRoutePreference.Create(AValue: TRoutePreference = rmFasterTime; ADataType: byte = dtByte);
+constructor TmRoutePreference.Create(ADataType: byte; AValue: TRoutePreference = rmFasterTime);
 begin
   inherited Create(GetKey, Ord(AValue));
 
@@ -2618,7 +2618,7 @@ var
 begin
   for ARoutePref in RoutePrefRecs do
   begin
-    if (ARoutePref.DwSize = false) and
+    if (ARoutePref.Dt = dtByte) and
        (Ord(ARoutePref.Rm) = (Value and $ff)) then
     exit(ARoutePref.Desc + Format(' (0x%s)', [IntTohex(Value, 4)]));
   end;
@@ -2919,7 +2919,7 @@ constructor TLink.Create(ARoutePref: TRoutePreference;
                          ATransportMode: TTransportMode);
 begin
   Create;
-  Add(TmRoutePreference.Create(ARoutePref, dtDWordRoutePref));
+  Add(TmRoutePreference.Create(dtDWordRoutePref, ARoutePref));
   Add(TmTransportationMode.Create(ATransportMode));
 end;
 
@@ -6029,7 +6029,7 @@ begin
   Add(TmOptimized.Create);
   Add(TmTotalTripTime.Create);
   Add(TmImported.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTotalTripDistance.Create);
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
@@ -6088,7 +6088,7 @@ begin
     Add(TmAllRoutes.Create); // Add Placeholder for AllRoutes
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
     Add(TmPartOfSplitRoute.Create);
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+    Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmShowLastStopAsShapingPoint.Create);
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
@@ -6139,7 +6139,7 @@ begin
     Add(TmIsRoundTrip.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmSerializedRoutePrefRoundTripLength.Create);
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+    Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
@@ -6195,7 +6195,7 @@ begin
     Add(TmImported.Create);
     Add(TmRoutePreferencesAdventurousHillsAndCurves.Create);
     Add(TmIsRoundTrip.Create);
-    Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+    Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmFileName.Create(Format(TripFileName, [TripName])));
     Add(TmLocations.Create);
@@ -6230,7 +6230,7 @@ begin
   Add(TmParentTripName.Create(TripName));
   Add(TmTotalTripTime.Create);
   Add(TmAvoidancesChanged.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
@@ -6245,7 +6245,7 @@ begin
   SetHeader(THeader.Create);
 
   Add(TmTotalTripDistance.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmAllRoutes.Create);
   Add(TmTripDate.Create);
   Add(TmParentTripId.Create(0));
@@ -6274,7 +6274,7 @@ begin
   Add(TmIsRoundTrip.Create);
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6293,7 +6293,7 @@ begin
   Add(TmImported.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmAvoidancesChanged.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
@@ -6348,7 +6348,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel), dtDWordRoutePref));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6374,7 +6374,7 @@ begin
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
-  Add(TmRoutePreference.Create(TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
+  Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));

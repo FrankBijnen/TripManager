@@ -24,7 +24,7 @@ begin
   Write('NeedRecreateTrips', #9);
   Write('HasAllLinks', #9);
   Write('SupportsGrouping', #9);
-  Write('RoutePrefDWordSize', #9);
+  Write('RoutePrefType', #9);
   Write('VersionSize', #9);
   Write('Version', #9);
 
@@ -60,7 +60,7 @@ begin
     Write(NeedRecreateTrips[TripModel], #9);
     Write(HasAllLinks[TripModel], #9);
     Write(SupportsGrouping[TripModel], #9);
-    Write(RoutePrefDWordSize[TripModel], #9);
+    Write(RoutePrefType[TripModel], #9);
     Write(TripVersion[TripModel].Size, #9);
     Write(TripVersion[TripModel].Version, #9);
 
