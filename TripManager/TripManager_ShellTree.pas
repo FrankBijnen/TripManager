@@ -23,6 +23,7 @@ type
   public
     property OnCustomDrawItem;
     property Path: string read GetPath write SetPath;
+    property ToolTips;
   end;
 
 implementation

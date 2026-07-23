@@ -140,10 +140,7 @@ const
   dtVersion         = 8;
   dtPosn            = 8;
   dtDWordRoutePref  = 8;
-  dtHeaderPref      = 10;
-  dtLctnPref        = 10;
-  dtLinkPref        = 10;
-  dtUdbPref         = 10;
+  dtHeader          = 10;
   dtUdbHandle       = 11;
   dtRaw             = 12;
   dtString          = 14;

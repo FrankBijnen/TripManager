@@ -2124,6 +2124,9 @@ begin
   VlTripInfo.OnSelectionMoved := VlTripInfoSelectionMoved;
   VlTripInfo.OnBeforeDrawCell := VlTripInfoBeforeDrawCell;
   ShellTreeView1.OnCustomDrawItem := ShellTreeView1CustomDrawItem;
+{$IFDEF VER350}
+  ShellTreeView1.ToolTips := false;
+{$ENDIF}
   ShellListView1.DragSource := true;
   ShellListView1.ColumnSorted := true;
   InitSortSpec(LstFiles.Columns[0], true, FSortSpecification);
@@ -2804,11 +2807,25 @@ end;
 
 procedure TFrmTripManager.ShellTreeView1CustomDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState;
   var DefaultDraw: Boolean);
+{$IFDEF VER350}
+var
+  r1, r2: Trect;
+{$ENDIF}
 begin
-// Artifacts on the Treeview with Rad11
-{$IFNDEF VER350}
+{$IFDEF VER350}
+  Sender.Canvas.Brush.Color := clWhite;
+{$ENDIF}
   if Node.Selected then
-    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
+    Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold]
+// Artifacts on the Treeview with Rad11. Clear the rectangle after the text.
+{$IFDEF VER350}
+  else
+  begin
+    r1 := Node.DisplayRect(false);
+    r2 := Node.DisplayRect(true);
+    r1.Left := r2.Left;
+    Sender.Canvas.FillRect(r1);
+  end;
 {$ENDIF}
 end;
 
@@ -3412,7 +3429,7 @@ begin
      (ANode is THeader) then
     HeaderOffset := 0
   else
-    HeaderOffset := SizeOf(THeaderValue);
+    HeaderOffset := SizeOf(TGenericHeaderValue);
 
   SelStart := SelStart + HeaderOffset;
   if (SelStart < 0) then
@@ -3550,46 +3567,58 @@ var
     end;
   end;
 
-  procedure AddLink(ANode: TTreeNode; ALink: TLink);
+  procedure AddLink(ALink: TLink);
   var
     ANitem: TBaseItem;
   begin
-    if not Assigned(ANode) then
-      exit;
+    VlTripInfo.Strings.AddPair('*** Link header', ALink.DisplayName,
+                               TGridSelItem.Create(ALink,
+                                                   SizeOf(ALink.Value) ));
 
-    with ALink do
-      VlTripInfo.Strings.AddPair('*** Link', ANode.Text,
-                                 TGridSelItem.Create(ALink) );
+    VlTripInfo.Strings.AddPair('ID', string(ALink.Value.Id),
+                               TGridSelItem.Create(ALink,
+                                                   SizeOf(ALink.Value.ID),
+                                                   OffsetInRecord(ALink.Value, ALink.Value.ID) ));
+
+    VlTripInfo.Strings.AddPair('Size', Format('%d', [ALink.Value.Size]),
+                               TGridSelItem.Create(ALink,
+                                                   SizeOf(ALink.Value.Size),
+                                                   OffsetInRecord(ALink.Value, ALink.Value.Size) ));
+
+    VlTripInfo.Strings.AddPair('DataType', Format('%d', [ALink.Value.DataType]),
+                               TGridSelItem.Create(ALink, SizeOf(ALink.Value.DataType), OffsetInRecord(ALink.Value, ALink.Value.DataType) ));
+
+    VlTripInfo.Strings.AddPair('Count', Format('%d', [ALink.Value.Count]),
+                               TGridSelItem.Create(ALink,
+                                                   SizeOf(ALink.Value.Count),
+                                                   OffsetInRecord(ALink.Value, ALink.Value.Count) ));
+
+    VlTripInfo.Strings.AddPair('*** End link header', DupeString('-', DupeCount),
+                               TGridSelItem.Create(ALink, 1,  SizeOf(ALink.Value) -1 ));
+
     for ANitem in ALink.Items do
     begin
       if (ANitem is TBaseDataItem) then
         AddBaseData(TBaseDataItem(ANitem));
     end;
 
-    with ALink do
-      VlTripInfo.Strings.AddPair('*** End Link', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(ALink, 1,
-                                                     (ALink.SelEnd - ALink.SelStart) -1) );
+    VlTripInfo.Strings.AddPair('*** End Link', DupeString('-', DupeCount),
+                               TGridSelItem.Create(ALink, 1,
+                                                   (ALink.SelEnd - ALink.SelStart) -1) );
   end;
 
-  procedure AddAllLinks(ANode: TTreeNode; AAllLinks: TmAllLinks);
+  procedure AddAllLinks(AAllLinks: TmAllLinks);
   var
     ANitem: TBaseItem;
-    ChildNode: TTreeNode;
   begin
 
-    VlTripInfo.Strings.AddPair('*** AllLinks header', '',
+    VlTripInfo.Strings.AddPair('*** AllLinks', DupeString('-', DupeCount),
                                TGridSelItem.Create(AAllLinks));
-    ChildNode := Anode.getFirstChild;
+
     for ANitem in AAllLinks.Links do
     begin
-      if (ChildNode = nil) then
-        break;
       if (ANitem is TLink) then
-      begin
-        AddLink(ChildNode, TLink(ANitem));
-        ChildNode := Anode.GetNextChild(ChildNode);
-      end;
+        AddLink(TLink(ANitem));
     end;
 
     VlTripInfo.Strings.AddPair('*** End AllLinks', DupeString('-', DupeCount),
@@ -3599,48 +3628,49 @@ var
   procedure AddLocation(ALocation: TLocation; ZoomToPoint: boolean);
   var
     ANitem: TBaseItem;
+    LocationValue: TGenericHeaderValue;
     LocationName, GpsCoords, RoutePreference, AdventurousLevel: string;
   begin
+    LocationValue := ALocation.LocationValue;
     LocationName := ALocation.LocationTmName.AsString;
     GpsCoords := ALocation.LocationTmScPosn.MapCoords;
 
     if (ZoomToPoint) then
       MapRequest(GpsCoords, LocationName, RoutePointTimeOut);
 
-    with ALocation do
+    VlTripInfo.Strings.AddPair('*** Location header', LocationName,
+                               TGridSelItem.Create(ALocation));
+
+    if (ALocation.RoutePref <> TRoutePreference.rmNA) then
     begin
-      VlTripInfo.Strings.AddPair('*** Location header', LocationName,
-                                 TGridSelItem.Create(ALocation));
-
-      VlTripInfo.Strings.AddPair('ID', string(LocationValue.Id),
-                                 TGridSelItem.Create(ALocation,
-                                                     SizeOf(LocationValue.ID),
-                                                     OffsetInRecord(LocationValue, LocationValue.ID) ));
-
-      VlTripInfo.Strings.AddPair('Size', Format('%d', [LocationValue.Size]),
-                                 TGridSelItem.Create(ALocation,
-                                                     SizeOf(LocationValue.Size),
-                                                     OffsetInRecord(LocationValue, LocationValue.Size) ));
-
-      VlTripInfo.Strings.AddPair('DataType', Format('%d', [LocationValue.DataType]),
-                                 TGridSelItem.Create(ALocation, SizeOf(LocationValue.DataType), OffsetInRecord(LocationValue, LocationValue.DataType) ));
-
-      VlTripInfo.Strings.AddPair('Count', Format('%d', [LocationValue.Count]),
-                                 TGridSelItem.Create(ALocation,
-                                                     SizeOf(LocationValue.Count),
-                                                     OffsetInRecord(LocationValue, LocationValue.Count) ));
-
       RoutePreference := RoutePref2Desc(ALocation.RoutePref, ATripList.TripModel);
       AdventurousLevel := '';
       if (ALocation.RoutePref = TRoutePreference.rmAdventurous) then
          IntToIdent(Ord(ALocation.AdvLevel), AdventurousLevel, AdvLevelMap);
-
-      VlTripInfo.Strings.AddPair('RoutePref', Format('%s %s', [RoutePreference, AdventurousLevel]),
+      VlTripInfo.Strings.AddPair('Route preference', Format('%s %s', [RoutePreference, AdventurousLevel]),
                                  TGridSelItem.Create(ALocation));
-
-      VlTripInfo.Strings.AddPair('*** End location header', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(ALocation, 1, ALocation.SelEnd - ALocation.SelStart -1 ));
     end;
+
+    VlTripInfo.Strings.AddPair('ID', string(LocationValue.Id),
+                               TGridSelItem.Create(ALocation,
+                                                   SizeOf(LocationValue.ID),
+                                                   OffsetInRecord(LocationValue, LocationValue.ID) ));
+
+    VlTripInfo.Strings.AddPair('Size', Format('%d', [LocationValue.Size]),
+                               TGridSelItem.Create(ALocation,
+                                                   SizeOf(LocationValue.Size),
+                                                   OffsetInRecord(LocationValue, LocationValue.Size) ));
+
+    VlTripInfo.Strings.AddPair('DataType', Format('%d', [LocationValue.DataType]),
+                               TGridSelItem.Create(ALocation, SizeOf(LocationValue.DataType), OffsetInRecord(LocationValue, LocationValue.DataType) ));
+
+    VlTripInfo.Strings.AddPair('Count', Format('%d', [LocationValue.Count]),
+                               TGridSelItem.Create(ALocation,
+                                                   SizeOf(LocationValue.Count),
+                                                   OffsetInRecord(LocationValue, LocationValue.Count) ));
+
+    VlTripInfo.Strings.AddPair('*** End location header', DupeString('-', DupeCount),
+                               TGridSelItem.Create(ALocation, 1, ALocation.SelEnd - ALocation.SelStart -1 ));
 
     for ANitem in ALocation.LocationItems do
     begin
@@ -3650,36 +3680,32 @@ var
         AddBaseData(TBaseDataItem(ANitem));
     end;
 
-    with ALocation do
-      VlTripInfo.Strings.AddPair('*** End location', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(ALocation, 1,
-                                                     SizeOf(LocationValue.Id) + SizeOf(LocationValue.Size) + LocationValue.Size -1) );
+    VlTripInfo.Strings.AddPair('*** End location', DupeString('-', DupeCount),
+                               TGridSelItem.Create(ALocation, 1,
+                                                   SizeOf(LocationValue.Id) + SizeOf(LocationValue.Size) + LocationValue.Size -1) );
   end;
 
   procedure AddLocations(AmLocations: TmLocations);
   var
     ANitem: TBaseItem;
   begin
-    with AmLocations do
-    begin
-      VlTripInfo.Strings.AddPair('*** mLocations', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(AmLocations));
+    VlTripInfo.Strings.AddPair('*** mLocations', DupeString('-', DupeCount),
+                               TGridSelItem.Create(AmLocations));
 
-      VlTripInfo.Strings.AddPair('Size', Format('%d', [LenValue]),
-                                 TGridSelItem.Create(AmLocations,
-                                                     SizeOf(LenValue),
-                                                     AmLocations.OffsetLenValue));
+    VlTripInfo.Strings.AddPair('Size', Format('%d', [AmLocations.LenValue]),
+                               TGridSelItem.Create(AmLocations,
+                                                   SizeOf(AmLocations.LenValue),
+                                                   AmLocations.OffsetLenValue));
 
-      VlTripInfo.Strings.AddPair('DataType', Format('%d', [DataType]),
-                                 TGridSelItem.Create(AmLocations,
-                                                     SizeOf(DataType),
-                                                     AmLocations.OffsetDataType));
+    VlTripInfo.Strings.AddPair('DataType', Format('%d', [AmLocations.DataType]),
+                               TGridSelItem.Create(AmLocations,
+                                                   SizeOf(AmLocations.DataType),
+                                                   AmLocations.OffsetDataType));
 
-      VlTripInfo.Strings.AddPair('LocationCount', Format('%d', [LocationCount]),
-                                 TGridSelItem.Create(AmLocations,
-                                                     SizeOf(LocationCount),
-                                                     AmLocations.OffsetValue));
-    end;
+    VlTripInfo.Strings.AddPair('Count',    Format('%d', [AmLocations.LocationCount]),
+                               TGridSelItem.Create(AmLocations,
+                                                   SizeOf(AmLocations.LocationCount),
+                                                   AmLocations.OffsetValue));
 
     for ANitem in AmLocations.Locations do
     begin
@@ -3773,31 +3799,35 @@ var
     ANitem: TBaseItem;
     Unknown3Offset, OffSetPref, LUnknown2: integer;
   begin
-    OffSetPref := - SizeOf(AnUdbhandle.PrefValue);
-    VlTripInfo.Strings.AddPair('*** UdbPrefix', DupeString('-', DupeCount),
+    OffSetPref := - SizeOf(AnUdbhandle.HeaderValue);
+    VlTripInfo.Strings.AddPair('*** UdbHandle header', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(AnUdbhandle.PrefValue),
+                                                   SizeOf(AnUdbhandle.HeaderValue),
                                                    OffSetPref));
 
-    VlTripInfo.Strings.AddPair(StrUnknown, Format('0x%s', [IntToHex(AnUdbhandle.PrefValue.Unknown1)]),
+    VlTripInfo.Strings.AddPair('ID', Format('0x%s', [IntToHex(integer(AnUdbhandle.HeaderValue.ID))]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(AnUdbhandle.PrefValue.Unknown1),
+                                                   SizeOf(AnUdbhandle.HeaderValue.ID),
                                                    OffSetPref));
 
-    VlTripInfo.Strings.AddPair('PrefixSize', Format('%d', [AnUdbhandle.PrefValue.PrefixSize]),
+    VlTripInfo.Strings.AddPair('Size', Format('%d', [AnUdbhandle.HeaderValue.Size]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(AnUdbhandle.PrefValue.PrefixSize),
-                                                   OffSetPref + OffsetInRecord(AnUdbhandle.PrefValue, AnUdbhandle.PrefValue.PrefixSize) ));
+                                                   SizeOf(AnUdbhandle.HeaderValue.Size),
+                                                   OffSetPref + OffsetInRecord(AnUdbhandle.HeaderValue, AnUdbhandle.HeaderValue.Size) ));
 
-    VlTripInfo.Strings.AddPair('DataType', Format('%d', [AnUdbhandle.PrefValue.DataType]),
+    VlTripInfo.Strings.AddPair('DataType', Format('%d', [AnUdbhandle.HeaderValue.DataType]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(AnUdbhandle.PrefValue.DataType),
-                                                   OffSetPref + OffsetInRecord(AnUdbhandle.PrefValue, AnUdbhandle.PrefValue.DataType) ));
+                                                   SizeOf(AnUdbhandle.HeaderValue.DataType),
+                                                   OffSetPref + OffsetInRecord(AnUdbhandle.HeaderValue, AnUdbhandle.HeaderValue.DataType) ));
 
-    VlTripInfo.Strings.AddPair('HandleId', Format('%d', [AnUdbhandle.PrefValue.PrefId]),
+    VlTripInfo.Strings.AddPair('Count', Format('%d', [AnUdbhandle.HeaderValue.Count]),
                                TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(AnUdbhandle.PrefValue.PrefId),
-                                                   OffSetPref + OffsetInRecord(AnUdbhandle.PrefValue, AnUdbhandle.PrefValue.PrefId) ));
+                                                   SizeOf(AnUdbhandle.HeaderValue.Count),
+                                                   OffSetPref + OffsetInRecord(AnUdbhandle.HeaderValue, AnUdbhandle.HeaderValue.Count) ));
+
+    VlTripInfo.Strings.AddPair('*** End UdbHandle header', DupeString('-', DupeCount),
+                                 TGridSelItem.Create(AnUdbhandle, 1, -1));
+
 
     VlTripInfo.Strings.AddPair('*** UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle));
@@ -3937,32 +3967,29 @@ var
 
   procedure AddHeader(AHeader: Theader);
   var
-    HeaderValue: THeaderValue;
+    HeaderValue: TGenericHeaderValue;
   begin
     HeaderValue := AHeader.HeaderValue;
-    with HeaderValue do
-    begin
-      VlTripInfo.Strings.AddPair('*** Trip header', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(AHeader));
-      VlTripInfo.Strings.AddPair('ID', string(ID),
-                                 TGridSelItem.Create(AHeader, SizeOf(ID)));
-      VlTripInfo.Strings.AddPair('Size',          Format('%d', [SubLength]),
-                                 TGridSelItem.Create(AHeader,
-                                                     SizeOf(SubLength),
-                                                     OffsetInRecord(HeaderValue, SubLength) ));
-      VlTripInfo.Strings.AddPair('Datatype',      Format('%d', [DataType]),
-                                 TGridSelItem.Create(AHeader,
-                                                     SizeOf(DataType),
-                                                     OffsetInRecord(HeaderValue, DataType) ));
-      VlTripInfo.Strings.AddPair('Item count',    Format('%d', [TotalItems]),
-                                 TGridSelItem.Create(AHeader,
-                                                     SizeOf(TotalItems),
-                                                     OffsetInRecord(HeaderValue, TotalItems) ));
-      VlTripInfo.Strings.AddPair('*** End Trip header', DupeString('-', DupeCount),
-                                 TGridSelItem.Create(AHeader,
-                                                     1,
-                                                     AHeader.SelStart + SizeOf(HeaderValue) -1 ));
-    end;
+    VlTripInfo.Strings.AddPair('*** Trip header', DupeString('-', DupeCount),
+                               TGridSelItem.Create(AHeader, SizeOf(HeaderValue)));
+    VlTripInfo.Strings.AddPair('ID', string(HeaderValue.ID),
+                               TGridSelItem.Create(AHeader, SizeOf(HeaderValue.ID)));
+    VlTripInfo.Strings.AddPair('Size',          Format('%d', [HeaderValue.Size]),
+                               TGridSelItem.Create(AHeader,
+                                                   SizeOf(Size),
+                                                   OffsetInRecord(HeaderValue, HeaderValue.Size) ));
+    VlTripInfo.Strings.AddPair('Datatype',      Format('%d', [HeaderValue.DataType]),
+                               TGridSelItem.Create(AHeader,
+                                                   SizeOf(HeaderValue.DataType),
+                                                   OffsetInRecord(HeaderValue, HeaderValue.DataType) ));
+    VlTripInfo.Strings.AddPair('Count',         Format('%d', [HeaderValue.Count]),
+                               TGridSelItem.Create(AHeader,
+                                                   SizeOf(HeaderValue.Count),
+                                                   OffsetInRecord(HeaderValue, HeaderValue.Count) ));
+    VlTripInfo.Strings.AddPair('*** End Trip header', DupeString('-', DupeCount),
+                               TGridSelItem.Create(AHeader,
+                                                   1,
+                                                   AHeader.SelStart + SizeOf(HeaderValue) -1 ));
   end;
 
   procedure AddTrip(ATrip: TTripList);
@@ -3973,6 +4000,12 @@ var
 
     for ANitem in ATrip.ItemList do
     begin
+      if (ANitem is TmAllLinks) then
+      begin
+        AddAllLinks(TmAllLinks(ANitem));
+        continue;
+      end;
+
       if (ANitem is TmAllRoutes) then
       begin
         AddAllRoutes(TmAllRoutes(ANitem));
@@ -4142,10 +4175,10 @@ begin
       AddUdbDir(TUdbDir(Node.Data), true)
 
     else if (TObject(Node.Data) is TmAllLinks) then
-      AddAllLinks(Node, TmAllLinks(Node.Data))
+      AddAllLinks(TmAllLinks(Node.Data))
 
     else if (TObject(Node.Data) is TLink) then
-      AddLink(Node, TLink(Node.Data))
+      AddLink(TLink(Node.Data))
 
     else if (TObject(Node.Data) is TmLocations) then
       AddLocations(TmLocations(Node.Data))
@@ -5176,7 +5209,6 @@ var
   var
     ANItem: TBaseItem;
     LinkCnt: integer;
-    LinkName: string;
     RoutePoints: TList<TLocation>;
     mLocations: TmLocations;
   begin
@@ -5190,10 +5222,10 @@ var
       begin
         if ANItem is Tlink then
         begin
-          LinkName := Format('Link: %d', [LinkCnt]);
+          Tlink(ANItem).DisplayName := Format('Link: %d', [LinkCnt]);
           if (LinkCnt < RoutePoints.Count) then
-            LinkName := RoutePoints[LinkCnt].LocationTmName.AsString;
-          TvTrip.Items.AddChildObject(AParentNode, LinkName, ANItem);
+            Tlink(ANItem).DisplayName := RoutePoints[LinkCnt].LocationTmName.AsString;
+          TvTrip.Items.AddChildObject(AParentNode, Tlink(ANItem).DisplayName, ANItem);
           AParentNode.Expand(false);
         end;
         Inc(LinkCnt);

@@ -583,39 +583,34 @@ type
     constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
   end;
 
-{*** Header ***}
-  THeaderValue = packed record
-    Id:               array[0..3] of AnsiChar;  // 'TRPL'
-    SubLength:        Cardinal;
+{*** Generic Header ***}
+  TGenericHeaderValue = packed record
+    Id:               array[0..3] of AnsiChar;  // TRPL, LCTN, 0x00 00 00 00
+    Size:             Cardinal;
     DataType:         byte;                     // 10
-    TotalItems:       Cardinal;
+    Count:            Cardinal;
     procedure SwapCardinals;
   end;
+
+{*** Header ***}
   THeader = class(TBaseItem)
   private
-    FValue:            THeaderValue;
+    FValue:            TGenericHeaderValue;
     procedure UpdateFromTripList(ItemCount, ASubLength: Cardinal);
     procedure WriteValue(AStream: TMemoryStream); override;
   public
     constructor Create; reintroduce;
     destructor Destroy; override;
     procedure Clear;
-    property HeaderValue: THeaderValue read FValue;
+    property HeaderValue: TGenericHeaderValue read FValue;
   end;
 
 {*** AllLinks (nuvi2595 ***}
-  TLinkValue = packed record
-    Id:               array[0..3] of AnsiChar;  // 'Link'
-    Size:             Cardinal;
-    DataType:         byte;
-    Unknown1:         Word;
-    Count:            Word;
-    procedure SwapCardinals;
-  end;
   Tlink = class(TBaseItem)
   private
-    FValue:           TLinkValue;
+    FValue:           TGenericHeaderValue;
     FItemList: TItemList;
+    FDisplayName:     string;
     procedure WriteValue(AStream: TMemoryStream); override;
   public
     constructor Create; reintroduce; overload;
@@ -624,8 +619,9 @@ type
     destructor Destroy; override;
     procedure Add(ANitem: TBaseItem);
     procedure Clear;
-    property Value: TLinkValue read FValue;
+    property Value: TGenericHeaderValue read FValue;
     property Items: TItemList read FItemList;
+    property DisplayName: string read FDisplayName write FDisplayName;
   end;
   TmAllLinks = class(TBaseDataItem)
   private
@@ -649,17 +645,9 @@ type
   end;
 
 {*** Locations ***}
-  TLocationValue = packed record
-    Id:               array[0..3] of AnsiChar;  // 'LCTN'
-    Size:             Cardinal;
-    DataType:         byte;
-    Unknown1:         Word;
-    Count:            Word;
-    procedure SwapCardinals;
-  end;
   TLocation = class(TBaseItem)
   private
-    FValue:           TLocationValue;
+    FValue:           TGenericHeaderValue;
     FItems: TItemList;
     FTransPortMode: TTransportMode;
     FRoutePref: TRoutePreference; // Not used for XT
@@ -677,7 +665,7 @@ type
     function LocationTmAddress: TmAddress;
     function LocationTmScPosn: TmScPosn;
     function LocationTmArrival: TmArrival;
-    property LocationValue: TLocationValue read FValue;
+    property LocationValue: TGenericHeaderValue read FValue;
     property LocationItems: TItemList read FItems;
     property TransportMode: TTransportMode read FTransPortMode write FTransPortMode;
     property RoutePref: TRoutePreference read FRoutePref write FRoutePref;
@@ -856,11 +844,11 @@ type
   end;
   TUdbDirList = Tlist<TUdbDir>;
 
-  TUdbPrefValue = packed record
-    Unknown1:         Cardinal;
-    PrefixSize:       Cardinal;
+  TUdbHeaderValue = packed record
+    Id:               array[0..3] of AnsiChar; // 0x00 00 00 00
+    Size:             Cardinal;
     DataType:         byte;
-    PrefId:           Cardinal;
+    Count:            Cardinal;
     procedure SwapCardinals;
   end;
 
@@ -883,7 +871,7 @@ type
   TmUdbDataHndl = class(TBaseDataItem)
   private
     FUdbHandleId:      Cardinal;
-    FUdbPrefValue:     TUdbPrefValue;
+    FUdbHeaderValue:   TUdbHeaderValue;
     FValue:            TUdbHandleValue;
     FUdbDirList:       TUdbDirList;
     FTrailer:          TBytes;
@@ -911,7 +899,7 @@ type
     function GetBounds: string;
     function NineFloats: string;
     property HandleId: Cardinal read FUdbHandleId;
-    property PrefValue: TUdbPrefValue read FUdbPrefValue;
+    property HeaderValue: TUdbHeaderValue read FUdbHeaderValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
     property Items: TUdbDirList read FUdbDirList;
     property DistOffset: integer read GetDistOffset;
@@ -2860,20 +2848,21 @@ begin
   InitFromStream(GetKey, ALenValue, ADataType, AStream);
 end;
 
-{*** Header ***}
-procedure THeaderValue.SwapCardinals;
+{*** CommonHeader ***}
+procedure TGenericHeaderValue.SwapCardinals;
 begin
-  SubLength := Swap32(SubLength);
-  TotalItems := Swap32(TotalItems);
+  Size := Swap32(Size);
+  Count := Swap32(Count);
 end;
 
+{*** Header ***}
 constructor THeader.Create;
 begin
   inherited Create;
   FValue.Id := 'TRPL';
-  FValue.SubLength := 0;
-  FValue.DataType := dtHeaderPref;
-  FValue.TotalItems := 0;
+  FValue.Size := 0;
+  FValue.DataType := dtHeader;
+  FValue.Count := 0;
 end;
 
 destructor THeader.Destroy;
@@ -2883,13 +2872,13 @@ end;
 
 procedure THeader.Clear;
 begin
-  FValue := Default(THeaderValue);
+  FValue := Default(TGenericHeaderValue);
 end;
 
 procedure THeader.UpdateFromTripList(ItemCount, ASubLength: Cardinal);
 begin
-  FValue.TotalItems := ItemCount;
-  FValue.SubLength := ASubLength + SizeOf(FValue.DataType) + SizeOf(FValue.TotalItems);
+  FValue.Count := ItemCount;
+  FValue.Size := ASubLength + SizeOf(FValue.DataType) + SizeOf(FValue.Count);
 end;
 
 procedure THeader.WriteValue(AStream: TMemoryStream);
@@ -2900,17 +2889,11 @@ begin
 end;
 
 {*** AllLinks ***}
-procedure TLinkValue.SwapCardinals;
-begin
-  Count := Swap(Count);
-  Size := Swap32(Size);
-end;
-
 constructor TLink.Create;
 begin
   inherited Create;
   FValue.Id := 'Link';
-  FValue.DataType := dtLinkPref;
+  FValue.DataType := dtHeader;
   FValue.Size := SizeOf(FValue) - SizeOf(FValue.Id) - SizeOf(FValue.Size);
   FItemList := TItemList.Create;
 end;
@@ -2977,7 +2960,7 @@ var
   LinkItems: integer;
   TmpItemCount: integer;
   ALink: Tlink;
-  ALinkValue: TLinkValue;
+  ALinkValue: TGenericHeaderValue;
   ABaseItem: TBaseItem;
   BytesRead: integer;
   KeyLen: Cardinal;
@@ -3098,18 +3081,12 @@ begin
 end;
 
 {*** Location ***}
-procedure TLocationValue.SwapCardinals;
-begin
-  Count := Swap(Count);
-  Size := Swap32(Size);
-end;
-
 constructor TLocation.Create(ARoutePref: TRoutePreference = TRoutePreference.rmNA;
                              AAdvLevel: TAdvlevel = TAdvlevel.advNA);
 begin
   inherited Create;
   FValue.Id := 'LCTN';
-  FValue.DataType := dtLctnPref;
+  FValue.DataType := dtHeader;
   FValue.Size := SizeOf(FValue) - SizeOf(FValue.Id) - SizeOf(FValue.Size);
   FItems := TItemList.Create;
   FRoutePref := ARoutePref;
@@ -3246,7 +3223,7 @@ var
   LocCnt: integer;
   LocItems: integer;
   TmpItemCount: integer;
-  ALocationValue: TLocationValue;
+  ALocationValue: TGenericHeaderValue;
   ABaseItem: TBaseItem;
   BytesRead: integer;
   KeyLen: Cardinal;
@@ -3703,10 +3680,10 @@ begin
 end;
 
 {*** UdbPref *** }
-procedure TUdbPrefValue.SwapCardinals;
+procedure TUdbHeaderValue.SwapCardinals;
 begin
-  PrefixSize := Swap32(PrefixSize);
-  PrefId := Swap32(PrefId);
+  Size := Swap32(Size);
+  Count := Swap32(Count);
 end;
 
 {*** UdbHandle ***}
@@ -3812,9 +3789,9 @@ begin
   FUdbHandleId := AHandleId; // Only value seen = 1
   Fvalue := Default(TUdbHandleValue);
 
-  FUdbPrefValue := Default(TUdbPrefValue);
-  FUdbPrefValue.DataType := dtUdbPref;
-  FUdbPrefValue.PrefId := FUdbHandleId;
+  FUdbHeaderValue := Default(TUdbHeaderValue);
+  FUdbHeaderValue.DataType := dtHeader;
+  FUdbHeaderValue.Count := FUdbHandleId;
 
   FValue.CalcStatus := CalculationMagic[AModel];
   FValue.AllocUnknown(AModel);
@@ -3860,9 +3837,9 @@ end;
 
 procedure TmUdbDataHndl.BeginWrite(AStream: TMemoryStream);
 begin
-  FUdbPrefValue.SwapCardinals;
-  AStream.Write(FUdbPrefValue, SizeOf(FUdbPrefValue));
-  FUdbPrefValue.SwapCardinals;
+  FUdbHeaderValue.SwapCardinals;
+  AStream.Write(FUdbHeaderValue, SizeOf(FUdbHeaderValue));
+  FUdbHeaderValue.SwapCardinals;
 
   inherited EndWrite(AStream); // EndWrite for UdbPrefValue
 
@@ -3897,7 +3874,7 @@ begin
     FValue.UDbDirCount := FUdbDirList.Count;
     FLenValue := SubLength - SizeOf(FLenName) - FLenName - SizeOf(FLenValue) - SizeOf(FDataType) - SizeOf(FInitiator);
     FValue.UdbHandleSize := FLenValue -4;
-    FUdbPrefValue.PrefixSize  := SubLength + SizeOf(FUdbPrefValue.DataType) + SizeOf(FUdbPrefValue.PrefId);
+    FUdbHeaderValue.Size  := SubLength + SizeOf(FUdbHeaderValue.DataType) + SizeOf(FUdbHeaderValue.Count);
   end;
 end;
 
@@ -4109,9 +4086,9 @@ begin
     AnUdbHandle := TmUdbDataHndl.Create(UdbHandleCnt);
     AnUdbHandle.SetTripList(TripList);
 
-    AStream.Read(AnUdbHandle.FUdbPrefValue, SizeOf(AnUdbHandle.FUdbPrefValue));
-    AnUdbHandle.FUdbPrefValue.SwapCardinals;
-    AnUdbHandle.FUdbHandleId := Swap32(AnUdbHandle.FUdbPrefValue.PrefId);
+    AStream.Read(AnUdbHandle.FUdbHeaderValue, SizeOf(AnUdbHandle.FUdbHeaderValue));
+    AnUdbHandle.FUdbHeaderValue.SwapCardinals;
+    AnUdbHandle.FUdbHandleId := Swap32(AnUdbHandle.FUdbHeaderValue.Count);
 
     BytesRead := ReadKeyVAlues(AStream,
                                Initiator,
@@ -4520,7 +4497,7 @@ end;
 // Gets an item scanning the stream. Future use.
 function TTripList.ScanStream(AStream: TStream; AKeyName: ShortString): TBaseItem;
 var
-  AHeader: THeaderValue;
+  AHeader: TGenericHeaderValue;
   BytesRead: integer;
   KeyLen: Cardinal;
   KeyName: ShortString;
@@ -4588,7 +4565,7 @@ end;
 
 function TTripList.LoadFromStream(AStream: TStream): boolean;
 var
-  AHeader: THeaderValue;
+  AHeader: TGenericHeaderValue;
   BytesRead: integer;
   KeyLen: Cardinal;
   KeyName: ShortString;
@@ -4608,8 +4585,7 @@ begin
      exit(false);
 
   SetHeader(THeader.Create);
-  AHeader.SubLength := Swap32(AHeader.SubLength);
-  AHeader.TotalItems := Swap32(AHeader.TotalItems);
+  AHeader.SwapCardinals;
   Header.FValue := AHeader;
 
   // Scan stream for mVersionNumber. Needed to correctly set UCS4 and Unknown2Size

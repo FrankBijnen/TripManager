@@ -15,8 +15,8 @@ type
     FSelLength: IntPtr;
   public
     constructor Create(ABaseItem: TBaseItem;
-                       ASelLength: IntPtr = -1;
-                       ASelStart: IntPtr = -1); overload;
+                       ASelLength: IntPtr = -MaxInt;
+                       ASelStart: IntPtr = -MaxInt); overload;
     constructor Create(ASelLength, ASelStart: IntPtr); overload;
     property BaseItem: TBaseItem read FBaseItem;
     property SelStart: IntPtr read FSelStart;
@@ -28,18 +28,18 @@ type
 implementation
 
 constructor TGridSelItem.Create(ABaseItem: TBaseItem;
-                                ASelLength: IntPtr = -1;
-                                ASelStart: IntPtr = -1);
+                                ASelLength: IntPtr = -MaxInt;
+                                ASelStart: IntPtr = -MaxInt);
 begin
   inherited Create;
   FBaseItem := ABaseItem;
 
   FSelStart := IntPtr(FBaseItem.SelStart);
-  if (ASelStart <> -1) then
+  if (ASelStart <> -MaxInt) then
     FSelStart := FSelStart + ASelStart;
 
   FSelLength := ASelLength;
-  if (FSelLength = -1) then
+  if (FSelLength = -MaxInt) then
     FSelLength := IntPtr(FBaseItem.SelEnd) - FSelStart;
 end;
 
