@@ -1,5 +1,6 @@
 ﻿unit UnitTripObjects;
 {.$DEFINE DEBUG_POS}
+{.$DEFINE TM_EXTENSIONS} //Shows how to add custom data to trip
 
 interface
 
@@ -977,7 +978,8 @@ type
     procedure AddTMExtension(RoutePtRteExt: TXmlVSNode; IsViaPoint: boolean;
                              Dist, Time: Cardinal;
                              TimeLst: TObjectlist<TLatLonTime>);
-    procedure Trip2XmlRte(Rte: TObject);
+    procedure Trip2XmlRte(XMLRoot: TObject);
+    procedure Trip2XmlTrk(XMLRoot: TObject);
     procedure AddLocation_XT(const Locations: TmLocations;
                              const Location2Add: TLocation2Add);
     procedure AddLocation_XT2(const Locations: TmLocations;
@@ -6024,7 +6026,7 @@ begin
   SetHeader(THeader.Create);
 
   Add(TmPreserveTrackToRoute.Create);
-  Add(TmParentTripId.Create(0));
+  Add(TmParentTripId.Create);
   Add(TmDayNumber.Create);
   Add(TmTripDate.Create);
   Add(TmIsDisplayable.Create);
@@ -6072,7 +6074,7 @@ begin
     Add(TmTotalTripTime.Create);
     Add(TmTripName.Create(TripName));
     Add(TmVehicleProfileGuid.Create(ProcessOptions.VehicleProfileGuid));
-    Add(TmParentTripId.Create(0));
+    Add(TmParentTripId.Create);
     Add(TmIsRoundTrip.Create);
     Add(TmVehicleProfileName.Create(ProcessOptions.VehicleProfileName));
     Add(TmAvoidancesChanged.Create);
@@ -6133,7 +6135,7 @@ begin
     Add(TmAvoidancesChanged.Create);
     Add(TmVehicleProfileName.Create(ProcessOptions.VehicleProfileName));
     Add(TmVehicleProfileHash.Create(ProcessOptions.VehicleProfileHash));
-    Add(TmParentTripId.Create(0));
+    Add(TmParentTripId.Create);
     Add(TmVehicleId.Create(ProcessOptions.VehicleId));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
@@ -6194,7 +6196,7 @@ begin
     Add(TmAvoidancesChanged.Create);
     Add(TmVehicleProfileName.Create(ProcessOptions.VehicleProfileName));
     Add(TmVehicleProfileHash.Create(ProcessOptions.VehicleProfileHash));
-    Add(TmParentTripId.Create(0));
+    Add(TmParentTripId.Create);
     Add(TmVehicleId.Create(ProcessOptions.VehicleId));
     Add(TmTripDate.Create);
     Add(TmImported.Create);
@@ -6226,7 +6228,7 @@ begin
 
   Add(TmOptimized.Create);
   Add(TmImported.Create);
-  Add(TmParentTripId.Create(0));
+  Add(TmParentTripId.Create);
   Add(TmTripName.Create(TripName));
   Add(TmDayNumber.Create);
   Add(TmTripDate.Create);
@@ -6253,7 +6255,7 @@ begin
   Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmAllRoutes.Create);
   Add(TmTripDate.Create);
-  Add(TmParentTripId.Create(0));
+  Add(TmParentTripId.Create);
   Add(TmImported.Create);
   Add(TmFileName.Create(Format(TripFileName, [TripName])));
   Add(TmLocations.Create);
@@ -6290,7 +6292,7 @@ begin
   SetHeader(THeader.Create);
 
   Add(TmOptimized.Create);
-  Add(TmParentTripId.Create(0));
+  Add(TmParentTripId.Create);
   Add(TmDayNumber.Create);
   Add(TmTripDate.Create);
   Add(TmParentTripName.Create(TripName));
@@ -6320,7 +6322,7 @@ begin
 
     Add(TmIsDeviceRoute.Create);
     Add(TmPreserveTrackToRoute.Create);
-    Add(TmParentTripId.Create(0));
+    Add(TmParentTripId.Create);
     Add(TmDayNumber.Create);
     Add(TmTripDate.Create);
     Add(TmAvoidancesChanged.Create);
@@ -6467,9 +6469,9 @@ begin
   TimeLst.Clear;
 end;
 
-procedure TTripList.Trip2XmlRte(Rte: TObject);
+procedure TTripList.Trip2XmlRte(XMLRoot: TObject);
 var
-  RtePt, RoutePt, RoutePtExt, RoutePtRteExt: TXmlVSNode;
+  Rte, RtePt, RoutePt, RoutePtExt, RoutePtRteExt: TXmlVSNode;
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
   ViaPointType, Arrival, TransportMode, CalculationMode, PointName, Lat, Lon, Address: string;
@@ -6491,9 +6493,9 @@ begin
     ANItem := GetItem(TmRoutePreference.GetKey);
     if (Assigned(ANItem)) then
       CalculationMode := TmRoutePreference(ANItem).AsString;
-
-    TXmlVSNode(Rte).AddChild('name').NodeValue := TripName;
-    TXmlVSNode(Rte).AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
+    Rte := TXmlVSNode(XMLRoot).AddChild('rte');
+    Rte.AddChild('name').NodeValue := TripName;
+    Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
 
     Locations := TmLocations(GetItem(TmLocations.GetKey));
     if not (Assigned(Locations)) then
@@ -6509,7 +6511,7 @@ begin
     begin
       if (Location is TLocation) then
       begin
-        RtePt := TXmlVSNode(Rte).AddChild('rtept');
+        RtePt := Rte.AddChild('rtept');
 
         // Point Type
         IsViaPoint := TLocation(Location).IsViaPoint;
@@ -6622,6 +6624,38 @@ begin
   end;
 end;
 
+procedure TTripList.Trip2XmlTrk(XMLRoot: TObject);
+var
+  ATrackToRouteInfoMap: TmTrackToRouteInfoMap;
+  Trk, TrkSeg, TrkPt: TXmlVSNode;
+  CoordsList: TStringList;
+  Coords, Lat, Lon: string;
+begin
+  ATrackToRouteInfoMap := GetItem(TmTrackToRouteInfoMap.GetKey) as TmTrackToRouteInfoMap;
+  if (ATrackToRouteInfoMap = nil) then
+    exit;
+  CoordsList := TStringList.Create;
+  try
+    CoordsList.Text := ATrackToRouteInfoMap.GetCoords;
+    if (CoordsList.Count = 0) then
+      exit;
+
+    Trk := TXmlVSNode(XMLRoot).AddChild('trk');
+    Trk.AddChild('name').NodeValue := TripName;
+    TrkSeg := Trk.AddChild('trkseg');
+
+    for Coords in CoordsList do
+    begin
+      TrkPt := TrkSeg.AddChild('trkpt');
+      Lon := Coords;
+      Lat := NextField(Lon, ',');
+      TrkPt.Attributes['lat'] := Trim(Lat);
+      TrkPt.Attributes['lon'] := Trim(Lon);
+    end;
+  finally
+    CoordsList.Free;
+  end;
+end;
 
 procedure TTripList.SaveAsGPX(const GPXFile: string);
 var
@@ -6631,7 +6665,10 @@ begin
   XML := TXmlVSDocument.Create;
   try
     XMLRoot := InitGarminGpx(XML);
-    Trip2XmlRte(XMLRoot.AddChild('rte'));
+
+    Trip2XmlRte(XMLRoot);
+
+    Trip2XmlTrk(XMLRoot);
 
     XML.SaveToFile(GPXFile);
   finally
