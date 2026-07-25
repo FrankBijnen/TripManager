@@ -175,7 +175,7 @@ begin
       if (FileType = TripFile) then
       begin
         AnUdbDir := TUdbDir(LbLog.Items.Objects[Index]);
-        if (AnUdbDir.UdbDirValue.SubClass.Direction <> 0) then
+        if (AnUdbDir.SubClass.Direction <> 0) then
           continue;
       end;
 
@@ -267,7 +267,7 @@ begin
          (LbLog.items.Objects[Index] is TUdbDir) then
       begin
         AnUdbDir := LbLog.Items.Objects[Index] as TUdbDir;
-        if (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint = false) then
+        if (AnUdbDir.SubClass.IsKnownRoutePoint = false) then
           continue;
         Inc(RoutePt);
         if (RoutePt >  RoutePointList.Count -1) then // Past end?

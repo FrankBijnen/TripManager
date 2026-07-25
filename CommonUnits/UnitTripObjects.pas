@@ -702,11 +702,11 @@ type
 +---------------------------------------------------------------------------------+
 |Fixed part UdbHandle                 |     |                                     |
 |                                     |     |                                     |
-|    Prefix                           |   13|                                     |
-|      unknown         Cardinal       |    4|                                     |
+|    Header                           |   13|                                     |
+|      ID              Cardinal       |    4| 0x00 00 00 00                       |
 |      Size            Cardinal       |    4|                                     |
 |      DataType        Byte           |    1| 0x0a                                |
-|      HandleId        Cardinal       |    4|                                     |
+|      Count           Cardinal       |    4|                                     |
 |    Initiator         Char           |    1| Tab 0x09                            |
 |    NameLen           Cardinal       |    4|                                     |
 |    Name              string         |   12| 'mUdbDataHndl'                      |
@@ -719,10 +719,14 @@ type
 |    UDbDirCount:      WORD           |    2|                                     |
 |    Unknown3:         TBytes         |  var| Unknown3Size[TTripModel]            |
 |---------------------------------------------------------------------------------|
-|Identified fields of Unknown3        |     |                                     |
-|       Unknown3Dist:  Cardinal       |    4| TripFileVersion.Unknown3DistOffset  |
-|       Unknown3Time:  Cardinal       |    4| TripFileVersion.Unknown3TimeOffset  | 
-|       Unknown3Shape: TBytes         |  var| TripFileVersion.Unknown3ShapeOffset |
+|Identified fields of Unknown3        |     | TripFileVersion                     |
+|       Unknown3Bounds:     Cardinal  |   16|    .Unknown3BoundsOffset            |
+|       Unknown3Dist:       Cardinal  |    4|    .Unknown3DistOffset              |
+|       Unknown3Time:       Cardinal  |    4|    .Unknown3TimeOffset              |
+|       Unknown3Floats                |   36|    .Unknown3FloatOffset             |
+|       Unknown3Magic:      Char      |    4|    .Unknown3MagicOffset             |
+|       Unknown3Avoidances: byte      |    1|    .Unknown3MagicOffset +4          |
+|       Unknown3Shape:      TBytes    |  var|    .Unknown3ShapeOffset             |
 |---------------------------------------------------------------------------------|
 |Variable part UdbHandle              |     |                                     |
 |    UdbDir 1                         |     |                                     |
@@ -761,6 +765,9 @@ type
     function IsKnownRoutePoint: boolean;
     function IsKnownComprLatLon: boolean;
     function IsKnownStartEndSegment: boolean;
+    function IsKnownStartSegment: boolean;
+    function IsKnownInterMediate: boolean;
+    function IsKnownEndSegment: boolean;
     case integer of
     0: (Direction:        byte;
         Unknown1:         array[0..5] of byte);
@@ -831,6 +838,7 @@ type
     property Unknown2: TBytes read FUnknown2;
     property Coords: TCoords read GetCoords;
     property MapCoords: string read GetMapCoords;
+    property SubClass: TSubClass read FValue.SubClass;
     property MapSegRoadDisplay: string read GetMapSegRoadDisplay;
     property MapSegRoad: string read GetMapSegRoad;
     property MapSegRoadExclBit: string read GetMapSegRoadExclBit;
@@ -880,6 +888,7 @@ type
     procedure EndWrite(AStream: TMemoryStream); override;
     function ComputeUnknown3Size(AModel: TTripModel): integer;
     function GetModel: TTripModel;
+    function GetSubClass(Index: Integer): TSubClass;
     function GetBoundsMin: string;
     function GetBoundsMax: string;
     function GetDistOffset: integer;
@@ -902,6 +911,7 @@ type
     property HeaderValue: TUdbHeaderValue read FUdbHeaderValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
     property Items: TUdbDirList read FUdbDirList;
+    property SubClass[Index: Integer]: TSubClass read GetSubClass;
     property DistOffset: integer read GetDistOffset;
     property TimeOffset: integer read GetTimeOffset;
     property ShapeOffset: integer read GetShapeOffset;
@@ -3419,22 +3429,34 @@ end;
 
 function TSubClass.IsKnownRoutePoint: boolean;
 begin
-  result := (PointType in RoutePointsKnown);
+  result := (PointType in UdbDirTypeRoutePoints);
 end;
 
 function TSubClass.IsKnownComprLatLon: boolean;
 begin
-  result := (PointType in RoutePointComprLatLon);
+  result := (PointType in UdbDirTypeComprLatLon);
 end;
 
 function TSubClass.IsKnownStartEndSegment: boolean;
 begin
-  case PointType of
-    $21:
-      result := true;
-    else
-      result := false;
-  end;
+  result := (PointType in UdbDirTypeStartEndSegment);
+end;
+
+function TSubClass.IsKnownStartSegment: boolean;
+begin
+  result := (PointType in UdbDirTypeStartEndSegment) and
+            (Direction in DirectionLeaveRoutePoint);
+end;
+
+function TSubClass.IsKnownIntermediate: boolean;
+begin
+  result := (PointType in UdbDirTypeIntermediate);
+end;
+
+function TSubClass.IsKnownEndSegment: boolean;
+begin
+  result := (PointType in UdbDirTypeStartEndSegment) and
+            (Direction in DirectionApproachRoutePoint);
 end;
 
 procedure TUdbDirFixedValue.SwapCardinals;
@@ -3905,6 +3927,13 @@ begin
     if (Length(FValue.Unknown3) = Unknown3Size[AModel]) then
       exit(AModel);
   end;
+end;
+
+function TmUdbDataHndl.GetSubClass(Index: Integer): TSubClass;
+begin
+  result := Default(TSubClass);
+  if (Index < Items.Count -1) then
+    result := Items[Index].FValue.SubClass;
 end;
 
 function TmUdbDataHndl.GetDistOffset: integer;
@@ -6550,15 +6579,35 @@ begin
           begin
             AnUdbHandle := AllRoutes.Items[UdbHndleCnt];
 
-            // Need to skip the First, last and RoutePoint Udb. Have time=$ffff
-            Inc(UdbDirCnt);
-            while (UdbDirCnt < AnUdbHandle.Items.Count) and
-                  (AnUdbHandle.Items[UdbDirCnt].FValue.SubClass.IsKnownRoutePoint = false) do
+            // Typical structure for UDB's belonging to a route point:
+            // $2116 Start Segment
+            // $1fxx Directions
+            // $2117 End Segment
+            // Other UDB's are not relevant for the GPX and need to be skipped.
+
+            // Advance to StartSegment
+            while (UdbDirCnt < AnUdbHandle.Items.Count) do
             begin
-              AddUdbDir2Xml(AnUdbHandle.Items[UdbDirCnt], RoutePtRteExt, TimeLst);
+              if (AnUdbHandle.SubClass[UdbDirCnt].IsKnownStartSegment) then
+                break;
+
               Inc(UdbDirCnt);
             end;
 
+            // Write relevant Udb's until an End segment is found.
+            while (UdbDirCnt < AnUdbHandle.Items.Count) do
+            begin
+              if (AnUdbHandle.SubClass[UdbDirCnt].IsKnownStartEndSegment) or
+                 (AnUdbHandle.SubClass[UdbDirCnt].IsKnownInterMediate) then
+                AddUdbDir2Xml(AnUdbHandle.Items[UdbDirCnt], RoutePtRteExt, TimeLst);
+
+              if (AnUdbHandle.SubClass[UdbDirCnt].IsKnownEndSegment) then
+                break;
+
+              Inc(UdbDirCnt);
+            end;
+
+            // Write Dist and Time in Extensions
             AddTMExtension(RoutePtRteExt,
                            IsViaPoint,
                            AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.DistOffset),

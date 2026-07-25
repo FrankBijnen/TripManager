@@ -1377,7 +1377,11 @@ begin
     GPIRec.SaveGpx(SaveTrip.FileName, APOIGroupList, TProcessOptions.GetCatSymbol)
   else if (Assigned(ATripList) and
           (ATripList.ItemList.Count > 0)) then
-    ATripList.SaveAsGPX(SaveTrip.FileName);
+    ATripList.SaveAsGPX(SaveTrip.FileName)
+  else
+    exit;
+
+  BtnRefreshFileSysClick(BtnRefreshFileSys);
 end;
 
 procedure TFrmTripManager.DbMemoSavetoFileClick(Sender: TObject);
@@ -3722,46 +3726,46 @@ var
     VlTripInfo.Strings.AddPair('*** UdbDir', DupeString('-', DupeCount), TGridSelItem.Create(AnUdbDir));
     VlTripInfo.Strings.AddPair('MapSegment + RoadId', AnUdbDir.MapSegRoadDisplay,
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.MapSegment) +
-                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.RoadId),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.MapSegment)));
+                                                  SizeOf(AnUdbDir.SubClass.MapSegment) +
+                                                    SizeOf(AnUdbDir.SubClass.RoadId),
+                                                  OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.MapSegment)));
 
     VlTripInfo.Strings.AddPair('PointType', AnUdbDir.PointType,
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.SubClass.PointType),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.PointType)));
+                                                  SizeOf(AnUdbDir.SubClass.PointType),
+                                                  OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.PointType)));
     if (AnUdbDir.UdbDirValue.SubClass.IsKnownComprLatLon) then
       VlTripInfo.Strings.AddPair('Compressed LatLon', AnUdbDir.ComprLatLon,
                                 TGridSelItem.Create(AnUdbDir,
-                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.ComprLatLon),
-                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.ComprLatLon)))
+                                                    SizeOf(AnUdbDir.SubClass.ComprLatLon),
+                                                    OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.ComprLatLon)))
     else
     begin
       if (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint = false) then
         VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
                                   TGridSelItem.Create(AnUdbDir,
-                                                      SizeOf(AnUdbDir.UdbDirValue.SubClass.Direction),
-                                                      OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Direction)));
+                                                      SizeOf(AnUdbDir.SubClass.Direction),
+                                                      OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.Direction)));
 
       VlTripInfo.Strings.AddPair('Subclass Unknown2', Format('%s %s %s',
-                                                         [IntToHex(AnUdbDir.UdbDirValue.SubClass.Unknown2[0], 2),
-                                                          IntToHex(AnUdbDir.UdbDirValue.SubClass.Unknown2[1], 2),
-                                                          IntToHex(Swap(AnUdbDir.UdbDirValue.SubClass.Unknown3), 4)]
+                                                         [IntToHex(AnUdbDir.SubClass.Unknown2[0], 2),
+                                                          IntToHex(AnUdbDir.SubClass.Unknown2[1], 2),
+                                                          IntToHex(Swap(AnUdbDir.SubClass.Unknown3), 4)]
                                                         ),
                                 TGridSelItem.Create(AnUdbDir,
-                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown2) + SizeOf(AnUdbDir.UdbDirValue.SubClass.Unknown3),
-                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Unknown2)));
+                                                    SizeOf(AnUdbDir.SubClass.Unknown2) + SizeOf(AnUdbDir.SubClass.Unknown3),
+                                                    OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.Unknown2)));
 
-      VlTripInfo.Strings.AddPair(Format('Subclass Distance ( *%1.2f Mtr)', [SubClassDistFact]), Format('%1f',
-                                                         [AnUdbDir.UdbDirValue.SubClass.Distance * SubClassDistFact]
+      VlTripInfo.Strings.AddPair(Format('Subclass Distance (* %1.3f Mtr)', [SubClassDistFact]), Format('%1f',
+                                                         [AnUdbDir.SubClass.Distance * SubClassDistFact]
                                                         ),
                                 TGridSelItem.Create(AnUdbDir,
-                                                    SizeOf(AnUdbDir.UdbDirValue.SubClass.Distance),
-                                                    OffsetInRecord(AnUdbDir.UdbDirValue.SubClass, AnUdbDir.UdbDirValue.SubClass.Distance)));
+                                                    SizeOf(AnUdbDir.SubClass.Distance),
+                                                    OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.Distance)));
     end;
     VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s', [AnUdbDir.MapCoords]),
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
+                                                  SizeOf(AnUdbDir.Lat) + SizeOf(AnUdbDir.Lon),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
     VlTripInfo.Strings.AddPair('UdbDir Magic', Format('%s',
@@ -5282,7 +5286,7 @@ var
       for AnUdbDir in AnUdbHandle.Items do
       begin
         if (CurrentRTPNode = nil) or
-           (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint) then
+           (AnUdbDir.SubClass.IsKnownRoutePoint) then
           CurrentRTPNode := TvTrip.Items.AddChildObject(CurrentUdbNode, AnUdbDir.DisplayName, AnUdbDir)
         else
           TvTrip.Items.AddChildObject(CurrentRTPNode, AnUdbDir.DisplayName, AnUdbDir);

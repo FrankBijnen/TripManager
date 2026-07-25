@@ -159,18 +159,20 @@ const
                                                           (Value: Ord(tmOffRoad);           Name: 'OffRoad')
                                                         );
 
-  UdbDirTypeMap : array[0..7] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Route point'),
+  UdbDirTypeMap : array[0..7] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Coordinates'),
                                                           (Value: $01;                      Name: 'Route point'),
                                                           (Value: $03;                      Name: 'Route point'),
                                                           (Value: $05;                      Name: 'Route point Center'),
                                                           (Value: $0D;                      Name: 'Route point'),
                                                           (Value: $14;                      Name: 'Point of interest'),
                                                           (Value: $1F;                      Name: 'Intermediate'),
-                                                          (Value: $21;                      Name: 'Begin or end segment')
+                                                          (Value: $21;                      Name: 'Begin or end segment') // Direction $16=Start or $17=End
                                                         );
 
-  RoutePointsKnown = [$00, $01, $03, $05, $0D];
-  RoutePointComprLatLon = [$03, $0D];
+  UdbDirTypeRoutePoints     = [$00, $01, $03, $05, $0D];
+  UdbDirTypeComprLatLon     = [$03, $0D];
+  UdbDirTypeIntermediate    = [$1F];
+  UdbDirTypeStartEndSegment = [$21];
 
   RoutePointMap : array[0..2] of TIdentMapEntry =       ( (Value: Ord(rpVia);               Name: 'Via point'),
                                                           (Value: Ord(rpShaping);           Name: 'Shaping point'),
@@ -227,7 +229,8 @@ const
                                                           (Value: $AF;                      Name: 'Leave roundabout at 3rd exit'),
                                                           (Value: $CF;                      Name: 'Leave roundabout at 4th exit')
                                                         );
-
+  DirectionLeaveRoutePoint    = [$16];
+  DirectionApproachRoutePoint = [$17];
   DefRoutePref                = $0100;
   DefRoutePrefAdv             = $0101;
   DefRoutePrefInclMaps        = $0164;
@@ -243,7 +246,7 @@ const
 
   TripExtension           = '.trip';
   TripMask                = '*' + TripExtension;
-  SubClassDistFact        = 2.39;
+  SubClassDistFact        = 40075017 / $00ffffff; // 2.39 = Earth circumference / 2^24
   // Model specific values
   CalcUndef               = $00000000;
   CalcNA                  = $ffffffff;
