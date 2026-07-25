@@ -967,7 +967,7 @@ var
   WptName, Symbol, ViaPtName, ShapePtName: string;
   IsShapePt: boolean;
   DescNode, RteNode: TXmlVSNode;
-  CalculatedSubClass, MapName: string;
+  CalculatedSubClass, MapName, MapSegName: string;
   MapSeg, NewDescPos: integer;
 begin
   Symbol := FindSubNodeValue(RtePtNode, 'sym');
@@ -1031,11 +1031,15 @@ begin
           DescNode.ChildNodes.DeleteRange(0, DescNode.ChildNodes.Count);
           if (MapSeg <> 0) then
           begin
-            MapName := LookupMap(IntToStr(MapSeg));
-            if (MapName <> '') then
-              DescNode.AddChild('Map', TXmlVSNodeType.ntComment).NodeValue := 'Map name: '+ MapName + ' Map segment: ' + IntToStr(MapSeg)
+            MapSegName := LookupMap(MapSeg);
+            if (MapSegName <> '') then
+            begin
+              MapName := NextField(MapSegName, #9);
+              DescNode.AddChild('', TXmlVSNodeType.ntComment).NodeValue := MapName;
+              DescNode.AddChild('', TXmlVSNodeType.ntComment).NodeValue := MapSegName;
+            end
             else
-              DescNode.AddChild('Map', TXmlVSNodeType.ntComment).NodeValue :='Map segment: '+ IntToStr(MapSeg);
+              DescNode.AddChild('', TXmlVSNodeType.ntComment).NodeValue :='Map segment: '+ IntToStr(MapSeg);
           end;
         end;
       end;

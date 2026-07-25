@@ -27,14 +27,32 @@
 namespace Unitstringutils
 {
 //-- forward type declarations -----------------------------------------------
+class DELPHICLASS TStringObject;
 //-- type declarations -------------------------------------------------------
 typedef System::StaticArray<System::Byte, 4> T4Bytes;
 
 typedef System::DynamicArray<int> TDynArrayType;
 
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TStringObject : public System::TObject
+{
+	typedef System::TObject inherited;
+	
+private:
+	System::UnicodeString FValue;
+	
+public:
+	__fastcall TStringObject(System::UnicodeString AValue);
+	__fastcall virtual ~TStringObject();
+	__property System::UnicodeString Value = {read=FValue, write=FValue};
+};
+
+#pragma pack(pop)
+
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::UnicodeString CreatedTempPath;
 extern DELPHI_PACKAGE System::UnicodeString App_Prefix;
+extern DELPHI_PACKAGE void __fastcall BreakPoint();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall SenSize(const __int64 S);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall Intd(const int N, const int D);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall Spc(const int Cnt);
@@ -77,6 +95,7 @@ extern DELPHI_PACKAGE System::UnicodeString __fastcall UserAgent();
 extern DELPHI_PACKAGE bool __fastcall SelectDirectory(const System::UnicodeString ACaption, System::UnicodeString &ADirectory);
 extern DELPHI_PACKAGE bool __fastcall SelectDirectoryOrFile(const System::UnicodeString ACaption, const System::WideString ARoot, System::UnicodeString &APath);
 extern DELPHI_PACKAGE TDynArrayType __fastcall DynArray(const int *ConstArray, const System::NativeInt ConstArray_High);
+extern DELPHI_PACKAGE void __fastcall CheckSurrogate(const System::UnicodeString AWideString);
 }	/* namespace Unitstringutils */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_UNITSTRINGUTILS)
 using namespace Unitstringutils;

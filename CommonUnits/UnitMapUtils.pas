@@ -4,19 +4,29 @@ unit UnitMapUtils;
 interface
 
 uses
-  System.Classes;
+  System.Classes, System.Generics.Collections;
+
+type
+  TMapSegment = class
+    MapSegment: integer;
+    MapDescription: string;
+    constructor Create(AMapSegment: integer);
+  end;
+  TMapSegmentList = TObjectDictionary<integer, TMapSegment>;
 
 function CreateLink(const PathObj, PathLink, Desc, Param: string): Boolean;
 function ResolveLink(const Path: string): string;
-procedure ListMapsRegistryKey(const MapsList: TStringList; const MapsKey: string);
+procedure ListMapsRegistryKey(const MapsList: TStringList;
+                              const MapsKey: string);
 procedure ListMapsAppData(const BaseDir: string;
                           const MapsList: TStringList;
                           const IncludePath: boolean = false);
-function ListMaps(const BaseDir: string): TStringList;
+procedure ListMaps(const BaseDir: string;
+                   const InstalledMaps: TStringList);
 function DeleteLink(const Path: string): boolean;
 function GetMapFolder: string;
 function GetKnownFolder(const Known: TGUID): string;
-function LookupMap(const MapSegment: string): string;
+function LookupMap(const MapSegment: integer): string;
 procedure ClearTileCache;
 
 implementation
@@ -24,7 +34,7 @@ implementation
 uses
   System.Win.Registry, System.SysUtils, System.StrUtils, System.Win.ComObj,
   Winapi.Windows, Winapi.ShlObj, Winapi.ActiveX, Winapi.ShellAPI, Winapi.KnownFolders,
-  UnitVerySimpleXml;
+  UnitVerySimpleXml, UnitStringUtils;
 
 var
   InstalledMaps: TStringList;
@@ -95,16 +105,38 @@ type
     procedure Init;
   end;
 
+  TDetailRec = packed record
+    MapSegment: integer;
+    MapParent:  integer;
+    Bounds:     array[0..3] of integer;
+  end;
+
+  TMIdxRec = packed record
+    MapId:      integer;
+    ProductId:  SmallInt;
+    FamilyId:   SmallInt;
+    MapName:    integer;
+  end;
+
 procedure TPNameRec.Init;
 begin
   Prec := Default(TPRec);
   MapName := '';
 end;
 
-function ScanTdb(const TdbFile: string): TPNameRec;
+constructor TMapSegment.Create(AMapSegment: integer);
+begin
+  inherited Create;
+  MapSegment := AMapSegment;
+end;
+
+function ScanTdb(const TdbFile: string;
+                 const InstalledMapSegs: TMapSegmentList): TPNameRec;
 var
   F: File;
   TDBRec: TTDBRec;
+  DetailRec: TDetailRec;
+  AMapSegment: TMapSegment;
   Rec: array of byte;
   BR: integer;
   SaveFileMode: byte;
@@ -144,9 +176,22 @@ begin
         case (TDBRec.RecType) of
           'P':
             begin
-              Move(Rec[0], result.Prec, SizeOf(result.Prec));
-              ReadString(SizeOf(result.Prec), result.MapName);
-              exit;
+              if (BR >= SizeOf(result.Prec)) then
+              begin
+                Move(Rec[0], result.Prec, SizeOf(result.Prec));
+                ReadString(SizeOf(result.Prec), result.MapName);
+              end;
+            end;
+          'L':
+            begin
+              if (BR >= SizeOf(DetailRec)) then
+              begin
+                DetailRec := Default(TDetailRec);
+                Move(Rec[0], DetailRec, SizeOf(DetailRec));
+                AMapSegment := TMapSegment.Create(DetailRec.MapSegment);
+                ReadString(SizeOf(DetailRec), AMapSegment.MapDescription);
+                InstalledMapSegs.Add(DetailRec.MapSegment, AMapSegment);
+              end;
             end;
         end;
       end;
@@ -158,15 +203,18 @@ begin
   end;
 end;
 
-procedure ListMdx(const MdxFile: string; const MapSegments: TStringList);
+procedure ListMdx(const MdxFile: string;
+                  const MapSegments: TStringList;
+                  const InstalledMapSegs: TMapSegmentList);
 var
   F: File;
   SaveFileMode: byte;
   Sign: array[0..5] of byte;
   Rec: array of byte;
   BR, RecLen: integer;
-  RecCount, Cnt, MapSegment: DWord;
-
+  RecCount, Cnt: DWord;
+  IdxRec: TMidxRec;
+  MapSegDescription: string;
 const
   MDXInvalid = 'MDX Invalid';
 
@@ -195,8 +243,15 @@ begin
         BlockRead(F, Rec[0], RecLen, BR);
         if (BR <> RecLen) then
           raise Exception.Create(MDXInvalid);
-        Move(Rec[0], MapSegment, SizeOf(MapSegment));
-        MapSegments.Add(IntToStr(MapSegment));
+
+        if (BR >= SizeOf(IdxRec)) then
+        begin
+          Move(Rec[0], IdxRec, SizeOf(IdxRec));
+          MapSegDescription := IntToStr(IdxRec.MapId);
+          if (InstalledMapSegs.ContainsKey(IdxRec.MapName)) then
+            MapSegDescription := InstalledMapSegs.Items[IdxRec.MapName].MapDescription;
+          MapSegments.AddObject(MapSegDescription, pointer(IdxRec.MapId));
+        end;
       end;
     finally
       CloseFile(F);
@@ -206,16 +261,20 @@ begin
   end;
 end;
 
-procedure ListMapsRegistryKey(const MapsList: TStringList; const MapsKey: string);
+procedure ListMapsRegistryKey(const MapsList: TStringList;
+                              const MapsKey: string);
 var
   Maps, SubProducts, MapSegments: TStringList;
   Idx, Tdb, AMapKey, BMap: string;
   ProductNameRec: TPNameRec;
   Reg: TRegistry;
+  InstalledMapSegs: TMapSegmentList;
+
 begin
   Maps := TStringList.Create;
   SubProducts := TStringList.Create;
   Reg := TRegistry.Create;
+  InstalledMapSegs := TMapSegmentList.Create([DoOwnsValues]);
   try
     Reg.RootKey := HKEY_LOCAL_MACHINE;
     if (Reg.OpenKeyReadOnly(MapsKey) = false) then
@@ -246,9 +305,10 @@ begin
             else
               BMap := '';
 
+            InstalledMapSegs.Clear;
             Tdb := Reg.ReadString('TDB');
             if (Tdb <> '') then
-              ProductNameRec := ScanTdb(Tdb);
+              ProductNameRec := ScanTdb(Tdb, InstalledMapSegs);
             Reg.CloseKey;
           end;
         end;
@@ -265,7 +325,7 @@ begin
           if (ProductNameRec.MapName = '') then
             ProductNameRec.MapName := ChangeFileExt(ExtractFileName(Idx), '');
           MapSegments := TStringList.Create;
-          ListMdx(Idx, MapSegments);
+          ListMdx(Idx, MapSegments, InstalledMapSegs);
           MapsList.AddObject(ProductNameRec.MapName, TStringList(MapSegments));
         end;
         Reg.CloseKey;
@@ -273,6 +333,7 @@ begin
     end;
 
   finally
+    InstalledMapSegs.Free;
     Maps.Free;
     SubProducts.Free;
     Reg.Free;
@@ -299,6 +360,7 @@ var
   ProductNameRec: TPNameRec;
 
   MapSegments: TStringList;
+  InstalledMapSegs: TMapSegmentList;
   XmlDoc: TXmlVSDocument;
   ProductNode, IdxNode, SubProductNode, SubProductDirNode, TDBNode: TXmlVSNode;
 begin
@@ -306,6 +368,7 @@ begin
     exit;
   ChDir(BaseDir);
   XmlDoc := TXmlVSDocument.Create;
+  InstalledMapSegs := TMapSegmentList.Create([doOwnsValues]);
   try
     First := true;
     while (True) do
@@ -343,6 +406,8 @@ begin
       Tdb := IncludeTrailingPathDelimiter(MapDir + SubProductDirNode.NodeValue) + TDBNode.NodeValue;
       if not FileExists(Tdb) then
         continue;
+      InstalledMapSegs.Clear;
+      ProductNameRec := ScanTdb(Tdb, InstalledMapSegs);
 
       MapSegments := TStringList.Create;
       IdxNode := ProductNode.Find('IDX');
@@ -350,33 +415,34 @@ begin
       begin
         Idx := MapDir + IdxNode.NodeValue;
         if FileExists(Idx) then
-          ListMdx(Idx, MapSegments);
+          ListMdx(Idx, MapSegments, InstalledMapSegs);
       end;
       if (IncludePath) then
         MapSegments.Add(ExpandFileName((Fs.Name)));
 
-      ProductNameRec := ScanTdb(Tdb);
       MapsList.AddObject(ProductNameRec.MapName, TStringList(MapSegments));
     end;
     System.SysUtils.FindClose(Fs);
   finally
     XmlDoc.Free;
+    InstalledMapSegs.Free;
   end;
 end;
 
-function ListMaps(const BaseDir: string): TStringList;
+procedure ListMaps(const BaseDir: string;
+                   const InstalledMaps: TStringList);
 begin
-  result := TStringList.Create;
-  ListMapsAppData(BaseDir, result);
-  ListMapsRegistry(result);
+  ListMapsAppData(BaseDir, InstalledMaps);
+  ListMapsRegistry(InstalledMaps);
 end;
 
 procedure ScanInstalledMaps;
 begin
-  InstalledMaps := ListMaps(GetMapFolder);
+  InstalledMaps := TStringList.Create;
+  ListMaps(GetMapFolder, InstalledMaps);
 end;
 
-function LookupMap(const MapSegment: string): string;
+function LookupMap(const MapSegment: integer): string;
 var
   Map, MapSeg: integer;
   MapsegList: TStringList;
@@ -390,9 +456,9 @@ begin
     MapsegList := TStringList(InstalledMaps.Objects[Map]);
     for MapSeg := 0 to MapsegList.Count -1 do
     begin
-      if (MapsegList[MapSeg] = MapSegment) then
+      if (integer(MapsegList.Objects[MapSeg]) = MapSegment) then
       begin
-        result := InstalledMaps[Map];
+        result := InstalledMaps[Map] + #9 + IntToStr(MapSegment) + ': ' + MapsegList[MapSeg];
         exit;
       end;
     end;
@@ -436,10 +502,11 @@ finalization
 var
   Index: integer;
 begin
-  if (InstalledMaps = nil) then
-    exit;
-  for Index := 0 to InstalledMaps.Count -1 do
-    TStringList(InstalledMaps.Objects[Index]).Free;
+  if (InstalledMaps <> nil) then
+  begin
+    for Index := 0 to InstalledMaps.Count -1 do
+      TStringList(InstalledMaps.Objects[Index]).Free;
+  end;
   InstalledMaps.Free;
 end;
 
