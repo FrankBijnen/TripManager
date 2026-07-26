@@ -331,7 +331,7 @@ const
         ExploreDB: false;
         GarminFmts: GPXPOIFmts;
         DefSymbolSize: GpiSmallSymbols),
-    (DeviceName: StrUnknown;
+    (DeviceName: Trip_StrUnknown;
         TripModel: TTripModel.Unknown;
         Safe: true;
         Displayable: true;
@@ -421,7 +421,7 @@ class function TModelConv.GetTripModel(const TripModel: TTripModel): string;
 begin
   if (Ord(TripModel) < 0) or
      (Ord(TripModel) > TripModels.Count -1) then
-    exit(StrUnknown);
+    exit(Trip_StrUnknown);
 
   result := TripModels[Ord(TripModel)];
 end;
@@ -434,7 +434,7 @@ begin
   result := TStringList.Create;
   UnknownIndex := Ord(High(TTripModel));
   result.Text := DupeString(#10, UnknownIndex +1); // Create empty lines
-  result[UnknownIndex] := StrUnknown;
+  result[UnknownIndex] := Trip_StrUnknown;
 
   for AGarminModel := Low(TGarminModel) to High(TGarminModel) do
   begin

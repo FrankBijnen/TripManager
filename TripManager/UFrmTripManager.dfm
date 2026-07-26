@@ -705,6 +705,8 @@ object FrmTripManager: TFrmTripManager
         Margins.Bottom = 1
         Align = alClient
         TabOrder = 2
+        AllowSingleSignOnUsingOSPrimaryAccount = False
+        TargetCompatibleBrowserVersion = '117.0.2045.28'
         UserDataFolder = '%LOCALAPPDATA%\bds.exe.WebView2'
         OnCreateWebViewCompleted = EdgeBrowser1CreateWebViewCompleted
         OnNavigationStarting = EdgeBrowser1NavigationStarting
@@ -1156,7 +1158,6 @@ object FrmTripManager: TFrmTripManager
     Font.Name = 'Segoe UI'
     Font.Style = []
     Spacing = 0
-    ExplicitWidth = 1346
   end
   object ImageList: TImageList
     Left = 124

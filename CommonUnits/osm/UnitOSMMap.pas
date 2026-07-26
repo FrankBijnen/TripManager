@@ -26,17 +26,16 @@ type TMapTilerLayer = record
 end;
 
 const
-  Track_Width       = '5';
-  Bounds_Width      = '2';
-  Bounds_Color      = 'Black';
-  Coord_Decimals    = 6;
-  Place_Decimals    = 4;
-  OSMCtrlClick      = 'Ctrl Click';
-  OSMGetBounds      = 'GetBounds';
-  OSMGetRoutePoint  = 'GetRoutePoint';
-  BaseLayer         = 'BaseLayer';
-  OSMMapLayer: TMapLayer
-                    =   (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
+  OSM_Track_Width         = '5';
+  OSM_Bounds_Width        = '2';
+  OSM_Bounds_Color        = 'Black';
+  OSM_Coord_Decimals      = 6;
+  OSM_Place_Decimals      = 4;
+  OSM_CtrlClick           = 'Ctrl Click';
+  OSM_GetBounds           = 'GetBounds';
+  OSM_GetRoutePoint       = 'GetRoutePoint';
+  OSM_BaseLayer           = 'BaseLayer';
+  OSM_MapLayer: TMapLayer = (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
 
   MapTilerLayers:  array[0..6] of TMapTilerLayer
                     = ( (Resource: 'maps';  Style: 'satellite-v4';  Description: 'Map Tiler Satellite'),
@@ -186,7 +185,7 @@ begin
   Html.Add('              var parm1 = (e.feature.layer.name) ? e.feature.layer.name : "";');
   Html.Add('              var parm2 = (e.feature.data.tooltip) ? e.feature.data.tooltip :');
   Html.Add('                                                    (e.feature.url) ? e.feature.url : "";');
-  Html.Add('              SendMessage("' + OSMGetRoutePoint + '", parm1, parm2);');
+  Html.Add('              SendMessage("' + OSM_GetRoutePoint + '", parm1, parm2);');
   Html.Add('              }');
   Html.Add('           },');
   Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
@@ -204,7 +203,7 @@ begin
   // Add Mapnik layer
   Html.Add('     var BaseLayers = new Array();');
   Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
-           [OSMMapLayer.ClassName, OSMMapLayer.Description]));
+           [OSM_MapLayer.ClassName, OSM_MapLayer.Description]));
 
   if (UseOl2Local) then
   begin
@@ -233,11 +232,11 @@ begin
 
     // Select Base layer
     Html.Add(Format('     map.setBaseLayer(map.getLayersBy("name", "%s")[0]);',
-                    [GetRegistry(Reg_BaseLayer_Key, OSMMapLayer.Description)]));
+                    [GetRegistry(Reg_BaseLayer_Key, OSM_MapLayer.Description)]));
 
     // base layer changed event
     Html.Add('     map.events.register("changebaselayer", map, function(event) {');
-    Html.Add('       SendMessage("' + BaseLayer + '", event.layer.name, "");');
+    Html.Add('       SendMessage("' + OSM_BaseLayer + '", event.layer.name, "");');
     Html.Add('     });');
   end;
 
@@ -248,13 +247,13 @@ begin
   Html.Add('        func: function(e){');
   Html.Add('           if (e.ctrlKey) {');
   Html.Add('              var lonlat = map.getLonLatFromViewPortPx(e.xy).transform(po, op);');
-  Html.Add('              SendMessage("' + OSMCtrlClick + '", lonlat.lat, lonlat.lon);');
+  Html.Add('              SendMessage("' + OSM_CtrlClick + '", lonlat.lat, lonlat.lon);');
   Html.Add('            }');
   Html.Add('        }');
   Html.Add('     });');
 
   Html.Add('     map.events.register(''moveend'', map, function(evt) {');
-  Html.Add('       GetBounds("' + OSMGetBounds + '");');
+  Html.Add('       GetBounds("' + OSM_GetBounds + '");');
   Html.Add('     })');
 
   Html.Add('     allpoints = new Array();');
@@ -286,7 +285,7 @@ begin
   Html.Add('     var bounds = map.getExtent();');
   Html.Add('     bounds.transform(po, op);');
   Html.Add('     var lonlat = bounds.getCenterLonLat();');
-  Html.Add('     SendMessage(Func, bounds.toBBOX(' + IntToStr(Place_Decimals) + ', true), lonlat.lat + ", " + lonlat.lon);');
+  Html.Add('     SendMessage(Func, bounds.toBBOX(' + IntToStr(OSM_Place_Decimals) + ', true), lonlat.lat + ", " + lonlat.lon);');
   Html.Add('  }');
 
   Html.Add('  function CreateExtent(MaxZoomLevel){');
@@ -377,7 +376,7 @@ begin
   Html.Add('  }');
 
   Html.Add('  function CreateTrack(linename, color, isBounds = false){');
-  Html.Add('     var width = ' + Track_Width + ';');
+  Html.Add('     var width = ' + OSM_Track_Width + ';');
   Html.Add('     var dash = "solid";');
   Html.Add('     var line_string = new OpenLayers.Geometry.LineString(trackpoints);');
   Html.Add('     var linefeature;');
@@ -394,7 +393,7 @@ begin
   Html.Add('        boundsbounds[linename].extend(line_string.bounds);');
   Html.Add('        TrackLayer[linename].setVisibility(false);');
   Html.Add('        TrackLayer[linename].displayInLayerSwitcher = false;');
-  Html.Add('        width = ' + Bounds_Width + ';');
+  Html.Add('        width = ' + OSM_Bounds_Width + ';');
   Html.Add('        dash = "dashdot";');
   Html.Add('     }');
   Html.Add('     style = {strokeColor: color, strokeDashstyle: dash, strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: width};');

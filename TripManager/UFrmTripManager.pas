@@ -1899,18 +1899,18 @@ begin
   Args.ArgsInterface.Get_webMessageAsJson(Message);
   ParseJsonMessage(Message, Msg, Parm1, Parm2);
 
-  if (Msg = OSMGetBounds) then
+  if (Msg = OSM_GetBounds) then
   begin
     EditMapBounds.Text := Parm1;
 
     ParseLatLon(Parm2, Lat, Lon);
-    AdjustLatLon(Lat, Lon, Coord_Decimals);
+    AdjustLatLon(Lat, Lon, OSM_Coord_Decimals);
     EditMapCoords.Text := Lat + ', ' + Lon;
 
     exit;
   end;
 
-  if (Msg = OSMGetRoutePoint) then
+  if (Msg = OSM_GetRoutePoint) then
   begin
     if (Parm1 <> '') then
       LblRoute.Text := Parm1;
@@ -1919,20 +1919,20 @@ begin
     exit;
   end;
 
-  if (Msg = BaseLayer) then
+  if (Msg = OSM_BaseLayer) then
   begin
     if (Parm1 <> '') then
       SetRegistry(Reg_BaseLayer_Key, Parm1);
     exit;
   end;
 
-  AdjustLatLon(Parm1, Parm2, Coord_Decimals);
+  AdjustLatLon(Parm1, Parm2, OSM_Coord_Decimals);
   EditMapCoords.Text := Parm1 + ', ' + Parm2;
-  if (Msg = OSMCtrlClick) then
+  if (Msg = OSM_CtrlClick) then
   begin
     Place := GetPlaceOfCoords(Parm1, Parm2);
     if (PLace = nil) then
-      MapRequest(EditMapCoords.Text, OSMCtrlClick, GeoSearchTimeOut)
+      MapRequest(EditMapCoords.Text, OSM_CtrlClick, GeoSearchTimeOut)
     else
     begin
       Clipboard.AsText := Place.DisplayPlace;

@@ -625,7 +625,7 @@ begin
 {$IFDEF GEOCODE}
   Lat := RtePtNode.AttributeList.Find('lat').Value;
   Lon := RtePtNode.AttributeList.Find('lon').Value;
-  AdjustLatLon(Lat, Lon, Place_Decimals);
+  AdjustLatLon(Lat, Lon, OSM_Place_Decimals);
 
   EnsureSubNodeAfter(RtePtNode, 'cmt', ['name']);
   RenameSubNode(RtePtNode, 'cmt',  Format('%s, %s', [Lat, Lon], FormatSettings));
@@ -714,7 +714,7 @@ begin
   WptNode := ExtensionsNode.Parent;
   Lat := WptNode.AttributeList.Find('lat').Value;
   Lon := WptNode.AttributeList.Find('lon').Value;
-  AdjustLatLon(Lat, Lon, Place_Decimals);
+  AdjustLatLon(Lat, Lon, OSM_Place_Decimals);
   Place := GetPlaceOfCoords(Lat, Lon, ProcessOptions.LookUpWindow, ProcessOptions.LookUpMessage);
   if (Place <> nil) then
   begin

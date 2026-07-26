@@ -131,7 +131,7 @@ begin
   end
   else
   begin
-    ModelDescription := StrUnknown;
+    ModelDescription := Trip_StrUnknown;
     Init(TGarminModel.Unknown);
   end;
 end;

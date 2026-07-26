@@ -447,8 +447,8 @@ uses
   UnitVerySimpleXml, UnitStringUtils;
 
 const
-  Coord_Decimals = '%1.6f';
-  DefLocale      = 'EN';
+  GPI_Coord_Decimals = '%1.6f';
+  GPI_Locale         = 'EN';
 
 var
   FormatSettings: TFormatSettings;
@@ -622,7 +622,7 @@ var
 begin
   try
     HCoord := SimpleRoundTo(ACoord / 4294967296 * 360, -6);
-    result := TGPXString(Format(Coord_Decimals, [HCoord], FormatSettings));
+    result := TGPXString(Format(GPI_Coord_Decimals, [HCoord], FormatSettings));
   except
     result := '';
   end;
@@ -656,7 +656,7 @@ end;
 constructor TPLString.Create(AChars: TGPXString);
 begin
   LCountry := SizeOf(LChars) + Length(AChars) +  SizeOf(Country);
-  Country := DefLocale;
+  Country := GPI_Locale;
   LChars := Length(AChars);
   SetLength(Chars, LChars);
   Move(Achars[1], Chars[0], LChars);
@@ -1892,7 +1892,7 @@ begin
       Stream.Free;
     end;
   end;
-  Locale := DefLocale;
+  Locale := GPI_Locale;
   TotalLength := SizeOf(Locale) + SizeOf(MediaLength);
 end;
 

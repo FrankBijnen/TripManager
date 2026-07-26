@@ -203,6 +203,7 @@ type
   // Note: capable of storing and reading UCS4 and WideChar
   TStringItem = class(TBaseDataItem)
   private
+    FRawBytesValid:    boolean; // Conversion to RawBytes done?
     FByteSize:         word;
     FRawBytes:         TBytes;
     FValue:            string;
@@ -343,9 +344,14 @@ type
     constructor Create(AValue: boolean = false);
   end;
 
+  TDWordRoutePref = packed record
+    Length: cardinal;
+    RoutePref: byte;
+    procedure SwapCardinals;
+  end;
   TmRoutePreference = class(TByteItem)
   private
-    FBytes:            TBytes;
+    FDWordRoutePref:   TDWordRoutePref;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     procedure SetByte(AByte: byte); override;
@@ -1085,16 +1091,6 @@ uses
 {$ENDIF}
   UnitStringUtils, UnitProcessOptions;
 
-const
-  Coord_Decimals                      = '%1.6f';
-  StringLoaded: word                  = $ffff;
-  TurnMagic: array[0..1] of byte      = ($47, $4E);
-  TripFileName                        = '0:/.System/Trips/%s.trip';
-  UdbDirTurn                          = 'Turn';
-  UdbDirMagic: Cardinal               = $51590469;
-  // Override length for Word size route prefs.
-  LenDtDWordRoutePref                 = 5;
-
 var
   FloatFormatSettings: TFormatSettings; // for FormatFloat -see Initialization
 
@@ -1140,7 +1136,7 @@ end;
 
 function FormatMapCoords(Lat, Lon: double): string;
 begin
-  result := Format(Format('%s, %s', [Coord_Decimals, Coord_Decimals]),
+  result := Format(Format('%s, %s', [Trip_Coord_Decimals, Trip_Coord_Decimals]),
                   [Lat, Lon], FloatFormatSettings);
 end;
 
@@ -1960,17 +1956,16 @@ end;
 procedure TStringItem.ToRawBytes;
 begin
   if (Assigned(TripList)) and // Need triplist to know UCS4 or WideSring
-     (FByteSize = StringLoaded) then
+     (FRawBytesValid = false) then
   begin
     if (TripList.TripFileVersion.IsUcs4) then
       ToUCS4RawBytes(FValue)
     else
       ToWideRawBytes(FValue);
     FLenValue := SizeOf(FByteSize) + FByteSize;
+    FRawBytesValid := true;
     SetLength(FValue, 0);
   end;
-  Assert((FByteSize <> StringLoaded) and
-         (Length(FValue) = 0), 'To Internal called, but TripList not assigned');
 end;
 
 constructor TStringItem.Create(AName: ShortString; AValue: string);
@@ -1979,7 +1974,7 @@ begin
   // Will be calculated correctly once we know if UCS4, or WideChar
   Create(AName, Length(AValue), dtString);
   FValue := AValue;
-  FByteSize := StringLoaded;
+  FRawBytesValid := false;
   SetLength(FRawBytes, 0);
 end;
 
@@ -1992,6 +1987,7 @@ begin
   SetLength(FRawBytes, FByteSize + SizeOf(UCS4Char)); // Null terminator
   AStream.Read(FRawBytes[0], FByteSize);
   SetLength(FValue, 0);
+  FRawBytesValid := true;
 end;
 
 destructor TStringItem.Destroy;
@@ -2009,7 +2005,7 @@ end;
 
 function TStringItem.GetValue: string;
 begin
-  if (FByteSize = StringLoaded) then
+  if (FRawBytesValid = false) then
     exit(FValue);  // GetValue called, but FValue not yet converted to Internal
 
   if (TripList.TripFileVersion.IsUcs4) then
@@ -2026,7 +2022,7 @@ end;
 procedure TStringItem.SetValue(NewValue: string);
 begin
   FValue := NewValue;
-  FByteSize := StringLoaded;
+  FRawBytesValid := false;
   SetLength(FRawBytes, 0);
 end;
 
@@ -2189,35 +2185,40 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+{ RoutePreference }
+procedure TDWordRoutePref.SwapCardinals;
+begin
+  Length := Swap32(Length);
+end;
+
 constructor TmRoutePreference.Create(ADataType: byte; AValue: TRoutePreference = rmFasterTime);
 begin
   inherited Create(GetKey, Ord(AValue));
 
   // Zumo 3x0, nuvi2595
+  FDWordRoutePref := Default(TDWordRoutePref);
   if (ADataType = dtDWordRoutePref) then
   begin
     FDataType := ADataType;
-    FLenValue := LenDtDWordRoutePref;
-    SetLength(FBytes, FLenValue);
-    FBytes[3] := $01;
-    FBytes[4] := Ord(AValue);
+    FLenValue := SizeOf(FDWordRoutePref);
+    FDWordRoutePref.Length := SizeOf(FDWordRoutePref.RoutePref);
+    FDWordRoutePref.RoutePref := Ord(AValue);
   end;
 end;
 
 procedure TmRoutePreference.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
-var
-  SavePos: Cardinal;
 begin
-  SavePos := AStream.Position;
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
 
   // Zumo 3x0, nuvi2595
+  FDWordRoutePref := Default(TDWordRoutePref);
   if (FDataType = dtDWordRoutePref) then
   begin
-    SetLength(FBytes, FLenValue);
-    AStream.Seek(SavePos, TSeekOrigin.soBeginning);
-    AStream.Read(Fbytes, FLenValue);
-    FValue := FBytes[4];
+    // Seek back. Inherited has read 1 byte as the FValue
+    AStream.Seek(- SizeOf(FValue), TSeekOrigin.soCurrent);
+    AStream.Read(FDWordRoutePref, SizeOf(FDWordRoutePref));
+    FDWordRoutePref.SwapCardinals;
+    FValue := FDWordRoutePref.RoutePref;
   end;
 end;
 
@@ -2238,13 +2239,16 @@ end;
 
 procedure TmRoutePreference.WriteValue(AStream: TMemoryStream);
 begin
-  if (FDataType <> dtByte) then
-  begin
-    AStream.Write(FBytes, FLenValue);
-    exit;
+  case (FDataType) of
+    dtDWordRoutePref:
+      begin
+        FDWordRoutePref.SwapCardinals;
+        AStream.Write(FDWordRoutePref, SizeOf(FDWordRoutePref));
+        FDWordRoutePref.SwapCardinals;
+      end;
+  else
+    inherited WriteValue(AStream);
   end;
-
-  inherited WriteValue(AStream);
 end;
 
 function TmRoutePreference.GetValue: string;
@@ -2258,12 +2262,11 @@ procedure TmRoutePreference.SetByte(AByte: byte);
 begin
   FValue := AByte;
 
+  FDWordRoutePref := Default(TDWordRoutePref);
   if (FDataType = dtDWordRoutePref) then
   begin
-    SetLength(FBytes, 5);
-    ZeroMemory(@FBytes[0], Length(FBytes));
-    FBytes[3] := $01;
-    FBytes[4] := FValue;
+    FDWordRoutePref.Length := SizeOf(FDWordRoutePref.RoutePref);
+    FDWordRoutePref.RoutePref := FValue;
   end;
 end;
 
@@ -3496,7 +3499,7 @@ begin
   // Init FValue
   FValue.Lat      := Swap32(CoordAsInt(ALat));
   FValue.Lon      := Swap32(CoordAsInt(ALon));
-  FValue.UdbDirMagic := Swap32(UdbDirMagic);
+  FValue.UdbDirMagic := Swap32(Trip_UdbDirMagic);
   FValue.SubClass.PointType := APointType;
 
   FUdbDirStatus   := TUdbDirStatus.udsUnchecked;
@@ -3600,7 +3603,7 @@ const
   WideNullTerminator: TBytes = [0, 0];
 begin
   if (IsTurn) then
-    result := UdbDirTurn
+    result := Trip_UdbDirTurn
   else
   begin
     case TripList.TripFileVersion.IsUcs4 of
@@ -3661,14 +3664,14 @@ end;
 function TUdbDir.GetPointType: string;
 begin
   if not (IntToIdent(FValue.SubClass.PointType, result, UdbDirTypeMap)) then
-    result := StrUnknown;
+    result := Trip_StrUnknown;
   result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.PointType, 2)]);
 end;
 
 function TUdbDir.GetDirection: string;
 begin
   if not (IntToIdent(FValue.SubClass.Direction, result, DirectionMap)) then
-    result := StrUnknown;
+    result := Trip_StrUnknown;
   result := Format('%s (0x%s)', [result, IntToHex(FValue.SubClass.Direction, 2)]);
 end;
 
@@ -3697,10 +3700,10 @@ const
   OffsWide = 2;
   OffsUcs4 = 4;
 begin
-  if (Length(FUdbDirName) < OffsUcs4 + SizeOf(TurnMagic)) then
+  if (Length(FUdbDirName) < OffsUcs4 + SizeOf(Trip_TurnMagic)) then
     exit(false);
-  result := CompareMem(@TurnMagic[0], @FUdbDirName[OffsUcs4], SizeOf(TurnMagic)) or
-            CompareMem(@TurnMagic[0], @FUdbDirName[OffsWide], SizeOf(TurnMagic));
+  result := CompareMem(@Trip_TurnMagic[0], @FUdbDirName[OffsUcs4], SizeOf(Trip_TurnMagic)) or
+            CompareMem(@Trip_TurnMagic[0], @FUdbDirName[OffsWide], SizeOf(Trip_TurnMagic));
 end;
 
 {*** UdbPref *** }
@@ -4074,7 +4077,7 @@ begin
     try
       if (AStream.Read(FirstUdbDir, SizeOf(FirstUdbDir)) <> SizeOf(FirstUdbDir)) then
         exit(TTripModel.Unknown);
-      if (Swap32(FirstUdbDir.UdbDirMagic) <> UdbDirMagic) then
+      if (Swap32(FirstUdbDir.UdbDirMagic) <> Trip_UdbDirMagic) then
         exit(TTripModel.Unknown);
     finally
       AStream.Seek(SavePos, TSeekOrigin.soBeginning);
@@ -4836,7 +4839,7 @@ begin
         OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMax)]) );
         OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMin)]) );
         OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
-        OutStringList.Add(Format('    CreateTrack("Bounds %s", ''%s'', true);', [EscapedTripName, Bounds_Color]));
+        OutStringList.Add(Format('    CreateTrack("Bounds %s", ''%s'', true);', [EscapedTripName, OSM_Bounds_Color]));
       end;
     end;
     for UdbDataHndl in AllRoutes.Items do
@@ -6039,7 +6042,7 @@ begin
   Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmTotalTripDistance.Create);
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6083,7 +6086,7 @@ begin
     Add(TmVehicleProfileHash.Create(ProcessOptions.VehicleProfileHash));
     Add(TmRoutePreferences.Create);
     Add(TmImported.Create);
-    Add(TmFileName.Create(Format(TripFileName, [TripName])));
+    Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
 
     CheckHRGuid(CreateGUID(Uuid));
     Add(TmExploreUuid.Create( ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll])));
@@ -6148,7 +6151,7 @@ begin
     Add(TmSerializedRoutePrefRoundTripLength.Create);
     Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-    Add(TmFileName.Create(Format(TripFileName, [TripName])));
+    Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
@@ -6204,7 +6207,7 @@ begin
     Add(TmIsRoundTrip.Create);
     Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-    Add(TmFileName.Create(Format(TripFileName, [TripName])));
+    Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmRoutePreferencesAdventurousPopularPaths.Create);
@@ -6239,7 +6242,7 @@ begin
   Add(TmAvoidancesChanged.Create);
   Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmTotalTripDistance.Create);
@@ -6257,7 +6260,7 @@ begin
   Add(TmTripDate.Create);
   Add(TmParentTripId.Create);
   Add(TmImported.Create);
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
   Add(TmPartOfSplitRoute.Create);
@@ -6277,7 +6280,7 @@ begin
   SetHeader(THeader.Create);
 
   Add(TmAllRoutes.Create);
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmIsRoundTrip.Create);
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
@@ -6302,7 +6305,7 @@ begin
   Add(TmAvoidancesChanged.Create);
   Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
   Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTotalTripDistance.Create);
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6335,7 +6338,7 @@ begin
     Add(TmRoutePreferencesAdventurousMode.Create);
     Add(TmTransportationMode.Create(TmTransportationMode.TransPortMethod(TransportMode)));
     Add(TmTotalTripDistance.Create);
-    Add(TmFileName.Create(Format(TripFileName, [TripName])));
+    Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
     Add(TmLocations.Create);
     Add(TmPartOfSplitRoute.Create);
     Add(TmVersionNumber.Create(TripFileVersion));
@@ -6352,7 +6355,7 @@ begin
   SetHeader(THeader.Create);
 
   Add(TmAllRoutes.Create);
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
@@ -6367,7 +6370,7 @@ begin
 
   Add(TmAllLinks.Create);
   Add(TmAllRoutes.Create);
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmTripName.Create(TripName));
   Add(TmVersionNumber.Create(TripFileVersion));
@@ -6378,7 +6381,7 @@ begin
   SetHeader(THeader.Create);
   Add(TmAllRoutes.Create);
   Add(TmAvoidancesChanged.Create);
-  Add(TmFileName.Create(Format(TripFileName, [TripName])));
+  Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));
   Add(TmLocations.Create);
   Add(TmPartOfSplitRoute.Create);
   Add(TmRoutePreference.Create(RoutePrefType[TripModel], TmRoutePreference.RoutePreference(CalculationMode, TripModel)));
@@ -6433,7 +6436,7 @@ var
 begin
   LatLonTime := TLatLonTime.Create;
   Coords := AnUdbDir.Coords;
-  Coords.FormatLatLon(LatLonTime.Lat, LatLonTime.Lon, Coord_Decimals);
+  Coords.FormatLatLon(LatLonTime.Lat, LatLonTime.Lon, Trip_Coord_Decimals);
   GpxxRpt := RoutePtRteExt.AddChild('gpxx:rpt');
   GpxxRpt.AttributeList.Add('lat').Value := LatLonTime.Lat;
   GpxxRpt.AttributeList.Add('lon').Value := LatLonTime.Lon;

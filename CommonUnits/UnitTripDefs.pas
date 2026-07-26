@@ -5,11 +5,7 @@ interface
 uses
   System.Classes;
 
-const
-  StrUnknown        = 'Unknown';
-
 type
-
   TTripModel        = (XT,
                        XT2,
                        XT3,
@@ -131,6 +127,13 @@ type
   end;
 
 const
+{ Constants }
+  Trip_StrUnknown                     = 'Unknown';
+  Trip_Coord_Decimals                 = '%1.6f';
+  Trip_TurnMagic: array[0..1] of byte = ($47, $4E);
+  Trip_TripFileName                   = '0:/.System/Trips/%s.trip';
+  Trip_UdbDirTurn                     = 'Turn';
+  Trip_UdbDirMagic: Cardinal          = $51590469;
 
 { Elementary data types }
   dtByte            = 1;
