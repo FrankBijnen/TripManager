@@ -3897,7 +3897,7 @@ var
 
     if (AnUdbhandle.MagicOffset <> 0) then
     begin
-      VlTripInfo.Strings.AddPair('Unknown3 Magic', Format('0x%s', [IntToHex(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.MagicOffset), 8)]),
+      VlTripInfo.Strings.AddPair('Unknown3 Magic', Format('0x%s', [IntToHex(Swap32(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.MagicOffset)), 8)]),
                                  TGridSelItem.Create(AnUdbhandle,
                                                      SizeOf(Cardinal),
                                                      Unknown3Offset + AnUdbhandle.MagicOffset));
