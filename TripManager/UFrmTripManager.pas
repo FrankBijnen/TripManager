@@ -1919,7 +1919,7 @@ begin
     exit;
   end;
 
-  if (Msg = OSM_BaseLayer) then
+  if (Msg = OSM_Base_Layer_Changed) then
   begin
     if (Parm1 <> '') then
       SetRegistry(Reg_BaseLayer_Key, Parm1);
@@ -1931,7 +1931,7 @@ begin
   if (Msg = OSM_CtrlClick) then
   begin
     Place := GetPlaceOfCoords(Parm1, Parm2);
-    if (PLace = nil) then
+    if (Place = nil) then
       MapRequest(EditMapCoords.Text, OSM_CtrlClick, GeoSearchTimeOut)
     else
     begin

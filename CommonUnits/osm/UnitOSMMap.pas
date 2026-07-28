@@ -14,17 +14,6 @@ function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; 
 function OSMColor(GPXColor: string): string;
 procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
 
-type TMapLayer = record
-  ClassName: string;
-  Description: string;
-end;
-
-type TMapTilerLayer = record
-  Resource: string;
-  Style: string;
-  Description: string;
-end;
-
 const
   OSM_Track_Width         = '5';
   OSM_Bounds_Width        = '2';
@@ -34,30 +23,12 @@ const
   OSM_CtrlClick           = 'Ctrl Click';
   OSM_GetBounds           = 'GetBounds';
   OSM_GetRoutePoint       = 'GetRoutePoint';
-  OSM_BaseLayer           = 'BaseLayer';
-  OSM_MapLayer: TMapLayer = (ClassName: 'OSM.Mapnik';          Description: 'Mapnik');
-
-  MapTilerLayers:  array[0..6] of TMapTilerLayer
-                    = ( (Resource: 'maps';  Style: 'satellite-v4';  Description: 'Map Tiler Satellite'),
-                        (Resource: 'maps';  Style: 'hybrid-v4';     Description: 'Map Tiler Hybrid'),
-                        (Resource: 'maps';  Style: 'base-v4';       Description: 'Map Tiler Base'),
-                        (Resource: 'maps';  Style: 'openstreetmap'; Description: 'Map Tiler OpenStreetMap'),
-                        (Resource: 'maps';  Style: 'streets-v4';    Description: 'Map Tiler Streets'),
-                        (Resource: 'maps';  Style: 'topo-v4';       Description: 'Map Tiler Topo'),
-                        (Resource: 'maps';  Style: 'bright-v2';     Description: 'Map Tiler Bright')
-                      );
-
-  XYZMapLayers:  array[0..1] of TMapLayer
-                    = ( (ClassName: 'XYZ.OpenTopoMap';     Description: 'Open Topo Map'),
-                        (ClassName: 'XYZ.TOPPlusOpen';     Description: 'TOP Plus Open')
-                      );
-  ESRIMapLayers: array[0..0] of TMapLayer
-                    = ( (ClassName: 'XYZ.ESRISatellite';   Description: 'ESRI Satellite')
-                      );
-
-  Reg_BaseLayer_Key = 'BaseLayer';
-  Reg_MapTilerApi_Key = 'MapTilerApiKey';
-  Reg_EnableESRI = 'EnableESRI';
+  OSM_Base_Layer          = 'BaseLayer';
+  OSM_Base_Layer_Changed  = 'BaseLayer_Changed';
+  Reg_BaseLayer_Key       = 'BaseLayer';
+  Reg_BaseLayer_Value     = 'Mapnik';
+  Reg_MapTilerApi_Key     = 'MapTilerApiKey';
+  Reg_EnableESRI          = 'EnableESRI';
 
 type
   TOSMHelper = class(TObject)
@@ -95,6 +66,69 @@ uses
 
 var
   Ol2Installed: boolean;
+  FTripManager_JS: TStringList;
+
+function TripManager_JS: TStrings;
+const
+  Ol2BaseLayers = 'OL2_TripManager_JS';
+var
+  ResStream: TResourceStream;
+begin
+  if not Assigned(FTripManager_JS) then
+  begin
+    FTripManager_JS := TStringList.Create;
+
+    ResStream := TResourceStream.Create(hInstance, Ol2BaseLayers, RT_RCDATA);
+    try
+      FTripManager_JS.LoadFromStream(ResStream);
+    finally
+      ResStream.Free;
+    end;
+  end;
+  result := FTripManager_JS;
+end;
+
+function InstallOpenLayers2: boolean;
+const
+  Ol2Files: array[0..13,0..1] of string  = (
+    ('OL2_OpenLayers',      'OpenLayers.js'),
+    ('OL2_img_cpr',         'img\cloud-popup-relative.png'),
+    ('OL2_img_em',          'img\east-mini.png'),
+    ('OL2_img_lsmax',       'img\layer-switcher-maximize.png'),
+    ('OL2_img_lsmin',       'img\layer-switcher-minimize.png'),
+    ('OL2_img_nm',          'img\north-mini.png'),
+    ('OL2_img_s',           'img\slider.png'),
+    ('OL2_img_sm',          'img\south-mini.png'),
+    ('OL2_img_wm',          'img\west-mini.png'),
+    ('OL2_img_zmm',         'img\zoom-minus-mini.png'),
+    ('OL2_img_zpm',         'img\zoom-plus-mini.png'),
+    ('OL2_img_zb',          'img\zoombar.png'),
+    ('OL2_thm_def_close',   'theme\default\img\close.gif'),
+    ('OL2_thm_def_style',   'theme\default\style.css')
+  );
+
+var
+  ResStream: TResourceStream;
+  Index: integer;
+begin
+  result := false;
+  try
+    ForceDirectories(IncludeTrailingPathDelimiter(GetOSMTemp) + 'img');
+    ForceDirectories(IncludeTrailingPathDelimiter(GetOSMTemp) + 'theme\default\img');
+    for Index := 0 to High(Ol2Files) do
+    begin
+      ResStream := TResourceStream.Create(hInstance, Ol2Files[Index, 0], RT_RCDATA);
+      try
+        ResStream.SaveToFile(IncludeTrailingPathDelimiter(GetOSMTemp) + Ol2Files[Index, 1]);
+      finally
+        ResStream.Free;
+      end;
+    end;
+    result := true;
+  except on E:Exception do
+    ShowMessage(E.Message);
+  end;
+end;
 
 constructor TOSMHelper.Create(const APathName, AHome: string);
 begin
@@ -124,286 +158,37 @@ end;
 
 procedure TOSMHelper.WriteHeader(const UseOl2Local: boolean);
 var
-  AMapLayer: TMapLayer;
-  AMapTilerLayer: TMapTilerLayer;
-  MapTilerKey: string;
+  ScriptLocation: string;
 begin
+  ScriptLocation := 'https://openlayers.org/api/';
+  if (UseOl2Local) then
+    ScriptLocation := '';
+
   HasData := false;
   Html.Clear;
 
   Html.Add('<html>');
   Html.Add('<head>');
   Html.Add('<title></title>');
-  if (UseOl2Local) then
-  begin
-    Html.Add('<script type="text/javascript" src="OpenLayers.js"></script>');
-    Html.Add('<script type="text/javascript" src="BaseLayers.js"></script>');
-  end
-  else
-  begin
-    Html.Add('<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>');
-    Html.Add('<script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
-  end;
+  Html.Add(Format('<script type="text/javascript" src="%sOpenLayers.js"></script>', [ScriptLocation]));
+
   Html.Add('<script type="text/javascript">');
-  Html.Add('var map;');
-  Html.Add('var BaseLayers;');
-  Html.Add('var RoutePointsLayer;');
-  Html.Add('var POILayer;');
-  Html.Add('var allpoints;');       // Needed for CreateExtent
-  Html.Add('var routepoints;');     // All route points
-  Html.Add('var TrackLayer;');
-  Html.Add('var trackpoints;');     // Trackpoints
-  Html.Add('var poipoints;');       // All POIs
-  Html.Add('var timeoutId = null;');
-  Html.Add('var popup = null;');
-  Html.Add('var boundsbounds;');
-  Html.Add('var style;');
-  Html.Add('var defTileSize;');     // Default tileSize = (256, 256)
-
-  Html.Add('var po;');
-  Html.Add('var op;');
-  Html.Add('var cacheWrite, cacheRead;');
+  Html.Add('');
+  Html.Add('/** Parameters passed by TripManager **/');
+  Html.Add(Format('var osm_MapTilerKey             = "%s";', [GetRegistry(Reg_MapTilerApi_Key, '')]));
+  Html.Add(Format('var osm_ESRIEnabled             = "%s";', [GetRegistry(Reg_EnableESRI, '')]));
+  Html.Add(Format('var osm_BaseLayer               = "%s";', [GetRegistry(Reg_BaseLayer_Key, Reg_BaseLayer_Value)]));
+  Html.Add(Format('var osm_PlaceDecimals           = "%d";', [OSM_Place_Decimals]));
+  Html.Add(Format('var osm_BoundsWidth             = "%s";', [OSM_Bounds_Width]));
+  Html.Add(Format('var osm_TrackWidth              = "%s";', [OSM_Track_Width]));
+  Html.Add(Format('var osm_BaseLayerChangedEvent   = "%s";', [OSM_Base_Layer_Changed]));
+  Html.Add(Format('var osm_CtrlClickEvent          = "%s";', [OSM_CtrlClick]));
+  Html.Add(Format('var osm_GetBoundsEvent          = "%s";', [OSM_GetBounds]));
+  Html.Add(Format('var osm_GetRoutePoint           = "%s";', [OSM_GetRoutePoint]));
 
   Html.Add('');
-  Html.Add('  function initialize()');
-  Html.Add('  {');
-  Html.Add('     map = new OpenLayers.Map ("map_canvas", {');
-  Html.Add('           controls:         [new OpenLayers.Control.Navigation(),');
-  Html.Add('                              new OpenLayers.Control.PanZoomBar(),');
-  Html.Add('                              new OpenLayers.Control.LayerSwitcher(),');
-  Html.Add('                              new OpenLayers.Control.Attribution()');
-  Html.Add('                             ],');
-  Html.Add('           maxResolution:    156543.0399,');
-  Html.Add('           numZoomLevels:    10,');
-  Html.Add('           units:            "m",');
-  Html.Add('           projection:       new OpenLayers.Projection("EPSG:900913"),');
 
-  Html.Add('           eventListeners: {');
-  Html.Add('              featureover: function(e) {');
-  Html.Add('              e.feature.renderIntent = "select";');
-  Html.Add('              e.feature.layer.drawFeature(e.feature);');
-  Html.Add('              var parm1 = (e.feature.layer.name) ? e.feature.layer.name : "";');
-  Html.Add('              var parm2 = (e.feature.data.tooltip) ? e.feature.data.tooltip :');
-  Html.Add('                                                    (e.feature.url) ? e.feature.url : "";');
-  Html.Add('              SendMessage("' + OSM_GetRoutePoint + '", parm1, parm2);');
-  Html.Add('              }');
-  Html.Add('           },');
-  Html.Add('           displayProjection:new OpenLayers.Projection("EPSG:4326")});');
-  Html.Add('');
-
-  // Save default tileSize
-  Html.Add('     defTileSize = map.tileSize;');
-
-  // Add Cache
-  Html.Add('     cacheWrite = new OpenLayers.Control.CacheWrite();');
-  Html.Add('     map.addControl(cacheWrite);');
-  Html.Add('     cacheRead = new OpenLayers.Control.CacheRead();');
-  Html.Add('     map.addControl(cacheRead);');
-
-  // Add Mapnik layer
-  Html.Add('     var BaseLayers = new Array();');
-  Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
-           [OSM_MapLayer.ClassName, OSM_MapLayer.Description]));
-
-  if (UseOl2Local) then
-  begin
-    // Add Map Tiler layers
-    MapTilerKey := GetRegistry(Reg_MapTilerApi_Key, '');
-    if (MapTilerKey <> '') then
-    begin
-      // MapTiler tiles are 512x512!
-      Html.Add('     map.tileSize = new OpenLayers.Size(512, 512);');
-      for AMapTilerLayer in MapTilerLayers do
-        Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.XYZ.MapTiler("%s", "%s", "%s", "%s")) -1]);',
-                 [AMapTilerLayer.Description, AMapTilerLayer.Resource, AMapTilerLayer.Style, MapTilerKey]));
-      Html.Add('     map.tileSize = defTileSize;');
-    end;
-
-    // Add Undocumented ESRI Base layers
-    if (GetRegistry(Reg_EnableESRI, '') <> '') then
-      for AMapLayer in ESRIMapLayers do
-      Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
-               [AMapLayer.ClassName, AMapLayer.Description]));
-
-    // Add 'Open' Base layers
-    for AMapLayer in XYZMapLayers do
-      Html.Add(Format('     map.addLayer(BaseLayers[BaseLayers.push(new OpenLayers.Layer.%s("%s")) -1]);',
-               [AMapLayer.ClassName, AMapLayer.Description]));
-
-    // Select Base layer
-    Html.Add(Format('     map.setBaseLayer(map.getLayersBy("name", "%s")[0]);',
-                    [GetRegistry(Reg_BaseLayer_Key, OSM_MapLayer.Description)]));
-
-    // base layer changed event
-    Html.Add('     map.events.register("changebaselayer", map, function(event) {');
-    Html.Add('       SendMessage("' + OSM_BaseLayer + '", event.layer.name, "");');
-    Html.Add('     });');
-  end;
-
-  Html.Add('     po = map.getProjectionObject();');
-  Html.Add('     op = new OpenLayers.Projection("EPSG:4326");');
-
-  Html.Add('     map.events.listeners.mousedown.unshift({');
-  Html.Add('        func: function(e){');
-  Html.Add('           if (e.ctrlKey) {');
-  Html.Add('              var lonlat = map.getLonLatFromViewPortPx(e.xy).transform(po, op);');
-  Html.Add('              SendMessage("' + OSM_CtrlClick + '", lonlat.lat, lonlat.lon);');
-  Html.Add('            }');
-  Html.Add('        }');
-  Html.Add('     });');
-
-  Html.Add('     map.events.register(''moveend'', map, function(evt) {');
-  Html.Add('       GetBounds("' + OSM_GetBounds + '");');
-  Html.Add('     })');
-
-  Html.Add('     allpoints = new Array();');
-  Html.Add('     routepoints = new Array();');
-  Html.Add('     trackpoints = new Array();');
-  Html.Add('     RtePts = new Array();');
-  Html.Add('     RoutePointsLayer = new Array();');
-  Html.Add('     POILayer = new Array();');
-  Html.Add('     TrackLayer = new Array();');
-  Html.Add('     poipoints = new Array();');
-  Html.Add('     boundsbounds = new Array();');
-  Html.Add('');
-  Html.Add('     AddTrackPoints();');
-  Html.Add('     CreateExtent(map.getNumZoomLevels() * 0.66);');
-  Html.Add('  }');
-
-  Html.Add('  function SendMessage(msg, parm1, parm2){');
-  Html.Add('     if (window && window.chrome)');
-  Html.Add('        window.chrome.webview.postMessage({ msg: msg, parm1: parm1, parm2: parm2});');
-  Html.Add('  }');
-
-  Html.Add('  function GetLocation(Func){');
-  Html.Add('     var bounds = map.getExtent();');
-  Html.Add('     var lonlat = bounds.getCenterLonLat().transform(po, op);');
-  Html.Add('     SendMessage(Func, lonlat.lat, lonlat.lon);');
-  Html.Add('  }');
-
-  Html.Add('  function GetBounds(Func){');
-  Html.Add('     var bounds = map.getExtent();');
-  Html.Add('     bounds.transform(po, op);');
-  Html.Add('     var lonlat = bounds.getCenterLonLat();');
-  Html.Add('     SendMessage(Func, bounds.toBBOX(' + IntToStr(OSM_Place_Decimals) + ', true), lonlat.lat + ", " + lonlat.lon);');
-  Html.Add('  }');
-
-  Html.Add('  function CreateExtent(MaxZoomLevel){');
-  Html.Add('     allpoints = allpoints.concat(trackpoints);');
-  Html.Add('     allpoints = allpoints.concat(routepoints);');
-  Html.Add('     allpoints = allpoints.concat(poipoints);');
-  Html.Add('     var line_string = new OpenLayers.Geometry.LineString(allpoints);');
-  Html.Add('     allpoints = new Array();'); // Remove from memory
-  Html.Add('     line_string.calculateBounds();');
-  Html.Add('     var bounds = new OpenLayers.Bounds();');
-  Html.Add('     bounds.extend(line_string.bounds);');
-  Html.Add('     map.zoomToExtent(bounds);');
-  Html.Add('     if (map.getZoom() > MaxZoomLevel){');
-  Html.Add('       map.zoomTo(MaxZoomLevel);');
-  Html.Add('     }');
-  Html.Add('  }');
-
-  // OpenLayers uses LonLat, not LatLon. Confusing maybe,
-  Html.Add('  function PopupAtPoint(Href, PointLat, PointLon, ZoomToPoint, PopupTimeOut){');
-  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     if (ZoomToPoint) { map.moveTo(lonlat, map.getNumZoomLevels() -4, null) };');
-  Html.Add('     if (Href) {');
-  Html.Add('       popup = new OpenLayers.Popup.FramedCloud("Popup", lonlat, null, Href, null, true);');
-  Html.Add('       map.addPopup(popup, true);');
-  Html.Add('       if (timeoutId) { clearTimeout(timeoutId) };');
-  Html.Add('       timeoutId = setTimeout(RemovePopup, PopupTimeOut);');
-  Html.Add('     };');
-  Html.Add('  }');
-
-  Html.Add('  function RemovePopup(){');
-  Html.Add('     if (popup) { map.removePopup(popup); popup = null};');
-  Html.Add('     for (let x in TrackLayer) {');
-  Html.Add('        if (TrackLayer[x].features.length > 0 &&');
-  Html.Add('            TrackLayer[x].features[0].style.strokeDashstyle == "dashdot") {');
-  Html.Add('          TrackLayer[x].setVisibility(false);');
-  Html.Add('        }');
-  Html.Add('     }');
-  Html.Add('  }');
-
-  Html.Add('  function AddRoutePoint(IdLayer, LayerName, RoutePointName, PointLat, PointLon, Color){');
-  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     var feature = new OpenLayers.Feature.Vector(');
-  Html.Add('         new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat))');
-  Html.Add('     feature.url = RoutePointName;'); // Use URL for routepoint name
-  Html.Add('     if (!RoutePointsLayer[IdLayer]) {');
-  Html.Add('        RoutePointsLayer[IdLayer] = new OpenLayers.Layer.Vector(LayerName,');
-  Html.Add('            { styleMap: new OpenLayers.StyleMap( { pointRadius: 6, fillColor: Color, fillOpacity: 0.5 } ) }); ');
-  Html.Add('     }');
-  Html.Add('     RoutePointsLayer[IdLayer].addFeatures(feature);');
-  Html.Add('     RoutePointsLayer[IdLayer].displayInLayerSwitcher = true;');
-  Html.Add('     map.addLayer(RoutePointsLayer[IdLayer]);');
-  // routepoints needed for CreateExtent
-  Html.Add('     routepoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
-  Html.Add('  }');
-
-  Html.Add('  function AddPOI(PoiName, PointLat, PointLon, PngFile, Id){');
-  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     var myLocation = new OpenLayers.Geometry.Point(PointLon, PointLat)');
-  Html.Add('         .transform(''EPSG:4326'', ''EPSG:3857'');');
-
-  Html.Add('     if (!POILayer[Id]) {');
-  Html.Add('        POILayer[Id] = new OpenLayers.Layer.Vector(Id, {');
-  Html.Add('            styleMap: new OpenLayers.StyleMap({');
-  Html.Add('                externalGraphic: PngFile,');
-  Html.Add('                graphicWidth: 20, graphicHeight: 20, graphicXOffset: -10, graphicYOffset: -10,');
-  Html.Add('                title: Id');
-  Html.Add('            })');
-  Html.Add('        });');
-
-  Html.Add('        POILayer[Id].displayInLayerSwitcher = false;');
-  Html.Add('        map.addLayer(POILayer[Id]);');
-  Html.Add('     }');
-  Html.Add('');
-  Html.Add('     POILayer[Id].addFeatures([new OpenLayers.Feature.Vector(myLocation, {tooltip: PoiName})]);');
-
-  // poipoints needed for CreateExtent
-  Html.Add('     poipoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
-  Html.Add('  };');
-
-  Html.Add('  function AddTrkPoint(PointLat, PointLon){');
-  Html.Add('     var lonlat = new OpenLayers.LonLat(PointLon, PointLat).transform(op, po);');
-  Html.Add('     trackpoints.push(new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat));');
-  Html.Add('  }');
-
-  Html.Add('  function ShowBounds(linename){');
-  Html.Add('     map.zoomToExtent(boundsbounds[linename]);');
-  Html.Add('     TrackLayer[linename].setVisibility(true);');
-  Html.Add('  }');
-
-  Html.Add('  function CreateTrack(linename, color, isBounds = false){');
-  Html.Add('     var width = ' + OSM_Track_Width + ';');
-  Html.Add('     var dash = "solid";');
-  Html.Add('     var line_string = new OpenLayers.Geometry.LineString(trackpoints);');
-  Html.Add('     var linefeature;');
-
-  Html.Add('     if (!TrackLayer[linename]) {');
-  Html.Add('        TrackLayer[linename] = new OpenLayers.Layer.Vector(linename);');
-  Html.Add('        map.addLayer(TrackLayer[linename]);');
-  Html.Add('     }');
-  Html.Add('     if (isBounds) {');
-  Html.Add('        line_string.calculateBounds();');
-  Html.Add('        if (!boundsbounds[linename]) {');
-  Html.Add('            boundsbounds[linename] = new OpenLayers.Bounds();');
-  Html.Add('        }');
-  Html.Add('        boundsbounds[linename].extend(line_string.bounds);');
-  Html.Add('        TrackLayer[linename].setVisibility(false);');
-  Html.Add('        TrackLayer[linename].displayInLayerSwitcher = false;');
-  Html.Add('        width = ' + OSM_Bounds_Width + ';');
-  Html.Add('        dash = "dashdot";');
-  Html.Add('     }');
-  Html.Add('     style = {strokeColor: color, strokeDashstyle: dash, strokeOpacity: 0.6, fillOpacity: 0, strokeWidth: width};');
-  Html.Add('     linefeature = new OpenLayers.Feature.Vector(line_string, null, style);');
-  Html.Add('     TrackLayer[linename].addFeatures([linefeature]);');
-
-  // Add trackpoints to allpoints. Needed for CreateExtent
-  Html.Add('     allpoints = allpoints.concat(trackpoints);');
-  Html.Add('     trackpoints = new Array();');
-  Html.Add('  }');
+  Html.Add(TripManager_JS.Text);
 end;
 
 procedure TOSMHelper.WriteTrackPoints;
@@ -456,49 +241,6 @@ begin
   Html.Add('</html>');
 
   Html.SaveToFile(FPathName, TEncoding.UTF8);
-end;
-
-function InstallOpenLayers2: boolean;
-const
-  Ol2Files: array[0..14,0..1] of string  = (
-    ('OL2_OpenLayers',      'OpenLayers.js'),
-    ('OL2_BaseLayers',      'BaseLayers.js'),
-    ('OL2_img_cpr',         'img\cloud-popup-relative.png'),
-    ('OL2_img_em',          'img\east-mini.png'),
-    ('OL2_img_lsmax',       'img\layer-switcher-maximize.png'),
-    ('OL2_img_lsmin',       'img\layer-switcher-minimize.png'),
-    ('OL2_img_nm',          'img\north-mini.png'),
-    ('OL2_img_s',           'img\slider.png'),
-    ('OL2_img_sm',          'img\south-mini.png'),
-    ('OL2_img_wm',          'img\west-mini.png'),
-    ('OL2_img_zmm',         'img\zoom-minus-mini.png'),
-    ('OL2_img_zpm',         'img\zoom-plus-mini.png'),
-    ('OL2_img_zb',          'img\zoombar.png'),
-    ('OL2_thm_def_close',   'theme\default\img\close.gif'),
-    ('OL2_thm_def_style',   'theme\default\style.css')
-  );
-
-var
-  ResStream: TResourceStream;
-  Index: integer;
-begin
-  result := false;
-  try
-    ForceDirectories(IncludeTrailingPathDelimiter(GetOSMTemp) + 'img');
-    ForceDirectories(IncludeTrailingPathDelimiter(GetOSMTemp) + 'theme\default\img');
-    for Index := 0 to High(Ol2Files) do
-    begin
-      ResStream := TResourceStream.Create(hInstance, Ol2Files[Index, 0], RT_RCDATA);
-      try
-        ResStream.SaveToFile(IncludeTrailingPathDelimiter(GetOSMTemp) + Ol2Files[Index, 1]);
-      finally
-        ResStream.Free;
-      end;
-    end;
-    result := true;
-  except on E:Exception do
-    ShowMessage(E.Message);
-  end;
 end;
 
 function CreateOSMMapHtml(Home: string = ''; UseOl2Local: boolean = true): boolean;
@@ -559,6 +301,12 @@ end;
 initialization
 begin
   Ol2Installed := false;
+  FTripManager_JS := nil;
+end;
+
+finalization
+begin
+  FTripManager_JS.Free;
 end;
 
 end.
