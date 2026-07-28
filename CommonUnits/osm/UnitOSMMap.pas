@@ -40,7 +40,7 @@ type
     FHome: string;
     FTrackPoints: TStringList;
     procedure WriteHeader(const UseOl2Local: boolean);
-    procedure WriteTrackPoints;
+    procedure WritePoints;
     procedure WriteFooter;
   public
     constructor Create(const APathName, AHome: string); overload;
@@ -191,13 +191,13 @@ begin
   Html.Add(TripManager_JS.Text);
 end;
 
-procedure TOSMHelper.WriteTrackPoints;
+procedure TOSMHelper.WritePoints;
 var
   F: TStringList;
   Fs: TSearchRec;
   Rc: integer;
 begin
-  Html.Add('  function AddTrackPoints(){');
+  Html.Add('function AddPoints() {');
   if (FHome <> '') then
   begin
     Html.Add('  AddTrkPoint(' + FHome + ');');
@@ -226,12 +226,12 @@ begin
       Rc := System.SysUtils.FindNext(Fs);
     end;
   end;
-  Html.Add('  }');
+  Html.Add('}');
 end;
 
 procedure TOSMHelper.WriteFooter;
 begin
-  WriteTrackPoints;
+  WritePoints;
 
   Html.Add('</script>');
   Html.Add('</head>');

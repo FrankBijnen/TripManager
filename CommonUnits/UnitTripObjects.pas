@@ -2771,7 +2771,7 @@ begin
     Inc(Offset, SizeOf(ATrackPoint));
   end;
   if (Color <> '') then
-    result := result + #10 + Format('    CreateTrack(''%s'', ''%s'');', [Name, Color]);
+    result := result + #10 + Format('  CreateTrack(''%s'', ''%s'');', [Name, Color]);
 end;
 
 procedure TmTrackToRouteInfoMap.Clear;
@@ -4834,19 +4834,19 @@ begin
          (LatMax <> 0) and
          (LatMax <> 0) then
       begin
-        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
-        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMax)]) );
-        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMax)]) );
-        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMin)]) );
-        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
-        OutStringList.Add(Format('    CreateTrack("Bounds %s", ''%s'', true);', [EscapedTripName, OSM_Bounds_Color]));
+        OutStringList.Add(Format('  AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
+        OutStringList.Add(Format('  AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMax)]) );
+        OutStringList.Add(Format('  AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMax)]) );
+        OutStringList.Add(Format('  AddTrkPoint(%s);', [FormatMapCoords(LatMax, LonMin)]) );
+        OutStringList.Add(Format('  AddTrkPoint(%s);', [FormatMapCoords(LatMin, LonMin)]) );
+        OutStringList.Add(Format('  CreateTrack("Bounds %s", ''%s'', true);', [EscapedTripName, OSM_Bounds_Color]));
       end;
     end;
     for UdbDataHndl in AllRoutes.Items do
     begin
       HasUdbs := HasUdbs or (UdbDataHndl.Items.Count > 0);
       for UdbDir in UdbDataHndl.Items do
-        OutStringList.Add(Format('    AddTrkPoint(%s);', [FormatMapCoords(UdbDir.Lat, UdbDir.Lon)]) );
+        OutStringList.Add(Format('  AddTrkPoint(%s);', [FormatMapCoords(UdbDir.Lat, UdbDir.Lon)]) );
     end;
   end;
 
@@ -4882,9 +4882,9 @@ begin
         end;
 
         if not (HasUdbs) then
-          OutStringList.Add(Format('    AddTrkPoint(%s);', [Coords], FloatFormatSettings ) );
+          OutStringList.Add(Format('  AddTrkPoint(%s);', [Coords], FloatFormatSettings ) );
 
-        OutStringList.Add(Format('    AddRoutePoint(%d, "%s", "%s", %s, "%s");',
+        OutStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, "%s");',
                                  [LayerId,
                                   LayerName,
                                   RoutePointName,
@@ -4892,7 +4892,7 @@ begin
                                   Color]));
       end;
     end;
-    OutStringList.Add(Format('    CreateTrack("%s", ''%s'');', [EscapedTripName, HTMLColor]));
+    OutStringList.Add(Format('  CreateTrack("%s", ''%s'');', [EscapedTripName, HTMLColor]));
   end;
 {$ENDIF}
 end;

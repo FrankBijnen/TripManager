@@ -2310,7 +2310,7 @@ begin
 
     TrackCoords.FromAttributes(TrackPoint.AttributeList);
     TrackCoords.FormatLatLon(Lat, Lon);
-    TrackStringList.Add(Format('     AddTrkPoint(%s,%s);', [ Lat, Lon]));
+    TrackStringList.Add(Format('  AddTrkPoint(%s,%s);', [ Lat, Lon]));
   end;
 
   if (ProcessOptions.ProcessCreateRoutePoints) then
@@ -2338,7 +2338,7 @@ begin
           Color := 'red';
         end;
 
-        TrackStringList.Add(Format('     AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
+        TrackStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
                                    [LayerId,
                                     LayerName,
                                     RoutePointName,
@@ -2349,7 +2349,7 @@ begin
       Inc(TrackId, 2);
     end;
   end;
-  TrackStringList.Add(Format('     CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
+  TrackStringList.Add(Format('  CreateTrack("%s", "%s");', [EscapeDQuote(Track.Name), OSMColor(DisplayColor)]));
 {$ENDIF}
 end;
 

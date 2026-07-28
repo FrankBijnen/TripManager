@@ -3098,7 +3098,7 @@ begin
         if (AGPXwayPoint.Speed <> 0) then
           Category := Category + Format('Speed: %d ', [AGPXwayPoint.Speed]);
         Category := EscapeDQuote(Category);
-        OsmTrack.Add(Format('AddPOI("%s", %s, %s, "./%d_%d.png", "%s");',
+        OsmTrack.Add(Format('  AddPOI("%s", %s, %s, "./%d_%d.png", "%s");',
                             [EscapeDQuote(string(AGPXwayPoint.Name)),
                              AGPXwayPoint.Lat, AGPXwayPoint.Lon,
                              GroupData.Id, AGPXwayPoint.BitmapId,
