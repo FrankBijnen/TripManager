@@ -194,12 +194,12 @@ function initialize() {
   glb_PoiPoints = new Array();
   glb_BoundsBounds = new Array();
 
-  AddTrackPoints();
+  AddPoints(); // Created by TripManager
   CreateExtent(glb_Map.getNumZoomLevels() * 0.66);
 }
 
 function SendMessage(msg, parm1, parm2) {
-  if (window && window.chrome)
+  if (window && window.chrome && window.chrome.webview)
     window.chrome.webview.postMessage({
       msg: msg,
       parm1: parm1,
