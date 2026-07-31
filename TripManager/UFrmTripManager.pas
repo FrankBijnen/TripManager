@@ -499,6 +499,7 @@ type
     procedure TripFileUpdating(Sender: TObject);
     procedure TripFileCanceled(Sender: TObject);
     procedure TripFileUpdated(Sender: TObject);
+    procedure TripFileCalculated(Sender: TObject; GPXFile: string);
     function GetMapCoords: string;
   end;
 
@@ -1217,6 +1218,7 @@ begin
   FrmTripEditor.OnTripFileUpdating := TripFileUpdating;
   FrmTripEditor.OnTripFileUpdated := TripFileUpdated;
   FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
+  FrmTripEditor.OnTripFileCalculated := TripFileCalculated;
 
 // Set DmRoutePoints events
   DmRoutePoints.OnGetMapCoords := GetMapCoords;
@@ -1328,6 +1330,11 @@ begin
         raise exception.Create('Writing file failed');
     end;
   end;
+end;
+
+procedure TFrmTripManager.TripFileCalculated(Sender: TObject; GPXFile: string);
+begin
+  AddToMap(GPXFile);
 end;
 
 procedure TFrmTripManager.BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

@@ -51,6 +51,8 @@ function CreateTempPath(const Prefix: string): string;
 function GetHtmlTmp: string;
 function GetTracksExt: string;
 function GetTracksMask: string;
+function GetXMLExt: string;
+function GetXMLMask: string;
 function GetTracksTmp: string;
 function GetOSMTemp: string;
 function GetRoutesTmp: string;
@@ -87,6 +89,7 @@ const
   Kb = ' Kb';
   Mb = ' Mb';
   HtmlTempFileName  = '.html';
+  XMLFileExt        = '.xml';
   TrackFileExt      = '.track';
   OSMDir            = 'OSM\';
   RoutesDir         = 'Routes\';
@@ -358,6 +361,16 @@ end;
 function GetTracksMask: string;
 begin
   result := '*' + GetTracksExt;
+end;
+
+function GetXMLExt: string;
+begin
+  result := XMLFileExt;
+end;
+
+function GetXMLMask: string;
+begin
+  result := '*' + GetXMLExt;
 end;
 
 function GetTracksTmp: string;

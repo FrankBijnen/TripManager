@@ -26,8 +26,6 @@ object FrmTripEditor: TFrmTripEditor
     Height = 29
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 520
-    ExplicitWidth = 547
     DesignSize = (
       545
       29)
@@ -41,7 +39,6 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnCancelClick
-      ExplicitLeft = 437
     end
     object BtnOK: TBitBtn
       Left = 347
@@ -53,7 +50,6 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 1
       OnClick = BtnOkClick
-      ExplicitLeft = 351
     end
   end
   object DBGRoutePoints: TDBGrid
@@ -122,13 +118,11 @@ object FrmTripEditor: TFrmTripEditor
     Height = 393
     Align = alRight
     TabOrder = 0
-    ExplicitLeft = 515
-    ExplicitHeight = 397
     object TBBRoutePoints: TToolBar
       Left = 1
       Top = 21
       Width = 30
-      Height = 375
+      Height = 371
       Align = alClient
       ButtonHeight = 32
       ButtonWidth = 32
@@ -225,7 +219,6 @@ object FrmTripEditor: TFrmTripEditor
     Align = alTop
     TabOrder = 3
     OnResize = PnlRouteResize
-    ExplicitWidth = 547
     object GrpRoute: TGroupBox
       Left = 0
       Top = 6
@@ -5216,6 +5209,7 @@ object FrmTripEditor: TFrmTripEditor
     Top = 177
   end
   object PopupGPX: TPopupMenu
+    OnPopup = PopupGPXPopup
     Left = 136
     Top = 168
     object ImportGPX: TMenuItem
@@ -5229,6 +5223,10 @@ object FrmTripEditor: TFrmTripEditor
     object ExportGpx: TMenuItem
       Caption = 'Export'
       OnClick = ExportGpxClick
+    end
+    object Calculate: TMenuItem
+      Caption = 'Calculate'
+      OnClick = CalculateClick
     end
   end
   object OpenTrip: TOpenDialog

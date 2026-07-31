@@ -41,6 +41,7 @@ type
     CurrentWayPointFromRoute: TXmlVSNode;
     CurrentRouteTrackName: string;
     ShapingPointCnt: integer;               // Counter of all <trp:ShapingPoint>. Seqnr of name
+    LegCnt: integer;
 
     CurrentCoord: TCoords;
     TotalDistance: double;
@@ -129,8 +130,10 @@ type
                            const Cnt, LastCnt: integer);
     procedure ProcessRte(const RteNode: TXmlVSNode);
     procedure ProcessTrk(const TrkNode: TXmlVSNode);
+    procedure ProcessGeometry(const GeometryNode: TXmlVSNode);
     procedure ProcessWpt(const WptNode: TXmlVSNode);
     procedure ProcessGPXNode(GpxNode: TXmlVSNode);
+    procedure ProcessRootNode(RootNode: TXmlVSNode);
     procedure StripRtePt(const RtePtNode: TXmlVSNode);
     procedure StripRte(const RteNode: TXmlVSNode);
 {$IFDEF TRIPOBJECTS}
@@ -177,6 +180,8 @@ type
     procedure DoCreateWayPoints;
     procedure DoCreatePOI;
     procedure DoCreateKML;
+    procedure DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
+                           const GeoApifyRecords: TGeoApifyRecords);
     procedure DoCreateHTML;
     procedure DoCreateKurviger;
     procedure DoCreateOSMPoints;
@@ -1385,6 +1390,150 @@ begin
   end;
 end;
 
+procedure TGPXFile.ProcessGeometry(const GeometryNode: TXmlVSNode);
+var
+  GeoSubNode: TXmlVSNode;
+  TrkPtNode: TXmlVSNode;
+  Lat, Lon: string;
+begin
+  if (ProcessOptions.ProcessTracks) then
+  begin
+    Lat := '';
+    Lon := '';
+    for GeoSubNode in GeometryNode.ChildNodes do
+    begin
+      if (GeoSubNode.Name = 'lon') and
+         (Lon = '') then
+        Lon := GeoSubNode.NodeValue
+      else if (GeoSubNode.Name = 'lat') and
+              (Lat = '') then
+        Lat := GeoSubNode.NodeValue;
+
+      if (Lon <> '') and
+         (Lat <> '') then
+      begin
+        TrkPtNode := CurrentTrack.AddChild('trkpt');
+        TrkPtNode.SetAttribute('lon', Lon);
+        TrkPtNode.SetAttribute('lat', Lat);
+        Lat := '';
+        Lon := '';
+      end;
+    end;
+  end;
+end;
+
+procedure TGPXfile.ProcessRootNode(RootNode: TXmlVSNode);
+var
+  MainNode, ResultsNode, LegsNode: TXmlVSNode;
+  BetterDist, TrkPtDist, LastDist, DiffDist, StepDist: double;
+  CurTrackPtIndex, FromTrackPtIndex, ToTrackPtIndex, BetterTrackPtIndex, GeometryCnt: integer;
+  SkipTrkPts: integer;
+
+begin
+  if not (ProcessOptions.ProcessTracks) then
+    exit;
+  if not (ProcessOptions.ProcessCreateRoutePoints) then
+    exit;
+
+  // Scan Geometry
+  GeometryCnt := LegCnt;
+  for MainNode in RootNode.ChildNodes do
+  begin
+    if (MainNode.Name <> 'results') then
+      continue;
+    for ResultsNode in MainNode.ChildNodes do
+    begin
+      if (ResultsNode.Name = 'geometry') then
+      begin
+        // Create new track for every leg
+        CurrentRouteTrackName := Format('GeoApify %3d', [GeometryCnt]);
+        CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
+        CurrentTrack.NodeValue := CurrentRouteTrackName;
+        CurrentTrack.AddChild('desc').NodeValue := TrkOrigin;
+
+        ProcessGeometry(ResultsNode);
+        Inc(GeometryCnt);
+      end;
+    end;
+  end;
+
+  if (CurrentTrack.ChildNodes.Count = 0) then
+    exit;
+  TotalDistance := 0;
+
+  for MainNode in RootNode.ChildNodes do
+  begin
+    if (MainNode.Name <> 'results') then
+      continue;
+    for ResultsNode in MainNode.ChildNodes do
+    begin
+      if (ResultsNode.Name <> 'legs') then
+        continue;
+
+      CurrentTrack := TrackList[LegCnt];
+      CurrentViaPointRoute := FRouteViaPointList.Add(CurrentTrack.Name);
+      CurrentViaPointRoute.NodeValue := CurrentTrack.Name;
+      LastDist := TotalDistance;
+      // Skip Desc node
+      SkipTrkPts := 0;
+      while (CurrentTrack.ChildNodes[SkipTrkPts].Name <> 'trkpt') do
+        Inc(SkipTrkPts);
+
+      CurTrackPtIndex := 0;
+      for LegsNode in ResultsNode.ChildNodes do
+      begin
+        if (LegsNode.Name <> 'steps') then
+          continue;
+        FromTrackPtIndex := StrToIntDef(FindSubNodeValue(LegsNode, 'from_index'), -1);
+        ToTrackPtIndex := StrToIntDef(FindSubNodeValue(LegsNode, 'to_index'), -1);
+        if (ToTrackPtIndex = FromTrackPtIndex) then // arrived at dest
+          continue;
+
+        StepDist := 0;
+        PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[CurTrackPtIndex + SkipTrkPts].AttributeList);
+        while ((CurTrackPtIndex < ToTrackPtIndex)) and
+               ((CurTrackPtIndex + SkipTrkPts)  < CurrentTrack.ChildNodes.Count -1) do
+        begin
+          Inc(CurTrackPtIndex);
+          CurrentCoord.FromAttributes(CurrentTrack.ChildNodes[CurTrackPtIndex + SkipTrkPts].AttributeList);
+          TrkPtDist := CoordDistance(CurrentCoord, PrevTrackCoords, TDistanceUnit.duKm);
+          PrevTrackCoords := CurrentCoord;
+          TotalDistance := TotalDistance + TrkPtDist;
+          StepDist := StepDist + TrkPtDist;
+        end;
+
+        BetterDist := 0;
+        BetterTrackPtIndex := CurTrackPtIndex;
+
+        PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
+        Inc(BetterTrackPtIndex);
+        while (BetterTrackPtIndex < CurrentTrack.ChildNodes.Count -1) and
+  //TODO Parm
+              (BetterDist < ProcessOptions.GetDistOKKms) do
+        begin
+          if (CurrentTrack.ChildNodes[BetterTrackPtIndex].Name = 'trkpt') then
+          begin
+            CurrentCoord.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
+            BetterDist := BetterDist + CoordDistance(CurrentCoord, PrevTrackCoords, TDistanceUnit.duKm);
+            PrevTrackCoords := CurrentCoord;
+          end;
+          Inc(BetterTrackPtIndex);
+        end;
+
+        DiffDist := (TotalDistance + BetterDist) - LastDist;
+        if (DiffDist > ProcessOptions.GetMinShapeDistKms) then
+        begin
+          AddShapingPoint(CurrentTrack.ChildNodes[BetterTrackPtIndex],
+                                                  Format('%d=%d=%f=%f Km', [LegCnt, CurTrackPtIndex, StepDist, TotalDistance + BetterDist]),
+                                                  ProcessOptions.DefRtePtSymbol);
+          LastDist := TotalDistance + BetterDist;
+        end;
+      end;
+      Inc(LegCnt);
+    end;
+  end;
+end;
+
 procedure TGPXfile.FixCurrentGPX;
 var
   AllXml: string;
@@ -1399,19 +1548,22 @@ end;
 
 procedure TGPXfile.ProcessGPX(GPXFiles: TGPXFiles);
 var
-  GpxNode: TXmlVSNode;
+  MainNode: TXmlVSNode;
   GPXFile: string;
 begin
+  LegCnt := 0;
   MinTrackDistKms := FProcessOptions.GetMinTrackDistKms;
   ClearGlobals;
   try
     for GPXFile in GPXFiles do
     begin
       FXmlDocument.LoadFromFile(GPXFile);
-      for GpxNode in FXmlDocument.ChildNodes do
+      for MainNode in FXmlDocument.ChildNodes do
       begin
-        if (GpxNode.Name = 'gpx') then
-          ProcessGPXNode(GpxNode);
+        if (MainNode.Name = 'gpx') then
+          ProcessGPXNode(MainNode)
+        else if (MainNode.Name = 'root') then
+          ProcessRootNode(MainNode);
       end;
     end;
   finally
@@ -2234,6 +2386,123 @@ begin
     Helper.Free;
   end;
 {$ENDIF}
+end;
+
+procedure TGPXFile.DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
+                                const GeoApifyRecords: TGeoApifyRecords);
+var
+  Lat, Lon: string;
+  OutExtensions, OutPointType, CalcRoot, RouteWayPoint, WayPoint: TXmlVSNode;
+  Track : TXmlVSNode;
+  OutRte, OutRtePt: TXmlVSNode;
+  OutTrack, OutTrackSeg, OutTrackPt, TrackPoint: TXmlVSNode;
+  RoutePtDist: double;
+  AddedRoutePtCoords, PrevRoutePtCoords, NextRoutePtCoords: TCoords;
+  CalcXml: TXmlVSDocument;
+  RoutePtCnt, AddedCnt: integer;
+
+  procedure AddOrgRoutePoint;
+  begin
+    OutRtePt := OutRte.AddChild('rtept');
+    OutRtePt.AttributeList.Add('lon').Value := GeoApifyRecords[RoutePtCnt].Lon;
+    OutRtePt.AttributeList.Add('lat').Value := GeoApifyRecords[RoutePtCnt].Lat;
+    OutRtePt.AddChild('name').NodeValue := GeoApifyRecords[RoutePtCnt].Name;
+    OutRtePt.AddChild('cmt').NodeValue := GeoApifyRecords[RoutePtCnt].Address;
+    OutRtePt.AddChild('desc').NodeValue := GeoApifyRecords[RoutePtCnt].Address;
+
+    // Add Symbol
+    if (RoutePtCnt = Low(GeoApifyRecords)) then
+      OutRtePt.AddChild('sym').NodeValue := ProcessOptions.BeginSymbol
+    else if (RoutePtCnt = High(GeoApifyRecords)) then
+      OutRtePt.AddChild('sym').NodeValue := ProcessOptions.EndSymbol
+    else
+      OutRtePt.AddChild('sym').NodeValue := ProcessOptions.DefRtePtSymbol;
+
+    if (GeoApifyRecords[RoutePtCnt].Via) then
+    begin
+      OutPointType := OutRtePt.AddChild('extensions').AddChild('trp:ViaPoint');
+      OutPointType.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
+    end
+    else
+      OutRtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
+  end;
+
+begin
+  if (High(GeoApifyRecords) <> FRouteViaPointList.Count) then
+    BreakPoint;
+
+  CalcXml := TXmlVSDocument.Create;
+  try
+    CalcRoot := InitGarminGpx(CalcXml);
+
+    if (ProcessOptions.ProcessCreateRoutePoints) then
+    begin
+      RoutePtCnt := 0;
+      OutRte := CalcRoot.AddChild('rte');
+      OutRte.AddChild('name').NodeValue := RouteName;
+      OutExtensions := OutRte.AddChild('extensions');
+      OutExtensions.AddChild('gpxx:RouteExtension').AddChild('gpxx:IsAutoNamed').NodeValue := 'false';
+      OutExtensions.AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
+
+      for RouteWayPoint in FRouteViaPointList do
+      begin
+        AddOrgRoutePoint;
+        PrevRoutePtCoords.Lat := StrToFloat(GeoApifyRecords[RoutePtCnt].Lat, FormatSettings);;
+        PrevRoutePtCoords.Lon := StrToFloat(GeoApifyRecords[RoutePtCnt].Lon, FormatSettings);;
+        NextRoutePtCoords.Lat := StrToFloat(GeoApifyRecords[RoutePtCnt +1].Lat, FormatSettings);;
+        NextRoutePtCoords.Lon := StrToFloat(GeoApifyRecords[RoutePtCnt +1].Lon, FormatSettings);;
+        AddedCnt := 0;
+        for WayPoint in RouteWayPoint.ChildNodes do
+        begin
+          AddedRoutePtCoords.FromAttributes(WayPoint.AttributeList);
+          // Check not too close to existing route points
+          RoutePtDist := CoordDistance(PrevRoutePtCoords, AddedRoutePtCoords, TDistanceUnit.duKm);
+          if (RoutePtDist < ProcessOptions.MinShapeDistKms) then
+            continue;
+          RoutePtDist := CoordDistance(NextRoutePtCoords, AddedRoutePtCoords, TDistanceUnit.duKm);
+          if (RoutePtDist < ProcessOptions.MinShapeDistKms) then
+            continue;
+
+          AddedRoutePtCoords.FormatLatLon(Lat, Lon);
+          OutRtePt := OutRte.AddChild('rtept');
+          CloneNode(WayPoint, OutRtePt);
+          Inc(AddedCnt);
+          OutRtePt.Find('name').NodeValue := Format('%s_%d', [GeoApifyRecords[RoutePtCnt].Name, AddedCnt]);
+        end;
+
+        Inc(RoutePtCnt);
+      end;
+      AddOrgRoutePoint;
+    end;
+
+    if (ProcessOptions.ProcessTracks) then
+    begin
+      AddedCnt := 0;
+      for Track in FTrackList do
+      begin
+        Inc(AddedCnt);
+        OutTrack := CalcRoot.AddChild('trk');
+        OutTrack.AddChild('name').NodeValue := GeoApifyRecords[AddedCnt].Name;
+
+        OutTrack.AddChild('extensions').
+                 AddChild('gpxx:TrackExtension').
+                 AddChild('gpxx:DisplayColor').NodeValue := ProcessOptions.DefTrackColor;
+
+        OutTrackSeg := OutTrack.AddChild('trkseg');
+        for TrackPoint in Track.ChildNodes do
+        begin
+          if (TrackPoint.Name <> 'trkpt') then
+            continue;
+          OutTrackPt := OutTrackSeg.AddChild('trkpt');
+          CloneNode(TrackPoint, OutTrackPt);
+        end;
+      end;
+    end;
+    CalcXml.SaveToFile(OutFile);
+
+  finally
+    CalcXml.Free;
+  end;
 end;
 
 function TGPXFile.GetSelected(const Preferred: string): TXmlVSNodeList;

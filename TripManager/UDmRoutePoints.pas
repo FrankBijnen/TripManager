@@ -54,6 +54,7 @@ type
     procedure SetAddressFromCoords(Sender: TObject; Coords: string);
     procedure OnSetAnalyzePrefs(Sender: TObject);
     procedure AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
+    procedure GetRouteCalculation(const Coords, XMLFile: string);
   public
     { Public declarations }
     function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
@@ -77,6 +78,7 @@ type
     procedure ImportFromCSV(const CSVFile: string);
     procedure ExportToCSV(const CSVFile: string);
     function KurvigerURL: string;
+    procedure CalcRoute(const GPXFile: string);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
@@ -88,15 +90,19 @@ type
 var
   DmRoutePoints: TDmRoutePoints;
 
+const
+  Reg_GeoApifyKey = 'GeoApifyKey';
+
 implementation
 
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
 uses
-  System.StrUtils, System.Variants, System.DateUtils, System.Math,
+  System.StrUtils, System.Variants, System.DateUtils, System.Math, System.JSON, System.IOUtils,
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
-  UnitGeoCode, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects,
+  REST.Client, REST.Types,
+  UnitGeoCode, UnitRegistry, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects,
   UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
@@ -1099,6 +1105,119 @@ end;
 function TDmRoutePoints.KurvigerURL: string;
 begin
   result := TTripList(FTripList).KurvigerUrl;
+end;
+
+const
+  GeoApifyUrl = 'https://api.geoapify.com';
+
+//  GeoApifyUrl = 'https://api.geoapify.com/v1/routing?mode=motorcycle&apiKey=f58807e4acab4c6088a94672ffb2ed17&waypoints';
+
+procedure TDmRoutePoints.GetRouteCalculation(const Coords, XMLFile: string);
+var
+  RESTClient:   TRESTClient;
+  RESTRequest:  TRESTRequest;
+  RESTResponse: TRESTResponse;
+begin
+  RESTClient := TRESTClient.Create(GeoApifyUrl);
+  RESTResponse := TRESTResponse.Create(nil);
+  RESTRequest := TRESTRequest.Create(nil);
+  RESTRequest.Client := RESTClient;
+  RESTRequest.Resource := 'v1/routing';
+  RESTRequest.Response := RESTResponse;
+  try
+    RESTRequest.Params.Clear;
+//TODO Add Params
+    RESTRequest.params.AddItem('format', 'xml' , TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.params.AddItem('mode', 'motorcycle' , TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.params.AddItem('apiKey', GetRegistry(Reg_GeoApifyKey, ''), TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.Execute;
+    if (RESTRequest.Response.StatusCode >= 400) then
+      raise exception.Create('Request failed with' + #10 + RESTRequest.Response.StatusText);
+    TFile.WriteAllText(XMLFile, RESTResponse.Content);
+
+  finally
+    RESTResponse.Free;
+    RESTRequest.Free;
+    RESTClient.Free;
+  end;
+end;
+
+procedure TDmRoutePoints.CalcRoute(const GPXFile: string);
+var
+  CalcRecord: TGeoApifyRecord;
+  GeoApifyRecords: TGeoApifyRecords;
+  CalcFiles: TGPXFiles;
+  CalcCoords: array of string;
+
+  CalcFileCnt, RoutePointCnt: integer;
+  SepChar, LastCoords: string;
+  CalcCnt: integer;
+  GPXObject: TGPXFile;
+  CRWait, CRNormal: HCURSOR;
+begin
+  CRWait := LoadCursor(0, IDC_WAIT);
+  CRNormal := SetCursor(CRWait);
+  try
+    DeleteTempFiles(GetRoutesTmp, GetXMLMask);
+    LastCoords := '';
+    CalcFileCnt := -1;
+    RoutePointCnt := MaxInt;
+    SetLength(GeoApifyRecords, 0);
+    SetLength(CalcCoords, 0);
+    SetLength(CalcFiles, 0);
+
+    CdsRoutePoints.First;
+    while not CdsRoutePoints.Eof do
+    begin
+      if (RoutePointCnt > 25) then
+      begin
+        RoutePointCnt := 0;
+        Inc(CalcFileCnt);
+        CalcCoords := CalcCoords + [LastCoords];
+        CalcFiles := CalcFiles + ['d:\temp\Calc_' + IntToStr(CalcFileCnt) + GetXMLExt];
+      end;
+      CalcRecord := Default(TGeoApifyRecord);
+      CalcRecord.LegCnt := CalcFileCnt;
+      CalcRecord.Name := CdsRoutePointsName.AsString;
+      CalcRecord.Via := CdsRoutePointsViaPoint.AsBoolean;
+      CalcRecord.Lat := CdsRoutePointsLat.AsString;
+      CalcRecord.Lon := CdsRoutePointsLon.AsString;
+      CalcRecord.Address := CdsRoutePointsAddress.AsString;
+      GeoApifyRecords := GeoApifyRecords + [CalcRecord];
+
+      SepChar := '';
+      if (LastCoords <> '') then
+        SepChar := '|';
+      LastCoords := CdsRoutePointsLat.AsString + ',' + CdsRoutePointsLon.AsString;
+      CalcCoords[High(CalcCoords)] := CalcCoords[High(CalcCoords)] + SepChar + LastCoords;
+
+      Inc(RoutePointCnt);
+      CdsRoutePoints.Next;
+    end;
+
+    for CalcCnt := 0 to High(CalcFiles) do
+    begin
+      SetCursor(CRWait);
+      GetRouteCalculation(CalcCoords[CalcCnt], CalcFiles[CalcCnt]);
+      Sleep(200);
+    end;
+
+    GPXObject := TGPXFile.Create(CalcFiles[0], GetRoutesTmp, nil, nil);
+    try
+      GPXObject.AnalyzeGpx(CalcFiles);
+      GPXObject.DoCreateCalc(CdsRouteTripName.AsString,
+                             CdsRouteTransportationMode.AsString,
+                             CdsRouteRoutePreference.AsString,
+                             GPXFile,
+                             GeoApifyRecords);
+    finally
+      GPXObject.Free;
+    end;
+
+  finally
+    SetCursor(CRNormal);
+  end;
 end;
 
 end.

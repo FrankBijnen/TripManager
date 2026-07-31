@@ -15,6 +15,7 @@ uses
 type
 
   TTripFileUpdate = TNotifyEvent;
+  TTripFileCalculated = procedure(Sender: TObject; GpxFile: string) of object;
   TRoutePointsShowing = procedure(Sender: TObject; Showing: boolean) of object;
 
   TFrmTripEditor = class(TForm)
@@ -66,6 +67,7 @@ type
     ExportCSV: TMenuItem;
     Trk2RtImport1: TMenuItem;
     TbBrowser: TToolButton;
+    Calculate: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -93,12 +95,15 @@ type
     procedure Trk2RtImport1Click(Sender: TObject);
     procedure TbBrowserClick(Sender: TObject);
     procedure LblRoutePrefClick(Sender: TObject);
+    procedure CalculateClick(Sender: TObject);
+    procedure PopupGPXPopup(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
     FTripFileCanceled: TTripFileUpdate;
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
+    FTripFileCalculated: TTripFileCalculated;
     procedure CopyToClipBoard(Cut: boolean);
     procedure SaveChanges;
   public
@@ -113,6 +118,7 @@ type
     property OnTripFileUpdating: TTripFileUpdate read FTripFileUpdating write FTripFileUpdating;
     property OnTripFileUpdated: TTripFileUpdate read FTripFileUpdated write FTripFileUpdated;
     property OnRoutePointsShowing: TRoutePointsShowing read FRoutePointsShowing write FRoutePointsShowing;
+    property OnTripFileCalculated: TTripFileCalculated read FTripFileCalculated write FTripFileCalculated;
   end;
 
 var
@@ -124,7 +130,8 @@ uses
   System.SysUtils, System.Math,
   Winapi.ShellAPI,
   Vcl.Clipbrd, Vcl.Graphics,
-  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv, UFrmEditRoutePref;
+  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv, UnitRegistry,
+  UFrmEditRoutePref;
 
 {$R *.dfm}
 
@@ -201,6 +208,19 @@ begin
       DmRoutePoints.OnRouteUpdated(Self);
     PointsList.Free;
   end;
+end;
+
+procedure TFrmTripEditor.CalculateClick(Sender: TObject);
+begin
+  SaveTrip.Filter := '*.gpx|*.gpx';
+  SaveTrip.InitialDir := CurPath;
+  SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
+  if not SaveTrip.Execute then
+    exit;
+
+  DmRoutePoints.CalcRoute(SaveTrip.FileName);
+  if (Assigned(FTripFileCalculated)) then
+    FTripFileCalculated(Self, SaveTrip.FileName);
 end;
 
 procedure TFrmTripEditor.Copy1Click(Sender: TObject);
@@ -432,6 +452,11 @@ begin
     DBGRoutePoints.Columns[DBGRoutePoints.Columns.Count -1].Width :=
       DBGRoutePoints.ClientWidth - W - GetSystemMetrics(SM_CXVSCROLL) -4;
   end;
+end;
+
+procedure TFrmTripEditor.PopupGPXPopup(Sender: TObject);
+begin
+  Calculate.Enabled := (GetRegistry(Reg_GeoApifyKey, '') <> '');
 end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);

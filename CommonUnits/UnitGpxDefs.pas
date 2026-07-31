@@ -48,6 +48,15 @@ type
 
   TTagsToShow = (WptRte = 1, WptTrk = 2, WptRteTrk = 3, RteTrk = 10, Rte = 20, Trk = 30);
   THtmlOutput = (OSM, Kurviger, Both);
+  TGeoApifyRecord = record
+    LegCnt: integer;
+    Name: string;
+    Via: boolean;
+    Lat: string;
+    Lon: string;
+    Address: string;
+  end;
+  TGeoApifyRecords = array of TGeoApifyRecord;
 
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;
