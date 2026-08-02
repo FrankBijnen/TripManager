@@ -190,7 +190,7 @@ const
                                                           (Value: Ord(avHighWays);          Name: 'Highways')
                                                         );
 
-  DirectionMap : array[0..46] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
+  DirectionMap : array[0..47] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
                                                           (Value: $01;                      Name: 'Bear right'),
                                                           (Value: $02;                      Name: 'Right'),
                                                           (Value: $03;                      Name: 'Sharp right'),
@@ -218,6 +218,7 @@ const
                                                           (Value: $1A;                      Name: 'Enter tunnel'),
                                                           (Value: $1D;                      Name: 'Route point'),
                                                           (Value: $1F;                      Name: 'Leave roundabout 1st exit'),
+                                                          (Value: $20;                      Name: 'Separated lanes'),
                                                           (Value: $22;                      Name: 'Turn right'),
                                                           (Value: $23;                      Name: 'Route point'),
                                                           (Value: $24;                      Name: 'Route point'),
