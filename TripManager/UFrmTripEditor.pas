@@ -67,7 +67,7 @@ type
     ExportCSV: TMenuItem;
     Trk2RtImport1: TMenuItem;
     TbBrowser: TToolButton;
-    Calculate: TMenuItem;
+    ExportCalculated: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -95,7 +95,7 @@ type
     procedure Trk2RtImport1Click(Sender: TObject);
     procedure TbBrowserClick(Sender: TObject);
     procedure LblRoutePrefClick(Sender: TObject);
-    procedure CalculateClick(Sender: TObject);
+    procedure ExportCalculatedClick(Sender: TObject);
     procedure PopupGPXPopup(Sender: TObject);
   private
     { Private declarations }
@@ -210,7 +210,7 @@ begin
   end;
 end;
 
-procedure TFrmTripEditor.CalculateClick(Sender: TObject);
+procedure TFrmTripEditor.ExportCalculatedClick(Sender: TObject);
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := CurPath;
@@ -456,7 +456,7 @@ end;
 
 procedure TFrmTripEditor.PopupGPXPopup(Sender: TObject);
 begin
-  Calculate.Enabled := (GetRegistry(Reg_GeoApifyKey, '') <> '');
+  ExportCalculated.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
 end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);

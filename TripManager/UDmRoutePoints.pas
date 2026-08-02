@@ -1175,7 +1175,7 @@ begin
         RoutePointCnt := 0;
         Inc(CalcFileCnt);
         CalcCoords := CalcCoords + [LastCoords];
-        CalcFiles := CalcFiles + ['d:\temp\Calc_' + IntToStr(CalcFileCnt) + GetXMLExt];
+        CalcFiles := CalcFiles + [GetRoutesTmp + 'Calc_' + IntToStr(CalcFileCnt) + GetXMLExt];
       end;
       CalcRecord := Default(TGeoApifyRecord);
       CalcRecord.LegCnt := CalcFileCnt;
@@ -1214,7 +1214,6 @@ begin
     finally
       GPXObject.Free;
     end;
-
   finally
     SetCursor(CRNormal);
   end;

@@ -1396,36 +1396,34 @@ var
   TrkPtNode: TXmlVSNode;
   Lat, Lon: string;
 begin
-  if (ProcessOptions.ProcessTracks) then
+  Lat := '';
+  Lon := '';
+  for GeoSubNode in GeometryNode.ChildNodes do
   begin
-    Lat := '';
-    Lon := '';
-    for GeoSubNode in GeometryNode.ChildNodes do
-    begin
-      if (GeoSubNode.Name = 'lon') and
-         (Lon = '') then
-        Lon := GeoSubNode.NodeValue
-      else if (GeoSubNode.Name = 'lat') and
-              (Lat = '') then
-        Lat := GeoSubNode.NodeValue;
+    if (GeoSubNode.Name = 'lon') and
+       (Lon = '') then
+      Lon := GeoSubNode.NodeValue
+    else if (GeoSubNode.Name = 'lat') and
+            (Lat = '') then
+      Lat := GeoSubNode.NodeValue;
 
-      if (Lon <> '') and
-         (Lat <> '') then
-      begin
-        TrkPtNode := CurrentTrack.AddChild('trkpt');
-        TrkPtNode.SetAttribute('lon', Lon);
-        TrkPtNode.SetAttribute('lat', Lat);
-        Lat := '';
-        Lon := '';
-      end;
+    if (Lon <> '') and
+       (Lat <> '') then
+    begin
+      TrkPtNode := CurrentTrack.AddChild('trkpt');
+      TrkPtNode.SetAttribute('lon', Lon);
+      TrkPtNode.SetAttribute('lat', Lat);
+      Lat := '';
+      Lon := '';
     end;
   end;
 end;
 
+// Parse output from GeoAPify
 procedure TGPXfile.ProcessRootNode(RootNode: TXmlVSNode);
 var
   MainNode, ResultsNode, LegsNode: TXmlVSNode;
-  BetterDist, TrkPtDist, LastDist, DiffDist, StepDist: double;
+  BetterDist, TrkPtDist, LastDist, DiffDist: double;
   CurTrackPtIndex, FromTrackPtIndex, ToTrackPtIndex, BetterTrackPtIndex, GeometryCnt: integer;
   SkipTrkPts: integer;
 
@@ -1436,6 +1434,7 @@ begin
     exit;
 
   // Scan Geometry
+  // Convert <lon></lon><lat></lat> to <trkpt lat="" lon="">
   GeometryCnt := LegCnt;
   for MainNode in RootNode.ChildNodes do
   begin
@@ -1457,10 +1456,11 @@ begin
     end;
   end;
 
+  // Have a track?
   if (CurrentTrack.ChildNodes.Count = 0) then
     exit;
-  TotalDistance := 0;
 
+  // Add Shaping points from the turns (steps), looking up the coordinates from the track[to_index]
   for MainNode in RootNode.ChildNodes do
   begin
     if (MainNode.Name <> 'results') then
@@ -1486,29 +1486,28 @@ begin
           continue;
         FromTrackPtIndex := StrToIntDef(FindSubNodeValue(LegsNode, 'from_index'), -1);
         ToTrackPtIndex := StrToIntDef(FindSubNodeValue(LegsNode, 'to_index'), -1);
-        if (ToTrackPtIndex = FromTrackPtIndex) then // arrived at dest
+        if (ToTrackPtIndex = FromTrackPtIndex) then // arrived at dest. Dest is already a via/shaping point
           continue;
 
-        StepDist := 0;
+        // Advance forward in track, to find the trackpoint that matches the turn.
         PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[CurTrackPtIndex + SkipTrkPts].AttributeList);
-        while ((CurTrackPtIndex < ToTrackPtIndex)) and
-               ((CurTrackPtIndex + SkipTrkPts)  < CurrentTrack.ChildNodes.Count -1) do
+        while (CurTrackPtIndex < ToTrackPtIndex) and
+              ((CurTrackPtIndex + SkipTrkPts) < (CurrentTrack.ChildNodes.Count -1)) do
         begin
           Inc(CurTrackPtIndex);
           CurrentCoord.FromAttributes(CurrentTrack.ChildNodes[CurTrackPtIndex + SkipTrkPts].AttributeList);
           TrkPtDist := CoordDistance(CurrentCoord, PrevTrackCoords, TDistanceUnit.duKm);
           PrevTrackCoords := CurrentCoord;
           TotalDistance := TotalDistance + TrkPtDist;
-          StepDist := StepDist + TrkPtDist;
         end;
 
+        // Advance forward in track, to place a shaping point 'ProcessOptions.GetDistOKKms' AFTER the turn.
+        //TODO need a separate Parm
         BetterDist := 0;
         BetterTrackPtIndex := CurTrackPtIndex;
-
         PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
         Inc(BetterTrackPtIndex);
         while (BetterTrackPtIndex < CurrentTrack.ChildNodes.Count -1) and
-  //TODO Parm
               (BetterDist < ProcessOptions.GetDistOKKms) do
         begin
           if (CurrentTrack.ChildNodes[BetterTrackPtIndex].Name = 'trkpt') then
@@ -1520,11 +1519,13 @@ begin
           Inc(BetterTrackPtIndex);
         end;
 
+        // Only add a shapingpoint if the distance is at least 'ProcessOptions.GetMinShapeDistKms' from the last added.
+        // EG Roundabout at 'Enter' and 'Exit' very close.
         DiffDist := (TotalDistance + BetterDist) - LastDist;
         if (DiffDist > ProcessOptions.GetMinShapeDistKms) then
         begin
           AddShapingPoint(CurrentTrack.ChildNodes[BetterTrackPtIndex],
-                                                  Format('%d=%d=%f=%f Km', [LegCnt, CurTrackPtIndex, StepDist, TotalDistance + BetterDist]),
+                                                  Format('%f Km', [TotalDistance + BetterDist]),
                                                   ProcessOptions.DefRtePtSymbol);
           LastDist := TotalDistance + BetterDist;
         end;
@@ -1552,6 +1553,7 @@ var
   GPXFile: string;
 begin
   LegCnt := 0;
+  TotalDistance := 0;
   MinTrackDistKms := FProcessOptions.GetMinTrackDistKms;
   ClearGlobals;
   try
@@ -2394,7 +2396,7 @@ var
   Lat, Lon: string;
   OutExtensions, OutPointType, CalcRoot, RouteWayPoint, WayPoint: TXmlVSNode;
   Track : TXmlVSNode;
-  OutRte, OutRtePt: TXmlVSNode;
+  OutRte, OutRtePt, OutName: TXmlVSNode;
   OutTrack, OutTrackSeg, OutTrackPt, TrackPoint: TXmlVSNode;
   RoutePtDist: double;
   AddedRoutePtCoords, PrevRoutePtCoords, NextRoutePtCoords: TCoords;
@@ -2467,7 +2469,9 @@ begin
           OutRtePt := OutRte.AddChild('rtept');
           CloneNode(WayPoint, OutRtePt);
           Inc(AddedCnt);
-          OutRtePt.Find('name').NodeValue := Format('%s_%d', [GeoApifyRecords[RoutePtCnt].Name, AddedCnt]);
+          OutName := OutRtePt.Find('name');
+          if (Assigned(OutName)) then
+            OutName.NodeValue := Format('%s_%d (%s)', [GeoApifyRecords[RoutePtCnt].Name, AddedCnt, OutName.NodeValue]);
         end;
 
         Inc(RoutePtCnt);
@@ -2480,7 +2484,6 @@ begin
       AddedCnt := 0;
       for Track in FTrackList do
       begin
-        Inc(AddedCnt);
         OutTrack := CalcRoot.AddChild('trk');
         OutTrack.AddChild('name').NodeValue := GeoApifyRecords[AddedCnt].Name;
 
@@ -2496,6 +2499,7 @@ begin
           OutTrackPt := OutTrackSeg.AddChild('trkpt');
           CloneNode(TrackPoint, OutTrackPt);
         end;
+        Inc(AddedCnt);
       end;
     end;
     CalcXml.SaveToFile(OutFile);

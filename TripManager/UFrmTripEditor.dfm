@@ -5224,9 +5224,9 @@ object FrmTripEditor: TFrmTripEditor
       Caption = 'Export'
       OnClick = ExportGpxClick
     end
-    object Calculate: TMenuItem
-      Caption = 'Calculate'
-      OnClick = CalculateClick
+    object ExportCalculated: TMenuItem
+      Caption = 'Export calculated'
+      OnClick = ExportCalculatedClick
     end
   end
   object OpenTrip: TOpenDialog
