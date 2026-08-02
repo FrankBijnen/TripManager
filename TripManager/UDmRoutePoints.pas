@@ -1110,8 +1110,6 @@ end;
 const
   GeoApifyUrl = 'https://api.geoapify.com';
 
-//  GeoApifyUrl = 'https://api.geoapify.com/v1/routing?mode=motorcycle&apiKey=f58807e4acab4c6088a94672ffb2ed17&waypoints';
-
 procedure TDmRoutePoints.GetRouteCalculation(const Coords, XMLFile: string);
 var
   RESTClient:   TRESTClient;
