@@ -1634,7 +1634,7 @@ begin
     exit;
 
 // Set filenames
-  OriginalName := ExtractFileName(SourceFile);
+  OriginalName := ExtractFileName(AListItem.Caption);
   CheckHRGuid(CreateGUID(Guid)); // A Guid should be unique. ALthough on MTP devices filenames dont need to be unique.
   TempName := ReplaceAll(LowerCase(GuidToString(Guid)) + TmpExtension, ['{','}'], ['',''], [rfReplaceAll]);
 

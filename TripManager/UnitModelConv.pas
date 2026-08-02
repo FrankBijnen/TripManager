@@ -18,7 +18,7 @@ const
   SystemDb                          = 'system.db';
   SettingsDb                        = 'settings.db';
   ProfileDb                         = 'vehicle_profile.db';
-  ExploreDb                         = 'explore.db';
+  ExploreDb                         = 'Explore.db';
   GarminDeviceXML                   = 'GarminDevice.xml';
   Reg_UnsafeModels                  = 'UnsafeModels';
   Reg_PrefDev_Key                   = 'PrefDevice';

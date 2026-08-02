@@ -960,7 +960,7 @@ begin
         end;
         if (CurrentItem = nil) then
           raise exception.Create('Overwrite file failed');
-        EdFileSysFolder.Text := Format('Transferring %s', [NFile]);
+        EdFileSysFolder.Text := Format('Transferring %s', [CurrentItem.Caption]);
         EdFileSysFolder.Update;
         if not CurrentDevice.TransferExistingFile(AFolder.PathName, FSavedFolderId, CurrentItem) then
           raise exception.Create('Overwrite file failed');

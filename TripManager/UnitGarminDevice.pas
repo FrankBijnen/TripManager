@@ -763,7 +763,7 @@ begin
   if not Assigned(AListItem) then
     raise exception.Create('No item selected.');
 
-  OPath := CombinePath(SSaveTo, ExtractFileName(SFile));
+  OPath := CombinePath(SSaveTo, AListItem.Caption); // Use casing of device
   result := CopyFile(Pchar(SFile), PChar(OPath), false);
   if (result) then
     GetListInfo(SSaveTo, ExtractFileName(SFile), AListItem);
