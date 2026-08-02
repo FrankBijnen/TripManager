@@ -951,7 +951,8 @@ begin
         CurrentItem := nil;
         for Index := 0 to LstFiles.Items.Count -1 do
         begin
-          if (LstFiles.Items[Index].Caption = NFile) then
+          if (Assigned(LstFiles.Items[Index].Data)) and
+             (TBase_Data(LstFiles.Items[Index].Data).ObjectId = CurrentObjectId) then
           begin
             CurrentItem := LstFiles.Items[Index];
             break;
