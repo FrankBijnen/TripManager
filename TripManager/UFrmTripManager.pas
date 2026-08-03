@@ -3559,10 +3559,11 @@ var
     try
       Offset := (ARoutePreferences.SelEnd - ARoutePreferences.SelStart - ARoutePreferences.LenValue) +
                 SizeOf(biInitiator);
-      if (ARoutePreferences is TmRoutePreferencesAdventurousMode) then
-        Segments.Text := ARoutePreferences.GetRoutePrefs(ATripList.GetItem(TmRoutePreferences.GetKey))
-      else
-        Segments.Text := ARoutePreferences.GetRoutePrefs;
+      if (ARoutePreferences is TmRoutePreferences) then
+        Segments.Text := ARoutePreferences.GetRoutePrefs
+      else // Need the base route prefs. Distinguish N/A and Not Selected
+        Segments.Text := ARoutePreferences.GetRoutePrefs(ATripList.GetItem(TmRoutePreferences.GetKey));
+
       VlTripInfo.Strings.AddObject(Format('%s #Segments', [ARoutePreferences.Name]) +
                                      VlTripInfo.Strings.NameValueSeparator +
                                      Format('%d', [ARoutePreferences.Count]),
@@ -3655,7 +3656,7 @@ var
 
     if (ALocation.RoutePref <> TRoutePreference.rmNA) then
     begin
-      RoutePreference := RoutePref2Desc(ALocation.RoutePref, ATripList.TripModel);
+      RoutePreference := RoutePref2Desc(ALocation.RoutePref, ATripList.TripModel, false);
       AdventurousLevel := '';
       if (ALocation.RoutePref = TRoutePreference.rmAdventurous) then
          IntToIdent(Ord(ALocation.AdvLevel), AdventurousLevel, AdvLevelMap);

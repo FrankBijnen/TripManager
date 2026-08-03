@@ -467,7 +467,7 @@ type
     constructor Create(AValue: boolean = false);
   end;
 
-{*** XT2 ***}
+{*** XT2, XT3 ***}
 {*** RoutePreferences ***}
   TBaseRoutePreferences = class(TRawDataItem)
   private
@@ -478,11 +478,6 @@ type
     function GetRoutePrefByte(ViaPt: cardinal): byte;
     function GetRoutePrefs(RoutePreference: TObject = nil): string; virtual;
     property Count: Cardinal read GetCount;
-  end;
-  TBaseAdvRoutePreferences = class(TBaseRoutePreferences)
-  private
-    function GetIntToIdent(const Value: word): string; override;
-    function GetItemEditMode: TItemEditMode; override;
   end;
 
   TmRoutePreferences = class(TBaseRoutePreferences)
@@ -501,6 +496,12 @@ type
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     function GetRoutePref(ViaPt: cardinal): TAdvlevel;
   end;
+  TBaseAdvRoutePreferences = class(TBaseRoutePreferences)
+  private
+    function GetIntToIdent(const Value: word): string; override;
+    function GetItemEditMode: TItemEditMode; override;
+  end;
+
   TmRoutePreferencesAdventurousHillsAndCurves = class(TBaseAdvRoutePreferences)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
@@ -2517,7 +2518,7 @@ end;
 { TBaseRoutePreferences }
 function TBaseRoutePreferences.GetIntToIdent(const Value: word): string;
 begin
-  result := Format('TBD (0x%s)', [IntTohex(Value, 4)]);
+  result := Format('%s (0x%s)', [ToBeDefined, IntTohex(Value, 4)]);
 end;
 
 function TBaseRoutePreferences.GetCount: Cardinal;
@@ -2556,6 +2557,7 @@ begin
       if (RoutePreference <> nil) then
       begin
         BaseRoutePrefByte := TmRoutePreferences(RoutePreference).GetRoutePrefByte(SegmentNr);
+        // The adventurous preferences are meaningless if the base is not adventurous
         if (TRoutePreference(BaseRoutePrefByte) <> TRoutePreference.rmAdventurous) then
         begin
           result := result + Format('%s (0x%s)', [AdvLevelMap[0].Name, IntTohex(RoutePref, 4)]) + #10;
@@ -2597,11 +2599,11 @@ function TBaseAdvRoutePreferences.GetIntToIdent(const Value: word): string;
 begin
   case Value of
     DefRoutePref:
-      Result := '';
+      Result := InclMapsNotSelected;
     DefRoutePrefInclMaps:
-      Result := 'Selected';
+      Result := InclMapsSelected;
     else
-      result := Format('TBD (0x%s)', [IntTohex(Value, 4)]);
+      result := Format('%s (0x%s)', [ToBeDefined, IntTohex(Value, 4)]);
   end;
 end;
 
@@ -2638,6 +2640,11 @@ begin
   result := TRoutePreference(GetRoutePrefByte(ViaPt));
 end;
 
+constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create(GetKey, 0 , $80);
+end;
+
 function TmRoutePreferencesAdventurousMode.GetIntToIdent(const Value: word): string;
 begin
   if (IntToIdent(Value and $ff, result, AdvLevelMap)) then
@@ -2661,17 +2668,12 @@ begin
   inherited Create(GetKey, 0 , $80);
 end;
 
-constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
-begin
-  inherited Create(GetKey, 0 , $80);
-end;
-
-constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
-begin
-  inherited Create(GetKey, 0 , $80);
-end;
-
 constructor TmRoutePreferencesAdventurousPopularPaths.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
+begin
+  inherited Create(GetKey, 0 , $80);
+end;
+
+constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
   inherited Create(GetKey, 0 , $80);
 end;
@@ -5837,7 +5839,7 @@ begin
 
     end;
 
-    if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc, TTripOption.ttTripTrackLocPrefs]) then
+    if (ProcessOptions.TripOption in [TTripOption.ttTripTrackLoc]) then
       SetPreserveTrackToRoute(RtePts);
 
     // Update Dist and Time

@@ -1,5 +1,7 @@
 unit UFrmSendTo;
 
+{.$DEFINE TripTrackLoc}
+
 interface
 
 uses
@@ -91,7 +93,11 @@ const
   TripOptions: string =
     'Recalculation forced'
      + #10 + 'No recalculation forced (BaseCamp calculated GPX only)'
-     + #10 + 'Preserve track to route (BaseCamp calculated GPX only)';
+     + #10 + 'Preserve track to route (BaseCamp calculated GPX only)'
+{$IFDEF TripTrackLoc}
+     + #10 + 'Preserve track to route + Locations (BaseCamp calculated GPX only)'
+{$ENDIF}
+     ;
 
 procedure TFrmSendTo.EnableItems;
 begin
@@ -129,9 +135,6 @@ procedure TFrmSendTo.UpdateDesign;
 var
   SubKey: string;
   ModelIndex: integer;
-{$IFDEF ALLTRIPTRACKS}
-  RegModelValue: string;
-{$ENDIF}
 begin
   // Show/hide
   if (ShowHelp) then

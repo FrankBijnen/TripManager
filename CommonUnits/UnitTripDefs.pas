@@ -22,8 +22,7 @@ type
 
   // Not available to the user:
   // ttTripTrackLoc       = Trip from a track with locations
-  // ttTripTrackLocPrefs  = Trip from a track with locations and routepreferences
-  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc, ttTripTrackLocPrefs);
+  TTripOption       = (ttCalc, ttNoCalc, ttTripTrack, ttTripTrackLoc);
 
   // Values in Trip files
   TRoutePreference  = (rmFasterTime           = $00,
@@ -245,6 +244,9 @@ const
   DefRoutePrefAdv             = $0101;
   DefRoutePrefInclMaps        = $0164;
   NotApplicable               = 'N/A';
+  ToBeDefined                 = 'TBD';
+  InclMapsSelected            = 'Selected';
+  InclMapsNotSelected         = 'Not selected';
 
   MinAdvLevelUserConfig = 1; // Only these are available to the user.
   AdvLevelMap : array[0..4] of TIdentMapEntry =         ( (Value: Ord(advNA);               Name: NotApplicable),
@@ -461,8 +463,12 @@ const
     []                                                      // Unknown
   );
 
-function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): string;
-function Desc2RoutePref(ADesc: string; AModel: TTripModel): TRoutePreference;
+function RoutePref2Desc(ARoutePref: TRoutePreference;
+                        AModel: TTripModel;
+                        OnlySupported: boolean = true): string;
+function Desc2RoutePref(ADesc: string;
+                        AModel: TTripModel;
+                        OnlySupported: boolean = true): TRoutePreference;
 
 implementation
 
@@ -629,19 +635,30 @@ begin
   end;
 end;
 
-function RoutePref2Desc(ARoutePref: TRoutePreference; AModel: TTripModel): string;
-var
-  ModelCalcMode: TCalcMode;
+function DefRoutePref2Desc(ARoutePref: TRoutePreference): string;
 begin
   if (ARoutePref = TRoutePreference.rmNA) then
     result := RoutePrefRecs[cmNA].Desc
   else
-    result := Format('TBD (0x%s)', [IntTohex(Ord(ARoutePref), 2)]);
-  for ModelCalcMode in CalcModesSuppported[AModel] do
+    result := Format('%s (0x%s)', [ToBeDefined, IntTohex(Ord(ARoutePref), 2)]);
+end;
+
+function RoutePref2Desc(ARoutePref: TRoutePreference;
+                        AModel: TTripModel;
+                        OnlySupported: boolean = true): string;
+var
+  ModelCalcMode: TCalcMode;
+begin
+  result := DefRoutePref2Desc(ARoutePref);
+
+  for ModelCalcMode := Low(TCalcMode) to High(TCalcMode) do
   begin
-    if (RoutePrefRecs[ModelCalcMode].Dt <> RoutePrefType[AModel]) then
+    if (OnlySupported) and
+       not (ModelCalcMode in CalcModesSuppported[AModel]) then
       continue;
-    if (RoutePrefRecs[ModelCalcMode].Rm = ARoutePref) then
+
+    if (RoutePrefRecs[ModelCalcMode].Dt = RoutePrefType[AModel]) and
+       (RoutePrefRecs[ModelCalcMode].Rm = ARoutePref) then
       exit(RoutePrefRecs[ModelCalcMode].Desc);
   end;
 end;
@@ -655,7 +672,9 @@ begin
     result := #9 + 'Adventurous' + #9 + 'Eco';
 end;
 
-function Desc2RoutePref(ADesc: string; AModel: TTripModel): TRoutePreference;
+function Desc2RoutePref(ADesc: string;
+                        AModel: TTripModel;
+                        OnlySupported: boolean = true): TRoutePreference;
 var
   ModelCalcMode: TCalcMode;
   Aliases: string;
@@ -669,6 +688,10 @@ begin
   Aliases := GpxDesc2TripDesc(ADesc);
   for ModelCalcMode in CalcModesSuppported[AModel] do
   begin
+    if (OnlySupported) and
+       not (ModelCalcMode in CalcModesSuppported[AModel]) then
+      continue;
+
     if (SameText(RoutePrefRecs[ModelCalcMode].Desc, ADesc)) or
        (ContainsText(Aliases, #9 + RoutePrefRecs[ModelCalcMode].Desc)) then
       exit(RoutePrefRecs[ModelCalcMode].Rm);
