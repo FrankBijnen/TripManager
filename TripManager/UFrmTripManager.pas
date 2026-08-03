@@ -19,7 +19,7 @@ uses
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.Themes,
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
-  Monitor, BCHexEditor, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox,
+  Monitor, BCHexEditor, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox, TripManager_DBGrid,
   UnitListViewSort, UnitBaseMTP, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi,
   UnitUSBEvent, Vcl.BaseImageCollection, Vcl.ImageCollection, Vcl.VirtualImageList;
 
@@ -49,9 +49,6 @@ const
   LocalHelp               = 'ChmDocs/TripManager.chm';
 
 type
-  // Get Access to Col of DBGrid
-  TDBGrid = class(Vcl.DBGrids.TDBGrid)
-  end;
 
   TMapReq = record
     Coords: string;
@@ -189,7 +186,7 @@ type
     CheckandFixcurrentgpx1: TMenuItem;
     TsSQlite: TTabSheet;
     PnlSQliteTop: TPanel;
-    DbgDeviceDb: TDBGrid;
+    DbgDeviceDb: TripManager_DBGrid.TDBGrid;
     DsDeviceDb: TDataSource;
     CdsDeviceDb: TClientDataSet;
     DBMemo: TMemo;
@@ -866,7 +863,6 @@ begin
 
     exit;
   end;
-
 end;
 
 procedure TFrmTripManager.BtnFromDevClick(Sender: TObject);

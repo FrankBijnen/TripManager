@@ -1,6 +1,6 @@
 unit TripManager_DBGrid;
 // DBGrid with better mouse selection
-
+// Access to protected properties
 interface
 
 uses
@@ -17,6 +17,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     property InplaceEditor;
+    property Col;
+    property Row;
   end;
 
 implementation
