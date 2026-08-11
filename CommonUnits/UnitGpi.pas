@@ -1066,7 +1066,7 @@ begin
       Dummy1 := 0;
       ImageSize := LineSize * Height;
       Dummy2 := 44;                     // ???
-      CntColPat := PalCount;
+      CntColPat := BitmapInfoHeader.biClrUsed;
       TranspCol := DefTransparentColor; // Magenta
       Flags2 := $0001;                  // Transparent
       Dummy3 := ImageSize + Dummy2;     // ???

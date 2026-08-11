@@ -73,7 +73,9 @@ procedure ReadGeoCodeSettings;
 procedure ClearCoordCache;
 
 const
-  Place_Decimals = 4;
+  Place_Decimals    = 4;
+  StrInvalidJson    = 'Json Invalid %s';
+  StrRequestFailed  = 'Request failed with %s%s';
 
 var
   GeoSettings: GEOsettingsRec;
@@ -88,10 +90,6 @@ uses
   REST.Types, REST.Client, REST.Utils,
   UnitStringUtils, UnitRegistry,
   UFrmPLaces, UFrmGeoSearch;
-
-const
-  StrInvalidJson    = 'Json Invalid %s';
-  StrRequestFailed  = 'Request failed with';
 
 var
   LastQuery: TDateTime;
@@ -254,7 +252,7 @@ begin
       RESTRequest.Execute;
       LastQuery := Now;
       if (RESTRequest.Response.StatusCode >= 400) then
-        raise exception.Create(StrRequestFailed + #10 + RESTRequest.Response.StatusText);
+        raise exception.Create(Format(StrRequestFailed, [#10, RESTRequest.Response.StatusText]));
     except
       on E:Exception do
       begin

@@ -641,6 +641,7 @@ var
   Rc: integer;
 begin
   CheckDevice;
+  ReadDefaultFolders;
 
   FolderId := CurrentDevice.PathId[DeviceFolder[1]];
   if (FolderId = '') then

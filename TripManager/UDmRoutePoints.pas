@@ -92,7 +92,6 @@ var
 
 const
   Reg_GeoApifyKey         = 'GeoApifyKey';
-  StrRequestFailed        = 'Request failed with';
 
 resourcestring
   DM_ERR_Need_Begin_End   = 'Need at least a begin and end point';
@@ -1137,7 +1136,7 @@ begin
     RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.Execute;
     if (RESTRequest.Response.StatusCode >= 400) then
-      raise exception.Create(StrRequestFailed + #10 + RESTRequest.Response.StatusText);
+      raise exception.Create(Format(StrRequestFailed, [#10, RESTRequest.Response.StatusText]));
     TFile.WriteAllText(XMLFile, RESTResponse.Content);
 
   finally

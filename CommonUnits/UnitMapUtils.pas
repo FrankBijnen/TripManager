@@ -158,7 +158,7 @@ begin
     exit;
   AssignFile(F, TdbFile);
   SaveFileMode := FileMode;
-  FileMode := 0;
+  FileMode := fmOpenRead;
   try
     Reset(F, 1);
     try
@@ -221,7 +221,7 @@ const
 begin
   AssignFile(F, MdxFile);
   SaveFileMode := FileMode;
-  Filemode := 0;
+  Filemode := fmOpenRead;
   try
     Reset(F, 1);
     try
