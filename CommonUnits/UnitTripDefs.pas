@@ -189,7 +189,7 @@ const
                                                           (Value: Ord(avHighWays);          Name: 'Highways')
                                                         );
 
-  DirectionMap : array[0..47] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
+  DirectionMap : array[0..54] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
                                                           (Value: $01;                      Name: 'Bear right'),
                                                           (Value: $02;                      Name: 'Right'),
                                                           (Value: $03;                      Name: 'Sharp right'),
@@ -204,7 +204,7 @@ const
                                                           (Value: $0D;                      Name: 'Leave ferry'),
                                                           (Value: $0E;                      Name: 'Enter roundabout'),
                                                           (Value: $0F;                      Name: 'Leave roundabout 1st exit'),
-                                                          (Value: $10;                      Name: 'Take left lane'),
+                                                          (Value: $10;                      Name: 'Leave roundabout 1st exit'),  //LHD
                                                           (Value: $11;                      Name: 'Ahead'),
                                                           (Value: $12;                      Name: 'Right'),
                                                           (Value: $13;                      Name: 'Left'),
@@ -223,19 +223,26 @@ const
                                                           (Value: $24;                      Name: 'Route point'),
                                                           (Value: $26;                      Name: 'Turn left'),
                                                           (Value: $2A;                      Name: 'Take highway ramp right'),
+                                                          (Value: $2E;                      Name: 'Enter turbo roundabout'),
                                                           (Value: $2F;                      Name: 'Leave roundabout 1st exit'),
+                                                          (Value: $30;                      Name: 'Leave roundabout 1st exit'), //LHD
                                                           (Value: $39;                      Name: 'Keep right'),
                                                           (Value: $4A;                      Name: 'Take ramp left'),
                                                           (Value: $4F;                      Name: 'Leave roundabout at 2nd exit'),
+                                                          (Value: $50;                      Name: 'Leave roundabout at 2nd exit'), //LHD
                                                           (Value: $5A;                      Name: 'Leave tunnel'),
                                                           (Value: $6F;                      Name: 'Leave roundabout at 2nd exit'),
+                                                          (Value: $70;                      Name: 'Leave roundabout at 2nd exit'), //LHD
                                                           (Value: $7A;                      Name: 'Leave tunnel'),
                                                           (Value: $88;                      Name: 'Take ramp ahead'),
                                                           (Value: $8A;                      Name: 'Take ramp right'),
                                                           (Value: $8F;                      Name: 'Leave roundabout at 3rd exit'),
+                                                          (Value: $90;                      Name: 'Leave roundabout at 3rd exit'), //LHD
                                                           (Value: $AA;                      Name: 'Take highway ramp right'),
                                                           (Value: $AF;                      Name: 'Leave roundabout at 3rd exit'),
+                                                          (Value: $B0;                      Name: 'Leave roundabout at 3rd exit'), // LHD
                                                           (Value: $CF;                      Name: 'Leave roundabout at 4th exit'),
+                                                          (Value: $D0;                      Name: 'Leave roundabout at 4th exit'), // LHD
                                                           (Value: $EF;                      Name: 'Leave roundabout at 4th exit')
                                                         );
   DirectionLeaveRoutePoint    = [$16];
