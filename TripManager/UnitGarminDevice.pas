@@ -321,7 +321,7 @@ begin
   // Get Name of file
   NFile := AListItem.Caption;
   if not GetFile(ABASE_Data_File.ObjectId, CreatedTempPath, NFile) then
-    raise Exception.Create(Format('Copy %s from %s failed', [NFile, Device]));
+    raise Exception.Create(Format(MTP_ERR_Copy_Failed, [NFile, Device]));
 
   result := IncludeTrailingPathDelimiter(CreatedTempPath) + NFile;
 end;
@@ -609,13 +609,13 @@ begin
       continue;
 
     if (CopyFileToTmp(AListItem) = '') then
-      raise Exception.Create(Format('Could not copy file: %s to %s',
+      raise Exception.Create(Format(MTP_ERR_Could_Not_Copy,
                                     [AListItem.Caption, CreatedTempPath]));
   end;
 
   // Delete .System\Trips
   if not DelFile(SystemTripsPathId, true) then
-    raise Exception.Create(Format('Could not remove directory: %s',
+    raise Exception.Create(Format(MTP_ERR_Could_Not_RMDir,
                                   [SystemTripsPath]));
 
   // Recreate .System\Trips, and get New Id.
@@ -624,7 +624,7 @@ begin
 
   // Copy Tmp file to device
   if (TransferNewFile(CreatedTempPath + LastRefreshFile, SystemTripsPathId) = '') then
-    raise Exception.Create(Format('Could not overwrite file: %s on %s',
+    raise Exception.Create(Format(MTP_ERR_Overwrite_Dev_Failed,
                                   [LastRefreshFile, DisplayedDevice]));
 
   // Copy trip files to device
@@ -636,7 +636,7 @@ begin
 
     // Did the transfer work?
     if (TransferNewFile(TempFile, SystemTripsPathId) = '') then
-      raise Exception.Create(Format('Could not overwrite file: %s on %s',
+      raise Exception.Create(Format(MTP_ERR_Overwrite_Dev_Failed,
                                     [ExtractFileName(TempFile), DisplayedDevice]));
     Rc := System.SysUtils.FindNext(Fs);
   end;
@@ -761,7 +761,7 @@ var
   OPath: string;
 begin
   if not Assigned(AListItem) then
-    raise exception.Create('No item selected.');
+    raise exception.Create(MTP_ERR_No_Item);
 
   OPath := CombinePath(SSaveTo, AListItem.Caption); // Use casing of device
   result := CopyFile(Pchar(SFile), PChar(OPath), false);

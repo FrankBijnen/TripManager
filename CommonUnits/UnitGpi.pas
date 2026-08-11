@@ -1398,7 +1398,6 @@ begin
       ExtraSize := ExtraSize + AMedia.Size;
     end;
   end;
-//TODO Message if not MP3, Jpg found?
 end;
 
 procedure TPOIGroup.AddWpt(GPXWayPt: TGPXWayPoint);

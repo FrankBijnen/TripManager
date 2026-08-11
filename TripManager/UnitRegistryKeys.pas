@@ -149,6 +149,10 @@ type
 var
   SetProcessOptions: TSetProcessOptions;
 
+resourcestring
+  REG_ERR_Select_Only_One     = 'Only one route option can be selected!';
+  REG_ERR_Select_At_Least_One = 'Select at least one of: %s %s %s %s %s %s!';
+
 implementation
 
 uses
@@ -352,7 +356,7 @@ begin
   begin
     if (Items[IdStrippedRoute].Checked) and
        (Items[IdCompleteRoute].Checked) then
-      raise Exception.Create('Only one route option can be selected!');
+      raise Exception.Create(REG_ERR_Select_Only_One);
 
     SetLength(result, 0);
 
@@ -393,7 +397,7 @@ begin
         if (Items[IdWayPointWpt].Checked = false) and
            (Items[IdWayPointVia].Checked = false) and
            (Items[IdWayPointShp].Checked = false) then
-          raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
+          raise Exception.Create(Format(REG_ERR_Select_At_Least_One,
            [#10, Items[IdWayPointWpt].Text,
             #10, Items[IdWayPointVia].Text,
             #10, Items[IdWayPointShp].Text]));
@@ -412,7 +416,7 @@ begin
         if (Items[IdGpiWayPt].Checked = false) and
            (Items[IdGpiViaPt].Checked = false) and
            (Items[IdGpiShpPt].Checked = false) then
-          raise Exception.Create(Format('Select at least one of: %s %s %s %s %s %s!',
+          raise Exception.Create(Format(REG_ERR_Select_At_Least_One,
            [#10, Items[IdGpiWayPt].Text,
             #10, Items[IdGpiViaPt].Text,
             #10, Items[IdGpiShpPt].Text]));

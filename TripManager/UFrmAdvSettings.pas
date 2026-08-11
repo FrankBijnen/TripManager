@@ -518,12 +518,12 @@ procedure TFrmAdvSettings.ValidateApiKey;
 begin
   GeoSettings.GeoCodeUrl := GridGeoCodeSettings.Cells[2, 2];
   if (Trim(GeoSettings.GeoCodeUrl) = '') then
-    raise Exception.Create('Need a GeoCode URL');
+    raise Exception.Create(GEO_ERR_Need_Url);
   GeoSettings.GeoCodeApiKey := GridGeoCodeSettings.Cells[2, 3];
   if (Trim(GeoSettings.GeoCodeApiKey) = '') then
-    raise Exception.Create('Need a GeoCode API_Key');
+    raise Exception.Create(GEO_ERR_Need_API_Key);
   if not(ValidLatLon(SampleLat, SampleLon)) then
-    raise Exception.Create(Format('Your current map position (%s, %s) is not valid.', [SampleLat, SampleLon]));
+    raise Exception.Create(Format(GEO_ERR_Invalid_Coords, [SampleLat, SampleLon]));
 
   MemoAddressFormat.Enabled := (GeoSettings.GeoCodeApiKey <> '');
   SamplePlace := nil;

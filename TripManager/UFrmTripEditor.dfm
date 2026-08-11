@@ -428,7 +428,7 @@ object FrmTripEditor: TFrmTripEditor
     ImageCollection = ImgColRoutePoints
     Width = 24
     Height = 24
-    Left = 378
+    Left = 394
     Top = 346
   end
   object ImgColRoutePoints: TImageCollection
@@ -5227,6 +5227,10 @@ object FrmTripEditor: TFrmTripEditor
     object ExportCalculated: TMenuItem
       Caption = 'Export calculated'
       OnClick = ExportCalculatedClick
+    end
+    object SendTo: TMenuItem
+      Caption = 'Send to'
+      OnClick = SendToClick
     end
   end
   object OpenTrip: TOpenDialog

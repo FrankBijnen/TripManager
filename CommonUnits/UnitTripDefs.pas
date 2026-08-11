@@ -463,6 +463,12 @@ const
     []                                                      // Unknown
   );
 
+resourcestring
+  TRP_ERR_Not_Supported   = 'Writing not supported for model: %s';
+  TRP_WRN_Too_Many_Points = 'Warning: Too many Via points (%d including Begin/End) in: %s';
+  TRP_ERR_No_Valid_Trip   = 'Not a valid trip file: %s';
+  TRP_ERR_Model_Not_Supp  = 'Model not supported';
+
 function RoutePref2Desc(ARoutePref: TRoutePreference;
                         AModel: TTripModel;
                         OnlySupported: boolean = true): string;

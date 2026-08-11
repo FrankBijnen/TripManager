@@ -21,6 +21,11 @@ const
   Reg_ThrottleGeoCode     = 'ThrottleGeoCode';
   Reg_SelectUniqPlace     = 'SelectUniqPlace';
 
+resourcestring
+  GEO_ERR_Need_Url        = 'Need a GeoCode URL';
+  GEO_ERR_Need_API_Key    = 'Need a GeoCode API_Key';
+  GEO_ERR_Invalid_Coords  = 'Your current map position (%s, %s) is not valid.';
+
 type
 
   TExecRestEvent = procedure(Url, Response: string; Succes: boolean) of object;
@@ -85,7 +90,8 @@ uses
   UFrmPLaces, UFrmGeoSearch;
 
 const
-  StrInvalidJson = 'Json Invalid %s';
+  StrInvalidJson    = 'Json Invalid %s';
+  StrRequestFailed  = 'Request failed with';
 
 var
   LastQuery: TDateTime;
@@ -248,7 +254,7 @@ begin
       RESTRequest.Execute;
       LastQuery := Now;
       if (RESTRequest.Response.StatusCode >= 400) then
-        raise exception.Create('Request failed with' + #10 + RESTRequest.Response.StatusText);
+        raise exception.Create(StrRequestFailed + #10 + RESTRequest.Response.StatusText);
     except
       on E:Exception do
       begin

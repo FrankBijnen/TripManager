@@ -23,6 +23,9 @@ const
   GpxMask                     = '*' + GpxExtension;
   NotApplicable               = 'N/A';
 
+resourcestring
+  GPX_ERR_CouldNotCopy        = 'Could not copy %s to:%s%s';
+
 type
   TDistanceUnit = (duKm, duMi);
   TProcessCategory = (pcSymbol, pcGPX);

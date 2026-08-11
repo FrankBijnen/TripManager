@@ -19,6 +19,28 @@ const
   NonMTPRoot          = '?:\';
   RelativePath        = '.';
 
+resourcestring
+  MTP_ERR_Reading               = 'Error: %s reading file: %s';
+  MTP_ERR_Writing               = 'Error: %s writing file: %s';
+  MTP_ERR_No_Item               = 'No item selected';
+  MTP_ERR_Delete_Failed         = 'Deleting file %s failed';
+  MTP_ERR_Overwrite_Failed      = 'Overwrite file: %s failed';
+  MTP_ERR_Overwrite_Dev_Failed  = 'Overwrite file: %s failed on: %s';
+  MTP_ERR_Copy_Failed           = 'Copy %s from %s failed';
+  MTP_ERR_Could_Not_Copy        = 'Could not copy file: %s to %s';
+  MTP_ERR_Could_Not_RMDir       = 'Could not remove directory: %s';
+  MTP_ERR_Could_Not_RMFile      = 'Could not remove file: %s on: %s';
+  MTP_ERR_Could_Not_RMObject    = 'Could not remove %s: %s on: %s';
+  MTP_ERR_Could_Not_CREDir      = 'Folder could not be created!';
+  MTP_ERR_Write_Failed          = 'Writing file: %s failed';
+  MTP_ERR_Rename_Failed         = 'Rename failed on device';
+  MTP_ERR_File_Exists           = 'File: %s exists!';
+  MTP_ERR_Not_Found             = '%s not found';
+  MTP_ERR_No_Dev_Open           = 'No MTP Device opened.';
+  MTP_ERR_Could_Not_Open_Dev    = 'Device: %s could not be opened.';
+  MTP_INF_Transferring          = 'Transferring: %s';
+  MTP_INF_SentTo                = '%s Sent to: %s';
+
 type
   TMediaType = (mtMTP, mtMSM, mtDRV);
 
@@ -322,7 +344,7 @@ function TBase_Device.TransferExistingFile(const SourceFile, DirOnDev: string;
                                            const AListItem: TListItem): boolean;
 begin
   if not Assigned(AListItem) then
-    raise exception.Create('No item selected.');
+    raise exception.Create(MTP_ERR_No_Item);
 
   CheckSurrogate(AListItem.Caption);
   result := MTP_TransferExistingFileToDevice(PortableDev, SourceFile, DirOnDev, AListItem);

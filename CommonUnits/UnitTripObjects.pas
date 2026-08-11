@@ -2254,9 +2254,8 @@ end;
 
 function TmRoutePreference.GetValue: string;
 begin
-  if (TripList = nil) then
-    raise exception.Create('TmRoutePreference.GetValue called, but no Triplist');
-  result := RoutePref2Desc(TroutePreference(FValue), TripList.TripModel);
+  Assert(TripList <> nil, 'TmRoutePreference.GetValue called, but no Triplist');
+  result := RoutePref2Desc(TRoutePreference(FValue), TripList.TripModel);
 end;
 
 procedure TmRoutePreference.SetByte(AByte: byte);
@@ -2273,8 +2272,7 @@ end;
 
 procedure TmRoutePreference.SetValue(AValue: string);
 begin
-  if (TripList = nil) then
-    raise exception.Create('TmRoutePreference.SetValue called, but no Triplist');
+  Assert(TripList <> nil, 'TmRoutePreference.SetValue called, but no Triplist');
   AsByte := Ord(TmRoutePreference.RoutePreference(AValue, TripList.TripModel));
 end;
 
@@ -4502,13 +4500,13 @@ var
   mLocations: TmLocations;
 begin
   if not TProcessOptions.SafeModel2Write(TripModel) then
-    raise Exception.Create(Format('Writing not supported for model: %s', [ModelDescription]));
+    raise Exception.Create(Format(TRP_ERR_Not_Supported, [ModelDescription]));
 
   mLocations := GetItem(TmLocations.GetKey) as TmLocations;
   if (mLocations <> nil) and // No Locations, cant be too many...
      (TProcessOptions.MaxViaPoints > 0) and
      (mLocations.GetViaPointCount > TProcessOptions.MaxViaPoints) then
-    MessageDlg(Format('Warning: Too many Via points (%d including Begin/End) in: %s',
+    MessageDlg(Format(TRP_WRN_Too_Many_Points,
                       [mLocations.GetViaPointCount, ExtractFileName(AFile)]),
                TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
 
@@ -4664,7 +4662,7 @@ begin
   try
     result := LoadFromStream(AStream);
     if not result then
-      raise Exception.Create(Format('Not a valid trip file: %s', [AFile]));
+      raise Exception.Create(Format(TRP_ERR_No_Valid_Trip, [AFile]));
   finally
     AStream.Free;
   end;
@@ -5361,7 +5359,7 @@ begin
     TTripModel.Nuvi2599_57:
       AddLocation_nuvi2599_57(Locations, Location2Add);
     else
-      raise exception.Create('AddLocation. Model not supported');
+      raise exception.Create(TRP_ERR_Model_Not_Supp);
   end;
 end;
 
@@ -6423,7 +6421,7 @@ begin
     TTripModel.Nuvi2599_57:
       CreateTemplate_nuvi2599_57(TripName, CalculationMode, TransportMode);
     else
-      raise exception.Create('Create template. Model not supported');
+      raise exception.Create(TRP_ERR_Model_Not_Supp);
   end;
 
   // Create dummy AllRoutes, and complete RoutePreferences

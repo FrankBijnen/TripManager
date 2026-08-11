@@ -91,7 +91,12 @@ var
   DmRoutePoints: TDmRoutePoints;
 
 const
-  Reg_GeoApifyKey = 'GeoApifyKey';
+  Reg_GeoApifyKey         = 'GeoApifyKey';
+  StrRequestFailed        = 'Request failed with';
+
+resourcestring
+  DM_ERR_Need_Begin_End   = 'Need at least a begin and end point';
+  DM_ERR_Trk2Rt_Missing   = 'Could not start %s.exe. Check installation';
 
 implementation
 
@@ -832,7 +837,7 @@ begin
 
     Trk2RtCmdLine := Format('%s.exe %s "%s"', [Trk2Rt, TProcessOptions.Trk2RtOptions, CreatedTempPath + Trk2RtIn]);
     if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
-      raise Exception.Create(Format('Could not start %s.exe. Check installation', [Trk2Rt]));
+      raise Exception.Create(Format(DM_ERR_Trk2Rt_Missing, [Trk2Rt]));
 
     GpxFileTrkObj := TGPXFile.Create(CreatedTempPath + Trk2RtOut, OnSetAnalyzePrefs, nil);
     try
@@ -870,7 +875,7 @@ begin
     Trk2RtCmdLine := Format('%s.exe %s exportPath="%s" "%s"',
                             [Trk2Rt, TProcessOptions.Trk2RtOptions, ExcludeTrailingPathDelimiter(CreatedTempPath), GPXOrKmlFile]);
     if not Sto_RedirectedExecute(Trk2RtCmdLine, CreatedTempPath, ResOutput, ResError, ResExit) then
-      raise Exception.Create(Format('Could not start %s.exe. Check installation', [Trk2Rt]));
+      raise Exception.Create(Format(DM_ERR_Trk2Rt_Missing, [Trk2Rt]));
     GpxFile := Format('%s%s_%s%s', [IncludeTrailingPathDelimiter(CreatedTempPath),
                                     ExtractFileName(ChangeFileExt(GPXOrKmlFile, '')),
                                     T2R,
@@ -1107,6 +1112,7 @@ begin
   result := TTripList(FTripList).KurvigerUrl;
 end;
 
+//TODO Add Param
 const
   GeoApifyUrl = 'https://api.geoapify.com';
 
@@ -1131,7 +1137,8 @@ begin
     RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.Execute;
     if (RESTRequest.Response.StatusCode >= 400) then
-      raise exception.Create('Request failed with' + #10 + RESTRequest.Response.StatusText);
+//TODO Add resource string
+      raise exception.Create(StrRequestFailed + #10 + RESTRequest.Response.StatusText);
     TFile.WriteAllText(XMLFile, RESTResponse.Content);
 
   finally

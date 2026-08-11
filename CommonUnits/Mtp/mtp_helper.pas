@@ -1401,7 +1401,7 @@ begin
         begin
           HR := FDevStream.Read(@Buf[0], ITransferSize, @IReadBytes);
           if not (HR in [S_OK, S_False]) then // S_False is returned when not all bytes are read. => Last part of file.
-            raise Exception.Create(Format('Error: %s reading file: %s', [IntToHex(HR, 8), NFile]));
+            raise Exception.Create(Format(MTP_ERR_Reading, [IntToHex(HR, 8), NFile]));
           if (IReadBytes = 0) then
             break;
 
@@ -1579,7 +1579,7 @@ begin
 
       HR := FDevStream.Write(@Buf[0], IReadBytes, @IWritten);
       if (HR <> S_OK) then
-        raise Exception.Create(Format('Error: %s writing file: %s', [IntToHex(HR, 8), NameOnDev]));
+        raise Exception.Create(Format(MTP_ERR_Writing, [IntToHex(HR, 8), NameOnDev]));
     end;
 
     //commit saving to stream

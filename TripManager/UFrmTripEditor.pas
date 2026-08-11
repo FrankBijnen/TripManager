@@ -15,7 +15,7 @@ uses
 type
 
   TTripFileUpdate = TNotifyEvent;
-  TTripFileCalculated = procedure(Sender: TObject; GpxFile: string) of object;
+  TTripGPXFileEvent = procedure(Sender: TObject; GpxFile: string) of object;
   TRoutePointsShowing = procedure(Sender: TObject; Showing: boolean) of object;
 
   TFrmTripEditor = class(TForm)
@@ -68,6 +68,7 @@ type
     Trk2RtImport1: TMenuItem;
     TbBrowser: TToolButton;
     ExportCalculated: TMenuItem;
+    SendTo: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -97,28 +98,33 @@ type
     procedure LblRoutePrefClick(Sender: TObject);
     procedure ExportCalculatedClick(Sender: TObject);
     procedure PopupGPXPopup(Sender: TObject);
+    procedure SendToClick(Sender: TObject);
   private
     { Private declarations }
     FTripFileUpdating: TTripFileUpdate;
     FTripFileCanceled: TTripFileUpdate;
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
-    FTripFileCalculated: TTripFileCalculated;
+    FTripFileCalculated: TTripGPXFileEvent;
+    CurrentGpxFolderId: string;
+    CurrentGPXFolder: string;
+    procedure SendGPXFile(GPXFile: string);
     procedure CopyToClipBoard(Cut: boolean);
     procedure SaveChanges;
   public
     { Public declarations }
     CurPath: string;
-    CurTripList: TOBject;
+    CurTripList: TObject;
     CurFile: string;
     CurNewFile: boolean;
-    CurDevice: boolean;
+    CurIsDeviceFile: boolean;
+    CurrentDevice: TObject;
     CurModel: TTripModel;
     property OnTripFileCanceled: TTripFileUpdate read FTripFileCanceled write FTripFileCanceled;
     property OnTripFileUpdating: TTripFileUpdate read FTripFileUpdating write FTripFileUpdating;
     property OnTripFileUpdated: TTripFileUpdate read FTripFileUpdated write FTripFileUpdated;
     property OnRoutePointsShowing: TRoutePointsShowing read FRoutePointsShowing write FRoutePointsShowing;
-    property OnTripFileCalculated: TTripFileCalculated read FTripFileCalculated write FTripFileCalculated;
+    property OnTripFileCalculated: TTripGPXFileEvent read FTripFileCalculated write FTripFileCalculated;
   end;
 
 var
@@ -130,7 +136,7 @@ uses
   System.SysUtils, System.Math,
   Winapi.ShellAPI,
   Vcl.Clipbrd, Vcl.Graphics,
-  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitModelConv, UnitRegistry,
+  UDmRoutePoints, UnitTripObjects, UnitStringUtils, UnitBaseMTP, UnitModelConv, UnitRegistry, UnitRegistryKeys,
   UFrmEditRoutePref;
 
 {$R *.dfm}
@@ -150,7 +156,7 @@ end;
 procedure TFrmTripEditor.SaveChanges;
 begin
   if (DmRoutePoints.CdsRoutePoints.RecordCount < 2) then
-    raise Exception.Create('Need at least a begin and end point.');
+    raise Exception.Create(DM_ERR_Need_Begin_End);
 
   if Assigned(FTripFileUpdating) then
     FTripFileUpdating(Self);
@@ -342,6 +348,9 @@ begin
 end;
 
 procedure TFrmTripEditor.FormShow(Sender: TObject);
+var
+  ModelIndex: integer;
+  SubKey: string;
 begin
 // Clear treeview to avoid AV's when the TripList's items are deleted
   if Assigned(FTripFileUpdating) then
@@ -350,7 +359,7 @@ begin
     FRoutePointsShowing(Self, true);
 
   GrpRoute.Caption := '';
-  if (CurDevice) then
+  if (CurIsDeviceFile) then
     GrpRoute.Caption := 'Device ';
   GrpRoute.Caption := GrpRoute.Caption + ExtractFileName(CurFile);
 
@@ -368,6 +377,21 @@ begin
     LblRoutePref.Cursor := TCursor(crDefault)
   else
     LblRoutePref.Cursor := TCursor(crHandPoint);
+
+  CurrentGPXFolder := '';
+  CurrentGpxFolderId := '';
+  if (Assigned(CurrentDevice)) and
+     (GetRegistry(Reg_EnableGpxFuncs, false)) then
+  begin
+    ModelIndex := TModelConv.GetCurrentDevice;
+    SubKey := TModelConv.GetDefaultDevice(ModelIndex);
+    CurrentGPXFolder := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                     Reg_PrefDevGpxFolder_Key,
+                                                     ModelIndex,
+                                                     1);
+    CurrentGpxFolderId := TBase_Device(CurrentDevice).PathId[CurrentGPXFolder];
+  end;
+  SendTo.Caption := 'Send to: ' + CurrentGPXFolder;
 end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);
@@ -457,6 +481,8 @@ end;
 procedure TFrmTripEditor.PopupGPXPopup(Sender: TObject);
 begin
   ExportCalculated.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
+  SendTo.Enabled := (Assigned(CurrentDevice)) and
+                    (CurrentGpxFolderId <> '');
 end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);
@@ -482,6 +508,39 @@ begin
   finally
     DmRoutePoints.CdsRoutePoints.EnableControls;
   end;
+end;
+
+procedure TFrmTripEditor.SendGPXFile(GPXFile: string);
+var
+  BaseDevice: TBase_Device;
+  CurrentObjId: string;
+  NFile: string;
+begin
+  BaseDevice := TBase_Device(CurrentDevice);
+  if (Assigned(BaseDevice) and
+      BaseDevice.CheckDevice) then
+  begin
+    NFile := ExtractFileName(GPXFile);
+    CurrentObjId := BaseDevice.FileId[CurrentGpxFolderId, NFile];
+    if (CurrentObjId <> '') then
+    begin
+      if (BaseDevice.DelFile(CurrentObjId) = false) then
+        raise exception.Create(Format(MTP_ERR_Delete_Failed, [NFile]));
+    end;
+    if (BaseDevice.TransferNewFile(GPXFile, CurrentGpxFolderId) = '') then
+      raise exception.Create(Format(MTP_ERR_Overwrite_Failed, [NFile]));
+    ShowMessage(Format(MTP_INF_SentTo, [NFile, CurrentGpxFolder]));
+  end;
+end;
+
+procedure TFrmTripEditor.SendToClick(Sender: TObject);
+var
+  AGPXFile: string;
+begin
+  SaveChanges;
+  AGPXFile := ChangeFileExt(GetRoutesTmp + DmRoutePoints.CdsRouteTripName.AsString, '.gpx');
+  DmRoutePoints.ExportToGPX(AGPXFile);
+  SendGPXFile(AGPXFile);
 end;
 
 procedure TFrmTripEditor.TbMoveUpClick(Sender: TObject);

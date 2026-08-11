@@ -19,7 +19,8 @@ uses
   Vcl.ButtonGroup, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.ActnList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.Themes,
   Vcl.DBGrids, Vcl.DBCtrls,
   Data.Db, Datasnap.DBClient,
-  Monitor, BCHexEditor, TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox, TripManager_DBGrid,
+  Monitor, BCHexEditor,
+  TripManager_ShellTree, TripManager_ShellList, TripManager_ValEdit, TripManager_ComboBox, TripManager_DBGrid,
   UnitListViewSort, UnitBaseMTP, UnitTripDefs, UnitTripObjects, UnitGpxDefs, UnitGpxObjects, UnitGpi,
   UnitUSBEvent, Vcl.BaseImageCollection, Vcl.ImageCollection, Vcl.VirtualImageList;
 
@@ -644,16 +645,16 @@ begin
 
   FolderId := CurrentDevice.PathId[DeviceFolder[1]];
   if (FolderId = '') then
-    raise exception.Create(DeviceFolder[1] + ' not found');
+    raise exception.Create(Format(MTP_ERR_Not_Found, [DeviceFolder[1]]));
 
   // Get Id of File
   NFile := 'Current.gpx';
   CurrentObjectId := CurrentDevice.FileId[FolderId, NFile];
   if (CurrentObjectId = '') then
-    raise exception.Create(NFile + ' not found');
+    raise exception.Create(Format(MTP_ERR_Not_Found, [NFile]));
 
   if not CurrentDevice.GetFile(CurrentObjectId, CreatedTempPath, NFile) then
-    raise Exception.Create(Format('Copy %s from %s failed', [NFile, CurrentDevice.Device]));
+    raise Exception.Create(Format(MTP_ERR_Copy_Failed, [NFile, CurrentDevice.Device]));
 
   FixMessages := TStringList.Create;
   GpxFile := TGPXFile.Create(CreatedTempPath + NFile, '', nil, nil, FixMessages);
@@ -671,9 +672,9 @@ begin
     begin
       GpxFile.FixCurrentGPX;
       if not CurrentDevice.DelFile(CurrentObjectId) then
-        raise exception.Create(Format('Deleting file %s failed', [NFile]));
+        raise exception.Create(Format(MTP_ERR_Delete_Failed, [NFile]));
       if (CurrentDevice.TransferNewFile(CreatedTempPath + NFile, FolderId) = '') then
-        raise exception.Create(Format('Writing file %s failed', [NFile]));
+        raise exception.Create(Format(MTP_ERR_Write_Failed, [NFile]));
 
       MessageDlg('Fix complete. Restart BaseCamp!', TMsgDlgType.mtInformation, [TMsgDlgBtn.mbOK], 0);
     end;
@@ -692,7 +693,7 @@ begin
 
   if (not result) and
      (RaiseException) then
-    raise exception.Create('No MTP Device opened.');
+    raise exception.Create(MTP_ERR_No_Dev_Open);
 end;
 
 function TFrmTripManager.HasTMTPDevice(const ADevice: TObject = nil): boolean;
@@ -893,7 +894,7 @@ begin
           continue;
       end;
 
-      EdDeviceFolder.Text := Format('Transferring %s', [AnItem.Caption]);
+      EdDeviceFolder.Text := Format(MTP_INF_Transferring, [AnItem.Caption]);
       EdDeviceFolder.Update;
       CurrentDevice.GetFile(ABase_Data.ObjectId, ShellTreeView1.Path, AnItem.Caption);
     end;
@@ -931,10 +932,10 @@ begin
       CurrentObjectId := CurrentDevice.FileId[FSavedFolderId, NFile];
       if (CurrentObjectId = '') then
       begin
-        EdFileSysFolder.Text := Format('Transferring %s', [NFile]);
+        EdFileSysFolder.Text := Format(MTP_INF_Transferring, [NFile]);
         EdFileSysFolder.Update;
         if (CurrentDevice.TransferNewFile(AFolder.PathName, FSavedFolderId) = '') then
-          raise exception.Create('Writing file failed');
+          raise exception.Create(Format(MTP_ERR_Write_Failed, [NFile]));
       end
       else
       begin
@@ -955,11 +956,11 @@ begin
           end;
         end;
         if (CurrentItem = nil) then
-          raise exception.Create('Overwrite file failed');
-        EdFileSysFolder.Text := Format('Transferring %s', [CurrentItem.Caption]);
+          raise exception.Create(Format(MTP_ERR_Overwrite_Failed, [NFile]));
+        EdFileSysFolder.Text := Format(MTP_INF_Transferring, [CurrentItem.Caption]);
         EdFileSysFolder.Update;
         if not CurrentDevice.TransferExistingFile(AFolder.PathName, FSavedFolderId, CurrentItem) then
-          raise exception.Create('Overwrite file failed');
+          raise exception.Create(Format(MTP_ERR_Overwrite_Failed, [CurrentItem.Caption]));
       end;
     end;
 
@@ -1085,17 +1086,17 @@ begin
                 if (WarnOverWrite in [mrNo, mrNoToAll]) then
                   continue;
                 if not CurrentDevice.DelFile(CurrentObjectid) then
-                  raise Exception.Create(Format('Could not remove file: %s on %s', [TempFile, CurrentDevice.DisplayedDevice]));
+                  raise Exception.Create(Format(MTP_ERR_Could_Not_RMFile, [TempFile, CurrentDevice.DisplayedDevice]));
               end;
 
               // Transfer
-              EdFileSysFolder.Text := Format('Transferring %s', [TempFile]);
+              EdFileSysFolder.Text := Format(MTP_INF_Transferring, [TempFile]);
               EdFileSysFolder.Update;
               TempFile := IncludeTrailingPathDelimiter(GetRoutesTmp) + TempFile;
 
               // Did the transfer work?
               if (CurrentDevice.TransferNewFile(TempFile, FSavedFolderId) = '') then
-                raise Exception.Create(Format('Could not overwrite file: %s on %s',
+                raise Exception.Create(Format(MTP_ERR_Overwrite_Dev_Failed,
                                               [ExtractFileName(TempFile), CurrentDevice.DisplayedDevice]));
             end;
             FindClose(Fs);
@@ -1242,7 +1243,8 @@ begin
   FrmTripEditor.CurTripList := ATripList;
   FrmTripEditor.CurPath := ShellTreeView1.Path;
   FrmTripEditor.CurFile := HexEditFile;
-  FrmTripEditor.CurDevice := DeviceFile;
+  FrmTripEditor.CurIsDeviceFile := DeviceFile;
+  FrmTripEditor.CurrentDevice := CurrentDevice;
   FrmTripEditor.CurNewFile := NewFile;
 
 // Set FrmTripEditor Events
@@ -1301,7 +1303,7 @@ end;
 procedure TFrmTripManager.TripFileCanceled(Sender: TObject);
 begin
   if (FileExists(FrmTripEditor.CurFile)) then
-    LoadTripFile(FrmTripEditor.CurFile, FrmTripEditor.CurDevice);
+    LoadTripFile(FrmTripEditor.CurFile, FrmTripEditor.CurIsDeviceFile);
 end;
 
 procedure TFrmTripManager.TripFileUpdated(Sender: TObject);
@@ -1324,7 +1326,7 @@ begin
     else
     begin
       if (CurrentDevice.TransferNewFile(HexEditFile, FSavedFolderId) = '') then
-        raise exception.Create('Writing file failed');
+        raise exception.Create(Format(MTP_ERR_Write_Failed, [ExtractFileName(HexEditFile)]));
     end;
   end;
 end;
@@ -2361,7 +2363,7 @@ begin
   CurrentDevice := DeviceList[Indx];
 
   if not CurrentDevice.Connect then
-    raise exception.Create(Format('Device %s could not be opened.', [CurrentDevice.DisplayedDevice]));
+    raise exception.Create(Format(MTP_ERR_Could_Not_Open_Dev, [CurrentDevice.DisplayedDevice]));
 
   // Guess model from DisplayedDevice
   GuessModel(CurrentDevice.DisplayedDevice);
@@ -4558,9 +4560,9 @@ begin
       if (ABase_Data.IsFolder <> AllowRecurse) then
         continue;
       if not CurrentDevice.DelFile(ABase_Data.ObjectId, AllowRecurse) then
-        raise Exception.Create(Format('Could not remove %s: %s on %s', [ObjectName[AllowRecurse],
-                                                                        ANitem.Caption,
-                                                                        CurrentDevice.DisplayedDevice]));
+        raise Exception.Create(Format(MTP_ERR_Could_Not_RMObject, [ObjectName[AllowRecurse],
+                                                                   ANitem.Caption,
+                                                                   CurrentDevice.DisplayedDevice]));
     end;
      PostReloadFileList;
   finally
@@ -4592,7 +4594,7 @@ begin
     exit;
 
   if not CurrentDevice.CreatePath(FSavedFolderId, NewName) then
-    raise Exception.Create('Folder could not be created!');
+    raise Exception.Create(MTP_ERR_Could_Not_CREDir);
 
   PostReloadFileList;
 end;
@@ -4618,10 +4620,10 @@ begin
   CrNormal := SetCursor(CrWait);
   try
     if (CurrentDevice.FileId[FSavedFolderId, NewName] <> '') then
-      raise exception.Create(Format('File %s exists!', [NewName]));
+      raise exception.Create(Format(MTP_ERR_File_Exists, [NewName]));
 
     if not CurrentDevice.RenameFile(TBase_Data(LstFiles.Selected.Data).ObjectId, NewName) then
-      raise exception.Create('Rename failed on device');
+      raise exception.Create(MTP_ERR_Rename_Failed);
 
     PostReloadFileList;
   finally
@@ -4662,11 +4664,11 @@ begin
 
         // Check already exists
         if (CurrentDevice.FileId[FSavedFolderId, TripFilename] <> '') then
-          raise exception.Create(Format('File %s exists!', [TripFilename]));
+          raise exception.Create(Format(MTP_ERR_File_Exists, [TripFilename]));
 
         // Rename
         if not CurrentDevice.RenameFile(ABase_Data.ObjectId, TripFilename) then
-          raise exception.Create('Rename failed on device');
+          raise exception.Create(MTP_ERR_Rename_Failed);
 
         AnItem.Caption := TripFilename; // Change caption
         CurrentDevice.GetListInfo(FSavedFolderId, TripFilename, AnItem); // Get modified data
@@ -4674,7 +4676,7 @@ begin
         // reload trip, and change mFilename
         TripFilename := CopyFileToTmp(AnItem);  // First copy to tmp
         TmpTripList.LoadFromFile(TripFilename);
-        TmFileName(TmpTripList.GetItem(TmFileName.GetKey)).AsString := Format('0:/.System/Trips/%s.trip', [TripName]);
+        TmFileName(TmpTripList.GetItem(TmFileName.GetKey)).AsString := Format(Trip_TripFileName, [TripName]);
         TmpTripList.SaveToFile(TripFilename);
 
         // Write back to dev
@@ -5329,7 +5331,7 @@ begin
 
   try
     if not ATripList.LoadFromFile(FileName) then
-      raise Exception.Create('Not a valid trip file');
+      raise Exception.Create(TRP_ERR_No_Valid_Trip);
 
     DeviceFile := FromDevice;
     HexEditFile := FileName;

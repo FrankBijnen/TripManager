@@ -1502,7 +1502,7 @@ begin
         end;
 
         // Advance forward in track, to place a shaping point 'ProcessOptions.GetDistOKKms' AFTER the turn.
-        //TODO need a separate Parm
+        //TODO Need a separate Parm
         BetterDist := 0;
         BetterTrackPtIndex := CurTrackPtIndex;
         PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
@@ -2973,7 +2973,7 @@ var
 begin
   OutFile := FOutDir + ExtractFilename(FGPXFile);
   if not CopyFile(PWideChar(FGPXFile), PWideChar(OutFile), false) then
-    raise Exception.Create(Format('Could not copy %s to:%s%s', [FGPXFile, #10, FOutDir]))
+    raise Exception.Create(Format(GPX_ERR_CouldNotCopy, [FGPXFile, #10, FOutDir]))
 end;
 
 {$IFDEF TRIPOBJECTS}

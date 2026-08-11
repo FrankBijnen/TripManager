@@ -74,6 +74,10 @@ var
   CreatedTempPath: string;
   App_Prefix: string;
 
+resourcestring
+  STR_ERR_ErrorCreating   = 'Error creating: %s';
+  STR_ERR_Invalid_Chars   = 'Invalid characters for file name: %s';
+
 implementation
 
 uses
@@ -336,16 +340,16 @@ begin
   // Strip .tmp from directory name, and create
   result := ChangeFileExt(result, '');
   if not System.Sysutils.ForceDirectories(result) then
-    raise Exception.Create(Format('Error creating: %s', [result]));
+    raise Exception.Create(Format(STR_ERR_ErrorCreating, [result]));
 
   // Save path name
   CreatedTempPath := IncludeTrailingPathDelimiter(result);
 
   if not System.Sysutils.ForceDirectories(GetOSMTemp) then
-    raise Exception.Create(Format('Error creating: %s', [GetOSMTemp]));
+    raise Exception.Create(Format(STR_ERR_ErrorCreating, [GetOSMTemp]));
 
   if not System.Sysutils.ForceDirectories(GetRoutesTmp) then
-    raise Exception.Create(Format('Error creating: %s', [GetRoutesTmp]));
+    raise Exception.Create(Format(STR_ERR_ErrorCreating, [GetRoutesTmp]));
 end;
 
 function GetHtmlTmp: string;
@@ -620,7 +624,7 @@ var
 begin
   for AWideChar in AWideString do
     if (IsLeadChar(AWideChar)) then
-      raise Exception.Create(Format('Invalid characters for file name: %s', [AWideString]));
+      raise Exception.Create(Format(STR_ERR_Invalid_Chars, [AWideString]));
 end;
 
 initialization
