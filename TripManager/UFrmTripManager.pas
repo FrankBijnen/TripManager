@@ -466,7 +466,6 @@ type
     procedure CheckTrips;
     procedure RecreateTrips;
     procedure ShowWarnRecalc;
-    procedure ShowWarnOverWrite(const AFile: string);
     procedure ReadDefaultFolders;
     procedure SetDeviceListColumns;
     procedure ReadFormLayout;
@@ -889,7 +888,7 @@ begin
 
       if (FileExists(IncludeTrailingPathDelimiter(ShellTreeView1.Path) + AnItem.Caption)) then
       begin
-        ShowWarnOverWrite(AnItem.Caption);
+        TBase_Device.ShowWarnOverWrite(AnItem.Caption, WarnOverWrite);
         if (WarnOverWrite in [mrNo, mrNoToAll]) then
           continue;
       end;
@@ -939,7 +938,7 @@ begin
       end
       else
       begin
-        ShowWarnOverWrite(NFile);
+        TBase_Device.ShowWarnOverWrite(NFile, WarnOverWrite);
         SetCursor(CrWait);
 
         if (WarnOverWrite in [mrNo, mrNoToAll]) then
@@ -1082,7 +1081,7 @@ begin
               CurrentObjectid := CurrentDevice.FileId[FSavedFolderId, TempFile];
               if (CurrentObjectid <> '') then
               begin
-                ShowWarnOverWrite(TempFile);
+                TBase_Device.ShowWarnOverWrite(TempFile, WarnOverWrite);
                 if (WarnOverWrite in [mrNo, mrNoToAll]) then
                   continue;
                 if not CurrentDevice.DelFile(CurrentObjectid) then
@@ -1834,18 +1833,6 @@ begin
   WarnRecalc := MessageDlg('Saving the trip will force recalculation. OK?',
                    TMsgDlgType.mtWarning,
                     [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo, TMsgDlgBtn.mbIgnore], 0);
-end;
-
-procedure TFrmTripManager.ShowWarnOverWrite(const AFile: string);
-begin
-  case WarnOverWrite of
-    mrNoToAll,
-    mrYesToAll:
-      exit;
-  end;
-  WarnOverWrite := MessageDlg(Format('Overwrite existing file: %s ?', [AFile]),
-                     TMsgDlgType.mtConfirmation,
-                     [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo, TMsgDlgBtn.mbYesToAll, TMsgDlgBtn.mbNoToAll], 0);
 end;
 
 procedure TFrmTripManager.EdDeviceFolderKeyPress(Sender: TObject; var Key: Char);

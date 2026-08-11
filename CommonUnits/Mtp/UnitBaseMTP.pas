@@ -133,7 +133,7 @@ type
 
     class function Clone(const ABase_Device: TBase_Device): TBase_Device;
     class function GetMediaType(const DeviceName: string): TMediaType;
-
+    class procedure ShowWarnOverWrite(const AFile: string; var WarnOverWrite: integer);
     property PathId[APath: string]: string read GetPathId;
     property FileId[APath, AFile: string]: string read GetFileId;
     property FriendlyPath[APath: string]: string read GetFriendlyPath;
@@ -143,8 +143,9 @@ type
 implementation
 
 uses
-  System.SysUtils, System.StrUtils, System.Math, System.Masks,
+  System.SysUtils, System.StrUtils, System.Math, System.Masks, System.UITypes,
   Winapi.Windows,
+  Vcl.Dialogs,
   mtp_helper, UnitStringUtils;
 
 var
@@ -438,6 +439,18 @@ begin
   if (ContainsText(DeviceName, USB_DISK)) and
      (ContainsText(DeviceName, USB_BUSENUM)) then
     result := TMediaType.mtMSM;
+end;
+
+class procedure TBase_Device.ShowWarnOverWrite(const AFile: string; var WarnOverWrite: integer);
+begin
+  case WarnOverWrite of
+    mrNoToAll,
+    mrYesToAll:
+      exit;
+  end;
+  WarnOverWrite := MessageDlg(Format('Overwrite existing file: %s ?', [AFile]),
+                              TMsgDlgType.mtConfirmation,
+                              [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo, TMsgDlgBtn.mbYesToAll, TMsgDlgBtn.mbNoToAll], 0);
 end;
 
 function CompareDevice(Item1, Item2: Pointer): Integer;

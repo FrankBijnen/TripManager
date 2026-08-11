@@ -1137,7 +1137,6 @@ begin
     RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.Execute;
     if (RESTRequest.Response.StatusCode >= 400) then
-//TODO Add resource string
       raise exception.Create(StrRequestFailed + #10 + RESTRequest.Response.StatusText);
     TFile.WriteAllText(XMLFile, RESTResponse.Content);
 

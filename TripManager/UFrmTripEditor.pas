@@ -101,6 +101,7 @@ type
     procedure SendToClick(Sender: TObject);
   private
     { Private declarations }
+    WarnOverWrite: integer;   // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
     FTripFileUpdating: TTripFileUpdate;
     FTripFileCanceled: TTripFileUpdate;
     FTripFileUpdated: TTripFileUpdate;
@@ -392,6 +393,7 @@ begin
     CurrentGpxFolderId := TBase_Device(CurrentDevice).PathId[CurrentGPXFolder];
   end;
   SendTo.Caption := 'Send to: ' + CurrentGPXFolder;
+  WarnOverWrite := mrNone;
 end;
 
 procedure TFrmTripEditor.Insert1Click(Sender: TObject);
@@ -524,6 +526,9 @@ begin
     CurrentObjId := BaseDevice.FileId[CurrentGpxFolderId, NFile];
     if (CurrentObjId <> '') then
     begin
+      TBase_Device.ShowWarnOverWrite(NFile, WarnOverWrite);
+      if (WarnOverWrite in [mrNo, mrNoToAll]) then
+        exit;
       if (BaseDevice.DelFile(CurrentObjId) = false) then
         raise exception.Create(Format(MTP_ERR_Delete_Failed, [NFile]));
     end;
