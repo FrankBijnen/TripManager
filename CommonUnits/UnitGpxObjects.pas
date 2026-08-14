@@ -965,15 +965,13 @@ end;
 procedure TGPXFile.ProcessRtePt(const RtePtNode: TXmlVsNode;
                                 const RouteName: string;
                                 const Cnt, LastCnt: integer);
-
 var
   RtePtExtension: TXmlVSNode;
   RptNode, ExtensionsNode, RtePtShapingPoint, RtePtViaPoint: TXmlVSNode;
   WptName, Symbol, ViaPtName, ShapePtName: string;
   IsShapePt: boolean;
-  DescNode, RteNode: TXmlVSNode;
   CalculatedSubClass, MapName, MapSegName: string;
-  MapSeg, NewDescPos: integer;
+  MapSeg: integer;
 begin
   Symbol := FindSubNodeValue(RtePtNode, 'sym');
   ExtensionsNode := RtePtNode.Find('extensions');
@@ -984,6 +982,30 @@ begin
   RtePtViaPoint := ExtensionsNode.Find('trp:ViaPoint');
   IsShapePt := (RtePtShapingPoint <> nil) or                          // BaseCamp, or other planner using Via and Shaping points
                ((RtePtShapingPoint = nil) and (RtePtViaPoint = nil)); // Mapsource, or other planner not using Via and Shaping points
+
+  // Fill Mapsegment
+  if (RtePtExtension <> nil) then
+  begin
+    // Delete old comments
+    while (RtePtExtension.ChildNodes[0].NodeType = TXmlVSNodeType.ntComment) do
+      RtePtExtension.ChildNodes.Delete(0);
+
+    CalculatedSubClass := GetFirstSubClass(RtePtExtension);
+    MapSeg := MapSegFromSubClass(CalculatedSubClass);
+    if (MapSeg <> 0) then
+    begin
+      MapSegName := LookupMap(MapSeg);
+      if (MapSegName <> '') then
+      begin
+        MapName := NextField(MapSegName, #9);
+        RtePtExtension.InsertChild('', 0, TXmlVSNodeType.ntComment).NodeValue := MapSegName;
+        RtePtExtension.InsertChild('', 0, TXmlVSNodeType.ntComment).NodeValue := MapName;
+      end
+      else
+        RtePtExtension.InsertChild('', 0, TXmlVSNodeType.ntComment).NodeValue :='Map segment: '+ IntToStr(MapSeg);
+    end;
+  end;
+
   // Begin
   if (ProcessOptions.ProcessDistance) and
      (Cnt = 1) then
@@ -1013,41 +1035,6 @@ begin
 
       if (ProcessOptions.ProcessFlags) then
         RenameSubNode(RtePtNode, 'sym', Symbol);
-
-      // Fill Mapsegment
-      RteNode := RtePtNode.Parent;
-      if (RteNode <> nil) then
-      begin
-        DescNode := RteNode.Find('desc');
-        if  (DescNode = nil) then                   // No Desc node, add it.
-        begin
-          NewDescPos := RteNode.FindPos('cmt');     // After existing Cmt?
-          if (NewDescPos < 0) then
-            NewDescPos := RteNode.FindPos('name');  // No, After name
-          if (NewDescPos > -1) then
-            DescNode := RteNode.InsertChild('desc', NewDescPos +1);
-        end;
-
-        if (DescNode <> nil) and
-           (RtePtExtension <> nil) then
-        begin
-          CalculatedSubClass := GetFirstSubClass(RtePtExtension);
-          MapSeg := MapSegFromSubClass(CalculatedSubClass);
-          DescNode.ChildNodes.DeleteRange(0, DescNode.ChildNodes.Count);
-          if (MapSeg <> 0) then
-          begin
-            MapSegName := LookupMap(MapSeg);
-            if (MapSegName <> '') then
-            begin
-              MapName := NextField(MapSegName, #9);
-              DescNode.AddChild('', TXmlVSNodeType.ntComment).NodeValue := MapName;
-              DescNode.AddChild('', TXmlVSNodeType.ntComment).NodeValue := MapSegName;
-            end
-            else
-              DescNode.AddChild('', TXmlVSNodeType.ntComment).NodeValue :='Map segment: '+ IntToStr(MapSeg);
-          end;
-        end;
-      end;
     end;
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then

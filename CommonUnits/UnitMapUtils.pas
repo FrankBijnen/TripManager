@@ -68,7 +68,6 @@ var
   FileData: TWin32FindData;
   Buf: Array[0..MAX_PATH] of char;
   Widepath: WideString;
-
 begin
   IObject := CreateComObject(CLSID_ShellLink);
   SLink := IObject as IShellLink;
@@ -133,13 +132,12 @@ end;
 function ScanTdb(const TdbFile: string;
                  const InstalledMapSegs: TMapSegmentList): TPNameRec;
 var
-  F: File;
   TDBRec: TTDBRec;
   DetailRec: TDetailRec;
   AMapSegment: TMapSegment;
   Rec: array of byte;
   BR: integer;
-  SaveFileMode: byte;
+  S: TBufferedFileStream;
 
   procedure ReadString(Indx: integer; var OutString: string);
   begin
@@ -156,50 +154,43 @@ begin
   Result.Init;
   if not (FileExists(TdbFile)) then
     exit;
-  AssignFile(F, TdbFile);
-  SaveFileMode := FileMode;
-  FileMode := fmOpenRead;
+  S := TBufferedFileStream.Create(TdbFile, fmOpenRead);
   try
-    Reset(F, 1);
-    try
-      while true do
-      begin
-        BlockRead(F, TDBRec, SizeOf(TDBRec), BR);
-        if (BR <> SizeOf(TDBRec)) then
-          exit;
+    while true do
+    begin
+      BR := S.Read(TDBRec, SizeOf(TDBRec));
+      if (BR <> SizeOf(TDBRec)) then
+        exit;
 
-        SetLength(Rec, TDBRec.RecLen);
-        BlockRead(F, Rec[0], TDBRec.RecLen, BR);
-        if (BR <> TDBRec.RecLen) then
-          exit;
+      SetLength(Rec, TDBRec.RecLen);
+      BR := S.Read(Rec[0], TDBRec.RecLen);
+      if (BR <> TDBRec.RecLen) then
+        exit;
 
-        case (TDBRec.RecType) of
-          'P':
+      case (TDBRec.RecType) of
+        'P':
+          begin
+            if (BR >= SizeOf(result.Prec)) then
             begin
-              if (BR >= SizeOf(result.Prec)) then
-              begin
-                Move(Rec[0], result.Prec, SizeOf(result.Prec));
-                ReadString(SizeOf(result.Prec), result.MapName);
-              end;
+              Move(Rec[0], result.Prec, SizeOf(result.Prec));
+              ReadString(SizeOf(result.Prec), result.MapName);
             end;
-          'L':
+          end;
+        'L':
+          begin
+            if (BR >= SizeOf(DetailRec)) then
             begin
-              if (BR >= SizeOf(DetailRec)) then
-              begin
-                DetailRec := Default(TDetailRec);
-                Move(Rec[0], DetailRec, SizeOf(DetailRec));
-                AMapSegment := TMapSegment.Create(DetailRec.MapSegment);
-                ReadString(SizeOf(DetailRec), AMapSegment.MapDescription);
-                InstalledMapSegs.Add(DetailRec.MapSegment, AMapSegment);
-              end;
+              DetailRec := Default(TDetailRec);
+              Move(Rec[0], DetailRec, SizeOf(DetailRec));
+              AMapSegment := TMapSegment.Create(DetailRec.MapSegment);
+              ReadString(SizeOf(DetailRec), AMapSegment.MapDescription);
+              InstalledMapSegs.Add(DetailRec.MapSegment, AMapSegment);
             end;
-        end;
+          end;
       end;
-    finally
-      CloseFile(F);
     end;
   finally
-    FileMode := SaveFileMode;
+    S.Free;
   end;
 end;
 
@@ -207,57 +198,49 @@ procedure ListMdx(const MdxFile: string;
                   const MapSegments: TStringList;
                   const InstalledMapSegs: TMapSegmentList);
 var
-  F: File;
-  SaveFileMode: byte;
   Sign: array[0..5] of byte;
   Rec: array of byte;
   BR, RecLen: integer;
   RecCount, Cnt: DWord;
   IdxRec: TMidxRec;
   MapSegDescription: string;
+  S: TBufferedFileStream;
 const
   MDXInvalid = 'MDX Invalid';
 
 begin
-  AssignFile(F, MdxFile);
-  SaveFileMode := FileMode;
-  Filemode := fmOpenRead;
+  S := TBufferedFileStream.Create(MdxFile, fmOpenRead);
   try
-    Reset(F, 1);
-    try
-      BlockRead(F, Sign[0], SizeOf(Sign), BR);
-      if (BR <> SizeOf(Sign)) then
+    BR := S.Read(Sign[0], SizeOf(Sign));
+    if (BR <> SizeOf(Sign)) then
+      raise Exception.Create(MDXInvalid);
+
+    BR := S.Read(RecLen, SizeOf(RecLen));
+    if (BR <> SizeOf(RecLen)) then
+      raise Exception.Create(MDXInvalid);
+
+    BR := S.Read(RecCount, SizeOf(RecCount));
+    if (BR <> SizeOf(RecCount)) then
+      raise Exception.Create(MDXInvalid);
+
+    SetLength(Rec, RecLen);
+    for Cnt := 1 to RecCount do
+    begin
+      BR := S.Read(Rec[0], RecLen);
+      if (BR <> RecLen) then
         raise Exception.Create(MDXInvalid);
 
-      BlockRead(F, RecLen, SizeOf(RecLen), BR);
-      if (BR <> SizeOf(RecLen)) then
-        raise Exception.Create(MDXInvalid);
-
-      BlockRead(F, RecCount, SizeOf(RecCount), BR);
-      if (BR <> SizeOf(RecCount)) then
-        raise Exception.Create(MDXInvalid);
-
-      SetLength(Rec, RecLen);
-      for Cnt := 1 to RecCount do
+      if (BR >= SizeOf(IdxRec)) then
       begin
-        BlockRead(F, Rec[0], RecLen, BR);
-        if (BR <> RecLen) then
-          raise Exception.Create(MDXInvalid);
-
-        if (BR >= SizeOf(IdxRec)) then
-        begin
-          Move(Rec[0], IdxRec, SizeOf(IdxRec));
-          MapSegDescription := IntToStr(IdxRec.MapId);
-          if (InstalledMapSegs.ContainsKey(IdxRec.MapName)) then
-            MapSegDescription := InstalledMapSegs.Items[IdxRec.MapName].MapDescription;
-          MapSegments.AddObject(MapSegDescription, pointer(IdxRec.MapId));
-        end;
+        Move(Rec[0], IdxRec, SizeOf(IdxRec));
+        MapSegDescription := IntToStr(IdxRec.MapId);
+        if (InstalledMapSegs.ContainsKey(IdxRec.MapName)) then
+          MapSegDescription := InstalledMapSegs.Items[IdxRec.MapName].MapDescription;
+        MapSegments.AddObject(MapSegDescription, pointer(IdxRec.MapId));
       end;
-    finally
-      CloseFile(F);
     end;
   finally
-    FileMode := SaveFileMode;
+    S.Free;
   end;
 end;
 
@@ -269,7 +252,6 @@ var
   ProductNameRec: TPNameRec;
   Reg: TRegistry;
   InstalledMapSegs: TMapSegmentList;
-
 begin
   Maps := TStringList.Create;
   SubProducts := TStringList.Create;
@@ -358,7 +340,6 @@ var
   First: boolean;
   Xml, MapDir, Tdb, Idx: string;
   ProductNameRec: TPNameRec;
-
   MapSegments: TStringList;
   InstalledMapSegs: TMapSegmentList;
   XmlDoc: TXmlVSDocument;
