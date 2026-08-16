@@ -3760,7 +3760,7 @@ var
     end;
     VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s', [AnUdbDir.MapCoords]),
                               TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.Lat) + SizeOf(AnUdbDir.Lon),
+                                                  SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
                                                   OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
     VlTripInfo.Strings.AddPair('UdbDir Magic', Format('%s',

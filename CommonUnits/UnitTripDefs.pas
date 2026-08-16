@@ -73,7 +73,6 @@ type
   TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
   TAvoidances       = (avValid = $01, avCarpool = $02, avFerries = $04, avToll = $10, avUnpaved = $20, avU_Turns = $40, avHighWays = $80);
-  PAvoidances       = ^ TAvoidances;
 
   TRoutePrefRec = record
     Sel: boolean;
@@ -161,18 +160,19 @@ const
                                                           (Value: Ord(tmOffRoad);           Name: 'OffRoad')
                                                         );
 
-  UdbDirTypeMap : array[0..7] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Coordinates'),
+  UdbDirTypeMap : array[0..8] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Coordinates'),
                                                           (Value: $01;                      Name: 'Route point'),
                                                           (Value: $03;                      Name: 'Route point'),
                                                           (Value: $05;                      Name: 'Route point Center'),
                                                           (Value: $0D;                      Name: 'Route point'),
+                                                          (Value: $0F;                      Name: 'Route point'),
                                                           (Value: $14;                      Name: 'Point of interest'),
                                                           (Value: $1F;                      Name: 'Intermediate'),
                                                           (Value: $21;                      Name: 'Begin or end segment') // Direction $16=Start or $17=End
                                                         );
 
-  UdbDirTypeRoutePoints     = [$00, $01, $03, $05, $0D];
-  UdbDirTypeComprLatLon     = [$03, $0D];
+  UdbDirTypeRoutePoints     = [$00, $01, $03, $05, $0D, $0F];
+  UdbDirTypeComprLatLon     = [$03, $0D, $0F];
   UdbDirTypeIntermediate    = [$1F];
   UdbDirTypeStartEndSegment = [$21];
 
