@@ -3736,11 +3736,10 @@ var
                                                     OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.ComprLatLon)))
     else
     begin
-      if (AnUdbDir.UdbDirValue.SubClass.IsKnownRoutePoint = false) then
-        VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
-                                  TGridSelItem.Create(AnUdbDir,
-                                                      SizeOf(AnUdbDir.SubClass.Direction),
-                                                      OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.Direction)));
+      VlTripInfo.Strings.AddPair('Direction', AnUdbDir.Direction,
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.SubClass.Direction),
+                                                    OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.Direction)));
 
       VlTripInfo.Strings.AddPair('Subclass Unknown2', Format('%s %s %s',
                                                          [IntToHex(AnUdbDir.SubClass.Unknown2[0], 2),
