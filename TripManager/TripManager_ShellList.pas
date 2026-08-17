@@ -342,6 +342,8 @@ begin
   LockDrawing;
 
   try
+    HandleNeeded;
+
     inherited;
 
     // Restore column widths

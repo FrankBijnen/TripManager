@@ -5627,7 +5627,8 @@ var
 begin
   ColWidths := GetRegistry(Reg_WidthColumns_Key, Reg_WidthColumns_Val);
   Index := 0;
-  while (ColWidths <> '') do
+  while (ColWidths <> '') and
+        (Index < ShellListView1.Columns.Count) do
   begin
     AColWidth := StrToIntDef(NextField(ColWidths, ','), 50);
     ShellListView1.Columns[Index].Width := AColWidth;
