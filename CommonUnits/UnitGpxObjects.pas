@@ -987,7 +987,9 @@ begin
   if (RtePtExtension <> nil) then
   begin
     // Delete old comments
-    while (RtePtExtension.ChildNodes[0].NodeType = TXmlVSNodeType.ntComment) do
+    while (RtePtExtension.ChildNodes <> nil) and
+          (RtePtExtension.ChildNodes.Count > 0) and
+          (RtePtExtension.ChildNodes[0].NodeType = TXmlVSNodeType.ntComment) do
       RtePtExtension.ChildNodes.Delete(0);
 
     CalculatedSubClass := GetFirstSubClass(RtePtExtension);

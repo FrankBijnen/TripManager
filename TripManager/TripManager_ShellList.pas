@@ -323,7 +323,10 @@ procedure TShellListView.Populate;
 begin
   Items.BeginUpdate;
   try
+    HandleNeeded;
+
     inherited Populate;
+
     ColumnSort;
   finally
     Items.EndUpdate;
@@ -342,8 +345,6 @@ begin
   LockDrawing;
 
   try
-    HandleNeeded;
-
     inherited;
 
     // Restore column widths
