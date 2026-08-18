@@ -11,7 +11,7 @@ type
                        XT3,
                        Tread2,
                        Zumo346,
-                       Zumo595,
+                       Zumo395_595,
                        Zumo590,
                        Zumo3x0, // Works for models 340, 350 and 390
                        Drive51,
@@ -303,7 +303,7 @@ const
       121 * 4,              // XT3
       121 * 4,              // Tread 2
       122 * 2,              // Zumo 346
-       32 * 2,              // Zumo 595
+       32 * 2,              // Zumo 395 595
        32 * 2,              // Zumo 590
        66 * 2,              // Zumo 3x0
        32 * 2,              // Drive 51
@@ -319,7 +319,7 @@ const
       1450,                 // XT3
       1346,                 // Tread 2
        292,                 // Zumo 346
-       292,                 // Zumo 595
+       292,                 // Zumo 395 595
        252,                 // Zumo 590
        128,                 // Zumo 3x0
        292,                 // Drive 51
@@ -335,7 +335,7 @@ const
       $05d8feff,            // XT3
       $0574feff,            // Tread 2
       $0170feff,            // Zumo 346
-      $0170feff,            // Zumo 595
+      $0170feff,            // Zumo 395 595
       CalcUndef,            // Zumo 590
       CalcUndef,            // Zumo 3x0
       $0170feff,            // Drive 51
@@ -350,7 +350,7 @@ const
       PosnLarge,            // XT3
       PosnLarge,            // Tread 2
       PosnNorm,             // Zumo 346
-      PosnNorm,             // Zumo 595
+      PosnNorm,             // Zumo 395 595
       PosnSmall,            // Zumo 590
       PosnSmall,            // Zumo 3x0
       PosnNorm,             // Drive 51
@@ -367,7 +367,7 @@ const
       false,                // XT3
       false,                // Tread 2
       false,                // Zumo 346
-      false,                // Zumo 595
+      false,                // Zumo 395 595
       false,                // Zumo 590
       true,                 // Zumo 3x0
       false,                // Drive 51
@@ -383,7 +383,7 @@ const
       false,                // XT3
       false,                // Tread 2
       false,                // Zumo 346
-      false,                // Zumo 595
+      false,                // Zumo 395 595
       false,                // Zumo 590
       false,                // Zumo 3x0
       false,                // Drive 51
@@ -400,7 +400,7 @@ const
       false,                // XT3
       false,                // Tread 2
       true,                 // Zumo 346
-      true,                 // Zumo 595
+      true,                 // Zumo 395 595
       false,                // Zumo 590
       false,                // Zumo 3x0
       true,                 // Drive 51
@@ -416,7 +416,7 @@ const
       (Size:4; Version:16),  // XT3
       (Size:4; Version:16),  // Tread 2
       (Size:1; Version: 6),  // Zumo 346
-      (Size:1; Version: 6),  // Zumo 595
+      (Size:1; Version: 6),  // Zumo 395 595
       (Size:1; Version: 3),  // Zumo 590
       (Size:1; Version: 3),  // Zumo 3x0
       (Size:1; Version: 6),  // Drive 51
@@ -431,7 +431,7 @@ const
       dtByte,               // XT3
       dtByte,               // Tread 2
       dtByte,               // Zumo 346
-      dtByte,               // Zumo 595
+      dtByte,               // Zumo 395 595
       dtByte,               // Zumo 590
       dtDWordRoutePref,     // Zumo 3x0
       dtByte,               // Drive 51
@@ -446,13 +446,13 @@ const
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT3
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // Tread 2
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 346
-    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 595
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 395 595
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmCurvyRoads],    // Zumo 590
     [cmDWordFasterTime, cmDWordOffRoad,         cmDWordShorterDistance],                  // Zumo 3x0
     [cmFasterTime,      cmShorterDistance,      cmOffRoad],                               // Drive 51
     [cmFasterTime,      cmOffRoad],                                                       // Drive 66
     [cmDWordFasterTime, cmDWordShorterDistance, cmDWordEco,             cmDWordOffRoad],  // Nuvi 2595
-    [cmFasterTime,      cmShorterDistance,      cmEco,                  cmOffRoad],       // Nuvi 57
+    [cmFasterTime,      cmShorterDistance,      cmEco,                  cmOffRoad],       // Nuvi 2599 57
     []                                                                                    // Unknown
   );
 
@@ -462,13 +462,13 @@ const
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT3        Profile overrides?
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Tread 2    Profile overrides?
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 346
-    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 595
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 395 595
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 590
     [tmAutoMotive,      tmMotorcycling],                    // Zumo 3x0
     [tmAutoMotive],                                         // Drive 51
     [tmAutoMotive],                                         // Drive 66
     [tmAutoMotive,      tmPedestrian],                      // Nuvi 2595
-    [tmAutoMotive],                                         // Nuvi 2599_57
+    [tmAutoMotive],                                         // Nuvi 2599 57
     []                                                      // Unknown
   );
 
@@ -522,9 +522,9 @@ function TTripVersion.Unknown2Size: integer;
 begin
   case (Version) of
     1..4:
-      result := 72;     // Nuvi 2595, 2599_57, 3x0, 590
+      result := 72;     // Nuvi 2595, 2599 57, 3x0, 590
     5..6:
-      result := 76;     // Drive 51, 346, 595
+      result := 76;     // Drive 51, 346, 395, 595
     else
       result := 150;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
@@ -536,7 +536,7 @@ begin
     1..2:
       result := 16;     // Nuvi 2595
     else
-      result := 18;     // Nuvi 2599_57, Drive 51, Drive 66, 3x0, 590, 346, 595, XT, XT2, XT3, Tread 2
+      result := 18;     // Nuvi 2599_57, Drive 51, Drive 66, 3x0, 590, 346, 395, 595, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -544,7 +544,7 @@ function TTripVersion.Unknown3BoundsOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $00;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := $00;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
       result := $02;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
@@ -554,7 +554,7 @@ function TTripVersion.Unknown3DistOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $10;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := $10;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
       result := $12;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
@@ -564,7 +564,7 @@ function TTripVersion.Unknown3TimeOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $14;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := $14;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
       result := $16;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
@@ -580,7 +580,7 @@ begin
     4:
         result := $20;  // Nuvi 2599_57
     5..6:
-        result := $1c;  // 346, 595, Drive 51
+        result := $1c;  // 346, 395, 595, Drive 51
     else
         result := $1e;  // XT, XT2, XT3, Tread2, Drive 66
   end;
@@ -596,7 +596,7 @@ begin
     4:
       result := $58;    // Nuvi 2599_57
     5..6:
-      result := $54;    // 346, 595, Drive 51
+      result := $54;    // 346, 395, 595, Drive 51
     else
       result := $56;    // XT, XT2, XT3, Tread2, Drive 66
   end;
@@ -612,7 +612,7 @@ begin
     4:
       result := $68;    // Nuvi 2599_57
     5..6:
-      result := $8c;    // 346, 595, Drive 51
+      result := $8c;    // 346, 395, 595, Drive 51
     7..8:
       result := $8e;    // XT
     else
@@ -624,7 +624,7 @@ function TTripVersion.HandleTrailer: boolean;
 begin
   case (Version) of
     1..6:               // Haven't see trailers for all these devices. But shouldn't hurt.
-      result := true;   // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := true;   // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
       result := false;  // Drive 66, XT, XT2, XT3, Tread 2
   end;
@@ -634,7 +634,7 @@ function TTripVersion.IsUcs4: boolean;
 begin
   case (Version) of
     1..6:
-      result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
       result := true;   // Drive 66, XT, XT2, XT3, Tread 2
   end;
@@ -644,7 +644,7 @@ function TTripVersion.CanCheckSystemTrips: boolean;
 begin
   case (Version) of
     1..6:
-      result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
       result := true;   // Drive 66, XT, XT2, XT3, Tread 2
   end;

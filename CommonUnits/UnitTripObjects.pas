@@ -163,7 +163,7 @@ type
         Lat_8:                    integer;
         Lon_8:                    integer;
       );
-    PosnNorm:                     // XT, XT2, 595, drive 51, drive 66
+    PosnNorm:                     // XT, XT2, 395, 595, drive 51, drive 66
       (
         Unknown1:                 Cardinal;
         Lat:                      integer;
@@ -999,7 +999,7 @@ type
                                  const Location2Add: TLocation2Add);
     procedure AddLocation_Zumo346(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
-    procedure AddLocation_Zumo595(const Locations: TmLocations;
+    procedure AddLocation_Zumo395_595(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
     procedure AddLocation_Zumo590(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
@@ -1018,7 +1018,7 @@ type
     procedure CreateTemplate_XT3(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo346(const TripName, CalculationMode, TransportMode: string);
-    procedure CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo395_595(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive66(const TripName, CalculationMode, TransportMode: string);
@@ -5241,7 +5241,7 @@ begin
   Locations.Add(TmName.Create(Location2Add.Name));
 end;
 
-procedure TTripList.AddLocation_Zumo595(const Locations: TmLocations;
+procedure TTripList.AddLocation_Zumo395_595(const Locations: TmLocations;
                                         const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
@@ -5348,8 +5348,8 @@ begin
       AddLocation_Tread2(Locations, Location2Add);
     TTripModel.Zumo346:
       AddLocation_Zumo346(Locations, Location2Add);
-    TTripModel.Zumo595:
-      AddLocation_Zumo595(Locations, Location2Add);
+    TTripModel.Zumo395_595:
+      AddLocation_Zumo395_595(Locations, Location2Add);
     TTripModel.Zumo590:
       AddLocation_Zumo590(Locations, Location2Add);
     TTripModel.Drive51:
@@ -5892,11 +5892,11 @@ begin
   // Get model from UdbHandle
   result := AnUdbHandle.GetModel;
 
-  // Zumo 595 and Drive 51 share the same UDBHandle size, but the Drive 51 has no mIsRoundTrip
+  // Zumo 395, 595 and Drive 51 share the same UDBHandle size, but the Drive 51 has no mIsRoundTrip
   // Tread 2 and SmartDrive 66 share the same UDBHandle size, but the SmartDrive 66 has no mIsRoundTrip
   if (GetItem(TmIsRoundTrip.GetKey) = nil) then
     case result of
-      TTripModel.Zumo595:
+      TTripModel.Zumo395_595:
         result := TTripModel.Drive51;
       TTripModel.Tread2:
         result := TTripModel.Drive66;
@@ -5904,7 +5904,7 @@ begin
   else
     case result of
       TTripModel.Drive51:
-        result := TTripModel.Zumo595;
+        result := TTripModel.Zumo395_595;
       TTripModel.Drive66:
         result := TTripModel.Tread2;
     end;
@@ -6255,7 +6255,7 @@ begin
 end;
 
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
-procedure TTripList.CreateTemplate_Zumo595(const TripName, CalculationMode, TransportMode: string);
+procedure TTripList.CreateTemplate_Zumo395_595(const TripName, CalculationMode, TransportMode: string);
 begin
   SetHeader(THeader.Create);
 
@@ -6409,8 +6409,8 @@ begin
       CreateTemplate_XT3(TripName, CalculationMode, TransportMode);
     TTripModel.Tread2:
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
-    TTripModel.Zumo595:
-      CreateTemplate_Zumo595(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo395_595:
+      CreateTemplate_Zumo395_595(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo346:
       CreateTemplate_Zumo346(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo590:

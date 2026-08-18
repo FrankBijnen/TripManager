@@ -209,7 +209,7 @@ begin
   begin
     // There is no garmindevice in ?:\Garmin, or Internal Storage\Garmin
     // Check other devices with the same serialId.
-    // It could be the SD Card, or a hidden MTP partition as found with the 595
+    // It could be the SD Card, or a hidden MTP partition as found with the 346, 395, 590, 595
     if (Assigned(ADeviceList)) then
     begin
       for DevId := 0 to ADeviceList.Count -1 do

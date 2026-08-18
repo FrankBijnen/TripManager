@@ -65,6 +65,9 @@ const
   Zumo595_Name                      = Zumo_Name + ' 595';
   Zumo595_PartNumber                = '006-B2436-00';
 
+  Zumo395_Name                      = Zumo_Name + ' 395';
+  Zumo395_PartNumber                = '006-B2435-00';
+
   Zumo590_Name                      = Zumo_Name + ' 590';
   Zumo590_PartNumber                = '006-B1796-00';
 
@@ -228,7 +231,17 @@ const
         DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo595_Name;
         PartNumber: Zumo595_PartNumber;
-        TripModel: TTripModel.Zumo595;
+        TripModel: TTripModel.Zumo395_595;
+        Safe: false;
+        Displayable: true;
+        SettingsDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
+    (DeviceName: Zumo395_Name;
+        PartNumber: Zumo395_PartNumber;
+        TripModel: TTripModel.Zumo395_595;
         Safe: false;
         Displayable: true;
         SettingsDB: false;
@@ -778,7 +791,7 @@ begin
   end;
 end;
 
-// The 590/595 in MassStorage mode and RWFS enabled have at least 2 partitions:
+// The 346/395/590/595 in MassStorage mode and RWFS enabled have at least 2 partitions:
 // System. No trips
 // System1. That has the trips. Prefer that from InsertedDevices.
 class function TModelConv.GetPreferredDevice(const InsertedDevices: TStringList;

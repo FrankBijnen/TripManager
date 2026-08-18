@@ -44,7 +44,7 @@ type
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: See TModelConv for mapping to TripModel
   TGarminModel  = (XT, XT2, XT3, Tread2,
-                   Zumo346, Zumo595, Zumo590, Zumo3x0,
+                   Zumo346, Zumo595, Zumo395, Zumo590, Zumo3x0,
                    Drive51, Drive66, Nuvi2595, Nuvi2599, Nuvi57,
                    GarminEdge, GarminForeRunner,
                    GarminGeneric, Unknown);
