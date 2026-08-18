@@ -3863,15 +3863,15 @@ var
                                                    SizeOf(AnUdbhandle.UdbHandleValue.UDbDirCount),
                                                    AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.UDbDirCount) ));
 
+    VlTripInfo.Strings.AddPair('Shaping point count', Format('%d', [AnUdbhandle.UdbHandleValue.ShapingCount]),
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(AnUdbhandle.UdbHandleValue.ShapingCount),
+                                                    AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.ShapingCount) ));
+
     Unknown3Offset := AnUdbhandle.OffsetValue + LUnknown2 + OffsetInRecord(AnUdbhandle.UdbHandleValue, AnUdbhandle.UdbHandleValue.Unknown3);
     VlTripInfo.Strings.AddPair('Unknown3', Format('%d bytes', [Length(AnUdbhandle.UdbHandleValue.Unknown3)]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3),
-                                                   Unknown3Offset));
-
-    VlTripInfo.Strings.AddPair('Shaping point count', Format('%d', [AnUdbhandle.UdbHandleValue.GetShapingCount]),
-                               TGridSelItem.Create(AnUdbhandle,
-                                                   SizeOf(Word),
                                                    Unknown3Offset));
 
     VlTripInfo.Strings.AddPair('Unknown3 Bounds', Format('%s', [AnUdbhandle.GetBounds]),
@@ -5699,6 +5699,12 @@ end;
 procedure TFrmTripManager.ReadFormLayout;
 begin
   Self.Position := poScreenCenter;
+
+  if (GetRegistry(Reg_Maximized_Key, False)) then
+    WindowState := TWindowState.wsMaximized
+  else
+    WindowState := TWindowState.wsNormal;
+
   if (GetRegistry(Reg_RememberLayout, false) = true) then
   begin
     Self.Position := poDesigned;
@@ -5735,10 +5741,6 @@ begin
   DeleteDirs.Enabled := GetRegistry(Reg_EnableDirFuncs, false);
   NewDirectory.Enabled := GetRegistry(Reg_EnableDirFuncs, false);
 
-  if (GetRegistry(Reg_Maximized_Key, False)) then
-    WindowState := TWindowState.wsMaximized
-  else
-    WindowState := TWindowState.wsNormal;
   ReadColumnSettings;
 
   EdgeBrowser1.UserDataFolder := CreatedTempPath;

@@ -314,18 +314,18 @@ const
 
   // Keep 0 for model Unknown
   Unknown3Size: array[TTripModel] of integer = (
-      1288,                 // XT
-      1448,                 // XT2
-      1452,                 // XT3
-      1348,                 // Tread 2
-       294,                 // Zumo 346
-       294,                 // Zumo 595
-       254,                 // Zumo 590
-       130,                 // Zumo 3x0
-       294,                 // Drive 51
-      1348,                 // Drive 66
-       134,                 // Nuvi 2595
-       258,                 // Nuvi 2599_57
+      1286,                 // XT
+      1446,                 // XT2
+      1450,                 // XT3
+      1346,                 // Tread 2
+       292,                 // Zumo 346
+       292,                 // Zumo 595
+       252,                 // Zumo 590
+       128,                 // Zumo 3x0
+       292,                 // Drive 51
+      1346,                 // Drive 66
+       132,                 // Nuvi 2595
+       256,                 // Nuvi 2599_57
          0);                // Unknown
 
   // The Nuvi can have Calculation Magic $00300030, $00310030, $00320030 etc. Therefore CalcUndef
@@ -544,9 +544,9 @@ function TTripVersion.Unknown3BoundsOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $02;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := $00;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := $04;    // Drive 66, XT, XT2, XT3, Tread 2
+      result := $02;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -554,9 +554,9 @@ function TTripVersion.Unknown3DistOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $12;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := $10;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := $14;    // Drive 66, XT, XT2, XT3, Tread 2
+      result := $12;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -564,9 +564,9 @@ function TTripVersion.Unknown3TimeOffset: integer;
 begin
   case (Version) of
     1..6:
-      result := $16;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
+      result := $14;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 595
     else
-      result := $18;    // Drive 66, XT, XT2, XT3, Tread 2
+      result := $16;    // Drive 66, XT, XT2, XT3, Tread 2
   end;
 end;
 
@@ -574,15 +574,15 @@ function TTripVersion.Unknown3FloatOffset: integer;
 begin
   case (Version) of
     1:
-        result := $22;  // Nuvi 2595
+        result := $20;  // Nuvi 2595
     2,3:
-        result := $1e;  // 590, 3x0
+        result := $1c;  // 590, 3x0
     4:
-        result := $22;  // Nuvi 2599_57
+        result := $20;  // Nuvi 2599_57
     5..6:
-        result := $1e;  // 346, 595, Drive 51
+        result := $1c;  // 346, 595, Drive 51
     else
-        result := $20;  // XT, XT2, XT3, Tread2, Drive 66
+        result := $1e;  // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
@@ -592,13 +592,13 @@ begin
     1:
       result := $00;    // Nuvi 2595
     2..3:
-      result := $56;    // 590, 3x0
+      result := $54;    // 590, 3x0
     4:
-      result := $5a;    // Nuvi 2599_57
+      result := $58;    // Nuvi 2599_57
     5..6:
-      result := $56;    // 346, 595, Drive 51
+      result := $54;    // 346, 595, Drive 51
     else
-      result := $58;    // XT, XT2, XT3, Tread2, Drive 66
+      result := $56;    // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
@@ -608,15 +608,15 @@ begin
     1:
       result := $00;    // Nuvi 2595
     2..3:
-      result := $66;    // 590, 3x0
+      result := $64;    // 590, 3x0
     4:
-      result := $6a;    // Nuvi 2599_57
+      result := $68;    // Nuvi 2599_57
     5..6:
-      result := $8e;    // 346, 595, Drive 51
+      result := $8c;    // 346, 595, Drive 51
     7..8:
-      result := $90;    // XT
+      result := $8e;    // XT
     else
-      result := $c0;    // XT2, XT3, Tread2, Drive 66
+      result := $be;    // XT2, XT3, Tread2, Drive 66
   end;
 end;
 

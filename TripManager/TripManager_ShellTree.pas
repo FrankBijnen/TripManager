@@ -100,14 +100,13 @@ begin
     if not CanAdd then
       NewNode.Delete;
   end;
-
 end;
 
 // Do the check for children deferred. Only when scrolled in view.
 function TShellTreeView.CustomDrawItem(Node: TTreeNode; State: TCustomDrawState;
   Stage: TCustomDrawStage; var PaintImages: Boolean): Boolean;
 var
-  prc: Trect;
+  Prc: TRect;
   AFolder: TShellFolder;
 begin
   if not (otNonFolders in ObjectTypes) and // Performance optimization only for directories.
@@ -116,8 +115,8 @@ begin
      ((Node.StateIndex and sfsNeedsCheck) = sfsNeedsCheck) then
   begin
     if (TreeView_GetItemRect(Handle, Node.ItemId, prc, false)) and
-       ((prc.Top + prc.Height) >= Self.Top) and
-       ((Prc.Bottom - Prc.Height) <= (Self.Top + Self.Height)) then // Only check items in view
+       (Prc.Top >= 0) and
+       ((Prc.Bottom - Prc.Height) <= Self.Height) then // Only check items in view
     begin
       // Only do the check 1 time.
       Node.StateIndex := Node.StateIndex xor sfsNeedsCheck;
@@ -125,7 +124,7 @@ begin
       // Get Folder
       AFolder := TShellFolder(Node.Data);
 
-      // Has subfoldere?
+      // Has subfolders?
       Node.HasChildren := AFolder.SubFolders;
 
       // Dont care if the folder is shared, or has non folder subitems

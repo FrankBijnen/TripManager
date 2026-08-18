@@ -725,6 +725,7 @@ type
 |    Unknown2:         TBytes         |     | TripFileVersion.Unknown2Size        |
 |---------------------------------------------------------------------------------|
 |    UDbDirCount:      WORD           |    2|                                     |
+|    ShapingCount      WORD           |    2|                                     |
 |    Unknown3:         TBytes         |  var| Unknown3Size[TTripModel]            |
 |---------------------------------------------------------------------------------|
 |Identified fields of Unknown3        |     | TripFileVersion                     |
@@ -873,6 +874,7 @@ type
     CalcStatus:       Cardinal;
     Unknown2:         TBytes;
     UDbDirCount:      Word;
+    ShapingCount:     Word;
     Unknown3:         TBytes;
     procedure SwapCardinals;
     procedure AllocUnknown2(ASize: Cardinal);
@@ -883,7 +885,6 @@ type
     function GetAvoidances(const Offset: integer): string;
     function GetShapeBitMapLen(const Offset: integer): integer;
     function GetShapeBitMap(const Offset: integer): string;
-    function GetShapingCount: Word;
   end;
   TmUdbDataHndl = class(TBaseDataItem)
   private
@@ -3809,18 +3810,6 @@ begin
   result := '0x' + result;
 end;
 
-//TODO Define field after UDbDirCount, and shorten unknown3 (+ offsets)
-function TUdbHandleValue.GetShapingCount: Word;
-var
-  PUknown3Val: ^Word;
-begin
-  if (Length(Self.Unknown3) < 2) then
-    exit(0);
-
-  PUknown3Val := @Unknown3[0];
-  result := PUknown3Val^;
-end;
-
 constructor TmUdbDataHndl.Create(AHandleId: Cardinal;
                                  AModel: TTripModel = TTripModel.Unknown;
                                  ForceRecalc: boolean = true);
@@ -3870,7 +3859,7 @@ var
   UdbDirSize: integer;
 begin
   TotalHandleSize := Swap32(integer(FValue.UdbHandleSize)) -
-                     (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount));
+                     (SizeOf(FValue.CalcStatus) + Length(FValue.Unknown2) + SizeOf(FValue.UDbDirCount) + SizeOf(FValue.ShapingCount));
   UdbDirSize := (FValue.UDbDirCount * (SizeOf(TUdbDirFixedValue) + TripVersion[AModel].UdbDirUnknown2Size + UdbDirNameSize[AModel]));
   result := TotalHandleSize - UdbDirSize;
 end;
@@ -3895,6 +3884,7 @@ begin
   AStream.Write(FValue.CalcStatus, SizeOf(FValue.CalcStatus));
   AStream.Write(FValue.Unknown2[0], Length(FValue.Unknown2));
   AStream.Write(FValue.UDbDirCount, SizeOf(FValue.UDbDirCount));
+  AStream.Write(FValue.ShapingCount, SizeOf(FValue.ShapingCount));
   AStream.Write(FValue.Unknown3[0], Length(FValue.Unknown3));
   FValue.SwapCardinals;
 
@@ -4059,10 +4049,11 @@ var
   FirstUdbDir: TUdbDirFixedValue;
 begin
   result := AModel;
-  AnUdbHandle.FValue.AllocUnknown2(TripList.TripFileVersion.Unknown2Size);              // Read the unknown2 size for this TripVersion
+  AnUdbHandle.FValue.AllocUnknown2(TripList.TripFileVersion.Unknown2Size);                // Read the unknown2 size for this TripVersion
   AStream.Read(AnUdbHandle.FValue.Unknown2[0], Length(AnUdbHandle.FValue.Unknown2));
-  AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount)); // Need the UdbDirCount to calculate
-  AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[AModel]);                               // Read the unknown3 size for this model
+  AStream.Read(AnUdbHandle.FValue.UDbDirCount, SizeOf(AnUdbHandle.FValue.UDbDirCount));   // Need the UdbDirCount to calculate
+  AStream.Read(AnUdbHandle.FValue.ShapingCount, SizeOf(AnUdbHandle.FValue.ShapingCount)); // Nr. of Shaping points
+  AnUdbHandle.FValue.AllocUnknown3(Unknown3Size[AModel]);                                 // Read the unknown3 size for this model
   AStream.Read(AnUdbHandle.FValue.Unknown3[0], Length(AnUdbHandle.FValue.Unknown3));
 
   Diff := AnUdbHandle.ComputeUnknown3Size(AModel) - Unknown3Size[AModel];
@@ -5717,6 +5708,7 @@ begin
           TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
       end;
 
+      AnUdbHandle.FValue.ShapingCount := RoutePointList.Count -2;
       if (AnUdbHandle.ShapeOffset <> 0) then
         GenShapeBitmap(RoutePointList.Count -2, @AnUdbHandle.FValue.Unknown3[AnUdbHandle.ShapeOffset]);
       for RoutePointId := 0 to RoutePointList.Count -2 do
