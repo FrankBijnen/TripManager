@@ -40,7 +40,7 @@ uses
 const
   ControlTop      = '.Top';
   ControlLeft     = '.Left';
-  ControlHeight   = '.Heigth';
+  ControlHeight   = '.Height';
   ControlWidth    = '.Width';
   ControlDefault  = $ffff;
 
