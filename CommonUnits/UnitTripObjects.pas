@@ -872,7 +872,7 @@ type
     UdbHandleSize:    Cardinal;
     CalcStatus:       Cardinal;
     Unknown2:         TBytes;
-    UDbDirCount:      WORD;
+    UDbDirCount:      Word;
     Unknown3:         TBytes;
     procedure SwapCardinals;
     procedure AllocUnknown2(ASize: Cardinal);
@@ -883,6 +883,7 @@ type
     function GetAvoidances(const Offset: integer): string;
     function GetShapeBitMapLen(const Offset: integer): integer;
     function GetShapeBitMap(const Offset: integer): string;
+    function GetShapingCount: Word;
   end;
   TmUdbDataHndl = class(TBaseDataItem)
   private
@@ -3806,6 +3807,18 @@ begin
   SetLength(result, Len * 2);
   BinToHex(Unknown3[Offset], PChar(result), Len);
   result := '0x' + result;
+end;
+
+//TODO Define field after UDbDirCount, and shorten unknown3 (+ offsets)
+function TUdbHandleValue.GetShapingCount: Word;
+var
+  PUknown3Val: ^Word;
+begin
+  if (Length(Self.Unknown3) < 2) then
+    exit(0);
+
+  PUknown3Val := @Unknown3[0];
+  result := PUknown3Val^;
 end;
 
 constructor TmUdbDataHndl.Create(AHandleId: Cardinal;

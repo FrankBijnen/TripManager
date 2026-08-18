@@ -3869,6 +3869,11 @@ var
                                                    Length(AnUdbhandle.UdbHandleValue.Unknown3),
                                                    Unknown3Offset));
 
+    VlTripInfo.Strings.AddPair('Shaping point count', Format('%d', [AnUdbhandle.UdbHandleValue.GetShapingCount]),
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Word),
+                                                   Unknown3Offset));
+
     VlTripInfo.Strings.AddPair('Unknown3 Bounds', Format('%s', [AnUdbhandle.GetBounds]),
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Cardinal) * 4,
