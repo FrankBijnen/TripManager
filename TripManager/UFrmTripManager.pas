@@ -3717,6 +3717,8 @@ var
   end;
 
   procedure AddUdbDir(AnUdbDir: TUdbDir; ZoomToPoint: boolean);
+  var
+    MapInfo: string;
   begin
     VlTripInfo.Strings.AddPair('*** UdbDir', DupeString('-', DupeCount), TGridSelItem.Create(AnUdbDir));
     VlTripInfo.Strings.AddPair('MapSegment + RoadId', AnUdbDir.MapSegRoadDisplay,
@@ -3729,6 +3731,7 @@ var
                               TGridSelItem.Create(AnUdbDir,
                                                   SizeOf(AnUdbDir.SubClass.PointType),
                                                   OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.PointType)));
+
     if (AnUdbDir.UdbDirValue.SubClass.IsKnownComprLatLon) then
       VlTripInfo.Strings.AddPair('Compressed LatLon', AnUdbDir.ComprLatLon,
                                 TGridSelItem.Create(AnUdbDir,
@@ -3787,8 +3790,14 @@ var
                               TGridSelItem.Create(AnUdbDir, 1, SizeOf(AnUdbDir.UdbDirValue) + Length(AnUdbDir.Unknown2) +
                                                                AnUdbDir.NameLength -1));
     if (ZoomToPoint) then
+    begin
+      if (AnUdbDir.UdbDirValue.SubClass.IsKnownComprLatLon) then
+        MapInfo := AnUdbDir.PointType
+      else
+        MapInfo := AnUdbDir.Direction;
       MapRequest(AnUdbDir.MapCoords,
-                 Format('%s<br>%s', [AnUdbDir.DisplayName, AnUdbDir.Direction]), RoutePointTimeOut);
+                 Format('%s<br>%s', [AnUdbDir.DisplayName, MapInfo]), RoutePointTimeOut);
+    end;
   end;
 
 
