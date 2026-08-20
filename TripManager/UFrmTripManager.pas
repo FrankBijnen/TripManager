@@ -3898,6 +3898,11 @@ var
                                                    SizeOf(Cardinal),
                                                    Unknown3Offset + AnUdbhandle.TimeOffset));
 
+    VlTripInfo.Strings.AddPair('Unknown3 Route Preference', AnUdbhandle.RoutePref,
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(byte),
+                                                   Unknown3Offset + AnUdbhandle.RoutePrefOffset));
+
     VlTripInfo.Strings.AddPair('Unknown3 9 Floats', AnUdbhandle.NineFloats,
                                TGridSelItem.Create(AnUdbhandle,
                                                    SizeOf(Single) * 9,
@@ -3915,6 +3920,11 @@ var
                                                      SizeOf(Byte),
                                                      Unknown3Offset + AnUdbhandle.AvoidancesOffset));
     end;
+
+      VlTripInfo.Strings.AddPair('Unknown3 TransportMode', AnUdbhandle.TransportMode,
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     SizeOf(Byte),
+                                                     Unknown3Offset + AnUdbhandle.TransportModeOffset));
 
     if (AnUdbhandle.ShapeOffset <> 0) then
       VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', AnUdbhandle.UdbHandleValue.GetShapeBitmap(AnUdbhandle.ShapeOffset),

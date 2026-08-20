@@ -100,7 +100,9 @@ type
     function Unknown3BoundsOffset: integer;
     function Unknown3DistOffset: integer;
     function Unknown3TimeOffset: integer;
+    function Unknown3RoutePrefOffset: integer;
     function Unknown3FloatOffset: integer;
+    function Unknown3TransportModeOffset: integer;
     function Unknown3MagicOffset: integer;
     function Unknown3ShapeOffset: integer;
 
@@ -570,6 +572,22 @@ begin
   end;
 end;
 
+function TTripVersion.Unknown3RoutePrefOffset: integer;
+begin
+  case (Version) of
+    1:
+        result := $1c;  // Nuvi 2595
+    2,3:
+        result := $18;  // 590, 3x0
+    4:
+        result := $1c;  // Nuvi 2599_57
+    5..6:
+        result := $18;  // 346, 395, 595, Drive 51
+    else
+        result := $1a;  // XT, XT2, XT3, Tread2, Drive 66
+  end;
+end;
+
 function TTripVersion.Unknown3FloatOffset: integer;
 begin
   case (Version) of
@@ -583,6 +601,22 @@ begin
         result := $1c;  // 346, 395, 595, Drive 51
     else
         result := $1e;  // XT, XT2, XT3, Tread2, Drive 66
+  end;
+end;
+
+function TTripVersion.Unknown3TransportModeOffset: integer;
+begin
+  case (Version) of
+    1:
+        result := $54;  // Nuvi 2595
+    2,3:
+        result := $50;  // 590, 3x0
+    4:
+        result := $54;  // Nuvi 2599_57
+    5..6:
+        result := $50;  // 346, 395, 595, Drive 51
+    else
+        result := $52;  // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 

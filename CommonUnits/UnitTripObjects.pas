@@ -907,6 +907,8 @@ type
     function GetMagicOffset: integer;
     function GetAvoidancesOffset: integer;
     function GetBoundsOffset(Index: Integer): integer;
+    function GetRoutePrefOffset: integer;
+    function GetTransportModeOffset: integer;
     function GetFloatOffset: integer;
   public
     constructor Create(AHandleId: Cardinal;
@@ -917,6 +919,8 @@ type
     function GetBoundsTopLeft: string;
     function GetBounds: string;
     function NineFloats: string;
+    function RoutePref: string;
+    function TransportMode: string;
     property HandleId: Cardinal read FUdbHandleId;
     property HeaderValue: TUdbHeaderValue read FUdbHeaderValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
@@ -928,6 +932,8 @@ type
     property MagicOffset: integer read GetMagicOffset;
     property AvoidancesOffset: integer read GetAvoidancesOffset;
     property BoundsOffset[Index: Integer]: integer read GetBoundsOffset;
+    property RoutePrefOffset: integer read GetRoutePrefOffset;
+    property TransportModeOffset: integer read GetTransportModeOffset;
     property FloatOffset: integer read GetFloatOffset;
     property Trailer: TBytes read FTrailer;
   end;
@@ -3974,6 +3980,16 @@ begin
   result := TripList.TripFileVersion.Unknown3BoundsOffset + (Index * SizeOf(Cardinal));
 end;
 
+function TmUdbDataHndl.GetRoutePrefOffset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3RoutePrefOffset;
+end;
+
+function TmUdbDataHndl.GetTransportModeOffset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3TransportModeOffset;
+end;
+
 function TmUdbDataHndl.GetFloatOffset: integer;
 begin
   result := TripList.TripFileVersion.Unknown3FloatOffset;
@@ -4004,6 +4020,19 @@ end;
 function TmUdbDataHndl.GetBounds: string;
 begin
   result := Format('%s, %s', [GetBoundsMin, GetBoundsMax]);
+end;
+
+function TmUdbDataHndl.RoutePref: string;
+begin
+  result := RoutePref2Desc(TRoutePreference(FValue.Unknown3[RoutePrefOffset]),
+                           FTripList.FTripModel,
+                           false);
+end;
+
+function TmUdbDataHndl.TransportMode: string;
+begin
+  if not IntToIdent(FValue.Unknown3[TransportModeOffset], result, TransportModeMap) then
+    result := NotApplicable;
 end;
 
 function TmUdbDataHndl.NineFloats: string;
