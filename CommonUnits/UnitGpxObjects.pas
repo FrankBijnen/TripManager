@@ -277,11 +277,11 @@ var
 begin
   Coord.FromAttributes(Coords);
   Hex := IntToHex(Float2Coord(Coord.Lat), 8);
-  LatLon := Hex + ' = ' + Coord2Float(Float2Coord(Coord.Lat));
+  LatLon := Hex + ' = ' + Debug_Coord2Float(Float2Coord(Coord.Lat));
   LastSub := Copy(Hex, 5, 2) + Copy(Hex, 3, 2);
   result := Copy(Hex, 1, 2);
   Hex := IntToHex(Float2Coord(Coord.Lon),8);
-  LatLon := LatLon + ' ' + Hex + ' = ' + Coord2Float(Float2Coord(Coord.Lon));
+  LatLon := LatLon + ' ' + Hex + ' = ' + Debug_Coord2Float(Float2Coord(Coord.Lon));
   LastSub := LastSub + Copy(Hex, 5, 2) + Copy(Hex, 3, 2);
   result := result + Copy(Hex, 1, 2) + 'xx';
   result := result + LastSub + ' ' + LatLon;

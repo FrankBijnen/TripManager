@@ -61,6 +61,7 @@ type
   end;
   TGeoApifyRecords = array of TGeoApifyRecord;
 
+function Debug_Coord2Float(ACoord: LongInt): string;
 function Coord2Float(ACoord: LongInt): string;
 function Float2Coord(ACoord: Double): LongInt;
 function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
@@ -105,7 +106,7 @@ begin
   end;
 end;
 
-function Coord2Float(ACoord: LongInt): string;
+function Debug_Coord2Float(ACoord: LongInt): string;
 var
   HCoord: Double;
 begin
@@ -116,6 +117,20 @@ begin
     Result := result + ' * 360 = ' + FormatFloat('0', HCoord);
     HCoord := HCoord / 4294967296; {2^32}
     Result := result + ' / 2^32 = ' + FormatFloat('0.000000000000000', HCoord);
+  except
+    result := '';
+  end;
+end;
+
+function Coord2Float(ACoord: LongInt): string;
+var
+  HCoord: Double;
+begin
+  HCoord := ACoord;
+  try
+    HCoord := HCoord * 360;
+    HCoord := HCoord / 4294967296; {2^32}
+    Result := FormatFloat('0.000000000000000', HCoord, FormatSettings);
   except
     result := '';
   end;

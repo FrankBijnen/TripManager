@@ -241,6 +241,7 @@ type
     DBMemoFormatJSON: TMenuItem;
     PnlHideGrid: TPanel;
     ResetAvoidancesUpdProfile: TMenuItem;
+    ExportExploredbtoGPX1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -366,6 +367,7 @@ type
     procedure DBMemoFormatJSONClick(Sender: TObject);
     procedure PnlHideGridClick(Sender: TObject);
     procedure ResetAvoidancesUpdProfileClick(Sender: TObject);
+    procedure ExportExploredbtoGPX1Click(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -510,9 +512,9 @@ uses
   System.JSON,
   Winapi.ShellAPI,
   Vcl.Clipbrd,
-  MsgLoop, UnitGarminDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite,
-  UnitOSMMap, UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv, UnitVehProfile,
-  UDmRoutePoints, TripManager_GridSelItem,
+  UnitGarminDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite, UnitOSMMap,
+  UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv, UnitVehProfile, UnitExplore,
+  MsgLoop, UDmRoutePoints, TripManager_GridSelItem,
   UFrmDateDialog, UFrmPostProcess, UFrmSendTo, UFrmAdvSettings, UFrmTripEditor, UFrmNewTrip,
   UFrmSelectGPX, UFrmShowLog, UFrmEditRoutePref;
 
@@ -1404,15 +1406,15 @@ end;
 procedure TFrmTripManager.DBMemoFormatJSONClick(Sender: TObject);
 var
   AField: TField;
-  JSONVAlue: TJSONValue;
+  JSONValue: TJSONValue;
 begin
   AField := CdsDeviceDb.FieldByName(DbgDeviceDb.Columns[DbgDeviceDb.Col -1].FieldName);
-  JSONVAlue := TJSONObject.ParseJSONValue(AField.AsString);
+  JSONValue := TJSONObject.ParseJSONValue(AField.AsString);
   try
-    if (Assigned(JSONVAlue)) then
-      DBMemo.Text := JSONVAlue.Format;
+    if (Assigned(JSONValue)) then
+      DBMemo.Text := JSONValue.Format;
   finally
-    JSONVAlue.Free;
+    JSONValue.Free;
   end;
 end;
 
@@ -3306,6 +3308,27 @@ begin
                             (SelectedScPosn <> nil);
 end;
 
+procedure TFrmTripManager.ExportExploredbtoGPX1Click(Sender: TObject);
+var
+  CdsExploreDb: TClientDataSet;
+begin
+  SaveTrip.Filter := '*.gpx|*.gpx';
+  SaveTrip.InitialDir := ShellTreeView1.Path;
+  SaveTrip.FileName := ChangeFileExt(ExploreDb, '.gpx');
+  if not SaveTrip.Execute then
+    exit;
+
+  CdsExploreDb := TClientDataSet.Create(nil);
+  try
+    CdsExploreDb.AfterOpen := FCDSEvents.AfterOpen;
+
+    CDSFromQuery(GetDeviceTmp + ExploreDb,  'select * from ' + Expl_ItemTable + ' order by type, name', CdsExploreDb);
+    Expl_ExportToGPX(CdsExploreDb, SaveTrip.FileName);
+  finally
+    CdsExploreDb.Free;
+  end;
+end;
+
 procedure TFrmTripManager.QueryDeviceClick(Sender: TObject);
 begin
   LoadSqlFile(GetDeviceTmp + StripHotkey(TMenuItem(Sender).Caption), false);
@@ -3908,6 +3931,11 @@ var
                                                    SizeOf(Single) * 9,
                                                    Unknown3Offset + AnUdbhandle.FloatOffset));
 
+    VlTripInfo.Strings.AddPair('Unknown3 TransportMode', AnUdbhandle.TransportMode,
+                               TGridSelItem.Create(AnUdbhandle,
+                                                   SizeOf(Byte),
+                                                   Unknown3Offset + AnUdbhandle.TransportModeOffset));
+
     if (AnUdbhandle.MagicOffset <> 0) then
     begin
       VlTripInfo.Strings.AddPair('Unknown3 Magic', Format('0x%s', [IntToHex(Swap32(AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.MagicOffset)), 8)]),
@@ -3920,11 +3948,6 @@ var
                                                      SizeOf(Byte),
                                                      Unknown3Offset + AnUdbhandle.AvoidancesOffset));
     end;
-
-      VlTripInfo.Strings.AddPair('Unknown3 TransportMode', AnUdbhandle.TransportMode,
-                                 TGridSelItem.Create(AnUdbhandle,
-                                                     SizeOf(Byte),
-                                                     Unknown3Offset + AnUdbhandle.TransportModeOffset));
 
     if (AnUdbhandle.ShapeOffset <> 0) then
       VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', AnUdbhandle.UdbHandleValue.GetShapeBitmap(AnUdbhandle.ShapeOffset),
