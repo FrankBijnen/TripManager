@@ -79,6 +79,13 @@ type
     Dt: byte;
     Rm: TRoutePreference;
     Desc: string;
+    DescGpx: string;
+  end;
+
+  TAdvLevelV6 = packed record
+    Curves: byte;
+    Hills: byte;
+    Highways: byte;
   end;
 
   TLocation2Add = record
@@ -104,6 +111,9 @@ type
     function Unknown3FloatOffset: integer;
     function Unknown3TransportModeOffset: integer;
     function Unknown3MagicOffset: integer;
+    function Unknown3AdvLevelV6Offset: integer;
+    function Unknown3TimeStampOffset: integer;
+    function Unknown3AdvLevelV7Offset: integer;
     function Unknown3ShapeOffset: integer;
 
     function IsUcs4: boolean;
@@ -279,26 +289,28 @@ const
 
   RoutePrefRecs : array[TCalcMode] of TRoutePrefRec
     = (
-        (Sel: true;  Dt: dtByte;            Rm: rmFasterTime;           Desc: 'FasterTime'),
-        (Sel: true;  Dt: dtByte;            Rm: rmShorterDistance;      Desc: 'ShorterDistance'),
-        (Sel: true;  Dt: dtByte;            Rm: rmStraight;             Desc: 'Straight'),
-        (Sel: false; Dt: dtByte;            Rm: rmAdventurous;          Desc: 'Adventurous'),
+        (Sel: true;   Dt: dtByte;            Rm: rmFasterTime;           Desc: 'FasterTime';      DescGpx: 'FasterTime'),
+        (Sel: true;   Dt: dtByte;            Rm: rmShorterDistance;      Desc: 'ShorterDistance'; DescGpx: 'ShorterDistance'),
+        (Sel: true;   Dt: dtByte;            Rm: rmStraight;             Desc: 'Straight';        DescGpx: 'Direct'),
+        (Sel: false;  Dt: dtByte;            Rm: rmAdventurous;          Desc: 'Adventurous';     DescGpx: 'CurvyRoads'),
 
-        (Sel: false; Dt: dtByte;            Rm: rmOffRoad;              Desc: 'OffRoad'),
-        (Sel: false; Dt: dtByte;            Rm: rmDirect;               Desc: 'Direct'),
-        (Sel: false; Dt: dtByte;            Rm: rmCurvyRoads;           Desc: 'CurvyRoads'),
-        (Sel: false; Dt: dtByte;            Rm: rmEco;                  Desc: 'Eco'),
+        (Sel: false;  Dt: dtByte;            Rm: rmOffRoad;              Desc: 'OffRoad';         DescGpx: 'Direct'),
+        (Sel: false;  Dt: dtByte;            Rm: rmDirect;               Desc: 'Direct'),
+        (Sel: false;  Dt: dtByte;            Rm: rmCurvyRoads;           Desc: 'CurvyRoads'),
+        (Sel: false;  Dt: dtByte;            Rm: rmEco;                  Desc: 'Eco';             DescGpx: 'CurvyRoads'),
 
-        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
-        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
-        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordOffRoad;         Desc: 'OffRoad'),
-        (Sel: false; Dt: dtDWordRoutePref;  Rm: rmDWordEco;             Desc: 'Eco'),
+        (Sel: false;  Dt: dtDWordRoutePref;  Rm: rmDWordFasterTime;      Desc: 'FasterTime'),
+        (Sel: false;  Dt: dtDWordRoutePref;  Rm: rmDWordShorterDistance; Desc: 'ShorterDistance'),
+        (Sel: false;  Dt: dtDWordRoutePref;  Rm: rmDWordOffRoad;         Desc: 'OffRoad'),
+        (Sel: false;  Dt: dtDWordRoutePref;  Rm: rmDWordEco;             Desc: 'Eco'),
 
-        (Sel: false; Dt: dtByte;            Rm: rmTripTrack;            Desc: 'TripTrack'),
-        (Sel: false; Dt: dtByte;            Rm: rmNA;                   Desc: NotApplicable)
+        (Sel: false;  Dt: dtByte;            Rm: rmTripTrack;            Desc: 'TripTrack'),
+        (Sel: false;  Dt: dtByte;            Rm: rmNA;                   Desc: NotApplicable)
       );
 
-  // Keep 0 for model Unknown
+  CalcModesExpl2GPX: array[0..3] of TCalcMode = (cmFasterTime, cmShorterDistance, cmStraight, cmAdventurous);
+
+   // Keep 0 for model Unknown
   UdbDirNameSize: array[TTripModel] of integer = (
       121 * 4,              // XT
       121 * 4,              // XT2
@@ -458,7 +470,7 @@ const
     []                                                                                    // Unknown
   );
 
-  TransportModesSuppported: array[TTripModel] of set of TTransportMode = (
+ TransportModesSuppported: array[TTripModel] of set of TTransportMode = (
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT2        Profile overrides?
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT3        Profile overrides?
@@ -486,6 +498,7 @@ function RoutePref2Desc(ARoutePref: TRoutePreference;
 function Desc2RoutePref(ADesc: string;
                         AModel: TTripModel;
                         OnlySupported: boolean = true): TRoutePreference;
+function Expl2GpxDesc(const ARoutePreference: TRoutePreference; const V2: boolean): string;
 
 implementation
 
@@ -636,6 +649,38 @@ begin
   end;
 end;
 
+function TTripVersion.Unknown3AdvLevelV6Offset: integer;
+begin
+  case (Version) of
+    6:
+      result := $60;    // 346, 395, 595 (Drive 51 has no adventurous)
+    else
+      result := $0;
+  end;
+end;
+
+function TTripVersion.Unknown3TimeStampOffset: integer;
+begin
+  case (Version) of
+    0..5:
+      result := $0;
+    6:
+      result := $68;    // 346, 395, 595, Drive 51
+    else
+      result := $6a;    // XT, XT2, XT3, Tread2, Drive 66
+  end;
+end;
+
+function TTripVersion.Unknown3AdvLevelV7Offset: integer;
+begin
+  case (Version) of
+    0..6:
+      result := $0;
+    else
+      result := $6f;    // XT, XT2, XT3, Tread2 (Drive 66 has no adventurous)
+  end;
+end;
+
 function TTripVersion.Unknown3ShapeOffset: integer;
 begin
   case (Version) of
@@ -712,21 +757,11 @@ begin
   end;
 end;
 
-function GpxDesc2TripDesc(ADesc: string): string;
-begin
-  result := '';
-  if (SameText(ADesc, 'Direct')) then
-    result := #9 + 'Straight' + #9 + 'OffRoad';
-  if (SameText(ADesc, 'CurvyRoads')) then
-    result := #9 + 'Adventurous' + #9 + 'Eco';
-end;
-
 function Desc2RoutePref(ADesc: string;
                         AModel: TTripModel;
                         OnlySupported: boolean = true): TRoutePreference;
 var
   ModelCalcMode: TCalcMode;
-  Aliases: string;
 begin
   // Default to FasterTime
   if (RoutePrefType[AModel] = dtDWordRoutePref) then
@@ -734,7 +769,6 @@ begin
   else
     result := TRoutePreference.rmFasterTime;
 
-  Aliases := GpxDesc2TripDesc(ADesc);
   for ModelCalcMode in CalcModesSuppported[AModel] do
   begin
     if (OnlySupported) and
@@ -742,8 +776,27 @@ begin
       continue;
 
     if (SameText(RoutePrefRecs[ModelCalcMode].Desc, ADesc)) or
-       (ContainsText(Aliases, #9 + RoutePrefRecs[ModelCalcMode].Desc)) then
+       (SameText(RoutePrefRecs[ModelCalcMode].DescGpx, ADesc)) then
       exit(RoutePrefRecs[ModelCalcMode].Rm);
+  end;
+end;
+
+function Expl2GpxDesc(const ARoutePreference: TRoutePreference; const V2: boolean): string;
+var
+  ACalcMode: TCalcMode;
+  ARoutePrefRec: TRoutePrefRec;
+begin
+  result := '';
+  for ACalcMode in CalcModesExpl2GPX do
+  begin
+    ARoutePrefRec := RoutePrefRecs[ACalcMode];
+    if  (ARoutePrefRec.Rm = ARoutePreference) then
+    begin
+      if (V2) then
+        exit(ARoutePrefRec.Desc)
+      else
+        exit(ARoutePrefRec.DescGpx);
+    end;
   end;
 end;
 

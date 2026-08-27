@@ -3056,9 +3056,15 @@ begin
         if (Location2Add.RoutePref = TRoutePreference.rmAdventurous) then
         begin
           Location2Add.AdvLevel := TAdvlevel.advNA;
-          RtePtAdvLevel := RtePtViaPoint.Find('trp:AdventurousLevel');
+          RtePtAdvLevel := RtePtExtensions.Find('trpv2:AdventurousLevel');
           if (RtePtAdvLevel <> nil) then
-            Location2Add.AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue);
+            Location2Add.AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue)
+          else
+          begin
+            RtePtAdvLevel := RtePtViaPoint.Find('trp:AdventurousLevel');
+            if (RtePtAdvLevel <> nil) then
+              Location2Add.AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue);
+          end;
         end;
       end;
     end;

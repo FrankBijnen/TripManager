@@ -257,7 +257,6 @@ object FrmTripManager: TFrmTripManager
       Height = 243
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 721
       object VSplitterFile_Sys: TSplitter
         Left = 278
         Top = 33
@@ -308,7 +307,6 @@ object FrmTripManager: TFrmTripManager
         ViewStyle = vsReport
         OnKeyDown = ShellListView1KeyDown
         OnKeyUp = ShellListView1KeyUp
-        ExplicitWidth = 439
       end
       object PnlXt2FileSys: TPanel
         Left = 1
@@ -347,7 +345,6 @@ object FrmTripManager: TFrmTripManager
         Height = 32
         Align = alTop
         TabOrder = 4
-        ExplicitWidth = 719
         object BtnAddToMap: TButton
           AlignWithMargins = True
           Left = 155
@@ -422,7 +419,6 @@ object FrmTripManager: TFrmTripManager
         Height = 25
         Align = alBottom
         TabOrder = 3
-        ExplicitWidth = 719
         object EdFileSysFolder: TComboBox
           AlignWithMargins = True
           Left = 67
@@ -439,7 +435,6 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 1
           OnCloseUp = EdFileSysFolderCloseUp
           OnKeyPress = EdFileSysFolderKeyPress
-          ExplicitWidth = 648
         end
         object BtnOpenTemp: TButton
           Left = 1
@@ -463,7 +458,6 @@ object FrmTripManager: TFrmTripManager
     ActivePage = TsOSMMap
     Align = alClient
     TabOrder = 1
-    ExplicitWidth = 723
     object TsHex: TTabSheet
       Caption = 'Hexadecimal display'
       object HexPanel: TPanel
@@ -478,7 +472,6 @@ object FrmTripManager: TFrmTripManager
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 0
-        ExplicitWidth = 715
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1
@@ -487,7 +480,6 @@ object FrmTripManager: TFrmTripManager
           Align = alTop
           ParentBackground = False
           TabOrder = 0
-          ExplicitWidth = 713
           object BtnSaveTripGpiFile: TButton
             Left = 1
             Top = 1
@@ -520,7 +512,6 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 0
         OnResize = AdvPanel_MapTopResize
-        ExplicitWidth = 715
         object SpeedBtn_MapClear: TSpeedButton
           AlignWithMargins = True
           Left = 0
@@ -599,7 +590,6 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           TabOrder = 2
           Text = '-'
-          ExplicitWidth = 50
           ExplicitHeight = 21
         end
         object PnlCoordinates: TPanel
@@ -649,7 +639,6 @@ object FrmTripManager: TFrmTripManager
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        ExplicitWidth = 715
         object LblBounds: TLabel
           AlignWithMargins = True
           Left = 116
@@ -677,7 +666,6 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           ShowHint = True
           TabOrder = 0
-          ExplicitWidth = 555
           ExplicitHeight = 21
         end
         object ChkZoomToPoint: TCheckBox
@@ -712,7 +700,6 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
-        ExplicitWidth = 713
       end
     end
     object TsSQlite: TTabSheet
@@ -744,7 +731,6 @@ object FrmTripManager: TFrmTripManager
         Height = 105
         Align = alTop
         TabOrder = 0
-        ExplicitWidth = 715
         object MemoSQL: TMemo
           Left = 1
           Top = 57
@@ -762,7 +748,6 @@ object FrmTripManager: TFrmTripManager
           ScrollBars = ssVertical
           TabOrder = 0
           OnKeyUp = MemoSQLKeyUp
-          ExplicitWidth = 713
         end
         object PnlQuickSql: TPanel
           Left = 1
@@ -771,7 +756,6 @@ object FrmTripManager: TFrmTripManager
           Height = 56
           Align = alTop
           TabOrder = 1
-          ExplicitWidth = 713
           object LblSqlResults: TLabel
             Left = 1
             Top = 33
@@ -800,7 +784,6 @@ object FrmTripManager: TFrmTripManager
             Align = alTop
             Caption = 'PnlQuickSqlGo'
             TabOrder = 0
-            ExplicitWidth = 711
             object CmbSQliteTabs: TComboBox
               AlignWithMargins = True
               Left = 4
@@ -817,7 +800,6 @@ object FrmTripManager: TFrmTripManager
               ParentFont = False
               TabOrder = 0
               OnChange = CmbSQliteTabsChange
-              ExplicitWidth = 646
             end
             object BitBtnSQLGo: TBitBtn
               Left = 665
@@ -841,7 +823,6 @@ object FrmTripManager: TFrmTripManager
               NumGlyphs = 2
               TabOrder = 1
               OnClick = BitBtnSQLGoClick
-              ExplicitLeft = 653
             end
           end
         end
@@ -878,7 +859,6 @@ object FrmTripManager: TFrmTripManager
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 2
-        ExplicitWidth = 715
       end
     end
     object TsExplore: TTabSheet
@@ -963,7 +943,6 @@ object FrmTripManager: TFrmTripManager
         SmallImages = VirtualImageListExplore
         TabOrder = 0
         ViewStyle = vsReport
-        ExplicitWidth = 715
       end
       object PnlExploreTop: TPanel
         Left = 0
@@ -972,7 +951,6 @@ object FrmTripManager: TFrmTripManager
         Height = 28
         Align = alTop
         TabOrder = 1
-        ExplicitWidth = 715
         object SpbRefreshExplore: TSpeedButton
           AlignWithMargins = True
           Left = 1
@@ -1160,7 +1138,6 @@ object FrmTripManager: TFrmTripManager
     Font.Name = 'Segoe UI'
     Font.Style = []
     Spacing = 0
-    ExplicitWidth = 1348
   end
   object ImageList: TImageList
     Left = 124

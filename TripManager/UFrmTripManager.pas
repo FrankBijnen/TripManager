@@ -3312,9 +3312,10 @@ procedure TFrmTripManager.ExportExploredbtoGPX1Click(Sender: TObject);
 var
   CdsExploreDb: TClientDataSet;
 begin
+//TODO Call add to map?
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
-  SaveTrip.FileName := ChangeFileExt(ExploreDb, '.gpx');
+  SaveTrip.FileName := ChangeFileExt(ChangeFileExt(ExploreDb, '')  + '_' + FormatDateTime('yyyy-mm-dd', Now), '.gpx');
   if not SaveTrip.Execute then
     exit;
 
@@ -3948,6 +3949,33 @@ var
                                                      SizeOf(Byte),
                                                      Unknown3Offset + AnUdbhandle.AvoidancesOffset));
     end;
+
+    if (AnUdbhandle.AdvLevelV6Offset <> 0) then
+      VlTripInfo.Strings.AddPair('Unknown3 Adventurous Levels',
+                                 Format('Curves: %d, Hills: %d, Highways: %d',
+                                        [AnUdbhandle.AdvLevelV6.Curves,
+                                         AnUdbhandle.AdvLevelV6.Hills,
+                                         AnUdbhandle.AdvLevelV6.Highways]),
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     SizeOf(AnUdbhandle.AdvLevelV6),
+                                                     Unknown3Offset + AnUdbhandle.AdvLevelV6Offset));
+    if (AnUdbhandle.TimeStampOffset <> 0) then
+      VlTripInfo.Strings.AddPair('Unknown3 TimeStamp',
+                                 Format('%s', [TUnixDateConv.CardinalAsDateTimeString(
+                                                 AnUdbhandle.UdbHandleValue.GetUnknown3(AnUdbhandle.TimeStampOffset))]
+                                                                                     ),
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     SizeOf(Cardinal),
+                                                     Unknown3Offset + AnUdbhandle.TimeStampOffset));
+
+    if (AnUdbhandle.AdvLevelV7Offset <> 0) then
+      VlTripInfo.Strings.AddPair('Unknown3 Adventurous Level',
+                                 Format('%d',
+                                        [AnUdbhandle.AdvLevelV7]),
+                                 TGridSelItem.Create(AnUdbhandle,
+                                                     SizeOf(AnUdbhandle.AdvLevelV7),
+                                                     Unknown3Offset + AnUdbhandle.AdvLevelV7Offset));
+
 
     if (AnUdbhandle.ShapeOffset <> 0) then
       VlTripInfo.Strings.AddPair('Unknown3 Shape bitmap', AnUdbhandle.UdbHandleValue.GetShapeBitmap(AnUdbhandle.ShapeOffset),

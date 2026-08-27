@@ -24,7 +24,7 @@ procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
 implementation
 
 uses
-  System.DateUtils, System.JSON, System.SysUtils, System.Classes,
+  System.DateUtils, System.JSON, System.SysUtils, System.Classes, System.Generics.Collections,
   UnitGpxDefs, UnitTripDefs, UnitVerySimpleXml, UnitStringUtils,
   UnitGarminDevice, UnitModelConv;
 
@@ -70,15 +70,25 @@ end;
 
 procedure ExportRtes(const GPXRoot: TXmlVsNode; const CdsExploreDb: TClientDataSet);
 var
-  Rte, RtePt: TXmlVSNode;
+  Rte, RtePt, ExtPt, ViaPt: TXmlVSNode;
+  MetaData: TField;
   Route_points: TField;
-  JSONValue: TJSONValue;
-  JSONArray: TJSONArray;
+  JSONRouteValue: TJSONValue;
+  JSONRouteArray: TJSONArray;
   JSONRtePt: TJSonValue;
   JSONRtePtName: TJSonValue;
   JSONRtePtType: TJSonValue;
+
+  JSONMetaValue: TJSONValue;
+  JSONMetaVehicleType: TJSONValue;
+  TransportMode: string;
+
+  JSONMetaRoutePrefArray: TJSONArray;
+  JSONMetaRoutePrefAdventurousModes: TJSONArray;
+  AdventurousMode: string;
   IsVia: boolean;
   Cnt: integer;
+  ViaCnt: integer;
 begin
   cdsExploreDb.Filter := 'Type=4';
   cdsExploreDb.Filtered := true;
@@ -86,17 +96,29 @@ begin
   Route_points := CdsExploreDb.FindField('Route_points');
   if (Route_points = nil) then
     exit;
+  MetaData := CdsExploreDb.FindField('MetaData');
+  if (MetaData = nil) then
+    exit;
 
   while not CdsExploreDb.Eof do
   begin
     Rte := GPXRoot.AddChild('rte');
     Rte.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
     Rte.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
-    JSONVAlue := TJSONObject.ParseJSONValue(Route_points.AsString);
+    JSONRouteValue := TJSONObject.ParseJSONValue(Route_points.AsString);
+    JSONMetaValue := TJSONObject.ParseJSONValue(MetaData.AsString);
+    JSONMetaVehicleType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('VehicleType') as TJSONValue;
+    JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
+    JSONMetaRoutePrefAdventurousModes := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefAdventurousModes') as TJSONArray;
+
+    if (IntToIdent(JSONMetaVehicleType.AsType<integer>, TransportMode, TransportModeMap)) then
+      Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
+
     try
       Cnt := 0;
-      JSONArray := JSONValue as TJSONArray;
-      for JSONRtePt in JSONArray do
+      ViaCnt := 0;
+      JSONRouteArray := JSONRouteValue as TJSONArray;
+      for JSONRtePt in JSONRouteArray do
       begin
         RtePt := Rte.AddChild('rtept');
         RtePt.SetAttribute('lat', JSONRtePt.FindValue('Lat').AsType<string>);
@@ -113,13 +135,35 @@ begin
         JSONRtePtType := JSONRtePt.FindValue('Type');
         if (JSONRtePtType <> nil) then
           IsVia := (JSONRtePtType.AsType<integer> = 1);
+
         if (IsVia) then
-          RtePt.AddChild('extensions').AddChild('trp:ViaPoint')
+        begin
+          ExtPt := RtePt.AddChild('extensions');
+          ViaPt := ExtPt.AddChild('trp:ViaPoint');
+
+          if (Assigned(JSONMetaRoutePrefArray)) then
+          begin
+            // End point
+            if (ViaCnt > JSONRouteArray.Count -2) then
+              ViaCnt := JSONRouteArray.Count -2;
+
+            ViaPt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>), false);
+            if (Assigned(JSONMetaRoutePrefAdventurousModes)) then
+            begin
+              ExtPt.AddChild('trpv2:CalculationMode').NodeValue := Expl2GpxDesc(TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>), true);
+              if (TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>) = TRoutePreference.rmAdventurous) and
+                 (IntToIdent(JSONMetaRoutePrefAdventurousModes[ViaCnt].AsType<integer>, AdventurousMode, AdvLevelMap)) then
+                ExtPt.AddChild('trpv2:AdventurousLevel').NodeValue := AdventurousMode;
+            end;
+          end;
+          Inc(ViaCnt);
+        end
         else
           RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
       end;
     finally
-      JSONVAlue.Free;
+      JSONRouteValue.Free;
+      JSONMetaValue.Free;
     end;
 
     CdsExploreDb.Next;

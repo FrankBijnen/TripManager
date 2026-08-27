@@ -906,6 +906,9 @@ type
     function GetShapeOffset: integer;
     function GetMagicOffset: integer;
     function GetAvoidancesOffset: integer;
+    function GetAdvLevelV6Offset: integer;
+    function GetTimeStampOffset: integer;
+    function GetAdvLevelV7Offset: integer;
     function GetBoundsOffset(Index: Integer): integer;
     function GetRoutePrefOffset: integer;
     function GetTransportModeOffset: integer;
@@ -921,6 +924,8 @@ type
     function NineFloats: string;
     function RoutePref: string;
     function TransportMode: string;
+    function AdvLevelV6: TAdvLevelV6;
+    function AdvLevelV7: byte;
     property HandleId: Cardinal read FUdbHandleId;
     property HeaderValue: TUdbHeaderValue read FUdbHeaderValue;
     property UdbHandleValue: TUdbHandleValue read FValue;
@@ -931,6 +936,9 @@ type
     property ShapeOffset: integer read GetShapeOffset;
     property MagicOffset: integer read GetMagicOffset;
     property AvoidancesOffset: integer read GetAvoidancesOffset;
+    property AdvLevelV6Offset: integer read GetAdvLevelV6Offset;
+    property TimeStampOffset: integer read GetTimeStampOffset;
+    property AdvLevelV7Offset: integer read GetAdvLevelV7Offset;
     property BoundsOffset[Index: Integer]: integer read GetBoundsOffset;
     property RoutePrefOffset: integer read GetRoutePrefOffset;
     property TransportModeOffset: integer read GetTransportModeOffset;
@@ -3975,6 +3983,21 @@ begin
   result := TripList.TripFileVersion.Unknown3MagicOffset + SizeOf(Cardinal);
 end;
 
+function TmUdbDataHndl.GetAdvLevelV6Offset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3AdvLevelV6Offset;
+end;
+
+function TmUdbDataHndl.GetTimeStampOffset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3TimeStampOffset;
+end;
+
+function TmUdbDataHndl.GetAdvLevelV7Offset: integer;
+begin
+  result := TripList.TripFileVersion.Unknown3AdvLevelV7Offset;
+end;
+
 function TmUdbDataHndl.GetBoundsOffset(Index: Integer): integer;
 begin
   result := TripList.TripFileVersion.Unknown3BoundsOffset + (Index * SizeOf(Cardinal));
@@ -4053,6 +4076,16 @@ begin
     if (Index = Low(TmpFloats)) then
       Fmt := ', ' + Fmt;
   end;
+end;
+
+function TmUdbDataHndl.AdvLevelV6: TAdvLevelV6;
+begin
+  CopyMemory(@result, @FValue.Unknown3[AdvLevelV6Offset], SizeOf(result));
+end;
+
+function TmUdbDataHndl.AdvLevelV7: byte;
+begin
+  CopyMemory(@result, @FValue.Unknown3[AdvLevelV7Offset], SizeOf(result));
 end;
 
 {*** AllRoutesList ***}
