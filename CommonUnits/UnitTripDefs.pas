@@ -30,9 +30,12 @@ type
                        rmShorterDistance      = $01,
                        rmDWordShorterDistance = $01,
                        rmEco                  = $02,
+                       rmImported             = $03,
+
                        rmDWordOffRoad         = $02,
                        rmDWordDirect          = $02,
                        rmDWordEco             = $03,
+
                        rmStraight             = $04,
                        rmOffRoad              = $04,
                        rmDirect               = $04,
@@ -80,6 +83,13 @@ type
     Rm: TRoutePreference;
     Desc: string;
     DescGpx: string;
+  end;
+
+  TUdbDataHndlXlateRec = record
+    Dt: byte;
+    Udb: byte;
+    Rp: TRoutePreference;
+    Desc: string;
   end;
 
   TAdvLevelV6 = packed record
@@ -287,7 +297,7 @@ const
   PosnNorm                = 12;
   PosnLarge               = 16;
 
-  RoutePrefRecs : array[TCalcMode] of TRoutePrefRec
+  RoutePrefRecs: array[TCalcMode] of TRoutePrefRec
     = (
         (Sel: true;   Dt: dtByte;            Rm: rmFasterTime;           Desc: 'FasterTime';      DescGpx: 'FasterTime'),
         (Sel: true;   Dt: dtByte;            Rm: rmShorterDistance;      Desc: 'ShorterDistance'; DescGpx: 'ShorterDistance'),
@@ -307,6 +317,15 @@ const
         (Sel: false;  Dt: dtByte;            Rm: rmTripTrack;            Desc: 'TripTrack'),
         (Sel: false;  Dt: dtByte;            Rm: rmNA;                   Desc: NotApplicable)
       );
+
+  // Translate route preference from Udb
+  UdbDataHndlXlateRecRecs: array[0..3] of TUdbDataHndlXlateRec
+  = (
+      (Dt: dtByte;            Udb: $03; Rp: rmImported;   Desc: 'As imported'),
+      (Dt: dtDWordRoutePref;  Udb: $03; Rp: rmImported;   Desc: 'As imported'),
+      (Dt: dtDWordRoutePref;  Udb: $02; Rp: rmDWordEco),
+      (Dt: dtDWordRoutePref;  Udb: $04; Rp: rmDWordOffRoad)
+    );
 
   CalcModesExpl2GPX: array[0..3] of TCalcMode = (cmFasterTime, cmShorterDistance, cmStraight, cmAdventurous);
 
@@ -492,12 +511,15 @@ resourcestring
   TRP_ERR_No_Valid_Trip   = 'Not a valid trip file: %s';
   TRP_ERR_Model_Not_Supp  = 'Model not supported';
 
-function RoutePref2Desc(ARoutePref: TRoutePreference;
-                        AModel: TTripModel;
-                        OnlySupported: boolean = true): string;
-function Desc2RoutePref(ADesc: string;
-                        AModel: TTripModel;
-                        OnlySupported: boolean = true): TRoutePreference;
+function UdbDataHndlPref2Desc(const AUdbRoutePref: byte;
+                              const AModel: TTripModel): string;
+
+function RoutePref2Desc(const ARoutePref: TRoutePreference;
+                        const AModel: TTripModel;
+                        const OnlySupported: boolean = true): string;
+function Desc2RoutePref(const ADesc: string;
+                        const AModel: TTripModel;
+                        const OnlySupported: boolean = true): TRoutePreference;
 function Expl2GpxDesc(const ARoutePreference: TRoutePreference): string;
 
 implementation
@@ -737,9 +759,32 @@ begin
     result := Format('%s (0x%s)', [ToBeDefined, IntTohex(Ord(ARoutePref), 2)]);
 end;
 
-function RoutePref2Desc(ARoutePref: TRoutePreference;
-                        AModel: TTripModel;
-                        OnlySupported: boolean = true): string;
+function UdbDataHndlPref2Desc(const AUdbRoutePref: byte;
+                              const AModel: TTripModel): string;
+var
+  AXlate: TUdbDataHndlXlateRec;
+begin
+  for AXlate in UdbDataHndlXlateRecRecs do
+  begin
+    if (AXlate.Dt = RoutePrefType[AModel]) and
+       (AXlate.Udb = AUdbRoutePref) then
+    begin
+      // Imported
+      if (AXlate.Desc <> '') then
+        exit(AXlate.Desc);
+
+      // $02 => Eco, $04 => OffRoad
+      exit(RoutePref2Desc(AXlate.Rp, AModel));
+    end;
+  end;
+
+  // Values in Udb are the same as in trip.
+  result := RoutePref2Desc(TRoutePreference(AUdbRoutePref), AModel);
+end;
+
+function RoutePref2Desc(const ARoutePref: TRoutePreference;
+                        const AModel: TTripModel;
+                        const OnlySupported: boolean = true): string;
 var
   ModelCalcMode: TCalcMode;
 begin
@@ -757,9 +802,9 @@ begin
   end;
 end;
 
-function Desc2RoutePref(ADesc: string;
-                        AModel: TTripModel;
-                        OnlySupported: boolean = true): TRoutePreference;
+function Desc2RoutePref(const ADesc: string;
+                        const AModel: TTripModel;
+                        const OnlySupported: boolean = true): TRoutePreference;
 var
   ModelCalcMode: TCalcMode;
 begin
