@@ -498,7 +498,7 @@ function RoutePref2Desc(ARoutePref: TRoutePreference;
 function Desc2RoutePref(ADesc: string;
                         AModel: TTripModel;
                         OnlySupported: boolean = true): TRoutePreference;
-function Expl2GpxDesc(const ARoutePreference: TRoutePreference; const V2: boolean): string;
+function Expl2GpxDesc(const ARoutePreference: TRoutePreference): string;
 
 implementation
 
@@ -781,7 +781,7 @@ begin
   end;
 end;
 
-function Expl2GpxDesc(const ARoutePreference: TRoutePreference; const V2: boolean): string;
+function Expl2GpxDesc(const ARoutePreference: TRoutePreference): string;
 var
   ACalcMode: TCalcMode;
   ARoutePrefRec: TRoutePrefRec;
@@ -790,13 +790,8 @@ begin
   for ACalcMode in CalcModesExpl2GPX do
   begin
     ARoutePrefRec := RoutePrefRecs[ACalcMode];
-    if  (ARoutePrefRec.Rm = ARoutePreference) then
-    begin
-      if (V2) then
-        exit(ARoutePrefRec.Desc)
-      else
-        exit(ARoutePrefRec.DescGpx);
-    end;
+    if (ARoutePrefRec.Rm = ARoutePreference) then
+      exit(ARoutePrefRec.DescGpx);
   end;
 end;
 

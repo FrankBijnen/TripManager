@@ -6544,7 +6544,9 @@ var
   Rte, RtePt, RoutePt, RoutePtExt, RoutePtRteExt: TXmlVSNode;
   Locations: TmLocations;
   Location, ANItem: TBaseItem;
-  ViaPointType, Arrival, TransportMode, CalculationMode, PointName, Lat, Lon, Address: string;
+  ViaPointType, Arrival, TransportMode, CalculationMode,  AdventurousMode, PointName, Lat, Lon, Address: string;
+  RoutePref: TRoutePreference;
+  AdvLevel: TAdvlevel;
   IsViaPoint, WriteTMExtensions: boolean;
   AllRoutes: TmAllRoutes;
   AnUdbHandle: TmUdbDataHndl;
@@ -6587,6 +6589,8 @@ begin
         IsViaPoint := TLocation(Location).IsViaPoint;
         Arrival := '';
         ViaPointType := 'trp:ShapingPoint';
+        RoutePref := TRoutePreference.rmNA;
+        AdventurousMode := '';
         if (IsViaPoint) then
         begin
           ViaPointType := 'trp:ViaPoint';
@@ -6596,6 +6600,12 @@ begin
           if (Assigned(ANItem)) and
              (TmArrival(ANItem).AsCardinal <> 0) then
             Arrival := DateToISO8601(TUnixDateConv.CardinalAsDateTime(TmArrival(ANItem).AsCardinal), false);
+
+          // RoutePref
+          RoutePref := TLocation(Location).RoutePref;
+          AdvLevel := TLocation(Location).AdvLevel;
+          if (AdvLevel <> TAdvlevel.advNA) then
+            IntToIdent(Ord(TLocation(Location).AdvLevel), AdventurousMode, AdvLevelMap);
 
           // Counters for TM Extensions
           Inc(UdbHndleCnt);
@@ -6638,7 +6648,12 @@ begin
         begin
           if (Arrival <> '') then
             RoutePt.AddChild('trp:DepartureTime').NodeValue := Arrival;
-          RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
+          if (RoutePref <> TRoutePreference.rmNA) then
+            RoutePt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(RoutePref)
+          else
+            RoutePt.AddChild('trp:CalculationMode').NodeValue := CalculationMode;
+          if (AdventurousMode <> '') then
+            RoutePtExt.AddChild('tm:AdventurousLevel').NodeValue := AdventurousMode;
         end;
 
         // Write RoutePointExtension

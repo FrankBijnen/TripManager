@@ -85,6 +85,7 @@ var
 
   JSONMetaRoutePrefArray: TJSONArray;
   JSONMetaRoutePrefAdventurousModes: TJSONArray;
+  RoutePreference: TRoutePreference;
   AdventurousMode: string;
   IsVia: boolean;
   Cnt: integer;
@@ -143,17 +144,18 @@ begin
 
           if (Assigned(JSONMetaRoutePrefArray)) then
           begin
-            // End point
+            // End point gets route pref of last.
             if (ViaCnt > JSONRouteArray.Count -2) then
               ViaCnt := JSONRouteArray.Count -2;
 
-            ViaPt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>), false);
-            if (Assigned(JSONMetaRoutePrefAdventurousModes)) then
+            RoutePreference := TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>);
+            ViaPt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(RoutePreference);
+
+            if (RoutePreference in [TRoutePreference.rmAdventurous]) then
             begin
-              ExtPt.AddChild('trpv2:CalculationMode').NodeValue := Expl2GpxDesc(TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>), true);
-              if (TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>) = TRoutePreference.rmAdventurous) and
+              if (Assigned(JSONMetaRoutePrefAdventurousModes)) and
                  (IntToIdent(JSONMetaRoutePrefAdventurousModes[ViaCnt].AsType<integer>, AdventurousMode, AdvLevelMap)) then
-                ExtPt.AddChild('trpv2:AdventurousLevel').NodeValue := AdventurousMode;
+                ExtPt.AddChild('tm:AdventurousLevel').NodeValue := AdventurousMode;
             end;
           end;
           Inc(ViaCnt);
