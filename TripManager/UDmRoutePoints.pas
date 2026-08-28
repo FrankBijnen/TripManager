@@ -914,6 +914,9 @@ var
   XMLRoot: TXmlVSNode;
   Rte, RtePt, Extensions, PointType: TXmlVSNode;
   DefProcessOptions: TProcessOptions;
+  RoutePref: TRoutePreference;
+  AdvLevel: TAdvlevel;
+  AdventurousMode: string;
 begin
   XML := TXmlVSDocument.Create;
   DefProcessOptions := TProcessOptions.Create;
@@ -949,18 +952,32 @@ begin
       else
         RtePt.AddChild('sym').NodeValue := DefProcessOptions.DefRtePtSymbol;
 
-      // Add Point Type (Via of Shaping)
+      // Add Point Type (Via or Shaping)
+      Extensions := RtePt.AddChild('extensions');
       if (CdsRoutePointsViaPoint.AsBoolean) then // Includes Begin and End
       begin
-        PointType := RtePt.AddChild('extensions').AddChild('trp:ViaPoint');
+        PointType := Extensions.AddChild('trp:ViaPoint');
+        // DepartureDate
         if (CdsRoutePoints.RecNo = 1) and
            (YearOf(CdsRouteDepartureDate.AsDateTime) <= MaxDepartureYear) then // BC Hack
           PointType.AddChild('trp:DepartureTime').NodeValue :=
             DateToISO8601(TTimezone.Local.ToUniversalTime(CdsRouteDepartureDate.AsDateTime), true);
-        PointType.AddChild('trp:CalculationMode').NodeValue := CdsRouteRoutePreference.AsString;
+        // RoutePref
+        RoutePref := TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger));
+        if (RoutePref <> TRoutePreference.rmNA) then
+          PointType.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(RoutePref)
+        else
+          PointType.AddChild('trp:CalculationMode').NodeValue := CdsRouteRoutePreference.AsString;
+        // AdventurousLevel
+        AdvLevel := TAdvlevel(Lo(CdsRoutePointsRoutePref.AsInteger));
+        if (AdvLevel <> TAdvlevel.advNA) then
+        begin
+          IntToIdent(Ord(AdvLevel), AdventurousMode, AdvLevelMap);
+          Extensions.AddChild('tm:AdventurousLevel').NodeValue := AdventurousMode;
+        end;
       end
       else
-        RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
+        Extensions.AddChild('trp:ShapingPoint');
 
       CdsRoutePoints.Next;
     end;
