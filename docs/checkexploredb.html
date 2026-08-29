@@ -10,14 +10,13 @@
   body {
   background-color: #FFFFFF;
   }
-  div.c13 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  span.c12 {color: #010101; font-family: Symbol; font-size: 12pt}
-  span.c11 {color: #010101}
-  br.c10 {page-break-before:always}
-  span.c9 {font-family: Calibri; font-size: 120%}
-  span.c8 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  div.c12 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c11 {color: #010101; font-family: Symbol; font-size: 12pt}
+  span.c10 {color: #010101}
+  br.c9 {page-break-before:always}
+  span.c8 {font-family: Calibri; font-size: 120%}
   table.c7 {border-collapse: collapse; border: none}
-  span.c6 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c6 {color: #0000FF; font-family: Calibri; font-size: 120%; font-weight: bold}
   span.c5 {color: #010101; font-family: Calibri; font-size: 120%}
   table.c4 {background-color: #FFFFFF}
   span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
@@ -65,7 +64,7 @@
     <br>
   </div>
   <div align="left">
-    <span class="c6">Background:</span>
+    <span class="c6">Background</span>
   </div>
   <div align="left">
     <span class="c5">The trips for the XT2, XT3 and Tread 2 have an
@@ -110,16 +109,16 @@
     <br>
   </div>
   <div align="left">
-    <span class="c8">Advice:</span>
+    <span class="c6">Advice</span>
   </div>
   <div align="left">
     <span class="c5">To prevent inconsistencies</span> <span class=
-    "c9">when using <b>TripManager</b> in conjunction with
+    "c8">when using <b>TripManager</b> in conjunction with
     <b>Explore</b> it is recommended to delete trips on the device,
     and not from the Trips folder.</span>
   </div>
   <div align="left">
-    <span class="c9">A known cause of errors: A route initially
+    <span class="c8">A known cause of errors: A route initially
     send using the normal 'Garmin' procedure, will be stored as
     '1234567890.trip'. If you send the same route again using
     TripManager it will be stored using the
@@ -129,7 +128,7 @@
   </div>
   <div align="left">
     <br>
-  </div><span class="c11"><br clear="all" class="c10"></span>
+  </div><span class="c10"><br clear="all" class="c9"></span>
   <div align="left">
     <span class="c6">Activating the function</span>
   </div>
@@ -168,18 +167,18 @@
     <br>
   </div>
   <div align="left">
-    <span class="c6">In addition:</span>
+    <span class="c6">In addition</span>
   </div>
   <div align="left">
     <span class="c5">When a model that uses Explore.db is connected
-    AND the trips tab is selected, 2 more functions are
+    AND the trips tab is selected, 3 more functions are
     enabled.</span>
   </div>
   <table width="846" cellpadding="4" cellspacing="0" class="c7">
     <tr>
       <td valign="top" width="838">
         <div align="left"><img src="checkexploredbb4.JPG" width=
-        "830" height="308" border="0" alt="graphic"></div>
+        "798" height="330" border="0" alt="graphic"></div>
       </td>
     </tr>
   </table>
@@ -187,19 +186,20 @@
     <br>
   </div>
   <div align="left">
-    <span class="c11"><br></span>
+    <span class="c10"><br></span>
   </div>
   <div align="left">
-    <span class="c5"><b>Query/Explore.db</b> will open a tab with a
-    table-browser. Just for quickly checking. You can enter any SQL
-    statement.</span>
+    <span class="c6">Query/Explore.db</span> <span class="c5">will
+    open a tab with a table-browser. Just for quickly checking. You
+    can enter any SQL statement.</span>
   </div>
   <div align="left">
     <br>
-  </div><span class="c11"><br clear="all" class="c10"></span>
+  </div><span class="c10"><br clear="all" class="c9"></span>
   <div align="left">
-    <span class="c5"><b>Compare Explore.db with Trips</b> Will run
-    a compare, and show the results in a tab.</span>
+    <span class="c6">Compare Explore.db with Trips</span>
+    <span class="c5">Will run a compare, and show the results in a
+    tab.</span>
   </div>
   <table width="942" cellpadding="4" cellspacing="0" class="c7">
     <tr>
@@ -213,42 +213,51 @@
     <br>
   </div>
   <div align="left">
-    <span class="c11"><br></span>
+    <span class="c10"><br></span>
   </div>
   <div align="left">
     <span class="c5">There are 5 possible groups. Note that you can
     double click to collapse or expand a group.</span>
   </div>
-  <div align="left" class="c13">
-    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c12">
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c5"><b>In Explore, not in Trips</b>. These trips are not
     correct, but TripManager can not fix that. To fix that the
     Explore.db would have to be written and updated on the device.
     To resolve delete the trips on the device, or in Explore/Tread
     app.</span>
   </div>
-  <div align="left" class="c13">
-    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c9"><b>In Trips and Explore, but duplicate TripName.</b> The
+  <div align="left" class="c12">
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c8"><b>In Trips and Explore, but duplicate TripName.</b> The
     same UUID is found for multiple Trip names. Delete the
     duplicates manually.</span>
   </div>
-  <div align="left" class="c13">
-    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c9"><b>In Explore and Trips, but different UUID</b>. Clicking
+  <div align="left" class="c12">
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c8"><b>In Explore and Trips, but different UUID</b>. Clicking
     on <b>Correct UUID</b> will write the UUID value from Explore
     in the trips. (no recalculation needed)</span>
   </div>
-  <div align="left" class="c13">
-    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c9"><b>In Trips, not in Explore.</b> Probably these are new
+  <div align="left" class="c12">
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c8"><b>In Trips, not in Explore.</b> Probably these are new
     trips that have just been transferred. Rebooting the device
     should fix it.</span>
   </div>
-  <div align="left" class="c13">
-    <span class="c12">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c12">
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c5"><b>In Explore, in Trips, Same Uuid.</b> These are the
-    perfect trips.</span>
+    perfect trips.</span><span class="c10"><br clear="all" class=
+    "c9"></span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">Export Explore.db to GPX</span> <span class=
+    "c5">Exports the contents of the Explore.db to GPX
+    format.</span>
   </div>
   <div align="left">
     <br>

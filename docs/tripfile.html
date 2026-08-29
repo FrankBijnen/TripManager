@@ -147,7 +147,7 @@
     <tr>
       <td valign="top" width="111" class="c12">
         <div align="left">
-          <span class="c5">SubLength</span>
+          <span class="c5">Size</span>
         </div>
       </td>
       <td valign="top" width="75" class="c12">
@@ -168,15 +168,12 @@
           <span class="c5">Size of the sub elements. Filesize minus
           8.</span>
         </div>
-        <div align="left">
-          <span class="c5">(ID + SubLength?)</span>
-        </div>
       </td>
     </tr>
     <tr>
       <td valign="top" width="111" class="c12">
         <div align="left">
-          <span class="c5">HeaderLength</span>
+          <span class="c5">DataType</span>
         </div>
       </td>
       <td valign="top" width="75" class="c12">
@@ -194,25 +191,14 @@
       </td>
       <td valign="top" width="441" class="c12">
         <div align="left">
-          <span class="c5">Previously, when 0x09 was considered a
-          terminator, this field was considered to be the size of
-          the header.</span>
-        </div>
-        <div align="left">
-          <span class="c5">But that no longer seems likely.</span>
-        </div>
-        <div align="left">
-          <span class="c5">It could also be Datatype 0x0a.</span>
-        </div>
-        <div align="left">
-          <span class="c5">Always 10.</span>
+          <span class="c5">See known data types</span>
         </div>
       </td>
     </tr>
     <tr>
       <td valign="top" width="111" height="43" class="c12">
         <div align="left">
-          <span class="c5">TotalItems</span>
+          <span class="c5">Count</span>
         </div>
         <div align="left"></div>
       </td>
@@ -927,7 +913,7 @@
       <td valign="top" width="561" class="c12">
         <div align="left">
           <span class="c5">The lists mLocations, mAllroutes and
-          possible THeader have a ‘prefix’ block. For more info see
+          THeader have a ‘prefix’ block. For more info see
           mLocations and mAllroutes.</span>
         </div>
       </td>
@@ -956,22 +942,22 @@
       </td>
     </tr>
     <tr>
-      <td valign="top" width="39" class="c12">
+      <td valign="top" width="39" height="69" class="c12">
         <div align="left">
           <span class="c5">0x0c</span>
         </div>
       </td>
-      <td valign="top" width="87" class="c12">
+      <td valign="top" width="87" height="69" class="c12">
         <div align="left">
           <span class="c5">Map type</span>
         </div>
       </td>
-      <td valign="top" width="69" class="c12">
+      <td valign="top" width="69" height="69" class="c12">
         <div align="left">
           <span class="c5">Varies</span>
         </div>
       </td>
-      <td valign="top" width="561" class="c12">
+      <td valign="top" width="561" height="69" class="c12">
         <div align="left">
           <span class="c5">Introduced with the XT2 for
           mGreatRidesInfoMap and mTrackToRouteInfoMap. This
@@ -3250,7 +3236,7 @@
     <br>
   </div>
   <div align="left">
-    <span class="c5">Each UdbHandle starts with a prefix:</span>
+    <span class="c5">Each UdbHandle starts with a header:</span>
   </div>
   <table border="1" width="1014" cellpadding="4" cellspacing="0"
   class="c13">
@@ -3416,17 +3402,45 @@
     class="c14"></span>
   </div>
   <div align="left">
+    <span class="c5">This tables shows the offsets for the XT(2)(3)
+    and Tread 2. For the offsets of other models see:
+    UnitTripDefs.pas</span>
+  </div>
+  <div align="left">
     <br>
   </div>
   <table border="1" width="1140" cellpadding="4" cellspacing="0"
   class="c13">
     <tr>
-      <td valign="top" width="159" height="35" class="c12">
+      <td valign="top" width="135" height="35" class="c12">
+        <div align="left">
+          <span class="c5">Bounds</span>
+        </div>
+      </td>
+      <td valign="top" width="261" height="35" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x04</span>
+        </div>
+      </td>
+      <td valign="top" width="231" height="35" class="c12">
+        <div align="left">
+          <span class="c5">16 bytes</span>
+        </div>
+      </td>
+      <td valign="top" width="477" height="35" class="c12">
+        <div align="left">
+          <span class="c5">Bounding box (Min/Max Lat/Lon) of this
+          UdbHandle</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="135" height="35" class="c12">
         <div align="left">
           <span class="c5">Distance</span>
         </div>
       </td>
-      <td valign="top" width="237" height="35" class="c12">
+      <td valign="top" width="261" height="35" class="c12">
         <div align="left">
           <span class="c5">Offset 0x14</span>
         </div>
@@ -3444,12 +3458,12 @@
       </td>
     </tr>
     <tr>
-      <td valign="top" width="159" class="c12">
+      <td valign="top" width="135" class="c12">
         <div align="left">
           <span class="c5">Time</span>
         </div>
       </td>
-      <td valign="top" width="237" class="c12">
+      <td valign="top" width="261" class="c12">
         <div align="left">
           <span class="c5">Offset 0x18</span>
         </div>
@@ -3467,22 +3481,85 @@
       </td>
     </tr>
     <tr>
-      <td valign="top" width="159" class="c12">
+      <td valign="top" width="135" class="c12">
+        <div align="left">
+          <span class="c5">9 floats</span>
+        </div>
+      </td>
+      <td valign="top" width="261" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x20</span>
+        </div>
+      </td>
+      <td valign="top" width="231" class="c12">
+        <div align="left">
+          <span class="c5">36 bytes</span>
+        </div>
+      </td>
+      <td valign="top" width="477" class="c12">
+        <div align="left">
+          <span class="c5">Unclear, but seems related to road
+          types/speeds</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="135" class="c12">
+        <div align="left">
+          <span class="c5">Magic</span>
+        </div>
+      </td>
+      <td valign="top" width="261" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x58</span>
+        </div>
+      </td>
+      <td valign="top" width="231" class="c12">
+        <div align="left">
+          <span class="c5">4 bytes</span>
+        </div>
+      </td>
+      <td valign="top" width="477" class="c12">
+        <div align="left">
+          <span class="c5">'uVAN'. Not always present</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="135" class="c12">
+        <div align="left">
+          <span class="c5">Avoidances</span>
+        </div>
+      </td>
+      <td valign="top" width="261" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x5C</span>
+        </div>
+      </td>
+      <td valign="top" width="231" class="c12">
+        <div align="left">
+          <span class="c5">1 byte</span>
+        </div>
+      </td>
+      <td valign="top" width="477" class="c12">
+        <div align="left">
+          <span class="c5">Avoidances in effect.</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="135" class="c12">
         <div align="left">
           <span class="c5">ShapeBitmap</span>
         </div>
       </td>
-      <td valign="top" width="237" class="c12">
+      <td valign="top" width="261" class="c12">
         <div align="left">
           <span class="c5">Offset 0x90 for XT</span>
         </div>
         <div align="left">
-          <span class="c5">Offset 0xC0 for XT2, XT3,</span>
+          <span class="c5">Offset 0xC0 for XT2, XT3, Tread 2</span>
         </div>
-        <div align="left">
-          <span class="c5">Tread 2</span>
-        </div>
-        <div align="left"></div>
       </td>
       <td valign="top" width="231" class="c12">
         <div align="left">
@@ -3503,11 +3580,10 @@
     </tr>
   </table>
   <div align="left">
-    <span class="c5">Note:</span>
+    <br>
   </div>
   <div align="left">
-    <span class="c5">See TripVersion in UnitTripDefs.pas for
-    offsets per version.</span>
+    <span class="c5">Notes:</span>
   </div>
   <div align="left">
     <span class="c5">The Distance, Time and ShapeBitmap are

@@ -10,11 +10,14 @@
   body {
   background-color: #FFFFFF;
   }
-  div.c12 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  span.c11 {font-family: Symbol; font-size: 12pt}
-  span.c10 {color: #010101}
-  a.c9 {color: #0000FF; font-family: Calibri; font-size: 120%}
-  span.c8 {font-size: 14pt; text-decoration: underline}
+  div.c15 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c14 {font-family: Symbol; font-size: 12pt}
+  a.c13 {font-family: Calibri; font-size: 120%}
+  span.c12 {font-size:14pt}
+  a.c11 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c10 {font-size: 14pt; text-decoration: underline}
+  span.c9 {color: #010101}
+  br.c8 {page-break-before:always}
   span.c7 {font-family: Calibri; font-size: 120%; font-weight: bold}
   span.c6 {font-family: Calibri; font-size: 120%}
   table.c5 {border-collapse: collapse; border: none}
@@ -73,13 +76,13 @@
     <tr>
       <td valign="top" width="820">
         <div align="left"><img src="devicefilelisttopleftb2.JPG"
-        width="812" height="316" border="0" alt="graphic"></div>
+        width="830" height="333" border="0" alt="graphic"></div>
       </td>
     </tr>
   </table>
   <div align="left">
     <br>
-  </div>
+  </div><span class="c9"><br clear="all" class="c8"></span>
   <div align="left">
     <span class="c6">The functions <b>Delete</b> and <b>Rename</b>
     (on the left) are always enabled.</span>
@@ -90,9 +93,40 @@
     the <b>Device Settings</b>.</span>
   </div>
   <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6"><b>Check and Fix Current.gpx</b> See:</span>
+    <a class="c11" href=
+    "14fixinginvalidcurrentgpx.html"><span class="c10">Fixing
+    invalid current.gpx</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c7">Process track</span> <a class="c13" name=
+    "process_track_logs" id="process_track_logs"><span class=
+    "c12"><b>logs</b> This function will analyze the selected track
+    logs and create 1 GPX file per day. Automatically creating Way
+    points from stops.</span></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6"><b>Add to map</b> Shows the selected trip/GPX
+    file on the map.</span>
+  </div>
+  <div align="left">
+    <span class="c6"><b>Open in Kurviger</b> Open the trip file in
+    Kurviger.</span><span class="c9"><br clear="all" class=
+    "c8"></span>
+  </div>
+  <div align="left">
     <span class="c6">The Trip functions in the middle are only
-    enabled if a .trip file is selected. See</span> <a class="c9"
-    href="tripfunctions.html"><span class="c8">Trip
+    enabled if a .trip file is selected. See</span> <a class="c11"
+    href="tripfunctions.html"><span class="c10">Trip
     functions</span></a>
   </div>
   <div align="left">
@@ -104,8 +138,8 @@
     <span class="c6"><b>Explore Functions</b> (on the right)</span>
   </div>
   <div align="left">
-    <span class="c6">The</span> <a class="c9" href=
-    "explorefunctions.html"><span class="c8">Explore
+    <span class="c6">The</span> <a class="c11" href=
+    "explorefunctions.html"><span class="c10">Explore
     functions</span></a> <span class="c6">are only enabled if an
     XT, XT2, XT3 or Tread 2, is connected and Explore functions (in
     Advanced/Settings/Device Settings) are enabled.</span>
@@ -114,7 +148,7 @@
     <br>
   </div>
   <div align="left">
-    <span class="c10"><br></span>
+    <span class="c9"><br></span>
   </div>
   <div align="left">
     <span class="c7">Refresh</span>
@@ -147,8 +181,8 @@
     the connected device. You can override that here.</span>
   </div>
   <div align="left">
-    <span class="c6">See</span> <a class="c9" href=
-    "modelinfo.html"><span class="c8">Model info</span></a>
+    <span class="c6">See</span> <a class="c11" href=
+    "modelinfo.html"><span class="c10">Model info</span></a>
     <span class="c6">for a list of supported models.</span>
   </div>
   <div align="left">
@@ -162,16 +196,16 @@
     can use these buttons for fast switching. The default locations
     for the XT(2)(3) and Tread 2 are:</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Internal Storage\.System\Trips</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Internal Storage\GPX</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Internal Storage\POI</span>
   </div>
   <div align="left">
@@ -196,16 +230,16 @@
   <div align="left">
     <span class="c6">Notes. In the <b>Trips</b> view:</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c6">A
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">A
     checkbox shows if the trip is saved, or imported.</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c6">An
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">An
     exclamation mark shows if a trip has been calculated.
     Uncalculated trips can trigger errors in Basecamp. See</span>
-    <a class="c9" href=
-    "14fixinginvalidcurrentgpx.html"><span class="c8">14 Fixing
+    <a class="c11" href=
+    "14fixinginvalidcurrentgpx.html"><span class="c10">14 Fixing
     invalid current.gpx</span></a>
   </div>
   <div align="left">
@@ -214,12 +248,12 @@
   <div align="left">
     <span class="c6">Tips for use:</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
     select all files in the file list use CTRL+A.</span>
   </div>
-  <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Clicking on the column heading sorts the files.</span>
   </div>
   <div align="left"></div>
