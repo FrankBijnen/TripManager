@@ -142,18 +142,18 @@ begin
           ExtPt := RtePt.AddChild('extensions');
           ViaPt := ExtPt.AddChild('trp:ViaPoint');
 
-          if (Assigned(JSONMetaRoutePrefArray)) then
+          if (Assigned(JSONMetaRoutePrefArray)) and
+             (JSONMetaRoutePrefArray.Count > 0) and
+             (ViaCnt < JSONMetaRoutePrefArray.Count -1) then
           begin
-            // End point gets route pref of last.
-            if (ViaCnt > JSONRouteArray.Count -2) then
-              ViaCnt := JSONRouteArray.Count -2;
-
             RoutePreference := TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>);
             ViaPt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(RoutePreference);
 
             if (RoutePreference in [TRoutePreference.rmAdventurous]) then
             begin
               if (Assigned(JSONMetaRoutePrefAdventurousModes)) and
+                 (JSONMetaRoutePrefAdventurousModes.Count > 0) and
+                 (ViaCnt < JSONMetaRoutePrefAdventurousModes.Count -1) and
                  (IntToIdent(JSONMetaRoutePrefAdventurousModes[ViaCnt].AsType<integer>, AdventurousMode, AdvLevelMap)) then
                 ExtPt.AddChild('tm:AdventurousLevel').NodeValue := AdventurousMode;
             end;
