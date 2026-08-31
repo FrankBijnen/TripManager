@@ -1926,6 +1926,12 @@ begin
   EditMapCoords.Text := Parm1 + ', ' + Parm2;
   if (Msg = OSM_CtrlClick) then
   begin
+    if (FrmTripEditor.Showing) then
+    begin
+      DmRoutePoints.CoordinatesApplied(Self, EditMapCoords.Text);
+      exit;
+    end;
+
     Place := GetPlaceOfCoords(Parm1, Parm2);
     if (Place = nil) then
       MapRequest(EditMapCoords.Text, OSM_CtrlClick, GeoSearchTimeOut)
@@ -1934,8 +1940,6 @@ begin
       Clipboard.AsText := Place.DisplayPlace;
       MapRequest(EditMapCoords.Text, Place.HtmlPlace, GeoSearchTimeOut);
     end;
-    if (FrmTripEditor.Showing) then
-      DmRoutePoints.CoordinatesApplied(Self, EditMapCoords.Text);
     exit;
   end;
 end;
