@@ -558,6 +558,8 @@ end;
 function TTripVersion.Unknown2Size: integer;
 begin
   case (Version) of
+    0:
+      result := 0;      // Unknown
     1..4:
       result := 72;     // Nuvi 2595, 2599 57, 3x0, 590
     5..6:
@@ -570,6 +572,8 @@ end;
 function TTripVersion.UdbDirUnknown2Size: integer;
 begin
   case (Version) of
+    0:
+      result := 0;      // Unknown
     1..2:
       result := 16;     // Nuvi 2595
     else
@@ -580,6 +584,8 @@ end;
 function TTripVersion.Unknown3BoundsOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1..6:
       result := $00;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
@@ -590,6 +596,8 @@ end;
 function TTripVersion.Unknown3DistOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1..6:
       result := $10;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
@@ -600,6 +608,8 @@ end;
 function TTripVersion.Unknown3TimeOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1..6:
       result := $14;    // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
@@ -610,54 +620,62 @@ end;
 function TTripVersion.Unknown3RoutePrefOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1:
-        result := $1c;  // Nuvi 2595
+      result := $1c;    // Nuvi 2595
     2,3:
-        result := $18;  // 590, 3x0
+      result := $18;    // 590, 3x0
     4:
-        result := $1c;  // Nuvi 2599_57
+      result := $1c;    // Nuvi 2599_57
     5..6:
-        result := $18;  // 346, 395, 595, Drive 51
+      result := $18;    // 346, 395, 595, Drive 51
     else
-        result := $1a;  // XT, XT2, XT3, Tread2, Drive 66
+      result := $1a;    // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
 function TTripVersion.Unknown3FloatOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1:
-        result := $20;  // Nuvi 2595
+      result := $20;    // Nuvi 2595
     2,3:
-        result := $1c;  // 590, 3x0
+      result := $1c;    // 590, 3x0
     4:
-        result := $20;  // Nuvi 2599_57
+      result := $20;    // Nuvi 2599_57
     5..6:
-        result := $1c;  // 346, 395, 595, Drive 51
+      result := $1c;    // 346, 395, 595, Drive 51
     else
-        result := $1e;  // XT, XT2, XT3, Tread2, Drive 66
+      result := $1e;    // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
 function TTripVersion.Unknown3TransportModeOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1:
-        result := $54;  // Nuvi 2595
+      result := $54;    // Nuvi 2595
     2,3:
-        result := $50;  // 590, 3x0
+      result := $50;    // 590, 3x0
     4:
-        result := $54;  // Nuvi 2599_57
+      result := $54;    // Nuvi 2599_57
     5..6:
-        result := $50;  // 346, 395, 595, Drive 51
+      result := $50;    // 346, 395, 595, Drive 51
     else
-        result := $52;  // XT, XT2, XT3, Tread2, Drive 66
+      result := $52;    // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
 function TTripVersion.Unknown3MagicOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1:
       result := $00;    // Nuvi 2595
     2..3:
@@ -674,18 +692,23 @@ end;
 function TTripVersion.Unknown3AdvLevelV6Offset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     6:
       result := $60;    // 346, 395, 595 (Drive 51 has no adventurous)
     else
-      result := $0;
+      result := $00;    // XT, XT2, XT3, Tread2, Drive 66
   end;
 end;
 
 function TTripVersion.Unknown3TimeStampOffset: integer;
 begin
   case (Version) of
-    0..5:
-      result := $0;
+    0:
+      result := $00;    // Unknown
+    1..5:
+      result := $00;    // Nuvi 2595, 590, 3x0 Nuvi 2599_57
+
     6:
       result := $68;    // 346, 395, 595, Drive 51
     else
@@ -696,8 +719,10 @@ end;
 function TTripVersion.Unknown3AdvLevelV7Offset: integer;
 begin
   case (Version) of
-    0..6:
-      result := $0;
+    0:
+      result := $00;    // Unknown
+    1..6:
+      result := $00;    // 590, 3x0, 346, 395, 595 (nuvi and drive 51 have no adventurous)
     else
       result := $6f;    // XT, XT2, XT3, Tread2 (Drive 66 has no adventurous)
   end;
@@ -706,6 +731,8 @@ end;
 function TTripVersion.Unknown3ShapeOffset: integer;
 begin
   case (Version) of
+    0:
+      result := $00;    // Unknown
     1:
       result := $00;    // Nuvi 2595
     2..3:
@@ -724,6 +751,8 @@ end;
 function TTripVersion.HandleTrailer: boolean;
 begin
   case (Version) of
+    0:
+      result := false;  // Unknown
     1..6:               // Haven't see trailers for all these devices. But shouldn't hurt.
       result := true;   // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
@@ -734,6 +763,8 @@ end;
 function TTripVersion.IsUcs4: boolean;
 begin
   case (Version) of
+    0:
+      result := false;  // Unknown
     1..6:
       result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else
@@ -744,6 +775,8 @@ end;
 function TTripVersion.CanCheckSystemTrips: boolean;
 begin
   case (Version) of
+    0:
+      result := false;  // Unknown
     1..6:
       result := false;  // Nuvi 2595, 2599_57, Drive 51, 3x0, 346, 590, 395, 595
     else

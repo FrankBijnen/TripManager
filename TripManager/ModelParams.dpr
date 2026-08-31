@@ -29,17 +29,25 @@ begin
   Write('Version', #9);
 
   Write('Version Specific Params', #9);
+
   Write('UCS4', #9);
-  Write('Unknown2Size', #9);
-  Write('UdbDirUnknown2Size', #9);
-  Write('Unknown3BoundsOffset', #9);
-  Write('Unknown3MagicOffset', #9);
-  Write('Unknown3ShapeOffset', #9);
-  Write('Unknown3DistOffset', #9);
-  Write('Unknown3TimeOffset', #9);
-  Write('Unknown3FloatOffset', #9);
   Write('HandleTrailer', #9);
   Write('CanCheckSystemTrips', #9);
+
+  Write('Unknown2Size', #9);
+  Write('UdbDirUnknown2Size', #9);
+
+  Write('Unknown3BoundsOffset', #9);
+  Write('Unknown3DistOffset', #9);
+  Write('Unknown3TimeOffset', #9);
+  Write('Unknown3RoutePrefOffset', #9);
+  Write('Unknown3FloatOffset', #9);
+  Write('Unknown3TransportModeOffset', #9);
+  Write('Unknown3MagicOffset', #9);
+  Write('Unknown3AdvLevel6Offset', #9);
+  Write('Unknown3TimeStamp6Offset', #9);
+  Write('Unknown3AdvLevel7Offset', #9);
+  Write('Unknown3ShapeOffset', #9);
 
   Writeln;
 
@@ -66,16 +74,23 @@ begin
 
     Write(#9);
     Write(TripVersion[TripModel].IsUcs4, #9);
-    Write(TripVersion[TripModel].Unknown2Size, #9);
-    Write(TripVersion[TripModel].UdbDirUnknown2Size, #9);
-    Write('0x', IntToHex(TripVersion[TripModel].Unknown3BoundsOffset, 4), #9);
-    Write('0x', IntToHex(TripVersion[TripModel].Unknown3MagicOffset, 4), #9);
-    Write('0x', IntToHex(TripVersion[TripModel].Unknown3ShapeOffset, 4), #9);
-    Write('0x', IntToHex(TripVersion[TripModel].Unknown3DistOffset, 4), #9);
-    Write('0x', IntToHex(TripVersion[TripModel].Unknown3TimeOffset, 4), #9);
-    Write('0x', IntToHex(TripVersion[TripModel].Unknown3FloatOffset, 4), #9);
     Write(TripVersion[TripModel].HandleTrailer, #9);
     Write(TripVersion[TripModel].CanCheckSystemTrips, #9);
+
+    Write(TripVersion[TripModel].Unknown2Size, #9);
+    Write(TripVersion[TripModel].UdbDirUnknown2Size, #9);
+
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3BoundsOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3DistOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3TimeOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3RoutePrefOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3FloatOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3TransportModeOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3MagicOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3AdvLevelV6Offset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3TimeStampOffset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3AdvLevelV7Offset, 4), #9);
+    Write('0x', IntToHex(TripVersion[TripModel].Unknown3ShapeOffset, 4), #9);
 
     Writeln;
   end;
