@@ -1936,7 +1936,8 @@ begin
     end;
     exit;
   end;
-
+  if (FrmTripEditor.Showing) then
+    DmRoutePoints.CoordinatesApplied(Self, EditMapCoords.Text);
 end;
 
 procedure TFrmTripManager.EdgeBrowser1ZoomFactorChanged(Sender: TCustomEdgeBrowser; AZoomFactor: Double);
