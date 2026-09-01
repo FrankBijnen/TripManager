@@ -368,6 +368,9 @@ type
     procedure PnlHideGridClick(Sender: TObject);
     procedure ResetAvoidancesUpdProfileClick(Sender: TObject);
     procedure ExportExploredbtoGPX1Click(Sender: TObject);
+    procedure DbgDeviceDbKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure DBMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -1416,6 +1419,14 @@ begin
   finally
     JSONValue.Free;
   end;
+end;
+
+procedure TFrmTripManager.DBMemoKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (ssCtrl in Shift) and
+     (Chr(Key) = 'A') then
+    DBMemo.SelectAll;
 end;
 
 procedure TFrmTripManager.CompareEploredbwithTrips1Click(Sender: TObject);
@@ -4645,6 +4656,54 @@ end;
 procedure TFrmTripManager.DbgDeviceDbColEnter(Sender: TObject);
 begin
   CdsDeviceDbAfterScroll(CdsDeviceDb);
+end;
+
+procedure TFrmTripManager.DbgDeviceDbKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  I, J: integer;
+  S: string;
+  ADs: TDataSet;
+begin
+  if (ssCtrl in Shift) and
+     (Chr(Key) = 'A') then
+  begin
+    ADs := DbgDeviceDb.DataSource.DataSet;
+    ADs.disablecontrols;
+    try
+      ADs.first;
+      while not ADs.eof do
+      begin
+        DbgDeviceDb.SelectedRows.CurrentRowSelected:=true;
+        ADs.next;
+      end;
+    finally
+      ADs.EnableControls;
+    end;
+  end;
+
+  if (ssCtrl in Shift) and
+     (Chr(Key) = 'C') and
+     (DbgDeviceDb.SelectedRows.Count > 0) then
+  begin
+    Clipboard.Clear;
+    ADs := DbgDeviceDb.DataSource.DataSet;
+    S := '';
+    for I := 0 to ADs.FieldCount -1 do
+       S  :=S + ADs.Fields[I].FieldName + chr(9);
+    S := S + Chr(10);
+    for I := 0 to DbgDeviceDb.SelectedRows.Count-1 do
+    begin
+      ADs.GotoBookmark(DbgDeviceDb.SelectedRows.Items[I]);
+      for J := 0 to DbgDeviceDb.Columns.Count -1 do
+      begin
+        S := S + ADs.Fields[J].DisplayText + Chr(9);
+      end;
+      S := S + Chr(10);
+    end;
+    Clipboard.AsText := S;
+    DbgDeviceDb.SelectedRows.Clear;
+  end;
 end;
 
 procedure TFrmTripManager.DeleteDirsClick(Sender: TObject);

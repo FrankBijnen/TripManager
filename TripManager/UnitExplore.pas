@@ -44,6 +44,18 @@ const
                                                   57, // XT3
                                                   48, // Tread 2
                                                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  BCTransportModeMap : array[0..9] of TIdentMapEntry = (
+                                                 (Value: $03;               Name: 'RV'),
+                                                 (Value: $04;               Name: 'Automotive'),
+                                                 (Value: $05;               Name: 'RV'),
+                                                 (Value: $06;               Name: 'RV'),
+                                                 (Value: $07;               Name: 'Motorcycling'),
+                                                 (Value: $08;               Name: 'ATV'),
+                                                 (Value: $09;               Name: 'ATV'),
+                                                 (Value: $0A;               Name: 'ATV'),
+                                                 (Value: $0B;               Name: 'Automotive'),
+                                                 (Value: $0C;               Name: 'Automotive')
+                                                );
 
 var
   FormatSettings: TFormatSettings;
@@ -80,7 +92,7 @@ var
   JSONRtePtType: TJSonValue;
 
   JSONMetaValue: TJSONValue;
-  JSONMetaVehicleType: TJSONValue;
+  JSONMetaTruckType: TJSONValue;
   TransportMode: string;
 
   JSONMetaRoutePrefArray: TJSONArray;
@@ -108,12 +120,13 @@ begin
     Rte.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
     JSONRouteValue := TJSONObject.ParseJSONValue(Route_points.AsString);
     JSONMetaValue := TJSONObject.ParseJSONValue(MetaData.AsString);
-    JSONMetaVehicleType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('VehicleType') as TJSONValue;
+    JSONMetaTruckType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('TruckType') as TJSONValue;
     JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
     JSONMetaRoutePrefAdventurousModes := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefAdventurousModes') as TJSONArray;
 
-    if (IntToIdent(JSONMetaVehicleType.AsType<integer>, TransportMode, TransportModeMap)) then
-      Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
+    if not (IntToIdent(JSONMetaTruckType.AsType<integer>, TransportMode, BCTransportModeMap)) then
+      TransportMode := NotApplicable;
+    Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
 
     try
       Cnt := 0;

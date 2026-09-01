@@ -24,7 +24,6 @@ OutputDir=.
 OutputBaseFilename=setup_{#MyAppName}
 Compression=lzma2/normal
 LZMANumBlockThreads=16
-LZMAUseSeparateProcess=yes
 SolidCompression=no
 RestartIfNeededByRun=no
 ArchitecturesInstallIn64BitMode=x64compatible

@@ -330,29 +330,39 @@ begin
     ACds.DisableControls;
     ACds.ReadOnly := false;
     ACds.FieldDefs.Clear;
-    for Index := 0 to QTab.ColCount -1 do
-    begin
-      // Check for duplicate FieldName
-      FieldNameToAdd := QTab.Columns[Index];
-      DupName := 1;
-      while (AddedFields.IndexOf(FieldNameToAdd) > 0) do
-      begin
-        Inc(DupName);
-        FieldNameToAdd := Format('%s_%d', [QTab.Columns[Index], DupName]);
-      end;
-      AddedFields.Add(FieldNameToAdd);
 
-      // Now add to FieldDefs
-      ACds.FieldDefs.Add(FieldNameToAdd,
-                         FieldTypeFromSql(QTab.Types[Index]),
-                         FieldSizeFromSql(QTab.Types[Index]),
-                         false);
-    end;
     try
+      // Add fields to CDS
+      for Index := 0 to QTab.ColCount -1 do
+      begin
+        // Check for duplicate FieldName
+        FieldNameToAdd := QTab.Columns[Index];
+        DupName := 1;
+        while (AddedFields.IndexOf(FieldNameToAdd) > -1) do
+        begin
+          Inc(DupName);
+          FieldNameToAdd := Format('%s_%d', [QTab.Columns[Index], DupName]);
+        end;
+        AddedFields.Add(FieldNameToAdd);
+
+        // Now add to FieldDefs
+        ACds.FieldDefs.Add(FieldNameToAdd,
+                           FieldTypeFromSql(QTab.Types[Index]),
+                           FieldSizeFromSql(QTab.Types[Index]),
+                           false);
+      end;
+
+      // Set reasonable widths
       ACds.CreateDataSet;
       for Index := 0 to QTab.ColCount -1 do
-        if (FieldTypeFromSql(QTab.Types[Index]) = ftString) then
-         ACds.Fields[Index].DisplayWidth := 15;
+      begin
+        case (FieldTypeFromSql(QTab.Types[Index])) of
+          ftString:
+            ACds.Fields[Index].DisplayWidth := 16;
+          ftMemo:
+            ACds.Fields[Index].DisplayWidth := 48;
+        end;
+      end;
       ACds.LogChanges := false;
 
       while not QTab.EOF do
@@ -372,7 +382,9 @@ begin
                 AMemStream.Free;
               end
             else
-              ACds.Fields[Index].Value := string(QTab.FieldAsStringUnicode(Index));
+              ACds.Fields[Index].Value := ReplaceAll(string(QTab.FieldAsStringUnicode(Index)),
+                                                     [#$200B, #$200C, #$200D, #$2060], // Zero-Width chars
+                                                     ['',     ''    , '',     '']);
           end;
         end;
         ACds.Post;

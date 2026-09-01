@@ -842,6 +842,7 @@ object FrmTripManager: TFrmTripManager
         TitleFont.Name = 'Tahoma'
         TitleFont.Style = []
         OnColEnter = DbgDeviceDbColEnter
+        OnKeyUp = DbgDeviceDbKeyUp
       end
       object DBMemo: TMemo
         Left = 0
@@ -859,6 +860,9 @@ object FrmTripManager: TFrmTripManager
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 2
+        OnKeyUp = DBMemoKeyUp
+        ExplicitTop = 334
+        ExplicitWidth = 725
       end
     end
     object TsExplore: TTabSheet

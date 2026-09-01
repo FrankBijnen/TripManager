@@ -2470,17 +2470,16 @@ begin
 
     if (ProcessOptions.ProcessTracks) then
     begin
-      AddedCnt := 0;
+      OutTrack := CalcRoot.AddChild('trk');
+      OutTrack.AddChild('name').NodeValue := RouteName;
+
+      OutTrack.AddChild('extensions').
+               AddChild('gpxx:TrackExtension').
+               AddChild('gpxx:DisplayColor').NodeValue := ProcessOptions.DefTrackColor;
+
+      OutTrackSeg := OutTrack.AddChild('trkseg');
       for Track in FTrackList do
       begin
-        OutTrack := CalcRoot.AddChild('trk');
-        OutTrack.AddChild('name').NodeValue := GeoApifyRecords[AddedCnt].Name;
-
-        OutTrack.AddChild('extensions').
-                 AddChild('gpxx:TrackExtension').
-                 AddChild('gpxx:DisplayColor').NodeValue := ProcessOptions.DefTrackColor;
-
-        OutTrackSeg := OutTrack.AddChild('trkseg');
         for TrackPoint in Track.ChildNodes do
         begin
           if (TrackPoint.Name <> 'trkpt') then
@@ -2488,7 +2487,6 @@ begin
           OutTrackPt := OutTrackSeg.AddChild('trkpt');
           CloneNode(TrackPoint, OutTrackPt);
         end;
-        Inc(AddedCnt);
       end;
     end;
     CalcXml.SaveToFile(OutFile);
