@@ -52,14 +52,17 @@ const
 type
 
   TMapReq = record
-    Coords: string;
+    Lat: string;
+    Lon: string;
     Desc: string;
-    Zoom: string;
-    TimeOut: string;
+    PositionMap: string;
+    ZoomLevel: integer;
+    TimeOut: integer;
   end;
 
   TDirType = (NoDir, Up, Down);
   TListFilesDir = (lfCurrent, lfUp, lfDown);
+  TPositionMap = (pmMove, pmMoveZoom, pmNone);
 
   TRouteParm = (RoutePref, TransportMode);
 
@@ -242,6 +245,12 @@ type
     PnlHideGrid: TPanel;
     ResetAvoidancesUpdProfile: TMenuItem;
     ExportExploredbtoGPX1: TMenuItem;
+    PopupTripEditor: TPopupMenu;
+    InsertRoutePoint: TMenuItem;
+    MoveRoutePoint: TMenuItem;
+    DeleteRoutePoint: TMenuItem;
+    RoutePoint: TMenuItem;
+    N18: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -371,6 +380,10 @@ type
     procedure DbgDeviceDbKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure DBMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure InsertRoutePointClick(Sender: TObject);
+    procedure DeleteRoutePointClick(Sender: TObject);
+    procedure MoveRoutePointClick(Sender: TObject);
+    procedure PopupTripEditorPopup(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -398,7 +411,8 @@ type
     DirectoryMonitor: TDirectoryMonitor;
 
     FMapReq: TMapReq;
-    EdgeZoom: double;
+    FEdgeZoom: double;
+    FMapZoom: string;
     RoutePointTimeOut: string;
     GeoSearchTimeOut: string;
     USBEvent: TUSBEvent;
@@ -421,7 +435,7 @@ type
     procedure HexEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HexEditKeyPress(Sender: TObject; var Key: Char);
     procedure LoadHex(const FileName: string);
-    procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string);
+    procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string; Zoom: boolean = true);
     procedure LoadGpiOnMap(PoiGroupList: TPOIGroupList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     procedure AddToMap(FileName: string);
@@ -429,7 +443,7 @@ type
     function ChooseTracksDirectory: boolean;
     procedure OpenInKurviger(const FileName: string);
     procedure MapRequest(const Coords, Desc, TimeOut: string;
-                         const ZoomLevel: string = '');
+                         const PositionMap: TPositionMap = pmMoveZoom);
     procedure SaveTripGpiFile;
     procedure LoadTripFile(const FileName: string; const FromDevice: boolean);
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
@@ -822,7 +836,7 @@ var
   procedure LocationUpdated;
   begin
     ATripList.ForceRecalc;
-    LoadTripOnMap(ATripList, CurrentMapItem);
+    LoadTripOnMap(ATripList, CurrentMapItem, FMapZoom = '0');
     BtnSaveTripValues.Enabled := true;
   end;
 
@@ -1001,7 +1015,7 @@ begin
   begin
     Place := GetPlaceOfCoords(Lat, Lon);
     Clipboard.AsText := Place.DisplayPlace;
-    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), GeoSearchTimeOut, 'true'); // Always zoom
+    MapRequest(Format('%s, %s', [Lat, Lon]), TPlace.UnEscape(Place.HtmlPlace), GeoSearchTimeOut);
   end;
 end;
 
@@ -1214,6 +1228,11 @@ begin
   result := EditMapCoords.Text;
 end;
 
+procedure TFrmTripManager.InsertRoutePointClick(Sender: TObject);
+begin
+  FrmTripEditor.TbInsertPointClick(nil);
+end;
+
 procedure TFrmTripManager.InstallTripEdit;
 begin
 // Set FrmTripEditor Events
@@ -1267,7 +1286,7 @@ begin
   DmRoutePoints.SaveTrip;
   ATripList := TTripList(FrmTripEditor.CurTripList);
   ATripList.ForceRecalc;
-  LoadTripOnMap(ATripList, CurrentMapItem);
+  LoadTripOnMap(ATripList, CurrentMapItem, false);
 end;
 
 procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
@@ -1752,6 +1771,12 @@ begin
   PnlHideGridClick(Sender);
 end;
 
+procedure TFrmTripManager.PopupTripEditorPopup(Sender: TObject);
+begin
+  if (FrmTripEditor.Showing) then
+    RoutePoint.Caption := DmRoutePoints.CdsRoutePointsName.AsString;
+end;
+
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
 begin
   MnuTripNewMTP.Enabled := CheckDevice(false);
@@ -1894,23 +1919,45 @@ end;
 
 procedure TFrmTripManager.EdgeBrowser1NavigationStarting(Sender: TCustomEdgeBrowser; Args: TNavigationStartingEventArgs);
 begin
-  Sender.ZoomFactor := EdgeZoom;
+  Sender.ZoomFactor := FEdgeZoom;
 end;
 
 procedure TFrmTripManager.EdgeBrowser1WebMessageReceived(Sender: TCustomEdgeBrowser; Args: TWebMessageReceivedEventArgs);
 var
   Message: PChar;
-  Msg, Parm1, Parm2, Lat, Lon: string;
+  Msg, Parm1, Parm2, Parm3, Parm4, Lat, Lon: string;
   Place: TPlace;
+  Pt: TPoint;
 begin
   Args.ArgsInterface.Get_webMessageAsJson(Message);
-  ParseJsonMessage(Message, Msg, Parm1, Parm2);
+  ParseJsonMessage(Message, Msg, Parm1, Parm2, Parm3, Parm4);
+
+  if (Msg = OSM_ContextMenu) then
+  begin
+    if (FrmTripEditor.Showing) then
+    begin
+      //TODO Keep?
+      if (Parm1 <> FMapZoom) then
+        breakpoint;
+      FMapZoom := Parm1;
+      Lat := Parm2;
+      Lon := Parm3;
+      AdjustLatLon(Lat, Lon, OSM_Coord_Decimals);
+      EditMapCoords.Text := Lat + ', ' + Lon;
+
+      GetCursorPos(Pt);
+      PopupTripEditor.Popup(Pt.X, Pt.Y);
+    end;
+
+    exit;
+  end;
 
   if (Msg = OSM_GetBounds) then
   begin
-    EditMapBounds.Text := Parm1;
-
-    ParseLatLon(Parm2, Lat, Lon);
+    FMapZoom := Parm1;
+    EditMapBounds.Text := Format('%s (Zoom level: %s)', [Parm2, Parm1]);
+    Lat := Parm3;
+    Lon := Parm4;
     AdjustLatLon(Lat, Lon, OSM_Coord_Decimals);
     EditMapCoords.Text := Lat + ', ' + Lon;
 
@@ -1919,10 +1966,22 @@ begin
 
   if (Msg = OSM_GetRoutePoint) then
   begin
-    if (Parm1 <> '') then
-      LblRoute.Text := Parm1;
+    FMapZoom := Parm1;
     if (Parm2 <> '') then
-      LblRoutePoint.Text := Parm2;
+      LblRoute.Text := Parm2;
+    if (Parm3 <> '') then
+      LblRoutePoint.Text := Parm3;
+
+    if (FrmTripEditor.Showing) and
+       (CtrlPressed or ShiftPressed or AltPressed) then
+    begin
+      DmRoutePoints.CdsRoutePoints.Locate('Name', LblRoutePoint.Text, [loCaseInsensitive]);
+
+      if (ChkZoomToPoint.Checked = false) then
+        MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
+                   DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
+                   RoutePointTimeOut);
+    end;
     exit;
   end;
 
@@ -1933,31 +1992,61 @@ begin
     exit;
   end;
 
-  AdjustLatLon(Parm1, Parm2, OSM_Coord_Decimals);
-  EditMapCoords.Text := Parm1 + ', ' + Parm2;
-  if (Msg = OSM_CtrlClick) then
+  if (Msg = OSM_Key) then
   begin
     if (FrmTripEditor.Showing) then
     begin
-      DmRoutePoints.CoordinatesApplied(Self, EditMapCoords.Text);
-      exit;
+      case StrToIntDef(Parm2, 0) of
+        VK_INSERT:
+          InsertRoutePointClick(InsertRoutePoint);
+        Ord('M'):
+           MoveRoutePointClick(MoveRoutePoint);
+        VK_DELETE:
+           DeleteRoutePointClick(DeleteRoutePoint);
+      end;
     end;
 
-    Place := GetPlaceOfCoords(Parm1, Parm2);
-    if (Place = nil) then
-      MapRequest(EditMapCoords.Text, OSM_CtrlClick, GeoSearchTimeOut)
-    else
-    begin
-      Clipboard.AsText := Place.DisplayPlace;
-      MapRequest(EditMapCoords.Text, Place.HtmlPlace, GeoSearchTimeOut);
-    end;
     exit;
   end;
+
+  if (Msg = OSM_LeftClick) then
+  begin
+    Lat := Parm2;
+    Lon := Parm3;
+    AdjustLatLon(Lat, Lon, OSM_Coord_Decimals);
+    EditMapCoords.Text := Lat + ', ' + Lon;
+
+    if (SameText(Parm1, 'Ctrl')) then
+    begin
+      Place := GetPlaceOfCoords(Lat, Lon);
+      if (Assigned(Place)) then
+      begin
+        Clipboard.AsText := Place.DisplayPlace;
+        MapRequest(EditMapCoords.Text, Place.HtmlPlace, GeoSearchTimeOut);
+      end
+      else
+        MapRequest(EditMapCoords.Text, Parm1 + ' ' + OSM_LeftClick, GeoSearchTimeOut);
+    end;
+
+//TODO Keep?
+//    if (FrmTripEditor.Showing) then
+//    begin
+//      if (ContainsText(Parm1, 'ShiftAlt')) then
+//       DeleteRoutePointClick(DeleteRoutePoint)
+//      else if (ContainsText(Parm1, 'Alt')) then
+//       InsertRoutePointClick(InsertRoutePoint)
+//      else if (ContainsText(Parm1, 'Shift')) then
+//       MoveRoutePointClick(MoveRoutePoint);
+//    end;
+
+    exit;
+  end;
+
 end;
 
 procedure TFrmTripManager.EdgeBrowser1ZoomFactorChanged(Sender: TCustomEdgeBrowser; AZoomFactor: Double);
 begin
-  EdgeZoom := AZoomFactor;
+  FEdgeZoom := AZoomFactor;
 end;
 
 procedure TFrmTripManager.MnuTripNewMTPClick(Sender: TObject);
@@ -2226,6 +2315,7 @@ begin
         end;
     end;
   end;
+
   if (ssCtrl in Shift) and
      (ssAlt in Shift) then
   begin
@@ -2242,6 +2332,7 @@ begin
         end;
     end;
   end;
+
 end;
 
 procedure TFrmTripManager.FormShow(Sender: TObject);
@@ -2547,6 +2638,11 @@ begin
   // Not all models support all transportation and routing preferences
   // EG: Nuvi does not have Motorcycling, but has Economic
   RebuildTransportAndRoutePrefMenu;
+end;
+
+procedure TFrmTripManager.MoveRoutePointClick(Sender: TObject);
+begin
+  DmRoutePoints.CoordinatesApplied(Self, EditMapCoords.Text);
 end;
 
 procedure TFrmTripManager.CmbModelChange(Sender: TObject);
@@ -3053,7 +3149,7 @@ begin
     AddToMap(ShellListView1.SelectedFolder.PathName);
 end;
 
-procedure TFrmTripManager.LoadTripOnMap(CurrentTrip: TTripList; Id: string);
+procedure TFrmTripManager.LoadTripOnMap(CurrentTrip: TTripList; Id: string; Zoom: boolean = true);
 var
   OsmTrack: TStringList;
   TrackToRouteInfoMap: TmTrackToRouteInfoMap;
@@ -3078,7 +3174,7 @@ begin
       OsmTrack.Text := TrackToRouteInfoMap.GetCoords(ProcessOptions.TripTrackColor);
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s_track%s', [App_Prefix, Id, GetTracksExt]));
     end;
-    if (CreateOSMMapHtml) then
+    if (CreateOSMMapHtml(Zoom)) then
       EdgeBrowser1.Navigate(GetHtmlTmp);
   finally
     OsmTrack.Free;
@@ -3328,7 +3424,6 @@ procedure TFrmTripManager.ExportExploredbtoGPX1Click(Sender: TObject);
 var
   CdsExploreDb: TClientDataSet;
 begin
-//TODO Call add to map?
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
   SaveTrip.FileName := ChangeFileExt(ChangeFileExt(ExploreDb, '')  + '_' + FormatDateTime('yyyy-mm-dd', Now), '.gpx');
@@ -4016,7 +4111,7 @@ var
        (AnUdbhandle.GetBoundsTopLeft <> '') then
     begin
       EdgeBrowser1.ExecuteScript('ShowBounds("Bounds ' + ATripList.TripName +'");');
-      MapRequest(AnUdbhandle.GetBoundsTopLeft, ATripList.TripName, RoutePointTimeOut, 'false');
+      MapRequest(AnUdbhandle.GetBoundsTopLeft, ATripList.TripName, RoutePointTimeOut, TPositionMap.pmNone); // Dont move map
     end;
   end;
 
@@ -4648,6 +4743,11 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.DeleteRoutePointClick(Sender: TObject);
+begin
+  FrmTripEditor.TbDeletePointClick(nil);
+end;
+
 procedure TFrmTripManager.DeleteFilesClick(Sender: TObject);
 begin
   DeleteObjects(false);
@@ -5272,20 +5372,26 @@ begin
 end;
 
 procedure TFrmTripManager.MapRequest(const Coords, Desc, TimeOut: string;
-                                     const ZoomLevel: string = '');
+                                     const PositionMap: TPositionMap = pmMoveZoom);
+
 begin
-  FMapReq.Coords := Coords;
+  ParseLatLon(Coords, FMapReq.Lat, FMapReq.Lon);
+  AdjustLatLon(FMapReq.Lat, FMapReq.Lon, OSM_Coord_Decimals);
   FMapReq.Desc := Desc;
-  if (ZoomLevel = '') then // Default to use setting
-  begin
-    if (ChkZoomToPoint.Checked) then
-      FMapReq.Zoom := 'true'
-    else
-      FMapReq.Zoom := 'false';
-  end
-  else
-    FMapReq.Zoom := ZoomLevel;
-  FMapReq.TimeOut := TimeOut;
+
+  FMapReq.PositionMap := '';
+  FMapReq.ZoomLevel := 0;
+  case (PositionMap) of
+    pmMoveZoom:
+      begin
+        FMapReq.PositionMap := 'MoveZoom';
+        if (ChkZoomToPoint.Checked = false) then
+          FMapReq.ZoomLevel := StrToIntDef(FMapZoom, 0);
+      end;
+    pmMove:
+        FMapReq.PositionMap := 'Move';
+  end;
+  FMapReq.TimeOut := StrToIntDef(TimeOut, 0);
   MapTimer.Enabled := false;
   MapTimer.Enabled := true;
 end;
@@ -5293,7 +5399,13 @@ end;
 procedure TFrmTripManager.MapTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
-  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, %s, %s);', [FMapReq.Desc, FMapReq.Coords, FMapReq.Zoom, FMapReq.TimeOut]));
+  EdgeBrowser1.ExecuteScript(Format('PopupAtPoint("%s", %s, %s, "%s", %d, %d);',
+                                    [FMapReq.Desc,
+                                     FMapReq.Lat,
+                                     FMapReq.Lon,
+                                     FMapReq.PositionMap,
+                                     FMapReq.ZoomLevel, // 0 = % of numzoomlevels
+                                     FMapReq.TimeOut]));
 end;
 
 procedure TFrmTripManager.MemoSQLKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);

@@ -14,6 +14,11 @@ var glb_BoundsBounds;
 var glb_ProjectionObject;
 var glb_Projection;
 var glb_CacheWrite, glb_CacheRead;
+var glb_ClickLonLat;
+
+const Shift_Key = 16;
+const Ctrl_Key = 17;
+const Alt_Key = 18;
 
 /**
  * BaseLayers.js. Classes for BaseLayers
@@ -141,7 +146,7 @@ function initialize() {
         var parm1 = (e.feature.layer.name) ? e.feature.layer.name : "";
         var parm2 = (e.feature.data.tooltip) ? e.feature.data.tooltip :
           (e.feature.url) ? e.feature.url : "";
-        SendMessage(osm_GetRoutePoint, parm1, parm2);
+        SendMessage(osm_GetRoutePoint, glb_Map.getZoom(), parm1, parm2, "");
       }
     },
     displayProjection: new OpenLayers.Projection("EPSG:4326")
@@ -152,6 +157,8 @@ function initialize() {
   glb_Map.addControl(glb_CacheWrite);
   glb_CacheRead = new OpenLayers.Control.CacheRead();
   glb_Map.addControl(glb_CacheRead);
+
+  // Define base layers
   glb_BaseLayers = new Array();
   glb_Map.addLayer(glb_BaseLayers[glb_BaseLayers.push(new OpenLayers.Layer.OSM.Mapnik("Mapnik")) - 1]);
   if (osm_MapTilerKey) {
@@ -171,20 +178,53 @@ function initialize() {
     glb_Map.addLayer(glb_BaseLayers[glb_BaseLayers.push(new OpenLayers.Layer.XYZ.ESRISatellite("ESRI Satellite")) - 1]);
   }
   glb_Map.setBaseLayer(glb_Map.getLayersBy("name", osm_BaseLayer)[0]);
-  glb_Map.events.register("changebaselayer", glb_Map, function(event) {
-    SendMessage(osm_BaseLayerChangedEvent, event.layer.name, "");
-  });
+  PerformLog(['BaseLayer init', osm_BaseLayer]);
+
+  // Get Projection
   glb_ProjectionObject = glb_Map.getProjectionObject();
   glb_Projection = new OpenLayers.Projection("EPSG:4326");
+
+  // Events
+  glb_Map.events.register("changebaselayer", glb_Map, function(event) {
+    SendMessage(osm_BaseLayerChangedEvent, event.layer.name, "", "", "");
+  });
+
+  glb_Map.events.register("moveend", glb_Map, function(event) {
+    GetBounds(osm_GetBoundsEvent);
+  });
+
   glb_Map.events.listeners.mousedown.unshift({
-    func: function(e) {
-      if (e.ctrlKey) {
-        var lonLat = glb_Map.getLonLatFromViewPortPx(e.xy).transform(glb_ProjectionObject, glb_Projection);
-        SendMessage(osm_CtrlClickEvent, lonLat.lat, lonLat.lon);
-      }
+    func: function(event) {
+      var keyModifiers = KeyModifiers(event);
+      glb_ClickLonLat = glb_Map.getLonLatFromViewPortPx(event.xy).transform(glb_ProjectionObject, glb_Projection);
+      if (keyModifiers != "") 
+        SendMessage(osm_LeftClickEvent, keyModifiers, glb_ClickLonLat.lat, glb_ClickLonLat.lon, "");
     }
   });
-  glb_Map.events.register("moveend", glb_Map, function(evt) { GetBounds(osm_GetBoundsEvent); })
+
+  OpenLayers.Event.observe(document, "keydown", function(event) {
+    var keyCode = event.keyCode;
+    var keyModifiers = KeyModifiers(event);
+
+    if (keyModifiers != "") {
+      if (glb_ClickLonLat) 
+        SendMessage(osm_KeyEvent, keyModifiers, keyCode, glb_ClickLonLat.lat, glb_ClickLonLat.lon);
+      else
+        SendMessage(osm_KeyEvent, keyModifiers, keyCode, "", "");
+    }
+  });
+
+  OpenLayers.Event.observe(document, "contextmenu", function(event) {
+    if (event.ctrlKey) {
+      OpenLayers.Event.stop(event);
+      if (glb_ClickLonLat) {
+        SendMessage(osm_ContextMenuEvent, glb_Map.getZoom(), glb_ClickLonLat.lat, glb_ClickLonLat.lon, "");
+      }
+      return false;
+    }
+  });
+
+  // Globals
   glb_AllPoints = new Array();
   glb_RoutePoints = new Array();
   glb_TrackPoints = new Array();
@@ -195,32 +235,75 @@ function initialize() {
   glb_BoundsBounds = new Array();
 
   AddPoints(); // Created by TripManager
-  CreateExtent(glb_Map.getNumZoomLevels() * 0.66);
+
+  CreateExtent(osm_Zoom);
 }
 
-function SendMessage(msg, parm1, parm2) {
+function PerformLog(Log) {
+  if (osm_Debug) {
+    console.log(Log);
+    console.trace();
+  }
+}
+
+function KeyModifiers(event) {
+  var keyModifiers = "";
+
+  // For Mouse only want Left Click
+  if ((event.type == "mousedown") && (event.button != 0))
+     return keyModifiers;
+
+  // For Key only want 'Shift, Ctrl, Alt' combined with other key
+  if ((event.type == "keydown") && ([Shift_Key, Ctrl_Key, Alt_Key].includes(event.keyCode)))
+     return keyModifiers;
+
+  if (event.ctrlKey)
+     keyModifiers += "Ctrl";
+  if (event.shiftKey)
+     keyModifiers += "Shift";
+  if (event.altKey)
+     keyModifiers += "Alt";
+
+  return keyModifiers;
+}
+
+function GetInitMapZoomLevel() {
+  return glb_Map.getNumZoomLevels() * 0.65;
+}
+
+function GetMaxMapZoomLevel(maxZoom) {
+  if (maxZoom)
+    return maxZoom;
+  else
+    return glb_Map.getNumZoomLevels() * 0.80;
+}
+
+function SendMessage(msg, parm1, parm2, parm3, parm4) {
+  PerformLog(['SendMessage', msg, parm1, parm2, parm4]);
   if (window && window.chrome && window.chrome.webview)
     window.chrome.webview.postMessage({
       msg: msg,
       parm1: parm1,
-      parm2: parm2
+      parm2: parm2,
+      parm3: parm3,
+      parm4: parm4
     });
 }
 
 function GetLocation(func) {
   var bounds = glb_Map.getExtent();
   var lonLat = bounds.getCenterLonLat().transform(glb_ProjectionObject, glb_Projection);
-  SendMessage(func, lonLat.lat, lonLat.lon);
+  SendMessage(func, lonLat.lat, lonLat.lon, "", "");
 }
 
 function GetBounds(func) {
   var bounds = glb_Map.getExtent();
   bounds.transform(glb_ProjectionObject, glb_Projection);
   var lonLat = bounds.getCenterLonLat();
-  SendMessage(func, bounds.toBBOX(osm_PlaceDecimals, true), lonLat.lat + ", " + lonLat.lon);
+  SendMessage(func, glb_Map.getZoom(), bounds.toBBOX(osm_PlaceDecimals, true), lonLat.lat, lonLat.lon);
 }
 
-function CreateExtent(maxZoomLevel) {
+function CreateExtent(mustZoom) {
   glb_AllPoints = glb_AllPoints.concat(glb_TrackPoints);
   glb_AllPoints = glb_AllPoints.concat(glb_RoutePoints);
   glb_AllPoints = glb_AllPoints.concat(glb_PoiPoints);
@@ -229,17 +312,30 @@ function CreateExtent(maxZoomLevel) {
   line_string.calculateBounds();
   var bounds = new OpenLayers.Bounds();
   bounds.extend(line_string.bounds);
-  glb_Map.zoomToExtent(bounds);
-  if (glb_Map.getZoom() > maxZoomLevel) {
-    glb_Map.zoomTo(maxZoomLevel);
-  }
+  PerformLog(['CreateExtent', mustZoom, bounds]);
+  if (mustZoom)
+    glb_Map.zoomToExtent(bounds);
+  if (glb_Map.getZoom() > GetInitMapZoomLevel())
+    glb_Map.zoomTo(GetInitMapZoomLevel());
 }
 
-function PopupAtPoint(href, pointLat, pointLon, zoomToPoint, popupTimeOut) {
+function PopupAtPoint(href, pointLat, pointLon, positionMap, zoomLevel, popupTimeOut) {
+  PerformLog(['PopupAtPoint', href, pointLat, pointLon, positionMap, zoomLevel, popupTimeOut]);
   var lonLat = new OpenLayers.LonLat(pointLon, pointLat).transform(glb_Projection, glb_ProjectionObject);
-  if (zoomToPoint) {
-    glb_Map.moveTo(lonLat, glb_Map.getNumZoomLevels() - 4, null)
-  };
+
+  // Position map. Make popup center of map. Optionally zoom
+  switch (positionMap) {
+      case 'Move':
+        glb_Map.moveTo(lonLat, null, null);
+      break;
+    case 'MoveZoom':
+        glb_Map.moveTo(lonLat, GetMaxMapZoomLevel(zoomLevel), null);
+      break;
+    default:
+      break;
+  }
+
+  // Create popup. Only visible for popupTimeOut
   if (href) {
     glb_PopUp = new OpenLayers.Popup.FramedCloud("Popup", lonLat, null, href, null, true);
     glb_Map.addPopup(glb_PopUp, true);

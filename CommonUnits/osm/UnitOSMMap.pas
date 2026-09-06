@@ -9,10 +9,11 @@ uses
   {$ENDIF}
   Vcl.Edge;
 
-function CreateOSMMapHtml(Home: string = ''; UseOl2Local: boolean = true): boolean; overload;
-function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; overload;
-function OSMColor(GPXColor: string): string;
-procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
+function CreateOSMMapHtml(const Home: string = ''): boolean; overload;
+function CreateOSMMapHtml(const Zoom: boolean; const Home: string = ''): boolean; overload;
+function CreateOSMMapHtml(const HtmlName: string; const TrackPoints: TStringList): boolean; overload;
+function OSMColor(const GPXColor: string): string;
+procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2, Parm3, Parm4: string);
 
 const
   OSM_Track_Width         = '5';
@@ -20,7 +21,9 @@ const
   OSM_Bounds_Color        = 'Black';
   OSM_Coord_Decimals      = 6;
   OSM_Place_Decimals      = 4;
-  OSM_CtrlClick           = 'Ctrl Click';
+  OSM_LeftClick           = 'Left Click';
+  OSM_Key                 = 'Key';
+  OSM_ContextMenu         = 'ContextMenu';
   OSM_GetBounds           = 'GetBounds';
   OSM_GetRoutePoint       = 'GetRoutePoint';
   OSM_Base_Layer          = 'BaseLayer';
@@ -37,13 +40,14 @@ type
     OsmFormatSettings: TFormatSettings;
     Html: TStringList;
     FPathName: string;
+    FZoom: string;
     FHome: string;
     FTrackPoints: TStringList;
     procedure WriteHeader(const UseOl2Local: boolean);
     procedure WritePoints;
     procedure WriteFooter;
   public
-    constructor Create(const APathName, AHome: string); overload;
+    constructor Create(const AZoom, APathName, AHome: string); overload;
     constructor Create(const APathName: string; ATrackPoints: TStringList); overload;
     destructor Destroy; override;
   end;
@@ -130,11 +134,12 @@ begin
   end;
 end;
 
-constructor TOSMHelper.Create(const APathName, AHome: string);
+constructor TOSMHelper.Create(const AZoom, APathName, AHome: string);
 begin
   inherited Create;
   OsmFormatSettings.DecimalSeparator := '.'; // The decimal separator is a . PERIOD!
   OsmFormatSettings.NegCurrFormat := 11;
+  FZoom := AZoom;
   FPathName := APathName;
   FHome := AHome;
   Html := TStringList.Create;
@@ -144,7 +149,7 @@ end;
 
 constructor TOSMHelper.Create(const APathName: string; ATrackPoints: TStringList);
 begin
-  Create(APathName, '');
+  Create('', APathName, '');
   FTrackPoints := ATrackPoints;
 end;
 
@@ -175,14 +180,24 @@ begin
   Html.Add('<script type="text/javascript">');
   Html.Add('');
   Html.Add('/** Parameters passed by TripManager **/');
+{$IFDEF DEBUG}
+  Html.Add(Format('var osm_Debug                   = %s;',   ['true']));
+{$ELSE}
+  Html.Add(Format('var osm_Debug                   = %s;',   ['false']));
+{$ENDIF}
   Html.Add(Format('var osm_MapTilerKey             = "%s";', [GetRegistry(Reg_MapTilerApi_Key, '')]));
   Html.Add(Format('var osm_ESRIEnabled             = "%s";', [GetRegistry(Reg_EnableESRI, '')]));
   Html.Add(Format('var osm_BaseLayer               = "%s";', [GetRegistry(Reg_BaseLayer_Key, Reg_BaseLayer_Value)]));
   Html.Add(Format('var osm_PlaceDecimals           = "%d";', [OSM_Place_Decimals]));
+  Html.Add(Format('var osm_Zoom                    = %s;',   [FZoom]));
   Html.Add(Format('var osm_BoundsWidth             = "%s";', [OSM_Bounds_Width]));
   Html.Add(Format('var osm_TrackWidth              = "%s";', [OSM_Track_Width]));
   Html.Add(Format('var osm_BaseLayerChangedEvent   = "%s";', [OSM_Base_Layer_Changed]));
-  Html.Add(Format('var osm_CtrlClickEvent          = "%s";', [OSM_CtrlClick]));
+
+  Html.Add(Format('var osm_LeftClickEvent          = "%s";', [OSM_LeftClick]));
+  Html.Add(Format('var osm_KeyEvent                = "%s";', [OSM_Key]));
+  Html.Add(Format('var osm_ContextMenuEvent        = "%s";', [OSM_ContextMenu]));
+
   Html.Add(Format('var osm_GetBoundsEvent          = "%s";', [OSM_GetBounds]));
   Html.Add(Format('var osm_GetRoutePoint           = "%s";', [OSM_GetRoutePoint]));
 
@@ -243,19 +258,18 @@ begin
   Html.SaveToFile(FPathName, TEncoding.UTF8);
 end;
 
-function CreateOSMMapHtml(Home: string = ''; UseOl2Local: boolean = true): boolean;
+function CreateOSMMapHtml(const Zoom: boolean; const Home: string = ''): boolean;
 var
   OsmHelper: TOSMHelper;
+  UseOl2Local: boolean;
 begin
-  if (UseOl2Local) then
-  begin
-    if not Ol2Installed then
-      Ol2Installed := InstallOpenLayers2;
-    if not Ol2Installed then
-      UseOl2Local := false;
-  end;
+  UseOl2Local := true;
+  if not Ol2Installed then
+    Ol2Installed := InstallOpenLayers2;
+  if not Ol2Installed then
+    UseOl2Local := false;
 
-  OsmHelper := TOSMHelper.Create(GetHtmlTmp, Home);
+  OsmHelper := TOSMHelper.Create(LowerCase(BoolToStr(Zoom, true)), GetHtmlTmp, Home);
   try
     OsmHelper.WriteHeader(UseOl2Local);
     OsmHelper.WriteFooter;
@@ -265,7 +279,12 @@ begin
   end;
 end;
 
-function CreateOSMMapHtml(HtmlName: string; TrackPoints: TStringList): boolean; overload;
+function CreateOSMMapHtml(const Home: string = ''): boolean;
+begin
+  result := CreateOSMMapHtml(true, Home);
+end;
+
+function CreateOSMMapHtml(const HtmlName: string; const TrackPoints: TStringList): boolean;
 var
   OsmHelper: TOSMHelper;
 begin
@@ -279,12 +298,12 @@ begin
   end;
 end;
 
-function OSMColor(GPXColor: string): string;
+function OSMColor(const GPXColor: string): string;
 begin
   result := Format('#%s', [GPX2HTMLColor(GPXColor)]);
 end;
 
-procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2: string);
+procedure ParseJsonMessage(const Message: string; var Msg, Parm1, Parm2, Parm3, Parm4: string);
 var
   JSONValue: TJSONValue;
 begin
@@ -293,6 +312,8 @@ begin
     Msg := JSONValue.GetValue<string>('msg');
     Parm1 := JSONValue.GetValue<string>('parm1');
     Parm2 := JSONValue.GetValue<string>('parm2');
+    Parm3 := JSONValue.GetValue<string>('parm3');
+    Parm4 := JSONValue.GetValue<string>('parm4');
   finally
     JSONValue.Free;
   end;

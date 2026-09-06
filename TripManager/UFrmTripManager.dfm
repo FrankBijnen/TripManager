@@ -861,8 +861,6 @@ object FrmTripManager: TFrmTripManager
         ScrollBars = ssVertical
         TabOrder = 2
         OnKeyUp = DBMemoKeyUp
-        ExplicitTop = 334
-        ExplicitWidth = 725
       end
     end
     object TsExplore: TTabSheet
@@ -3699,6 +3697,31 @@ object FrmTripManager: TFrmTripManager
     object DBMemoFormatJSON: TMenuItem
       Caption = 'Format JSON'
       OnClick = DBMemoFormatJSONClick
+    end
+  end
+  object PopupTripEditor: TPopupMenu
+    OnPopup = PopupTripEditorPopup
+    Left = 912
+    Top = 352
+    object RoutePoint: TMenuItem
+    end
+    object N18: TMenuItem
+      Caption = '-'
+    end
+    object InsertRoutePoint: TMenuItem
+      Caption = 'Insert route point'
+      ShortCut = 16429
+      OnClick = InsertRoutePointClick
+    end
+    object MoveRoutePoint: TMenuItem
+      Caption = 'Move route point'
+      ShortCut = 16461
+      OnClick = MoveRoutePointClick
+    end
+    object DeleteRoutePoint: TMenuItem
+      Caption = 'Delete route point'
+      ShortCut = 16430
+      OnClick = DeleteRoutePointClick
     end
   end
 end

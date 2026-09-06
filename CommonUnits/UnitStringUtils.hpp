@@ -1,11 +1,11 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2024 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2025 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'UnitStringUtils.pas' rev: 36.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'UnitStringUtils.pas' rev: 37.00 (Windows)
 
-#ifndef UnitstringutilsHPP
-#define UnitstringutilsHPP
+#ifndef UnitStringUtilsHPP
+#define UnitStringUtilsHPP
 
 #pragma delphiheader begin
 #pragma option push
@@ -52,6 +52,10 @@ public:
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE System::UnicodeString CreatedTempPath;
 extern DELPHI_PACKAGE System::UnicodeString App_Prefix;
+extern DELPHI_PACKAGE System::ResourceString _STR_ERR_ErrorCreating;
+#define Unitstringutils_STR_ERR_ErrorCreating System::LoadResourceString(&Unitstringutils::_STR_ERR_ErrorCreating)
+extern DELPHI_PACKAGE System::ResourceString _STR_ERR_Invalid_Chars;
+#define Unitstringutils_STR_ERR_Invalid_Chars System::LoadResourceString(&Unitstringutils::_STR_ERR_Invalid_Chars)
 extern DELPHI_PACKAGE void __fastcall BreakPoint();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall SenSize(const __int64 S);
 extern DELPHI_PACKAGE System::UnicodeString __fastcall Intd(const int N, const int D);
@@ -77,6 +81,8 @@ extern DELPHI_PACKAGE System::UnicodeString __fastcall CreateTempPath(const Syst
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetHtmlTmp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTracksExt();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTracksMask();
+extern DELPHI_PACKAGE System::UnicodeString __fastcall GetXMLExt();
+extern DELPHI_PACKAGE System::UnicodeString __fastcall GetXMLMask();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetTracksTmp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetOSMTemp();
 extern DELPHI_PACKAGE System::UnicodeString __fastcall GetRoutesTmp();
@@ -105,4 +111,4 @@ using namespace Unitstringutils;
 
 #pragma delphiheader end.
 //-- end unit ----------------------------------------------------------------
-#endif	// UnitstringutilsHPP
+#endif	// UnitStringUtilsHPP

@@ -69,6 +69,8 @@ type
     TbBrowser: TToolButton;
     ExportCalculated: TMenuItem;
     SendTo: TMenuItem;
+    Move1: TMenuItem;
+    TbMovePoint: TToolButton;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -99,6 +101,8 @@ type
     procedure ExportCalculatedClick(Sender: TObject);
     procedure PopupGPXPopup(Sender: TObject);
     procedure SendToClick(Sender: TObject);
+    procedure Move1Click(Sender: TObject);
+    procedure TbMovePointClick(Sender: TObject);
   private
     { Private declarations }
     WarnOverWrite: integer;   // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
@@ -141,6 +145,11 @@ uses
   UFrmEditRoutePref;
 
 {$R *.dfm}
+
+procedure TFrmTripEditor.Move1Click(Sender: TObject);
+begin
+  TbMovePointClick(TbMovePoint);
+end;
 
 procedure TFrmTripEditor.BtnCancelClick(Sender: TObject);
 begin
@@ -552,6 +561,12 @@ procedure TFrmTripEditor.TbMoveUpClick(Sender: TObject);
 begin
   DBGRoutePoints.SelectedRows.Clear;
   DmRoutePoints.MoveUp(DmRoutePoints.CdsRoutePoints);
+end;
+
+procedure TFrmTripEditor.TbMovePointClick(Sender: TObject);
+begin
+  if Assigned(DmRoutePoints.OnGetMapCoords) then
+    DmRoutePoints.CoordinatesApplied(Self, DmRoutePoints.OnGetMapCoords);
 end;
 
 procedure TFrmTripEditor.TbBrowserClick(Sender: TObject);

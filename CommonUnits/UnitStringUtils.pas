@@ -69,6 +69,10 @@ function VerInfo(IncludeCompany: boolean = false): string;
 function UserAgent: string;
 function DynArray(const ConstArray: array of integer): TDynArrayType;
 procedure CheckSurrogate(const AWideString: string);
+function ShiftPressed: boolean;
+function AltPressed: boolean;
+function CtrlPressed: boolean;
+function VKeyPressed(AKey: integer): boolean;
 
 var
   CreatedTempPath: string;
@@ -625,6 +629,26 @@ begin
   for AWideChar in AWideString do
     if (IsLeadChar(AWideChar)) then
       raise Exception.Create(Format(STR_ERR_Invalid_Chars, [AWideString]));
+end;
+
+function ShiftPressed: boolean;
+begin
+  result := (GetAsyncKeyState(VK_SHIFT) and $8000) <> 0;
+end;
+
+function AltPressed: boolean;
+begin
+  result := (GetAsyncKeyState(VK_MENU) and $8000) <> 0;
+end;
+
+function CtrlPressed: boolean;
+begin
+  result := (GetAsyncKeyState(VK_CONTROL) and $8000) <> 0;
+end;
+
+function VKeyPressed(AKey: integer): boolean;
+begin
+  result := (GetAsyncKeyState(AKey) and $8000) <> 0;
 end;
 
 initialization

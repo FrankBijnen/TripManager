@@ -210,6 +210,7 @@ $(PreBuildEvent)]]></PreBuildEvent>
         <DCCReference Include="..\CommonUnits\Mtp\UnitBaseMTP.pas">
             <Form>$R *.res</Form>
         </DCCReference>
+        <None Include="..\CommonUnits\osm\Resources\TripManager.js"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -236,10 +237,22 @@ $(PreBuildEvent)]]></PreBuildEvent>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="5">
+                <DeployFile LocalName="..\CommonUnits\osm\Resources\TripManager.js" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Icon\TripManager.png" Configuration="Debug" Class="UWP_DelphiLogo44"/>
                 <DeployFile LocalName="Icon\TripManager.png" Configuration="Release" Class="UWP_DelphiLogo44"/>
                 <DeployFile LocalName="Win32\Debug\SetTripsToSaved_Delphi.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="Win32\TripManager.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="Win32\TripManager.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>TripManager.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Win32\TripManager.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployFile LocalName="Win64\TripManager.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
