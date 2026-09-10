@@ -3,9 +3,17 @@ unit UnitExplore;
 interface
 
 uses
+  System.Classes,
   Data.DB, Datasnap.DBClient;
 
 type
+  TExpl_Object = class(TObject)
+    Expl_Id: integer;
+    Expl_Type: integer;
+    Expl_Name: string;
+    constructor Create(ACds: TClientDataset);
+  end;
+
   TExpl_TrackPoint = packed record
     Lat:      integer;
     Lon:      integer;
@@ -16,15 +24,19 @@ type
 
 const
   Expl_ItemTable    = 'Items';
+  Expl_Query        = 'select * from ' + Expl_ItemTable + ' order by type, name';
   Expl_MaxElevation = 10000;
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
-                           const GPXFileName: string);
+                           const GPXFileName: string;
+                           const Filter: integer = -1);
+procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
+
 
 implementation
 
 uses
-  System.DateUtils, System.JSON, System.SysUtils, System.Classes, System.Generics.Collections,
+  System.DateUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks,
   UnitGpxDefs, UnitTripDefs, UnitVerySimpleXml, UnitStringUtils,
   UnitGarminDevice, UnitModelConv;
 
@@ -60,7 +72,53 @@ const
 var
   FormatSettings: TFormatSettings;
 
-procedure ExportWpts(const GPXRoot: TXmlVsNode; const CdsExploreDb: TClientDataSet);
+constructor TExpl_Object.Create(ACds: TClientDataset);
+begin
+  Expl_Id := ACds.FieldByName('id').AsInteger;
+  Expl_Type := ACds.FieldByName('type').AsInteger;
+  Expl_Name := Acds.FieldByName('name').DisplayText;
+end;
+
+//procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
+//var
+//  JSONMetaValue: TJSONValue;
+//  JSONMetaObject: TJSONObject;
+//  JSONPair: TJSONPair;
+//begin
+//  AStrings.Clear;
+//  JSONMetaValue := TJSONObject.ParseJSONValue(JsonString);
+//  if (JSONMetaValue = nil) then
+//    exit;
+//  try
+//    if (JSONMetaValue is TJSONObject) then
+//    begin
+//      JSONMetaObject := JSONMetaValue as TJSONObject;
+//      for JSONPair in JSONMetaObject do
+//        AStrings.AddPair(JSONPair.JsonString.ToString, JSONPair.JSonValue.ToString);
+//    end;
+//    AStrings.Add('');
+//  finally
+//    JSONMetaValue.Free;
+//  end;
+//end;
+
+procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
+var
+  JSONMetaValue: TJSONValue;
+begin
+  AStrings.Clear;
+  JSONMetaValue := TJSONObject.ParseJSONValue(JsonString);
+  try
+    if (JSONMetaValue <> nil) then
+      AStrings.Text := JSONMetaValue.Format(2);
+  finally
+    JSONMetaValue.Free;
+  end;
+end;
+
+procedure ExportWpts(const GPXRoot: TXmlVsNode;
+                     const CdsExploreDb: TClientDataSet;
+                     const Filter: integer = -1);
 var
   Wpt: TXmlVSNode;
 begin
@@ -69,18 +127,26 @@ begin
   CdsExploreDb.First;
   while not CdsExploreDb.Eof do
   begin
+    if (Filter > -1) and
+       (Filter <> CdsExploreDb.FieldByName('ID').AsInteger) then
+    begin
+      CdsExploreDb.Next;
+      continue;
+    end;
+
     Wpt := GPXRoot.AddChild('wpt');
-    Wpt.SetAttribute('lat' , Coord2Float(CdsExploreDb.FieldByName('lat').AsInteger));
-    Wpt.SetAttribute('lon' , Coord2Float(CdsExploreDb.FieldByName('lon').AsInteger));
+    Wpt.SetAttribute('lat', Coord2Float(CdsExploreDb.FieldByName('lat').AsInteger));
+    Wpt.SetAttribute('lon', Coord2Float(CdsExploreDb.FieldByName('lon').AsInteger));
     Wpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(CdsExploreDb.FieldByName('Creation_date').AsInteger), false);
     Wpt.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
     Wpt.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
-
     CdsExploreDb.Next;
   end;
 end;
 
-procedure ExportRtes(const GPXRoot: TXmlVsNode; const CdsExploreDb: TClientDataSet);
+procedure ExportRtes(const GPXRoot: TXmlVsNode;
+                     const CdsExploreDb: TClientDataSet;
+                     const Filter: integer = -1);
 var
   Rte, RtePt, ExtPt, ViaPt: TXmlVSNode;
   MetaData: TField;
@@ -115,6 +181,13 @@ begin
 
   while not CdsExploreDb.Eof do
   begin
+    if (Filter > -1) and
+       (Filter <> CdsExploreDb.FieldByName('ID').AsInteger) then
+    begin
+      CdsExploreDb.Next;
+      continue;
+    end;
+
     Rte := GPXRoot.AddChild('rte');
     Rte.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
     Rte.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
@@ -185,7 +258,9 @@ begin
   end;
 end;
 
-procedure ExportTrks(const GPXRoot: TXmlVsNode; const CdsExploreDb: TClientDataSet);
+procedure ExportTrks(const GPXRoot: TXmlVsNode;
+                     const CdsExploreDb: TClientDataSet;
+                     const Filter: integer = -1);
 var
   TmpGarminDevice: TGarminDevice;
   GarminModel: TGarminModel;
@@ -235,6 +310,13 @@ begin
 
     while not CdsExploreDb.Eof do
     begin
+      if (Filter > -1) and
+         (Filter <> CdsExploreDb.FieldByName('ID').AsInteger) then
+      begin
+        CdsExploreDb.Next;
+        continue;
+      end;
+
       Trk := GPXRoot.AddChild('trk');
       Trk.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
       Trk.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
@@ -288,20 +370,21 @@ begin
 end;
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
-                           const GPXFileName: string);
+                           const GPXFileName: string;
+                           const Filter: integer = -1);
 var
   GPXXml: TXmlVSDocument;
   GPXRoot: TXmlVSNode;
 begin
-
   GPXXml := TXmlVSDocument.Create;
   GPXRoot := InitGarminGpx(GPXXml);
   try
-    ExportWpts(GPXRoot, CdsExploreDb);
-    ExportRtes(GPXRoot, CdsExploreDb);
-    ExportTrks(GPXRoot, CdsExploreDb);
-
+    ExportWpts(GPXRoot, CdsExploreDb, Filter);
+    ExportRtes(GPXRoot, CdsExploreDb, Filter);
+    ExportTrks(GPXRoot, CdsExploreDb, Filter);
   finally
+    CdsExploreDb.Filter := '';
+    CdsExploreDb.Filtered := false;
     GPXXml.SaveToFile(GPXFileName);
     GPXXml.Free;
   end;

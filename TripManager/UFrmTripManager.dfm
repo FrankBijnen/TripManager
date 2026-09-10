@@ -131,6 +131,7 @@ object FrmTripManager: TFrmTripManager
             end>
           ItemIndex = 0
           TabOrder = 4
+          StyleElements = [seFont, seBorder]
           OnClick = BgDeviceClick
         end
         object BtnSetDefault: TButton
@@ -464,7 +465,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 727
-        Height = 430
+        Height = 428
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
@@ -627,7 +628,7 @@ object FrmTripManager: TFrmTripManager
       end
       object AdvPanel_MapBottom: TPanel
         Left = 0
-        Top = 400
+        Top = 398
         Width = 727
         Height = 30
         Align = alBottom
@@ -644,12 +645,11 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -686,7 +686,7 @@ object FrmTripManager: TFrmTripManager
         Left = 1
         Top = 29
         Width = 725
-        Height = 370
+        Height = 368
         Margins.Left = 1
         Margins.Top = 1
         Margins.Right = 1
@@ -694,7 +694,7 @@ object FrmTripManager: TFrmTripManager
         Align = alClient
         TabOrder = 2
         AllowSingleSignOnUsingOSPrimaryAccount = False
-        TargetCompatibleBrowserVersion = '117.0.2045.28'
+        TargetCompatibleBrowserVersion = '137.0.3296.44'
         UserDataFolder = '%LOCALAPPDATA%\bds.exe.WebView2'
         OnCreateWebViewCompleted = EdgeBrowser1CreateWebViewCompleted
         OnNavigationStarting = EdgeBrowser1NavigationStarting
@@ -870,7 +870,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 28
         Width = 727
-        Height = 402
+        Height = 400
         Align = alClient
         Columns = <
           item
@@ -986,29 +986,55 @@ object FrmTripManager: TFrmTripManager
       end
     end
   end
-  object PCTTripInfo: TPageControl
+  object PnlTripInfo: TPanel
     Left = 0
     Top = 275
     Width = 620
     Height = 458
-    ActivePage = TsTripGpiInfo
     Align = alLeft
+    Caption = 'Panel1'
     TabOrder = 2
-    OnResize = PCTTripInfoResize
-    object TsTripGpiInfo: TTabSheet
-      Caption = 'Trip info'
+    OnResize = PNLTripInfoResize
+    object BgTripInfo: TButtonGroup
+      Left = 1
+      Top = 1
+      Width = 618
+      Height = 26
+      Align = alTop
+      ButtonHeight = 22
+      ButtonWidth = 70
+      ButtonOptions = [gboGroupStyle, gboShowCaptions]
+      Items = <
+        item
+          Caption = 'Trip info'
+        end
+        item
+          Caption = 'Explore info'
+        end>
+      TabOrder = 1
+      StyleElements = [seFont, seBorder]
+      OnClick = BgTripInfoClick
+    end
+    object PnlTripInfoDetail: TPanel
+      Left = 1
+      Top = 27
+      Width = 618
+      Height = 430
+      Align = alClient
+      TabOrder = 0
       object VSplitterTree_Grid: TSplitter
-        Left = 241
-        Top = 22
+        Left = 242
+        Top = 23
         Width = 5
-        Height = 389
-        ExplicitTop = 0
-        ExplicitHeight = 383
+        Height = 387
+        ExplicitLeft = 495
+        ExplicitTop = 6
+        ExplicitHeight = 398
       end
       object PnlTripGpiInfo: TPanel
-        Left = 0
-        Top = 0
-        Width = 612
+        Left = 1
+        Top = 1
+        Width = 616
         Height = 22
         Align = alTop
         Caption = '-'
@@ -1024,7 +1050,7 @@ object FrmTripManager: TFrmTripManager
         StyleElements = [seBorder]
         OnDblClick = PnlTripGpiInfoDblClick
         object PnlHideGrid: TPanel
-          Left = 591
+          Left = 595
           Top = 1
           Width = 20
           Height = 20
@@ -1038,10 +1064,10 @@ object FrmTripManager: TFrmTripManager
         end
       end
       object TvTrip: TTreeView
-        Left = 0
-        Top = 22
+        Left = 1
+        Top = 23
         Width = 241
-        Height = 389
+        Height = 387
         Align = alLeft
         DoubleBuffered = True
         HideSelection = False
@@ -1053,19 +1079,20 @@ object FrmTripManager: TFrmTripManager
         StyleElements = [seFont, seBorder]
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
+        OnDeletion = TvTripDeletion
       end
       object PnlVlTripInfo: TPanel
-        Left = 246
-        Top = 22
-        Width = 366
-        Height = 389
+        Left = 247
+        Top = 23
+        Width = 370
+        Height = 387
         Align = alClient
         TabOrder = 1
         object VlTripInfo: TValueListEditor
           Left = 1
           Top = 27
-          Width = 364
-          Height = 361
+          Width = 368
+          Height = 359
           Align = alClient
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goEditing, goThumbTracking]
           PopupMenu = PopupTripInfo
@@ -1076,12 +1103,12 @@ object FrmTripManager: TFrmTripManager
           OnStringsChange = VlTripInfoStringsChange
           ColWidths = (
             150
-            208)
+            212)
         end
         object PnlVlTripInfoTop: TPanel
           Left = 1
           Top = 1
-          Width = 364
+          Width = 368
           Height = 26
           Align = alTop
           TabOrder = 1
@@ -1109,9 +1136,9 @@ object FrmTripManager: TFrmTripManager
         end
       end
       object SbPostProcess: TStatusBar
-        Left = 0
-        Top = 411
-        Width = 612
+        Left = 1
+        Top = 410
+        Width = 616
         Height = 19
         Panels = <
           item
@@ -3723,5 +3750,11 @@ object FrmTripManager: TFrmTripManager
       ShortCut = 16430
       OnClick = DeleteRoutePointClick
     end
+  end
+  object CdsExploreDb: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 1141
+    Top = 435
   end
 end

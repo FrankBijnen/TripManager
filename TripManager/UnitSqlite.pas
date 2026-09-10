@@ -327,6 +327,8 @@ begin
   try
     QTab := Db.GetTable(Query);
     ACds.Close;
+    ACds.Filter := '';
+    ACds.Filtered := false;
     ACds.DisableControls;
     ACds.ReadOnly := false;
     ACds.FieldDefs.Clear;

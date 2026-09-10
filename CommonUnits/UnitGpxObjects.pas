@@ -2553,7 +2553,7 @@ var
   RouteWayPoint, WayPoint: TXmlVSNode;
   TrackPoint: TXmlVSNode;
   RtePtExtensions: TXmlVSNode;
-  LayerId: integer;
+  TrkPtCnt, LayerId: integer;
   TrackCoords: TCoords;
 {$ENDIF}
 begin
@@ -2563,11 +2563,13 @@ begin
   if (DisplayColor = '') then
     exit;
 
+  TrkPtCnt := 0;
   for TrackPoint in Track.ChildNodes do
   begin
     if (TrackPoint.Name <> 'trkpt') then
       continue;
 
+    Inc(TrkPtCnt);
     TrackCoords.FromAttributes(TrackPoint.AttributeList);
     TrackCoords.FormatLatLon(Lat, Lon);
     TrackStringList.Add(Format('  AddTrkPoint(%s,%s);', [ Lat, Lon]));
@@ -2597,7 +2599,9 @@ begin
           LayerName := Format('Via: %s', [EscapeDQuote(Track.name)]);
           Color := 'red';
         end;
-
+//TODO Check        
+        if (TrkPtCnt = 0) then
+          TrackStringList.Add(Format('  AddTrkPoint(%s,%s);', [ Lat, Lon]));
         TrackStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
                                    [LayerId,
                                     LayerName,
@@ -2786,8 +2790,10 @@ end;
 procedure TGPXFile.DoCreateOSMPoints;
 var
   TracksProcessed: TXmlVSNodeList;
-  Track : TXmlVSNode;
+  WayPoint, Track : TXmlVSNode;
   TrackId: integer;
+  WptCoords: TCoords;
+  Lat, Lon: string;
   TrackPointList: TStringList;
 begin
   FOutStringList.Clear;
@@ -2800,6 +2806,21 @@ begin
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       FOutStringList.AddStrings(TrackPointList);
     end;
+//TODO Check    
+    for WayPoint in WayPointList do
+    begin
+        WptCoords.FromAttributes(WayPoint.AttributeList);
+        WptCoords.FormatLatLon(Lat, Lon);
+
+        FOutStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
+                               [TrackId,
+                                'Wpt',
+                                FindSubNodeValue(WayPoint, 'name'),
+                                Lat,
+                                Lon,
+                                'green']));
+    end;
+
   finally
     TrackPointList.Free;
     TracksProcessed.Free;
