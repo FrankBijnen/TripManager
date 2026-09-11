@@ -628,7 +628,7 @@ object FrmTripManager: TFrmTripManager
       end
       object AdvPanel_MapBottom: TPanel
         Left = 0
-        Top = 398
+        Top = 400
         Width = 727
         Height = 30
         Align = alBottom
@@ -645,11 +645,12 @@ object FrmTripManager: TFrmTripManager
           Left = 116
           Top = 3
           Width = 35
-          Height = 13
+          Height = 24
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -686,7 +687,7 @@ object FrmTripManager: TFrmTripManager
         Left = 1
         Top = 29
         Width = 725
-        Height = 368
+        Height = 370
         Margins.Left = 1
         Margins.Top = 1
         Margins.Right = 1
@@ -1155,7 +1156,6 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1360
     Height = 25
-    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1163,7 +1163,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
+    Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

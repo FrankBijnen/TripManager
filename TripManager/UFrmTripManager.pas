@@ -445,6 +445,7 @@ type
     procedure LoadTripOnMap(CurrentTrip: TTripList; Id: string; Zoom: boolean = true);
     procedure LoadGpiOnMap(PoiGroupList: TPOIGroupList; Id: string);
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
+    function HasExploreData: boolean;
     procedure LoadExploreOnMap(AnExplore: TObject);
     procedure AddToMap(FileName: string);
     procedure DeviceFilesOnMap(Tag: integer);
@@ -1401,16 +1402,20 @@ begin
   PopupTripEdit.Popup(Pt.X, Pt.Y);
 end;
 
+function TFrmTripManager.HasExploreData: boolean;
+begin
+  result := (BgTripInfo.ItemIndex = 1) and
+            (CdsExploreDb.State in [dsBrowse]) and
+            (TvTrip.Selected <> nil) and
+            (TvTrip.Selected.Data <> nil) and
+            (TObject(TvTrip.Selected.Data) is TExpl_Object);
+end;
+
 procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
 begin
   SaveTrip.Filter := '*.csv|*.csv';
   SaveTrip.InitialDir := ShellTreeView1.Path;
-//TODO Check  
-  if (BgTripInfo.ItemIndex = 1) and
-     (CdsExploreDb.State in [dsBrowse]) and
-     (TvTrip.Selected <> nil) and
-     (TvTrip.Selected.Data <> nil) and
-     (TObject(TvTrip.Selected.Data) is TExpl_Object) then
+  if (HasExploreData) then
   begin
     if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, [])) then
       SaveTrip.FileName := ChangeFileExt(CdsExploreDb.FieldByName('name').AsString, '.csv')
@@ -1431,12 +1436,7 @@ var
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
-//TODO Check  
-  if (BgTripInfo.ItemIndex = 1) and
-     (CdsExploreDb.State in [dsBrowse]) and
-     (TvTrip.Selected <> nil) and
-     (TvTrip.Selected.Data <> nil) and
-     (TObject(TvTrip.Selected.Data) is TExpl_Object) then
+  if (HasExploreData) then
   begin
     if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, [])) then
       SaveTrip.FileName := ChangeFileExt(CdsExploreDb.FieldByName('name').AsString, '.gpx')
@@ -1988,7 +1988,6 @@ begin
   begin
     if (FrmTripEditor.Showing) then
     begin
-      //TODO Keep?
       if (Parm1 <> FMapZoom) then
         breakpoint;
       FMapZoom := Parm1;
@@ -2079,17 +2078,6 @@ begin
       else
         MapRequest(EditMapCoords.Text, Parm1 + ' ' + OSM_LeftClick, GeoSearchTimeOut);
     end;
-
-//TODO Keep?
-//    if (FrmTripEditor.Showing) then
-//    begin
-//      if (ContainsText(Parm1, 'ShiftAlt')) then
-//       DeleteRoutePointClick(DeleteRoutePoint)
-//      else if (ContainsText(Parm1, 'Alt')) then
-//       InsertRoutePointClick(InsertRoutePoint)
-//      else if (ContainsText(Parm1, 'Shift')) then
-//       MoveRoutePointClick(MoveRoutePoint);
-//    end;
 
     exit;
   end;
@@ -3581,6 +3569,7 @@ begin
     Rc := FindNext(Fs);
   end;
   FindClose(Fs);
+  SetupBgTripInfo(BgTripInfoCaption);
 end;
 
 procedure TFrmTripManager.ClearSelHexEdit;
@@ -3670,7 +3659,6 @@ begin
      (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) or
      (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
   begin
-//TODO LoadTrip
     CopyFileToTmp(LstFiles.Selected);
     if (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
       LoadGpiFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
@@ -5696,7 +5684,6 @@ begin
 
   TsSQlite.TabVisible := false;
   SetupBgTripInfo(BgTripInfoCaption);
-//TODO load
   ATripList.Clear;
   if (Assigned(APOIGroupList)) then
     APOIGroupList.Clear;
@@ -5803,7 +5790,6 @@ begin
       ATripList.Clear;
     if (Assigned(AFitInfo)) then
       AFitInfo.Clear;
-//TODO LOAD
     SetupBgTripInfo(BgPoiInfoCaption);
     AStream := TBufferedFileStream.Create(FileName, fmOpenRead);
 
@@ -5869,7 +5855,6 @@ begin
   if (Assigned(APOIGroupList)) then
     APOIGroupList.Clear;
 
-//TODO Load
   SetupBgTripInfo(BgFitInfoCaption);
   TvTrip.LockDrawing;
   TvTrip.items.BeginUpdate;
@@ -5927,6 +5912,7 @@ begin
   ReAlignEdgeBrowser;
 end;
 
+//TODO LOAD
 procedure TFrmTripManager.LoadExploreDb;
 var
   CurType: integer;
@@ -5937,13 +5923,11 @@ begin
   CrWait := LoadCursor(0, IDC_WAIT);
   CRNormal := SetCursor(CrWait);
   try
-//TODO Check
     if (Assigned(ATripList)) then
       ATripList.Clear;
     if (Assigned(AFitInfo)) then
       AFitInfo.Clear;
 
-//TODO LOAD
     TvTrip.Items.BeginUpdate;
     TvTrip.LockDrawing;
     VlTripInfo.Strings.BeginUpdate;

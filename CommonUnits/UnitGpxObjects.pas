@@ -2553,7 +2553,8 @@ var
   RouteWayPoint, WayPoint: TXmlVSNode;
   TrackPoint: TXmlVSNode;
   RtePtExtensions: TXmlVSNode;
-  TrkPtCnt, LayerId: integer;
+  LayerId: integer;
+  HasTrackPts: boolean;
   TrackCoords: TCoords;
 {$ENDIF}
 begin
@@ -2563,13 +2564,13 @@ begin
   if (DisplayColor = '') then
     exit;
 
-  TrkPtCnt := 0;
+  HasTrackPts := false;
   for TrackPoint in Track.ChildNodes do
   begin
     if (TrackPoint.Name <> 'trkpt') then
       continue;
 
-    Inc(TrkPtCnt);
+    HasTrackPts := true;
     TrackCoords.FromAttributes(TrackPoint.AttributeList);
     TrackCoords.FormatLatLon(Lat, Lon);
     TrackStringList.Add(Format('  AddTrkPoint(%s,%s);', [ Lat, Lon]));
@@ -2599,8 +2600,7 @@ begin
           LayerName := Format('Via: %s', [EscapeDQuote(Track.name)]);
           Color := 'red';
         end;
-//TODO Check        
-        if (TrkPtCnt = 0) then
+        if (HasTrackPts = false) then // Draw straight lines between route points if no track avail.
           TrackStringList.Add(Format('  AddTrkPoint(%s,%s);', [ Lat, Lon]));
         TrackStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
                                    [LayerId,
@@ -2806,7 +2806,7 @@ begin
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       FOutStringList.AddStrings(TrackPointList);
     end;
-//TODO Check    
+    //TODO Waypoints are always shown now. Need to select in FrmSelectGpx?
     for WayPoint in WayPointList do
     begin
         WptCoords.FromAttributes(WayPoint.AttributeList);
