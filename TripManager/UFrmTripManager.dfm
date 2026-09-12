@@ -465,7 +465,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 727
-        Height = 428
+        Height = 430
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
@@ -871,7 +871,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 28
         Width = 727
-        Height = 400
+        Height = 402
         Align = alClient
         Columns = <
           item
@@ -1080,7 +1080,6 @@ object FrmTripManager: TFrmTripManager
         StyleElements = [seFont, seBorder]
         OnChange = TvTripChange
         OnCustomDrawItem = TvTripCustomDrawItem
-        OnDeletion = TvTripDeletion
       end
       object PnlVlTripInfo: TPanel
         Left = 247
@@ -1156,6 +1155,7 @@ object FrmTripManager: TFrmTripManager
     Top = 0
     Width = 1360
     Height = 25
+    UseSystemFont = False
     ActionManager = ActionManager
     Color = clMenuBar
     ColorMap.DisabledFontColor = 10461087
@@ -1163,7 +1163,7 @@ object FrmTripManager: TFrmTripManager
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
+    Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Segoe UI'
     Font.Style = []

@@ -71,7 +71,7 @@ type
     function AddressFromCoords(const Lat, Lon: string): string;
     procedure LookUpAddress;
     procedure CoordinatesApplied(Sender: TObject; Coords: string);
-    procedure ImportFromGPX(const GPXFile: string);
+    function ImportFromGPX(const GPXFile: string): boolean;
     function Trk2RtPreview(GPXFileObj: TObject; UpdateDb: boolean): integer;
     function Trk2RtImportFromGPX(const GPXOrKmlFile: string; const UpdateDB: boolean = false): integer;
     procedure ExportToGPX(const GPXFile: string);
@@ -755,7 +755,7 @@ begin
   DmRoutePoints.CdsRoutePoints.Post;
 end;
 
-procedure TDmRoutePoints.ImportFromGPX(const GPXFile: string);
+function TDmRoutePoints.ImportFromGPX(const GPXFile: string): boolean;
 var
   CrNormal,CrWait: HCURSOR;
   RoutePoints, RoutePoint: TXmlVSNode;
@@ -763,6 +763,7 @@ var
   SelectedItem: Char;
   GPXFileObj: TGPXFile;
 begin
+  result := false;
   CrWait := LoadCursor(0,IDC_WAIT);
   CrNormal := SetCursor(CrWait);
   GPXFileObj := TGPXFile.Create(GPXFile, OnSetAnalyzePrefs, nil);
@@ -812,6 +813,7 @@ begin
         if Assigned(OnRouteUpdated) then
           OnRouteUpdated(Self);
       end;
+      result := true;
     end;
   finally
     GPXFileObj.Free;

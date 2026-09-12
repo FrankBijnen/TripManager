@@ -26,6 +26,9 @@ const
   Expl_ItemTable    = 'Items';
   Expl_Query        = 'select * from ' + Expl_ItemTable + ' order by type, name';
   Expl_MaxElevation = 10000;
+  Expl_WptType      = 1;
+  Expl_TrkType      = 2;
+  Expl_RteType      = 4;
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;
@@ -122,7 +125,7 @@ procedure ExportWpts(const GPXRoot: TXmlVsNode;
 var
   Wpt: TXmlVSNode;
 begin
-  cdsExploreDb.Filter := 'Type=1';
+  cdsExploreDb.Filter := Format('Type=%d', [Expl_WptType]);
   cdsExploreDb.Filtered := true;
   CdsExploreDb.First;
   while not CdsExploreDb.Eof do
@@ -169,7 +172,7 @@ var
   Cnt: integer;
   ViaCnt: integer;
 begin
-  cdsExploreDb.Filter := 'Type=4';
+  cdsExploreDb.Filter := Format('Type=%d', [Expl_RteType]);
   cdsExploreDb.Filtered := true;
   CdsExploreDb.First;
   Route_points := CdsExploreDb.FindField('Route_points');
@@ -277,7 +280,7 @@ var
   Expl_TrackPoint: TExpl_TrackPoint;
   SavePos: int64;
 begin
-  cdsExploreDb.Filter := 'Type=2';
+  cdsExploreDb.Filter := Format('Type=%d', [Expl_TrkType]);
   cdsExploreDb.Filtered := true;
   CdsExploreDb.First;
 

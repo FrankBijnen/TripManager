@@ -111,9 +111,7 @@ type
     FTripFileUpdated: TTripFileUpdate;
     FRoutePointsShowing: TRoutePointsShowing;
     FTripFileCalculated: TTripGPXFileEvent;
-    CurrentGpxFolderId: string;
-    CurrentGPXFolder: string;
-    procedure SendGPXFile(GPXFile: string);
+    DeviceFolders: array[0..2] of string;
     procedure CopyToClipBoard(Cut: boolean);
     procedure SaveChanges;
   public
@@ -123,8 +121,10 @@ type
     CurFile: string;
     CurNewFile: boolean;
     CurIsDeviceFile: boolean;
+    CurIsExplore: boolean;
     CurrentDevice: TObject;
     CurModel: TTripModel;
+    procedure SendDeviceFile(FolderId: integer; DevFile: string);
     property OnTripFileCanceled: TTripFileUpdate read FTripFileCanceled write FTripFileCanceled;
     property OnTripFileUpdating: TTripFileUpdate read FTripFileUpdating write FTripFileUpdating;
     property OnTripFileUpdated: TTripFileUpdate read FTripFileUpdated write FTripFileUpdated;
@@ -180,9 +180,6 @@ end;
 
 procedure TFrmTripEditor.BtnOkClick(Sender: TObject);
 begin
-  if (fsModal in FormState) then
-    exit;
-
   SaveChanges;
 
   if Assigned(FTripFileUpdated) then
@@ -360,7 +357,6 @@ end;
 procedure TFrmTripEditor.FormShow(Sender: TObject);
 var
   ModelIndex: integer;
-  SubKey: string;
 begin
 // Clear treeview to avoid AV's when the TripList's items are deleted
   if Assigned(FTripFileUpdating) then
@@ -388,20 +384,29 @@ begin
   else
     LblRoutePref.Cursor := TCursor(crHandPoint);
 
-  CurrentGPXFolder := '';
-  CurrentGpxFolderId := '';
+  DeviceFolders[0] := '';
+  DeviceFolders[1] := '';
+  DeviceFolders[2] := '';
   if (Assigned(CurrentDevice)) and
      (GetRegistry(Reg_EnableGpxFuncs, false)) then
   begin
     ModelIndex := TModelConv.GetCurrentDevice;
-    SubKey := TModelConv.GetDefaultDevice(ModelIndex);
-    CurrentGPXFolder := TModelConv.GetKnownGarminPath(CurrentDevice,
-                                                     Reg_PrefDevGpxFolder_Key,
-                                                     ModelIndex,
-                                                     1);
-    CurrentGpxFolderId := TBase_Device(CurrentDevice).PathId[CurrentGPXFolder];
+    DeviceFolders[0] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                      Reg_PrefDevTripsFolder_Key,
+                                                      ModelIndex,
+                                                      0);
+    DeviceFolders[1] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                      Reg_PrefDevGpxFolder_Key,
+                                                      ModelIndex,
+                                                      1);
+    SendTo.Caption := 'Send to: ' + DeviceFolders[1];
+    DeviceFolders[2] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                      Reg_PrefDevPoiFolder_Key,
+                                                      ModelIndex,
+                                                      2);
+
   end;
-  SendTo.Caption := 'Send to: ' + CurrentGPXFolder;
+
   WarnOverWrite := mrNone;
 end;
 
@@ -493,7 +498,7 @@ procedure TFrmTripEditor.PopupGPXPopup(Sender: TObject);
 begin
   ExportCalculated.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
   SendTo.Enabled := (Assigned(CurrentDevice)) and
-                    (CurrentGpxFolderId <> '');
+                    (DeviceFolders[1] <> '');
 end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);
@@ -521,18 +526,19 @@ begin
   end;
 end;
 
-procedure TFrmTripEditor.SendGPXFile(GPXFile: string);
+procedure TFrmTripEditor.SendDeviceFile(FolderId: integer; DevFile: string);
 var
   BaseDevice: TBase_Device;
-  CurrentObjId: string;
+  CurrentObjId, DevFolderId: string;
   NFile: string;
 begin
   BaseDevice := TBase_Device(CurrentDevice);
   if (Assigned(BaseDevice) and
       BaseDevice.CheckDevice) then
   begin
-    NFile := ExtractFileName(GPXFile);
-    CurrentObjId := BaseDevice.FileId[CurrentGpxFolderId, NFile];
+    NFile := ExtractFileName(DevFile);
+    DevFolderId := TBase_Device(CurrentDevice).PathId[DeviceFolders[FolderId]];
+    CurrentObjId := BaseDevice.FileId[DevFolderId, NFile];
     if (CurrentObjId <> '') then
     begin
       TBase_Device.ShowWarnOverWrite(NFile, WarnOverWrite);
@@ -541,9 +547,9 @@ begin
       if (BaseDevice.DelFile(CurrentObjId) = false) then
         raise exception.Create(Format(MTP_ERR_Delete_Failed, [NFile]));
     end;
-    if (BaseDevice.TransferNewFile(GPXFile, CurrentGpxFolderId) = '') then
+    if (BaseDevice.TransferNewFile(DevFile, DevFolderId) = '') then
       raise exception.Create(Format(MTP_ERR_Overwrite_Failed, [NFile]));
-    ShowMessage(Format(MTP_INF_SentTo, [NFile, CurrentGpxFolder]));
+    ShowMessage(Format(MTP_INF_SentTo, [NFile, DeviceFolders[FolderId]]));
   end;
 end;
 
@@ -554,7 +560,7 @@ begin
   SaveChanges;
   AGPXFile := ChangeFileExt(GetRoutesTmp + DmRoutePoints.CdsRouteTripName.AsString, '.gpx');
   DmRoutePoints.ExportToGPX(AGPXFile);
-  SendGPXFile(AGPXFile);
+  SendDeviceFile(1, AGPXFile);
 end;
 
 procedure TFrmTripEditor.TbMoveUpClick(Sender: TObject);
