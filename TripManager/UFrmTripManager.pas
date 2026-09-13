@@ -2063,18 +2063,21 @@ begin
     if (Parm2 <> '') then
       LblRoute.Text := Parm2;
     if (Parm3 <> '') then
-      LblRoutePoint.Text := Parm3;
-
-    if (FrmTripEditor.Showing) and
-       (CtrlPressed or ShiftPressed or AltPressed) then
     begin
-      DmRoutePoints.CdsRoutePoints.Locate('Name', LblRoutePoint.Text, [loCaseInsensitive]);
-
-      if (ChkZoomToPoint.Checked = false) then
-        MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
-                   DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
-                   RoutePointTimeOut);
+      LblRoutePoint.Text := Parm3;
+      if (FrmTripEditor.Showing) and
+         (CtrlPressed) then
+      begin
+        if (DmRoutePoints.CdsRoutePoints.Locate('Name', LblRoutePoint.Text, [loCaseInsensitive])) then
+        begin
+          if (ChkZoomToPoint.Checked = false) then
+            MapRequest(DmRoutePoints.CdsRoutePoints.FieldByName('Coords').AsString,
+                       DmRoutePoints.CdsRoutePoints.FieldByName('Name').AsString,
+                       RoutePointTimeOut);
+        end;
+      end;
     end;
+
     exit;
   end;
 
@@ -2082,6 +2085,7 @@ begin
   begin
     if (Parm1 <> '') then
       SetRegistry(Reg_BaseLayer_Key, Parm1);
+
     exit;
   end;
 
