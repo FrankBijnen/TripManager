@@ -82,6 +82,7 @@ begin
   Expl_Name := Acds.FieldByName('name').DisplayText;
 end;
 
+//TODO: Format JSON?
 //procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
 //var
 //  JSONMetaValue: TJSONValue;
@@ -151,7 +152,7 @@ procedure ExportRtes(const GPXRoot: TXmlVsNode;
                      const CdsExploreDb: TClientDataSet;
                      const Filter: integer = -1);
 var
-  Rte, RtePt, ExtPt, ViaPt: TXmlVSNode;
+  Rte, RtePt, ExtPt, RteExtPt, ViaPt: TXmlVSNode;
   MetaData: TField;
   Route_points: TField;
   JSONRouteValue: TJSONValue;
@@ -202,8 +203,11 @@ begin
 
     if not (IntToIdent(JSONMetaTruckType.AsType<integer>, TransportMode, BCTransportModeMap)) then
       TransportMode := NotApplicable;
-    Rte.AddChild('extensions').AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
-
+    ExtPt := Rte.AddChild('extensions');
+    RteExtPt := ExtPt.AddChild('gpxx:RouteExtension');
+    RteExtPt.AddChild('gpxx:IsAutoNamed').NodeValue := 'false';
+    RteExtPt.AddChild('gpxx:DisplayColor').NodeValue := Explore2GPXColor(CdsExploreDb.FieldByName('Color').AsInteger);
+    ExtPt.AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
     try
       Cnt := 0;
       ViaCnt := 0;
@@ -323,7 +327,10 @@ begin
       Trk := GPXRoot.AddChild('trk');
       Trk.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
       Trk.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
+      Trk.AddChild('extensions').AddChild('gpxx:TrackExtension').AddChild('gpxx:DisplayColor').NodeValue :=
+        Explore2GPXColor(CdsExploreDb.FieldByName('Color').AsInteger);
       TrkSeg  := Trk.AddChild('trkseg');
+
       MemoryStream.Size := Length(TrackPoints.AsBytes);
       MemoryStream.Seek(0, TSeekOrigin.soBeginning);
       MemoryStream.WriteBuffer(TrackPoints.AsBytes, Length(TrackPoints.AsBytes));

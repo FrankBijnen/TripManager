@@ -1520,10 +1520,10 @@ object FrmTripManager: TFrmTripManager
       OnClick = ExportExploredbtoGPX1Click
     end
   end
-  object TripGpiTimer: TTimer
+  object TripGpiFitExplTimer: TTimer
     Enabled = False
-    Interval = 100
-    OnTimer = TripGpiTimerTimer
+    Interval = 200
+    OnTimer = TripGpiFitExplTimerTimer
     Left = 214
     Top = 66
   end

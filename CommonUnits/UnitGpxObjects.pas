@@ -152,6 +152,7 @@ type
     function GetSelected(const Preferred: string): TXmlVSNodeList;
     function GetSelectedTracks: TXmlVSNodeList;
     function GetSelectedRoutes: TXmlVSNodeList;
+    function GetSelectedWayPts: boolean;
     procedure Track2OSMTrackPoints(Track: TXmlVSNode;
                                    var TrackId: integer;
                                    TrackStringList: TStringList);
@@ -2140,11 +2141,14 @@ begin
         if (WayPointNotProcessed(WayPoint)) then
           CloneNode(WayPoint, WptRoot.AddChild(WayPoint.Name));
       end;
-      OutFile := FOutDir +
-           'WayPoints_' +
-           FBaseFile +
-           ExtractFileExt(FGPXFile);
-      WptXml.SaveToFile(OutFile);
+      if (WptRoot.ChildNodes.Count > 0) then
+      begin
+        OutFile := FOutDir +
+             'WayPoints_' +
+             FBaseFile +
+             ExtractFileExt(FGPXFile);
+        WptXml.SaveToFile(OutFile);
+      end;
     end;
 
   // Create Way points, from Via, or Shaping points in routes.
@@ -2172,11 +2176,14 @@ begin
           end;
         end;
 
-        OutFile := FOutDir +
-                   'WayPoints_' +
-                   EscapeFileName(RouteWayPoints.Name) +
-                   ExtractFileExt(FGPXFile);
-        WptXml.SaveToFile(OutFile);
+        if (WptRoot.ChildNodes.Count > 0) then
+        begin
+          OutFile := FOutDir +
+                     'WayPoints_' +
+                     EscapeFileName(RouteWayPoints.Name) +
+                     ExtractFileExt(FGPXFile);
+          WptXml.SaveToFile(OutFile);
+        end;
       end;
     end;
   finally
@@ -2544,6 +2551,12 @@ begin
   result := GetSelected(RteOrigin);
 end;
 
+// Waypoints selected. (all or none)
+function TGPXFile.GetSelectedWayPts: boolean;
+begin
+  result := FrmSelectGpx.WayPtsSelected;
+end;
+
 procedure TGPXFile.Track2OSMTrackPoints(Track: TXmlVSNode;
                                         var TrackId: integer;
                                         TrackStringList: TStringList);
@@ -2806,21 +2819,23 @@ begin
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
       FOutStringList.AddStrings(TrackPointList);
     end;
-    //TODO Waypoints are always shown now. Need to select in FrmSelectGpx?
-    for WayPoint in WayPointList do
+
+    if (GetSelectedWayPts) then
     begin
-        WptCoords.FromAttributes(WayPoint.AttributeList);
-        WptCoords.FormatLatLon(Lat, Lon);
+      for WayPoint in WayPointList do
+      begin
+          WptCoords.FromAttributes(WayPoint.AttributeList);
+          WptCoords.FormatLatLon(Lat, Lon);
 
-        FOutStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
-                               [TrackId,
-                                'Wpt',
-                                FindSubNodeValue(WayPoint, 'name'),
-                                Lat,
-                                Lon,
-                                'green']));
+          FOutStringList.Add(Format('  AddRoutePoint(%d, "%s", "%s", %s, %s, "%s");',
+                                 [TrackId,
+                                  'Wpt',
+                                  FindSubNodeValue(WayPoint, 'name'),
+                                  Lat,
+                                  Lon,
+                                  ProcessOptions.DefWayPointColor]));
+      end;
     end;
-
   finally
     TrackPointList.Free;
     TracksProcessed.Free;
@@ -3282,6 +3297,7 @@ class procedure TGPXFile.PerformFunctions(const AllFuncs: array of TGPXFunc;
                                           const SeqNo: cardinal = 0);
 var
   Func: TGPXFunc;
+  TagsToShow: TTagsToShow;
   GpxFileObj: TGPXFile;
   SubCaption: string;
   CrWait, CrNormal: HCURSOR;
@@ -3327,6 +3343,7 @@ begin
     GpxFileObj.AnalyzeGpx;
 
     SubCaption := '';
+    TagsToShow := TTagsToShow.RteTrk;
     for Func in AllFuncs do
     begin
       case Func of
@@ -3345,7 +3362,10 @@ begin
         CreateKurviger:
           SubCaption := AddSubCaption(SubCaption, 'Kurviger');
         CreateOSMPoints:
-          SubCaption := AddSubCaption(SubCaption, 'Map');
+          begin
+            SubCaption := AddSubCaption(SubCaption, 'Map');
+            TagsToShow := TTagsToShow.WptRteTrk;
+          end;
         CreateFITPoints:
           SubCaption := AddSubCaption(SubCaption, 'Fit');
         CreateTrips:
@@ -3354,7 +3374,7 @@ begin
     end;
     if (SubCaption <> '') then
     begin
-      if (not GpxFileObj.ShowSelectTracks(TTagsToShow.RteTrk,
+      if (not GpxFileObj.ShowSelectTracks(TagsToShow,
                                           ExtractFileName(GPXFile),
                                           Format('Use the Checkboxes to select Routes/Tracks to add to %s', [SubCaption]),
                                           '*', nil)) then

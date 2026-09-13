@@ -126,7 +126,9 @@ type
     DefTrackColor: string;                    // Blue, Used if no Displaycolor found in <trk>
     TrackColor: string;                       // '', The Track color possible changed by user. Saved in Registry
 
-    DefWaypointSymbol: string;                // Flag, Green, Default symbol for Via and Shaping points in GPX
+    DefWayPointSymbol: string;                // Flag, Green, Default symbol for Via and Shaping points in GPX
+//TODO configurable
+    DefWayPointColor: string;                 // Green.
     CatSymbol: string;                        // Symbol:, used in created Waypoints/GPI
     CatGPX: string;                           // GPX:, used in created Waypoints/GPI from Original Way points
     CatRoute: string;                         // ROUTE:, used in created Waypoints/GPI from Via/Shaping points
@@ -274,7 +276,8 @@ begin
   DefTrackColor := 'Blue';
   TrackColor := '';
 
-  DefWaypointSymbol := 'Flag, Green';
+  DefWayPointSymbol := 'Flag, Green';
+  DefWayPointColor := 'Green';
   CatSymbol := TProcessOptions.GetCatSymbol + ':';
   CatGPX := 'GPX:';
   CatRoute := 'Route:';

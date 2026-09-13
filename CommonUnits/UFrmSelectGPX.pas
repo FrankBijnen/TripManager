@@ -58,6 +58,7 @@ type
                          const AGPXObject: TObject;
                          const AGetPreviewInfo: TOnGetPreviewInfo);
     function TrackSelectedColor(const TrackName, RteTrk: string): string;
+    function WayPtsSelected: boolean;
     function CheckedCount: integer;
   end;
 
@@ -108,9 +109,13 @@ begin
 {$ENDIF}
         LvTracks.Columns[TypeColumn].Caption := 'Wpt/Trk';
       end;
-    TTagsToShow.WptRteTrk:    // TripEditor. Trk2Rt + Import from GPX
+    TTagsToShow.WptRteTrk:    // TripEditor. Trk2Rt + Import from GPX  FrmTripManager. Add to Map
       begin
 {$IFDEF TRIPOBJECTS}
+        PnlColor.Visible := true;
+        LblMinTrackDist.Visible := true;
+        SpinMinTrackPtDist.Visible := true;
+
         PnlPreview.Visible := Assigned(FOnGetPreviewInfo);
 {$ENDIF}
         LvTracks.Columns[TypeColumn].Caption := 'Wpt/Rte/Trk';
@@ -158,7 +163,9 @@ begin
         CanCheck := SameText(CheckMask, '*');
     end;
     LVItem.SubItems.Add(FromRoute);
-    if (DisplayColor = '') then
+    if (SameText(FromRoute, 'Wpt')) then
+      LVItem.SubItems.Add(TGPXFile(FGPXObject).ProcessOptions.DefWayPointColor)
+    else if (DisplayColor = '') then
       LVItem.SubItems.Add(Color)
     else
       LVItem.SubItems.Add(DisplayColor);
@@ -271,8 +278,10 @@ begin
   begin
     for AnItem in LvTracks.Items do
     begin
-      if (AnItem.Checked) then
-        AnItem.SubItems[ColorSubItem] := CmbOverruleColor.Text;
+      if (SameText(AnItem.SubItems[TypeSubItem], 'Wpt')) or
+         ((AnItem.Checked) = false) then
+        continue;
+      AnItem.SubItems[ColorSubItem] := CmbOverruleColor.Text;
     end;
   end;
 end;
@@ -337,6 +346,19 @@ begin
        (SameText(LVItem.SubItems[TypeSubItem], RteTrk)) and
        (LVItem.Checked) then
       exit(LVItem.SubItems[ColorSubItem]);
+  end;
+end;
+
+function TFrmSelectGPX.WayPtsSelected: boolean;
+var
+  LVItem: TListItem;
+begin
+  result := false;
+  for LVItem in LvTracks.Items do
+  begin
+    if (SameText(LVItem.SubItems[TypeSubItem], 'Wpt')) and
+       (LVItem.Checked) then
+      exit(true);
   end;
 end;
 

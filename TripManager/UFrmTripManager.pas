@@ -126,7 +126,7 @@ type
     DeleteFiles: TMenuItem;
     N2: TMenuItem;
     Rename1: TMenuItem;
-    TripGpiTimer: TTimer;
+    TripGpiFitExplTimer: TTimer;
     N4: TMenuItem;
     Setdeparturedatetimeofselected1: TMenuItem;
     N5: TMenuItem;
@@ -288,7 +288,7 @@ type
     procedure BtnFunctionsMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SetSelectedTrips(Sender: TObject);
     procedure BtnSetDefaultClick(Sender: TObject);
-    procedure TripGpiTimerTimer(Sender: TObject);
+    procedure TripGpiFitExplTimerTimer(Sender: TObject);
     procedure DeleteFilesClick(Sender: TObject);
     procedure RenameFile(Sender: TObject);
     procedure Setdeparturedatetimeofselected1Click(Sender: TObject);
@@ -803,26 +803,9 @@ begin
 end;
 
 procedure TFrmTripManager.BgTripInfoClick(Sender: TObject);
-var
-  Ext: string;
 begin
-  case (BgTripInfo.ItemIndex) of
-    0:begin
-        if (FileExists(HexEditFile)) then
-        begin
-          Ext := ExtractFileExt(HexEditFile);
-          if (ContainsText(Ext, TripExtension)) then
-            LoadTripFile(HexEditFile, DeviceFile)
-          else if (ContainsText(Ext, GPIExtension)) then
-            LoadGpiFile(HexEditFile, DeviceFile)
-          else if (ContainsText(Ext, FitExtension)) then
-            LoadFitFile(HexEditFile, DeviceFile);
-        end;
-      end;
-    1:begin
-        LoadExploreDb;
-      end;
-  end;
+  TripGpiFitExplTimer.Enabled := false;
+  TripGpiFitExplTimer.Enabled := true;
 end;
 
 procedure TFrmTripManager.BgDeviceItemsGpxClick(Sender: TObject);
@@ -1290,10 +1273,12 @@ var
   AnItem: TBaseItem;
 begin
   result := true;
-// Create new empty triplist?
+
+  // Create triplist?
   if not Assigned(ATripList) then
     ATripList := TTripList.Create;
-// Set FrmTripEditor Params
+
+  // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
   FrmTripEditor.CurFile := HexEditFile;
   FrmTripEditor.CurIsDeviceFile := DeviceFile;
@@ -1302,16 +1287,24 @@ begin
   FrmTripEditor.CurrentDevice := CurrentDevice;
   FrmTripEditor.CurNewFile := NewFile;
 
-  ATripList.TripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);;
   if (NewFile) then
-    ATripList.CreateTemplate(FrmNewTrip.EdNewTrip.Text)
-  else if HasExploreData(Expl_RteType) then
   begin
-    FrmTripEditor.CurIsDeviceFile := true;
-    ActGpxFile := GetOSMTemp + Format('\%s_%s%s', [App_Prefix, 'Explore', '.gpx']);
-    if (FileExists(ActGpxFile)) then
+    // New triplist for selected model?
+    ATripList.TripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
+    ATripList.CreateTemplate(FrmNewTrip.EdNewTrip.Text);
+  end
+  else
+  begin
+    // Load from Explore?
+    if (HasExploreData(Expl_RteType)) then
     begin
+      ATripList.TripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
       ATripList.CreateTemplate(TExpl_Object(TvTrip.Selected.Data).Expl_Name);
+
+      ActGpxFile := GetOSMTemp + Format('\%s_%s%s', [App_Prefix, 'Explore', '.gpx']);
+      if (FileExists(ActGpxFile) = false) then
+        exit(false);
+
       HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + TExpl_Object(TvTrip.Selected.Data).Expl_Name, TripExtension);
       FrmTripEditor.CurFile := HexEditFile;
       DeviceFile := true;
@@ -1319,35 +1312,34 @@ begin
       FrmTripEditor.CurIsExplore := true;
       FrmTripEditor.CurNewFile := true;
 
-      TmRoutePreference(ATripList.GetItem(TmRoutePreference.GetKey)).AsByte := 0;
+      if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, []) = false) then
+        exit(false);
 
-      if CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, []) then
-      begin
-        JSONMetaValue := TJSONObject.ParseJSONValue(CdsExploreDb.FieldByName('METADATA').AsString);
-        try
-          if (JSONMetaValue <> nil) then
-          begin
-            AnItem := ATripList.GetItem(TmTransportationMode.GetKey);
-            JSONMetaVehicleType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('VehicleType') as TJSONValue;
-            if (AnItem <> nil) and
-               (JSONMetaVehicleType <> nil) then
-              TmTransportationMode(AnItem).AsByte := JSONMetaVehicleType.AsType<integer>;
+      JSONMetaValue := TJSONObject.ParseJSONValue(CdsExploreDb.FieldByName('METADATA').AsString);
+      try
+        if (JSONMetaValue <> nil) then
+        begin
+          AnItem := ATripList.GetItem(TmTransportationMode.GetKey);
+          JSONMetaVehicleType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('VehicleType') as TJSONValue;
+          if (AnItem <> nil) and
+             (JSONMetaVehicleType <> nil) then
+            TmTransportationMode(AnItem).AsByte := JSONMetaVehicleType.AsType<integer>;
 
-            AnItem := ATripList.GetItem(TmRoutePreference.GetKey);
-            JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
-            if (AnItem <> nil) and
-               (JSONMetaRoutePrefArray <> nil) and
-               (JSONMetaRoutePrefArray.Count > 0) then
-              TmRoutePreference(AnItem).AsByte := JSONMetaRoutePrefArray[0].AsType<integer>;
-          end;
-        finally
-          JSONMetaValue.Free;
+          AnItem := ATripList.GetItem(TmRoutePreference.GetKey);
+          JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
+          if (AnItem <> nil) and
+             (JSONMetaRoutePrefArray <> nil) and
+             (JSONMetaRoutePrefArray.Count > 0) then
+            TmRoutePreference(AnItem).AsByte := JSONMetaRoutePrefArray[0].AsType<integer>;
         end;
+      finally
+        JSONMetaValue.Free;
       end;
 
       DmRoutePoints.LoadTrip(ATripList);
       if not DmRoutePoints.ImportFromGPX(ActGpxFile) then
         exit(false);
+
       DmRoutePoints.SaveTrip;
     end;
   end;
@@ -1379,25 +1371,21 @@ begin
   else
   begin
     DmRoutePoints.OnRoutePointUpdated := nil;
-    if (FrmTripEditor.CurIsExplore) then
-      LoadExploreDb(ChangeFileExt(ExtractFileName(FrmTripEditor.CurFile), ''))
-    else
+    if (DeviceFile) and
+       (BgDevice.ItemIndex = 0) then
     begin
-      if (DeviceFile) and
-         (BgDevice.ItemIndex = 0) then
-      begin
-        // Save currently selected trip
-        if Assigned(LstFiles.Selected) then
-          CurSel := LstFiles.Selected.Index
-        else
-          CurSel := -1;
+      // Save currently selected trip
+      if Assigned(LstFiles.Selected) then
+        CurSel := LstFiles.Selected.Index
+      else
+        CurSel := -1;
 
-        PostReloadFileList;
-        // Need to (re)select?
-        if (CurSel > -1) and
-           (CurSel < LstFiles.items.Count) then
-          LstFiles.Items[CurSel].Selected := true;
-      end;
+      PostReloadFileList;
+
+      // Need to (re)select?
+      if (CurSel > -1) and
+         (CurSel < LstFiles.items.Count) then
+        LstFiles.Items[CurSel].Selected := true;
     end;
   end;
 
@@ -1431,24 +1419,11 @@ begin
   end;
 
   ATripList.ForceRecalc;
-  ATripList.SaveToFile(HexEditFile);
-  if (FrmTripEditor.CurIsExplore) then
-    FrmTripEditor.SendDeviceFile(0, HexEditFile)
+  ATripList.SaveToFile(FrmTripEditor.CurFile);
+  if (FrmTripEditor.CurIsDeviceFile) then
+    FrmTripEditor.SendDeviceFile(0, FrmTripEditor.CurFile)
   else
-  begin
-    if not (DeviceFile) then
-      BtnRefreshFileSysClick(Sender)
-    else
-    begin
-      if (FrmTripEditor.CurNewFile = false) then
-        CopyFileFromTmp(HexEditFile, LstFiles.Selected)
-      else
-      begin
-        if (CurrentDevice.TransferNewFile(HexEditFile, FSavedFolderId) = '') then
-          raise exception.Create(Format(MTP_ERR_Write_Failed, [ExtractFileName(HexEditFile)]));
-      end;
-    end;
-  end;
+    BtnRefreshFileSysClick(Sender);
 end;
 
 procedure TFrmTripManager.TripFileCalculated(Sender: TObject; GPXFile: string);
@@ -3364,13 +3339,12 @@ begin
   OsmTrack := TStringList.Create;
   try
     TGPXFile.PerformFunctions([CreateOSMPoints], ActGpxFile,
-                               SetProcessOptions.SetSkipTrackDlgPrefs, SetProcessOptions.SavePrefs,
-                               '', OsmTrack);
+                               SetProcessOptions.SetSkipTrackDlgPrefs, SetProcessOptions.SavePrefs, '', OsmTrack);
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                             [App_Prefix,
                                             FileSysTrip,
                                             ExtractFileName(ActGpxFile),
-                                          GetTracksExt]));
+                                            GetTracksExt]));
   finally
     OsmTrack.Free;
   end;
@@ -3715,26 +3689,34 @@ begin
 end;
 
 // Defer loading trips. Speeds up selecting files
-procedure TFrmTripManager.TripGpiTimerTimer(Sender: TObject);
+procedure TFrmTripManager.TripGpiFitExplTimerTimer(Sender: TObject);
 begin
   TTimer(Sender).Enabled := false;
 
-  if (LstFiles.Selected = nil) then
-    exit;
-  if TBase_Data(LstFiles.Selected.Data).IsFolder then
-    exit;
+  case BgTripInfo.ItemIndex of
+    0:
+      begin
+        if (LstFiles.Selected = nil) or
+           (TBase_Data(LstFiles.Selected.Data).IsFolder) then
+          exit;
 
-  if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) or
-     (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) or
-     (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
-  begin
-    CopyFileToTmp(LstFiles.Selected);
-    if (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
-      LoadGpiFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
-    else if (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
-      LoadFitFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
-    else
-      LoadTripFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true);
+        if (ContainsText(LstFiles.Selected.SubItems[2], TripExtension)) or
+           (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) or
+           (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
+        begin
+          CopyFileToTmp(LstFiles.Selected);
+          if (ContainsText(LstFiles.Selected.SubItems[2], GpiExtension)) then
+            LoadGpiFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
+          else if (ContainsText(LstFiles.Selected.SubItems[2], FitExtension)) then
+            LoadFitFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true)
+          else
+            LoadTripFile(IncludeTrailingPathDelimiter(CreatedTempPath) + LstFiles.Selected.Caption, true);
+        end;
+      end;
+    1:
+      begin
+        LoadExploreDb;
+      end;
   end;
 end;
 
@@ -5523,7 +5505,6 @@ begin
     exit;
   if (Item.Data = nil) then
     exit;
-
   if TBase_Data(Item.Data).IsFolder then
     exit;
 
@@ -5541,8 +5522,9 @@ end;
 
 procedure TFrmTripManager.LstFilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
-  TripGpiTimer.Enabled := false;
-  TripGpiTimer.Enabled := true;
+  BgTripInfo.ItemIndex := 0;
+  TripGpiFitExplTimer.Enabled := false;
+  TripGpiFitExplTimer.Enabled := true;
 end;
 
 procedure TFrmTripManager.MapRequest(const Coords, Desc, TimeOut: string;
@@ -5625,10 +5607,12 @@ begin
   BtnCount := 1;
   if (FileExists(GetDeviceTmp + ExploreDb)) then
     Inc(BtnCount);
-  while (BgTripInfo.Items.Count < BtnCount) do
-    BgTripInfo.Items.Add;
-  while (BgTripInfo.Items.Count > BtnCount) do
-    BgTripInfo.Items.Delete(0);
+  if (BgTripInfo.Items.Count <> BtnCount) then
+  begin
+    BgTripInfo.Items.Clear;
+    while (BgTripInfo.Items.Count < BtnCount) do
+      BgTripInfo.Items.Add;
+  end;
   BgTripInfo.Items[0].Caption := Caption;
   BgTripInfo.ItemIndex := 0;
   if (BtnCount > 1) then

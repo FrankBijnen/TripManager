@@ -64,6 +64,7 @@ function SelectDirectoryOrFile(const ACaption: string;
                                const ARoot: WideString;
                                var APath: string): boolean;
 function GPX2HTMLColor(GPXColor: string): string;
+function Explore2GPXColor(ExploreColor: integer): string;
 function GetLocaleSetting: TFormatSettings;
 function VerInfo(IncludeCompany: boolean = false): string;
 function UserAgent: string;
@@ -509,6 +510,32 @@ begin
   if (GPXColor = 'Cyan')        then exit('00ffff');
   if (GPXColor = 'White')       then exit('ffffff');
   if (GPXColor = 'Transparent') then exit('ffffff');
+end;
+
+function Explore2GPXColor(ExploreColor: integer): string;
+const
+  ExploreColors: array[0..15] of string =
+    ( 'Black',
+      'DarkRed',
+      'DarkGreen',
+      'DarkYellow',
+      'DarkBlue',
+      'DarkMagenta',
+      'DarkCyan',
+      'LightGray',
+      'DarkGray',
+      'Red',
+      'Green',
+      'Yellow',
+      'Blue',
+      'Magenta',
+      'Cyan',
+      'White' );
+begin
+  result := 'Blue';
+  if (ExploreColor >= Low(ExploreColors)) and
+     (ExploreColor <= High(ExploreColors)) then
+    result := ExploreColors[ExploreColor];
 end;
 
 function GetLocaleSetting: TFormatSettings;

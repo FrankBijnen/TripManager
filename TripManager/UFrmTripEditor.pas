@@ -533,8 +533,8 @@ var
   NFile: string;
 begin
   BaseDevice := TBase_Device(CurrentDevice);
-  if (Assigned(BaseDevice) and
-      BaseDevice.CheckDevice) then
+  if (Assigned(BaseDevice)) and
+     (BaseDevice.CheckDevice) then
   begin
     NFile := ExtractFileName(DevFile);
     DevFolderId := TBase_Device(CurrentDevice).PathId[DeviceFolders[FolderId]];
@@ -549,7 +549,6 @@ begin
     end;
     if (BaseDevice.TransferNewFile(DevFile, DevFolderId) = '') then
       raise exception.Create(Format(MTP_ERR_Overwrite_Failed, [NFile]));
-    ShowMessage(Format(MTP_INF_SentTo, [NFile, DeviceFolders[FolderId]]));
   end;
 end;
 
@@ -561,6 +560,7 @@ begin
   AGPXFile := ChangeFileExt(GetRoutesTmp + DmRoutePoints.CdsRouteTripName.AsString, '.gpx');
   DmRoutePoints.ExportToGPX(AGPXFile);
   SendDeviceFile(1, AGPXFile);
+  ShowMessage(Format(MTP_INF_SentTo, [ExtractFileName(AGPXFile), DeviceFolders[1]]));
 end;
 
 procedure TFrmTripEditor.TbMoveUpClick(Sender: TObject);

@@ -149,7 +149,7 @@ object FrmSelectGPX: TFrmSelectGPX
       Left = 466
       Top = 4
       Width = 54
-      Height = 19
+      Height = 22
       Hint = 'Can be used to filter the number of trackpoints'
       Align = alRight
       AutoSize = False
@@ -161,7 +161,6 @@ object FrmSelectGPX: TFrmSelectGPX
       Value = 1
       OnChange = SpinMinTrackPtDistChange
       OnKeyUp = SpinKeyUp
-      ExplicitHeight = 22
     end
   end
   object PnlPreview: TPanel
@@ -174,13 +173,15 @@ object FrmSelectGPX: TFrmSelectGPX
     object LblPreview: TLabel
       Left = 173
       Top = 1
-      Width = 51
-      Height = 13
+      Width = 350
+      Height = 21
       Align = alClient
       Alignment = taCenter
       Caption = 'LblPreview'
       Layout = tlCenter
       WordWrap = True
+      ExplicitWidth = 51
+      ExplicitHeight = 13
     end
     object LblPercent: TLabel
       Left = 1
