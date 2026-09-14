@@ -53,7 +53,9 @@ type
     function CheckEmptyField(Sender: TField): boolean;
     procedure SetAddressFromCoords(Sender: TObject; Coords: string);
     procedure OnSetAnalyzePrefs(Sender: TObject);
-    procedure AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
+    procedure AddRoutePoint(ARoutePoint: TXmlVSNode;
+                            FromWpt: boolean;
+                            ProcessOptions: TObject);
     procedure GetRouteCalculation(const Coords, XMLFile: string);
   public
     { Public declarations }
@@ -708,9 +710,14 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.AddRoutePoint(ARoutePoint: TXmlVSNode; FromWpt: boolean);
+procedure TDmRoutePoints.AddRoutePoint(ARoutePoint: TXmlVSNode;
+                                       FromWpt: boolean;
+                                       ProcessOptions: TObject);
 var
   ExtensionsNode, WayPointExtension, Address, AddressChild: TXmlVSNode;
+  RtePtViaPoint, RtePtCalculationMode, RtePtAdvLevel: TXmlVSNode;
+  RoutePref: TRoutePreference;
+  AdvLevel: TAdvlevel;
   Lat, Lon, AddressLine: string;
 begin
   DmRoutePoints.CdsRoutePoints.Insert;
@@ -750,7 +757,32 @@ begin
     if (DmRoutePoints.CdsRoutePointsAddress.AsString = '') then
       DmRoutePoints.CdsRoutePointsAddress.AsString := DmRoutePoints.AddressFromCoords(Lat, Lon);
     if (ExtensionsNode <> nil) then
-      DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := (ExtensionsNode.Find('trp:ViaPoint') <> nil);
+    begin
+      RtePtViaPoint := ExtensionsNode.Find('trp:ViaPoint');
+      DmRoutePoints.CdsRoutePointsViaPoint.AsBoolean := (RtePtViaPoint <> nil);
+      if (RtePtViaPoint <> nil) then
+      begin
+        RtePtCalculationMode := RtePtViaPoint.Find('trp:CalculationMode');
+        if (RtePtCalculationMode <> nil) then
+        begin
+          RoutePref := TmRoutePreference.RoutePreference(RtePtCalculationMode.NodeValue, TProcessOptions(ProcessOptions).TripModel);
+          AdvLevel := TAdvlevel.advNA;
+          if (RoutePref in [TRoutePreference.rmAdventurous]) then
+          begin
+            RtePtAdvLevel := ExtensionsNode.Find('tm:AdventurousLevel');
+            if (RtePtAdvLevel <> nil) then
+              AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue)
+            else
+            begin
+              RtePtAdvLevel := RtePtViaPoint.Find('trp:AdventurousLevel');
+              if (RtePtAdvLevel <> nil) then
+                AdvLevel := TmRoutePreference.AdvLevel(RtePtAdvLevel.NodeValue);
+            end;
+          end;
+          CdsRoutePointsRoutePref.AsInteger := (Ord(RoutePref) shl 8) + Ord(AdvLevel);
+        end;
+      end;
+    end;
   end;
   DmRoutePoints.CdsRoutePoints.Post;
 end;
@@ -793,17 +825,17 @@ begin
           'W':
             begin
               for RoutePoint in GPXFileObj.WayPointList do
-                AddRoutePoint(RoutePoint, true);
+                AddRoutePoint(RoutePoint, true, GPXFileObj.ProcessOptions);
             end;
           'R':
             begin
-              for RoutePoints in GPXFileObj.WayPointFromRouteList do
+              for RoutePoints in GPXFileObj.RouteViaPointList do
               begin
                 if (RoutePoints.NodeName <> AnItem.Caption) then
                   continue;
 
                 for RoutePoint in RoutePoints.ChildNodes do
-                  AddRoutePoint(RoutePoint, false);
+                  AddRoutePoint(RoutePoint, false, GPXFileObj.ProcessOptions);
               end;
             end;
           end;
@@ -850,7 +882,7 @@ begin
       if (UpdateDB) then
       begin
         for RoutePoint in RoutePoints.ChildNodes do
-          AddRoutePoint(RoutePoint, false);
+          AddRoutePoint(RoutePoint, false, GpxFileTrkObj.ProcessOptions);
       end;
     finally
       GpxFileTrkObj.Free;

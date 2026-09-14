@@ -1268,7 +1268,6 @@ function TFrmTripManager.EditTrip(NewFile: boolean): boolean;
 var
   ActGpxFile: string;
   JSONMetaValue: TJSONValue;
-  JSONMetaRoutePrefArray: TJSONArray;
   JSONMetaVehicleType: TJSONValue;
   AnItem: TBaseItem;
 begin
@@ -1315,6 +1314,7 @@ begin
       if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, []) = false) then
         exit(false);
 
+      // Create a new Triplist for this model. Set Transportmode and RoutePrefs
       JSONMetaValue := TJSONObject.ParseJSONValue(CdsExploreDb.FieldByName('METADATA').AsString);
       try
         if (JSONMetaValue <> nil) then
@@ -1324,22 +1324,29 @@ begin
           if (AnItem <> nil) and
              (JSONMetaVehicleType <> nil) then
             TmTransportationMode(AnItem).AsByte := JSONMetaVehicleType.AsType<integer>;
-
-          AnItem := ATripList.GetItem(TmRoutePreference.GetKey);
-          JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
-          if (AnItem <> nil) and
-             (JSONMetaRoutePrefArray <> nil) and
-             (JSONMetaRoutePrefArray.Count > 0) then
-            TmRoutePreference(AnItem).AsByte := JSONMetaRoutePrefArray[0].AsType<integer>;
         end;
       finally
         JSONMetaValue.Free;
       end;
 
+      // Load in CDS
       DmRoutePoints.LoadTrip(ATripList);
+
+      // Use the Import GPX to load
       if not DmRoutePoints.ImportFromGPX(ActGpxFile) then
         exit(false);
 
+      // Set routepref from begin as routepref for route
+      DmRoutePoints.CdsRoutePoints.First;
+      if not (DmRoutePoints.CdsRoutePoints.Eof) then
+      begin
+        DmRoutePoints.CdsRoute.Edit;
+        DmRoutePoints.CdsRouteRoutePreference.AsString :=
+          RoutePref2Desc(TRoutePreference(Hi(DmRoutePoints.CdsRoutePointsRoutePref.AsInteger)), ATripList.TripModel);
+        DmRoutePoints.CdsRoute.Post;
+      end;
+
+      // Save CDS to triplist
       DmRoutePoints.SaveTrip;
     end;
   end;
@@ -1371,21 +1378,26 @@ begin
   else
   begin
     DmRoutePoints.OnRoutePointUpdated := nil;
-    if (DeviceFile) and
-       (BgDevice.ItemIndex = 0) then
+    if (FrmTripEditor.CurIsExplore) then
+      LoadExploreDb(ChangeFileExt(ExtractFileName(FrmTripEditor.CurFile), ''))
+    else
     begin
-      // Save currently selected trip
-      if Assigned(LstFiles.Selected) then
-        CurSel := LstFiles.Selected.Index
-      else
-        CurSel := -1;
+      if (DeviceFile) and
+         (BgDevice.ItemIndex = 0) then
+      begin
+        // Save currently selected trip
+        if Assigned(LstFiles.Selected) then
+          CurSel := LstFiles.Selected.Index
+        else
+          CurSel := -1;
 
-      PostReloadFileList;
+        PostReloadFileList;
 
-      // Need to (re)select?
-      if (CurSel > -1) and
-         (CurSel < LstFiles.items.Count) then
-        LstFiles.Items[CurSel].Selected := true;
+        // Need to (re)select?
+        if (CurSel > -1) and
+           (CurSel < LstFiles.items.Count) then
+          LstFiles.Items[CurSel].Selected := true;
+      end;
     end;
   end;
 

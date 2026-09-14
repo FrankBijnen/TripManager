@@ -853,6 +853,7 @@ procedure TGPXFile.AddViaOrShapePoint(const RtePtNode: TXmlVsNode;
                                       const Category: string);
 var
   NewNode, ExtensionsNode: TXmlVsNode;
+  ToVia, FromExtensions, FromVia, FromTm: TXmlVsNode;
   DefinedSymbol, Distance: string;
 begin
   // If there is a symbol defined, other than Waypoint, take that.
@@ -875,7 +876,18 @@ begin
 
   ExtensionsNode := NewNode.AddChild('extensions');
   if (ProcessPointType = pptViaPt) then
-    ExtensionsNode.AddChild('trp:ViaPoint');
+  begin
+    ToVia := ExtensionsNode.AddChild('trp:ViaPoint');
+    FromExtensions := RtePtNode.Find('extensions');
+    if (FromExtensions <> nil) then
+    begin
+      FromVia := FromExtensions.Find('trp:ViaPoint');
+      CloneNode(FromVia, ToVia);
+      FromTm := FromExtensions.Find('tm:AdventurousLevel');
+      if (FromTm <> nil) then
+        ExtensionsNode.AddChild('tm:AdventurousLevel').NodeValue := FromTm.NodeValue;
+    end;
+  end;
   if (ProcessPointType = pptShapePt) then
     ExtensionsNode.AddChild('trp:ShapingPoint');
 end;
