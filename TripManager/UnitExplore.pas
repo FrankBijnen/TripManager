@@ -1,4 +1,5 @@
 unit UnitExplore;
+{$DEFINE CUSTOMJSONFORMAT}
 
 interface
 
@@ -40,7 +41,7 @@ function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
 implementation
 
 uses
-  System.DateUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks,
+  System.DateUtils, System.StrUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks,
   UnitGpxDefs, UnitTripDefs, UnitVerySimpleXml, UnitStringUtils,
   UnitGarminDevice, UnitModelConv;
 
@@ -83,29 +84,6 @@ begin
   Expl_Name := Acds.FieldByName('name').DisplayText;
 end;
 
-//TODO: Format JSON?
-//procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
-//var
-//  JSONMetaValue: TJSONValue;
-//  JSONMetaObject: TJSONObject;
-//  JSONPair: TJSONPair;
-//begin
-//  AStrings.Clear;
-//  JSONMetaValue := TJSONObject.ParseJSONValue(JsonString);
-//  if (JSONMetaValue = nil) then
-//    exit;
-//  try
-//    if (JSONMetaValue is TJSONObject) then
-//    begin
-//      JSONMetaObject := JSONMetaValue as TJSONObject;
-//      for JSONPair in JSONMetaObject do
-//        AStrings.AddPair(JSONPair.JsonString.ToString, JSONPair.JSonValue.ToString);
-//    end;
-//    AStrings.Add('');
-//  finally
-//    JSONMetaValue.Free;
-//  end;
-//end;
 
 function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
                           const Expl_Object: TExpl_Object): byte;
@@ -135,6 +113,77 @@ begin
   end;
 end;
 
+{$IFDEF CUSTOMJSONFORMAT}
+procedure Custom_ParseJson(const JSonParent: TJSONAncestor;
+                           const AStrings: TStrings;
+                           const Level: integer = 0);
+var
+  JSONValue: TJSONValue;
+  JSONObject: TJSONObject;
+  JSONArray: TJSONArray;
+  JSONPair: TJSONPair;
+  Indent: string;
+begin
+  Indent := DupeString(' ', Level);
+
+  if (JSonParent is TJSONObject) then
+  begin
+    JSONObject := JSonParent as TJSONObject;
+    AStrings.AddPair(Indent + '{', '');
+    for JSONPair in JSONObject do
+      Custom_ParseJson(JSONPair, AStrings, Level + 2);
+    AStrings.AddPair(Indent + '}', '');
+    exit;
+  end;
+
+  if (JSonParent is TJSONArray) then
+  begin
+    JSONArray := JSonParent as TJSONArray;
+    AStrings.AddPair(Indent + '[', '');
+    for JSONValue in JSONArray do
+      Custom_ParseJson(JSONValue, AStrings, Level + 2);
+    AStrings.AddPair(Indent + ']', '');
+    exit;
+  end;
+
+  if (JSonParent is TJSONPair) then
+  begin
+    JSONPair := JSonParent as TJSONPair;
+    if (JSONPair.JsonValue is TJSONObject) or
+      (JSONPair.JsonValue is TJSONArray) then
+    begin
+      AStrings.AddPair(Indent + JSONPair.JsonString.Value, '');
+      Custom_ParseJson(JSONPair.JsonValue, AStrings, Level);
+    end
+    else
+      AStrings.AddPair(Indent + JSONPair.JsonString.Value, JSONPair.JsonValue.Value);
+    exit;
+  end;
+
+  if (JSonParent is TJSONValue) then
+  begin
+    JSONValue := JSonParent as TJSONValue;
+    AStrings.AddPair('', JSONValue.Value);
+    exit;
+  end;
+end;
+
+procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
+var
+  JSONMetaValue: TJSONValue;
+begin
+  AStrings.Clear;
+  JSONMetaValue := TJSONObject.ParseJSONValue(JSonString);
+  if (JSONMetaValue = nil) then
+    exit;
+  try
+    Custom_ParseJson(JSONMetaValue, AStrings);
+  finally
+    JSONMetaValue.Free;
+  end;
+end;
+
+{$ELSE}
 procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
 var
   JSONMetaValue: TJSONValue;
@@ -148,6 +197,8 @@ begin
     JSONMetaValue.Free;
   end;
 end;
+
+{$ENDIF}
 
 procedure ExportWpts(const GPXRoot: TXmlVsNode;
                      const CdsExploreDb: TClientDataSet;

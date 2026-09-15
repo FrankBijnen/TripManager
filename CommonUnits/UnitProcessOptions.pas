@@ -127,7 +127,6 @@ type
     TrackColor: string;                       // '', The Track color possible changed by user. Saved in Registry
 
     DefWayPointSymbol: string;                // Flag, Green, Default symbol for Via and Shaping points in GPX
-//TODO configurable
     DefWayPointColor: string;                 // Green.
     CatSymbol: string;                        // Symbol:, used in created Waypoints/GPI
     CatGPX: string;                           // GPX:, used in created Waypoints/GPI from Original Way points
