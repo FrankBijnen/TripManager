@@ -10,6 +10,7 @@ uses
 type
   TExpl_Object = class(TObject)
     Expl_Id: integer;
+    Expl_UUID: string;
     Expl_Type: integer;
     Expl_Name: string;
     constructor Create(ACds: TClientDataset);
@@ -41,7 +42,8 @@ function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
 implementation
 
 uses
-  System.DateUtils, System.StrUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks,
+  System.DateUtils, System.StrUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks, System.UITypes,
+  Vcl.Dialogs,
   UnitGpxDefs, UnitTripDefs, UnitVerySimpleXml, UnitStringUtils,
   UnitGarminDevice, UnitModelConv;
 
@@ -80,17 +82,18 @@ var
 constructor TExpl_Object.Create(ACds: TClientDataset);
 begin
   Expl_Id := ACds.FieldByName('id').AsInteger;
+  Expl_UUID := Acds.FieldByName('uuid').DisplayText;
   Expl_Type := ACds.FieldByName('type').AsInteger;
   Expl_Name := Acds.FieldByName('name').DisplayText;
 end;
 
-
 function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
                           const Expl_Object: TExpl_Object): byte;
 var
-  JSONMetaValue, JSONVehicleProfileData, JSONMetaVehicleType: TJSONValue;
+  JSONMetaValue, JSONVehicleProfileData: TJSONValue;
 begin
   result := 0;
+
   // Find record in CDS
   if (CdsExploreDb.Locate('id', Expl_Object.Expl_Id, []) = false) then
     exit;
@@ -102,12 +105,8 @@ begin
 
   try
     JSONVehicleProfileData := JSONMetaValue.FindValue('VehicleProfileData') as TJSONValue;
-    if (JSONVehicleProfileData = nil) then
-      exit;
-    JSONMetaVehicleType := JSONVehicleProfileData.FindValue('VehicleType') as TJSONValue;
-    if (JSONMetaVehicleType = nil) then
-      exit;
-    result := JSONMetaVehicleType.AsType<integer>;
+    if (JSONVehicleProfileData <> nil) then
+      JSONVehicleProfileData.TryGetValue<byte>('VehicleType', result);
   finally
     JSONMetaValue.Free;
   end;
@@ -184,6 +183,7 @@ begin
 end;
 
 {$ELSE}
+
 procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
 var
   JSONMetaValue: TJSONValue;
@@ -240,11 +240,9 @@ var
   JSONRtePt: TJSonValue;
   JSONRtePtName: TJSonValue;
   JSONRtePtType: TJSonValue;
-
   JSONMetaValue: TJSONValue;
-  JSONMetaTruckType: TJSONValue;
+  TruckType: integer;
   TransportMode: string;
-
   JSONMetaRoutePrefArray: TJSONArray;
   JSONMetaRoutePrefAdventurousModes: TJSONArray;
   RoutePreference: TRoutePreference;
@@ -277,12 +275,14 @@ begin
     Rte.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
     JSONRouteValue := TJSONObject.ParseJSONValue(Route_points.AsString);
     JSONMetaValue := TJSONObject.ParseJSONValue(MetaData.AsString);
-    JSONMetaTruckType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('TruckType') as TJSONValue;
+    JSONMetaValue.FindValue('VehicleProfileData').TryGetValue<integer>('TruckType', TruckType);
     JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
     JSONMetaRoutePrefAdventurousModes := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefAdventurousModes') as TJSONArray;
-
-    if not (IntToIdent(JSONMetaTruckType.AsType<integer>, TransportMode, BCTransportModeMap)) then
+    if not (IntToIdent(TruckType, TransportMode, BCTransportModeMap)) then
+    begin
       TransportMode := NotApplicable;
+      MessageDlg(Format('TransportMode unknown.%sCheck VehicleProfileData!', [#10]), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
+    end;
     ExtPt := Rte.AddChild('extensions');
     RteExtPt := ExtPt.AddChild('gpxx:RouteExtension');
     RteExtPt.AddChild('gpxx:IsAutoNamed').NodeValue := 'false';

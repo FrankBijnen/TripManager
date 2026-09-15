@@ -1311,6 +1311,11 @@ begin
       if (FileExists(ActGpxFile) = false) then
         exit(false);
 
+      // Set UUID
+      AnItem := ATripList.GetItem(TmExploreUuid.GetKey);
+      if (AnItem <> nil)  then;
+        TmExploreUuid(AnItem).AsString := TExpl_Object(TvTrip.Selected.Data).Expl_UUID;
+
       // Set TransportationMode from vehicleType
       AnItem := ATripList.GetItem(TmTransportationMode.GetKey);
       if (AnItem <> nil)  then

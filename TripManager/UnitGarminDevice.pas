@@ -416,29 +416,29 @@ var
   JSONModified: Cardinal;
   JSONHash: Cardinal;
   JSONProfile, JSONVAlue: TJSONValue;
+
 begin
   if (TModelConv.ReadVehicleDB(GarminDevice.GarminModel) = false) then
     exit;
 
-  SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice) + '\' +
-              Reg_VehicleProfileHashList + '\' ;
+  SubKey := TModelConv.GetDefaultDevice(TModelConv.GetCurrentDevice) + '\' + Reg_VehicleProfileHashList + '\';
+  JSONVAlue := TJSONObject.ParseJSONValue(JSONMetaData);
   try
-    JSONVAlue := TJSONObject.ParseJSONValue(JSONMetaData);
-    try
-      JSONProfile := JSONVAlue.FindValue('VehicleProfileData');
-      JSONGuid := JSONProfile.FindValue('VehicleProfileGuid').GetValue<string>;
-      JSONHash := JSONProfile.FindValue('VehicleProfileHash').GetValue<cardinal>;
-      JSONModified := JSONProfile.FindValue('ModifiedDate').GetValue<cardinal>;
-      JSONProfileName := JSONProfile.FindValue('VehicleProfileName').GetValue<string>;
-    finally
-      JSONVAlue.Free;
-    end;
-  except
-    BreakPoint; // Should not occur. Debugger break
-    exit;
+    JSONProfile := JSONVAlue.FindValue('VehicleProfileData');
+    if (JSONProfile = nil) then
+      exit;
+
+    JSONProfile.TryGetValue<string>('VehicleProfileGuid',JSONGuid);
+    JSONProfile.TryGetValue<cardinal>('VehicleProfileHash', JSONHash);
+    JSONProfile.TryGetValue<cardinal>('ModifiedDate', JSONModified);
+    JSONProfile.TryGetValue<string> ('VehicleProfileName', JSONProfileName);
+  finally
+    JSONVAlue.Free;
   end;
 
-  if (JSONHash <> 0) and
+  if (JSONGuid <> '') and
+     (JSONHash <> 0) and
+     (JSONProfileName <> '') and
      (JSONModified > GetRegistry(Reg_VehicleProfileModifiedDate,
                                  0,
                                  SubKey + JSONGuid)) then
