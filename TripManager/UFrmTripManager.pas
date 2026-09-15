@@ -172,7 +172,7 @@ type
     PopupTripEdit: TPopupMenu;
     MnuTripNewMTP: TMenuItem;
     MnuTripEdit: TMenuItem;
-    NewtripWindows1: TMenuItem;
+    MnuTripNewWindows: TMenuItem;
     ChkZoomToPoint: TCheckBox;
     SbPostProcess: TStatusBar;
     LblBounds: TLabel;
@@ -325,7 +325,7 @@ type
     procedure BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MnuTripEditClick(Sender: TObject);
     procedure MnuTripNewMTPClick(Sender: TObject);
-    procedure NewtripWindows1Click(Sender: TObject);
+    procedure MnuTripNewWindowsClick(Sender: TObject);
     procedure PopupTripEditPopup(Sender: TObject);
     procedure PnlTripInfoResize(Sender: TObject);
     procedure ShellListView1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1267,8 +1267,6 @@ end;
 function TFrmTripManager.EditTrip(NewFile: boolean): boolean;
 var
   ActGpxFile: string;
-  JSONMetaValue: TJSONValue;
-  JSONMetaVehicleType: TJSONValue;
   AnItem: TBaseItem;
 begin
   result := true;
@@ -1279,12 +1277,20 @@ begin
 
   // Set FrmTripEditor Params
   FrmTripEditor.CurTripList := ATripList;
-  FrmTripEditor.CurFile := HexEditFile;
-  FrmTripEditor.CurIsDeviceFile := DeviceFile;
-  FrmTripEditor.CurIsExplore := false;
   FrmTripEditor.CurPath := ShellTreeView1.Path;
   FrmTripEditor.CurrentDevice := CurrentDevice;
-  FrmTripEditor.CurNewFile := NewFile;
+  FrmTripEditor.CurWarnRecalc := (NewFile = false);
+
+  // Change Source if from Explore
+  FrmTripEditor.CurIsExplore := HasExploreData(Expl_RteType);
+  if (FrmTripEditor.CurIsExplore) then
+  begin
+    FrmTripEditor.CurWarnRecalc := false; // Dont want warning
+    HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + TExpl_Object(TvTrip.Selected.Data).Expl_Name, TripExtension);
+    DeviceFile := true;
+  end;
+  FrmTripEditor.CurFile := HexEditFile;
+  FrmTripEditor.CurIsDeviceFile := DeviceFile;
 
   if (NewFile) then
   begin
@@ -1295,66 +1301,31 @@ begin
   else
   begin
     // Load from Explore?
-    if (HasExploreData(Expl_RteType)) then
+    if (FrmTripEditor.CurIsExplore) then
     begin
       ATripList.TripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
       ATripList.CreateTemplate(TExpl_Object(TvTrip.Selected.Data).Expl_Name);
 
+      // GPX should be in temp
       ActGpxFile := GetOSMTemp + Format('\%s_%s%s', [App_Prefix, 'Explore', '.gpx']);
       if (FileExists(ActGpxFile) = false) then
         exit(false);
 
-      HexEditFile := ChangeFileExt(IncludeTrailingPathDelimiter(CreatedTempPath) + TExpl_Object(TvTrip.Selected.Data).Expl_Name, TripExtension);
-      FrmTripEditor.CurFile := HexEditFile;
-      DeviceFile := true;
-      FrmTripEditor.CurIsDeviceFile := DeviceFile;
-      FrmTripEditor.CurIsExplore := true;
-      FrmTripEditor.CurNewFile := true;
+      // Set TransportationMode from vehicleType
+      AnItem := ATripList.GetItem(TmTransportationMode.GetKey);
+      if (AnItem <> nil)  then
+        TmTransportationMode(AnItem).AsByte := Expl_VehicleType(CdsExploreDb, TvTrip.Selected.Data);
 
-      if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, []) = false) then
-        exit(false);
-
-      // Create a new Triplist for this model. Set Transportmode and RoutePrefs
-      JSONMetaValue := TJSONObject.ParseJSONValue(CdsExploreDb.FieldByName('METADATA').AsString);
-      try
-        if (JSONMetaValue <> nil) then
-        begin
-          AnItem := ATripList.GetItem(TmTransportationMode.GetKey);
-          JSONMetaVehicleType := JSONMetaValue.FindValue('VehicleProfileData').FindValue('VehicleType') as TJSONValue;
-          if (AnItem <> nil) and
-             (JSONMetaVehicleType <> nil) then
-            TmTransportationMode(AnItem).AsByte := JSONMetaVehicleType.AsType<integer>;
-        end;
-      finally
-        JSONMetaValue.Free;
-      end;
-
-      // Load in CDS
-      DmRoutePoints.LoadTrip(ATripList);
-
-      // Use the Import GPX to load
-      if not DmRoutePoints.ImportFromGPX(ActGpxFile) then
-        exit(false);
-
-      // Set routepref from begin as routepref for route
-      DmRoutePoints.CdsRoutePoints.First;
-      if not (DmRoutePoints.CdsRoutePoints.Eof) then
-      begin
-        DmRoutePoints.CdsRoute.Edit;
-        DmRoutePoints.CdsRouteRoutePreference.AsString :=
-          RoutePref2Desc(TRoutePreference(Hi(DmRoutePoints.CdsRoutePointsRoutePref.AsInteger)), ATripList.TripModel);
-        DmRoutePoints.CdsRoute.Post;
-      end;
-
-      // Save CDS to triplist
-      DmRoutePoints.SaveTrip;
+      // Load route points from GPX
+      if not DmRoutePoints.LoadExplore(ATripList, ActGpxFile) then
+        exit;
     end;
   end;
 
-// Set FrmTripEditor Events
+  // Set FrmTripEditor Events
   InstallTripEdit;
 
-// Position left from the map.
+  // Position left from the map.
   FrmTripEditor.Top := Top;
   FrmTripEditor.Left := Left;
 end;
@@ -1378,6 +1349,7 @@ begin
   else
   begin
     DmRoutePoints.OnRoutePointUpdated := nil;
+
     if (FrmTripEditor.CurIsExplore) then
       LoadExploreDb(ChangeFileExt(ExtractFileName(FrmTripEditor.CurFile), ''))
     else
@@ -1423,7 +1395,7 @@ end;
 
 procedure TFrmTripManager.TripFileUpdated(Sender: TObject);
 begin
-  if (FrmTripEditor.CurNewFile = false) then
+  if (FrmTripEditor.CurWarnRecalc) then
   begin
     ShowWarnRecalc;
     if (WarnRecalc = mrNo) then
@@ -1881,10 +1853,15 @@ begin
 end;
 
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);
+var
+  HasExploreRoutes: boolean;
 begin
-  MnuTripNewMTP.Enabled := CheckDevice(false);
+  HasExploreRoutes := HasExploreData(Expl_RteType); // Explore Routes
+  MnuTripNewMTP.Enabled := CheckDevice(false) and
+                           not HasExploreRoutes;
+  MnuTripNewWindows.Enabled := not HasExploreRoutes;
   MnuTripEdit.Enabled := ((ATripList <> nil) and (ATripList.ItemList.Count > 0)) or
-                          HasExploreData(Expl_RteType); // Explore Routes
+                          HasExploreRoutes;
 end;
 
 procedure TFrmTripManager.PopupTripInfoPopup(Sender: TObject);
@@ -2165,7 +2142,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.NewtripWindows1Click(Sender: TObject);
+procedure TFrmTripManager.MnuTripNewWindowsClick(Sender: TObject);
 begin
   FrmNewTrip.SavedFolderId := '';
   FrmNewTrip.CurrentDevice := nil;

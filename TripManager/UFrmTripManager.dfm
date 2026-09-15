@@ -1673,9 +1673,9 @@ object FrmTripManager: TFrmTripManager
       Enabled = False
       OnClick = MnuTripNewMTPClick
     end
-    object NewtripWindows1: TMenuItem
+    object MnuTripNewWindows: TMenuItem
       Caption = 'New trip (Windows)'
-      OnClick = NewtripWindows1Click
+      OnClick = MnuTripNewWindowsClick
     end
     object MnuTripEdit: TMenuItem
       Caption = 'Edit'

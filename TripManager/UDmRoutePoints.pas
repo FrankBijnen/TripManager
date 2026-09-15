@@ -59,10 +59,14 @@ type
     procedure GetRouteCalculation(const Coords, XMLFile: string);
   public
     { Public declarations }
-    function ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
-    function NameExists(Name: string): boolean;
-    procedure SetPickLists(ATripList: TObject);
-    procedure LoadTrip(ATripList: TObject);
+    function ShowFieldExists(const AField: string;
+                             const AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
+    function NameExists(const Name: string): boolean;
+    procedure SetPickLists(const ATripList: TObject);
+    procedure LoadTrip(const ATripList: TObject);
+    function LoadExplore(const ATripList: TObject;
+                         const ActGpxFile: string): boolean;
+
     procedure SaveTrip;
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
@@ -247,7 +251,8 @@ begin
   end;
 end;
 
-function TDmRoutePoints.ShowFieldExists(AField: string; AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
+function TDmRoutePoints.ShowFieldExists(const AField: string;
+                                        const AButtons: TMsgDlgButtons = [TMsgDlgBtn.mbOK]): integer;
 begin
   result := MessageDlg(Format('%s Exists', [AField]), TMsgDlgType.mtError, AButtons, 0);
 end;
@@ -477,7 +482,7 @@ begin
   end;
 end;
 
-function TDmRoutePoints.NameExists(Name: string): boolean;
+function TDmRoutePoints.NameExists(const Name: string): boolean;
 var
   ACds: TClientDataSet;
 begin
@@ -490,7 +495,7 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.SetPickLists(ATripList: TObject);
+procedure TDmRoutePoints.SetPickLists(const ATripList: TObject);
 begin
   with TmRoutePreference.Create(dtByte, TRoutePreference.rmFasterTime) do
   begin
@@ -506,7 +511,7 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.LoadTrip(ATripList: TObject);
+procedure TDmRoutePoints.LoadTrip(const ATripList: TObject);
 var
   Locations: TmLocations;
   Links: TmAllLinks;
@@ -618,6 +623,32 @@ begin
 
     DoRoutePointUpdated;  // Now filter tagnames
   end;
+end;
+
+function TDmRoutePoints.LoadExplore(const ATripList: TObject;
+                                    const ActGpxFile: string): boolean;
+begin
+  result := true;
+
+  // Load in CDS
+  LoadTrip(ATripList);
+
+  // Use Import GPX to load
+  if not ImportFromGPX(ActGpxFile) then
+    exit(false);
+
+  // Set routepref from begin as routepref for route
+  CdsRoutePoints.First;
+  if not (CdsRoutePoints.Eof) then
+  begin
+    CdsRoute.Edit;
+    CdsRouteRoutePreference.AsString :=
+      RoutePref2Desc(TRoutePreference(Hi(CdsRoutePointsRoutePref.AsInteger)), TTripList(ATripList).TripModel);
+    CdsRoute.Post;
+  end;
+
+  // Save CDS to triplist
+  SaveTrip;
 end;
 
 procedure TDmRoutePoints.SetDefaultName(IdToAssign: integer);

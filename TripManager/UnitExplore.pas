@@ -34,7 +34,8 @@ procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;
                            const Filter: integer = -1);
 procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
-
+function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
+                          const Expl_Object: TExpl_Object): byte;
 
 implementation
 
@@ -105,6 +106,34 @@ end;
 //    JSONMetaValue.Free;
 //  end;
 //end;
+
+function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
+                          const Expl_Object: TExpl_Object): byte;
+var
+  JSONMetaValue, JSONVehicleProfileData, JSONMetaVehicleType: TJSONValue;
+begin
+  result := 0;
+  // Find record in CDS
+  if (CdsExploreDb.Locate('id', Expl_Object.Expl_Id, []) = false) then
+    exit;
+
+  // Look in VehicleProfileData
+  JSONMetaValue := TJSONObject.ParseJSONValue(CdsExploreDb.FieldByName('METADATA').AsString);
+  if (JSONMetaValue = nil) then
+    exit;
+
+  try
+    JSONVehicleProfileData := JSONMetaValue.FindValue('VehicleProfileData') as TJSONValue;
+    if (JSONVehicleProfileData = nil) then
+      exit;
+    JSONMetaVehicleType := JSONVehicleProfileData.FindValue('VehicleType') as TJSONValue;
+    if (JSONMetaVehicleType = nil) then
+      exit;
+    result := JSONMetaVehicleType.AsType<integer>;
+  finally
+    JSONMetaValue.Free;
+  end;
+end;
 
 procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
 var

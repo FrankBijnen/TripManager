@@ -119,7 +119,7 @@ type
     CurPath: string;
     CurTripList: TObject;
     CurFile: string;
-    CurNewFile: boolean;
+    CurWarnRecalc: boolean;
     CurIsDeviceFile: boolean;
     CurIsExplore: boolean;
     CurrentDevice: TObject;
