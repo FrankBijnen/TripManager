@@ -1,5 +1,7 @@
 ﻿unit UnitVehProfile;
 
+{$DEFINE NO_XT3HASH}
+
 interface
 
 uses
@@ -238,6 +240,9 @@ begin
         Proposed_Hash := $0815F480;
     TGarminModel.XT3:
       begin
+{$IFDEF NO_XT3HASH}
+        exit;
+{$ENDIF}
         for Index := Low(XT3_Base_Hashes) to High(XT3_Base_Hashes) do
         begin
           if (TProfCalcMethod(Calc_Method) <> XT3_Base_Hashes[Index].CM) then
