@@ -24,10 +24,10 @@
   a.c11 {color: #0000FF; font-family: Calibri; font-size: 120%}
   span.c10 {font-size: 14pt; text-decoration: underline}
   span.c9 {font-family: Calibri; font-size: 120%}
-  span.c8 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
-  div.c7 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  span.c6 {color: #010101; font-family: Symbol; font-size: 120%}
-  span.c5 {color: #010101; font-family: Calibri; font-size: 120%}
+  div.c8 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c7 {color: #010101; font-family: Symbol; font-size: 120%}
+  span.c6 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c5 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
   table.c4 {background-color: #FFFFFF}
   span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
   td.c2 {font-weight: bold}
@@ -50,7 +50,14 @@
   </table>
   <hr>
   <div align="left">
-    <span class="c5">The XT3 features Vehicle Profiles. Something
+    <span class="c5">Warning. This info applie to firmware V3.50 or
+    earlier.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">The XT3 features Vehicle Profiles. Something
     that was already observed for the Tread2. In the Trip files
     these items must be filled, or the XT3 will not accept it as a
     valid trip file.</span>
@@ -58,31 +65,31 @@
   <div align="left">
     <br>
   </div>
-  <div align="left" class="c7">
-    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c5">mVehicleProfileTruckType</span>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">mVehicleProfileTruckType</span>
   </div>
-  <div align="left" class="c7">
-    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c5">mVehicleProfileName</span>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">mVehicleProfileName</span>
   </div>
-  <div align="left" class="c7">
-    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c8">mVehicleProfileHash</span>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileHash</span>
   </div>
-  <div align="left" class="c7">
-    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c5">mVehicleId</span>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">mVehicleId</span>
   </div>
-  <div align="left" class="c7">
-    <span class="c6">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c5">mVehicleProfileGuid</span>
+  <div align="left" class="c8">
+    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">mVehicleProfileGuid</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
-    <span class="c5">The data for these items can be found in the
+    <span class="c6">The data for these items can be found in the
     vehicle_profile.db, except for</span> <span class=
     "c9"><b>mVehicleProfileHash.</b> Only recently, using a lot of
     tests, it has been discovered how this Hash value can be
@@ -592,7 +599,7 @@
         </div>
         <div align="left">
           <span class="c17">$0A4F0000+$A000</span><span class=
-          "c5">=</span><span class="c17">$0A4FA000</span>
+          "c6">=</span><span class="c17">$0A4FA000</span>
         </div>
       </td>
     </tr>
@@ -614,7 +621,7 @@
         </div>
         <div align="left">
           <span class="c9">Background info. The value</span>
-          <span class="c5"><b>Max_Vehicle_Speed</b> in the Vehicle
+          <span class="c6"><b>Max_Vehicle_Speed</b> in the Vehicle
           profile is expressed as Decimeters/Sec. In the Sample
           data <b>Max_Vehicle_Speed</b> = 0, meaning no
           restriction. See below for an example of max speed 60
@@ -624,11 +631,11 @@
           <br>
         </div>
         <div align="left">
-          <span class="c5">Step 1: Write the value as 3
+          <span class="c6">Step 1: Write the value as 3
           nibbles.</span>
         </div>
         <div align="left">
-          <span class="c5">0 = &gt; 0x000</span>
+          <span class="c6">0 = &gt; 0x000</span>
         </div>
       </td>
       <td valign="top" width="321" class="c15"></td>
@@ -636,7 +643,7 @@
     <tr>
       <td valign="top" width="969" class="c15">
         <div align="left">
-          <span class="c5">Nibble1: 0. Add this to the 2nd Nibble
+          <span class="c6">Nibble1: 0. Add this to the 2nd Nibble
           of HashValue:</span> <span class=
           "c19">$0<b>A</b>4FA000</span>
         </div>
@@ -644,13 +651,13 @@
           <br>
         </div>
         <div align="left">
-          <span class="c5">Note: Need values 90kmh or higher for a
+          <span class="c6">Note: Need values 90kmh or higher for a
           value &gt; 0.</span>
         </div>
       </td>
       <td valign="top" width="321" class="c15">
         <div align="left">
-          <span class="c5">Nibble 1 Speed: 0</span>
+          <span class="c6">Nibble 1 Speed: 0</span>
         </div>
         <div align="left">
           <br>
@@ -664,10 +671,10 @@
     <tr>
       <td valign="top" width="969" height="67" class="c15">
         <div align="left">
-          <span class="c5">Nibble:2 0. Use the</span> <span class=
+          <span class="c6">Nibble:2 0. Use the</span> <span class=
           "c9">low nibble of <b>Width</b> and the 2nd nibble
           of&nbsp;</span> <span class="c9"><b>Max_Vehicle_Speed</b>
-          to</span> <span class="c5">lookup the value in table
+          to</span> <span class="c6">lookup the value in table
           Speed2Tab and add that value to the 6th Nibble:</span>
           <span class="c19">$0A4FA<b>0</b>00</span>
         </div>
@@ -781,10 +788,10 @@
       </td>
       <td valign="top" width="321" height="67" class="c15">
         <div align="left">
-          <span class="c5">Low nibble Width: 8</span>
+          <span class="c6">Low nibble Width: 8</span>
         </div>
         <div align="left">
-          <span class="c5">Nibble 2 Speed: 0</span>
+          <span class="c6">Nibble 2 Speed: 0</span>
         </div>
         <div align="left">
           <br>
@@ -841,7 +848,7 @@
     <tr>
       <td valign="top" width="969" class="c15">
         <div align="left">
-          <span class="c5">Nibble:3 0. Use the values for <b>Bike,
+          <span class="c6">Nibble:3 0. Use the values for <b>Bike,
           Imperial</b> and the <b>3rd</b> nibble of <b>speed</b> to
           lookup the nibble the value in table Speed3Tab and add
           that value to the 7th nibble:</span> <span class=
@@ -880,14 +887,14 @@
       </td>
       <td valign="top" width="321" class="c15">
         <div align="left">
-          <span class="c5">Bike: true (Truck_Type: 7=Bike,
+          <span class="c6">Bike: true (Truck_Type: 7=Bike,
           11=Car)</span>
         </div>
         <div align="left">
-          <span class="c5">Imperial: false (Width_metric=1)</span>
+          <span class="c6">Imperial: false (Width_metric=1)</span>
         </div>
         <div align="left">
-          <span class="c5">Nibble 3 speed: 0</span>
+          <span class="c6">Nibble 3 speed: 0</span>
         </div>
         <div align="left">
           <br>
@@ -903,7 +910,7 @@
         </div>
         <div align="left">
           <span class="c19">$0A4FAF<b>0</b>0</span><span class=
-          "c8">+ $20=</span><span class=
+          "c5">+ $20=</span><span class=
           "c19">$0A4FAF<b>2</b>0</span>
         </div>
       </td>
@@ -911,17 +918,17 @@
     <tr>
       <td valign="top" width="969" class="c15">
         <div align="left">
-          <span class="c5">4<b>. 60 kmh example.</b></span>
+          <span class="c6">4<b>. 60 kmh example.</b></span>
         </div>
         <div align="left">
-          <span class="c5">60 kmh corresponds to <b>166</b> Dm/sec
+          <span class="c6">60 kmh corresponds to <b>166</b> Dm/sec
           in the vehicle profile.</span>
         </div>
         <div align="left">
-          <span class="c5">166 =&gt; 0x0a6</span>
+          <span class="c6">166 =&gt; 0x0a6</span>
         </div>
         <div align="left">
-          <span class="c5">Width 120 =&gt; 0x78</span>
+          <span class="c6">Width 120 =&gt; 0x78</span>
         </div>
       </td>
       <td valign="top" width="321" class="c15"></td>
@@ -929,7 +936,7 @@
     <tr>
       <td valign="top" width="969" class="c15">
         <div align="left">
-          <span class="c5">Nibble 1 speed: 0</span>
+          <span class="c6">Nibble 1 speed: 0</span>
         </div>
         <div align="left"></div>
       </td>
@@ -946,16 +953,16 @@
     <tr>
       <td valign="top" width="969" height="45" class="c15">
         <div align="left">
-          <span class="c5">Low nibble width: 0x08</span>
+          <span class="c6">Low nibble width: 0x08</span>
         </div>
         <div align="left">
-          <span class="c5">Nibble 2 speed: 0x0a</span>
+          <span class="c6">Nibble 2 speed: 0x0a</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c5">Speed2Tab[0x08, 0x0a] = 5</span>
+          <span class="c6">Speed2Tab[0x08, 0x0a] = 5</span>
         </div>
       </td>
       <td valign="top" width="321" height="45" class="c15">
@@ -970,7 +977,7 @@
         </div>
         <div align="left">
           <span class="c19">$0A4FA<b>0</b>00</span><span class=
-          "c8">+$500=</span><span class=
+          "c5">+$500=</span><span class=
           "c19">$0A4FA<b>5</b>00</span>
         </div>
       </td>
@@ -978,14 +985,14 @@
     <tr>
       <td valign="top" width="969" class="c15">
         <div align="left">
-          <span class="c5">Bike: true, Imperial: false, Nibble 3
+          <span class="c6">Bike: true, Imperial: false, Nibble 3
           speed: 0x06</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c5">Speed3Tab[true, false, 0x06] = 4</span>
+          <span class="c6">Speed3Tab[true, false, 0x06] = 4</span>
         </div>
       </td>
       <td valign="top" width="321" class="c15">
@@ -997,7 +1004,7 @@
         </div>
         <div align="left">
           <span class="c19">$0A4FA5<b>0</b>0</span><span class=
-          "c8">+$40 =</span><span class=
+          "c5">+$40 =</span><span class=
           "c19">$0A4FA5<b>4</b>0</span>
         </div>
       </td>
