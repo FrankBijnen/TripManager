@@ -473,17 +473,18 @@ begin
     TGarminModel.Tread2,
     TGarminModel.XT3:
       // SchemaVersion = 49
+      // SchemaVersion = 52 With firmware 4.30
       result :=
         'select' + CRLF +
         '(select act."description:1" from properties_dbg act where act.value = v.vehicle_id and act."description:1" = ''active_profile'' ) as Status, ' + CRLF +
         'g.description as GUID, ' + CRLF +
-        'e.value as Environmental,' + CRLF +
+        '(select e.value from properties_dbg e where e.key_id = g.key_id and e."description:1" like ''environmental%'' ) as Environmental, ' + CRLF +
+        '(select a.value from properties_dbg a where a.key_id = g.key_id and a."description:1" like ''%avoidances%'' ) as Avoidances, ' + CRLF +
         '0 as Proposed_Hash,' + CRLF +
-        '0 as Overridden_Hash,' + CRLF +
+        '0 as Calculated_Hash,' + CRLF +
         'v.*' + CRLF +
         'from vehicle_profile v' + CRLF +
         'join properties_dbg g on (g.value = v.vehicle_id and g."description:1" = ''guid'') ' + CRLF +
-        'join properties_dbg e on (e.key_id = g.key_id and e."description:1" like ''environmental%'')' + CRLF +
         'order by ' + OrderBy;
     else
       // SchemaVersion = 39
@@ -493,7 +494,7 @@ begin
         'v.Guid_Data as GUID, ' + CRLF +
         '0 as Environmental,' + CRLF +
         '0 as Proposed_Hash,' + CRLF +
-        '0 as Overridden_Hash,' + CRLF +
+        '0 as Calculated_Hash,' + CRLF +
         'v.*' + CRLF +
         'from vehicle_profile v';
   end;
@@ -529,8 +530,9 @@ begin
       ACds.Next;
     end;
   finally
+    result.Proposed_Hash := result.HashFromHashList(SubKey);
     if (result.Proposed_Hash = 0) then
-      result.Proposed_Hash := result.HashFromHashList(SubKey);
+      Result.Calculate_Proposed_Hash(Model);
     ACds.Free;
   end;
 end;

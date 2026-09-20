@@ -74,6 +74,7 @@ function ShiftPressed: boolean;
 function AltPressed: boolean;
 function CtrlPressed: boolean;
 function VKeyPressed(AKey: integer): boolean;
+function FormatHex(ACardinal: Cardinal): string;
 
 var
   CreatedTempPath: string;
@@ -676,6 +677,12 @@ end;
 function VKeyPressed(AKey: integer): boolean;
 begin
   result := (GetAsyncKeyState(AKey) and $8000) <> 0;
+end;
+
+function FormatHex(ACardinal: Cardinal): string;
+begin
+  result := IntToHex(ACardinal, 8);
+  result := Format('%s%s %s%s %s%s %s%s', [result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8]]);
 end;
 
 initialization

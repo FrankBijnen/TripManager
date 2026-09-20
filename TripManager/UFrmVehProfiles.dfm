@@ -4,8 +4,8 @@ object FrmVehProfiles: TFrmVehProfiles
   ActiveControl = GrdVehProfile
   BorderStyle = bsSizeToolWin
   Caption = 'Vehicle profiles'
-  ClientHeight = 761
-  ClientWidth = 849
+  ClientHeight = 733
+  ClientWidth = 833
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,18 +23,18 @@ object FrmVehProfiles: TFrmVehProfiles
   TextHeight = 15
   object PnlBottom: TPanel
     Left = 0
-    Top = 730
-    Width = 849
+    Top = 702
+    Width = 833
     Height = 31
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
     DesignSize = (
-      849
+      833
       31)
     object BtnOK: TButton
-      Left = 661
-      Top = 3
+      Left = 667
+      Top = 2
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
@@ -44,7 +44,7 @@ object FrmVehProfiles: TFrmVehProfiles
     end
     object BtnCancel: TButton
       Left = 748
-      Top = 3
+      Top = 2
       Width = 75
       Height = 25
       Anchors = [akTop, akRight]
@@ -76,8 +76,8 @@ object FrmVehProfiles: TFrmVehProfiles
   object PCTMain: TPageControl
     Left = 0
     Top = 0
-    Width = 849
-    Height = 730
+    Width = 833
+    Height = 702
     ActivePage = TabAllProfiles
     Align = alClient
     TabOrder = 0
@@ -86,15 +86,16 @@ object FrmVehProfiles: TFrmVehProfiles
       object SpltGridDetail: TSplitter
         Left = 0
         Top = 139
-        Width = 841
+        Width = 825
         Height = 5
         Cursor = crVSplit
         Align = alTop
+        ExplicitWidth = 841
       end
       object GrdVehProfile: TDBGrid
         Left = 0
         Top = 0
-        Width = 841
+        Width = 825
         Height = 139
         Align = alTop
         DataSource = DsVehProfile
@@ -147,8 +148,8 @@ object FrmVehProfiles: TFrmVehProfiles
       object PctDetails: TPageControl
         Left = 0
         Top = 144
-        Width = 841
-        Height = 556
+        Width = 825
+        Height = 528
         ActivePage = TabHashList
         Align = alClient
         TabOrder = 1
@@ -158,8 +159,8 @@ object FrmVehProfiles: TFrmVehProfiles
           object GridProfile: TStringGrid
             Left = 0
             Top = 0
-            Width = 833
-            Height = 526
+            Width = 817
+            Height = 498
             Align = alClient
             ColCount = 3
             DefaultColWidth = 230
@@ -189,15 +190,15 @@ object FrmVehProfiles: TFrmVehProfiles
           object ScrllAllFields: TScrollBox
             Left = 0
             Top = 0
-            Width = 833
-            Height = 526
+            Width = 817
+            Height = 498
             VertScrollBar.Tracking = True
             Align = alClient
             TabOrder = 0
             object PnlAllFields: TPanel
               Left = 0
               Top = 0
-              Width = 829
+              Width = 813
               Height = 313
               Align = alTop
               TabOrder = 0
@@ -212,8 +213,8 @@ object FrmVehProfiles: TFrmVehProfiles
           object GridHashList: TStringGrid
             Left = 0
             Top = 33
-            Width = 833
-            Height = 493
+            Width = 817
+            Height = 465
             Align = alClient
             ColCount = 4
             DefaultColWidth = 230
@@ -227,6 +228,7 @@ object FrmVehProfiles: TFrmVehProfiles
             GradientEndColor = clMoneyGreen
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
             ParentFont = False
+            ScrollBars = ssVertical
             TabOrder = 0
             StyleElements = []
             OnSelectCell = GridHashListSelectCell
@@ -240,7 +242,7 @@ object FrmVehProfiles: TFrmVehProfiles
           object PnlHashFunc: TPanel
             Left = 0
             Top = 0
-            Width = 833
+            Width = 817
             Height = 33
             Align = alTop
             TabOrder = 1
