@@ -84,7 +84,7 @@ void PrintSessions(FILE* file)
 
               TimeStamp2Buf(session->start_time, DateTimeBuf, sizeof(DateTimeBuf));
               printf("Started=%s\n", DateTimeBuf);
-              TimeStamp2Buf(session->timestamp, DateTimeBuf, sizeof(DateTimeBuf));
+              TimeStamp2Buf(session->start_time + (session->total_elapsed_time / 1000), DateTimeBuf, sizeof(DateTimeBuf));
               printf("Ended=%s\n", DateTimeBuf);
 
               int min = session->total_elapsed_time / 1000 / 60;
@@ -99,9 +99,14 @@ void PrintSessions(FILE* file)
               printf("End Lat=%.6f\n", (session->end_position_lat) ? session->end_position_lat * todegrees : 0);
               printf("End Lon=%.6f\n", (session->end_position_long) ? session->end_position_long * todegrees : 0);
 
-              printf("Total Calories=%u\n", session->total_calories);
-              printf("Avg Speed=%.2f\n", (double)session->avg_speed * 3600 / 1000 / 1000);
-              printf("Max Speed=%.2f\n", (double)session->max_speed * 3600 / 1000 / 1000);
+              printf("Total Calories=%u\n", (session->total_calories != 0xffff) ? session->total_calories : 0);
+
+              printf("Avg Speed=%.2f\n", (session->avg_speed != 0xffff) ? (double)session->avg_speed * 3600 / 1000 / 1000 : 0);
+              printf("Max Speed=%.2f\n", (session->max_speed != 0xffff) ? (double)session->max_speed * 3600 / 1000 / 1000 : 0);
+
+              printf("Avg bpm=%u\n", (session->avg_heart_rate != 0xff) ? session->avg_heart_rate : 0);
+              printf("Max bpm=%u\n", (session->max_heart_rate != 0xff) ? session->max_heart_rate : 0);
+
               printf("Total Ascent=%u Mtr.\n", (session->total_ascent) ? session->total_ascent : 0);
               printf("Total Descent=%u Mtr.\n", (session->total_descent) ? session->total_descent : 0);
               break;
@@ -158,7 +163,7 @@ void PrintLaps(FILE* file)
 
               TimeStamp2Buf(lap->start_time, DateTimeBuf, sizeof(DateTimeBuf));
               printf("Lap Started=%s\n", DateTimeBuf);
-              TimeStamp2Buf(lap->timestamp, DateTimeBuf, sizeof(DateTimeBuf));
+              TimeStamp2Buf(lap->timestamp + (lap->total_elapsed_time / 1000), DateTimeBuf, sizeof(DateTimeBuf));
               printf("Lap Ended=%s\n", DateTimeBuf);
 
               int min = lap->total_elapsed_time / 1000 / 60;
@@ -173,9 +178,14 @@ void PrintLaps(FILE* file)
               printf("End Lat=%.6f\n", (lap->end_position_lat) ? lap->end_position_lat * todegrees : 0);
               printf("End Lon=%.6f\n", (lap->end_position_long) ? lap->end_position_long * todegrees : 0);
 
-              printf("Total Calories=%u\n", lap->total_calories);
-              printf("Avg Speed=%.2f\n", (double)lap->avg_speed * 3600 / 1000 / 1000);
-              printf("Max Speed=%.2f\n", (double)lap->max_speed * 3600 / 1000 / 1000);
+              printf("Total Calories=%u\n", (lap->total_calories != 0xffff) ? lap->total_calories : 0);
+
+              printf("Avg Speed=%.2f\n", (lap->avg_speed != 0xffff) ? (double)lap->avg_speed * 3600 / 1000 / 1000 : 0);
+              printf("Max Speed=%.2f\n", (lap->max_speed != 0xffff) ? (double)lap->max_speed * 3600 / 1000 / 1000 : 0);
+
+              printf("Avg bpm=%u\n", (lap->avg_heart_rate != 0xff) ? lap->avg_heart_rate : 0);
+              printf("Max bpm=%u\n", (lap->max_heart_rate != 0xff) ? lap->max_heart_rate : 0);
+
               printf("Total Ascent=%u Mtr.\n", lap->total_ascent);
               printf("Total Descent=%u Mtr.\n", lap->total_descent);
               break;
@@ -186,7 +196,6 @@ void PrintLaps(FILE* file)
           }
           break;
         }
-
         default:
           break;
       }

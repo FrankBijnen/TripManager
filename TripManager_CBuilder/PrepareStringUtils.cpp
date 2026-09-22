@@ -3,6 +3,8 @@
 //---------------------------------------------------------------------------
 
 #include <vcl.h>
+#pragma link "vclx.bpi"
+
 #pragma hdrstop
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)

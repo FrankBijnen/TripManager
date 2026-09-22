@@ -10,10 +10,18 @@
 #include "fit_convert.h"
 
 
-void TimeStamp2Buf(FIT_DATE_TIME timestamp, char *buf, int buflen) {
-   time_t tms = timestamp + 631065600; // Seconds since 1989 something
-   struct tm ts = *gmtime(&tms);
+void TimeStamp2DateTime(FIT_DATE_TIME timestamp, char *buf, int buflen) {
+ time_t tms = timestamp + 631065600; // Seconds since 1989 something
+ struct tm ts = *gmtime(&tms);
+ if (buflen >= 21) {
    strftime(buf, buflen, "%Y-%m-%dT%H:%M:%SZ", &ts);
+  }
+  else
+  {
+    if (buflen >= 11) {
+      strftime(buf, buflen, "%Y-%m-%d", &ts);
+    }
+  }
 }
 
 int main(int argc, char* argv[])
@@ -24,6 +32,7 @@ int main(int argc, char* argv[])
   FIT_UINT32 buf_size;
   FIT_UINT32 mesg_index = 0;
   char DateTimeBuf[21];
+  char CourseDateBuf[11];
   char CourseName[FIT_COURSE_MESG_NAME_COUNT] = "";
   FIT_FILE file_type = FIT_FILE_ACTIVITY;
   int HeaderDone = 0;
@@ -68,6 +77,14 @@ int main(int argc, char* argv[])
             {
               const FIT_FILE_ID_MESG *id = (FIT_FILE_ID_MESG *)mesg;
               file_type = id->type;
+              TimeStamp2DateTime(id->time_created, CourseDateBuf, sizeof(CourseDateBuf));
+              break;
+            }
+
+            case FIT_MESG_NUM_SPORT:
+            {
+              const FIT_SPORT_MESG *sport = (FIT_SPORT_MESG *)mesg;
+              snprintf(CourseName, sizeof(CourseName), "%s %s", sport->name, CourseDateBuf);
               break;
             }
 
@@ -81,8 +98,8 @@ int main(int argc, char* argv[])
             case FIT_MESG_NUM_TRAINING_FILE:
             {
               const FIT_TRAINING_FILE_MESG *training = (FIT_TRAINING_FILE_MESG *)mesg;
-              TimeStamp2Buf(training->timestamp, DateTimeBuf, sizeof(DateTimeBuf));
-              snprintf(CourseName, sizeof(CourseName), "Activity %s", DateTimeBuf);
+              TimeStamp2DateTime(training->timestamp, CourseDateBuf, sizeof(CourseDateBuf));
+              snprintf(CourseName, sizeof(CourseName), "Activity %s", CourseDateBuf);
               break;
             }
 
@@ -113,7 +130,7 @@ int main(int argc, char* argv[])
               }
 
               // timestamp
-              TimeStamp2Buf(record->timestamp, DateTimeBuf, sizeof(DateTimeBuf));
+              TimeStamp2DateTime(record->timestamp, DateTimeBuf, sizeof(DateTimeBuf));
 
               // Elevation
               double alt = (record->altitude) ? (double)(record->altitude / 5.0) - 500.0: 0;
@@ -168,9 +185,11 @@ int main(int argc, char* argv[])
 
   if (convert_return == FIT_CONVERT_END_OF_FILE)
   {
-    printf("</trkseg></trk></gpx>\n");
+    if (HeaderDone) {
+      printf("</trkseg></trk></gpx>\n");
+    }
+    fclose(file);
   }
-  fclose(file);
 
   return 0;
 }
