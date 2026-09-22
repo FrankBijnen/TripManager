@@ -13,7 +13,8 @@ type
     Expl_UUID: string;
     Expl_Type: integer;
     Expl_Name: string;
-    constructor Create(ACds: TClientDataset);
+    constructor Create(const ACds: TClientDataset = nil);
+    function TempFile(const Id: string): string;
   end;
 
   TExpl_TrackPoint = packed record
@@ -25,12 +26,29 @@ type
   end;
 
 const
-  Expl_ItemTable    = 'Items';
-  Expl_Query        = 'select * from ' + Expl_ItemTable + ' order by type, name';
-  Expl_MaxElevation = 10000;
-  Expl_WptType      = 1;
-  Expl_TrkType      = 2;
-  Expl_RteType      = 4;
+  CRLF = #10#13;
+  Expl_ItemTable        = 'Items';
+  Expl_TagsTable        = 'Tags';
+  Expl_CollectionsTable = 'Collections';
+  Expl_MaxElevation     = 10000;
+  Expl_WptType          = 1;
+  Expl_TrkType          = 2;
+  Expl_RteType          = 4;
+  Expl_AllTypes         = '1, 2, 4';
+  Expl_Query            =
+    'Select t.collection_id,' + CRLF +
+    '(select case' + CRLF +
+    '   when %s then ''All''' + CRLF +
+    '   when t.collection_id <> 0 then c.name' + CRLF +
+    '   else ''Unorganised''' + CRLF +
+    'end' + CRLF +
+    ') as Collection,' + CRLF +
+    'c.show_on_map, i.*' + CRLF +
+    'from ' + Expl_ItemTable + ' i' + CRLF +
+    'left outer join ' + Expl_TagsTable + ' t on (t.item_id = i.id)' + CRLF +
+    'left outer join ' + Expl_CollectionsTable + ' c on (c.id = t.collection_id)' + CRLF +
+    'where type in (' + Expl_AllTypes + ')' + CRLF +
+    'order by Collection, i.type, i.name';
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;
@@ -79,12 +97,20 @@ const
 var
   FormatSettings: TFormatSettings;
 
-constructor TExpl_Object.Create(ACds: TClientDataset);
+constructor TExpl_Object.Create(const ACds: TClientDataset = nil);
 begin
+  Expl_Id := -1;
+  if not Assigned(ACds) then
+    exit;
   Expl_Id := ACds.FieldByName('id').AsInteger;
   Expl_UUID := Acds.FieldByName('uuid').DisplayText;
   Expl_Type := ACds.FieldByName('type').AsInteger;
   Expl_Name := Acds.FieldByName('name').DisplayText;
+end;
+
+function TExpl_Object.TempFile(const Id: string): string;
+begin
+  result := GetOSMTemp + Format('\%s_%s_%s_%s', [App_Prefix, Id, Expl_Name, GpxExtension]);
 end;
 
 function Expl_VehicleType(const CdsExploreDb: TClientDataSet;

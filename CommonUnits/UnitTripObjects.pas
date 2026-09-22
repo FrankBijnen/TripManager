@@ -6768,7 +6768,7 @@ begin
   Rte := TXmlVSNode.Create;
   Trip2XmlRte(Rte);
   try
-    result := ProcessOptions.GetKurvigerUrl(Rte);
+    result := ProcessOptions.GetKurvigerUrl(Rte.FirstChild);
   finally
     Rte.Free;
     ProcessOptions.Free;

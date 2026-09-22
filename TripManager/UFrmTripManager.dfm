@@ -1086,6 +1086,17 @@ object FrmTripManager: TFrmTripManager
           TabOrder = 0
           OnClick = PnlHideGridClick
         end
+        object ChkCollections: TCheckBox
+          Left = 1
+          Top = 1
+          Width = 97
+          Height = 20
+          Align = alLeft
+          Caption = 'Collections'
+          TabOrder = 1
+          Visible = False
+          OnClick = ChkCollectionsClick
+        end
       end
       object TvTrip: TTreeView
         Left = 1
@@ -1685,6 +1696,10 @@ object FrmTripManager: TFrmTripManager
     object MnuTripOverview: TMenuItem
       Caption = 'Trip overview '
       OnClick = MnuTripOverviewClick
+    end
+    object PopupTripAddToMap: TMenuItem
+      Caption = 'Add to Map'
+      OnClick = PopupTripAddToMapClick
     end
   end
   object SaveTrip: TSaveDialog
