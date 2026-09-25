@@ -521,6 +521,7 @@ function Desc2RoutePref(const ADesc: string;
                         const AModel: TTripModel;
                         const OnlySupported: boolean = true): TRoutePreference;
 function Expl2GpxDesc(const ARoutePreference: TRoutePreference): string;
+function DefaultTransportMode(const AModel: TTripmodel): string;
 
 implementation
 
@@ -871,6 +872,15 @@ begin
     if (ARoutePrefRec.Rm = ARoutePreference) then
       exit(ARoutePrefRec.DescGpx);
   end;
+end;
+
+function DefaultTransportMode(const AModel: TTripmodel): string;
+begin
+  result := '';
+  if (tmMotorcycling in TransportModesSuppported[AModel]) then
+    IntToIdent(Ord(tmMotorcycling), result, TransportModeMap)
+  else if (tmAutoMotive in TransportModesSuppported[AModel]) then
+    IntToIdent(Ord(tmAutoMotive), result, TransportModeMap);
 end;
 
 end.

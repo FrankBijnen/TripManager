@@ -30,7 +30,7 @@ object FrmTripEditor: TFrmTripEditor
       545
       29)
     object BtnCancel: TBitBtn
-      Left = 433
+      Left = 431
       Top = 2
       Width = 75
       Height = 25
@@ -41,7 +41,7 @@ object FrmTripEditor: TFrmTripEditor
       OnClick = BtnCancelClick
     end
     object BtnOK: TBitBtn
-      Left = 347
+      Left = 345
       Top = 2
       Width = 75
       Height = 25
@@ -58,7 +58,7 @@ object FrmTripEditor: TFrmTripEditor
     Width = 513
     Height = 393
     Align = alClient
-    Constraints.MinWidth = 512
+    Constraints.MinWidth = 511
     DataSource = DmRoutePoints.DsRoutePoints
     Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgMultiSelect, dgTitleClick, dgTitleHotTrack]
     TabOrder = 1
@@ -340,6 +340,7 @@ object FrmTripEditor: TFrmTripEditor
     end
   end
   object PopupGrid: TPopupMenu
+    OnPopup = PopupGridPopup
     Left = 56
     Top = 168
     object Selectall1: TMenuItem
@@ -395,6 +396,14 @@ object FrmTripEditor: TFrmTripEditor
       Caption = 'Delete'
       ShortCut = 16430
       OnClick = Delete1Click
+    end
+    object N4: TMenuItem
+      Caption = '-'
+    end
+    object Routepreview1: TMenuItem
+      Caption = 'Route preview'
+      ShortCut = 16466
+      OnClick = Routepreview1Click
     end
   end
   object VirtImgListRoutePoints: TVirtualImageList

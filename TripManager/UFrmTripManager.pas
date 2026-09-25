@@ -1308,7 +1308,9 @@ begin
   begin
     // New triplist for selected model?
     ATripList.TripModel := TModelConv.Display2Trip(TModelConv.GetCurrentDevice);
-    ATripList.CreateTemplate(FrmNewTrip.EdNewTrip.Text);
+    ATripList.CreateTemplate(FrmNewTrip.EdNewTrip.Text,
+                             RoutePref2Desc(TRoutePreference.rmFasterTime, ATripList.TripModel),  // faster they all know.
+                             DefaultTransportMode(ATripList.TripModel));
   end
   else
   begin
@@ -1456,10 +1458,11 @@ procedure TFrmTripManager.SaveCSV1Click(Sender: TObject);
 begin
   SaveTrip.Filter := '*.csv|*.csv';
   SaveTrip.InitialDir := ShellTreeView1.Path;
-  if (HasExploreData) then
+  if (HasExploreData) and
+     (TExpl_Object(TvTrip.Selected.Data).Expl_RecNo > -1) then
   begin
-    if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, [])) then
-      SaveTrip.FileName := ChangeFileExt(CdsExploreDb.FieldByName('name').AsString, '.csv')
+    CdsExploreDb.RecNo := TExpl_Object(TvTrip.Selected.Data).Expl_RecNo;
+    SaveTrip.FileName := ChangeFileExt(CdsExploreDb.FieldByName('name').AsString, '.csv')
   end
   else
     SaveTrip.FileName := ChangeFileExt(ExtractFileName(HexEditFile), '.csv');
@@ -1477,10 +1480,11 @@ var
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
-  if (HasExploreData) then
+  if (HasExploreData) and
+     (TExpl_Object(TvTrip.Selected.Data).Expl_RecNo > -1) then
   begin
-    if (CdsExploreDb.Locate('id', TExpl_Object(TvTrip.Selected.Data).Expl_Id, [])) then
-      SaveTrip.FileName := ChangeFileExt(CdsExploreDb.FieldByName('name').AsString, '.gpx')
+    CdsExploreDb.RecNo := TExpl_Object(TvTrip.Selected.Data).Expl_RecNo;
+    SaveTrip.FileName := ChangeFileExt(CdsExploreDb.FieldByName('name').AsString, '.gpx')
   end
   else
     SaveTrip.FileName := ChangeFileExt(ExtractFileName(HexEditFile), '.gpx');
@@ -3367,7 +3371,8 @@ var
 begin
   HexEditFile := TExpl_Object(AnExplore).TempFile(ExploreTrip);
   DeviceFile := true;
-  Expl_ExportToGPX(CdsExploreDb, HexEditFile, TExpl_Object(AnExplore).Expl_Id);
+  Expl_ExportToGPX(CdsExploreDb, HexEditFile,
+                   TExpl_Object(AnExplore).Expl_RecNo);
   OsmTrack := TStringList.Create;
   try
     TGPXFile.PerformFunctions([CreateOSMPoints], HexEditFile,
@@ -3567,15 +3572,22 @@ begin
 end;
 
 procedure TFrmTripManager.ExportExploredbtoGPX1Click(Sender: TObject);
+var
+  TmpExploreDb: TClientDataSet;
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := ShellTreeView1.Path;
   SaveTrip.FileName := ChangeFileExt(ChangeFileExt(ExploreDb, '')  + '_' + FormatDateTime('yyyy-mm-dd', Now), '.gpx');
   if not SaveTrip.Execute then
     exit;
-
-  CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Query, ['true']), CdsExploreDb);
-  Expl_ExportToGPX(CdsExploreDb, SaveTrip.FileName);
+  TmpExploreDb := TClientDataSet.Create(nil);
+  try
+    TmpExploreDb.AfterOpen := FCDSEvents.AfterOpen;
+    CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Query, ['true']), TmpExploreDb);
+    Expl_ExportToGPX(TmpExploreDb, SaveTrip.FileName);
+  finally
+    TmpExploreDb.Free;
+  end;
 end;
 
 procedure TFrmTripManager.QueryDeviceClick(Sender: TObject);
@@ -4494,8 +4506,9 @@ var
   begin
     AStringList := TStringList.Create;
     try
-      if not (CdsExploreDb.Locate('id', AnExplore.Expl_Id, [])) then
+      if (AnExplore.Expl_RecNo < 0) then
         exit;
+      CdsExploreDb.RecNo := AnExplore.Expl_RecNo;
 
       for AField in CdsExploreDb.Fields do
       begin
@@ -4520,7 +4533,7 @@ var
     if (TsSQlite.TabVisible) and
        (CmbSQliteTabs.Text = 'items') and
        (CdsDeviceDb.FindField('id') <> nil) then
-      CdsDeviceDb.Locate('id', AnExplore.Expl_Id, []);
+      CdsDeviceDb.Locate('id', AnExplore.Expl_Item_Id, []);
   end;
 
 begin
@@ -4648,7 +4661,7 @@ begin
   end;
   if (Node.Data <> nil) and
      (TObject(Node.Data) is TExpl_Object) and
-     (TExpl_Object(Node.Data).Expl_Id < 0) then
+     (TExpl_Object(Node.Data).Expl_Item_Id < 0) then
     Sender.Canvas.Font.Style := Sender.Canvas.Font.Style + [fsBold];
 end;
 

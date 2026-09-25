@@ -71,6 +71,8 @@ type
     SendTo: TMenuItem;
     Move1: TMenuItem;
     TbMovePoint: TToolButton;
+    N4: TMenuItem;
+    Routepreview1: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -103,6 +105,8 @@ type
     procedure SendToClick(Sender: TObject);
     procedure Move1Click(Sender: TObject);
     procedure TbMovePointClick(Sender: TObject);
+    procedure Routepreview1Click(Sender: TObject);
+    procedure PopupGridPopup(Sender: TObject);
   private
     { Private declarations }
     WarnOverWrite: integer;   // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
@@ -113,6 +117,7 @@ type
     FTripFileCalculated: TTripGPXFileEvent;
     DeviceFolders: array[0..2] of string;
     procedure CopyToClipBoard(Cut: boolean);
+    procedure RoutePreview(const GPX: string);
     procedure SaveChanges;
   public
     { Public declarations }
@@ -145,6 +150,9 @@ uses
   UFrmEditRoutePref;
 
 {$R *.dfm}
+
+const
+  RoutePreviewName = 'RoutePreview.gpx';
 
 procedure TFrmTripEditor.Move1Click(Sender: TObject);
 begin
@@ -223,17 +231,47 @@ begin
   end;
 end;
 
+procedure TFrmTripEditor.RoutePreview(const GPX: string);
+var
+  CurRoutePoints: TRoutePointList;
+  Index: integer;
+begin
+  CurRoutePoints := TRoutePointList.Create;
+  DmRoutePoints.CdsRoutePoints.DisableControls;
+  try
+    if (DBGRoutePoints.SelectedRows.Count = 0) then
+    begin
+      DmRoutePoints.CdsRoutePoints.First;
+      while not DmRoutePoints.CdsRoutePoints.Eof do
+      begin
+        CurRoutePoints.Add(TCDSBookMark.Create(DmRoutePoints.CdsRoutePoints));
+        DmRoutePoints.CdsRoutePoints.Next;
+      end;
+    end
+    else
+    begin
+      for Index := 0 to DBGRoutePoints.SelectedRows.Count -1 do
+      begin
+        DmRoutePoints.CdsRoutePoints.GotoBookmark(DBGRoutePoints.SelectedRows[Index]);
+        CurRoutePoints.Add(TCDSBookMark.Create(DmRoutePoints.CdsRoutePoints));
+      end;
+    end;
+    DmRoutePoints.CalcRoute(GPX, CurRoutePoints);
+  finally
+    CurRoutePoints.Free;
+    DmRoutePoints.CdsRoutePoints.EnableControls;
+    if (Assigned(FTripFileCalculated)) then
+      FTripFileCalculated(Self, GPX);
+  end;
+end;
+
 procedure TFrmTripEditor.ExportCalculatedClick(Sender: TObject);
 begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := CurPath;
   SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
-  if not SaveTrip.Execute then
-    exit;
-
-  DmRoutePoints.CalcRoute(SaveTrip.FileName);
-  if (Assigned(FTripFileCalculated)) then
-    FTripFileCalculated(Self, SaveTrip.FileName);
+  if SaveTrip.Execute then
+    RoutePreview(SaveTrip.FileName);
 end;
 
 procedure TFrmTripEditor.Copy1Click(Sender: TObject);
@@ -499,6 +537,16 @@ begin
   ExportCalculated.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
   SendTo.Enabled := (Assigned(CurrentDevice)) and
                     (DeviceFolders[1] <> '');
+end;
+
+procedure TFrmTripEditor.PopupGridPopup(Sender: TObject);
+begin
+  RoutePreview1.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
+end;
+
+procedure TFrmTripEditor.Routepreview1Click(Sender: TObject);
+begin
+  RoutePreview(GetOSMTemp + RoutePreviewName);
 end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);

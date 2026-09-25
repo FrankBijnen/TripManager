@@ -874,22 +874,29 @@ begin
               DefinedSymbol,
               Distance);
 
+  // Add Extensions?
   ExtensionsNode := NewNode.AddChild('extensions');
-  if (ProcessPointType = pptViaPt) then
-  begin
-    ToVia := ExtensionsNode.AddChild('trp:ViaPoint');
-    FromExtensions := RtePtNode.Find('extensions');
-    if (FromExtensions <> nil) then
-    begin
-      FromVia := FromExtensions.Find('trp:ViaPoint');
-      CloneNode(FromVia, ToVia);
-      FromTm := FromExtensions.Find('tm:AdventurousLevel');
-      if (FromTm <> nil) then
+  case (ProcessPointType) of
+    TProcessPointType.pptViaPt:
+      begin
+        ToVia := ExtensionsNode.AddChild('trp:ViaPoint');
+        FromExtensions := RtePtNode.Find('extensions');
+        if (FromExtensions = nil) then
+          exit;
+        FromVia := FromExtensions.Find('trp:ViaPoint');
+        if (FromVia = nil) then
+          exit;
+        CloneNode(FromVia, ToVia);
+
+        // Add TM extension?
+        FromTm := FromExtensions.Find('tm:AdventurousLevel');
+        if (FromTm = nil) then
+          exit;
         ExtensionsNode.AddChild('tm:AdventurousLevel').NodeValue := FromTm.NodeValue;
-    end;
+      end;
+    TProcessPointType.pptShapePt:
+      ExtensionsNode.AddChild('trp:ShapingPoint');
   end;
-  if (ProcessPointType = pptShapePt) then
-    ExtensionsNode.AddChild('trp:ShapingPoint');
 end;
 
 procedure TGPXFile.AddBeginPoint(const RtePtNode: TXmlVsNode;
@@ -2438,14 +2445,13 @@ var
   end;
 
 begin
-  if (High(GeoApifyRecords) <> FRouteViaPointList.Count) then
-    BreakPoint;
 
   CalcXml := TXmlVSDocument.Create;
   try
     CalcRoot := InitGarminGpx(CalcXml);
 
-    if (ProcessOptions.ProcessCreateRoutePoints) then
+    if (High(GeoApifyRecords) = FRouteViaPointList.Count) and // intermediate_waypoint_mode=pass_through?
+       (ProcessOptions.ProcessCreateRoutePoints) then
     begin
       RoutePtCnt := 0;
       OutRte := CalcRoot.AddChild('rte');

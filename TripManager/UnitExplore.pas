@@ -9,7 +9,8 @@ uses
 
 type
   TExpl_Object = class(TObject)
-    Expl_Id: integer;
+    Expl_RecNo: integer;
+    Expl_Item_Id: integer;
     Expl_UUID: string;
     Expl_Type: integer;
     Expl_Name: string;
@@ -48,11 +49,12 @@ const
     'left outer join ' + Expl_TagsTable + ' t on (t.item_id = i.id)' + CRLF +
     'left outer join ' + Expl_CollectionsTable + ' c on (c.id = t.collection_id)' + CRLF +
     'where type in (' + Expl_AllTypes + ')' + CRLF +
+    'group by Collection, i.type, i.name' + CRLF +
     'order by Collection, i.type, i.name';
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;
-                           const Filter: integer = -1);
+                           const RecNo: integer = -1);
 procedure Expl_ParseJson(const JSonString: string; const AStrings: TStrings);
 function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
                           const Expl_Object: TExpl_Object): byte;
@@ -60,7 +62,8 @@ function Expl_VehicleType(const CdsExploreDb: TClientDataSet;
 implementation
 
 uses
-  System.DateUtils, System.StrUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks, System.UITypes,
+  System.DateUtils, System.StrUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks,
+  System.UITypes, System.Variants,
   Vcl.Dialogs,
   UnitGpxDefs, UnitTripDefs, UnitVerySimpleXml, UnitStringUtils,
   UnitGarminDevice, UnitModelConv;
@@ -99,10 +102,12 @@ var
 
 constructor TExpl_Object.Create(const ACds: TClientDataset = nil);
 begin
-  Expl_Id := -1;
+  Expl_RecNo := -1;
+  Expl_Item_Id := -1;
   if not Assigned(ACds) then
     exit;
-  Expl_Id := ACds.FieldByName('id').AsInteger;
+  Expl_RecNo := ACds.RecNo;
+  Expl_Item_Id := ACds.FieldByName('id').AsInteger;
   Expl_UUID := Acds.FieldByName('uuid').DisplayText;
   Expl_Type := ACds.FieldByName('type').AsInteger;
   Expl_Name := Acds.FieldByName('name').DisplayText;
@@ -121,7 +126,7 @@ begin
   result := 0;
 
   // Find record in CDS
-  if (CdsExploreDb.Locate('id', Expl_Object.Expl_Id, []) = false) then
+  if (CdsExploreDb.Locate('collectoin_id;id', VarArrayOf([Expl_Object.Expl_Item_Id, Expl_Object.Expl_Item_Id]), []) = false) then
     exit;
 
   // Look in VehicleProfileData
@@ -226,37 +231,45 @@ end;
 
 {$ENDIF}
 
-procedure ExportWpts(const GPXRoot: TXmlVsNode;
-                     const CdsExploreDb: TClientDataSet;
-                     const Filter: integer = -1);
+procedure ExportWptsRec(const GPXRoot: TXmlVsNode;
+                        const CdsExploreDb: TClientDataSet);
 var
   Wpt: TXmlVSNode;
 begin
+  Wpt := GPXRoot.AddChild('wpt');
+  Wpt.SetAttribute('lat', Coord2Float(CdsExploreDb.FieldByName('lat').AsInteger));
+  Wpt.SetAttribute('lon', Coord2Float(CdsExploreDb.FieldByName('lon').AsInteger));
+  Wpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(CdsExploreDb.FieldByName('Creation_date').AsInteger), false);
+  Wpt.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
+  Wpt.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
+end;
+
+procedure ExportWpts(const GPXRoot: TXmlVsNode;
+                     const CdsExploreDb: TClientDataSet;
+                     const RecNo: integer = -1);
+begin
+  if(RecNo > -1) then
+  begin
+    cdsExploreDb.RecNo := RecNo;
+    if (cdsExploreDb.FieldByName('type').AsInteger = Expl_WptType) then
+      ExportWptsRec(GPXRoot, CdsExploreDb);
+    exit;
+  end;
+
   cdsExploreDb.Filter := Format('Type=%d', [Expl_WptType]);
   cdsExploreDb.Filtered := true;
   CdsExploreDb.First;
   while not CdsExploreDb.Eof do
   begin
-    if (Filter > -1) and
-       (Filter <> CdsExploreDb.FieldByName('ID').AsInteger) then
-    begin
-      CdsExploreDb.Next;
-      continue;
-    end;
+    ExportWptsRec(GPXRoot, CdsExploreDb);
 
-    Wpt := GPXRoot.AddChild('wpt');
-    Wpt.SetAttribute('lat', Coord2Float(CdsExploreDb.FieldByName('lat').AsInteger));
-    Wpt.SetAttribute('lon', Coord2Float(CdsExploreDb.FieldByName('lon').AsInteger));
-    Wpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(CdsExploreDb.FieldByName('Creation_date').AsInteger), false);
-    Wpt.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
-    Wpt.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
     CdsExploreDb.Next;
   end;
 end;
 
-procedure ExportRtes(const GPXRoot: TXmlVsNode;
-                     const CdsExploreDb: TClientDataSet;
-                     const Filter: integer = -1);
+procedure ExportRtesRec(const GPXRoot: TXmlVsNode;
+                        const CdsExploreDb: TClientDataSet;
+                        var ShowWarning: boolean);
 var
   Rte, RtePt, ExtPt, RteExtPt, ViaPt: TXmlVSNode;
   MetaData: TField;
@@ -277,110 +290,150 @@ var
   Cnt: integer;
   ViaCnt: integer;
 begin
-  cdsExploreDb.Filter := Format('Type=%d', [Expl_RteType]);
-  cdsExploreDb.Filtered := true;
-  CdsExploreDb.First;
   Route_points := CdsExploreDb.FindField('Route_points');
   if (Route_points = nil) then
     exit;
   MetaData := CdsExploreDb.FindField('MetaData');
   if (MetaData = nil) then
     exit;
-
-  while not CdsExploreDb.Eof do
-  begin
-    if (Filter > -1) and
-       (Filter <> CdsExploreDb.FieldByName('ID').AsInteger) then
-    begin
-      CdsExploreDb.Next;
-      continue;
-    end;
-
+  JSONRouteValue := TJSONObject.ParseJSONValue(Route_points.AsString);
+  JSONMetaValue := TJSONObject.ParseJSONValue(MetaData.AsString);
+  try
     Rte := GPXRoot.AddChild('rte');
     Rte.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
     Rte.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
-    JSONRouteValue := TJSONObject.ParseJSONValue(Route_points.AsString);
-    JSONMetaValue := TJSONObject.ParseJSONValue(MetaData.AsString);
     JSONMetaValue.FindValue('VehicleProfileData').TryGetValue<integer>('TruckType', TruckType);
     JSONMetaRoutePrefArray := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefUdbMethods') as TJSONArray;
     JSONMetaRoutePrefAdventurousModes := JSONMetaValue.FindValue('RoutePrefData').FindValue('RoutePrefAdventurousModes') as TJSONArray;
     if not (IntToIdent(TruckType, TransportMode, BCTransportModeMap)) then
     begin
       TransportMode := NotApplicable;
-      MessageDlg(Format('TransportMode unknown.%sCheck VehicleProfileData!', [#10]), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
+      if (ShowWarning) then
+      begin
+        MessageDlg(Format('TransportMode unknown.%sCheck VehicleProfileData!', [#10]), TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
+        ShowWarning := false;
+      end;
     end;
     ExtPt := Rte.AddChild('extensions');
     RteExtPt := ExtPt.AddChild('gpxx:RouteExtension');
     RteExtPt.AddChild('gpxx:IsAutoNamed').NodeValue := 'false';
     RteExtPt.AddChild('gpxx:DisplayColor').NodeValue := Explore2GPXColor(CdsExploreDb.FieldByName('Color').AsInteger);
     ExtPt.AddChild('trp:Trip').AddChild('trp:TransportationMode').NodeValue := TransportMode;
-    try
-      Cnt := 0;
-      ViaCnt := 0;
-      JSONRouteArray := JSONRouteValue as TJSONArray;
-      for JSONRtePt in JSONRouteArray do
+
+    Cnt := 0;
+    ViaCnt := 0;
+    JSONRouteArray := JSONRouteValue as TJSONArray;
+    for JSONRtePt in JSONRouteArray do
+    begin
+      RtePt := Rte.AddChild('rtept');
+      RtePt.SetAttribute('lat', JSONRtePt.FindValue('Lat').AsType<string>);
+      RtePt.SetAttribute('lon', JSONRtePt.FindValue('Lon').AsType<string>);
+      JSONRtePtName := JSONRtePt.FindValue('Name');
+      if (JSONRtePtName <> nil) then
+        RtePt.AddChild('name').NodeValue := JSONRtePtName.AsType<string>
+      else
       begin
-        RtePt := Rte.AddChild('rtept');
-        RtePt.SetAttribute('lat', JSONRtePt.FindValue('Lat').AsType<string>);
-        RtePt.SetAttribute('lon', JSONRtePt.FindValue('Lon').AsType<string>);
-        JSONRtePtName := JSONRtePt.FindValue('Name');
-        if (JSONRtePtName <> nil) then
-          RtePt.AddChild('name').NodeValue := JSONRtePtName.AsType<string>
-        else
-        begin
-          Inc(Cnt);
-          RtePt.AddChild('name').NodeValue := Format('%s_%d', [CdsExploreDb.FieldByName('name').AsString, Cnt]);
-        end;
-        IsVia := false;
-        JSONRtePtType := JSONRtePt.FindValue('Type');
-        if (JSONRtePtType <> nil) then
-          IsVia := (JSONRtePtType.AsType<integer> = 1);
-
-        if (IsVia) then
-        begin
-          ExtPt := RtePt.AddChild('extensions');
-          ViaPt := ExtPt.AddChild('trp:ViaPoint');
-
-          if (Assigned(JSONMetaRoutePrefArray)) and
-             (JSONMetaRoutePrefArray.Count > 0) and
-             (ViaCnt < JSONMetaRoutePrefArray.Count) then
-          begin
-            RoutePreference := TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>);
-            ViaPt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(RoutePreference);
-
-            if (RoutePreference in [TRoutePreference.rmAdventurous]) then
-            begin
-              if (Assigned(JSONMetaRoutePrefAdventurousModes)) and
-                 (JSONMetaRoutePrefAdventurousModes.Count > 0) and
-                 (ViaCnt < JSONMetaRoutePrefAdventurousModes.Count) and
-                 (IntToIdent(JSONMetaRoutePrefAdventurousModes[ViaCnt].AsType<integer>, AdventurousMode, AdvLevelMap)) then
-                ExtPt.AddChild('tm:AdventurousLevel').NodeValue := AdventurousMode;
-            end;
-          end;
-          Inc(ViaCnt);
-        end
-        else
-          RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
+        Inc(Cnt);
+        RtePt.AddChild('name').NodeValue := Format('%s_%d', [CdsExploreDb.FieldByName('name').AsString, Cnt]);
       end;
-    finally
-      JSONRouteValue.Free;
-      JSONMetaValue.Free;
+      IsVia := false;
+      JSONRtePtType := JSONRtePt.FindValue('Type');
+      if (JSONRtePtType <> nil) then
+        IsVia := (JSONRtePtType.AsType<integer> = 1);
+
+      if (IsVia) then
+      begin
+        ExtPt := RtePt.AddChild('extensions');
+        ViaPt := ExtPt.AddChild('trp:ViaPoint');
+
+        if (Assigned(JSONMetaRoutePrefArray)) and
+           (JSONMetaRoutePrefArray.Count > 0) and
+           (ViaCnt < JSONMetaRoutePrefArray.Count) then
+        begin
+          RoutePreference := TRoutePreference(JSONMetaRoutePrefArray[ViaCnt].AsType<integer>);
+          ViaPt.AddChild('trp:CalculationMode').NodeValue := Expl2GpxDesc(RoutePreference);
+
+          if (RoutePreference in [TRoutePreference.rmAdventurous]) then
+          begin
+            if (Assigned(JSONMetaRoutePrefAdventurousModes)) and
+               (JSONMetaRoutePrefAdventurousModes.Count > 0) and
+               (ViaCnt < JSONMetaRoutePrefAdventurousModes.Count) and
+               (IntToIdent(JSONMetaRoutePrefAdventurousModes[ViaCnt].AsType<integer>, AdventurousMode, AdvLevelMap)) then
+              ExtPt.AddChild('tm:AdventurousLevel').NodeValue := AdventurousMode;
+          end;
+        end;
+        Inc(ViaCnt);
+      end
+      else
+        RtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
     end;
+  finally
+    JSONRouteValue.Free;
+    JSONMetaValue.Free;
+  end;
+end;
+
+procedure ExportRtes(const GPXRoot: TXmlVsNode;
+                     const CdsExploreDb: TClientDataSet;
+                     const RecNo: integer = -1);
+var
+  ShowWarning: boolean;
+begin
+  ShowWarning := true;
+  if(RecNo > -1) then
+  begin
+    cdsExploreDb.RecNo := RecNo;
+    if (cdsExploreDb.FieldByName('type').AsInteger = Expl_RteType) then
+      ExportRtesRec(GPXRoot, CdsExploreDb, ShowWarning);
+    exit;
+  end;
+
+  cdsExploreDb.Filter := Format('Type=%d', [Expl_RteType]);
+  cdsExploreDb.Filtered := true;
+  CdsExploreDb.First;
+  while not CdsExploreDb.Eof do
+  begin
+    ExportRtesRec(GPXRoot, CdsExploreDb, ShowWarning);
 
     CdsExploreDb.Next;
   end;
 end;
 
-procedure ExportTrks(const GPXRoot: TXmlVsNode;
-                     const CdsExploreDb: TClientDataSet;
-                     const Filter: integer = -1);
+// Determine Model from PartNumber
+function ModelFromMeta(const CdsExploreDb: TClientDataSet): TGarminModel;
 var
-  TmpGarminDevice: TGarminDevice;
-  GarminModel: TGarminModel;
-  Trk, TrkSeg, TrkPt: TXmlVSNode;
-  MetaData, TrackPoints: TField;
+  MetaData: TField;
   JSONValue: TJSONValue;
   JSONPartNbr: TJSONValue;
+  TmpGarminDevice: TGarminDevice;
+begin
+  result := TGarminModel.XT;
+  MetaData := CdsExploreDb.FindField('Metadata');
+  if (MetaData <> nil) then
+  begin
+    JSONVAlue := TJSONObject.ParseJSONValue(MetaData.AsString);
+    TmpGarminDevice := TGarminDevice.Create;
+    try
+      JSONPartNbr := JSONVAlue.FindValue('PartNumber');
+      if (JSONPartNbr <> nil) then
+      begin
+        TmpGarminDevice.Init;
+        TmpGarminDevice.PartNumber := JSONPartNbr.AsType<string>;
+        result := TModelConv.GetModelFromGarminDevice(TmpGarminDevice);
+      end;
+    finally
+      JSONValue.Free;
+      TmpGarminDevice.Free;
+    end;
+  end;
+end;
+
+procedure ExportTrksRec(const GPXRoot: TXmlVsNode;
+                        const CdsExploreDb: TClientDataSet;
+                        const GarminModel: TGarminModel);
+var
+  Trk, TrkSeg, TrkPt: TXmlVSNode;
+  TrackPoints: TField;
   MemoryStream: TMemoryStream;
   Cnt: integer;
   LId: cardinal;
@@ -390,104 +443,101 @@ var
   Expl_TrackPoint: TExpl_TrackPoint;
   SavePos: int64;
 begin
-  cdsExploreDb.Filter := Format('Type=%d', [Expl_TrkType]);
-  cdsExploreDb.Filtered := true;
-  CdsExploreDb.First;
-
   TrackPoints := CdsExploreDb.FindField('Track_Points');
   if (TrackPoints = nil) then
     exit;
 
   MemoryStream := TMemoryStream.Create;
   try
-    // Determine Model from PartNumber
-    GarminModel := TGarminModel.XT;
-    MetaData := CdsExploreDb.FindField('Metadata');
-    if (MetaData <> nil) then
-    begin
-      JSONVAlue := TJSONObject.ParseJSONValue(MetaData.AsString);
-      TmpGarminDevice := TGarminDevice.Create;
-      try
-        JSONPartNbr := JSONVAlue.FindValue('PartNumber');
-        if (JSONPartNbr <> nil) then
-        begin
-          TmpGarminDevice.Init;
-          TmpGarminDevice.PartNumber := JSONPartNbr.AsType<string>;
-          GarminModel := TModelConv.GetModelFromGarminDevice(TmpGarminDevice);
-        end;
-      finally
-        JSONValue.Free;
-        TmpGarminDevice.Free;
-      end;
+    MemoryStream.Size := Length(TrackPoints.AsBytes);
+    MemoryStream.Seek(0, TSeekOrigin.soBeginning);
+    MemoryStream.WriteBuffer(TrackPoints.AsBytes, Length(TrackPoints.AsBytes));
+
+    MemoryStream.Seek(0, TSeekOrigin.soBeginning);
+    MemoryStream.Read(LId, SizeOf(LId));
+    if (Lid <> SizeOf(Id)) then
+      exit;
+
+    case GarminModel of
+      TGarminModel.XT,
+      TGarminModel.XT2:;
+      else
+        MemoryStream.Seek(SizeOf(Cardinal), TSeekOrigin.soCurrent);
     end;
+    MemoryStream.Read(Id, SizeOf(Id));
+    if (Id <> 'serialization::archive') then
+      exit;
 
-    while not CdsExploreDb.Eof do
+    Trk := GPXRoot.AddChild('trk');
+    Trk.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
+    Trk.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
+    Trk.AddChild('extensions').AddChild('gpxx:TrackExtension').AddChild('gpxx:DisplayColor').NodeValue :=
+      Explore2GPXColor(CdsExploreDb.FieldByName('Color').AsInteger);
+    TrkSeg := Trk.AddChild('trkseg');
+
+    MemoryStream.Read(Flags, SizeOf(Flags));
+    MemoryStream.Read(TrkPts, SizeOf(TrkPts));
+    MemoryStream.Seek(RecordStart[GarminModel], TSeekOrigin.soBeginning);
+    for Cnt := 0 to TrkPts -1 do
     begin
-      if (Filter > -1) and
-         (Filter <> CdsExploreDb.FieldByName('ID').AsInteger) then
-      begin
-        CdsExploreDb.Next;
-        continue;
-      end;
+      SavePos := MemoryStream.Position;
+      Expl_TrackPoint := Default(TExpl_TrackPoint);
+      MemoryStream.Read(Expl_TrackPoint, RecordLen[GarminModel]);
 
-      Trk := GPXRoot.AddChild('trk');
-      Trk.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
-      Trk.AddChild('cmt').NodeValue := CdsExploreDb.FieldByName('UUID').DisplayText;
-      Trk.AddChild('extensions').AddChild('gpxx:TrackExtension').AddChild('gpxx:DisplayColor').NodeValue :=
-        Explore2GPXColor(CdsExploreDb.FieldByName('Color').AsInteger);
-      TrkSeg  := Trk.AddChild('trkseg');
+      // Add Trackpoint to XML
+      TrkPt := TrkSeg.AddChild('trkpt');
+      Trkpt.SetAttribute('lat', Coord2Float(Expl_TrackPoint.Lat));
+      Trkpt.SetAttribute('lon', Coord2Float(Expl_TrackPoint.Lon));
+      if (Abs(Expl_TrackPoint.Ele) < Expl_MaxElevation) then
+        Trkpt.AddChild('ele').NodeValue := FormatFloat('####0.00', Expl_TrackPoint.Ele, FormatSettings);
+      if (Expl_TrackPoint.DateTime > 0) and
+         (Expl_TrackPoint.DateTime < $ffffffff) then
+      Trkpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(Expl_TrackPoint.DateTime), false);
 
-      MemoryStream.Size := Length(TrackPoints.AsBytes);
-      MemoryStream.Seek(0, TSeekOrigin.soBeginning);
-      MemoryStream.WriteBuffer(TrackPoints.AsBytes, Length(TrackPoints.AsBytes));
-
-      MemoryStream.Seek(0, TSeekOrigin.soBeginning);
-      MemoryStream.Read(LId, SizeOf(LId));
-      if (Lid <> SizeOf(Id)) then
-        continue;
-
-      case GarminModel of
-        TGarminModel.XT, TGarminModel.XT2:;
-        else
-          MemoryStream.Seek(SizeOf(Cardinal), TSeekOrigin.soCurrent);
-      end;
-      MemoryStream.Read(Id, SizeOf(Id));
-      if (Id <> 'serialization::archive') then
-        continue;
-      MemoryStream.Read(Flags, SizeOf(Flags));
-      MemoryStream.Read(TrkPts, SizeOf(TrkPts));
-
-      MemoryStream.Seek(RecordStart[GarminModel], TSeekOrigin.soBeginning);
-      for Cnt := 0 to TrkPts -1 do
-      begin
-        SavePos := MemoryStream.Position;
-        Expl_TrackPoint := Default(TExpl_TrackPoint);
-        MemoryStream.Read(Expl_TrackPoint, RecordLen[GarminModel]);
-
-        // Add Trackpoint to XML
-        TrkPt := TrkSeg.AddChild('trkpt');
-        Trkpt.SetAttribute('lat', Coord2Float(Expl_TrackPoint.Lat));
-        Trkpt.SetAttribute('lon', Coord2Float(Expl_TrackPoint.Lon));
-        if (Abs(Expl_TrackPoint.Ele) < Expl_MaxElevation) then
-          Trkpt.AddChild('ele').NodeValue := FormatFloat('####0.00', Expl_TrackPoint.Ele, FormatSettings);
-        if (Expl_TrackPoint.DateTime > 0) and
-           (Expl_TrackPoint.DateTime < $ffffffff) then
-        Trkpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(Expl_TrackPoint.DateTime), false);
-
-        MemoryStream.Seek(SavePos + RecordLen[GarminModel], TSeekOrigin.soBeginning);
-      end;
-      CdsExploreDb.Next;
+      MemoryStream.Seek(SavePos + RecordLen[GarminModel], TSeekOrigin.soBeginning);
     end;
-
   finally
     MemoryStream.Free;
   end;
+end;
 
+procedure ExportTrks(const GPXRoot: TXmlVsNode;
+                     const CdsExploreDb: TClientDataSet;
+                     const RecNo: integer = -1);
+var
+  GarminModel: TGarminModel;
+begin
+  GarminModel := TGarminModel.Unknown;
+
+  if(RecNo > -1) then
+  begin
+    cdsExploreDb.RecNo := RecNo;
+    if (cdsExploreDb.FieldByName('type').AsInteger = Expl_TrkType) then
+    begin
+      if (GarminModel = TGarminModel.Unknown) then
+        GarminModel := ModelFromMeta(CdsExploreDb);
+      ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel);
+    end;
+    exit;
+  end;
+
+  cdsExploreDb.Filter := Format('Type=%d', [Expl_TrkType]);
+  cdsExploreDb.Filtered := true;
+  CdsExploreDb.First;
+  while not CdsExploreDb.Eof do
+  begin
+    if (GarminModel = TGarminModel.Unknown) then
+      GarminModel := ModelFromMeta(CdsExploreDb);
+    ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel);
+
+    CdsExploreDb.Next;
+  end;
 end;
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;
-                           const Filter: integer = -1);
+                           const RecNo: integer = -1);
+
 var
   GPXXml: TXmlVSDocument;
   GPXRoot: TXmlVSNode;
@@ -495,9 +545,9 @@ begin
   GPXXml := TXmlVSDocument.Create;
   GPXRoot := InitGarminGpx(GPXXml);
   try
-    ExportWpts(GPXRoot, CdsExploreDb, Filter);
-    ExportRtes(GPXRoot, CdsExploreDb, Filter);
-    ExportTrks(GPXRoot, CdsExploreDb, Filter);
+    ExportWpts(GPXRoot, CdsExploreDb, RecNo);
+    ExportRtes(GPXRoot, CdsExploreDb, RecNo);
+    ExportTrks(GPXRoot, CdsExploreDb, RecNo);
   finally
     CdsExploreDb.Filter := '';
     CdsExploreDb.Filtered := false;

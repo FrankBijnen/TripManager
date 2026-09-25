@@ -5,9 +5,20 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
   Data.DB, Datasnap.DBClient,
-  UnitVerySimpleXml;
+  UnitVerySimpleXml, UnitGpxDefs;
 
 type
+  TCDSBookMark = class(TObject)
+    FCDS: TClientDataset;
+    FBookMark: TBookMark;
+  public
+    constructor Create(ACDS: TClientDataset);
+    destructor Destroy; override;
+    property BookMark: TBookmark read FBookMark;
+  end;
+
+  TRoutePointList = TObjectList<TCDSBookMark>;
+
   TOnGetMapCoords = function: string of object;
 
   TDmRoutePoints = class(TDataModule)
@@ -56,6 +67,8 @@ type
     procedure AddRoutePoint(ARoutePoint: TXmlVSNode;
                             FromWpt: boolean;
                             ProcessOptions: TObject);
+    function RoutePoint2GeoApify(const LegCnt: integer): TGeoApifyRecord;
+
     procedure GetRouteCalculation(const Coords, XMLFile: string);
   public
     { Public declarations }
@@ -84,7 +97,8 @@ type
     procedure ImportFromCSV(const CSVFile: string);
     procedure ExportToCSV(const CSVFile: string);
     function KurvigerURL: string;
-    procedure CalcRoute(const GPXFile: string);
+    procedure CalcRoute(const GPXFile: string;
+                        const RoutePoints: TRoutePointList);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
@@ -112,7 +126,7 @@ uses
   Winapi.Windows,
   Vcl.Dialogs, Vcl.ComCtrls,
   REST.Client, REST.Types,
-  UnitGeoCode, UnitRegistry, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxDefs, UnitGpxObjects,
+  UnitGeoCode, UnitRegistry, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxObjects,
   UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
@@ -133,6 +147,19 @@ const
 var
   RegionalFormatSettings: TFormatSettings;
   FloatFormatSettings: TFormatSettings;
+
+constructor TCDSBookMark.Create(ACDS: TClientDataset);
+begin
+  inherited Create;
+  FCDS := ACDS;
+  FBookMark := FCDS.GetBookmark;
+end;
+
+destructor TCDSBookMark.Destroy;
+begin
+  FCDS.FreeBookmark(FBookMark);
+  inherited Destroy;
+end;
 
 function TDmRoutePoints.CheckEmptyField(Sender: TField): boolean;
 begin
@@ -1203,6 +1230,8 @@ var
   RESTRequest:  TRESTRequest;
   RESTResponse: TRESTResponse;
 begin
+  if (GetRegistry(Reg_GeoApifyKey, '') = '') then
+    raise exception.Create('Need an GeoApify API key');
   RESTClient := TRESTClient.Create(GeoApifyUrl);
   RESTResponse := TRESTResponse.Create(nil);
   RESTRequest := TRESTRequest.Create(nil);
@@ -1212,10 +1241,30 @@ begin
   try
     RESTRequest.Params.Clear;
 //TODO Add Params
+//intermediate_waypoint_mode=stopover,through_stop,pass_through (Default=stopover)
+//trough_stop for creating routes
+//pass_trough for creating track
+
+//mode=drive,motorcycle
+//From trip.  tmAutoMotive=drive else motorcycle
+
+//type=balanced,short,less_maneuvers
+//Balanced
+
+//avoid=tolls:<imp>,ferries:<imp>,highways:<imp>,avoid=location:35.234045,-80.836392
+//Parm
+
+//traffic=free_flow,approximated
+//free_flow
+
+//max_speed=
+//Parm
     RESTRequest.params.AddItem('format', 'xml' , TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('mode', 'motorcycle' , TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('apiKey', GetRegistry(Reg_GeoApifyKey, ''), TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.params.AddItem('intermediate_waypoint_mode', 'through_stop', TRESTRequestParameterKind.pkGETorPOST);
+//    RESTRequest.params.AddItem('max_speed', '50', TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.Execute;
     if (RESTRequest.Response.StatusCode >= 400) then
       raise exception.Create(Format(StrRequestFailed, [#10, RESTRequest.Response.StatusText]));
@@ -1228,21 +1277,34 @@ begin
   end;
 end;
 
-procedure TDmRoutePoints.CalcRoute(const GPXFile: string);
+function TDmRoutePoints.RoutePoint2GeoApify(const LegCnt: integer): TGeoApifyRecord;
+begin
+  result := Default(TGeoApifyRecord);
+  result.LegCnt := LegCnt;
+  result.Name := CdsRoutePointsName.AsString;
+  result.Via := CdsRoutePointsViaPoint.AsBoolean;
+  result.Lat := CdsRoutePointsLat.AsString;
+  result.Lon := CdsRoutePointsLon.AsString;
+  result.Address := CdsRoutePointsAddress.AsString;
+end;
+
+procedure TDmRoutePoints.CalcRoute(const GPXFile: string;
+                                   const RoutePoints: TRoutePointList);
 var
   CalcRecord: TGeoApifyRecord;
   GeoApifyRecords: TGeoApifyRecords;
   CalcFiles: TGPXFiles;
   CalcCoords: array of string;
-
   CalcFileCnt, RoutePointCnt: integer;
   SepChar, LastCoords: string;
   CalcCnt: integer;
   GPXObject: TGPXFile;
+  CurRoutePoint: TCDSBookMark;
   CRWait, CRNormal: HCURSOR;
 begin
   CRWait := LoadCursor(0, IDC_WAIT);
   CRNormal := SetCursor(CRWait);
+
   try
     DeleteTempFiles(GetRoutesTmp, GetXMLMask);
     LastCoords := '';
@@ -1252,9 +1314,9 @@ begin
     SetLength(CalcCoords, 0);
     SetLength(CalcFiles, 0);
 
-    CdsRoutePoints.First;
-    while not CdsRoutePoints.Eof do
+    for CurRoutePoint in RoutePoints do
     begin
+      CdsRoutePoints.GotoBookmark(CurRoutePoint.BookMark);
       if (RoutePointCnt > 25) then
       begin
         RoutePointCnt := 0;
@@ -1262,13 +1324,7 @@ begin
         CalcCoords := CalcCoords + [LastCoords];
         CalcFiles := CalcFiles + [GetRoutesTmp + 'Calc_' + IntToStr(CalcFileCnt) + GetXMLExt];
       end;
-      CalcRecord := Default(TGeoApifyRecord);
-      CalcRecord.LegCnt := CalcFileCnt;
-      CalcRecord.Name := CdsRoutePointsName.AsString;
-      CalcRecord.Via := CdsRoutePointsViaPoint.AsBoolean;
-      CalcRecord.Lat := CdsRoutePointsLat.AsString;
-      CalcRecord.Lon := CdsRoutePointsLon.AsString;
-      CalcRecord.Address := CdsRoutePointsAddress.AsString;
+      CalcRecord := RoutePoint2GeoApify(CalcFileCnt);
       GeoApifyRecords := GeoApifyRecords + [CalcRecord];
 
       SepChar := '';
@@ -1278,7 +1334,6 @@ begin
       CalcCoords[High(CalcCoords)] := CalcCoords[High(CalcCoords)] + SepChar + LastCoords;
 
       Inc(RoutePointCnt);
-      CdsRoutePoints.Next;
     end;
 
     for CalcCnt := 0 to High(CalcFiles) do
