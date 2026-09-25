@@ -407,7 +407,7 @@ var
   JSONPartNbr: TJSONValue;
   TmpGarminDevice: TGarminDevice;
 begin
-  result := TGarminModel.XT;
+  result := TModelConv.Display2Garmin(TModelConv.GetCurrentDevice);
   MetaData := CdsExploreDb.FindField('Metadata');
   if (MetaData <> nil) then
   begin
@@ -415,7 +415,8 @@ begin
     TmpGarminDevice := TGarminDevice.Create;
     try
       JSONPartNbr := JSONVAlue.FindValue('PartNumber');
-      if (JSONPartNbr <> nil) then
+      if (JSONPartNbr <> nil) and
+         (JSONPartNbr.AsType<string> <> '') then
       begin
         TmpGarminDevice.Init;
         TmpGarminDevice.PartNumber := JSONPartNbr.AsType<string>;
@@ -507,15 +508,12 @@ procedure ExportTrks(const GPXRoot: TXmlVsNode;
 var
   GarminModel: TGarminModel;
 begin
-  GarminModel := TGarminModel.Unknown;
-
   if(RecNo > -1) then
   begin
     cdsExploreDb.RecNo := RecNo;
     if (cdsExploreDb.FieldByName('type').AsInteger = Expl_TrkType) then
     begin
-      if (GarminModel = TGarminModel.Unknown) then
-        GarminModel := ModelFromMeta(CdsExploreDb);
+      GarminModel := ModelFromMeta(CdsExploreDb);
       ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel);
     end;
     exit;
@@ -526,8 +524,7 @@ begin
   CdsExploreDb.First;
   while not CdsExploreDb.Eof do
   begin
-    if (GarminModel = TGarminModel.Unknown) then
-      GarminModel := ModelFromMeta(CdsExploreDb);
+    GarminModel := ModelFromMeta(CdsExploreDb);
     ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel);
 
     CdsExploreDb.Next;
