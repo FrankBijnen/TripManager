@@ -211,7 +211,7 @@ type
     function FindPos(Node: TXmlNode): Integer; overload; virtual;
     /// <summary> Find position of a node by its name (case sensitive), returns -1 if no node is found </summary>
     function FindPos(const Name: String; NodeTypes: TXmlNodeTypes = [ntElement]): Integer; overload; virtual;
-    /// <summary> Find a child node by name and node value </summary>
+    /// <summary> Find position of a child node by name and node value </summary>
     function FindPos(const Name, NodeValue: String; NodeTypes: TXmlNodeTypes = [ntElement]): Integer; overload; virtual;
 //FB_X
     /// <summary> Find a node by its name (case sensitive), returns NIL if no node is found </summary>

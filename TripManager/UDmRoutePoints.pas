@@ -69,7 +69,8 @@ type
                             ProcessOptions: TObject);
     function RoutePoint2GeoApify(const LegCnt: integer): TGeoApifyRecord;
 
-    procedure GetRouteCalculation(const Coords, XMLFile: string);
+    procedure GetRouteCalculation(const Coords, XMLFile: string;
+                                  const IncludeRoute: boolean);
   public
     { Public declarations }
     function ShowFieldExists(const AField: string;
@@ -1226,7 +1227,8 @@ end;
 const
   GeoApifyUrl = 'https://api.geoapify.com';
 
-procedure TDmRoutePoints.GetRouteCalculation(const Coords, XMLFile: string);
+procedure TDmRoutePoints.GetRouteCalculation(const Coords, XMLFile: string;
+                                             const IncludeRoute: boolean);
 var
   RESTClient:   TRESTClient;
   RESTRequest:  TRESTRequest;
@@ -1251,7 +1253,7 @@ begin
 //From trip.  tmAutoMotive=drive else motorcycle
 
 //type=balanced,short,less_maneuvers
-//Balanced
+//balanced
 
 //avoid=tolls:<imp>,ferries:<imp>,highways:<imp>,avoid=location:35.234045,-80.836392
 //Parm
@@ -1262,11 +1264,21 @@ begin
 //max_speed=
 //Parm
     RESTRequest.params.AddItem('format', 'xml' , TRESTRequestParameterKind.pkGETorPOST);
-    RESTRequest.params.AddItem('mode', 'motorcycle' , TRESTRequestParameterKind.pkGETorPOST);
+    if (TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString) in [TTransportMode.tmDriving, TTransportMode.tmAutoMotive]) then
+      RESTRequest.params.AddItem('mode', 'drive' , TRESTRequestParameterKind.pkGETorPOST)
+    else
+      RESTRequest.params.AddItem('mode', 'motorcycle' , TRESTRequestParameterKind.pkGETorPOST);
+    if (TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString, TTripList(FTripList).TripModel) in [TRoutePreference.rmShorterDistance]) then
+      RESTRequest.params.AddItem('type', 'short' , TRESTRequestParameterKind.pkGETorPOST)
+    else
+      RESTRequest.params.AddItem('type', 'balanced' , TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('apiKey', GetRegistry(Reg_GeoApifyKey, ''), TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
-    RESTRequest.params.AddItem('intermediate_waypoint_mode', 'through_stop', TRESTRequestParameterKind.pkGETorPOST);
-//    RESTRequest.params.AddItem('max_speed', '50', TRESTRequestParameterKind.pkGETorPOST);
+    if (IncludeRoute) then
+      RESTRequest.params.AddItem('intermediate_waypoint_mode', 'through_stop', TRESTRequestParameterKind.pkGETorPOST)
+    else
+      RESTRequest.params.AddItem('intermediate_waypoint_mode', 'pass_through', TRESTRequestParameterKind.pkGETorPOST);
+
     RESTRequest.Execute;
     if (RESTRequest.Response.StatusCode >= 400) then
       raise exception.Create(Format(StrRequestFailed, [#10, RESTRequest.Response.StatusText]));
@@ -1342,7 +1354,7 @@ begin
     for CalcCnt := 0 to High(CalcFiles) do
     begin
       SetCursor(CRWait);
-      GetRouteCalculation(CalcCoords[CalcCnt], CalcFiles[CalcCnt]);
+      GetRouteCalculation(CalcCoords[CalcCnt], CalcFiles[CalcCnt], IncludeRoute);
       Sleep(200);
     end;
 
