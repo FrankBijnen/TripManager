@@ -1431,8 +1431,8 @@ procedure TGPXfile.ProcessRootNode(RootNode: TXmlVSNode);
 var
   MainNode, ResultsNode, LegsNode: TXmlVSNode;
   BetterDist, TrkPtDist, LastDist, DiffDist: double;
-  CurTrackPtIndex, FromTrackPtIndex, ToTrackPtIndex, BetterTrackPtIndex, GeometryCnt: integer;
-  SkipTrkPts: integer;
+  CurTrackPtIndex, FromTrackPtIndex, ToTrackPtIndex, BetterTrackPtIndex: integer;
+  GeometryCnt, SkipTrkPts: integer;
 begin
   if not (ProcessOptions.ProcessTracks) then
     exit;
@@ -1511,23 +1511,23 @@ begin
         BetterDist := 0;
         BetterTrackPtIndex := CurTrackPtIndex;
         PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
-        Inc(BetterTrackPtIndex);
         while (BetterTrackPtIndex < CurrentTrack.ChildNodes.Count -1) and
               (BetterDist < ProcessOptions.GetMinDistAfterTurn) do
         begin
+          Inc(BetterTrackPtIndex);
           if (CurrentTrack.ChildNodes[BetterTrackPtIndex].Name = 'trkpt') then
           begin
             CurrentCoord.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
             BetterDist := BetterDist + CoordDistance(CurrentCoord, PrevTrackCoords, TDistanceUnit.duKm);
             PrevTrackCoords := CurrentCoord;
           end;
-          Inc(BetterTrackPtIndex);
         end;
 
         // Only add a shapingpoint if the distance is at least 'ProcessOptions.GetMinShapeDistKms' from the last added.
         // EG Roundabout at 'Enter' and 'Exit' very close.
         DiffDist := (TotalDistance + BetterDist) - LastDist;
-        if (DiffDist > ProcessOptions.GetMinShapeDistKms) then
+        if (DiffDist > ProcessOptions.GetMinShapeDistKms) and
+           (BetterTrackPtIndex < CurrentTrack.ChildNodes.Count) then
         begin
           AddShapingPoint(CurrentTrack.ChildNodes[BetterTrackPtIndex],
                                                   Format('%f Km', [TotalDistance + BetterDist]),
