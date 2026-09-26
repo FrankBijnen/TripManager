@@ -161,6 +161,9 @@ type
     DefRoadSpeed: integer;                    // XT1,XT2,XT3
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
     ExploreUUIDList: TStrings;                // XT2,XT3
+
+//GeoApify
+    MinDistAfterTurn: double;                 // XT1,XT2,XT3
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -189,6 +192,9 @@ type
     class function SafeModel2Write(ATripModel: TTripModel): boolean;
     class function MaxViaPoints: integer;
     function GetKurvigerUrl(Rte: TObject): string;
+//GeoApify
+    function GetMinDistAfterTurn: double;
+
     {$ENDIF}
 
     property DistOKKms: double read GetDistOKKms;
@@ -327,6 +333,8 @@ begin
   AdvInclPopular := true;
   AdvInclScenic := true;
   ExploreUUIDList := nil;
+//GeoApify
+  MinDistAfterTurn := Reg_MinDistAfterTurn_Val;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}
@@ -425,7 +433,7 @@ end;
 
 class function TProcessOptions.GetMinDistTrackPoints: integer;
 begin
-  result := GetRegistry(Reg_MinDistTrackPoints, 0);  // No filter
+  result := GetRegistry(Reg_MinDistTrackPoints, 0);  // 0=No filter
 end;
 
 class function TProcessOptions.GetMinTimeTrackPoints: integer;
@@ -568,6 +576,11 @@ begin
     Inc(Cnt);
   end;
   result := result + Format('&document_title=%s', [EscapeUrl(RouteName)]);
+end;
+
+function TProcessOptions.GetMinDistAfterTurn: double;
+begin
+  result := MinDistAfterTurn / 1000;
 end;
 
 {$ENDIF}

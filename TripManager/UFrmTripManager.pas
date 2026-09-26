@@ -452,7 +452,8 @@ type
     procedure LoadFitOnMap(FitAsGpxFile: string; Id: string);
     function HasExploreData(const ExploreType: integer = -1): boolean;
     procedure LoadExploreOnMap(AnExplore: TObject; Id: string);
-    procedure AddToMap(const FileName: string);
+    procedure AddToMap(const FileName: string;
+                       const SkipTrkDialog: boolean = false);
     procedure DeviceFilesOnMap(Tag: integer);
     function ChooseTracksDirectory: boolean;
     procedure OpenInKurviger(const FileName: string);
@@ -533,7 +534,7 @@ type
     procedure TripFileUpdating(Sender: TObject);
     procedure TripFileCanceled(Sender: TObject);
     procedure TripFileUpdated(Sender: TObject);
-    procedure TripFileCalculated(Sender: TObject; GPXFile: string);
+    procedure TripFileCalculated(Sender: TObject; GPXFile: string; IncludeRoute: boolean);
     function GetMapCoords: string;
   end;
 
@@ -1429,9 +1430,9 @@ begin
     BtnRefreshFileSysClick(Sender);
 end;
 
-procedure TFrmTripManager.TripFileCalculated(Sender: TObject; GPXFile: string);
+procedure TFrmTripManager.TripFileCalculated(Sender: TObject; GPXFile: string; IncludeRoute: boolean);
 begin
-  AddToMap(GPXFile);
+  AddToMap(GPXFile, not IncludeRoute);
 end;
 
 procedure TFrmTripManager.BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -3107,7 +3108,8 @@ begin
     EdgeBrowser1.Navigate(GetHtmlTmp);
 end;
 
-procedure TFrmTripManager.AddToMap(const FileName: string);
+procedure TFrmTripManager.AddToMap(const FileName: string;
+                                   const SkipTrkDialog: boolean = false);
 var
   MapTrip: TTripList;
   OsmTrack: TStringList;
@@ -3141,10 +3143,14 @@ begin
         ActGpxFile := GetRoutesTmp + ChangeFileExt(ExtractFilename(ActGpxFile), GpxExtension);
         TFile.WriteAllText(ActGpxFile, OOutput);
       end;
-
-      TGPXFile.PerformFunctions([CreateOSMPoints], ActGpxFile,
-                                 nil, SetProcessOptions.SavePrefs,
-                                 '', OsmTrack);
+      if (SkipTrkDialog) then
+        TGPXFile.PerformFunctions([CreateOSMPoints], ActGpxFile,
+                                   SetProcessOptions.SetSkipTrackDlgPrefs, nil,
+                                   '', OsmTrack)
+      else
+        TGPXFile.PerformFunctions([CreateOSMPoints], ActGpxFile,
+                                   nil, SetProcessOptions.SavePrefs,
+                                   '', OsmTrack);
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s%s',
                                               [App_Prefix,
                                               FileSysTrip,

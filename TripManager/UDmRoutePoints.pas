@@ -98,7 +98,8 @@ type
     procedure ExportToCSV(const CSVFile: string);
     function KurvigerURL: string;
     procedure CalcRoute(const GPXFile: string;
-                        const RoutePoints: TRoutePointList);
+                        const RoutePoints: TRoutePointList;
+                        const IncludeRoute: boolean);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
@@ -889,7 +890,8 @@ begin
             begin
               for RoutePoints in GPXFileObj.RouteViaPointList do
               begin
-                if (RoutePoints.NodeName <> AnItem.Caption) then
+                if (RoutePoints.Text <> RteOrigin) or
+                   (RoutePoints.Name <> AnItem.Caption) then
                   continue;
 
                 for RoutePoint in RoutePoints.ChildNodes do
@@ -1289,7 +1291,8 @@ begin
 end;
 
 procedure TDmRoutePoints.CalcRoute(const GPXFile: string;
-                                   const RoutePoints: TRoutePointList);
+                                   const RoutePoints: TRoutePointList;
+                                   const IncludeRoute: boolean);
 var
   CalcRecord: TGeoApifyRecord;
   GeoApifyRecords: TGeoApifyRecords;
@@ -1350,6 +1353,7 @@ begin
                              CdsRouteTransportationMode.AsString,
                              CdsRouteRoutePreference.AsString,
                              GPXFile,
+                             IncludeRoute,
                              GeoApifyRecords);
     finally
       GPXObject.Free;

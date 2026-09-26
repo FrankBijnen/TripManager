@@ -149,7 +149,7 @@ end;
 
 constructor TOSMHelper.Create(const APathName: string; ATrackPoints: TStringList);
 begin
-  Create('', APathName, '');
+  Create('true', APathName, '');
   FTrackPoints := ATrackPoints;
 end;
 

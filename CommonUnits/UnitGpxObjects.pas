@@ -97,10 +97,12 @@ type
                           const ProcessPointType: TProcessPointType;
                           const Symbol: string = '';
                           const Description: string = '');
+    procedure AddRouteExtensions(const RtePtNode, ExtensionsNode: TXmlVsNode;
+                                 const ProcessPointType: TProcessPointType);
 
     procedure AddWayPointFromRoute(const RtePtNode: TXmlVsNode;
                                    const WayPointName: string;
-                                   const ViaPt: boolean;
+                                   const ProcessPointType: TProcessPointType;
                                    const Symbol: string;
                                    const Category: string;
                                    const Route: string);
@@ -182,6 +184,7 @@ type
     procedure DoCreatePOI;
     procedure DoCreateKML;
     procedure DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
+                           const IncludeRoute: boolean;
                            const GeoApifyRecords: TGeoApifyRecords);
     procedure DoCreateHTML;
     procedure DoCreateKurviger;
@@ -813,9 +816,37 @@ begin
   end;
 end;
 
+procedure TGPXFile.AddRouteExtensions(const RtePtNode, ExtensionsNode: TXmlVsNode;
+                                      const ProcessPointType: TProcessPointType);
+var
+  ToVia, FromExtensions, FromVia, FromTm: TXmlVsNode;
+begin
+  case (ProcessPointType) of
+    TProcessPointType.pptViaPt:
+      begin
+        ToVia := ExtensionsNode.AddChild('trp:ViaPoint');
+        FromExtensions := RtePtNode.Find('extensions');
+        if (FromExtensions = nil) then
+          exit;
+        FromVia := FromExtensions.Find('trp:ViaPoint');
+        if (FromVia = nil) then
+          exit;
+        CloneNode(FromVia, ToVia);
+
+        // Add TM extension?
+        FromTm := FromExtensions.Find('tm:AdventurousLevel');
+        if (FromTm = nil) then
+          exit;
+        ExtensionsNode.AddChild('tm:AdventurousLevel').NodeValue := FromTm.NodeValue;
+      end;
+    TProcessPointType.pptShapePt:
+      ExtensionsNode.AddChild('trp:ShapingPoint');
+  end;
+end;
+
 procedure TGPXFile.AddWayPointFromRoute(const RtePtNode: TXmlVsNode;
                                         const WayPointName: string;
-                                        const ViaPt: boolean;
+                                        const ProcessPointType: TProcessPointType;
                                         const Symbol: string;
                                         const Category: string;
                                         const Route: string);
@@ -823,25 +854,12 @@ var
   NewNode, ExtensionsNode: TXmlVsNode;
 begin
   NewNode := CurrentWayPointFromRoute.AddChild('wpt');
-  if (ViaPt) then
-    AddWptPoint(NewNode,
-                RtePtNode,
-                WayPointName,
-                TProcessPointType.pptViaPt,
-                Symbol)
-  else
-    AddWptPoint(NewNode,
-                RtePtNode,
-                WayPointName,
-                TProcessPointType.pptShapePt,
-                Symbol);
-
+  AddWptPoint(NewNode,
+              RtePtNode,
+              WayPointName,
+              ProcessPointType,
+              Symbol);
   ExtensionsNode := NewNode.AddChild('extensions');
-  if (ViaPt) then
-    ExtensionsNode.AddChild('trp:ViaPoint')
-  else
-    ExtensionsNode.AddChild('trp:ShapingPoint');
-
   AddRouteCategory(ExtensionsNode, 'gpxx:', Category, Route);
   AddRouteCategory(ExtensionsNode, 'wptx1:', Category, Route);
 end;
@@ -853,7 +871,6 @@ procedure TGPXFile.AddViaOrShapePoint(const RtePtNode: TXmlVsNode;
                                       const Category: string);
 var
   NewNode, ExtensionsNode: TXmlVsNode;
-  ToVia, FromExtensions, FromVia, FromTm: TXmlVsNode;
   DefinedSymbol, Distance: string;
 begin
   // If there is a symbol defined, other than Waypoint, take that.
@@ -876,27 +893,7 @@ begin
 
   // Add Extensions?
   ExtensionsNode := NewNode.AddChild('extensions');
-  case (ProcessPointType) of
-    TProcessPointType.pptViaPt:
-      begin
-        ToVia := ExtensionsNode.AddChild('trp:ViaPoint');
-        FromExtensions := RtePtNode.Find('extensions');
-        if (FromExtensions = nil) then
-          exit;
-        FromVia := FromExtensions.Find('trp:ViaPoint');
-        if (FromVia = nil) then
-          exit;
-        CloneNode(FromVia, ToVia);
-
-        // Add TM extension?
-        FromTm := FromExtensions.Find('tm:AdventurousLevel');
-        if (FromTm = nil) then
-          exit;
-        ExtensionsNode.AddChild('tm:AdventurousLevel').NodeValue := FromTm.NodeValue;
-      end;
-    TProcessPointType.pptShapePt:
-      ExtensionsNode.AddChild('trp:ShapingPoint');
-  end;
+  AddRouteExtensions(RtePtNode, ExtensionsNode, ProcessPointType);
 end;
 
 procedure TGPXFile.AddBeginPoint(const RtePtNode: TXmlVsNode;
@@ -1060,7 +1057,8 @@ begin
     end;
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, WptName, true, Symbol, ProcessOptions.BeginStr, RouteName);
+      AddWayPointFromRoute(RtePtNode, WptName, TProcessPointType.pptViaPt,
+                           Symbol, ProcessOptions.BeginStr, RouteName);
 
     if (ProcessOptions.ProcessCreateRoutePoints) then
       AddBeginPoint(RtePtNode, WptName, Symbol);
@@ -1091,7 +1089,8 @@ begin
     end;
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, WptName, true, Symbol, ProcessOptions.EndStr, RouteName);
+      AddWayPointFromRoute(RtePtNode, WptName, TProcessPointType.pptViaPt,
+                           Symbol, ProcessOptions.EndStr, RouteName);
 
     if (ProcessOptions.ProcessCreateRoutePoints) then
     begin
@@ -1149,7 +1148,8 @@ begin
       AddShapingPoint(RtePtNode, ShapePtName, Symbol);
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, ShapePtName, false, Symbol, ProcessOptions.ShapingPointCategory, RouteName);
+      AddWayPointFromRoute(RtePtNode, ShapePtName, TProcessPointType.pptShapePt,
+                           Symbol, ProcessOptions.ShapingPointCategory, RouteName);
   end;
 
   // Via point
@@ -1175,7 +1175,8 @@ begin
       AddViaPoint(RtePtNode, ViaPtName, Symbol);
 
     if (ProcessOptions.ProcessWayPtsFromRoute) then
-      AddWayPointFromRoute(RtePtNode, ViaPtName, true, Symbol, ProcessOptions.ViaPointCategory, RouteName);
+      AddWayPointFromRoute(RtePtNode, ViaPtName, TProcessPointType.pptViaPt,
+                           Symbol, ProcessOptions.ViaPointCategory, RouteName);
   end;
 
   if (ProcessOptions.ProcessDistance) and
@@ -1218,13 +1219,13 @@ begin
   if (ProcessOptions.ProcessWayPtsFromRoute) then
   begin
     CurrentWayPointFromRoute := FWayPointFromRouteList.Add(CurrentRouteTrackName);
-    CurrentWayPointFromRoute.NodeValue := CurrentRouteTrackName;
+    CurrentWayPointFromRoute.Text := RteOrigin;
   end;
 
   if (ProcessOptions.ProcessCreateRoutePoints) then
   begin
     CurrentViaPointRoute := FRouteViaPointList.Add(CurrentRouteTrackName);
-    CurrentViaPointRoute.NodeValue := CurrentRouteTrackName;
+    CurrentViaPointRoute.Text := RteOrigin;
   end;
 
   NumberNode := nil;
@@ -1232,9 +1233,7 @@ begin
   begin
     PrevTrackCoords := Default(TCoords);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
-    CurrentTrack.NodeValue := CurrentRouteTrackName;
-    CurrentTrack.AddChild('desc').NodeValue := RteOrigin;
-
+    CurrentTrack.Text := RteOrigin;
     NumberNode := CurrentTrack.AddChild('number');
     if (ExtensionsNode <> nil) then
     begin
@@ -1288,15 +1287,14 @@ begin
   if (ProcessOptions.ProcessCreateRoutePoints) then
   begin
     CurrentViaPointRoute := FRouteViaPointList.Add(CurrentRouteTrackName);
-    CurrentViaPointRoute.NodeValue := CurrentRouteTrackName;
+    CurrentViaPointRoute.Text := TrkOrigin;
   end;
 
   if (ProcessOptions.ProcessTracks) then
   begin
     PrevTrackCoords := Default(TCoords);
     CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
-    CurrentTrack.NodeValue := CurrentRouteTrackName;
-    CurrentTrack.AddChild('desc').NodeValue := TrkOrigin;
+    CurrentTrack.Text := TrkOrigin;
     if (ExtensionsNode <> nil) then
     begin
       TrackExtension := ExtensionsNode.Find('gpxx:TrackExtension');
@@ -1435,7 +1433,6 @@ var
   BetterDist, TrkPtDist, LastDist, DiffDist: double;
   CurTrackPtIndex, FromTrackPtIndex, ToTrackPtIndex, BetterTrackPtIndex, GeometryCnt: integer;
   SkipTrkPts: integer;
-
 begin
   if not (ProcessOptions.ProcessTracks) then
     exit;
@@ -1456,8 +1453,7 @@ begin
         // Create new track for every leg
         CurrentRouteTrackName := Format('GeoApify %3d', [GeometryCnt]);
         CurrentTrack := FTrackList.Add(CurrentRouteTrackName);
-        CurrentTrack.NodeValue := CurrentRouteTrackName;
-        CurrentTrack.AddChild('desc').NodeValue := TrkOrigin;
+        CurrentTrack.Text := TrkOrigin;
 
         ProcessGeometry(ResultsNode);
         Inc(GeometryCnt);
@@ -1481,9 +1477,10 @@ begin
 
       CurrentTrack := TrackList[LegCnt];
       CurrentViaPointRoute := FRouteViaPointList.Add(CurrentTrack.Name);
-      CurrentViaPointRoute.NodeValue := CurrentTrack.Name;
+      CurrentViaPointRoute.Text := RteOrigin;
       LastDist := TotalDistance;
-      // Skip Desc node
+
+      // Skip non trkpt nodes
       SkipTrkPts := 0;
       while (CurrentTrack.ChildNodes[SkipTrkPts].Name <> 'trkpt') do
         Inc(SkipTrkPts);
@@ -1510,14 +1507,13 @@ begin
           TotalDistance := TotalDistance + TrkPtDist;
         end;
 
-        // Advance forward in track, to place a shaping point 'ProcessOptions.GetDistOKKms' AFTER the turn.
-        //TODO Need a separate Parm
+        // Advance forward in track, to place a shaping point 'ProcessOptions.GetMinDistAfterTurn' AFTER the turn.
         BetterDist := 0;
         BetterTrackPtIndex := CurTrackPtIndex;
         PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
         Inc(BetterTrackPtIndex);
         while (BetterTrackPtIndex < CurrentTrack.ChildNodes.Count -1) and
-              (BetterDist < ProcessOptions.GetDistOKKms) do
+              (BetterDist < ProcessOptions.GetMinDistAfterTurn) do
         begin
           if (CurrentTrack.ChildNodes[BetterTrackPtIndex].Name = 'trkpt') then
           begin
@@ -1824,8 +1820,7 @@ begin
           AStatusBar.Panels[1].Text := Track.NodeValue;
           AStatusBar.Update;
         end;
-
-        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+        DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, Track.Text);
         for TrackPoint in Track.ChildNodes do
         begin
           if (TrackPoint.Name <> 'trkpt') then
@@ -1928,11 +1923,13 @@ end;
 // Add AllTracks to FrmSelectGpx
 procedure TGPXfile.AddSelectTracks(const TagsToShow: TTagsToShow);
 var
-  Track, RoutePoints: TXmlVSNode;
+  Track: TXmlVSNode;
   DisplayColor, RteTrk: string;
+  RouteIndex: integer;
   ChildNodeCount: string;
 begin
   FrmSelectGPX.AllTracks.Clear;
+
   // Add Wpt line
   case TagsToShow of
     TTagsToShow.WptRte,
@@ -1950,7 +1947,7 @@ begin
   // Add Rte or Trk lines
   for Track in FTrackList do
   begin
-    RteTrk := FindSubNodeValue(Track, 'desc');
+    RteTrk := Track.Text;
     case TagsToShow of
       TTagsToShow.WptRte,
       TTagsToShow.Rte:
@@ -1962,13 +1959,14 @@ begin
           continue;
     end;
 
-    ChildNodeCount := IntToStr(Track.ChildNodes.Count);
     if SameText(RteTrk, 'rte') then
     begin
-      RoutePoints := RouteViaPointList.Find(Track.Name);
-      if (RoutePoints <> nil) then
-        ChildNodeCount := IntToStr(RoutePoints.ChildNodes.Count);
-    end;
+      RouteIndex := RouteViaPointList.FindPos(Track.Name, RteOrigin);
+      if (RouteIndex > -1) then
+        ChildNodeCount := IntToStr(RouteViaPointList[RouteIndex].ChildNodes.Count);
+    end
+    else
+      ChildNodeCount := IntToStr(Track.ChildNodes.Count);
 
     if (Track.Find('extensions') <> nil) then
       DisplayColor := GetTrackColor(Track.Find('extensions').Find('gpxx:TrackExtension'))
@@ -2123,7 +2121,7 @@ begin
 
     for Track in TracksProcessed do
     begin
-      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+      DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, Track.Text);
       WriteTrack2XML(TracksRoot, Track, DisplayColor);
     end;
 
@@ -2355,8 +2353,8 @@ begin
       try
         for Track in TracksProcessed do
         begin
-          DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
-          Helper.WritePointsStart(Track.NodeValue, DisplayColor);
+          DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, Track.Text);
+          Helper.WritePointsStart(Track.Name, DisplayColor);
           for TrackPoint in Track.ChildNodes do
           begin
             if (TrackPoint.Name <> 'trkpt') then
@@ -2372,7 +2370,8 @@ begin
           begin
             for RouteWayPoint in FRouteViaPointList do
             begin
-              if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+              if (RouteWayPoint.Text <> Track.Text) or
+                 (RouteWayPoint.Name <> Track.Name) then
                 continue;
               for WayPoint in RouteWayPoint.ChildNodes do
               begin
@@ -2406,6 +2405,7 @@ begin
 end;
 
 procedure TGPXFile.DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
+                                const IncludeRoute: boolean;
                                 const GeoApifyRecords: TGeoApifyRecords);
 var
   Lat, Lon: string;
@@ -2450,8 +2450,9 @@ begin
   try
     CalcRoot := InitGarminGpx(CalcXml);
 
-    if (High(GeoApifyRecords) = FRouteViaPointList.Count) and // intermediate_waypoint_mode=pass_through?
-       (ProcessOptions.ProcessCreateRoutePoints) then
+    if (IncludeRoute) and
+       (ProcessOptions.ProcessCreateRoutePoints) and
+       (High(GeoApifyRecords) = FRouteViaPointList.Count) then // intermediate_waypoint_mode=pass_through?
     begin
       RoutePtCnt := 0;
       OutRte := CalcRoot.AddChild('rte');
@@ -2531,10 +2532,10 @@ begin
   // First add the preferred (trk, or rte)
   for Track in FTrackList do
   begin
-    DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+    DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, Track.Text);
     if (DisplayColor = '') then
       continue;
-    if (FindSubNodeValue(Track, 'desc') <> Preferred) then
+    if (Track.Text <> Preferred) then
       continue;
 
     result.Add(Track);
@@ -2543,12 +2544,12 @@ begin
   // Now add not preferred only if not exists
   for Track in FTrackList do
   begin
-    DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+    DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, Track.Text);
     if (DisplayColor = '') then
       continue;
 
     if (UniqueTracks) and
-       (result.FindPos(Track.NodeValue, Track.NodeValue) > -1) then
+       (result.FindPos(Track.Name, Track.Text) > -1) then
         continue;
 
      result.Add(Track);
@@ -2591,7 +2592,7 @@ var
 begin
 {$IFDEF OSMMAP}
   TrackStringList.Clear;
-  DisplayColor := FrmSelectGpx.TrackSelectedColor(Track.Name, FindSubNodeValue(Track, 'desc'));
+  DisplayColor := FrmSelectGpx.TrackSelectedColor(Track.Name, Track.Text);
   if (DisplayColor = '') then
     exit;
 
@@ -2611,7 +2612,8 @@ begin
   begin
     for RouteWayPoint in FRouteViaPointList do
     begin
-      if (RouteWayPoint.NodeValue <> Track.NodeValue) then
+      if (RouteWayPoint.Text <> Track.Text) or
+         (RouteWayPoint.Name <> Track.Name) then
         continue;
 
       for WayPoint in RouteWayPoint.ChildNodes do
@@ -2697,7 +2699,7 @@ begin
 
   for Rte in RouteViaPointList do
   begin
-    if (Rte.NodeName <> Track.Name) then
+    if (Rte.Name <> Track.Name) then
       continue;
     for RtePt in Rte.ChildNodes do
     begin
@@ -2793,7 +2795,7 @@ begin
       for Rte in WayPointFromRouteList do
       begin
         // Get Route Via points of this route
-        if (Rte.NodeName <> Route.Name) then
+        if (Rte.Name <> Route.Name) then
           continue;
 
         KurvUrl := ProcessOptions.GetKurvigerUrl(Rte);
@@ -2862,24 +2864,24 @@ end;
 
 procedure TGPXFile.DoCreatePOLY;
 var
-  RouteWayPoints, WayPoint: TXmlVSNode;
+  RouteViaPoints, ViaPoint: TXmlVSNode;
   OutFile: string;
   F: TextFile;
   Coords: TCoords;
 begin
-  for RouteWayPoints in FRouteViaPointList do
+  for RouteViaPoints in FRouteViaPointList do
   begin
     OutFile := FOutDir +
-               EscapeFileName(RouteWayPoints.Name) +
+               EscapeFileName(RouteViaPoints.Name) +
                '.poly';
     AssignFile(F, OutFile);
     Rewrite(F);
-    Writeln(F, EscapeFileName(RouteWayPoints.Name) );
+    Writeln(F, EscapeFileName(RouteViaPoints.Name) );
     Writeln(F, '1');
 
-    for WayPoint in RouteWayPoints.ChildNodes do
+    for ViaPoint in RouteViaPoints.ChildNodes do
     begin
-      Coords.FromAttributes(WayPoint.AttributeList);
+      Coords.FromAttributes(ViaPoint.AttributeList);
       Writeln(F, ' ',
               FormatFloat('0.00000;-0.00000;0.00', Coords.Lon, FormatSettings),
               ' ',
@@ -3147,10 +3149,10 @@ var
   Locations:        TmLocations;
   mParentTripId:    TmParentTripId;
   mParentTripName:  TmParentTripName;
-  RouteNode:        TXmlVSNode;
   GpxDistance:      double;
   mExploreUuid:     TmExploreUuid;
   KnownExploreUuid: string;
+  RouteIndex:       integer;
 begin
   if (SupportsGrouping[ProcessOptions.TripModel]) and
      (ProcessOptions.AllowGrouping) then
@@ -3191,9 +3193,9 @@ begin
     begin
       // Get distance from GPX, the subclasses are not accurate enough
       GpxDistance := 0;
-      RouteNode := FTrackList.Find(TripName);
-      if (Assigned(RouteNode)) then
-        TryStrToFloat(FindSubNodeValue(RouteNode, 'number'), GpxDistance);
+      RouteIndex := FTrackList.FindPos(TripName, RteOrigin);
+      if (RouteIndex > -1) then
+        TryStrToFloat(FindSubNodeValue(FTrackList[RouteIndex], 'number'), GpxDistance);
 
       // Create TripTrack from BC calculation
       FTripList.TripTrack(FTripList.TripModel, RtePts, SubClassList, GpxDistance);

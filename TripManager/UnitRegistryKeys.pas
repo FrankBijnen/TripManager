@@ -111,6 +111,9 @@ const
 
   Reg_RememberLayout              = 'RememberLayout';
   Reg_SavedLayout                 = 'SavedLayout';
+//GeoApify
+  Reg_MinDistAfterTurn_Key        = 'MinDistAfterTurn';
+  Reg_MinDistAfterTurn_Val        = 500;
 
 // See SendToItems.txt for item texts
 const
@@ -231,7 +234,8 @@ begin
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, DefGpiProximity, SubKey);
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
     MinShapeDist := GetRegistry(Reg_MinShapeDist_Key, Reg_MinShapeDist_Val);
-
+//GeoApify
+    MinDistAfterTurn := GetRegistry(Reg_MinDistAfterTurn_Key, Reg_MinDistAfterTurn_Val);
     ProcessCategory := [];
   end;
 end;

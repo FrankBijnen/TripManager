@@ -126,8 +126,10 @@ begin
   result := 0;
 
   // Find record in CDS
-  if (CdsExploreDb.Locate('collectoin_id;id', VarArrayOf([Expl_Object.Expl_Item_Id, Expl_Object.Expl_Item_Id]), []) = false) then
+  if (Expl_Object.Expl_RecNo < 1) or
+     (Expl_Object.Expl_RecNo > CdsExploreDb.RecordCount) then
     exit;
+  CdsExploreDb.RecNo := Expl_Object.Expl_RecNo;
 
   // Look in VehicleProfileData
   JSONMetaValue := TJSONObject.ParseJSONValue(CdsExploreDb.FieldByName('METADATA').AsString);

@@ -191,7 +191,7 @@ begin
   for TrackRouteSelected in TrackList do
   begin
     if (FrmSelectGPX.TrackSelectedColor(TrackRouteSelected.Name,
-                                        FindSubNodeValue(TrackRouteSelected, 'desc')) = '') then
+                                        TrackRouteSelected.Text) = '') then
       continue;
     Track2OSMTrackPoints(TrackRouteSelected, TrackId, TStringList(OutTrackList));
     exit(TrackRouteSelected);
