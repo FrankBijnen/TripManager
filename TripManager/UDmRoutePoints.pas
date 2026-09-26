@@ -903,8 +903,7 @@ begin
         end;
       finally
         CdsRoutePoints.EnableControls;
-        if Assigned(OnRouteUpdated) then
-          OnRouteUpdated(Self);
+        DoRouteUpdated;
       end;
       result := true;
     end;
@@ -995,8 +994,7 @@ begin
 
     finally
       CdsRoutePoints.EnableControls;
-      if Assigned(OnRouteUpdated) then
-        OnRouteUpdated(Self);
+      DoRouteUpdated;
     end;
   finally
     GPXFileObj.Free;

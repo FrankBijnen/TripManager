@@ -1357,7 +1357,7 @@ begin
   DmRoutePoints.SaveTrip;
   ATripList := TTripList(FrmTripEditor.CurTripList);
   ATripList.ForceRecalc;
-  LoadTripOnMap(ATripList, CurrentMapItem, false);
+  LoadTripOnMap(ATripList, CurrentMapItem);
 end;
 
 procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
