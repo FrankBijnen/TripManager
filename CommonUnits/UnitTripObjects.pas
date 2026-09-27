@@ -4047,7 +4047,7 @@ end;
 
 function TmUdbDataHndl.RoutePref: string;
 begin
-  result := UdbDataHndlPref2Desc(FValue.Unknown3[RoutePrefOffset], FTripList.FTripModel);
+  result := UdbDataHndlPref2Desc(FValue.Unknown3[RoutePrefOffset], TripList.FTripModel);
 end;
 
 function TmUdbDataHndl.TransportMode: string;
