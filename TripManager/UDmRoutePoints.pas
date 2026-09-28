@@ -112,9 +112,6 @@ type
 var
   DmRoutePoints: TDmRoutePoints;
 
-const
-  Reg_GeoApifyKey         = 'GeoApifyKey';
-
 resourcestring
   DM_ERR_Need_Begin_End   = 'Need at least a begin and end point';
   DM_ERR_Trk2Rt_Missing   = 'Could not start %s.exe. Check installation';
@@ -129,6 +126,7 @@ uses
   Vcl.Dialogs, Vcl.ComCtrls,
   REST.Client, REST.Types,
   UnitGeoCode, UnitRegistry, UnitStringUtils, UnitRedirect, UnitProcessOptions, UnitGpxObjects,
+  UnitRegistryKeys,
   UnitTripDefs, UnitTripObjects;
 
 {$R *.dfm}
@@ -1221,10 +1219,6 @@ begin
   result := TTripList(FTripList).KurvigerUrl;
 end;
 
-//TODO Add Param
-const
-  GeoApifyUrl = 'https://api.geoapify.com';
-
 procedure TDmRoutePoints.GetRouteCalculation(const Coords, XMLFile: string;
                                              const IncludeRoute: boolean);
 var
@@ -1233,8 +1227,8 @@ var
   RESTResponse: TRESTResponse;
 begin
   if (GetRegistry(Reg_GeoApifyKey, '') = '') then
-    raise exception.Create('Need an GeoApify API key');
-  RESTClient := TRESTClient.Create(GeoApifyUrl);
+    raise exception.Create('Need an API key');
+  RESTClient := TRESTClient.Create(GetRegistry(Reg_GeoApifyUrl_Key, Reg_GeoApifyUrl_Val));
   RESTResponse := TRESTResponse.Create(nil);
   RESTRequest := TRESTRequest.Create(nil);
   RESTRequest.Client := RESTClient;
@@ -1248,7 +1242,7 @@ begin
 //pass_trough for creating track
 
 //mode=drive,motorcycle
-//From trip.  tmAutoMotive=drive else motorcycle
+//From trip. tmAutoMotive=drive else motorcycle
 
 //type=balanced,short,less_maneuvers
 //balanced
@@ -1261,17 +1255,20 @@ begin
 
 //max_speed=
 //Parm
+    RESTRequest.params.AddItem('apiKey', GetRegistry(Reg_GeoApifyKey, ''), TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('format', 'xml' , TRESTRequestParameterKind.pkGETorPOST);
+    RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
+
     if (TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString) in [TTransportMode.tmDriving, TTransportMode.tmAutoMotive]) then
       RESTRequest.params.AddItem('mode', 'drive' , TRESTRequestParameterKind.pkGETorPOST)
     else
       RESTRequest.params.AddItem('mode', 'motorcycle' , TRESTRequestParameterKind.pkGETorPOST);
+
     if (TmRoutePreference.RoutePreference(CdsRouteRoutePreference.AsString, TTripList(FTripList).TripModel) in [TRoutePreference.rmShorterDistance]) then
       RESTRequest.params.AddItem('type', 'short' , TRESTRequestParameterKind.pkGETorPOST)
     else
       RESTRequest.params.AddItem('type', 'balanced' , TRESTRequestParameterKind.pkGETorPOST);
-    RESTRequest.params.AddItem('apiKey', GetRegistry(Reg_GeoApifyKey, ''), TRESTRequestParameterKind.pkGETorPOST);
-    RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
+
     if (IncludeRoute) then
       RESTRequest.params.AddItem('intermediate_waypoint_mode', 'through_stop', TRESTRequestParameterKind.pkGETorPOST)
     else
@@ -1351,8 +1348,8 @@ begin
 
     for CalcCnt := 0 to High(CalcFiles) do
     begin
-      SetCursor(CRWait);
       GetRouteCalculation(CalcCoords[CalcCnt], CalcFiles[CalcCnt], IncludeRoute);
+      SetCursor(CRWait);
       Sleep(200);
     end;
 

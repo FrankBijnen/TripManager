@@ -15,7 +15,7 @@ uses
 type
 
   TTripFileUpdate = TNotifyEvent;
-  TTripGPXFileEvent = procedure(Sender: TObject; GpxFile: string; IncludeRoute: boolean) of object;
+  TTripGPXFileEvent = procedure(Sender: TObject; GpxFile: string; IncludeRoute, Add2Map: boolean) of object;
   TRoutePointsShowing = procedure(Sender: TObject; Showing: boolean) of object;
 
   TFrmTripEditor = class(TForm)
@@ -118,7 +118,7 @@ type
     DeviceFolders: array[0..2] of string;
     procedure CopyToClipBoard(Cut: boolean);
     procedure RoutePreview(const GPX: string;
-                           const IncludeRoute: boolean);
+                           const IncludeRoute, Add2Map: boolean);
     procedure SaveChanges;
   public
     { Public declarations }
@@ -233,7 +233,7 @@ begin
 end;
 
 procedure TFrmTripEditor.RoutePreview(const GPX: string;
-                                      const IncludeRoute: boolean);
+                                      const IncludeRoute, Add2Map: boolean);
 var
   CurRoutePoints: TRoutePointList;
   Index: integer;
@@ -241,7 +241,7 @@ begin
   CurRoutePoints := TRoutePointList.Create;
   DmRoutePoints.CdsRoutePoints.DisableControls;
   try
-    if (DBGRoutePoints.SelectedRows.Count = 0) then
+    if (DBGRoutePoints.SelectedRows.Count < 2) then
     begin
       DmRoutePoints.CdsRoutePoints.First;
       while not DmRoutePoints.CdsRoutePoints.Eof do
@@ -263,7 +263,7 @@ begin
     CurRoutePoints.Free;
     DmRoutePoints.CdsRoutePoints.EnableControls;
     if (Assigned(FTripFileCalculated)) then
-      FTripFileCalculated(Self, GPX, IncludeRoute);
+      FTripFileCalculated(Self, GPX, IncludeRoute, Add2Map);
   end;
 end;
 
@@ -274,7 +274,7 @@ begin
   SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
 //TODO add parm
   if SaveTrip.Execute then
-    RoutePreview(SaveTrip.FileName, true);
+    RoutePreview(SaveTrip.FileName, true, false);
 end;
 
 procedure TFrmTripEditor.Copy1Click(Sender: TObject);
@@ -549,7 +549,7 @@ end;
 
 procedure TFrmTripEditor.Routepreview1Click(Sender: TObject);
 begin
-  RoutePreview(GetOSMTemp + RoutePreviewName, false);
+  RoutePreview(GetOSMTemp + RoutePreviewName, false, true);
 end;
 
 procedure TFrmTripEditor.Trk2RtImport1Click(Sender: TObject);

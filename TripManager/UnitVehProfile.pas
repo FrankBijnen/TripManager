@@ -448,14 +448,12 @@ begin
             case (TTraction(Traction)) of
               TTraction.tr2Wheels:
                 Proposed_Hash := XT3_FW430_Base_Hashes[Index].HashT2;
-              //TODO
-              TTraction.tr3Wheels:;
+              TTraction.tr3Wheels:;       //TODO Need profile tests
               TTraction.tr2WD:
-              //TODO
-                if (High_Clearance) then
+                if (High_Clearance) then  //TODO Need profile tests
                 else
                   Proposed_Hash := XT3_FW430_Base_Hashes[Index].Hash2WD;
-              TTraction.tr4WD:;
+              TTraction.tr4WD:;           //TODO Need profile tests
             end;
             Proposed_Hash := Proposed_Hash + Cardinal(AvoidMask);
 

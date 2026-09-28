@@ -2019,7 +2019,7 @@ var
   SubNodeValue: string;
 begin
   OutTrack := TracksRoot.AddChild('trk');
-  OutTrack.AddChild('name').NodeValue := Track.NodeValue;
+  OutTrack.AddChild('name').NodeValue := Track.Name;
 
   OutTrack.AddChild('extensions').
            AddChild('gpxx:TrackExtension').
@@ -2287,7 +2287,7 @@ begin
           begin
             if (RoutesProcessed.Find(RouteWayPoints.Name) = nil) then
               continue;
-            CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.NodeValue)); // RouteName
+            CatId := PoiGroup.AddCat(GPXCategory(ProcessOptions.CatRoute + RouteWayPoints.Name)); // RouteName
 
             for WayPoint in RouteWayPoints.ChildNodes do
             begin

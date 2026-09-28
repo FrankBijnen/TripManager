@@ -162,7 +162,7 @@ type
     RoadSpeedMap: array[0..11] of TIdentMapEntry;
     ExploreUUIDList: TStrings;                // XT2,XT3
 
-//GeoApify
+    //GeoApify
     MinDistAfterTurn: double;                 // XT1,XT2,XT3
     {$ENDIF}
 
@@ -192,7 +192,7 @@ type
     class function SafeModel2Write(ATripModel: TTripModel): boolean;
     class function MaxViaPoints: integer;
     function GetKurvigerUrl(Rte: TObject): string;
-//GeoApify
+    //GeoApify
     function GetMinDistAfterTurn: double;
 
     {$ENDIF}
@@ -333,7 +333,7 @@ begin
   AdvInclPopular := true;
   AdvInclScenic := true;
   ExploreUUIDList := nil;
-//GeoApify
+  //GeoApify
   MinDistAfterTurn := Reg_MinDistAfterTurn_Val;
 {$ENDIF}
 

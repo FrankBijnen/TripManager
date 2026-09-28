@@ -111,9 +111,13 @@ const
 
   Reg_RememberLayout              = 'RememberLayout';
   Reg_SavedLayout                 = 'SavedLayout';
-//GeoApify
+
+  //GeoApify
+  Reg_GeoApifyUrl_Key             = 'GeoApifyUrl';
+  Reg_GeoApifyUrl_Val             = 'https://api.geoapify.com';
+  Reg_GeoApifyKey                 = 'GeoApifyKey';
   Reg_MinDistAfterTurn_Key        = 'MinDistAfterTurn';
-  Reg_MinDistAfterTurn_Val        = 500;
+  Reg_MinDistAfterTurn_Val        = 100;
 
 // See SendToItems.txt for item texts
 const
@@ -210,6 +214,9 @@ begin
     KurvigerAvoidNarrow := GetRegistry(Reg_KurvigerAvoidNarrow, false);
     KurvigerAvoidUnpaved := GetRegistry(Reg_KurvigerAvoidUnpaved, false);
 
+    //GeoApify
+    MinDistAfterTurn := GetRegistry(Reg_MinDistAfterTurn_Key, Reg_MinDistAfterTurn_Val);
+
     // XT1, XT2, and XT3 Defaults
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
     TripOption := TTripOption(GetRegistry(Reg_TripOption, Ord(TTripOption.ttCalc)));
@@ -234,8 +241,6 @@ begin
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, DefGpiProximity, SubKey);
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
     MinShapeDist := GetRegistry(Reg_MinShapeDist_Key, Reg_MinShapeDist_Val);
-//GeoApify
-    MinDistAfterTurn := GetRegistry(Reg_MinDistAfterTurn_Key, Reg_MinDistAfterTurn_Val);
     ProcessCategory := [];
   end;
 end;

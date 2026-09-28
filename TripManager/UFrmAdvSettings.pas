@@ -195,7 +195,7 @@ begin
                                       'Enable creating and deleting folders');
 
     AddGridLine(GridDeviceSettings,   CurRow, Reg_EnableExploreFuncs,
-                                      'False',
+                                      'True',
                                       'Enable Explore');
 
     AddGridLine(GridDeviceSettings,   CurRow, '', '');

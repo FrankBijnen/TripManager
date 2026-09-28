@@ -481,7 +481,7 @@ begin
 
   // Copy explore.db
   // Get ProfileHashes from explore.db
-  if (GetRegistry(Reg_EnableExploreFuncs, false)) and
+  if (GetRegistry(Reg_EnableExploreFuncs, true)) and
      (TModelConv.ReadExploreDB(GarminModel)) and
      (CopyDeviceFile(DBPath, ExploreDb, GetDeviceTmp)) then
   begin

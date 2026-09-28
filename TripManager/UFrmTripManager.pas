@@ -534,7 +534,7 @@ type
     procedure TripFileUpdating(Sender: TObject);
     procedure TripFileCanceled(Sender: TObject);
     procedure TripFileUpdated(Sender: TObject);
-    procedure TripFileCalculated(Sender: TObject; GPXFile: string; IncludeRoute: boolean);
+    procedure TripFileCalculated(Sender: TObject; GPXFile: string; IncludeRoute, Add2Map: boolean);
     function GetMapCoords: string;
   end;
 
@@ -1271,7 +1271,7 @@ begin
   FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
   FrmTripEditor.OnTripFileCalculated := TripFileCalculated;
 
-// Set DmRoutePoints events
+// Set DmRoutePoints events and parms
   DmRoutePoints.OnGetMapCoords := GetMapCoords;
   DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
   DmRoutePoints.UuidList := ExploreList;
@@ -1430,9 +1430,12 @@ begin
     BtnRefreshFileSysClick(Sender);
 end;
 
-procedure TFrmTripManager.TripFileCalculated(Sender: TObject; GPXFile: string; IncludeRoute: boolean);
+procedure TFrmTripManager.TripFileCalculated(Sender: TObject; GPXFile: string; IncludeRoute, Add2Map: boolean);
 begin
-  AddToMap(GPXFile, not IncludeRoute);
+  if (Add2map) then
+    AddToMap(GPXFile,not IncludeRoute)
+  else
+    BtnRefreshFileSysClick(Sender);
 end;
 
 procedure TFrmTripManager.BtnTripEditorMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -4852,7 +4855,7 @@ var
   AMenuItem: TMenuItem;
   ExploreEnabled: boolean;
 begin
-  ExploreEnabled := GetRegistry(Reg_EnableExploreFuncs, false);
+  ExploreEnabled := GetRegistry(Reg_EnableExploreFuncs, true);
   for AMenuItem in TPopupMenu(Sender).Items do
   begin
     AMenuItem.Enabled := ((AMenuItem.GroupIndex = 1) and (AMenuItem.Enabled)) or
