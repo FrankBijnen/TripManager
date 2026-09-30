@@ -272,9 +272,8 @@ begin
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := CurPath;
   SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
-//TODO add parm
   if SaveTrip.Execute then
-    RoutePreview(SaveTrip.FileName, true, false);
+    RoutePreview(SaveTrip.FileName, GetRegistry(Reg_GeoApifyInclRoute, false), false);
 end;
 
 procedure TFrmTripEditor.Copy1Click(Sender: TObject);

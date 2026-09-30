@@ -24,8 +24,6 @@ object FrmAdvSettings: TFrmAdvSettings
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 630
-    ExplicitWidth = 609
     DesignSize = (
       615
       31)
@@ -39,7 +37,6 @@ object FrmAdvSettings: TFrmAdvSettings
       Default = True
       ModalResult = 1
       TabOrder = 0
-      ExplicitLeft = 431
     end
     object BtnCancel: TButton
       Left = 524
@@ -51,7 +48,6 @@ object FrmAdvSettings: TFrmAdvSettings
       Caption = 'Cancel'
       ModalResult = 2
       TabOrder = 1
-      ExplicitLeft = 518
     end
   end
   object PctMain: TPageControl
@@ -64,8 +60,6 @@ object FrmAdvSettings: TFrmAdvSettings
     TabHeight = 25
     TabOrder = 1
     OnResize = PctMainResize
-    ExplicitWidth = 609
-    ExplicitHeight = 630
     object TabGeneral: TTabSheet
       Caption = 'General'
       object GridGeneralSettings: TStringGrid
@@ -106,8 +100,6 @@ object FrmAdvSettings: TFrmAdvSettings
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goEditing, goAlwaysShowEditor, goFixedRowDefAlign]
         TabOrder = 0
         StyleElements = []
-        ExplicitWidth = 601
-        ExplicitHeight = 595
         RowHeights = (
           24
           24
@@ -163,9 +155,9 @@ object FrmAdvSettings: TFrmAdvSettings
         end
       end
     end
-    object TabKurviger: TTabSheet
-      Caption = 'Kurviger'
-      object GridKurviger: TStringGrid
+    object TabKurvigerGeoApify: TTabSheet
+      Caption = 'Kurviger/GeoApify'
+      object GridKurvigerGeoApify: TStringGrid
         Left = 0
         Top = 0
         Width = 607

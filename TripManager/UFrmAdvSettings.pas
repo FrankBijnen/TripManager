@@ -36,8 +36,8 @@ type
     BtnVehProfile: TButton;
     TabTripOverview: TTabSheet;
     GridTripOverview: TripManager_StringGrid.TStringGrid;
-    TabKurviger: TTabSheet;
-    GridKurviger: TripManager_StringGrid.TStringGrid;
+    TabKurvigerGeoApify: TTabSheet;
+    GridKurvigerGeoApify: TripManager_StringGrid.TStringGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure MemoAddressFormatChange(Sender: TObject);
@@ -62,7 +62,7 @@ type
     procedure LoadSettings_General;
     procedure LoadSettings_Device;
     procedure LoadSettings_Zumo;
-    procedure LoadSettings_Kurviger;
+    procedure LoadSettings_KurvigerGeoApify;
     procedure LoadSettings_TripOverview;
     procedure LoadSettings_GeoCode;
     procedure LoadSettings;
@@ -336,57 +336,71 @@ begin
   end;
 end;
 
-procedure TFrmAdvSettings.LoadSettings_Kurviger;
+procedure TFrmAdvSettings.LoadSettings_KurvigerGeoApify;
 var
   CurRow: integer;
 begin
-  GridKurviger.OnModified := GridModified;
-  GridKurviger.RowCount := GridTripOverview.FixedRows +1;
-  GridKurviger.BeginUpdate;
+  GridKurvigerGeoApify.OnModified := GridModified;
+  GridKurvigerGeoApify.RowCount := GridTripOverview.FixedRows +1;
+  GridKurvigerGeoApify.BeginUpdate;
   try
 
     CurRow := 1;
-    AddGridLine(GridKurviger, CurRow,  '', '', '-Kurviger parameters-');
-    AddGridLine(GridKurviger, CurRow,  '', '');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerUrl_Key,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '-Kurviger parameters-');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerUrl_Key,
                                        Reg_KurvigerUrl_Val,
                                        'Kurviger URL');
-    AddGridLine(GridKurviger, CurRow,  '', '', 'en=English, de=Deutsch, nl=Nederlands');
-    AddGridLine(GridKurviger, CurRow,  '', '', 'fr=Français, es=Español, it=Italiano');
-    AddGridLine(GridKurviger, CurRow,  '', '');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerCurvature,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', 'en=English, de=Deutsch, nl=Nederlands');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', 'fr=Français, es=Español, it=Italiano');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerCurvature,
                                        IntToStr(3),
                                        'Default Curvature Level (1-4)');
-    AddGridLine(GridKurviger, CurRow,  '', '', '1=Fastest, 2=Fast and curvy, 3=Curvy, 4=Extra curvy');
-    AddGridLine(GridKurviger, CurRow,  '', '', '5=All curvy route modes (Not implemented)');
-    AddGridLine(GridKurviger, CurRow,  '', '');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '1=Fastest, 2=Fast and curvy, 3=Curvy, 4=Extra curvy');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '5=All curvy route modes (Not implemented)');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
 
-    AddGridLine(GridKurviger, CurRow,  '', '', '-Avoidances-');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidSame,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '-Avoidances-');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidSame,
                                        'False',
                                        'Same road twice');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidToll,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidToll,
                                        'False',
                                        'Toll');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidMotorways,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidMotorways,
                                        'False',
                                        'Motorways');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidMain,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidMain,
                                        'False',
                                        'Main roads');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidNarrow,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidNarrow,
                                        'False',
                                        'Narrow roads');
-    AddGridLine(GridKurviger, CurRow,  Reg_KurvigerAvoidUnpaved,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidUnpaved,
                                        'False',
                                        'Unpaved roads');
 
-    AddGridLine(GridKurviger, CurRow,  '', '');
-    GridKurviger.RowCount := CurRow;
-    AddGridHeader(GridKurviger);
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '-GeoApify parameters-');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyUrl_Key,
+                                       Reg_GeoApifyUrl_Val,
+                                       'GeoApify Url');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyKey,
+                                       '',
+                                       'Api Key');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyInclRoute,
+                                       'false',
+                                       'Include route with added shaping points');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_MinDistAfterTurn_Key,
+                                       Reg_MinDistAfterTurn_Val,
+                                       'Distance after turn for added shaping points');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
+    GridKurvigerGeoApify.RowCount := CurRow;
+    AddGridHeader(GridKurvigerGeoApify);
 
   finally
-    GridKurviger.EndUpdate;
+    GridKurvigerGeoApify.EndUpdate;
   end;
 end;
 
@@ -493,7 +507,7 @@ begin
   LoadSettings_General;
   LoadSettings_Device;
   LoadSettings_Zumo;
-  LoadSettings_Kurviger;
+  LoadSettings_KurvigerGeoApify;
   LoadSettings_TripOverview;
   LoadSettings_GeoCode;
 end;
@@ -553,7 +567,7 @@ begin
   AlignGrid(GridGeneralSettings, SpaceLeft);
   AlignGrid(GridDeviceSettings, SpaceLeft);
   AlignGrid(GridZumoSettings, SpaceLeft);
-  AlignGrid(GridKurviger, SpaceLeft);
+  AlignGrid(GridKurvigerGeoApify, SpaceLeft);
   AlignGrid(GridTripOverview, SpaceLeft);
   AlignGrid(GridGeoCodeSettings, SpaceLeft);
 end;
@@ -583,7 +597,7 @@ begin
   SaveGrid(GridGeneralSettings);
   SaveGrid(GridDeviceSettings);
   SaveGrid(GridZumoSettings);
-  SaveGrid(GridKurviger);
+  SaveGrid(GridKurvigerGeoApify);
   SaveGrid(GridTripOverview);
   SaveGrid(GridGeoCodeSettings);
 

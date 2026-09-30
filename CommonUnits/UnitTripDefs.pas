@@ -156,6 +156,7 @@ const
   Trip_TripFileName                   = '0:/.System/Trips/%s.trip';
   Trip_UdbDirTurn                     = 'Turn';
   Trip_UdbDirMagic: Cardinal          = $51590469;
+  Trip_Dummy_Value                    = $80000000;
 
 { Elementary data types }
   dtByte            = 1;

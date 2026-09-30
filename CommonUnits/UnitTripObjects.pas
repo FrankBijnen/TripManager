@@ -445,10 +445,13 @@ type
     function GetValue: string; override;
     function GetItemEditMode: TItemEditMode; override;
   public
-    constructor Create(AValue: Cardinal = $80000000);
+    constructor Create(AValue: Cardinal = Trip_Dummy_Value);
   end;
 
   TmShapingCenter = class(TRawDataItem)
+  private
+    function GetValue: string; override;
+  public
     constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
   end;
 
@@ -2489,14 +2492,16 @@ begin
 end;
 
 { TmShapingRadius }
-constructor TmShapingRadius.Create(AValue: Cardinal = $80000000);
+constructor TmShapingRadius.Create(AValue: Cardinal = Trip_Dummy_Value);
 begin
   inherited Create(GetKey, AValue);
 end;
 
 function TmShapingRadius.GetValue: string;
 begin
-  result := '0x' + IntTohex(FValue, 8);
+  result := Format('0x%s', [IntTohex(FValue, 8)]);
+  if (FValue <> Trip_Dummy_Value) then
+    result := Format('%1.f Mtr', [Fvalue / 100]);
 end;
 
 function TmShapingRadius.GetItemEditMode: TItemEditMode;
@@ -2509,6 +2514,26 @@ constructor TmShapingCenter.Create(ALenValue: Cardinal; ADataType: byte; AStream
 begin
   inherited Create;
   InitFromStream(GetKey, ALenValue, ADataType, AStream);
+end;
+
+function TmShapingCenter.GetValue: string;
+const
+  LatPos = 4;
+  LonPos = 8;
+var
+  FormatStr: string;
+  ALat, ALon: Cardinal;
+begin
+  result := inherited;
+  if (Length(FBytes) >= LonPos + SizeOf(ALon)) then
+  begin
+    FormatStr := Format('%s, %s', [Trip_Coord_Decimals, Trip_Coord_Decimals]);
+    CopyMemory(@ALat, @FBytes[LatPos], SizeOf(ALat));
+    CopyMemory(@ALon, @FBytes[LonPos], SizeOf(ALon));
+    if (ALat <> Trip_Dummy_Value) and
+       (ALon <> Trip_Dummy_Value) then
+      result := Format(FormatStr, [CoordAsDec(ALat), CoordAsDec(ALon)], FloatFormatSettings);
+  end;
 end;
 
 { TmName }
