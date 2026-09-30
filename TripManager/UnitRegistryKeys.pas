@@ -116,6 +116,7 @@ const
   Reg_GeoApifyUrl_Key             = 'GeoApifyUrl';
   Reg_GeoApifyUrl_Val             = 'https://api.geoapify.com';
   Reg_GeoApifyKey                 = 'GeoApifyKey';
+  Reg_GeoApifyAvoid               = 'GeoApifyAvoid';
   Reg_GeoApifyInclRoute           = 'GeoApifyInclRoute';
   Reg_MinDistAfterTurn_Key        = 'MinDistAfterTurn';
   Reg_MinDistAfterTurn_Val        = 100;

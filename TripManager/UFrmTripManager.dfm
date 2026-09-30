@@ -464,8 +464,8 @@ object FrmTripManager: TFrmTripManager
       object HexPanel: TPanel
         Left = 0
         Top = 0
-        Width = 727
-        Height = 430
+        Width = 732
+        Height = 422
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
@@ -476,7 +476,7 @@ object FrmTripManager: TFrmTripManager
         object PnlHexEditTrip: TPanel
           Left = 1
           Top = 1
-          Width = 725
+          Width = 730
           Height = 25
           Align = alTop
           ParentBackground = False
@@ -732,7 +732,6 @@ object FrmTripManager: TFrmTripManager
         Height = 105
         Align = alTop
         TabOrder = 0
-        ExplicitWidth = 586
         object MemoSQL: TMemo
           Left = 1
           Top = 57
@@ -758,7 +757,6 @@ object FrmTripManager: TFrmTripManager
           Height = 56
           Align = alTop
           TabOrder = 1
-          ExplicitWidth = 584
           object LblSqlResults: TLabel
             Left = 1
             Top = 33
@@ -787,7 +785,6 @@ object FrmTripManager: TFrmTripManager
             Align = alTop
             Caption = 'PnlQuickSqlGo'
             TabOrder = 0
-            ExplicitWidth = 582
             object CmbSQliteTabs: TComboBox
               AlignWithMargins = True
               Left = 4
@@ -827,7 +824,6 @@ object FrmTripManager: TFrmTripManager
               NumGlyphs = 2
               TabOrder = 1
               OnClick = BitBtnSQLGoClick
-              ExplicitLeft = 665
             end
           end
         end
@@ -866,8 +862,6 @@ object FrmTripManager: TFrmTripManager
         ScrollBars = ssVertical
         TabOrder = 2
         OnKeyUp = DBMemoKeyUp
-        ExplicitTop = 340
-        ExplicitWidth = 727
       end
     end
     object TsExplore: TTabSheet
@@ -876,8 +870,8 @@ object FrmTripManager: TFrmTripManager
       object LvExplore: TListView
         Left = 0
         Top = 28
-        Width = 727
-        Height = 402
+        Width = 732
+        Height = 394
         Align = alClient
         Columns = <
           item
@@ -956,7 +950,7 @@ object FrmTripManager: TFrmTripManager
       object PnlExploreTop: TPanel
         Left = 0
         Top = 0
-        Width = 727
+        Width = 732
         Height = 28
         Align = alTop
         TabOrder = 1

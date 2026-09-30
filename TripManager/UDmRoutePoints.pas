@@ -5,6 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.UITypes,
   Data.DB, Datasnap.DBClient,
+  vcl.DBGrids,
   UnitVerySimpleXml, UnitGpxDefs;
 
 type
@@ -20,6 +21,7 @@ type
   TRoutePointList = TObjectList<TCDSBookMark>;
 
   TOnGetMapCoords = function: string of object;
+  TTripGPXFileEvent = procedure(Sender: TObject; GpxFile: string; IncludeRoute, Add2Map: boolean) of object;
 
   TDmRoutePoints = class(TDataModule)
     DsRoutePoints: TDataSource;
@@ -57,6 +59,7 @@ type
     IdToInsert: integer;
     FOnRouteUpdated: TNotifyEvent;
     FOnRoutePointUpdated: TNotifyEvent;
+    FTripFileCalculated: TTripGPXFileEvent;
     FOnGetMapCoords: TOnGetMapCoords;
     FUuidList: TStringList;
     procedure DoRouteUpdated;
@@ -101,9 +104,14 @@ type
     procedure CalcRoute(const GPXFile: string;
                         const RoutePoints: TRoutePointList;
                         const IncludeRoute: boolean);
+
+    procedure RoutePreview(const AGrid: TDBGrid;
+                           const GPX: string;
+                           const IncludeRoute, Add2Map: boolean);
     property OnRouteUpdated: TNotifyEvent read FOnRouteUpdated write FOnRouteUpdated;
     property OnRoutePointUpdated: TNotifyEvent read FOnRoutePointUpdated write FOnRoutePointUpdated;
     property OnGetMapCoords: TOnGetMapCoords read FOnGetMapCoords write FOnGetMapCoords;
+    property OnTripFileCalculated: TTripGPXFileEvent read FTripFileCalculated write FTripFileCalculated;
     property RoutePickList: string read FRoutePickList;
     property TransportPickList: string read FTransportPickList;
     property UuidList: TStringList read FUuidList write FUuidList;
@@ -143,6 +151,7 @@ const
   GPXExtension      = '.gpx';
   Trk2RtIn          = Trk2Rt + GPXExtension;
   Trk2RtOut         = T2R + '\' + Trk2Rt + '_' + T2R + GPXExtension;
+  RoutePreviewName  = 'RoutePreview.gpx';
 
 var
   RegionalFormatSettings: TFormatSettings;
@@ -1236,7 +1245,7 @@ begin
   RESTRequest.Response := RESTResponse;
   try
     RESTRequest.Params.Clear;
-//TODO Add Params
+//TODO Check Params
 //intermediate_waypoint_mode=stopover,through_stop,pass_through (Default=stopover)
 //trough_stop for creating routes
 //pass_trough for creating track
@@ -1258,7 +1267,8 @@ begin
     RESTRequest.params.AddItem('apiKey', GetRegistry(Reg_GeoApifyKey, ''), TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('format', 'xml' , TRESTRequestParameterKind.pkGETorPOST);
     RESTRequest.params.AddItem('waypoints', Coords, TRESTRequestParameterKind.pkGETorPOST);
-
+    if (GetRegistry(Reg_GeoApifyAvoid, '') <> '') then
+      RESTRequest.params.AddItem('avoid', GetRegistry(Reg_GeoApifyAvoid, ''), TRESTRequestParameterKind.pkGETorPOST);
     if (TmTransportationMode.TransPortMethod(CdsRouteTransportationMode.AsString) in [TTransportMode.tmDriving, TTransportMode.tmAutoMotive]) then
       RESTRequest.params.AddItem('mode', 'drive' , TRESTRequestParameterKind.pkGETorPOST)
     else
@@ -1367,6 +1377,50 @@ begin
     end;
   finally
     SetCursor(CRNormal);
+  end;
+end;
+
+procedure TDmRoutePoints.RoutePreview(const AGrid: TDBgrid;
+                                      const GPX: string;
+                                      const IncludeRoute, Add2Map: boolean);
+var
+  CurRoutePoints: TRoutePointList;
+  CurGPX: string;
+  Index: integer;
+begin
+  CurGPX := GPX;
+  if (CurGPX = '') then
+    CurGPX := GetOSMTemp + RoutePreviewName;
+  System.SysUtils.DeleteFile(CurGPX);
+
+  CurRoutePoints := TRoutePointList.Create;
+  CdsRoutePoints.DisableControls;
+  try
+    if (AGrid = nil) or
+       (AGrid.SelectedRows.Count < 2) then
+    begin
+      CdsRoutePoints.First;
+      while not CdsRoutePoints.Eof do
+      begin
+        CurRoutePoints.Add(TCDSBookMark.Create(CdsRoutePoints));
+        CdsRoutePoints.Next;
+      end;
+    end
+    else
+    begin
+      for Index := 0 to AGrid.SelectedRows.Count -1 do
+      begin
+        CdsRoutePoints.GotoBookmark(AGrid.SelectedRows[Index]);
+        CurRoutePoints.Add(TCDSBookMark.Create(CdsRoutePoints));
+      end;
+    end;
+    CalcRoute(CurGPX, CurRoutePoints, IncludeRoute);
+  finally
+    CurRoutePoints.Free;
+    CdsRoutePoints.EnableControls;
+    if (Assigned(FTripFileCalculated)) and
+       (FileExists(CurGPX)) then
+      FTripFileCalculated(Self, CurGPX, IncludeRoute, Add2Map);
   end;
 end;
 

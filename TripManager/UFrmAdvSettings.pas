@@ -353,13 +353,11 @@ begin
                                        'Kurviger URL');
     AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', 'en=English, de=Deutsch, nl=Nederlands');
     AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', 'fr=Français, es=Español, it=Italiano');
-    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerCurvature,
                                        IntToStr(3),
                                        'Default Curvature Level (1-4)');
     AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '1=Fastest, 2=Fast and curvy, 3=Curvy, 4=Extra curvy');
     AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '5=All curvy route modes (Not implemented)');
-    AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
 
     AddGridLine(GridKurvigerGeoApify, CurRow,  '', '', '-Avoidances-');
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_KurvigerAvoidSame,
@@ -389,6 +387,9 @@ begin
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyKey,
                                        '',
                                        'Api Key');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyAvoid,
+                                       '',
+                                       'avoid=tolls,ferries,highways,avoid=location:lat,lon');
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyInclRoute,
                                        'false',
                                        'Include route with added shaping points');

@@ -1269,11 +1269,11 @@ begin
   FrmTripEditor.OnTripFileUpdating := TripFileUpdating;
   FrmTripEditor.OnTripFileUpdated := TripFileUpdated;
   FrmTripEditor.OnRoutePointsShowing := RoutePointsShowing;
-  FrmTripEditor.OnTripFileCalculated := TripFileCalculated;
 
 // Set DmRoutePoints events and parms
   DmRoutePoints.OnGetMapCoords := GetMapCoords;
   DmRoutePoints.OnRouteUpdated := ReloadTripOnMap;
+  DmRoutePoints.OnTripFileCalculated := TripFileCalculated;
   DmRoutePoints.UuidList := ExploreList;
 end;
 
@@ -2130,6 +2130,8 @@ begin
           InsertRoutePointClick(InsertRoutePoint);
         Ord('M'):
            MoveRoutePointClick(MoveRoutePoint);
+        Ord('R'):
+          DmRoutePoints.RoutePreview(FrmTripEditor.DBGRoutePoints, '', false, true);
         VK_DELETE:
            DeleteRoutePointClick(DeleteRoutePoint);
       end;
