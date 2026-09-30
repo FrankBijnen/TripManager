@@ -2765,7 +2765,7 @@ begin
     begin
       TrackId := 0; // We get a new HTML file for every track/route
       Track2OSMTrackPoints(Track, TrackId, TrackPointList);
-      OutFile := FOutDir + ChangeFileExt(EscapeFileName(Track.NodeValue), '.html');
+      OutFile := FOutDir + ChangeFileExt(EscapeFileName(Track.Name), '.html');
       CreateOSMMapHtml(OutFile, TrackPointList);
     end;
   finally
@@ -2805,10 +2805,10 @@ begin
         begin
           if (ProcessOptions.HtmlOutput <> THtmlOutput.OSM) then
           begin
-            OutFile := FOutDir + ChangeFileExt(EscapeFileName(Route.Name), '_kurviger.html');
+            OutFile := FOutDir + ChangeFileExt(EscapeFileName(Rte.Name), '_kurviger.html');
             HTML := Format('<html><head><meta http-equiv="refresh" content="3;url=%s" /></head><body>', [KurvUrl]);
             HTML := HTML + '<h1>If not redirected in 3 Seconds.<br><br>';
-            HTML := HTML + Format('<a href="%s">Click here to open %s in <b>Kurviger</b></a></h1></body></html>', [KurvUrl, Route.Name]);
+            HTML := HTML + Format('<a href="%s">Click here to open %s in <b>Kurviger</b></a></h1></body></html>', [KurvUrl, Rte.Name]);
             TFile.WriteAllText(OutFile, HTML);
           end;
         end;
