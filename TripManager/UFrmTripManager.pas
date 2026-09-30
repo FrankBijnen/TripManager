@@ -259,6 +259,8 @@ type
     CdsExploreDb: TClientDataSet;
     ChkCollections: TCheckBox;
     PopupTripAddToMap: TMenuItem;
+    N19: TMenuItem;
+    Routepreview1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -395,6 +397,7 @@ type
     procedure BgTripInfoClick(Sender: TObject);
     procedure ChkCollectionsClick(Sender: TObject);
     procedure PopupTripAddToMapClick(Sender: TObject);
+    procedure Routepreview1Click(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -2131,7 +2134,7 @@ begin
         Ord('M'):
            MoveRoutePointClick(MoveRoutePoint);
         Ord('R'):
-          DmRoutePoints.RoutePreview(FrmTripEditor.DBGRoutePoints, '', false, true);
+          Routepreview1Click(Routepreview1);
         VK_DELETE:
            DeleteRoutePointClick(DeleteRoutePoint);
       end;
@@ -5403,6 +5406,11 @@ end;
 procedure TFrmTripManager.RoutePreferenceClick(Sender: TObject);
 begin
   SetRouteParm(TRouteParm.RoutePref, TMenuItem(Sender).Tag);
+end;
+
+procedure TFrmTripManager.Routepreview1Click(Sender: TObject);
+begin
+  DmRoutePoints.RoutePreview(FrmTripEditor.DBGRoutePoints, '', false, true);
 end;
 
 procedure TFrmTripManager.CopyFileFromTmp(const LocalFile: string; const AListItem: TListItem);

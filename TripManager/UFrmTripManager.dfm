@@ -3764,6 +3764,14 @@ object FrmTripManager: TFrmTripManager
       ShortCut = 16430
       OnClick = DeleteRoutePointClick
     end
+    object N19: TMenuItem
+      Caption = '-'
+    end
+    object Routepreview1: TMenuItem
+      Caption = 'Route preview'
+      ShortCut = 16466
+      OnClick = Routepreview1Click
+    end
   end
   object CdsExploreDb: TClientDataSet
     Aggregates = <>
