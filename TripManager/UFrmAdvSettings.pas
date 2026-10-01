@@ -387,15 +387,18 @@ begin
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyKey,
                                        '',
                                        'Api Key');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyColor_Key,
+                                       Reg_GeoApifyColor_Val,
+                                       'EG: Red, Black, Blue etc.');
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyAvoid,
                                        '',
                                        'avoid=tolls,ferries,highways,avoid=location:lat,lon');
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyInclRoute,
                                        'false',
                                        'Include route with added shaping points');
-    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_MinDistAfterTurn_Key,
-                                       Reg_MinDistAfterTurn_Val,
-                                       'Distance after turn for added shaping points');
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyMinDistTurn_Key,
+                                       Reg_GeoApifyMinDistTurn_Val,
+                                       'Distance from turn for added shaping points');
     AddGridLine(GridKurvigerGeoApify, CurRow,  '', '');
     GridKurvigerGeoApify.RowCount := CurRow;
     AddGridHeader(GridKurvigerGeoApify);

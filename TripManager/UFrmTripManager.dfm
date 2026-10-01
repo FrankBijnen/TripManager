@@ -1712,7 +1712,7 @@ object FrmTripManager: TFrmTripManager
     Aggregates = <>
     Params = <>
     AfterScroll = CdsDeviceDbAfterScroll
-    Left = 1053
+    Left = 1069
     Top = 427
   end
   object SaveBlob: TSaveDialog
@@ -3776,7 +3776,7 @@ object FrmTripManager: TFrmTripManager
   object CdsExploreDb: TClientDataSet
     Aggregates = <>
     Params = <>
-    Left = 1141
-    Top = 435
+    Left = 1149
+    Top = 427
   end
 end

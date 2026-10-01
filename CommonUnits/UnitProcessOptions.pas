@@ -163,7 +163,8 @@ type
     ExploreUUIDList: TStrings;                // XT2,XT3
 
     //GeoApify
-    MinDistAfterTurn: double;                 // XT1,XT2,XT3
+    GeoApifyMinDistTurn: double;              // XT1,XT2,XT3
+    GeoApifyColor: string;                    // XT1,XT2,XT3
     {$ENDIF}
 
     FOnSetFuncPrefs: TNotifyEvent;
@@ -193,7 +194,8 @@ type
     class function MaxViaPoints: integer;
     function GetKurvigerUrl(Rte: TObject): string;
     //GeoApify
-    function GetMinDistAfterTurn: double;
+    function GetGeoApifyMinDistTurn: double;
+    function GetGeoApifyColor: string;
 
     {$ENDIF}
 
@@ -334,7 +336,8 @@ begin
   AdvInclScenic := true;
   ExploreUUIDList := nil;
   //GeoApify
-  MinDistAfterTurn := Reg_MinDistAfterTurn_Val;
+  GeoApifyMinDistTurn := Reg_GeoApifyMinDistTurn_Val;
+  GeoApifyColor := Reg_GeoApifyColor_Val;
 {$ENDIF}
 
 {$IFDEF REGISTRYKEYS}
@@ -578,9 +581,14 @@ begin
   result := result + Format('&document_title=%s', [EscapeUrl(RouteName)]);
 end;
 
-function TProcessOptions.GetMinDistAfterTurn: double;
+function TProcessOptions.GetGeoApifyMinDistTurn: double;
 begin
-  result := MinDistAfterTurn / 1000;
+  result := GeoApifyMinDistTurn / 1000;
+end;
+
+function TProcessOptions.GetGeoApifyColor: string;
+begin
+  result := GeoApifyColor;
 end;
 
 {$ENDIF}

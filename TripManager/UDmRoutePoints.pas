@@ -83,7 +83,7 @@ type
     procedure LoadTrip(const ATripList: TObject);
     function LoadExplore(const ATripList: TObject;
                          const ActGpxFile: string): boolean;
-
+    procedure PostChanges;
     procedure SaveTrip;
     procedure MoveUp(Dataset: TDataset);
     procedure MoveDown(Dataset: TDataset);
@@ -104,7 +104,6 @@ type
     procedure CalcRoute(const GPXFile: string;
                         const RoutePoints: TRoutePointList;
                         const IncludeRoute: boolean);
-
     procedure RoutePreview(const AGrid: TDBGrid;
                            const GPX: string;
                            const IncludeRoute, Add2Map: boolean);
@@ -428,6 +427,15 @@ begin
   TmpStream.Position := 0;
 end;
 
+procedure TDmRoutePoints.PostChanges;
+begin
+  if (CdsRoute.State in [dsEdit, dsInsert]) then
+    CdsRoute.Post;
+
+  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
+    CdsRoutePoints.Post;
+end;
+
 procedure TDmRoutePoints.SaveTrip;
 var
   SaveRecNo: integer;
@@ -437,11 +445,7 @@ var
   P: integer;
   Location2Add: TLocation2Add;
 begin
-  if (CdsRoute.State in [dsEdit, dsInsert]) then
-    CdsRoute.Post;
-
-  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-    CdsRoutePoints.Post;
+  PostChanges;
 
   SaveRecNo := CdsRoutePoints.RecNo;
   CdsRoutePoints.DisableControls;
@@ -873,11 +877,7 @@ begin
                                     'Import route points from: ' + ExtractFileName(GPXFile),
                                     'Use the Checkboxes to select Waypoints/Routes', CdsRouteTripName.AsString, nil)) then
     begin
-      if (CdsRoute.State in [dsEdit, dsInsert]) then
-        CdsRoute.Post;
-      if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-        CdsRoutePoints.Post;
-
+      PostChanges;
       CdsRoutePoints.DisableControls;
       try
         CdsRoutePoints.Last;  // Add to Route Points at end of list
@@ -984,10 +984,7 @@ begin
 
   GPXFileObj := TGPXFile.Create(GPXFile, OnSetAnalyzePrefs, nil);
   try
-    if (CdsRoute.State in [dsEdit, dsInsert]) then
-      CdsRoute.Post;
-    if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-      CdsRoutePoints.Post;
+    PostChanges;
 
     CdsRoutePoints.DisableControls;
     CdsRoutePoints.Last;  // Add to Route Points at end of list
@@ -1020,11 +1017,8 @@ var
 begin
   XML := TXmlVSDocument.Create;
   DefProcessOptions := TProcessOptions.Create;
-  if (CdsRoute.State in [dsEdit, dsInsert]) then
-    CdsRoute.Post;
-  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-    CdsRoutePoints.Post;
 
+  PostChanges;
   CdsRoutePoints.DisableControls;
   try
     XMLRoot := InitGarminGpx(XML);
@@ -1104,11 +1098,8 @@ begin
 
   Reader := TStringList.Create;
   Reader.LoadFromFile(CSVFile);
-  if (CdsRoute.State in [dsEdit, dsInsert]) then
-    CdsRoute.Post;
-  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-    CdsRoutePoints.Post;
 
+  PostChanges;
   PointId := CdsRoutePoints.RecordCount +1;
   CdsRoutePoints.DisableControls;
   try
@@ -1180,10 +1171,7 @@ var
   Lst: TStringList;
   ViaShape: string;
 begin
-  if (CdsRoute.State in [dsEdit, dsInsert]) then
-    CdsRoute.Post;
-  if (CdsRoutePoints.State in [dsEdit, dsInsert]) then
-    CdsRoutePoints.Post;
+  PostChanges;
 
   CdsRoutePoints.DisableControls;
   Writer := TStreamWriter.Create(CSVFile, false, TEncoding.UTF8);
@@ -1393,6 +1381,7 @@ begin
     CurGPX := GetOSMTemp + RoutePreviewName;
   System.SysUtils.DeleteFile(CurGPX);
 
+  PostChanges;
   CurRoutePoints := TRoutePointList.Create;
   CdsRoutePoints.DisableControls;
   try

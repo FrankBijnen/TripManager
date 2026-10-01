@@ -1880,8 +1880,12 @@ end;
 
 procedure TFrmTripManager.PopupTripEditorPopup(Sender: TObject);
 begin
-  if (FrmTripEditor.Showing) then
-    RoutePoint.Caption := DmRoutePoints.CdsRoutePointsName.AsString;
+  if (DmRoutePoints.CdsRoutePoints.Active) and
+     (DmRoutePoints.CdsRoutePoints.RecNo > 0) then
+    RoutePoint.Caption := DmRoutePoints.CdsRoutePointsName.AsString
+  else
+    RoutePoint.Caption := NotApplicable;
+  RoutePreview1.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
 end;
 
 procedure TFrmTripManager.PopupTripEditPopup(Sender: TObject);

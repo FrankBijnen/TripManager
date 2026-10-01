@@ -1512,7 +1512,7 @@ begin
         BetterTrackPtIndex := CurTrackPtIndex;
         PrevTrackCoords.FromAttributes(CurrentTrack.ChildNodes[BetterTrackPtIndex].AttributeList);
         while (BetterTrackPtIndex < CurrentTrack.ChildNodes.Count -1) and
-              (BetterDist < ProcessOptions.GetMinDistAfterTurn) do
+              (BetterDist < ProcessOptions.GetGeoApifyMinDistTurn) do
         begin
           Inc(BetterTrackPtIndex);
           if (CurrentTrack.ChildNodes[BetterTrackPtIndex].Name = 'trkpt') then
@@ -1984,17 +1984,24 @@ end;
 function TGPXfile.ShowSelectTracks(const TagsToShow: TTagsToShow;
                                    const Caption, SubCaption, CheckMask: string;
                                    const AGetPreviewInfo: TOnGetPreviewInfo): boolean;
+var
+  TrackColor: string;
 begin
   AddSelectTracks(TagsToShow);
+  TrackColor := '';
+  if (ProcessOptions.SkipTrackDialog = false) then
+    TrackColor := ProcessOptions.TrackColor;
 
-  FrmSelectGPX.LoadTracks(TagsToShow, ProcessOptions.TrackColor, CheckMask, Self, AGetPreviewInfo);
+  FrmSelectGPX.LoadTracks(TagsToShow, TrackColor, CheckMask, Self, AGetPreviewInfo);
   FrmSelectGPX.Caption := Caption;
   FrmSelectGPX.PnlTop.Caption := SubCaption;
-  result := ProcessOptions.HasConsole or ProcessOptions.SkipTrackDialog;
+  result := ProcessOptions.HasConsole or
+            ProcessOptions.SkipTrackDialog;
   if not result then
     result := (FrmSelectGPX.ShowModal = ID_OK);
 
-  if (result) then
+  if (result) and
+     (ProcessOptions.SkipTrackDialog = false) then
   begin
     if (FrmSelectGPX.CmbOverruleColor.ItemIndex = 0) then
       ProcessOptions.TrackColor := ''
@@ -2452,7 +2459,7 @@ begin
 
     if (IncludeRoute) and
        (ProcessOptions.ProcessCreateRoutePoints) and
-       (High(GeoApifyRecords) = RouteViaPointList.Count) then // intermediate_waypoint_mode=pass_through?
+       (High(GeoApifyRecords) = RouteViaPointList.Count) then // intermediate_waypoint_mode=pass_through not supported for routes.
     begin
       RoutePtCnt := 0;
       OutRte := CalcRoot.AddChild('rte');
@@ -2498,10 +2505,9 @@ begin
     begin
       OutTrack := CalcRoot.AddChild('trk');
       OutTrack.AddChild('name').NodeValue := RouteName;
-
       OutTrack.AddChild('extensions').
                AddChild('gpxx:TrackExtension').
-               AddChild('gpxx:DisplayColor').NodeValue := ProcessOptions.DefTrackColor;
+               AddChild('gpxx:DisplayColor').NodeValue := ProcessOptions.GeoApifyColor;
 
       OutTrackSeg := OutTrack.AddChild('trkseg');
       for Track in TrackList do

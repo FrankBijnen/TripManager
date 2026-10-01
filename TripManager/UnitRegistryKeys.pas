@@ -117,9 +117,11 @@ const
   Reg_GeoApifyUrl_Val             = 'https://api.geoapify.com';
   Reg_GeoApifyKey                 = 'GeoApifyKey';
   Reg_GeoApifyAvoid               = 'GeoApifyAvoid';
+  Reg_GeoApifyColor_Key           = 'GeoApifyColor';
+  Reg_GeoApifyColor_Val           = 'Red';
   Reg_GeoApifyInclRoute           = 'GeoApifyInclRoute';
-  Reg_MinDistAfterTurn_Key        = 'MinDistAfterTurn';
-  Reg_MinDistAfterTurn_Val        = 100;
+  Reg_GeoApifyMinDistTurn_Key     = 'GeoApifyMinDistTurn';
+  Reg_GeoApifyMinDistTurn_Val     = 100;
 
 // See SendToItems.txt for item texts
 const
@@ -217,7 +219,8 @@ begin
     KurvigerAvoidUnpaved := GetRegistry(Reg_KurvigerAvoidUnpaved, false);
 
     //GeoApify
-    MinDistAfterTurn := GetRegistry(Reg_MinDistAfterTurn_Key, Reg_MinDistAfterTurn_Val);
+    GeoApifyMinDistTurn := GetRegistry(Reg_GeoApifyMinDistTurn_Key, Reg_GeoApifyMinDistTurn_Val);
+    GeoApifyColor := GetRegistry(Reg_GeoApifyColor_Key, Reg_GeoApifyColor_Val);
 
     // XT1, XT2, and XT3 Defaults
     AllowGrouping := GetRegistry(Reg_AllowGrouping, true);
