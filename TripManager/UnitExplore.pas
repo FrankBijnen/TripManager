@@ -38,9 +38,10 @@ const
   Expl_AllTypes         = '1, 2, 4';
   Expl_Query            =
     'Select t.collection_id,' + CRLF +
+    't.included,' + CRLF +
     '(select case' + CRLF +
     '   when %s then ''All''' + CRLF +
-    '   when t.collection_id <> 0 then c.name' + CRLF +
+    '   when t.collection_id <> 0 and t.included <> 0 then c.name' + CRLF +
     '   else ''Unorganised''' + CRLF +
     'end' + CRLF +
     ') as Collection,' + CRLF +
@@ -63,7 +64,7 @@ implementation
 
 uses
   System.DateUtils, System.StrUtils, System.JSON, System.SysUtils, System.Generics.Collections, System.Masks,
-  System.UITypes, System.Variants,
+  System.UITypes, System.Variants, System.Math,
   Vcl.Dialogs,
   UnitGpxDefs, UnitTripDefs, UnitVerySimpleXml, UnitStringUtils,
   UnitGarminDevice, UnitModelConv;
@@ -444,6 +445,7 @@ var
   Flags: array[0..9] of byte;
   TrkPts: word;
   Expl_TrackPoint: TExpl_TrackPoint;
+  MaxRecSize: integer;
   SavePos: int64;
 begin
   TrackPoints := CdsExploreDb.FindField('Track_Points');
@@ -481,11 +483,12 @@ begin
     MemoryStream.Read(Flags, SizeOf(Flags));
     MemoryStream.Read(TrkPts, SizeOf(TrkPts));
     MemoryStream.Seek(RecordStart[GarminModel], TSeekOrigin.soBeginning);
+    MaxRecSize := Min(SizeOf(Expl_TrackPoint), RecordLen[GarminModel]);
     for Cnt := 0 to TrkPts -1 do
     begin
       SavePos := MemoryStream.Position;
       Expl_TrackPoint := Default(TExpl_TrackPoint);
-      MemoryStream.Read(Expl_TrackPoint, RecordLen[GarminModel]);
+      MemoryStream.Read(Expl_TrackPoint, MaxRecSize);
 
       // Add Trackpoint to XML
       TrkPt := TrkSeg.AddChild('trkpt');
@@ -495,8 +498,8 @@ begin
         Trkpt.AddChild('ele').NodeValue := FormatFloat('####0.00', Expl_TrackPoint.Ele, FormatSettings);
       if (Expl_TrackPoint.DateTime > 0) and
          (Expl_TrackPoint.DateTime < $ffffffff) then
-      Trkpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(Expl_TrackPoint.DateTime), false);
-
+        Trkpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(Expl_TrackPoint.DateTime), false);
+      
       MemoryStream.Seek(SavePos + RecordLen[GarminModel], TSeekOrigin.soBeginning);
     end;
   finally

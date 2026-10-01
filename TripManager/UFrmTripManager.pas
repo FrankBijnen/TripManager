@@ -6070,6 +6070,7 @@ begin
           AExpl_Object := TExpl_Object.Create;
           AnExploreList.Add(AExpl_Object);
           CurCol := CdsExploreDb.FieldByName('Collection').AsString;
+          CurType := -1;
           CollectionNode := TvTrip.Items.AddChildObject(RootNode, CurCol, AExpl_Object);
           if (CdsExploreDb.FieldByName('show_on_map').AsInteger > 0) then
             CollectionNode.Text := CollectionNode.Text + ' (Show on Map)';
