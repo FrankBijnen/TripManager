@@ -44,7 +44,8 @@ function ExecUpdateSql(const DbName: string;
                        const Query: string): int64;
 function CDSFromQuery(const DbName: string;
                       const Query: string;
-                      const ACds: TClientDataSet): integer;
+                      const ACds: TClientDataSet;
+                      const AllowNulls: boolean = false): integer;
 function GetAvoidancesChanged(const DbName: string): string;
 procedure GetExploreList(const DBName: string;
                          const ExploreList: TStrings;
@@ -308,7 +309,8 @@ end;
 
 function CDSFromQuery(const DbName: string;
                       const Query: string;
-                      const ACds: TClientDataSet): integer;
+                      const ACds: TClientDataSet;
+                      const AllowNulls: boolean = false): integer;
 var
   DB: TSQLiteDatabase;
   QTab: TSQLiteTable;
@@ -372,6 +374,9 @@ begin
         ACds.Append;
         for Index := 0 to QTab.ColCount -1 do
         begin
+          if (AllowNulls) and
+             (QTab.FieldIsNull(Index)) then
+            continue;
           case Acds.Fields[Index].DataType of
             TFieldType.ftInteger:
               ACds.Fields[Index].AsInteger := QTab.FieldAsInteger(Index);

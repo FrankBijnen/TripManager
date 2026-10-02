@@ -674,7 +674,7 @@ begin
     DBMemo.PopupMenu := PopupDBMemo;
   end
   else
-    DBMemo.Lines.Text := Afield.DisplayText;
+    DBMemo.Lines.Text := AField.DisplayText;
 end;
 
 procedure TFrmTripManager.CheckandFixcurrentgpx1Click(Sender: TObject);
@@ -853,7 +853,7 @@ begin
                                       [ExecUpdateSql(SqlFile, MemoSQL.Lines.Text)])
     else
       LblSqlResults.Caption := Format('Records selected: %d',
-                                      [CDSFromQuery(SqlFile, MemoSQL.Lines.Text, CdsDeviceDb)]);
+                                      [CDSFromQuery(SqlFile, MemoSQL.Lines.Text, CdsDeviceDb, true)]);
   finally
     SetCursor(CrNormal);
   end;

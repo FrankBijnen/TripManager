@@ -508,7 +508,8 @@ procedure TVehicleProfile.FromCds(const ACDS: TClientDataSet; const AModel: TGar
   begin
     result := Unassigned;
     AField := ACDS.FindField(AFieldName);
-    if (AField = nil) then
+    if (AField = nil) or
+       (AField.IsNull) then
       exit;
 
     if (ContainsText(AFieldName, 'UID')) then

@@ -465,7 +465,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 732
-        Height = 422
+        Height = 420
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
@@ -513,6 +513,7 @@ object FrmTripManager: TFrmTripManager
         ParentFont = False
         TabOrder = 0
         OnResize = AdvPanel_MapTopResize
+        ExplicitWidth = 730
         object SpeedBtn_MapClear: TSpeedButton
           AlignWithMargins = True
           Left = 0
@@ -591,6 +592,7 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           TabOrder = 2
           Text = '-'
+          ExplicitWidth = 65
           ExplicitHeight = 21
         end
         object PnlCoordinates: TPanel
@@ -628,7 +630,7 @@ object FrmTripManager: TFrmTripManager
       end
       object AdvPanel_MapBottom: TPanel
         Left = 0
-        Top = 392
+        Top = 390
         Width = 732
         Height = 30
         Align = alBottom
@@ -640,17 +642,18 @@ object FrmTripManager: TFrmTripManager
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitTop = 386
+        ExplicitWidth = 730
         object LblBounds: TLabel
           AlignWithMargins = True
           Left = 116
           Top = 3
           Width = 35
-          Height = 24
+          Height = 13
           Margins.Left = 10
           Align = alLeft
           Caption = 'Bounds'
           Layout = tlCenter
-          ExplicitHeight = 13
         end
         object EditMapBounds: TEdit
           AlignWithMargins = True
@@ -667,6 +670,7 @@ object FrmTripManager: TFrmTripManager
           ReadOnly = True
           ShowHint = True
           TabOrder = 0
+          ExplicitWidth = 570
           ExplicitHeight = 21
         end
         object ChkZoomToPoint: TCheckBox
@@ -687,7 +691,7 @@ object FrmTripManager: TFrmTripManager
         Left = 1
         Top = 29
         Width = 730
-        Height = 362
+        Height = 360
         Margins.Left = 1
         Margins.Top = 1
         Margins.Right = 1
@@ -701,6 +705,8 @@ object FrmTripManager: TFrmTripManager
         OnNavigationStarting = EdgeBrowser1NavigationStarting
         OnWebMessageReceived = EdgeBrowser1WebMessageReceived
         OnZoomFactorChanged = EdgeBrowser1ZoomFactorChanged
+        ExplicitWidth = 728
+        ExplicitHeight = 356
       end
     end
     object TsSQlite: TTabSheet
@@ -871,7 +877,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 28
         Width = 732
-        Height = 394
+        Height = 392
         Align = alClient
         Columns = <
           item

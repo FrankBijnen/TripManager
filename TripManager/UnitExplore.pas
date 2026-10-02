@@ -410,6 +410,7 @@ var
   JSONPartNbr: TJSONValue;
   TmpGarminDevice: TGarminDevice;
 begin
+  // Init with currently selected model
   result := TModelConv.Display2Garmin(TModelConv.GetCurrentDevice);
   MetaData := CdsExploreDb.FindField('Metadata');
   if (MetaData <> nil) then
@@ -432,9 +433,19 @@ begin
   end;
 end;
 
+procedure ShowTrkWarning(var ShowWarning: boolean);
+begin
+  if (ShowWarning) then
+  begin
+    MessageDlg('TrackPoints has unexpected format!', TMsgDlgType.mtWarning, [TMsgDlgBtn.mbOK], 0);
+    ShowWarning := false;
+  end;
+end;
+
 procedure ExportTrksRec(const GPXRoot: TXmlVsNode;
                         const CdsExploreDb: TClientDataSet;
-                        const GarminModel: TGarminModel);
+                        const GarminModel: TGarminModel;
+                        var ShowWarning: boolean);
 var
   Trk, TrkSeg, TrkPt: TXmlVSNode;
   TrackPoints: TField;
@@ -445,6 +456,7 @@ var
   Flags: array[0..9] of byte;
   TrkPts: word;
   Expl_TrackPoint: TExpl_TrackPoint;
+  Lat, Lon: string;
   MaxRecSize: integer;
   SavePos: int64;
 begin
@@ -461,7 +473,10 @@ begin
     MemoryStream.Seek(0, TSeekOrigin.soBeginning);
     MemoryStream.Read(LId, SizeOf(LId));
     if (Lid <> SizeOf(Id)) then
+    begin
+      ShowTrkWarning(ShowWarning);
       exit;
+    end;
 
     case GarminModel of
       TGarminModel.XT,
@@ -471,7 +486,21 @@ begin
     end;
     MemoryStream.Read(Id, SizeOf(Id));
     if (Id <> 'serialization::archive') then
+    begin
+      ShowTrkWarning(ShowWarning);
       exit;
+    end;
+
+    MemoryStream.Read(Flags, SizeOf(Flags));
+    MemoryStream.Read(TrkPts, SizeOf(TrkPts));
+    MemoryStream.Seek(RecordStart[GarminModel], TSeekOrigin.soBeginning);
+    if ((MemoryStream.Size - MemoryStream.Position) < (TrkPts * RecordLen[GarminModel])) then
+    begin
+      ShowTrkWarning(ShowWarning);
+      exit;
+    end;
+
+    MaxRecSize := Min(SizeOf(Expl_TrackPoint), RecordLen[GarminModel]);
 
     Trk := GPXRoot.AddChild('trk');
     Trk.AddChild('name').NodeValue := CdsExploreDb.FieldByName('name').AsString;
@@ -480,10 +509,6 @@ begin
       Explore2GPXColor(CdsExploreDb.FieldByName('Color').AsInteger);
     TrkSeg := Trk.AddChild('trkseg');
 
-    MemoryStream.Read(Flags, SizeOf(Flags));
-    MemoryStream.Read(TrkPts, SizeOf(TrkPts));
-    MemoryStream.Seek(RecordStart[GarminModel], TSeekOrigin.soBeginning);
-    MaxRecSize := Min(SizeOf(Expl_TrackPoint), RecordLen[GarminModel]);
     for Cnt := 0 to TrkPts -1 do
     begin
       SavePos := MemoryStream.Position;
@@ -492,14 +517,22 @@ begin
 
       // Add Trackpoint to XML
       TrkPt := TrkSeg.AddChild('trkpt');
-      Trkpt.SetAttribute('lat', Coord2Float(Expl_TrackPoint.Lat));
-      Trkpt.SetAttribute('lon', Coord2Float(Expl_TrackPoint.Lon));
+      Lat := Coord2Float(Expl_TrackPoint.Lat);
+      Lon := Coord2Float(Expl_TrackPoint.Lon);
+      if (ValidLatLon(Lat, Lon) = false) then
+      begin
+        ShowTrkWarning(ShowWarning);
+        exit;
+      end;
+
+      Trkpt.SetAttribute('lat', Lat);
+      Trkpt.SetAttribute('lon', Lon);
       if (Abs(Expl_TrackPoint.Ele) < Expl_MaxElevation) then
         Trkpt.AddChild('ele').NodeValue := FormatFloat('####0.00', Expl_TrackPoint.Ele, FormatSettings);
       if (Expl_TrackPoint.DateTime > 0) and
          (Expl_TrackPoint.DateTime < $ffffffff) then
         Trkpt.AddChild('time').NodeValue := DateToISO8601(TUnixDateConv.CardinalAsDateTime(Expl_TrackPoint.DateTime), false);
-      
+
       MemoryStream.Seek(SavePos + RecordLen[GarminModel], TSeekOrigin.soBeginning);
     end;
   finally
@@ -512,14 +545,16 @@ procedure ExportTrks(const GPXRoot: TXmlVsNode;
                      const RecNo: integer = -1);
 var
   GarminModel: TGarminModel;
+  ShowWarning: boolean;
 begin
+  ShowWarning := true;
   if(RecNo > -1) then
   begin
     cdsExploreDb.RecNo := RecNo;
     if (cdsExploreDb.FieldByName('type').AsInteger = Expl_TrkType) then
     begin
       GarminModel := ModelFromMeta(CdsExploreDb);
-      ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel);
+      ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel, ShowWarning);
     end;
     exit;
   end;
@@ -530,7 +565,7 @@ begin
   while not CdsExploreDb.Eof do
   begin
     GarminModel := ModelFromMeta(CdsExploreDb);
-    ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel);
+    ExportTrksRec(GPXRoot, CdsExploreDb, GarminModel, ShowWarning);
 
     CdsExploreDb.Next;
   end;
@@ -544,6 +579,7 @@ var
   GPXXml: TXmlVSDocument;
   GPXRoot: TXmlVSNode;
 begin
+  DeleteFile(GPXFileName);
   GPXXml := TXmlVSDocument.Create;
   GPXRoot := InitGarminGpx(GPXXml);
   try
