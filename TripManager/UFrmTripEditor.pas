@@ -387,23 +387,25 @@ begin
   DeviceFolders[0] := '';
   DeviceFolders[1] := '';
   DeviceFolders[2] := '';
-  if (Assigned(CurrentDevice)) and
-     (GetRegistry(Reg_EnableGpxFuncs, false)) then
+  if (Assigned(CurrentDevice)) then
   begin
     ModelIndex := TModelConv.GetCurrentDevice;
-    DeviceFolders[0] := TModelConv.GetKnownGarminPath(CurrentDevice,
-                                                      Reg_PrefDevTripsFolder_Key,
-                                                      ModelIndex,
-                                                      0);
-    DeviceFolders[1] := TModelConv.GetKnownGarminPath(CurrentDevice,
-                                                      Reg_PrefDevGpxFolder_Key,
-                                                      ModelIndex,
-                                                      1);
+    if (GetRegistry(Reg_EnableTripFuncs, false)) then
+      DeviceFolders[0] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                        Reg_PrefDevTripsFolder_Key,
+                                                        ModelIndex,
+                                                        0);
+    if (GetRegistry(Reg_EnableGpxFuncs, false)) then
+      DeviceFolders[1] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                        Reg_PrefDevGpxFolder_Key,
+                                                        ModelIndex,
+                                                        1);
     SendTo.Caption := 'Send to: ' + DeviceFolders[1];
-    DeviceFolders[2] := TModelConv.GetKnownGarminPath(CurrentDevice,
-                                                      Reg_PrefDevPoiFolder_Key,
-                                                      ModelIndex,
-                                                      2);
+    if (GetRegistry(Reg_EnableGpiFuncs, false)) then
+      DeviceFolders[2] := TModelConv.GetKnownGarminPath(CurrentDevice,
+                                                        Reg_PrefDevPoiFolder_Key,
+                                                        ModelIndex,
+                                                        2);
 
   end;
 
