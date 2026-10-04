@@ -72,6 +72,9 @@ type
     TbMovePoint: TToolButton;
     N4: TMenuItem;
     Routepreview1: TMenuItem;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    Sendtocalculated: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -106,6 +109,7 @@ type
     procedure TbMovePointClick(Sender: TObject);
     procedure Routepreview1Click(Sender: TObject);
     procedure PopupGridPopup(Sender: TObject);
+    procedure SendtocalculatedClick(Sender: TObject);
   private
     { Private declarations }
     WarnOverWrite: integer;   // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
@@ -226,6 +230,7 @@ end;
 
 procedure TFrmTripEditor.ExportCalculatedClick(Sender: TObject);
 begin
+  SaveChanges;
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := CurPath;
   SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
@@ -279,6 +284,7 @@ end;
 
 procedure TFrmTripEditor.ExportGpxClick(Sender: TObject);
 begin
+  SaveChanges;
   SaveTrip.Filter := '*.gpx|*.gpx';
   SaveTrip.InitialDir := CurPath;
   SaveTrip.FileName := ChangeFileExt(ExtractFileName(CurFile), '.gpx');
@@ -400,7 +406,8 @@ begin
                                                         Reg_PrefDevGpxFolder_Key,
                                                         ModelIndex,
                                                         1);
-    SendTo.Caption := 'Send to: ' + DeviceFolders[1];
+    SendTo.Caption := Format('Send to: %s', [DeviceFolders[1]]);
+    Sendtocalculated.Caption := Format('Send calculated to: %s', [DeviceFolders[1]]);
     if (GetRegistry(Reg_EnableGpiFuncs, false)) then
       DeviceFolders[2] := TModelConv.GetKnownGarminPath(CurrentDevice,
                                                         Reg_PrefDevPoiFolder_Key,
@@ -499,8 +506,11 @@ end;
 procedure TFrmTripEditor.PopupGPXPopup(Sender: TObject);
 begin
   ExportCalculated.Visible := (GetRegistry(Reg_GeoApifyKey, '') <> '');
+  SendToCalculated.Visible := ExportCalculated.Visible;
+
   SendTo.Enabled := (Assigned(CurrentDevice)) and
                     (DeviceFolders[1] <> '');
+  SendToCalculated.Enabled := SendTo.Enabled;
 end;
 
 procedure TFrmTripEditor.PopupGridPopup(Sender: TObject);
@@ -565,6 +575,20 @@ begin
     if (BaseDevice.TransferNewFile(DevFile, DevFolderId) = '') then
       raise exception.Create(Format(MTP_ERR_Overwrite_Failed, [NFile]));
   end;
+end;
+
+procedure TFrmTripEditor.SendtocalculatedClick(Sender: TObject);
+var
+  AGPXFile: string;
+begin
+  SaveChanges;
+  AGPXFile := ChangeFileExt(GetRoutesTmp + DmRoutePoints.CdsRouteTripName.AsString, '.gpx');
+  DmRoutePoints.RoutePreview(DBGRoutePoints,
+                             AGPXFile,
+                             GetRegistry(Reg_GeoApifyInclRoute, false),
+                             false);
+  SendDeviceFile(1, AGPXFile);
+  ShowMessage(Format(MTP_INF_SentTo, [ExtractFileName(AGPXFile), DeviceFolders[1]]));
 end;
 
 procedure TFrmTripEditor.SendToClick(Sender: TObject);

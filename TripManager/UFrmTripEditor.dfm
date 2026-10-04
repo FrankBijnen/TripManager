@@ -26,11 +26,13 @@ object FrmTripEditor: TFrmTripEditor
     Height = 29
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 512
+    ExplicitWidth = 543
     DesignSize = (
       545
       29)
     object BtnCancel: TBitBtn
-      Left = 431
+      Left = 429
       Top = 2
       Width = 75
       Height = 25
@@ -39,9 +41,10 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 0
       OnClick = BtnCancelClick
+      ExplicitLeft = 427
     end
     object BtnOK: TBitBtn
-      Left = 345
+      Left = 343
       Top = 2
       Width = 75
       Height = 25
@@ -50,6 +53,7 @@ object FrmTripEditor: TFrmTripEditor
       NumGlyphs = 2
       TabOrder = 1
       OnClick = BtnOkClick
+      ExplicitLeft = 341
     end
   end
   object DBGRoutePoints: TDBGrid
@@ -118,6 +122,8 @@ object FrmTripEditor: TFrmTripEditor
     Height = 393
     Align = alRight
     TabOrder = 0
+    ExplicitLeft = 511
+    ExplicitHeight = 389
     object TBBRoutePoints: TToolBar
       Left = 1
       Top = 21
@@ -130,6 +136,7 @@ object FrmTripEditor: TFrmTripEditor
       List = True
       AllowTextButtons = True
       TabOrder = 0
+      ExplicitHeight = 367
       object TbMoveUp: TToolButton
         Left = 0
         Top = 0
@@ -228,6 +235,7 @@ object FrmTripEditor: TFrmTripEditor
     Align = alTop
     TabOrder = 3
     OnResize = PnlRouteResize
+    ExplicitWidth = 543
     object GrpRoute: TGroupBox
       Left = 0
       Top = 6
@@ -5441,6 +5449,9 @@ object FrmTripEditor: TFrmTripEditor
       Caption = 'Trk2Rt + Import'
       OnClick = Trk2RtImport1Click
     end
+    object N6: TMenuItem
+      Caption = '-'
+    end
     object ExportGpx: TMenuItem
       Caption = 'Export'
       OnClick = ExportGpxClick
@@ -5449,9 +5460,16 @@ object FrmTripEditor: TFrmTripEditor
       Caption = 'Export calculated'
       OnClick = ExportCalculatedClick
     end
+    object N5: TMenuItem
+      Caption = '-'
+    end
     object SendTo: TMenuItem
-      Caption = 'Send to'
+      Caption = 'Send to:'
       OnClick = SendToClick
+    end
+    object Sendtocalculated: TMenuItem
+      Caption = 'Send calculated to:'
+      OnClick = SendtocalculatedClick
     end
   end
   object OpenTrip: TOpenDialog

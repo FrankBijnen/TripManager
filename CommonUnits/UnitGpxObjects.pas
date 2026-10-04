@@ -132,13 +132,13 @@ type
                            const Cnt, LastCnt: integer);
     procedure ProcessRte(const RteNode: TXmlVSNode);
     procedure ProcessTrk(const TrkNode: TXmlVSNode);
-    procedure ProcessGeometry(const GeometryNode: TXmlVSNode);
     procedure ProcessWpt(const WptNode: TXmlVSNode);
     procedure ProcessGPXNode(GpxNode: TXmlVSNode);
     procedure ProcessRootNode(RootNode: TXmlVSNode);
     procedure StripRtePt(const RtePtNode: TXmlVSNode);
     procedure StripRte(const RteNode: TXmlVSNode);
 {$IFDEF TRIPOBJECTS}
+    procedure ProcessGeometry(const GeometryNode: TXmlVSNode);
     function BuildSubClassesList(const RtePts: TXmlVSNodeList): boolean;
     procedure CreateLocations(Locations: TmLocations; RtePts: TXmlVSNodeList);
     procedure UpdateTemplate(const TripName: string; RouteCnt, ParentTripId: cardinal; RtePts: TXmlVSNodeList);
@@ -1397,6 +1397,7 @@ begin
   end;
 end;
 
+{$IFDEF TRIPOBJECTS}
 procedure TGPXFile.ProcessGeometry(const GeometryNode: TXmlVSNode);
 var
   GeoSubNode: TXmlVSNode;
@@ -1425,15 +1426,19 @@ begin
     end;
   end;
 end;
+{$ENDIF}
 
 // Parse output from GeoAPify
 procedure TGPXfile.ProcessRootNode(RootNode: TXmlVSNode);
+{$IFDEF TRIPOBJECTS}
 var
   MainNode, ResultsNode, LegsNode: TXmlVSNode;
   BetterDist, TrkPtDist, LastDist, DiffDist: double;
   CurTrackPtIndex, FromTrackPtIndex, ToTrackPtIndex, BetterTrackPtIndex: integer;
   GeometryCnt, SkipTrkPts: integer;
+{$ENDIF}
 begin
+{$IFDEF TRIPOBJECTS}
   if not (ProcessOptions.ProcessTracks) then
     exit;
   if not (ProcessOptions.ProcessCreateRoutePoints) then
@@ -1538,6 +1543,7 @@ begin
       Inc(LegCnt);
     end;
   end;
+{$ENDIF}
 end;
 
 procedure TGPXfile.FixCurrentGPX;
@@ -2414,6 +2420,7 @@ end;
 procedure TGPXFile.DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
                                 const IncludeRoute: boolean;
                                 const GeoApifyRecords: TGeoApifyRecords);
+{$IFDEF TRIPOBJECTS}
 var
   Lat, Lon: string;
   OutExtensions, OutPointType, CalcRoot, RouteWayPoint, WayPoint: TXmlVSNode;
@@ -2450,9 +2457,9 @@ var
     else
       OutRtePt.AddChild('extensions').AddChild('trp:ShapingPoint');
   end;
-
+{$ENDIF}
 begin
-
+{$IFDEF TRIPOBJECTS}
   CalcXml := TXmlVSDocument.Create;
   try
     CalcRoot := InitGarminGpx(CalcXml);
@@ -2526,6 +2533,7 @@ begin
   finally
     CalcXml.Free;
   end;
+{$ENDIF}
 end;
 
 function TGPXFile.GetSelected(const Preferred: string): TXmlVSNodeList;
@@ -2782,6 +2790,7 @@ begin
 end;
 
 procedure TGPXFile.DoCreateKurviger;
+{$IFDEF TRIPOBJECTS}
 {$IFDEF OSMMAP}
 var
   RoutesProcessed: TXmlVSNodeList;
@@ -2789,7 +2798,9 @@ var
   KurvUrl, HTML: string;
   OutFile: string;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF TRIPOBJECTS}
 {$IFDEF OSMMAP}
   if (ProcessOptions.KurvigerUrl = '') then
     exit;
@@ -2823,6 +2834,7 @@ begin
   finally
     RoutesProcessed.Free;
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -2884,14 +2896,13 @@ begin
     Rewrite(F);
     Writeln(F, EscapeFileName(RouteViaPoints.Name) );
     Writeln(F, '1');
-
     for ViaPoint in RouteViaPoints.ChildNodes do
     begin
       Coords.FromAttributes(ViaPoint.AttributeList);
       Writeln(F, ' ',
-              FormatFloat('0.00000;-0.00000;0.00', Coords.Lon, FormatSettings),
+              FormatFloat('  0.00000000;  -0.00000000;  0.00', Coords.Lon, FormatSettings),
               ' ',
-              FormatFloat('0.00000;-0.00000;0.00', Coords.Lat, FormatSettings));
+              FormatFloat('  0.00000000;  -0.00000000;  0.00', Coords.Lat, FormatSettings));
     end;
     Writeln(F, 'END');
     Writeln(F, 'END');

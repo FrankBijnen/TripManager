@@ -1,7 +1,8 @@
 program TripManager;
 
-{$R 'OpenLayers2.res' '..\CommonUnits\osm\Resources\OpenLayers2.rc'}
 {$R 'TripManager_Resources.res' 'Resources\TripManager_Resources.rc'}
+{$R 'OpenLayers2.res' '..\CommonUnits\osm\Resources\OpenLayers2.rc'}
+{$R 'TripManager_JS.res' '..\CommonUnits\osm\Resources\TripManager_JS.rc'}
 
 {.$DEFINE Debug_CallStack}
 

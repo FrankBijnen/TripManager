@@ -187,7 +187,10 @@ begin
 {$ENDIF}
   Html.Add(Format('var osm_MapTilerKey             = "%s";', [GetRegistry(Reg_MapTilerApi_Key, '')]));
   Html.Add(Format('var osm_ESRIEnabled             = "%s";', [GetRegistry(Reg_EnableESRI, '')]));
-  Html.Add(Format('var osm_BaseLayer               = "%s";', [GetRegistry(Reg_BaseLayer_Key, Reg_BaseLayer_Value)]));
+  if (UseOl2Local) then
+    Html.Add(Format('var osm_BaseLayer               = "%s";', [GetRegistry(Reg_BaseLayer_Key, Reg_BaseLayer_Value)]))
+  else
+    Html.Add(Format('var osm_BaseLayer               = "%s";', ['TOP Plus Open']));
   Html.Add(Format('var osm_PlaceDecimals           = "%d";', [OSM_Place_Decimals]));
   Html.Add(Format('var osm_Zoom                    = %s;',   [FZoom]));
   Html.Add(Format('var osm_BoundsWidth             = "%s";', [OSM_Bounds_Width]));

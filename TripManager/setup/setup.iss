@@ -326,5 +326,6 @@ begin
   RegDeleteValue(HKCU, RegKey, 'VehicleTraction');
   RegDeleteValue(HKCU, RegKey, 'GPISymbolsSize');
   RegDeleteValue(HKCU, RegKey, 'GPIProximity');
+  RegDeleteValue(HKCU, RegKey, 'EnableExploreFuncs');
  
 end;
