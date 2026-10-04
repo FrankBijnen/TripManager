@@ -257,6 +257,7 @@ type
     BgTripInfo: TButtonGroup;
     PnlTripInfoDetail: TPanel;
     CdsExploreDb: TClientDataSet;
+    CdsCollectionTab: TClientDataSet;
     ChkCollections: TCheckBox;
     PopupTripAddToMap: TMenuItem;
     N19: TMenuItem;
@@ -2406,6 +2407,7 @@ begin
   RebuildDeviceDbMenu;
   CdsDeviceDb.AfterOpen := FCDSEvents.AfterOpen;
   CdsExploreDb.AfterOpen := FCDSEvents.AfterOpen;
+  CdsCollectionTab.AfterOpen := FCDSEvents.AfterOpen;
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -3601,7 +3603,7 @@ begin
   TmpExploreDb := TClientDataSet.Create(nil);
   try
     TmpExploreDb.AfterOpen := FCDSEvents.AfterOpen;
-    CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Query, ['true']), TmpExploreDb);
+    CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Item_Query, ['true']), TmpExploreDb);
     Expl_ExportToGPX(TmpExploreDb, SaveTrip.FileName);
   finally
     TmpExploreDb.Free;
@@ -3618,6 +3620,7 @@ begin
   ExploreList.Clear;
   CdsDeviceDb.Close;
   CdsExploreDb.Close;
+  CdsCollectionTab.Close;
   TsSQlite.TabVisible := false;
   DeleteTempFiles(GetDeviceTmp, '*.db');
 end;
@@ -4521,15 +4524,41 @@ var
   var
     AField: TField;
     AStringList: TStringList;
+    CollectionInfo: string;
+    CollectionKey: string;
   begin
     AStringList := TStringList.Create;
     try
       if (AnExplore.Expl_RecNo < 0) then
         exit;
       CdsExploreDb.RecNo := AnExplore.Expl_RecNo;
-
+      CdsCollectionTab.Filter := Format('item_id = ''%s''', [CdsExploreDb.FieldByName('id').AsString]);
+      CdsCollectionTab.Filtered := true;
+      CollectionKey := 'COLLECTION(S)';
+      if (CdsCollectionTab.Bof) and
+         (CdsCollectionTab.Eof) then
+        VlTripInfo.Strings.AddPair(CollectionKey, Expl_Unorganised)
+      else
+      begin
+        while not CdsCollectionTab.Eof do
+        begin
+          CollectionInfo := '';
+          if (CdsCollectionTab.FieldByName('show_on_map').AsInteger <> 0) then
+            CollectionInfo := Format(' (%s)', [Expl_ShowOnMap]);
+          CollectionInfo := Format('%s %s',
+                                   [CdsCollectionTab.FieldByName('Name').AsString,
+                                    CollectionInfo]);
+          VlTripInfo.Strings.AddPair(CollectionKey, CollectionInfo);
+          CollectionKey := '';
+          CdsCollectionTab.Next;
+        end;
+      end;
+      VlTripInfo.Strings.Add('-');
       for AField in CdsExploreDb.Fields do
       begin
+        if (AField.FieldNo in Expl_Hide_Item_Fields) then
+          continue;
+
         if (SameText(AField.FieldName, 'TRACK_POINTS')) then
           VlTripInfo.Strings.AddPair(AField.FieldName, 'Binary')
         else if (SameText(AField.FieldName, 'METADATA')) or
@@ -6061,7 +6090,8 @@ begin
       CurType := -1;
       ExplGroupNode := nil;
       CollectionNode := nil;
-      CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Query, [BoolToStr(ChkCollections.Checked = false, true)]), CdsExploreDb);
+      CDSFromQuery(GetDeviceTmp + ExploreDb, Expl_Collection_Query, CdsCollectionTab);
+      CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Item_Query, [BoolToStr(ChkCollections.Checked = false, true)]), CdsExploreDb);
       CdsExploreDb.First;
       while not CdsExploreDb.Eof do
       begin
@@ -6073,7 +6103,7 @@ begin
           CurType := -1;
           CollectionNode := TvTrip.Items.AddChildObject(RootNode, CurCol, AExpl_Object);
           if (CdsExploreDb.FieldByName('show_on_map').AsInteger > 0) then
-            CollectionNode.Text := CollectionNode.Text + ' (Show on Map)';
+            CollectionNode.Text := Format('%s (%s)', [CollectionNode.Text, Expl_ShowOnMap]);
 
           RootNode.Expand(false);
         end;

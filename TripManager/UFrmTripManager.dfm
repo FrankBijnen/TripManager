@@ -3785,4 +3785,10 @@ object FrmTripManager: TFrmTripManager
     Left = 1149
     Top = 427
   end
+  object CdsCollectionTab: TClientDataSet
+    Aggregates = <>
+    Params = <>
+    Left = 1200
+    Top = 427
+  end
 end

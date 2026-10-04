@@ -36,13 +36,17 @@ const
   Expl_TrkType          = 2;
   Expl_RteType          = 4;
   Expl_AllTypes         = '1, 2, 4';
-  Expl_Query            =
+  Expl_All              = 'All';
+  Expl_Unorganised      = 'Unorganised';
+  Expl_ShowOnMap        = 'Show on Map';
+
+  Expl_Item_Query       =
     'Select t.collection_id,' + CRLF +
     't.included,' + CRLF +
     '(select case' + CRLF +
-    '   when %s then ''All''' + CRLF +
+    '   when %s then ''' + Expl_All + '''' + CRLF +
     '   when t.collection_id <> 0 and t.included <> 0 then c.name' + CRLF +
-    '   else ''Unorganised''' + CRLF +
+    '   else ''' + Expl_Unorganised + '''' + CRLF +
     'end' + CRLF +
     ') as Collection,' + CRLF +
     'c.show_on_map, i.*' + CRLF +
@@ -52,6 +56,14 @@ const
     'where type in (' + Expl_AllTypes + ')' + CRLF +
     'group by Collection, i.type, i.name' + CRLF +
     'order by Collection, i.type, i.name';
+
+  // Fields to hide in Explore info tab, but needed in code.
+  Expl_Hide_Item_Fields: set of byte = [1, 2, 3, 4];
+
+  Expl_Collection_Query =
+    'select * from ' + Expl_TagsTable + ' t' + CRLF +
+    'join ' + Expl_CollectionsTable + ' c on (c.id = t.collection_id)' + CRLF +
+    'where t.included <> 0';
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;

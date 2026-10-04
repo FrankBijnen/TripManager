@@ -66,7 +66,10 @@ uses
   System.Variants, System.JSON, System.NetEncoding, System.Math, System.DateUtils, System.IOUtils,
   Winapi.Windows, Vcl.Dialogs,
   REST.Types, REST.Client, REST.Utils,
-  UnitStringUtils, UnitRegistry;
+{$IFDEF REGISTRYKEYS}
+  UnitRegistry,
+{$ENDIF}
+  UnitStringUtils;
 
 var
   Ol2Installed: boolean;
@@ -185,12 +188,18 @@ begin
 {$ELSE}
   Html.Add(Format('var osm_Debug                   = %s;',   ['false']));
 {$ENDIF}
+{$IFDEF REGISTRYKEYS}
   Html.Add(Format('var osm_MapTilerKey             = "%s";', [GetRegistry(Reg_MapTilerApi_Key, '')]));
   Html.Add(Format('var osm_ESRIEnabled             = "%s";', [GetRegistry(Reg_EnableESRI, '')]));
   if (UseOl2Local) then
     Html.Add(Format('var osm_BaseLayer               = "%s";', [GetRegistry(Reg_BaseLayer_Key, Reg_BaseLayer_Value)]))
   else
     Html.Add(Format('var osm_BaseLayer               = "%s";', ['TOP Plus Open']));
+{$ELSE}
+  Html.Add(Format('var osm_MapTilerKey             = "%s";', ['']));
+  Html.Add(Format('var osm_ESRIEnabled             = "%s";', ['']));
+  Html.Add(Format('var osm_BaseLayer               = "%s";', ['TOP Plus Open']));
+{$ENDIF}
   Html.Add(Format('var osm_PlaceDecimals           = "%d";', [OSM_Place_Decimals]));
   Html.Add(Format('var osm_Zoom                    = %s;',   [FZoom]));
   Html.Add(Format('var osm_BoundsWidth             = "%s";', [OSM_Bounds_Width]));
