@@ -74,7 +74,7 @@ type
     Routepreview1: TMenuItem;
     N5: TMenuItem;
     N6: TMenuItem;
-    Sendtocalculated: TMenuItem;
+    SendToCalculated: TMenuItem;
     procedure BtnOkClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -109,7 +109,7 @@ type
     procedure TbMovePointClick(Sender: TObject);
     procedure Routepreview1Click(Sender: TObject);
     procedure PopupGridPopup(Sender: TObject);
-    procedure SendtocalculatedClick(Sender: TObject);
+    procedure SendToCalculatedClick(Sender: TObject);
   private
     { Private declarations }
     WarnOverWrite: integer;   // MrNone, MrYes, MrNo, mrYesToAll, mrNoToAll
@@ -237,7 +237,7 @@ begin
   if SaveTrip.Execute then
     DmRoutePoints.RoutePreview(DBGRoutePoints,
                                SaveTrip.FileName,
-                               GetRegistry(Reg_GeoApifyInclRoute, false),
+                               true,
                                false);
 end;
 
@@ -407,7 +407,7 @@ begin
                                                         ModelIndex,
                                                         1);
     SendTo.Caption := Format('Send to: %s', [DeviceFolders[1]]);
-    Sendtocalculated.Caption := Format('Send calculated to: %s', [DeviceFolders[1]]);
+    SendToCalculated.Caption := Format('Send calculated to: %s', [DeviceFolders[1]]);
     if (GetRegistry(Reg_EnableGpiFuncs, false)) then
       DeviceFolders[2] := TModelConv.GetKnownGarminPath(CurrentDevice,
                                                         Reg_PrefDevPoiFolder_Key,
@@ -577,7 +577,7 @@ begin
   end;
 end;
 
-procedure TFrmTripEditor.SendtocalculatedClick(Sender: TObject);
+procedure TFrmTripEditor.SendToCalculatedClick(Sender: TObject);
 var
   AGPXFile: string;
 begin
@@ -585,7 +585,7 @@ begin
   AGPXFile := ChangeFileExt(GetRoutesTmp + DmRoutePoints.CdsRouteTripName.AsString, '.gpx');
   DmRoutePoints.RoutePreview(DBGRoutePoints,
                              AGPXFile,
-                             GetRegistry(Reg_GeoApifyInclRoute, false),
+                             true,
                              false);
   SendDeviceFile(1, AGPXFile);
   ShowMessage(Format(MTP_INF_SentTo, [ExtractFileName(AGPXFile), DeviceFolders[1]]));

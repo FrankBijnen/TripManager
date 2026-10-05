@@ -13,6 +13,7 @@ type
     FirstSel: integer;
     procedure SelectRange;
   protected
+    procedure LinkActive(Value: Boolean); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X: Integer; Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -40,7 +41,7 @@ var
 begin
   SelectedRows.Clear;
 
-  if (FirstSel < 1) or
+  if (FirstSel < 0) or
      (FirstSel > DataSource.DataSet.RecordCount) or
      (FirstSel = DataSource.DataSet.RecNo) then
     exit;
@@ -61,6 +62,15 @@ begin
   end;
 end;
 
+procedure TDBGrid.LinkActive(Value: Boolean);
+begin
+  inherited LinkActive(Value);
+
+  FirstSel := -1;
+  if (Value) then
+    FirstSel := DataSource.DataSet.RecNo;
+end;
+
 procedure TDBGrid.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited;
@@ -69,10 +79,15 @@ begin
     exit;
   if (ssCtrl in Shift) then
     exit;
+  if (DataSource.DataSet.Active = false) then
+    exit;
 
-  if not (ssShift in Shift) then
+  if (ssShift in Shift) then
+    SelectRange;
+
+  if (SelectedRows.Count < 2) then
     FirstSel := DataSource.DataSet.RecNo;
-  SelectRange;
+
 end;
 
 end.

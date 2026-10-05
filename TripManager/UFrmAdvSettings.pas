@@ -393,9 +393,9 @@ begin
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyAvoid,
                                        '',
                                        'avoid=tolls,ferries,highways,avoid=location:lat,lon');
-    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyInclRoute,
+    AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyAddShaping,
                                        'false',
-                                       'Include route with added shaping points');
+                                       'Add Shaping points in calculated routes');
     AddGridLine(GridKurvigerGeoApify, CurRow,  Reg_GeoApifyMinDistTurn_Key,
                                        Reg_GeoApifyMinDistTurn_Val,
                                        'Distance from turn for added shaping points');

@@ -184,7 +184,7 @@ type
     procedure DoCreatePOI;
     procedure DoCreateKML;
     procedure DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
-                           const IncludeRoute: boolean;
+                           const IncludeRoute, AutoShapingPoints: boolean;
                            const GeoApifyRecords: TGeoApifyRecords);
     procedure DoCreateHTML;
     procedure DoCreateKurviger;
@@ -2418,7 +2418,7 @@ begin
 end;
 
 procedure TGPXFile.DoCreateCalc(const RouteName, TransportMode, CalculationMode, OutFile: string;
-                                const IncludeRoute: boolean;
+                                const IncludeRoute, AutoShapingPoints: boolean;
                                 const GeoApifyRecords: TGeoApifyRecords);
 {$IFDEF TRIPOBJECTS}
 var
@@ -2478,29 +2478,33 @@ begin
       for RouteWayPoint in RouteViaPointList do
       begin
         AddOrgRoutePoint;
-        PrevRoutePtCoords.Lat := StrToFloat(GeoApifyRecords[RoutePtCnt].Lat, FormatSettings);;
-        PrevRoutePtCoords.Lon := StrToFloat(GeoApifyRecords[RoutePtCnt].Lon, FormatSettings);;
-        NextRoutePtCoords.Lat := StrToFloat(GeoApifyRecords[RoutePtCnt +1].Lat, FormatSettings);;
-        NextRoutePtCoords.Lon := StrToFloat(GeoApifyRecords[RoutePtCnt +1].Lon, FormatSettings);;
-        AddedCnt := 0;
-        for WayPoint in RouteWayPoint.ChildNodes do
-        begin
-          AddedRoutePtCoords.FromAttributes(WayPoint.AttributeList);
-          // Check not too close to existing route points
-          RoutePtDist := CoordDistance(PrevRoutePtCoords, AddedRoutePtCoords, TDistanceUnit.duKm);
-          if (RoutePtDist < ProcessOptions.MinShapeDistKms) then
-            continue;
-          RoutePtDist := CoordDistance(NextRoutePtCoords, AddedRoutePtCoords, TDistanceUnit.duKm);
-          if (RoutePtDist < ProcessOptions.MinShapeDistKms) then
-            continue;
 
-          AddedRoutePtCoords.FormatLatLon(Lat, Lon);
-          OutRtePt := OutRte.AddChild('rtept');
-          CloneNode(WayPoint, OutRtePt);
-          Inc(AddedCnt);
-          OutName := OutRtePt.Find('name');
-          if (Assigned(OutName)) then
-            OutName.NodeValue := Format('%s_%d (%s)', [GeoApifyRecords[RoutePtCnt].Name, AddedCnt, OutName.NodeValue]);
+        if (AutoShapingPoints) then
+        begin
+          PrevRoutePtCoords.Lat := StrToFloat(GeoApifyRecords[RoutePtCnt].Lat, FormatSettings);;
+          PrevRoutePtCoords.Lon := StrToFloat(GeoApifyRecords[RoutePtCnt].Lon, FormatSettings);;
+          NextRoutePtCoords.Lat := StrToFloat(GeoApifyRecords[RoutePtCnt +1].Lat, FormatSettings);;
+          NextRoutePtCoords.Lon := StrToFloat(GeoApifyRecords[RoutePtCnt +1].Lon, FormatSettings);;
+          AddedCnt := 0;
+          for WayPoint in RouteWayPoint.ChildNodes do
+          begin
+            AddedRoutePtCoords.FromAttributes(WayPoint.AttributeList);
+            // Check not too close to existing route points
+            RoutePtDist := CoordDistance(PrevRoutePtCoords, AddedRoutePtCoords, TDistanceUnit.duKm);
+            if (RoutePtDist < ProcessOptions.MinShapeDistKms) then
+              continue;
+            RoutePtDist := CoordDistance(NextRoutePtCoords, AddedRoutePtCoords, TDistanceUnit.duKm);
+            if (RoutePtDist < ProcessOptions.MinShapeDistKms) then
+              continue;
+
+            AddedRoutePtCoords.FormatLatLon(Lat, Lon);
+            OutRtePt := OutRte.AddChild('rtept');
+            CloneNode(WayPoint, OutRtePt);
+            Inc(AddedCnt);
+            OutName := OutRtePt.Find('name');
+            if (Assigned(OutName)) then
+              OutName.NodeValue := Format('%s_%d (%s)', [GeoApifyRecords[RoutePtCnt].Name, AddedCnt, OutName.NodeValue]);
+          end;
         end;
 
         Inc(RoutePtCnt);

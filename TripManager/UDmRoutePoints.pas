@@ -103,7 +103,7 @@ type
     function KurvigerURL: string;
     procedure CalcRoute(const GPXFile: string;
                         const RoutePoints: TRoutePointList;
-                        const IncludeRoute: boolean);
+                        const IncludeRoute, AutoShapingPoints: boolean);
     procedure RoutePreview(const AGrid: TDBGrid;
                            const GPX: string;
                            const IncludeRoute, Add2Map: boolean);
@@ -1297,7 +1297,7 @@ end;
 
 procedure TDmRoutePoints.CalcRoute(const GPXFile: string;
                                    const RoutePoints: TRoutePointList;
-                                   const IncludeRoute: boolean);
+                                   const IncludeRoute, AutoShapingPoints: boolean);
 var
   CalcRecord: TGeoApifyRecord;
   GeoApifyRecords: TGeoApifyRecords;
@@ -1358,7 +1358,7 @@ begin
                              CdsRouteTransportationMode.AsString,
                              CdsRouteRoutePreference.AsString,
                              GPXFile,
-                             IncludeRoute,
+                             IncludeRoute, AutoShapingPoints,
                              GeoApifyRecords);
     finally
       GPXObject.Free;
@@ -1403,7 +1403,7 @@ begin
         CurRoutePoints.Add(TCDSBookMark.Create(CdsRoutePoints));
       end;
     end;
-    CalcRoute(CurGPX, CurRoutePoints, IncludeRoute);
+    CalcRoute(CurGPX, CurRoutePoints, IncludeRoute, GetRegistry(Reg_GeoApifyAddShaping, false));
   finally
     CurRoutePoints.Free;
     CdsRoutePoints.EnableControls;

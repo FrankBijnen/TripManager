@@ -119,7 +119,7 @@ const
   Reg_GeoApifyAvoid               = 'GeoApifyAvoid';
   Reg_GeoApifyColor_Key           = 'GeoApifyColor';
   Reg_GeoApifyColor_Val           = 'Red';
-  Reg_GeoApifyInclRoute           = 'GeoApifyInclRoute';
+  Reg_GeoApifyAddShaping          = 'GeoApifyAddShaping';
   Reg_GeoApifyMinDistTurn_Key     = 'GeoApifyMinDistTurn';
   Reg_GeoApifyMinDistTurn_Val     = 100;
 

@@ -5467,9 +5467,9 @@ object FrmTripEditor: TFrmTripEditor
       Caption = 'Send to:'
       OnClick = SendToClick
     end
-    object Sendtocalculated: TMenuItem
+    object SendToCalculated: TMenuItem
       Caption = 'Send calculated to:'
-      OnClick = SendtocalculatedClick
+      OnClick = SendToCalculatedClick
     end
   end
   object OpenTrip: TOpenDialog
