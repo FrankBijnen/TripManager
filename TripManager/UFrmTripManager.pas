@@ -470,6 +470,8 @@ type
     procedure LoadGpiFile(const FileName: string; const FromDevice: boolean);
     procedure LoadFitFile(const FileName: string; const FromDevice: boolean);
     procedure LoadSqlFile(const FileName: string; const FromDevice: boolean);
+    procedure UpdateChildNodesCount(const ANode: TTreeNode;
+                                    const Cnt: integer);
     procedure LoadExploreDb(const SelectNode: string = '');
     procedure FreeDeviceData(const TmpDevice: TBase_Device);
     procedure FreeDevices;
@@ -6057,10 +6059,17 @@ begin
   ReAlignEdgeBrowser;
 end;
 
+procedure TFrmTripManager.UpdateChildNodesCount(const ANode: TTreeNode;
+                                                const Cnt: integer);
+begin
+  if Assigned(ANode) then
+    ANode.Text := Format('%s (%d)', [ANode.Text, Cnt]);
+end;
+
 procedure TFrmTripManager.LoadExploreDb(const SelectNode: string = '');
 var
-  CurCol: string;
-  CurType: integer;
+  CurCol, ShowAll: string;
+  CurType, ColCnt, ColTypeCnt: integer;
   RootNode, CollectionNode, ExplGroupNode, Node2Select: TTreeNode;
   AExpl_Object: TExpl_Object;
   CrWait, CrNormal: HCURSOR;
@@ -6088,30 +6097,40 @@ begin
       Node2Select := RootNode;
       CurCol := '';
       CurType := -1;
+      ColCnt := 0;
+      ColTypeCnt := 0;
       ExplGroupNode := nil;
       CollectionNode := nil;
       CDSFromQuery(GetDeviceTmp + ExploreDb, Expl_Collection_Query, CdsCollectionTab);
-      CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Item_Query, [BoolToStr(ChkCollections.Checked = false, true)]), CdsExploreDb);
+      ShowAll := BoolToStr(ChkCollections.Checked = false, true);
+      CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Item_Query, [ShowAll, ShowAll]), CdsExploreDb);
       CdsExploreDb.First;
       while not CdsExploreDb.Eof do
       begin
         if (CdsExploreDb.FieldByName('Collection').AsString <> CurCol) then
         begin
+          UpdateChildNodesCount(CollectionNode, ColCnt);
+          UpdateChildNodesCount(ExplGroupNode, ColTypeCnt);
           AExpl_Object := TExpl_Object.Create;
           AnExploreList.Add(AExpl_Object);
           CurCol := CdsExploreDb.FieldByName('Collection').AsString;
           CurType := -1;
+          ColCnt := 0;
+          ColTypeCnt := 0;
           CollectionNode := TvTrip.Items.AddChildObject(RootNode, CurCol, AExpl_Object);
           if (CdsExploreDb.FieldByName('show_on_map').AsInteger > 0) then
             CollectionNode.Text := Format('%s (%s)', [CollectionNode.Text, Expl_ShowOnMap]);
+          ExplGroupNode := nil;
 
           RootNode.Expand(false);
         end;
         if (CdsExploreDb.FieldByName('type').AsInteger <> CurType) then
         begin
+          UpdateChildNodesCount(ExplGroupNode, ColCnt);
           AExpl_Object := TExpl_Object.Create;
           AnExploreList.Add(AExpl_Object);
           CurType := CdsExploreDb.FieldByName('type').AsInteger;
+          ColTypeCnt := 0;
           case (CurType) of
             Expl_WptType: ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Waypoints', AExpl_Object);
             Expl_TrkType: ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Tracks', AExpl_Object);
@@ -6123,6 +6142,8 @@ begin
         end;
         if (ExplGroupNode <> nil) then
         begin
+          Inc(ColCnt);
+          Inc(ColTypeCnt);
           AExpl_Object := TExpl_Object.Create(CdsExploreDb);
           AnExploreList.Add(AExpl_Object);
           if (SameText(CdsExploreDb.FieldByName('name').AsString, SelectNode)) then
@@ -6133,6 +6154,8 @@ begin
         end;
         CdsExploreDb.Next;
       end;
+      UpdateChildNodesCount(CollectionNode, ColCnt);
+      UpdateChildNodesCount(ExplGroupNode, ColTypeCnt);
     finally
       TvTrip.Items.EndUpdate;
       TvTrip.UnlockDrawing;

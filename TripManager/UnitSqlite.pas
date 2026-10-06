@@ -1,5 +1,5 @@
 unit UnitSqlite;
-
+{.$DEFINE DEBUG_SQL}
 interface
 
 uses
@@ -320,6 +320,11 @@ var
   AddedFields: TStringList;
   FieldNameToAdd: string;
 begin
+{$IFDEF DEBUG_SQL}
+  AllocConsole;
+  Writeln(Query);
+  Writeln;
+{$ENDIF}
   result := 0;
   if not SQLite3Loaded then
     exit;

@@ -45,17 +45,20 @@ const
     't.included,' + CRLF +
     '(select case' + CRLF +
     '   when %s then ''' + Expl_All + '''' + CRLF +
-    '   when t.collection_id <> 0 and t.included <> 0 then c.name' + CRLF +
+    '   when (t.included <> 0) then c.name' + CRLF +
     '   else ''' + Expl_Unorganised + '''' + CRLF +
-    'end' + CRLF +
-    ') as Collection,' + CRLF +
-    'c.show_on_map, i.*' + CRLF +
+    'end) as collection,' + CRLF +
+    '(select case' + CRLF +
+    '   when %s or c.show_on_map is null then 0' + CRLF +
+    '   else c.show_on_map' + CRLF +
+    'end) as show_on_map,' + CRLF +
+    'i.*' + CRLF +
     'from ' + Expl_ItemTable + ' i' + CRLF +
-    'left outer join ' + Expl_TagsTable + ' t on (t.item_id = i.id)' + CRLF +
+    'left outer join ' + Expl_TagsTable + ' t on (t.item_id = i.id and t.included <> 0)' + CRLF +
     'left outer join ' + Expl_CollectionsTable + ' c on (c.id = t.collection_id)' + CRLF +
-    'where type in (' + Expl_AllTypes + ')' + CRLF +
-    'group by Collection, i.type, i.name' + CRLF +
-    'order by Collection, i.type, i.name';
+    'where i.type in (' + Expl_AllTypes + ')' + CRLF +
+    'group by collection, i.type, i.name' + CRLF +
+    'order by collection, i.type, i.name';
 
   // Fields to hide in Explore info tab, but needed in code.
   Expl_Hide_Item_Fields: set of byte = [1, 2, 3, 4];
