@@ -41,17 +41,14 @@ const
   Expl_ShowOnMap        = 'Show on Map';
 
   Expl_Item_Query       =
-    'Select t.collection_id,' + CRLF +
+    'select t.collection_id,' + CRLF +
     't.included,' + CRLF +
     '(select case' + CRLF +
     '   when %s then ''' + Expl_All + '''' + CRLF +
-    '   when (t.included <> 0) then c.name' + CRLF +
-    '   else ''' + Expl_Unorganised + '''' + CRLF +
+    '   when c.name is null then ''' + Expl_Unorganised + '''' + CRLF +
+    '   when c.show_on_map > 0 then concat(c.name, '' (' + Expl_ShowOnMap + ')'') ' + CRLF +
+    '   else c.name' + CRLF +
     'end) as collection,' + CRLF +
-    '(select case' + CRLF +
-    '   when %s or c.show_on_map is null then 0' + CRLF +
-    '   else c.show_on_map' + CRLF +
-    'end) as show_on_map,' + CRLF +
     'i.*' + CRLF +
     'from ' + Expl_ItemTable + ' i' + CRLF +
     'left outer join ' + Expl_TagsTable + ' t on (t.item_id = i.id and t.included <> 0)' + CRLF +
@@ -61,12 +58,17 @@ const
     'order by collection, i.type, i.name';
 
   // Fields to hide in Explore info tab, but needed in code.
-  Expl_Hide_Item_Fields: set of byte = [1, 2, 3, 4];
+  Expl_Hide_Item_Fields: set of byte = [1, 2, 3];
 
   Expl_Collection_Query =
-    'select * from ' + Expl_TagsTable + ' t' + CRLF +
+    'select' + CRLF +
+    '(select case' + CRLF +
+    '   when c.show_on_map > 0 then concat(c.name, '' (' + Expl_ShowOnMap + ')'') ' + CRLF +
+    '   else c.name' + CRLF +
+    'end) as collection,' + CRLF +
+    '* from ' + Expl_TagsTable + ' t' + CRLF +
     'join ' + Expl_CollectionsTable + ' c on (c.id = t.collection_id)' + CRLF +
-    'where t.included <> 0';
+    'where t.included > 0';
 
 procedure Expl_ExportToGPX(const CdsExploreDb: TClientDataSet;
                            const GPXFileName: string;

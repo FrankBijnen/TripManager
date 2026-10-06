@@ -4526,7 +4526,6 @@ var
   var
     AField: TField;
     AStringList: TStringList;
-    CollectionInfo: string;
     CollectionKey: string;
   begin
     AStringList := TStringList.Create;
@@ -4544,13 +4543,7 @@ var
       begin
         while not CdsCollectionTab.Eof do
         begin
-          CollectionInfo := '';
-          if (CdsCollectionTab.FieldByName('show_on_map').AsInteger <> 0) then
-            CollectionInfo := Format(' (%s)', [Expl_ShowOnMap]);
-          CollectionInfo := Format('%s %s',
-                                   [CdsCollectionTab.FieldByName('Name').AsString,
-                                    CollectionInfo]);
-          VlTripInfo.Strings.AddPair(CollectionKey, CollectionInfo);
+          VlTripInfo.Strings.AddPair(CollectionKey, CdsCollectionTab.FieldByName('collection').AsString);
           CollectionKey := '';
           CdsCollectionTab.Next;
         end;
@@ -6068,7 +6061,7 @@ end;
 
 procedure TFrmTripManager.LoadExploreDb(const SelectNode: string = '');
 var
-  CurCol, ShowAll: string;
+  CurCol: string;
   CurType, ColCnt, ColTypeCnt: integer;
   RootNode, CollectionNode, ExplGroupNode, Node2Select: TTreeNode;
   AExpl_Object: TExpl_Object;
@@ -6102,8 +6095,11 @@ begin
       ExplGroupNode := nil;
       CollectionNode := nil;
       CDSFromQuery(GetDeviceTmp + ExploreDb, Expl_Collection_Query, CdsCollectionTab);
-      ShowAll := BoolToStr(ChkCollections.Checked = false, true);
-      CDSFromQuery(GetDeviceTmp + ExploreDb, Format(Expl_Item_Query, [ShowAll, ShowAll]), CdsExploreDb);
+      CDSFromQuery(GetDeviceTmp + ExploreDb,
+                   ReplaceAll(Expl_Item_Query,
+                              ['%s'],
+                              [BoolToStr(ChkCollections.Checked = false, true)]),
+                   CdsExploreDb);
       CdsExploreDb.First;
       while not CdsExploreDb.Eof do
       begin
@@ -6118,15 +6114,13 @@ begin
           ColCnt := 0;
           ColTypeCnt := 0;
           CollectionNode := TvTrip.Items.AddChildObject(RootNode, CurCol, AExpl_Object);
-          if (CdsExploreDb.FieldByName('show_on_map').AsInteger > 0) then
-            CollectionNode.Text := Format('%s (%s)', [CollectionNode.Text, Expl_ShowOnMap]);
           ExplGroupNode := nil;
 
           RootNode.Expand(false);
         end;
         if (CdsExploreDb.FieldByName('type').AsInteger <> CurType) then
         begin
-          UpdateChildNodesCount(ExplGroupNode, ColCnt);
+          UpdateChildNodesCount(ExplGroupNode, ColTypeCnt);
           AExpl_Object := TExpl_Object.Create;
           AnExploreList.Add(AExpl_Object);
           CurType := CdsExploreDb.FieldByName('type').AsInteger;
