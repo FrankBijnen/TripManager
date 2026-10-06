@@ -1367,8 +1367,6 @@ begin
 end;
 
 procedure TFrmTripManager.RoutePointsShowing(Sender: TObject; Showing: boolean);
-var
-  CurSel: integer;
 begin
   if Showing then
     DmRoutePoints.OnRoutePointUpdated := RoutePointUpdated
@@ -1376,26 +1374,14 @@ begin
   begin
     DmRoutePoints.OnRoutePointUpdated := nil;
 
+    if (DeviceFile) and
+       (BgDevice.ItemIndex = 0) then
+      PostReloadFileList;
+
     if (FrmTripEditor.CurIsExplore) then
-      LoadExploreDb(ChangeFileExt(ExtractFileName(FrmTripEditor.CurFile), ''))
-    else
     begin
-      if (DeviceFile) and
-         (BgDevice.ItemIndex = 0) then
-      begin
-        // Save currently selected trip
-        if Assigned(LstFiles.Selected) then
-          CurSel := LstFiles.Selected.Index
-        else
-          CurSel := -1;
-
-        PostReloadFileList;
-
-        // Need to (re)select?
-        if (CurSel > -1) and
-           (CurSel < LstFiles.items.Count) then
-          LstFiles.Items[CurSel].Selected := true;
-      end;
+      LstFiles.Selected := nil;
+      LoadExploreDb(ChangeFileExt(ExtractFileName(FrmTripEditor.CurFile), ''));
     end;
   end;
 
@@ -5542,7 +5528,6 @@ begin
   SelectedFile := '';
   if (LstFiles.Selected <> nil) then
     SelectedFile := LstFiles.Selected.Caption;
-
   ListFiles(lfCurrent, SelectedFile);
   Msg.Result := 0;
 end;
@@ -5623,9 +5608,17 @@ end;
 
 procedure TFrmTripManager.LstFilesSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
-  BgTripInfo.ItemIndex := 0;
-  TripGpiFitExplTimer.Enabled := false;
-  TripGpiFitExplTimer.Enabled := true;
+  if (Selected = false) then
+    exit;
+
+  if (ContainsText(Item.SubItems[2], TripExtension)) or
+     (ContainsText(Item.SubItems[2], GpiExtension)) or
+     (ContainsText(Item.SubItems[2], FitExtension)) then
+  begin
+    BgTripInfo.ItemIndex := 0;
+    TripGpiFitExplTimer.Enabled := false;
+    TripGpiFitExplTimer.Enabled := true;
+  end;
 end;
 
 procedure TFrmTripManager.MapRequest(const Coords, Desc, TimeOut: string;
