@@ -61,9 +61,9 @@ type
   end;
   TGeoApifyRecords = array of TGeoApifyRecord;
 
-function Debug_Coord2Float(ACoord: LongInt): string;
-function Coord2Float(ACoord: LongInt): string;
-function Float2Coord(ACoord: Double): LongInt;
+function Debug_Coord2Float(ACoord: integer): string;
+function Coord2Float(ACoord: integer): string;
+function Float2Coord(ACoord: Double): integer;
 function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
 function GetFirstGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 function GetLastGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
@@ -106,7 +106,7 @@ begin
   end;
 end;
 
-function Debug_Coord2Float(ACoord: LongInt): string;
+function Debug_Coord2Float(ACoord: integer): string;
 var
   HCoord: Double;
 begin
@@ -122,7 +122,7 @@ begin
   end;
 end;
 
-function Coord2Float(ACoord: LongInt): string;
+function Coord2Float(ACoord: integer): string;
 var
   HCoord: Double;
 begin
@@ -136,7 +136,7 @@ begin
   end;
 end;
 
-function Float2Coord(ACoord: Double): LongInt;
+function Float2Coord(ACoord: Double): integer;
 var
   HCoord: Double;
 begin

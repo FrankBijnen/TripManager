@@ -67,7 +67,7 @@ begin
 
     if Command then
     begin
-      ICmd := LongInt(Command) -1;
+      ICmd := integer(Command) -1;
       HR := CM.GetCommandString(ICmd, GCS_VERBA, nil, ZVerb, SizeOf(ZVerb));
       Verb := string(ZVerb);
 

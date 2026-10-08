@@ -323,8 +323,8 @@ type
     Extra:      boolean;                    // Internal variable, dont write
     ExtraRec:   TExtraRec;
     MainRec:    TMainRec;
-    Lat:        LongInt;
-    Lon:        LongInt;
+    Lat:        integer;
+    Lon:        integer;
     Dummy1:     Word;
     HasAlert:   Byte;
     Name:       TPLString;
@@ -348,10 +348,10 @@ type
     Extra:      boolean;                   // Internal variable, dont write
     ExtraSize:  integer;
     ExtraRec:   TExtraRec;
-    MaxLat:     LongInt;
-    MaxLon:     LongInt;
-    MinLat:     LongInt;
-    MinLon:     LongInt;
+    MaxLat:     integer;
+    MaxLon:     integer;
+    MinLat:     integer;
+    MinLon:     integer;
     Dummy1:     DWord;
     Dummy2:     Word;
     Alert:      Byte;
@@ -603,7 +603,7 @@ begin
 end;
 
 //Relies on formatsettings with a decimal point
-function Str2Coord(ACoord: TGPXString): LongInt;
+function Str2Coord(ACoord: TGPXString): integer;
 var
   HCoord: Double;
 begin
@@ -616,7 +616,7 @@ begin
   end;
 end;
 
-function Coord2Str(ACoord: LongInt): TGPXString;
+function Coord2Str(ACoord: integer): TGPXString;
 var
   HCoord: Double;
 begin
