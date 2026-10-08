@@ -13,6 +13,7 @@ const
   Reg_TrackColor                  = 'TrackColor';         // User preferred track color
   Reg_MinDistTrackPoints          = 'MinDistTrackPoints'; // Used to filter trackpoints
   Reg_MinTimeTrackPoints          = 'MinTimeTrackPoints'; // Used to auto create waypoints from stops
+  Reg_MinDistKmlPoints            = 'MinDistKmlPoints';   // Used to filter Kmlpoints
 
   // XT1
   Reg_AllowGrouping               = 'AllowGrouping';
@@ -244,9 +245,14 @@ begin
                         ExtractFilePath(ParamStr(0))) + DefGpiSymbolsDir +
                         GetRegistry(Reg_GPISymbolSize, TModelConv.DefGpiSymbolSize(TModelConv.GetCurrentDevice) , SubKey));
     DefaultProximityStr := GetRegistry(Reg_GPIProximity, DefGpiProximity, SubKey);
+    ProcessCategory := [];
+
+    // Compare defaults
     CompareDistanceOK := GetRegistry(Reg_CompareDistOK_Key, Reg_CompareDistOK_Val);
     MinShapeDist := GetRegistry(Reg_MinShapeDist_Key, Reg_MinShapeDist_Val);
-    ProcessCategory := [];
+
+    // Kml default
+    MinDistKmlPoint := GetRegistry(Reg_MinDistKmlPoints, 0);
   end;
 end;
 

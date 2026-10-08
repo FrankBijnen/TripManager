@@ -95,6 +95,7 @@ type
 
     ProcessTracks: boolean;                   // True, Retain tracks, Create tracks from ghost points in routes.
       MinDistTrackPoint: integer;             // 0, Minimum distance between trackpoint. Use as a filter.
+      MinDistKmlPoint: integer;               // 0, Minimum distance between kmlpoint.
 
     ProcessWayPtsFromRoute: boolean;          // True, Allow adding routepoints to FWayPointFromRouteList for creating WayPoints
                                               // Used in: CreateWayPoints, CreatePOI
@@ -178,6 +179,7 @@ type
     function GetDistOKKms: double;
     function GetMinShapeDistKms: double;
     function GetMinTrackDistKms: double;
+    function GetMinKmlDistKms: double;
     class function GetCatSymbol: string;
     {$IFDEF TRIPOBJECTS}
     function TripTrackColor: string;
@@ -185,6 +187,7 @@ type
     function ComputeTime(const RoadClass: string; const Dist: Double): double;
     class function GetMinDistTrackPoints: integer;
     class function GetMinTimeTrackPoints: integer;
+    class function GetMinDistKmlPoints: integer;
     class function Trk2RtOptions: string;
     class procedure SetTrk2RtExportPerc(AValue: integer);
     class function GetTrk2RtExportPerc: integer;
@@ -255,6 +258,7 @@ begin
 
   ProcessTracks := true;
   MinDistTrackPoint := 0;
+  MinDistKmlPoint := 0;
 
   ProcessWayPtsFromRoute := true; // Create points for GPI and route Points from route
   ProcessWayPtsInWayPts := true;
@@ -410,6 +414,11 @@ begin
   result := MinDistTrackPoint / 1000;
 end;
 
+function TProcessOptions.GetMinKmlDistKms: double;
+begin
+  result := MinDistKmlPoint / 1000;
+end;
+
 class function TProcessOptions.GetCatSymbol: string;
 begin
   result := 'Symbol';
@@ -442,6 +451,11 @@ end;
 class function TProcessOptions.GetMinTimeTrackPoints: integer;
 begin
   result := GetRegistry(Reg_MinTimeTrackPoints, 60);
+end;
+
+class function TProcessOptions.GetMinDistKmlPoints: integer;
+begin
+  result := GetRegistry(Reg_MinDistKmlPoints, 0);  // 0=No filter
 end;
 
 class function TProcessOptions.Trk2RtOptions: string;

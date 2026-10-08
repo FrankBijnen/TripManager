@@ -1196,7 +1196,11 @@ begin
     for RptNode in RtePtExtension.ChildNodes do
     begin
       if (RptNode.Name = 'gpxx:rpt') then
+      begin
+        if (RptNode = RtePtExtension.LastChild) then
+          PrevTrackCoords := Default(TCoords);
         AddTrackPoint(RptNode);
+      end;
     end;
   end;
 end;
@@ -1313,6 +1317,8 @@ begin
       begin
         if (TrkPtNode.Name = 'trkpt') then
         begin
+          if (TrkPtNode = TrkSegNode.LastChild) then
+            PrevTrackCoords := Default(TCoords);
           AddTrackPoint(TrkPtNode);
           if (FirstTrkPtNode = nil) then
           begin
@@ -2348,10 +2354,12 @@ var
   Folder: IXMLNode;
   TrackPoint: TXmlVSNode;
   Helper: TKMLHelper;
-  TrackCoords: TCoords;
+  PrevCoords, KmlCoords: TCoords;
+  CoordDist, MinKmlDistKms: double;
 {$ENDIF}
 begin
 {$IFDEF KML}
+  MinKmlDistKms := ProcessOptions.GetMinKmlDistKms;
   OutFile := FOutDir + ChangeFileExt(ExtractFileName(FGPXFile), '.kml');
   Helper := TKMLHelper.Create(OutFile);
   Helper.FormatSettings := GetLocaleSetting;
@@ -2368,13 +2376,24 @@ begin
         begin
           DisplayColor := FrmSelectGPX.TrackSelectedColor(Track.Name, Track.Text);
           Helper.WritePointsStart(Track.Name, DisplayColor);
+          PrevCoords := Default(TCoords);
           for TrackPoint in Track.ChildNodes do
           begin
             if (TrackPoint.Name <> 'trkpt') then
               continue;
+            KmlCoords.FromAttributes(TrackPoint.AttributeList);
 
-            TrackCoords.FromAttributes(TrackPoint.AttributeList);
-            TrackCoords.FormatLatLon(Lat, Lon);
+            // Filter KML points to keep line on the ground while flying
+            if (MinKmlDistKms > 0) and
+                (TrackPoint <> Track.LastChild) then
+            begin
+              CoordDist := CoordDistance(PrevCoords, KmlCoords, TDistanceUnit.duKm);
+              if (CoordDist < MinKmlDistKms) then
+                continue;
+              PrevCoords := KmlCoords;
+            end;
+
+            KmlCoords.FormatLatLon(Lat, Lon);
             Helper.WritePoint(Lon, Lat, '0');
           end;
           Folder := Helper.WritePointsEnd;
@@ -2388,8 +2407,8 @@ begin
                 continue;
               for WayPoint in RouteWayPoint.ChildNodes do
               begin
-                TrackCoords.FromAttributes(WayPoint.AttributeList);
-                TrackCoords.FormatLatLon(Lat, Lon);
+                KmlCoords.FromAttributes(WayPoint.AttributeList);
+                KmlCoords.FormatLatLon(Lat, Lon);
 
                 Description := ReplaceAll(FindSubNodeValue(WayPoint, 'cmt'), [#13#10, #13, #10], [', ', ', ', ', ']);
                 if (Description <> '') then

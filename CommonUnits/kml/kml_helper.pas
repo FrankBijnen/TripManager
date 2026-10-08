@@ -13,7 +13,7 @@ type
     Style:string;
     Scale:double;
   public
-    constructor Create(Akey, AStyle: string; AScale: double);
+    constructor Create(const Akey, AStyle: string; const AScale: double);
   end;
 
   TKMLHelper = class
@@ -22,31 +22,32 @@ type
     FTrackName : string;
     FColor: string;
     FUseFolder: boolean;
+    FUseTessellate: boolean;
     FKmlNode: IXMLDocumentType;
     FDocumentNode: IXMLNode;
     procedure NewKMLDocument;
-    procedure WriteLineStyle(AStyle: IXMLNode; AColor: string = 'Magenta');
-    procedure WriteStyle(AStyle: TStyleMap);
-    procedure WriteStyleMap(Styles: array of TStyleMap);
-    function WriteFolder(AName: string; ACoordinates: string): IXMLNode;
-    procedure WriteHeader(ARing: boolean = false);
+    procedure WriteLineStyle(const AStyle: IXMLNode; const AColor: string = 'Magenta');
+    procedure WriteStyle(const AStyle: TStyleMap);
+    procedure WriteStyleMap(const Styles: array of TStyleMap);
+    function WriteFolder(const AName: string; const ACoordinates: string): IXMLNode;
+    procedure WriteHeader(const ARing: boolean = false);
     procedure WritePointsStart(const ATrackName, AColor: string);
     procedure WritePoint(const ALon, ALat, AEle: string);
     function WritePointsEnd: IXMLNode;
-    function WritePlacesStart(AName: string): IXMLNode;
-    procedure WritePlace(AFolder: IXMLNode;
-                         ACoordinates: string;
-                         AName: string;
-                         ADescription: string = '');
+    function WritePlacesStart(const AName: string): IXMLNode;
+    procedure WritePlace(const AFolder: IXMLNode;
+                         const ACoordinates: string;
+                         const AName: string;
+                         const ADescription: string = '');
     procedure WritePlacesEnd;
     procedure WriteFooter;
     procedure WriteKml;
-
   public
     var FormatSettings: TFormatSettings;
-    constructor Create(APathName: string);
+    constructor Create(const APathName: string);
     destructor Destroy; override;
     property UseFolder: boolean read FUseFolder write FUseFolder;
+    property UseTessellate: boolean read FUseTessellate write FUseTessellate;
   end;
 
 const
@@ -72,14 +73,14 @@ begin
   result := (AParent as IXMLNodeAccess).AddChild(AName, TargetNamespace, SomeType);
 end;
 
-constructor TStyleMap.Create(Akey, AStyle: string; AScale: double);
+constructor TStyleMap.Create(const Akey, AStyle: string; const AScale: double);
 begin
   Key   := Akey;
   Style := AStyle;
   Scale := Ascale;
 end;
 
-procedure TKMLHelper.WriteLineStyle(AStyle: IXMLNode; AColor: string = 'Magenta');
+procedure TKMLHelper.WriteLineStyle(const AStyle: IXMLNode; const AColor: string = 'Magenta');
 begin
   with AStyle as IXMLStyleType,
        LineStyle as IXMLLineStyleType do
@@ -89,7 +90,7 @@ begin
   end;
 end;
 
-procedure TKMLHelper.WriteStyle(AStyle: TStyleMap);
+procedure TKMLHelper.WriteStyle(const AStyle: TStyleMap);
 var
   Style: IXMLNode;
 begin
@@ -113,7 +114,7 @@ begin
   end;
 end;
 
-procedure TKMLHelper.WriteStyleMap(Styles: array of TStyleMap);
+procedure TKMLHelper.WriteStyleMap(const Styles: array of TStyleMap);
 var
   StyleMap  : IXMLNode;
   Style     : TStyleMap;
@@ -145,7 +146,7 @@ begin
   FCoordinates := FCoordinates + Format('%s,%s,%s ', [ALon, ALat, AEle]);
 end;
 
-function TKMLHelper.WriteFolder(AName: string; ACoordinates: string): IXMLNode;
+function TKMLHelper.WriteFolder(const AName: string; const ACoordinates: string): IXMLNode;
 var
   PlaceMark     : IXMLNode;
   LineString    : IXMLNode;
@@ -165,7 +166,10 @@ begin
     WriteLineStyle(AddTypedNode(PlaceMark, 'Style', TXMLStyleType), FColor);
     LineString := AddTypedNode(PlaceMark, 'LineString', TXMLLineStringType);
     with LineString as IXMLLineStringType do
+    begin
+      Tessellate := UseTessellate;
       Coordinates := ACoordinates;
+    end;
   end;
 end;
 
@@ -175,17 +179,17 @@ begin
   SetLength(FCoordinates, 0)
 end;
 
-function TKMLHelper.WritePlacesStart(AName: string): IXMLNode;
+function TKMLHelper.WritePlacesStart(const AName: string): IXMLNode;
 begin
   Result := AddTypedNode(FDocumentNode, 'Folder', TXMLFolderType);
   with Result as IXMLFolderType do
     Name := AName;
 end;
 
-procedure TKMLHelper.WritePlace(AFolder: IXMLNode;
-                                ACoordinates: string;
-                                AName: string;
-                                ADescription: string = '');
+procedure TKMLHelper.WritePlace(const AFolder: IXMLNode;
+                                const ACoordinates: string;
+                                const AName: string;
+                                const ADescription: string = '');
 var
   PlaceMark : IXMLNode;
   Point     : IXMLNode;
@@ -211,7 +215,7 @@ begin
 {}
 end;
 
-procedure TKMLHelper.WriteHeader(ARing:boolean = false);
+procedure TKMLHelper.WriteHeader(const ARing:boolean = false);
 var
   MyStyles  : array of TStyleMap;
   Style     : TStyleMap;
@@ -233,11 +237,12 @@ begin
   FDocumentNode.AddChild('name').NodeValue := ChangeFileExt(ExtractFileName(FPathName), '');
 end;
 
-constructor TKMLHelper.Create(APathName: string);
+constructor TKMLHelper.Create(const APathName: string);
 begin
   inherited Create;
 
   FUseFolder := true;
+  FUseTessellate := false;
   FPathName := APathName;
   NewKMLDocument;
 end;
