@@ -161,9 +161,7 @@ type
     ActAbout: TAction;
     ActOnline: TAction;
     PopupTripInfo: TPopupMenu;
-    CopyValueFromTrip: TMenuItem;
     ActSettings: TAction;
-    N7: TMenuItem;
     SaveCSV1: TMenuItem;
     SaveTrip: TSaveDialog;
     SaveGPX1: TMenuItem;
@@ -262,6 +260,8 @@ type
     PopupTripAddToMap: TMenuItem;
     N19: TMenuItem;
     Routepreview1: TMenuItem;
+    N7: TMenuItem;
+    CheckSharpTurns: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -323,7 +323,6 @@ type
     procedure ShellListView1DblClick(Sender: TObject);
     procedure ActAboutExecute(Sender: TObject);
     procedure ActOnlineExecute(Sender: TObject);
-    procedure CopyValueFromTripClick(Sender: TObject);
     procedure ActSettingsExecute(Sender: TObject);
     procedure SaveCSV1Click(Sender: TObject);
     procedure SaveGPX1Click(Sender: TObject);
@@ -399,6 +398,7 @@ type
     procedure ChkCollectionsClick(Sender: TObject);
     procedure PopupTripAddToMapClick(Sender: TObject);
     procedure Routepreview1Click(Sender: TObject);
+    procedure CheckSharpTurnsClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -1895,6 +1895,8 @@ var
 begin
   MnuCompareGpxRoute.Enabled := (ATripList <> nil) and (ATripList.ItemList.Count > 0);
   MnuCompareGpxTrack.Enabled := MnuCompareGpxRoute.Enabled;
+  MnuTripOverview.Enabled := MnuCompareGpxRoute.Enabled;
+  CheckSharpTurns.Enabled := MnuCompareGpxRoute.Enabled;
   SaveGPX1.Enabled := ( MnuCompareGpxRoute.Enabled ) or
                       ( (APOIGroupList <> nil)  and (APOIGroupList.Count > 0)) or
                       ( (AFitInfo <> nil)  and (AFitInfo.Count > 0)) or
@@ -2212,10 +2214,7 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNOK,
-                                       TUdbDirStatus.UdsRoadOKCoordsNOK,
-                                       TUdbDirStatus.udsCoordsNOK,
-                                       TUdbDirStatus.udsRoutePointNOK]) then
+       (TUdbDir(ANode.Data).Status not in [TUdbDirStatus.udsUnchecked]) then
     begin
       TvTrip.Selected := ANode;
       break;
@@ -2238,10 +2237,7 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsRoadNOK,
-                                       TUdbDirStatus.UdsRoadOKCoordsNOK,
-                                       TUdbDirStatus.udsCoordsNOK,
-                                       TUdbDirStatus.udsRoutePointNOK]) then
+       (TUdbDir(ANode.Data).Status not in [TUdbDirStatus.udsUnchecked]) then
     begin
       TvTrip.Selected := ANode;
       break;
@@ -3505,6 +3501,15 @@ begin
   end;
 end;
 
+procedure TFrmTripManager.CheckSharpTurnsClick(Sender: TObject);
+begin
+  if Assigned(ATripList) then
+  begin
+    ATripList.CheckTurns;
+    TvTrip.Repaint;
+  end;
+end;
+
 procedure TFrmTripManager.RecreateTrips;
 var
   CrNormal,CrWait: HCURSOR;
@@ -4063,10 +4068,16 @@ var
                                                     SizeOf(AnUdbDir.SubClass.Distance),
                                                     OffsetInRecord(AnUdbDir.SubClass, AnUdbDir.SubClass.Distance)));
     end;
-    VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s', [AnUdbDir.MapCoords]),
-                              TGridSelItem.Create(AnUdbDir,
-                                                  SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
-                                                  OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
+    if (AnUdbDir.Heading <> 0) then
+      VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s Heading %1.1f', [AnUdbDir.MapCoords, AnUdbDir.Heading]),
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)))
+    else
+      VlTripInfo.Strings.AddPair('Lat, Lon', Format('%s', [AnUdbDir.MapCoords]),
+                                TGridSelItem.Create(AnUdbDir,
+                                                    SizeOf(AnUdbDir.UdbDirValue.Lat) + SizeOf(AnUdbDir.UdbDirValue.Lon),
+                                                    OffsetInRecord(AnUdbDir.UdbDirValue, AnUdbDir.UdbDirValue.Lat)));
 
     VlTripInfo.Strings.AddPair('UdbDir Magic', Format('%s',
                                                          [IntToHex(Swap32(AnUdbDir.UdbDirValue.UdbDirMagic), 8)]
@@ -4679,9 +4690,11 @@ begin
     case TUdbDir(Node.Data).Status of
       TUdbDirStatus.udsRoutePointNOK:
         Sender.Canvas.Brush.Color := clWebAqua;
-      TUdbDirStatus.udsRoadNOK:
+      TUdbDirStatus.udsRoadNOK,
+      TUdbDirStatus.udsUTurn:
         Sender.Canvas.Brush.Color := clWebRed;
-      TUdbDirStatus.UdsRoadOKCoordsNOK:
+      TUdbDirStatus.UdsRoadOKCoordsNOK,
+      TUdbDirStatus.udsSharpTurn:
         Sender.Canvas.Brush.Color := clWebOrange;
       TUdbDirStatus.udsCoordsNOK:
         Sender.Canvas.Brush.Color := clWebYellow;
@@ -4831,42 +4844,6 @@ begin
   result := '';
   CheckDevice;
   result := TGarminMTP_Device(CurrentDevice).CopyFileToTmp(AListItem);
-end;
-
-procedure TFrmTripManager.CopyValueFromTripClick(Sender: TObject);
-var
-  ABaseDataItem: TBaseDataItem;
-  TmpDataItem, CopyDataItem: TBaseItem;
-  TmpTripList, CopyTripList: TTripList;
-begin
-  ABaseDataItem := TGridSelItem.BaseDataItem(VlTripInfo, VlTripInfo.Row -1);
-  if not Assigned(ABaseDataItem) then
-    exit;
-
-  OpenTrip.DefaultExt := 'trip';
-  OpenTrip.Filter := '*.trip|*.trip';
-  OpenTrip.InitialDir := ShellTreeView1.Path;
-  if not (OpenTrip.Execute) then
-    exit;
-  TmpTripList := TTripList.Create;
-  CopyTripList := TTripList.Create;
-  try
-    TmpTripList.LoadFromFile(OpenTrip.FileName);
-    CopyTripList.LoadFromFile(HexEditFile);
-    TmpDataItem := TmpTripList.GetItem(ABaseDataItem.Name);
-    CopyDataItem := CopyTripList.GetItem(ABaseDataItem.Name);
-    if (TmpDataItem <> nil) and
-       (CopyDataItem <> nil) then
-    begin
-      TmpTripList.SetItem(ABaseDataItem.Name, CopyDataItem);
-      CopyTripList.SetItem(ABaseDataItem.Name, TmpDataItem);
-      CopyTripList.SaveToFile(ChangeFileExt(HexEditFile, '') + '_' + string(ABaseDataItem.Name) + ExtractFileExt(HexEditFile));
-    end;
-  finally
-    TmpTripList.Free;
-    CopyTripList.Free;
-    ShellListView1.Refresh;
-  end;
 end;
 
 procedure TFrmTripManager.DeviceMenuPopup(Sender: TObject);
@@ -5866,7 +5843,6 @@ begin
     LoadHex(FileName);
     LoadTripOnMap(ATripList, CurrentMapItem);
 
-    CopyValueFromTrip.Enabled := not DeviceFile;
     TripName := ATripList.TripName;
     ParentTripName := ATripList.GetValue(TmParentTripName.GetKey);
 

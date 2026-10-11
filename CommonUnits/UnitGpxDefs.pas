@@ -65,6 +65,7 @@ function Debug_Coord2Float(ACoord: integer): string;
 function Coord2Float(ACoord: integer): string;
 function Float2Coord(ACoord: Double): integer;
 function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
+function CoordHeading(Coord1, Coord2: TCoords): double;
 function GetFirstGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 function GetLastGpxxRptNode(const ARtePt: TXmlVSNode): TXmlVSNode;
 function GetTMExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;
@@ -148,29 +149,39 @@ begin
   end;
 end;
 
-function DegreesToRadians(Degrees: double): double;
-begin
-  result := Degrees * PI / 180;
-end;
-
 function CoordDistance(Coord1, Coord2: TCoords; DistanceUnit: TDistanceUnit): double;
 var
   DLat, DLon, Lat1, Lat2, A, C: double;
 begin
-  DLat := DegreesToRadians(Coord2.Lat - Coord1.Lat);
-  DLon := DegreesToRadians(Coord2.Lon - Coord1.lon);
+  Lat1 := DegToRad(Coord1.Lat);
+  Lat2 := DegToRad(Coord2.Lat);
+  DLat := DegToRad(Coord2.Lat - Coord1.Lat);
+  DLon := DegToRad(Coord2.Lon - Coord1.lon);
 
-  Lat1 := DegreesToRadians(Coord1.Lat);
-  Lat2 := DegreesToRadians(Coord2.Lat);
-
-  A := sin(DLat/2) * sin(DLat/2) +
-       sin(DLon/2) * sin(DLon/2) * cos(Lat1) * cos(Lat2);
-  C := 2 * ArcTan2(sqrt(A), sqrt(1-A));
+  A := Sin(DLat/2) * Sin(DLat/2) +
+       Sin(DLon/2) * Sin(DLon/2) * Cos(Lat1) * Cos(Lat2);
+  C := 2 * ArcTan2(Sqrt(A), Sqrt(1-A));
 
   if (DistanceUnit = TDistanceUnit.duMi) then
     result := EarthRadiusMi * C
   else
     result := EarthRadiusKm * C;
+end;
+
+function CoordHeading(Coord1, Coord2: TCoords): double;
+var
+  Lat1, Lat2, DLon, X, Y: Double;
+begin
+  Lat1 := DegToRad(Coord1.Lat);
+  Lat2 := DegToRad(Coord2.Lat);
+  DLon := DegToRad(Coord2.Lon - Coord1.Lon);
+
+  X := Sin(DLon) * Cos(Lat2);
+  Y := (Cos(Lat1) * Sin(Lat2)) - (Sin(Lat1) * Cos(Lat2) * Cos(DLon));
+
+  result := RadToDeg(ArcTan2(X, Y));
+  while (result < 0) do
+    result := result + 360.0;
 end;
 
 function GetRoutePointExtensionsNode(const ARtePt: TXmlVSNode): TXmlVSNode;

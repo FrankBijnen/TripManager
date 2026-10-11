@@ -465,7 +465,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 0
         Width = 732
-        Height = 420
+        Height = 422
         Align = alClient
         Color = clWhite
         DoubleBuffered = True
@@ -871,7 +871,7 @@ object FrmTripManager: TFrmTripManager
         Left = 0
         Top = 28
         Width = 732
-        Height = 392
+        Height = 394
         Align = alClient
         Columns = <
           item
@@ -1112,6 +1112,8 @@ object FrmTripManager: TFrmTripManager
           OnEditButtonClick = VlTripInfoEditButtonClick
           OnKeyDown = ValueListKeyDown
           OnStringsChange = VlTripInfoStringsChange
+          ExplicitLeft = 3
+          ExplicitTop = 22
           ColWidths = (
             150
             212)
@@ -1616,13 +1618,6 @@ object FrmTripManager: TFrmTripManager
     OnPopup = PopupTripInfoPopup
     Left = 378
     Top = 393
-    object CopyValueFromTrip: TMenuItem
-      Caption = 'Copy value from trip file'
-      OnClick = CopyValueFromTripClick
-    end
-    object N7: TMenuItem
-      Caption = '-'
-    end
     object SaveCSV1: TMenuItem
       Caption = 'Save CSV'
       OnClick = SaveCSV1Click
@@ -1672,6 +1667,13 @@ object FrmTripManager: TFrmTripManager
     object PopupTripAddToMap: TMenuItem
       Caption = 'Add to Map'
       OnClick = PopupTripAddToMapClick
+    end
+    object N7: TMenuItem
+      Caption = '-'
+    end
+    object CheckSharpTurns: TMenuItem
+      Caption = 'Check sharp turns'
+      OnClick = CheckSharpTurnsClick
     end
   end
   object SaveTrip: TSaveDialog

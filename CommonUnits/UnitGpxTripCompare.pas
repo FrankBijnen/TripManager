@@ -155,8 +155,6 @@ function TGPXTripCompare.PrepareTripForCompare(const Messages, OutTrackList: TSt
 var
   TrackId: integer;
   TrackRouteSelected: TXmlVSNode;
-  AnUdbHandle: TmUdbDataHndl;
-  AnUdbDir: TUdbDir;
 begin
   result := nil;
 
@@ -167,19 +165,7 @@ begin
     exit;
   end;
 
-  UdbDirCount := 0;
-  UdbHandleCount := 0;
-  for AnUdbHandle in FAllRoutes.Items do
-  begin
-    for AnUdbDir in AnUdbHandle.Items do
-    begin
-      AnUdbDir.Status := udsUnchecked;
-      if (AnUdbDir.SubClass.IsKnownRoutePoint) then
-        Inc(UdbDirCount);
-    end;
-    Inc(UdbHandleCount);
-  end;
-
+  FAllRoutes.CheckAndCountUdbs(UdbDirCount, UdbHandleCount);
   if (UdbDirCount = 0) then
   begin
     Messages.Add('Trip does not appear to be calculated.');

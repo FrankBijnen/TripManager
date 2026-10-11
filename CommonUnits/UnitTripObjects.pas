@@ -809,6 +809,7 @@ type
     FUdbDirName:       TBytes;
     FUdbDirStatus:     TUdbDirStatus;
     FRoadClass:        string;
+    FHeading:          Double;
     constructor Create(AModel: TTripModel;
                        ATripOption:TTripOption;
                        AName: WideString;
@@ -861,6 +862,7 @@ type
     property RoadClass: string read FRoadClass write FRoadClass; // Only valid in SaveCalculated
     property Lat: Double read GetLat write SetLat;
     property Lon: Double read GetLon write SetLon;
+    property Heading: Double read FHeading write FHeading;
   end;
   TUdbDirList = Tlist<TUdbDir>;
 
@@ -966,6 +968,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
+    procedure CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer);
     property Items: TUdbHandleList read FUdBList;
     property AllRoutesValue: TmAllRoutesValue read FValue;
   end;
@@ -1060,6 +1063,7 @@ type
     function LoadFromFile(AFile: string): boolean;
     procedure Assign(ATripList: TTripList);
     procedure Recalculate;
+    procedure CheckTurns;
     function GetValue(AKey: ShortString): string;
     function GetItem(AKey: ShortString): TBaseItem;
     procedure SetItem(AKey: ShortString; ABaseItem: TBaseItem);
@@ -4337,6 +4341,67 @@ begin
   FUdBList.Add(AnUdbHandle);
 end;
 
+procedure TmAllRoutes.CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer);
+var
+  Index: integer;
+  AnUdbHandle: TmUdbDataHndl;
+  PrevUdbDir, RoutePointUdbDir, AnUdbDir: TUdbDir;
+  TurnAngle: double;
+begin
+  RoutePointCount := 0;
+  UdbHandleCount := 0;
+
+  for AnUdbHandle in Items do
+  begin
+    PrevUdbDir := nil;
+    RoutePointUdbDir := nil;
+    for Index := 0 to AnUdbHandle.Items.Count -1  do
+    begin
+      AnUdbDir := AnUdbHandle.Items[Index];
+      AnUdbDir.Status := udsUnchecked;
+      AnUdbDir.Heading := 0;
+
+      if (AnUdbDir.SubClass.IsKnownRoutePoint) then
+      begin
+        Inc(RoutePointCount);
+        RoutePointUdbDir := AnUdbDir;
+      end;
+
+      if (AnUdbDir.SubClass.IsKnownInterMediate) and
+         (AnUdbDir.SubClass.Direction = $04) then
+        AnUdbDir.Status := udsUTurn
+      else if (AnUdbDir.SubClass.IsKnownEndSegment) and
+              (Index > 0) then
+      begin
+        AnUdbDir.Heading := CoordHeading(AnUdbHandle.Items[Index -1].Coords, AnUdbDir.Coords);
+        PrevUdbDir := AnUdbDir;
+      end
+      else
+      begin
+        if (AnUdbDir.SubClass.IsKnownStartSegment) and
+           (Index < AnUdbHandle.Items.Count -1) then
+        begin
+          AnUdbDir.Heading := CoordHeading(AnUdbDir.Coords, AnUdbHandle.Items[Index +1].Coords);
+          if (Assigned(PrevUdbDir)) then
+          begin
+            TurnAngle := Abs(FMod((AnUdbDir.Heading - PrevUdbDir.Heading + 540), 360) - 180);
+            // TODO Parm
+            if (TurnAngle > 160) then
+              AnUdbDir.Status := TUdbDirStatus.udsSharpTurn;
+          end;
+        end;
+      end;
+
+      if (Assigned(RoutePointUdbDir)) and
+         (RoutePointUdbDir.Status = TUdbDirStatus.udsUnchecked) and
+         (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
+        RoutePointUdbDir.Status := AnUdbDir.Status;
+
+    end;
+    Inc(UdbHandleCount);
+  end;
+end;
+
 procedure TmAllRoutes.EndWrite(AStream: TMemoryStream);
 begin
   inherited EndWrite(AStream);
@@ -4484,6 +4549,17 @@ begin
   finally
     AStream.Free;
   end;
+end;
+
+procedure TTripList.CheckTurns;
+var
+  AllRoutes: TmAllRoutes;
+  UdbDirCount, UdbHandleCount: integer;
+begin
+  AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
+  if not Assigned(AllRoutes) then
+    exit;
+  AllRoutes.CheckAndCountUdbs(UdbDirCount, UdbHandleCount);
 end;
 
 procedure TTripList.UpdLocsFromRoutePrefs;
@@ -5588,7 +5664,7 @@ begin
       if (StartArrival = nil) then
         exit;
 
-      if (StartArrival.GetAsUnixDateTime <> 0 ) then
+      if (StartArrival.GetAsUnixDateTime <> 0) then
       begin
         EndLocation := RoutePoints[RoutePoints.Count -1];
         EndArrival := EndLocation.LocationTmArrival;

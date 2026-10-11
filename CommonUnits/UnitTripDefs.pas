@@ -73,7 +73,7 @@ type
   TRoutePoint       = (rpVia              = 0,
                        rpShaping          = 1,
                        rpExtShaping       = 2);
-  TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK);
+  TUdbDirStatus     = (udsUnchecked, udsRoutePointNOK, udsRoadNOK, UdsRoadOKCoordsNOK, udsCoordsNOK, udsUTurn, udsSharpTurn);
   TItemEditMode     = (emNone, emEdit, emPickList, emButton);
   TAvoidances       = (avValid = $01, avCarpool = $02, avFerries = $04, avToll = $10, avUnpaved = $20, avU_Turns = $40, avHighWays = $80);
 
