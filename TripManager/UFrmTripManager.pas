@@ -2214,7 +2214,7 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status not in [TUdbDirStatus.udsUnchecked]) then
+       not (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsUnchecked]) then
     begin
       TvTrip.Selected := ANode;
       break;
@@ -2237,7 +2237,7 @@ begin
   begin
     if (ANode.Data <> nil) and
        (TObject(ANode.Data) is TUdbDir) and
-       (TUdbDir(ANode.Data).Status not in [TUdbDirStatus.udsUnchecked]) then
+       not (TUdbDir(ANode.Data).Status in [TUdbDirStatus.udsUnchecked]) then
     begin
       TvTrip.Selected := ANode;
       break;
