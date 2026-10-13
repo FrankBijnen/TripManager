@@ -261,7 +261,9 @@ type
     N19: TMenuItem;
     Routepreview1: TMenuItem;
     N7: TMenuItem;
-    CheckSharpTurns: TMenuItem;
+    FindSharpTurns: TMenuItem;
+    VirtualImageListExploreDB: TVirtualImageList;
+    ImageCollectionExploreDB: TImageCollection;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
@@ -398,7 +400,7 @@ type
     procedure ChkCollectionsClick(Sender: TObject);
     procedure PopupTripAddToMapClick(Sender: TObject);
     procedure Routepreview1Click(Sender: TObject);
-    procedure CheckSharpTurnsClick(Sender: TObject);
+    procedure FindSharpTurnsClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -419,6 +421,7 @@ type
     ATripList: TTripList;
     APOIGroupList: TPOIGroupList;
     AFitInfo: TStringList;
+    DefaultItemHeight: integer;
     AnExploreList: TObjectlist<TExpl_Object>;
 
     WarnRecalc: integer;      // MrNone, MrYes, MrNo, mrIgnore
@@ -551,7 +554,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.TypInfo, System.IOUtils, System.JSON,
-  Winapi.ShellAPI,
+  Winapi.ShellAPI, Winapi.CommCtrl,
   Vcl.Clipbrd,
   UnitGarminDevice, UnitProcessOptions, UnitRegistry, UnitRegistryKeys, UnitStringUtils, UnitSqlite, UnitOSMMap,
   UnitGeoCode, UnitVerySimpleXml, UnitRedirect, UnitGpxTripCompare, UnitModelConv, UnitVehProfile,
@@ -1893,10 +1896,12 @@ procedure TFrmTripManager.PopupTripInfoPopup(Sender: TObject);
 var
   Ext: string;
 begin
-  MnuCompareGpxRoute.Enabled := (ATripList <> nil) and (ATripList.ItemList.Count > 0);
+  MnuCompareGpxRoute.Enabled := (ATripList <> nil) and
+                                (ATripList.ItemList.Count > 0) and
+                                (TvTrip.Items.Count > 0);
   MnuCompareGpxTrack.Enabled := MnuCompareGpxRoute.Enabled;
   MnuTripOverview.Enabled := MnuCompareGpxRoute.Enabled;
-  CheckSharpTurns.Enabled := MnuCompareGpxRoute.Enabled;
+  FindSharpTurns.Enabled := MnuCompareGpxRoute.Enabled;
   SaveGPX1.Enabled := ( MnuCompareGpxRoute.Enabled ) or
                       ( (APOIGroupList <> nil)  and (APOIGroupList.Count > 0)) or
                       ( (AFitInfo <> nil)  and (AFitInfo.Count > 0)) or
@@ -1969,6 +1974,8 @@ end;
 procedure TFrmTripManager.ClearTvTrip;
 begin
   TvTrip.Items.Clear;
+  TvTrip.StateImages := nil;
+  TreeView_SetItemHeight(TvTrip.Handle, DefaultItemHeight);
   SetupPnlTripGpiInfo;
 end;
 
@@ -2392,6 +2399,7 @@ begin
   CdsDeviceDb.AfterOpen := FCDSEvents.AfterOpen;
   CdsExploreDb.AfterOpen := FCDSEvents.AfterOpen;
   CdsCollectionTab.AfterOpen := FCDSEvents.AfterOpen;
+  DefaultItemHeight := TreeView_GetItemHeight(TvTrip.Handle);
 end;
 
 procedure TFrmTripManager.FormDestroy(Sender: TObject);
@@ -3501,13 +3509,40 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.CheckSharpTurnsClick(Sender: TObject);
+procedure TFrmTripManager.FindSharpTurnsClick(Sender: TObject);
+var
+  Rc: integer;
+  Msg: string;
+  MsgType: TMsgDlgType;
+  MsgButtons: TMsgDlgButtons;
 begin
-  if Assigned(ATripList) then
-  begin
-    ATripList.CheckTurns;
-    TvTrip.Repaint;
+  if (ATripList = nil) or
+     (TvTrip.Items.Count = 0) then
+    exit;
+
+  Rc := ATripList.FindTurns;
+  Msg := 'U-Turns/Sharp turns found';
+  MsgType := TMsgDlgType.mtInformation;
+  MsgButtons := [TMsgDlgBtn.mbOK];
+  case Rc of
+    0: Msg := Format('%s %s', ['No', Msg]);
+  else
+    begin
+      Msg := Format('%s: %d%s%s%s%s', [Msg, Rc,
+                                       #10, 'Select the first?',
+                                       #10#10, '(Alt+Up/Down finds more)']);
+      MsgType := TMsgDlgType.mtWarning;
+      MsgButtons := [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo];
+    end;
   end;
+
+  if (MessageDlg(Msg, MsgType, MsgButtons, 0) <> idYes) then
+    exit;
+
+  TvTrip.Repaint;
+  TvTrip.Selected := TvTrip.Items[0];
+
+  MnuNextDiffClick(Sender);
 end;
 
 procedure TFrmTripManager.RecreateTrips;
@@ -6031,8 +6066,8 @@ end;
 procedure TFrmTripManager.LoadExploreDb(const SelectNode: string = '');
 var
   CurCol: string;
-  CurType, ColCnt, ColTypeCnt: integer;
-  RootNode, CollectionNode, ExplGroupNode, Node2Select: TTreeNode;
+  CurType, RootCnt, ColCnt, ColTypeCnt: integer;
+  RootNode, CollectionNode, ExplGroupNode, Node2Select, ItemNode: TTreeNode;
   AExpl_Object: TExpl_Object;
   CrWait, CrNormal: HCURSOR;
 begin
@@ -6049,16 +6084,21 @@ begin
     VlTripInfo.Strings.BeginUpdate;
     try
       ClearTvTrip;
+      TvTrip.StateImages := VirtualImageListExploreDB;
+      TreeView_SetItemHeight(TvTrip.Handle, VirtualImageListExploreDB.Height);
       ClearTripInfo;
       AnExploreList.Clear;
       DeleteExploreFiles;
+
       AExpl_Object := TExpl_Object.Create;
       AnExploreList.Add(AExpl_Object);
       RootNode := TvTrip.Items.AddObject(nil, 'Explore.db', AExpl_Object);
+      RootNode.StateIndex := 1;
       SetupPnlTripGpiInfo(RootNode.Text);
       Node2Select := RootNode;
       CurCol := '';
       CurType := -1;
+      RootCnt := 0;
       ColCnt := 0;
       ColTypeCnt := 0;
       ExplGroupNode := nil;
@@ -6072,19 +6112,26 @@ begin
       CdsExploreDb.First;
       while not CdsExploreDb.Eof do
       begin
-        if (CdsExploreDb.FieldByName('Collection').AsString <> CurCol) then
+        if (CdsExploreDb.FieldByName('collection_name').AsString <> CurCol) then
         begin
           UpdateChildNodesCount(CollectionNode, ColCnt);
           UpdateChildNodesCount(ExplGroupNode, ColTypeCnt);
           AExpl_Object := TExpl_Object.Create;
           AnExploreList.Add(AExpl_Object);
-          CurCol := CdsExploreDb.FieldByName('Collection').AsString;
+          CurCol := CdsExploreDb.FieldByName('collection_name').AsString;
           CurType := -1;
           ColCnt := 0;
           ColTypeCnt := 0;
-          CollectionNode := TvTrip.Items.AddChildObject(RootNode, CurCol, AExpl_Object);
-          ExplGroupNode := nil;
 
+          if (ChkCollections.Checked) then
+          begin
+            CollectionNode := TvTrip.Items.AddChildObject(RootNode, CurCol, AExpl_Object);
+            CollectionNode.StateIndex := CdsExploreDb.FieldByName('show_on_map').AsInteger + 2;
+          end
+          else
+            CollectionNode := RootNode;
+
+          ExplGroupNode := nil;
           RootNode.Expand(false);
         end;
         if (CdsExploreDb.FieldByName('type').AsInteger <> CurType) then
@@ -6095,9 +6142,21 @@ begin
           CurType := CdsExploreDb.FieldByName('type').AsInteger;
           ColTypeCnt := 0;
           case (CurType) of
-            Expl_WptType: ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Waypoints', AExpl_Object);
-            Expl_TrkType: ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Tracks', AExpl_Object);
-            Expl_RteType: ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Routes', AExpl_Object);
+            Expl_WptType:
+              begin
+                ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Waypoints', AExpl_Object);
+                ExplGroupNode.StateIndex := 4;
+              end;
+            Expl_TrkType:
+              begin
+                ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Tracks', AExpl_Object);
+                ExplGroupNode.StateIndex := 5;
+              end;
+            Expl_RteType:
+              begin
+                ExplGroupNode := TvTrip.Items.AddChildObject(CollectionNode, 'Routes', AExpl_Object);
+                ExplGroupNode.StateIndex := 6;
+              end
           else
             ExplGroupNode := nil;
           end;
@@ -6105,20 +6164,22 @@ begin
         end;
         if (ExplGroupNode <> nil) then
         begin
+          Inc(RootCnt);
           Inc(ColCnt);
           Inc(ColTypeCnt);
           AExpl_Object := TExpl_Object.Create(CdsExploreDb);
           AnExploreList.Add(AExpl_Object);
+          ItemNode := TvTrip.Items.AddChildObject(ExplGroupNode, CdsExploreDb.FieldByName('name').AsString, AExpl_Object);
           if (SameText(CdsExploreDb.FieldByName('name').AsString, SelectNode)) then
-            Node2Select := TvTrip.Items.AddChildObject(ExplGroupNode, CdsExploreDb.FieldByName('name').AsString, AExpl_Object)
-          else
-            TvTrip.Items.AddChildObject(ExplGroupNode, CdsExploreDb.FieldByName('name').AsString, AExpl_Object);
+            Node2Select := ItemNode;
           ExplGroupNode.Expand(false);
         end;
         CdsExploreDb.Next;
       end;
       UpdateChildNodesCount(CollectionNode, ColCnt);
       UpdateChildNodesCount(ExplGroupNode, ColTypeCnt);
+      if (ChkCollections.Checked) then
+        UpdateChildNodesCount(RootNode, RootCnt);
     finally
       TvTrip.Items.EndUpdate;
       TvTrip.UnlockDrawing;

@@ -968,7 +968,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
-    procedure CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer);
+    function CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer): integer;
     property Items: TUdbHandleList read FUdBList;
     property AllRoutesValue: TmAllRoutesValue read FValue;
   end;
@@ -1017,9 +1017,9 @@ type
                               const Location2Add: TLocation2Add);
     procedure AddLocation_Tread2(const Locations: TmLocations;
                                  const Location2Add: TLocation2Add);
-    procedure AddLocation_Zumo346(const Locations: TmLocations;
+    procedure AddLocation_Zumo396_346(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
-    procedure AddLocation_Zumo395_595(const Locations: TmLocations;
+    procedure AddLocation_Zumo595_395_345(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
     procedure AddLocation_Zumo590(const Locations: TmLocations;
                                   const Location2Add: TLocation2Add);
@@ -1037,8 +1037,8 @@ type
     procedure CreateTemplate_XT2(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_XT3(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Tread2(const TripName, CalculationMode, TransportMode: string);
-    procedure CreateTemplate_Zumo346(const TripName, CalculationMode, TransportMode: string);
-    procedure CreateTemplate_Zumo395_595(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo396_346(const TripName, CalculationMode, TransportMode: string);
+    procedure CreateTemplate_Zumo595_395_345(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Zumo590(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive51(const TripName, CalculationMode, TransportMode: string);
     procedure CreateTemplate_Drive66(const TripName, CalculationMode, TransportMode: string);
@@ -1063,7 +1063,7 @@ type
     function LoadFromFile(AFile: string): boolean;
     procedure Assign(ATripList: TTripList);
     procedure Recalculate;
-    procedure CheckTurns;
+    function FindTurns: integer;
     function GetValue(AKey: ShortString): string;
     function GetItem(AKey: ShortString): TBaseItem;
     procedure SetItem(AKey: ShortString; ABaseItem: TBaseItem);
@@ -4341,13 +4341,14 @@ begin
   FUdBList.Add(AnUdbHandle);
 end;
 
-procedure TmAllRoutes.CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer);
+function TmAllRoutes.CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer): integer;
 var
-  Index: integer;
+  Index, ScanIndex: integer;
   AnUdbHandle: TmUdbDataHndl;
   PrevUdbDir, RoutePointUdbDir, AnUdbDir: TUdbDir;
   TurnAngle: double;
 begin
+  result := 0;
   RoutePointCount := 0;
   UdbHandleCount := 0;
 
@@ -4370,24 +4371,42 @@ begin
       if (AnUdbDir.SubClass.IsKnownInterMediate) and
          (AnUdbDir.SubClass.Direction = $04) then
         AnUdbDir.Status := udsUTurn
-      else if (AnUdbDir.SubClass.IsKnownEndSegment) and
-              (Index > 0) then
+      else if (AnUdbDir.SubClass.IsKnownEndSegment) then
       begin
-        AnUdbDir.Heading := CoordHeading(AnUdbHandle.Items[Index -1].Coords, AnUdbDir.Coords);
-        PrevUdbDir := AnUdbDir;
+        // Scan backward until the coords are different
+        ScanIndex := Index;
+        while (ScanIndex > 0) do
+        begin
+          Dec(ScanIndex);
+          if (AnUdbHandle.Items[ScanIndex].Coords.IsSame(AnUdbDir.Coords)) then
+            continue;
+
+          AnUdbDir.Heading := CoordHeading(AnUdbHandle.Items[ScanIndex].Coords, AnUdbDir.Coords);
+          PrevUdbDir := AnUdbDir;
+          break;
+        end;
       end
       else
       begin
-        if (AnUdbDir.SubClass.IsKnownStartSegment) and
-           (Index < AnUdbHandle.Items.Count -1) then
+        if (AnUdbDir.SubClass.IsKnownStartSegment) then
         begin
-          AnUdbDir.Heading := CoordHeading(AnUdbDir.Coords, AnUdbHandle.Items[Index +1].Coords);
-          if (Assigned(PrevUdbDir)) then
+          // Scan forward until the coords are different
+          ScanIndex := Index;
+          while (ScanIndex < AnUdbHandle.Items.Count -1) do
           begin
-            TurnAngle := Abs(FMod((AnUdbDir.Heading - PrevUdbDir.Heading + 540), 360) - 180);
-            // TODO Parm
-            if (TurnAngle > 160) then
-              AnUdbDir.Status := TUdbDirStatus.udsSharpTurn;
+            Inc(ScanIndex);
+            if (AnUdbHandle.Items[ScanIndex].Coords.IsSame(AnUdbDir.Coords)) then
+              continue;
+
+            AnUdbDir.Heading := CoordHeading(AnUdbDir.Coords, AnUdbHandle.Items[ScanIndex].Coords);
+            if (Assigned(PrevUdbDir)) then
+            begin
+              TurnAngle := Abs(FMod((AnUdbDir.Heading - PrevUdbDir.Heading + 540), 360) - 180);
+              // TODO Parm
+              if (TurnAngle > 160) then
+                AnUdbDir.Status := TUdbDirStatus.udsSharpTurn;
+            end;
+            break;
           end;
         end;
       end;
@@ -4395,7 +4414,10 @@ begin
       if (Assigned(RoutePointUdbDir)) and
          (RoutePointUdbDir.Status = TUdbDirStatus.udsUnchecked) and
          (AnUdbDir.Status <> TUdbDirStatus.udsUnchecked) then
+      begin
         RoutePointUdbDir.Status := AnUdbDir.Status;
+        Inc(result);
+      end;
 
     end;
     Inc(UdbHandleCount);
@@ -4551,15 +4573,16 @@ begin
   end;
 end;
 
-procedure TTripList.CheckTurns;
+function TTripList.FindTurns: integer;
 var
   AllRoutes: TmAllRoutes;
   UdbDirCount, UdbHandleCount: integer;
 begin
+  result := 0;
   AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if not Assigned(AllRoutes) then
     exit;
-  AllRoutes.CheckAndCountUdbs(UdbDirCount, UdbHandleCount);
+  result := AllRoutes.CheckAndCountUdbs(UdbDirCount, UdbHandleCount);
 end;
 
 procedure TTripList.UpdLocsFromRoutePrefs;
@@ -5386,7 +5409,7 @@ begin
   end;
 end;
 
-procedure TTripList.AddLocation_Zumo346(const Locations: TmLocations;
+procedure TTripList.AddLocation_Zumo396_346(const Locations: TmLocations;
                                         const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
@@ -5402,7 +5425,7 @@ begin
   Locations.Add(TmName.Create(Location2Add.Name));
 end;
 
-procedure TTripList.AddLocation_Zumo395_595(const Locations: TmLocations;
+procedure TTripList.AddLocation_Zumo595_395_345(const Locations: TmLocations;
                                         const Location2Add: TLocation2Add);
 begin
   Locations.AddLocation(TLocation.Create);
@@ -5507,10 +5530,10 @@ begin
       AddLocation_XT3(Locations, Location2Add);
     TTripModel.Tread2:
       AddLocation_Tread2(Locations, Location2Add);
-    TTripModel.Zumo346:
-      AddLocation_Zumo346(Locations, Location2Add);
-    TTripModel.Zumo395_595:
-      AddLocation_Zumo395_595(Locations, Location2Add);
+    TTripModel.Zumo396_346:
+      AddLocation_Zumo396_346(Locations, Location2Add);
+    TTripModel.Zumo595_395_345:
+      AddLocation_Zumo595_395_345(Locations, Location2Add);
     TTripModel.Zumo590:
       AddLocation_Zumo590(Locations, Location2Add);
     TTripModel.Drive51:
@@ -6057,7 +6080,7 @@ begin
   // Tread 2 and SmartDrive 66 share the same UDBHandle size, but the SmartDrive 66 has no mIsRoundTrip
   if (GetItem(TmIsRoundTrip.GetKey) = nil) then
     case result of
-      TTripModel.Zumo395_595:
+      TTripModel.Zumo595_395_345:
         result := TTripModel.Drive51;
       TTripModel.Tread2:
         result := TTripModel.Drive66;
@@ -6065,7 +6088,7 @@ begin
   else
     case result of
       TTripModel.Drive51:
-        result := TTripModel.Zumo395_595;
+        result := TTripModel.Zumo595_395_345;
       TTripModel.Drive66:
         result := TTripModel.Tread2;
     end;
@@ -6391,7 +6414,7 @@ begin
   end;
 end;
 
-procedure TTripList.CreateTemplate_Zumo346(const TripName, CalculationMode, TransportMode: string);
+procedure TTripList.CreateTemplate_Zumo396_346(const TripName, CalculationMode, TransportMode: string);
 begin
   SetHeader(THeader.Create);
 
@@ -6416,7 +6439,7 @@ begin
 end;
 
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
-procedure TTripList.CreateTemplate_Zumo395_595(const TripName, CalculationMode, TransportMode: string);
+procedure TTripList.CreateTemplate_Zumo595_395_345(const TripName, CalculationMode, TransportMode: string);
 begin
   SetHeader(THeader.Create);
 
@@ -6570,10 +6593,10 @@ begin
       CreateTemplate_XT3(TripName, CalculationMode, TransportMode);
     TTripModel.Tread2:
       CreateTemplate_Tread2(TripName, CalculationMode, TransportMode);
-    TTripModel.Zumo395_595:
-      CreateTemplate_Zumo395_595(TripName, CalculationMode, TransportMode);
-    TTripModel.Zumo346:
-      CreateTemplate_Zumo346(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo595_395_345:
+      CreateTemplate_Zumo595_395_345(TripName, CalculationMode, TransportMode);
+    TTripModel.Zumo396_346:
+      CreateTemplate_Zumo396_346(TripName, CalculationMode, TransportMode);
     TTripModel.Zumo590:
       CreateTemplate_Zumo590(TripName, CalculationMode, TransportMode);
     TTripModel.Drive51:

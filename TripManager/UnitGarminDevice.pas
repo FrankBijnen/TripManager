@@ -252,7 +252,8 @@ begin
       // Update model from GarminDevice.xml
       PartNumber := FindSubNodeValue(ModelNode, 'PartNumber');
       SoftwareVersion := FindSubNodeValue(ModelNode, 'SoftwareVersion');
-      ModelDescription := FindSubNodeValue(ModelNode, 'Description');
+      // In Model_Tab we always use this funny character u
+      ModelDescription := ReplaceAll(FindSubNodeValue(ModelNode, 'Description'), ['zumo'], [Zumo_Name], [rfIgnoreCase]);
       GarminModel := TModelConv.GetModelFromGarminDevice(Self);
 
       case GarminModel of

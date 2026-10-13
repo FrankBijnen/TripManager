@@ -46,19 +46,19 @@ const
     '(select case' + CRLF +
     '   when %s then ''' + Expl_All + '''' + CRLF +
     '   when c.name is null then ''' + Expl_Unorganised + '''' + CRLF +
-    '   when c.show_on_map > 0 then concat(c.name, '' (' + Expl_ShowOnMap + ')'') ' + CRLF +
     '   else c.name' + CRLF +
-    'end) as collection,' + CRLF +
+    'end) as collection_name,' + CRLF +
+    'c.show_on_map,' + CRLF +
     'i.*' + CRLF +
     'from ' + Expl_ItemTable + ' i' + CRLF +
     'left outer join ' + Expl_TagsTable + ' t on (t.item_id = i.id and t.included <> 0)' + CRLF +
     'left outer join ' + Expl_CollectionsTable + ' c on (c.id = t.collection_id)' + CRLF +
     'where i.type in (' + Expl_AllTypes + ')' + CRLF +
-    'group by collection, i.type, i.name' + CRLF +
-    'order by collection, i.type, i.name';
+    'group by collection_name, i.type, i.name' + CRLF +
+    'order by collection_name, i.type, i.name';
 
   // Fields to hide in Explore info tab, but needed in code.
-  Expl_Hide_Item_Fields: set of byte = [1, 2, 3];
+  Expl_Hide_Item_Fields: set of byte = [1, 2, 3, 4, 5];
 
   Expl_Collection_Query =
     'select' + CRLF +
@@ -91,17 +91,17 @@ const
                                                   4,  // XT2
                                                   8,  // XT3
                                                   8,  // Tread 2
-                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   RecordStart: array[TGarminModel]  of integer = (40, // XT
                                                   40, // XT2
                                                   48, // XT3
                                                   48, // Tread 2
-                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   RecordLen: array[TGarminModel]    of integer = (8,  // XT
                                                   57, // XT2
                                                   57, // XT3
                                                   48, // Tread 2
-                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   BCTransportModeMap : array[0..9] of TIdentMapEntry = (
                                                  (Value: $03;               Name: 'RV'),
                                                  (Value: $04;               Name: 'Automotive'),

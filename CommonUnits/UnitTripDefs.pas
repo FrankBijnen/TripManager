@@ -10,8 +10,8 @@ type
                        XT2,
                        XT3,
                        Tread2,
-                       Zumo346,
-                       Zumo395_595,
+                       Zumo396_346,
+                       Zumo595_395_345,
                        Zumo590,
                        Zumo3x0, // Works for models 340, 350 and 390
                        Drive51,

@@ -35,7 +35,13 @@ const
   DefUnusedDesc                     = 'Unused';
 
   // Device names and part numbers
-  Zumo_Name                         = 'z' + #0363 + 'mo'; // Dont need to save as UTF8
+  Zumo_Name                         = 'z' + #0363 + 'mo'; // So we dont need to save as UTF8
+  Nuvi_Name                         = 'n' + #0252 + 'vi';
+
+  // Generic Garmin & Edge & ForeRunner
+  Garmin_Name                       = 'Garmin';
+  Edge_Name                         = 'Edge';
+  ForeRunner_Name                   = 'ForeRunner';
 
   // XT
   XT_Name                           = Zumo_Name + ' XT';
@@ -53,23 +59,27 @@ const
   Tread2_Name                       = 'Tread 2';
   Tread2_PartNumber                 = '006-B4557-00';
 
-  // Generic Garmin & Edge & ForeRunner
-  Garmin_Name                       = 'Garmin';
-  Edge_Name                         = 'Edge';
-  ForeRunner_Name                   = 'ForeRunner';
-
   // Older models
+  Zumo396_Name                      = Zumo_Name + ' 396';
+  Zumo396_PartNumber                = '006-B3033-00';     // Same as 346
+
   Zumo346_Name                      = Zumo_Name + ' 346';
-  Zumo346_PartNumber                = '006-B3033-00';
+  Zumo346_PartNumber                = '006-B3033-00';     // Same as 396
 
   Zumo595_Name                      = Zumo_Name + ' 595';
   Zumo595_PartNumber                = '006-B2436-00';
 
+  Zumo345_Name                      = Zumo_Name + ' 345';
+  Zumo345_PartNumber                = '006-B2435-00';     // Same as 395
+
   Zumo395_Name                      = Zumo_Name + ' 395';
-  Zumo395_PartNumber                = '006-B2435-00';
+  Zumo395_PartNumber                = '006-B2435-00';     // Same as 345
 
   Zumo590_Name                      = Zumo_Name + ' 590';
   Zumo590_PartNumber                = '006-B1796-00';
+
+  Zumo3x0_Name                      = Zumo_Name + ' 3x0';
+  Zumo3x0_PartNumber                = '006-B1473-00';
 
   Drive51_Name                      = Garmin_Name + ' Drive 51';
   Drive51_PartNumber                = '006-B2586-00';
@@ -77,16 +87,13 @@ const
   Drive66_Name                      = Garmin_Name + ' DriveSmart 66';
   Drive66_PartNumber                = '006-B3817-00';
 
-  Zumo3x0_Name                      = Zumo_Name + ' 3x0';
-  Zumo3x0_PartNumber                = '006-B1473-00';
-
-  Nuvi2595_Name                     = 'n' + #0252 + 'vi 2595';
+  Nuvi2595_Name                     = Nuvi_Name + ' 2595';
   Nuvi2595_PartNumber               = '006-B1371-00';
 
-  Nuvi2599_Name                     = 'n' + #0252 + 'vi 2599';
+  Nuvi2599_Name                     = Nuvi_Name + ' 2599';
   Nuvi2599_PartNumber               = '006-B1947-00';
 
-  Nuvi57_Name                       = 'n' + #0252 + 'vi 57';
+  Nuvi57_Name                       = Nuvi_Name + ' 57';
   Nuvi57_PartNumber                 = '006-B2087-00';
 
   // Defaults vehicle profile
@@ -219,9 +226,19 @@ const
         ExploreDB: true;
         GarminFmts: TripsGPXPOIFmts;
         DefSymbolSize: GpiLargeSymbols),
+    (DeviceName: Zumo396_Name;
+        PartNumber: Zumo396_PartNumber;
+        TripModel: TTripModel.Zumo396_346;
+        Safe: false;
+        Displayable: true;
+        SettingsDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo346_Name;
         PartNumber: Zumo346_PartNumber;
-        TripModel: TTripModel.Zumo346;
+        TripModel: TTripModel.Zumo396_346;
         Safe: false;
         Displayable: true;
         SettingsDB: false;
@@ -231,7 +248,17 @@ const
         DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo595_Name;
         PartNumber: Zumo595_PartNumber;
-        TripModel: TTripModel.Zumo395_595;
+        TripModel: TTripModel.Zumo595_395_345;
+        Safe: false;
+        Displayable: true;
+        SettingsDB: false;
+        VehicleDB: false;
+        ExploreDB: false;
+        GarminFmts: TripsFmts;
+        DefSymbolSize: GpiSmallSymbols),
+    (DeviceName: Zumo345_Name;
+        PartNumber: Zumo345_PartNumber;
+        TripModel: TTripModel.Zumo595_395_345;
         Safe: false;
         Displayable: true;
         SettingsDB: false;
@@ -241,7 +268,7 @@ const
         DefSymbolSize: GpiSmallSymbols),
     (DeviceName: Zumo395_Name;
         PartNumber: Zumo395_PartNumber;
-        TripModel: TTripModel.Zumo395_595;
+        TripModel: TTripModel.Zumo595_395_345;
         Safe: false;
         Displayable: true;
         SettingsDB: false;
@@ -473,7 +500,6 @@ var
   DevIndex: integer;
 begin
   result := TGarminModel.Unknown;
-
   for DevIndex := 0 to KnownDevices.Count -1 do
   begin
     AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
@@ -481,6 +507,20 @@ begin
     // Check possibly overriden Device Name
     if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
       exit(AGarminModel);
+
+    // Check for known PartNumbers and Device Name
+    if (Model_Tab[AGarminModel].PartNumber = '') then
+      continue;
+
+    if (SameText(GarminDevice.PartNumber, Model_Tab[AGarminModel].PartNumber))  and
+       (SameText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
+      exit(AGarminModel);
+  end;
+
+  // Check for PartNumber only.
+  for DevIndex := 0 to KnownDevices.Count -1 do
+  begin
+    AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
 
     // Check for known PartNumbers
     if (Model_Tab[AGarminModel].PartNumber <> '') and

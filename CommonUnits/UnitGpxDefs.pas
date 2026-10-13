@@ -36,6 +36,7 @@ type
     Lon: double;
     procedure FormatLatLon(var OLat: string; var OLon: string; const FormatStr: string = '');
     procedure FromAttributes(Attributes: TObject);
+    function IsSame(ACoords: TCoords): boolean;
   end;
   TGPXFunc = (PostProcess, CreateTracks, CreateWayPoints, CreatePOI, CreateKML,
               CreateHTML, CreateKurviger, CreatePoly, CreateRoutes, CreateTrips, CreateOSMPoints, CreateFITPoints,
@@ -44,7 +45,7 @@ type
   TSubClassType = set of (scCompare, scFirst, ScLast);
   // Note: See TModelConv for mapping to TripModel
   TGarminModel  = (XT, XT2, XT3, Tread2,
-                   Zumo346, Zumo595, Zumo395, Zumo590, Zumo3x0,
+                   Zumo396, Zumo346, Zumo595, Zumo345, Zumo395, Zumo590, Zumo3x0,
                    Drive51, Drive66, Nuvi2595, Nuvi2599, Nuvi57,
                    GarminEdge, GarminForeRunner,
                    GarminGeneric, Unknown);
@@ -105,6 +106,12 @@ begin
   except
     Self := Default(TCoords);
   end;
+end;
+
+function TCoords.IsSame(ACoords: TCoords): boolean;
+begin
+  result := SameValue(Lat, ACoords.Lat) and
+            SameValue(Lon, ACoords.Lon);
 end;
 
 function Debug_Coord2Float(ACoord: integer): string;
