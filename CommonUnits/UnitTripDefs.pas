@@ -214,7 +214,7 @@ const
                                                           (Value: Ord(avHighWays);          Name: 'Highways')
                                                         );
 
-  DirectionMap : array[0..54] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
+  DirectionMap : array[0..55] of TIdentMapEntry =       ( (Value: $00;                      Name: 'Continue'),
                                                           (Value: $01;                      Name: 'Bear right'),
                                                           (Value: $02;                      Name: 'Right'),
                                                           (Value: $03;                      Name: 'Sharp right'),
@@ -251,6 +251,7 @@ const
                                                           (Value: $2E;                      Name: 'Enter turbo roundabout'),
                                                           (Value: $2F;                      Name: 'Leave roundabout 1st exit'),
                                                           (Value: $30;                      Name: 'Leave roundabout 1st exit'), //LHD
+                                                          (Value: $38;                      Name: 'Keep left'),
                                                           (Value: $39;                      Name: 'Keep right'),
                                                           (Value: $4A;                      Name: 'Take ramp left'),
                                                           (Value: $4F;                      Name: 'Leave roundabout at 2nd exit'),
@@ -336,8 +337,8 @@ const
       121 * 4,              // XT2
       121 * 4,              // XT3
       121 * 4,              // Tread 2
-      122 * 2,              // Zumo 346
-       32 * 2,              // Zumo 395 595
+      122 * 2,              // Zumo 396 346
+       32 * 2,              // Zumo 595 395 345
        32 * 2,              // Zumo 590
        66 * 2,              // Zumo 3x0
        32 * 2,              // Drive 51
@@ -352,8 +353,8 @@ const
       1446,                 // XT2
       1450,                 // XT3
       1346,                 // Tread 2
-       292,                 // Zumo 346
-       292,                 // Zumo 395 595
+       292,                 // Zumo 396 346
+       292,                 // Zumo 595 395 345
        252,                 // Zumo 590
        128,                 // Zumo 3x0
        292,                 // Drive 51
@@ -368,8 +369,8 @@ const
       $05d8feff,            // XT2
       $05d8feff,            // XT3
       $0574feff,            // Tread 2
-      $0170feff,            // Zumo 346
-      $0170feff,            // Zumo 395 595
+      $0170feff,            // Zumo 396 346
+      $0170feff,            // Zumo 595 395 345
       CalcUndef,            // Zumo 590
       CalcUndef,            // Zumo 3x0
       $0170feff,            // Drive 51
@@ -383,8 +384,8 @@ const
       PosnNorm,             // XT2
       PosnLarge,            // XT3
       PosnLarge,            // Tread 2
-      PosnNorm,             // Zumo 346
-      PosnNorm,             // Zumo 395 595
+      PosnNorm,             // Zumo 396 346
+      PosnNorm,             // Zumo 595 395 345
       PosnSmall,            // Zumo 590
       PosnSmall,            // Zumo 3x0
       PosnNorm,             // Drive 51
@@ -400,8 +401,8 @@ const
       false,                // XT2
       false,                // XT3
       false,                // Tread 2
-      false,                // Zumo 346
-      false,                // Zumo 395 595
+      false,                // Zumo 396 346
+      false,                // Zumo 595 395 345
       false,                // Zumo 590
       true,                 // Zumo 3x0
       false,                // Drive 51
@@ -416,8 +417,8 @@ const
       false,                // XT2
       false,                // XT3
       false,                // Tread 2
-      false,                // Zumo 346
-      false,                // Zumo 395 595
+      false,                // Zumo 396 346
+      false,                // Zumo 595 395 345
       false,                // Zumo 590
       false,                // Zumo 3x0
       false,                // Drive 51
@@ -433,8 +434,8 @@ const
       false,                // XT2
       false,                // XT3
       false,                // Tread 2
-      true,                 // Zumo 346
-      true,                 // Zumo 395 595
+      true,                 // Zumo 396 346
+      true,                 // Zumo 595 395 345
       false,                // Zumo 590
       false,                // Zumo 3x0
       true,                 // Drive 51
@@ -449,8 +450,8 @@ const
       (Size:4; Version:16),  // XT2
       (Size:4; Version:16),  // XT3
       (Size:4; Version:16),  // Tread 2
-      (Size:1; Version: 6),  // Zumo 346
-      (Size:1; Version: 6),  // Zumo 395 595
+      (Size:1; Version: 6),  // Zumo 396 346
+      (Size:1; Version: 6),  // Zumo 595 395 345
       (Size:1; Version: 3),  // Zumo 590
       (Size:1; Version: 3),  // Zumo 3x0
       (Size:1; Version: 6),  // Drive 51
@@ -464,8 +465,8 @@ const
       dtByte,               // XT2
       dtByte,               // XT3
       dtByte,               // Tread 2
-      dtByte,               // Zumo 346
-      dtByte,               // Zumo 395 595
+      dtByte,               // Zumo 396 346
+      dtByte,               // Zumo 595 395 345
       dtByte,               // Zumo 590
       dtDWordRoutePref,     // Zumo 3x0
       dtByte,               // Drive 51
@@ -479,8 +480,8 @@ const
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT2
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // XT3
     [cmFasterTime,      cmShorterDistance,      cmStraight,             cmAdventurous],   // Tread 2
-    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 346
-    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 395 595
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 396 346
+    [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmAdventurous],   // Zumo 595 395 345
     [cmFasterTime,      cmShorterDistance,      cmOffRoad,              cmCurvyRoads],    // Zumo 590
     [cmDWordFasterTime, cmDWordOffRoad,         cmDWordShorterDistance],                  // Zumo 3x0
     [cmFasterTime,      cmShorterDistance,      cmOffRoad],                               // Drive 51
@@ -495,8 +496,8 @@ const
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT2        Profile overrides?
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // XT3        Profile overrides?
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Tread 2    Profile overrides?
-    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 346
-    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 395 595
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 396 346
+    [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 595 395 345
     [tmAutoMotive,      tmMotorcycling,      tmOffRoad],    // Zumo 590
     [tmAutoMotive,      tmMotorcycling],                    // Zumo 3x0
     [tmAutoMotive],                                         // Drive 51

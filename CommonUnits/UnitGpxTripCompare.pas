@@ -165,7 +165,7 @@ begin
     exit;
   end;
 
-  FAllRoutes.CheckAndCountUdbs(UdbDirCount, UdbHandleCount);
+  FAllRoutes.CountAndResetUdbs(UdbDirCount, UdbHandleCount);
   if (UdbDirCount = 0) then
   begin
     Messages.Add('Trip does not appear to be calculated.');

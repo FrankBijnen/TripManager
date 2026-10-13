@@ -968,7 +968,8 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
-    function CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer): integer;
+    procedure CountAndResetUdbs(var RoutePointCount, UdbHandleCount: integer);
+    function FindTurns: integer;
     property Items: TUdbHandleList read FUdBList;
     property AllRoutesValue: TmAllRoutesValue read FValue;
   end;
@@ -4341,7 +4342,26 @@ begin
   FUdBList.Add(AnUdbHandle);
 end;
 
-function TmAllRoutes.CheckAndCountUdbs(var RoutePointCount, UdbHandleCount: integer): integer;
+procedure TmAllRoutes.CountAndResetUdbs(var RoutePointCount, UdbHandleCount: integer);
+var
+  AnUdbHandle: TmUdbDataHndl;
+  AnUdbDir: TUdbDir;
+begin
+  RoutePointCount := 0;
+  UdbHandleCount := 0;
+  for AnUdbHandle in Items do
+  begin
+    for AnUdbDir in AnUdbHandle.Items do
+    begin
+      AnUdbDir.Status := udsUnchecked;
+      if (AnUdbDir.SubClass.IsKnownRoutePoint) then
+        Inc(RoutePointCount);
+    end;
+    Inc(UdbHandleCount);
+  end;
+end;
+
+function TmAllRoutes.FindTurns: integer;
 var
   Index, ScanIndex: integer;
   AnUdbHandle: TmUdbDataHndl;
@@ -4349,9 +4369,6 @@ var
   TurnAngle: double;
 begin
   result := 0;
-  RoutePointCount := 0;
-  UdbHandleCount := 0;
-
   for AnUdbHandle in Items do
   begin
     PrevUdbDir := nil;
@@ -4363,10 +4380,7 @@ begin
       AnUdbDir.Heading := 0;
 
       if (AnUdbDir.SubClass.IsKnownRoutePoint) then
-      begin
-        Inc(RoutePointCount);
         RoutePointUdbDir := AnUdbDir;
-      end;
 
       if (AnUdbDir.SubClass.IsKnownInterMediate) and
          (AnUdbDir.SubClass.Direction = $04) then
@@ -4420,7 +4434,6 @@ begin
       end;
 
     end;
-    Inc(UdbHandleCount);
   end;
 end;
 
@@ -4576,13 +4589,12 @@ end;
 function TTripList.FindTurns: integer;
 var
   AllRoutes: TmAllRoutes;
-  UdbDirCount, UdbHandleCount: integer;
 begin
   result := 0;
   AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if not Assigned(AllRoutes) then
     exit;
-  result := AllRoutes.CheckAndCountUdbs(UdbDirCount, UdbHandleCount);
+  result := AllRoutes.FindTurns;
 end;
 
 procedure TTripList.UpdLocsFromRoutePrefs;

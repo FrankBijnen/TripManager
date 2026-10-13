@@ -3446,7 +3446,9 @@ begin
     // Check Calculated
     AMTP_Data.IsCalculated := TmpTripList.IsCalculated;
     if (AMTP_Data.IsCalculated = false) then
-      AListItem.ImageIndex := 2;
+      AListItem.ImageIndex := 2
+    else if (TmpTripList.FindTurns > 0) then
+      AListItem.ImageIndex := 3;
 
     // Save Explore UUID, TripName and FileName
     AMTP_Data.ExploreUUID := TmpTripList.ExploreUUID;
@@ -5866,13 +5868,22 @@ begin
     DeviceFile := FromDevice;
     HexEditFile := FileName;
 
-    if (DeviceFile) and
-       (ATripList.IsCalculated = false) then
+    if (DeviceFile) then
     begin
-      SbPostProcess.Panels[0].Text := 'Not a calculated trip. Marked with !';
-      SbPostProcess.Panels[1].Text := 'BaseCamp may have problems reading current.gpx';
-      StatusTimer.Enabled := false;
-      StatusTimer.Enabled := true;
+      if (ATripList.IsCalculated = false) then
+      begin
+        SbPostProcess.Panels[0].Text := 'Not a calculated trip. Marked with !';
+        SbPostProcess.Panels[1].Text := 'BaseCamp may have problems reading current.gpx';
+        StatusTimer.Enabled := false;
+        StatusTimer.Enabled := true;
+      end
+      else if (ATripList.FindTurns > 0) then
+      begin
+        SbPostProcess.Panels[0].Text := 'Sharp turns found !';
+        SbPostProcess.Panels[1].Text := 'Closest Entry Point may have problems';
+        StatusTimer.Enabled := false;
+        StatusTimer.Enabled := true;
+      end;
     end;
 
     LoadHex(FileName);
