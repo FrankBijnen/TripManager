@@ -969,7 +969,7 @@ type
     destructor Destroy; override;
     procedure AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
     procedure CountAndResetUdbs(var RoutePointCount, UdbHandleCount: integer);
-    function FindTurns: integer;
+    function FindTurnArounds: integer;
     property Items: TUdbHandleList read FUdBList;
     property AllRoutesValue: TmAllRoutesValue read FValue;
   end;
@@ -1064,7 +1064,7 @@ type
     function LoadFromFile(AFile: string): boolean;
     procedure Assign(ATripList: TTripList);
     procedure Recalculate;
-    function FindTurns: integer;
+    function FindTurnArounds: integer;
     function GetValue(AKey: ShortString): string;
     function GetItem(AKey: ShortString): TBaseItem;
     procedure SetItem(AKey: ShortString; ABaseItem: TBaseItem);
@@ -4361,7 +4361,7 @@ begin
   end;
 end;
 
-function TmAllRoutes.FindTurns: integer;
+function TmAllRoutes.FindTurnArounds: integer;
 var
   Index, ScanIndex: integer;
   AnUdbHandle: TmUdbDataHndl;
@@ -4416,7 +4416,7 @@ begin
             if (Assigned(PrevUdbDir)) then
             begin
               TurnAngle := Abs(FMod((AnUdbDir.Heading - PrevUdbDir.Heading + 540), 360) - 180);
-              // TODO Parm
+              // TODO Parm?
               if (TurnAngle > 160) then
                 AnUdbDir.Status := TUdbDirStatus.udsSharpTurn;
             end;
@@ -4586,7 +4586,7 @@ begin
   end;
 end;
 
-function TTripList.FindTurns: integer;
+function TTripList.FindTurnArounds: integer;
 var
   AllRoutes: TmAllRoutes;
 begin
@@ -4594,7 +4594,7 @@ begin
   AllRoutes := TmAllRoutes(GetItem(TmAllRoutes.GetKey));
   if not Assigned(AllRoutes) then
     exit;
-  result := AllRoutes.FindTurns;
+  result := AllRoutes.FindTurnArounds;
 end;
 
 procedure TTripList.UpdLocsFromRoutePrefs;

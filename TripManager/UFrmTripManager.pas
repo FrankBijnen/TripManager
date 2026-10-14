@@ -261,7 +261,7 @@ type
     N19: TMenuItem;
     Routepreview1: TMenuItem;
     N7: TMenuItem;
-    FindSharpTurns: TMenuItem;
+    FindTurnArounds: TMenuItem;
     VirtualImageListExploreDB: TVirtualImageList;
     ImageCollectionExploreDB: TImageCollection;
     procedure FormCreate(Sender: TObject);
@@ -400,7 +400,7 @@ type
     procedure ChkCollectionsClick(Sender: TObject);
     procedure PopupTripAddToMapClick(Sender: TObject);
     procedure Routepreview1Click(Sender: TObject);
-    procedure FindSharpTurnsClick(Sender: TObject);
+    procedure FindTurnAroundsClick(Sender: TObject);
   private
     { Private declarations }
     FStyleServices: TCustomStyleServices;
@@ -1901,7 +1901,7 @@ begin
                                 (TvTrip.Items.Count > 0);
   MnuCompareGpxTrack.Enabled := MnuCompareGpxRoute.Enabled;
   MnuTripOverview.Enabled := MnuCompareGpxRoute.Enabled;
-  FindSharpTurns.Enabled := MnuCompareGpxRoute.Enabled;
+  FindTurnArounds.Enabled := MnuCompareGpxRoute.Enabled;
   SaveGPX1.Enabled := ( MnuCompareGpxRoute.Enabled ) or
                       ( (APOIGroupList <> nil)  and (APOIGroupList.Count > 0)) or
                       ( (AFitInfo <> nil)  and (AFitInfo.Count > 0)) or
@@ -3447,7 +3447,7 @@ begin
     AMTP_Data.IsCalculated := TmpTripList.IsCalculated;
     if (AMTP_Data.IsCalculated = false) then
       AListItem.ImageIndex := 2
-    else if (TmpTripList.FindTurns > 0) then
+    else if (TmpTripList.FindTurnArounds > 0) then
       AListItem.ImageIndex := 3;
 
     // Save Explore UUID, TripName and FileName
@@ -3511,7 +3511,7 @@ begin
   end;
 end;
 
-procedure TFrmTripManager.FindSharpTurnsClick(Sender: TObject);
+procedure TFrmTripManager.FindTurnAroundsClick(Sender: TObject);
 var
   Rc: integer;
   Msg: string;
@@ -3522,8 +3522,8 @@ begin
      (TvTrip.Items.Count = 0) then
     exit;
 
-  Rc := ATripList.FindTurns;
-  Msg := 'U-Turns/Sharp turns found';
+  Rc := ATripList.FindTurnArounds;
+  Msg := 'Turnarounds found';
   MsgType := TMsgDlgType.mtInformation;
   MsgButtons := [TMsgDlgBtn.mbOK];
   case Rc of
@@ -3532,7 +3532,7 @@ begin
     begin
       Msg := Format('%s: %d%s%s%s%s', [Msg, Rc,
                                        #10, 'Select the first?',
-                                       #10#10, '(Alt+Up/Down finds more)']);
+                                       #10#10, '(Alt+Down/Up finds a Next/Previous)']);
       MsgType := TMsgDlgType.mtWarning;
       MsgButtons := [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo];
     end;
@@ -5877,9 +5877,9 @@ begin
         StatusTimer.Enabled := false;
         StatusTimer.Enabled := true;
       end
-      else if (ATripList.FindTurns > 0) then
+      else if (ATripList.FindTurnArounds > 0) then
       begin
-        SbPostProcess.Panels[0].Text := 'Sharp turns found !';
+        SbPostProcess.Panels[0].Text := 'Turnarounds found !';
         SbPostProcess.Panels[1].Text := 'Closest Entry Point may have problems';
         StatusTimer.Enabled := false;
         StatusTimer.Enabled := true;
