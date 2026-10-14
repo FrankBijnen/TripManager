@@ -314,23 +314,32 @@ object FrmAdvSettings: TFrmAdvSettings
         Height = 33
         Align = alTop
         TabOrder = 2
+        ExplicitLeft = 1
+        ExplicitTop = -6
         object BtnValidate: TButton
+          AlignWithMargins = True
           Left = 4
-          Top = 3
+          Top = 4
           Width = 75
           Height = 25
+          Align = alLeft
           Caption = 'Validate'
           TabOrder = 0
           OnClick = BtnValidateClick
+          ExplicitTop = 3
         end
         object BtnClearCoordCache: TButton
-          Left = 86
-          Top = 3
+          AlignWithMargins = True
+          Left = 85
+          Top = 4
           Width = 137
           Height = 25
+          Align = alLeft
           Caption = 'Clear GeoCode cache'
           TabOrder = 1
           OnClick = BtnClearCoordCacheClick
+          ExplicitLeft = 86
+          ExplicitTop = 3
         end
       end
     end

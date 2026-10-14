@@ -627,7 +627,7 @@ end;
 
 procedure TFrmAdvSettings.BtnClearCoordCacheClick(Sender: TObject);
 begin
-  if (MessageDlg('Clear the cache?', TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> idOK) then
+  if (MessageDlg('Clear the GeoCoords cache?', TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbOK, TMsgDlgBtn.mbCancel], 0) <> idOK) then
     exit;
 
   ClearCoordCache;

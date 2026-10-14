@@ -685,6 +685,14 @@ begin
   result := Format('%s%s %s%s %s%s %s%s', [result[1], result[2], result[3], result[4], result[5], result[6], result[7], result[8]]);
 end;
 
+// Can be used to check for single instance
+function CreateOwnedMutex: THandle;
+begin
+  result := CreateMutex(nil, true, PChar(Application.Title));
+  if (GetLastError = ERROR_ALREADY_EXISTS) then
+    result := 0;
+end;
+
 initialization
 begin
   FloatFormatSettings.ThousandSeparator := ',';
