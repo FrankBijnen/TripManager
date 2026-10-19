@@ -4376,7 +4376,7 @@ var
                                TGridSelItem.Create(AHeader, SizeOf(HeaderValue.ID)));
     VlTripInfo.Strings.AddPair('Size',          Format('%d', [HeaderValue.Size]),
                                TGridSelItem.Create(AHeader,
-                                                   SizeOf(Size),
+                                                   SizeOf(HeaderValue.Size),
                                                    OffsetInRecord(HeaderValue, HeaderValue.Size) ));
     VlTripInfo.Strings.AddPair('Datatype',      Format('%d', [HeaderValue.DataType]),
                                TGridSelItem.Create(AHeader,
