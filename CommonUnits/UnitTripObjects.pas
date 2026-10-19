@@ -4050,14 +4050,14 @@ end;
 
 function TmUdbDataHndl.GetBoundsMin: string;
 begin
-  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[2])),
-                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])));
+  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
+                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
 end;
 
 function TmUdbDataHndl.GetBoundsMax: string;
 begin
-  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
-                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
+  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[2])),
+                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])));
 end;
 
 function TmUdbDataHndl.GetBoundsTopLeft: string;
