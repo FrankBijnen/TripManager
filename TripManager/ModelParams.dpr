@@ -14,8 +14,8 @@ var
 begin
 
   AllocConsole;
+  Writeln('Model Specific Params');
   Write('Model', #9);
-  Write('Model Specific Params', #9);
   Write('UdbDirNameSize (Bytes)', #9);
   Write('UdbDirNameSize (Chars)', #9);
   Write('Unknown3Size', #9);
@@ -27,8 +27,36 @@ begin
   Write('RoutePrefType', #9);
   Write('VersionSize', #9);
   Write('Version', #9);
+  Writeln;
 
-  Write('Version Specific Params', #9);
+  for TripModel := Low(TTripModel) to High(TTripModel) do
+  begin
+    if (TripVersion[TripModel].IsUcs4) then
+      Chars := UdbDirNameSize[TripModel] div 4
+    else
+      Chars := UdbDirNameSize[TripModel] div 2;
+
+    Write(GetEnumName(TypeInfo(TTripModel), Ord(TripModel)), #9);
+    Write(UdbDirNameSize[TripModel], #9);
+    Write(Chars, #9);
+    Write(Unknown3Size[TripModel], #9);
+    Write('0x', IntToHex(CalculationMagic[TripModel], 8), #9);
+    Write(ScPosnSize[TripModel], #9);
+    Write(NeedRecreateTrips[TripModel], #9);
+    Write(HasAllLinks[TripModel], #9);
+    Write(SupportsGrouping[TripModel], #9);
+    Write(RoutePrefType[TripModel], #9);
+    Write(TripVersion[TripModel].Size, #9);
+    Write(TripVersion[TripModel].Version, #9);
+    Writeln;
+  end;
+
+  Writeln;
+  Writeln;
+  Writeln('Version Specific Params');
+
+  Write('Model', #9);
+  Write('Version', #9);
 
   Write('UCS4', #9);
   Write('HandleTrailer', #9);
@@ -53,26 +81,9 @@ begin
 
   for TripModel := Low(TTripModel) to High(TTripModel) do
   begin
-    if (TripVersion[TripModel].IsUcs4) then
-      Chars := UdbDirNameSize[TripModel] div 4
-    else
-      Chars := UdbDirNameSize[TripModel] div 2;
-
     Write(GetEnumName(TypeInfo(TTripModel), Ord(TripModel)), #9);
-    Write(#9);
-    Write(UdbDirNameSize[TripModel], #9);
-    Write(Chars, #9);
-    Write(Unknown3Size[TripModel], #9);
-    Write('0x', IntToHex(CalculationMagic[TripModel], 8), #9);
-    Write(ScPosnSize[TripModel], #9);
-    Write(NeedRecreateTrips[TripModel], #9);
-    Write(HasAllLinks[TripModel], #9);
-    Write(SupportsGrouping[TripModel], #9);
-    Write(RoutePrefType[TripModel], #9);
-    Write(TripVersion[TripModel].Size, #9);
     Write(TripVersion[TripModel].Version, #9);
 
-    Write(#9);
     Write(TripVersion[TripModel].IsUcs4, #9);
     Write(TripVersion[TripModel].HandleTrailer, #9);
     Write(TripVersion[TripModel].CanCheckSystemTrips, #9);
