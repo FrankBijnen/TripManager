@@ -904,8 +904,13 @@ type
     function ComputeUnknown3Size(AModel: TTripModel): integer;
     function GetModel: TTripModel;
     function GetSubClass(Index: Integer): TSubClass;
-    function GetBoundsMin: string;
-    function GetBoundsMax: string;
+    function MinBoundsValue(const Coord1, Coord2: integer): double;
+    function MaxBoundsValue(const Coord1, Coord2: integer): double;
+    procedure TLBoundsValues(var Lat: double; var Lon: double);
+    procedure BRBoundsValues(var Lat: double; var Lon: double);
+    function GetHasBounds: boolean;
+    function GetBoundsTL: string;
+    function GetBoundsBR: string;
     function GetDistOffset: integer;
     function GetTimeOffset: integer;
     function GetShapeOffset: integer;
@@ -924,7 +929,6 @@ type
                        ForceRecalc: boolean = true); reintroduce;
     destructor Destroy; override;
     procedure Add(AnUdbDir: TUdbDir);
-    function GetBoundsTopLeft: string;
     function GetBounds: string;
     function NineFloats: string;
     function RoutePref: string;
@@ -945,6 +949,9 @@ type
     property TimeStampOffset: integer read GetTimeStampOffset;
     property AdvLevelV7Offset: integer read GetAdvLevelV7Offset;
     property BoundsOffset[Index: Integer]: integer read GetBoundsOffset;
+    property BoundsTL: string read GetBoundsTL;
+    property BoundsBR: string read GetBoundsBR;
+    property HasBounds: boolean read GetHasBounds;
     property RoutePrefOffset: integer read GetRoutePrefOffset;
     property TransportModeOffset: integer read GetTransportModeOffset;
     property FloatOffset: integer read GetFloatOffset;
@@ -4048,31 +4055,66 @@ begin
   result := TripList.TripFileVersion.Unknown3FloatOffset;
 end;
 
-function TmUdbDataHndl.GetBoundsMin: string;
+function TmUdbDataHndl.MinBoundsValue(const Coord1, Coord2: integer): double;
+var
+  D1: double;
 begin
-  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
-                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[1])));
+  result := CoordAsDec(FValue.GetUnknown3(BoundsOffset[Coord1]));
+  D1 := CoordAsDec(FValue.GetUnknown3(BoundsOffset[Coord2]));
+  if (D1 < result) then
+    result := D1;
 end;
 
-function TmUdbDataHndl.GetBoundsMax: string;
+function TmUdbDataHndl.MaxBoundsValue(const Coord1, Coord2: integer): double;
+var
+  D1: double;
 begin
-  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[2])),
-                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])));
+  result := CoordAsDec(FValue.GetUnknown3(BoundsOffset[Coord1]));
+  D1 := CoordAsDec(FValue.GetUnknown3(BoundsOffset[Coord2]));
+  if (D1 > result) then
+    result := D1;
 end;
 
-function TmUdbDataHndl.GetBoundsTopLeft: string;
+procedure TmUdbDataHndl.TLBoundsValues(var Lat: double; var Lon: double);
 begin
-  if (FValue.GetUnknown3(BoundsOffset[0]) = 0) and
-     (FValue.GetUnknown3(BoundsOffset[3]) = 0) then
-    exit('');
+  Lat := MaxBoundsValue(0, 2);
+  Lon := MinBoundsValue(1, 3);
+end;
 
-  result := FormatMapCoords(CoordAsDec(FValue.GetUnknown3(BoundsOffset[0])),
-                            CoordAsDec(FValue.GetUnknown3(BoundsOffset[3])))
+procedure TmUdbDataHndl.BRBoundsValues(var Lat: double; var Lon: double);
+begin
+  Lat := MinBoundsValue(0, 2);
+  Lon := MaxBoundsValue(1, 3);
+end;
+
+function TmUdbDataHndl.GetBoundsTL: string;
+var
+  Lat, Lon: double;
+begin
+  TLBoundsValues(Lat, Lon);
+  result := FormatMapCoords(Lat, Lon);
+end;
+
+function TmUdbDataHndl.GetBoundsBR: string;
+var
+  Lat, Lon: double;
+begin
+  BRBoundsValues(Lat, Lon);
+  result := FormatMapCoords(Lat, Lon);
+end;
+
+function TmUdbDataHndl.GetHasBounds: boolean;
+var
+  Lat, Lon: double;
+begin
+  TLBoundsValues(Lat, Lon);
+  result := (Lat <> 0) and
+            (Lon <> 0);
 end;
 
 function TmUdbDataHndl.GetBounds: string;
 begin
-  result := Format('%s, %s', [GetBoundsMin, GetBoundsMax]);
+  result := Format('%s, %s', [BoundsTL, BoundsBR]);
 end;
 
 function TmUdbDataHndl.RoutePref: string;

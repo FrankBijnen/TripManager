@@ -405,8 +405,21 @@ function AddTrkPoint(pointLat, pointLon) {
   glb_TrackPoints.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
 }
 
-function ShowBounds(lineName) {
-  glb_Map.zoomToExtent(glb_BoundsBounds[lineName]);
+function ShowBounds(lineName, LatTL, LonTL, LatBR, LonBR) {
+  PerformLog(['ShowBounds', glb_BoundsBounds, LatTL, LonTL, LatBR, LonBR]);
+
+  if (LatTL && LonTL && LatBR && LonBR)
+  {
+    var boundsPoints = new Array();
+    var lonLat = new OpenLayers.LonLat(LonTL, LatTL).transform(glb_Projection, glb_ProjectionObject);
+    boundsPoints.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+    lonLat = new OpenLayers.LonLat(LonBR, LatBR).transform(glb_Projection, glb_ProjectionObject);
+    boundsPoints.push(new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat));
+    var line_string = new OpenLayers.Geometry.LineString(boundsPoints);
+    line_string.calculateBounds();
+    glb_Map.zoomToExtent(line_string.bounds);
+  }
+
   glb_TrackLayer[lineName].setVisibility(true);
 }
 

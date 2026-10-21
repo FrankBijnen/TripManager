@@ -4156,6 +4156,7 @@ var
   var
     ANitem: TBaseItem;
     Unknown3Offset, OffSetPref, LUnknown2: integer;
+    BoundsDesc, BoundsCall: string;
   begin
     OffSetPref := - SizeOf(AnUdbhandle.HeaderValue);
     VlTripInfo.Strings.AddPair('*** UdbHandle header', DupeString('-', DupeCount),
@@ -4324,10 +4325,18 @@ var
     VlTripInfo.Strings.AddPair('*** End UdbHandle', DupeString('-', DupeCount),
                                TGridSelItem.Create(AnUdbhandle, 1, AnUdbhandle.SelEnd - AnUdbhandle.SelStart -1));
     if (ShowBounds) and
-       (AnUdbhandle.GetBoundsTopLeft <> '') then
+       (AnUdbhandle.HasBounds) then
     begin
-      EdgeBrowser1.ExecuteScript('ShowBounds("Bounds ' + ATripList.TripName +'");');
-      MapRequest(AnUdbhandle.GetBoundsTopLeft, ATripList.TripName, RoutePointTimeOut, TPositionMap.pmNone); // Dont move map
+      BoundsDesc := ATripList.TripName;
+      BoundsCall := 'ShowBounds("Bounds';
+      if (ChkZoomToPoint.Checked = false) then
+        BoundsCall := Format('%s %s")', [BoundsCall, BoundsDesc])
+      else
+        BoundsCall := Format('%s %s", %s, %s)', [BoundsCall, BoundsDesc, AnUdbhandle.BoundsTL, AnUdbhandle.BoundsBR]);
+      EdgeBrowser1.ExecuteScript(BoundsCall);
+      if (AnUdbhandle.Items.Count > 0) then
+        BoundsDesc := AnUdbhandle.Items[0].DisplayName;
+      MapRequest(AnUdbhandle.BoundsTL, BoundsDesc, RoutePointTimeOut, TPositionMap.pmNone); // Dont move map
     end;
   end;
 
