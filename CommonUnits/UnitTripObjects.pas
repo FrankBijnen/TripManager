@@ -85,7 +85,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
-    constructor Create(AName: ShortString; AValue: byte); reintroduce;
+    constructor Create(AName: ShortString; AValue: byte = 0); reintroduce;
     destructor Destroy; override;
     property AsByte: byte read FValue write SetByte;
   end;
@@ -101,7 +101,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
-    constructor Create(AName: ShortString; AValue: Cardinal); reintroduce;
+    constructor Create(AName: ShortString; AValue: Cardinal = 0); reintroduce;
     destructor Destroy; override;
     property AsCardinal: Cardinal read FValue write FValue;
   end;
@@ -117,7 +117,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
-    constructor Create(AName: ShortString; AValue: Single); reintroduce;
+    constructor Create(AName: ShortString; AValue: Single = 0); reintroduce;
     destructor Destroy; override;
     property AsSingle: single read FValue write FValue;
   end;
@@ -134,7 +134,7 @@ type
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
-    constructor Create(AName: ShortString; AValue: boolean); reintroduce;
+    constructor Create(AName: ShortString; AValue: boolean = false); reintroduce;
     destructor Destroy; override;
     property AsBoolean: boolean read FValue write FValue;
   end;
@@ -1079,6 +1079,12 @@ type
                              TimeLst: TObjectlist<TLatLonTime>);
     procedure Trip2XmlRte(XMLRoot: TObject);
     procedure Trip2XmlTrk(XMLRoot: TObject);
+    function CreateItemFromObject(AKeyName: ShortString;
+                                  ATrip2AddObject: TTrip2AddObject): TBaseDataItem;
+    function CreateItemFromStream(AKeyName: ShortString;
+                                  AValueLen: Cardinal;
+                                  ADataType: byte;
+                                  AStream: TStream): TBaseItem;
     procedure AddLocation_XT(const Locations: TmLocations;
                              const Location2Add: TLocation2Add);
     procedure AddLocation_XT2(const Locations: TmLocations;
@@ -1174,15 +1180,6 @@ type
     property TripFileVersion: TTripVersion read FTripFileVersion write SetTripFileVersion;
     property RouteCnt: Cardinal read FRouteCnt write FRouteCnt;
   end;
-
-function CreateItemFromObject(ATripList: TTripList;
-                              AKeyName: ShortString;
-                              ATrip2AddObject: TTrip2AddObject = nil): TBaseDataItem;
-function CreateItemFromStream(ATripList: TTripList;
-                              AKeyName: ShortString;
-                              AValueLen: Cardinal;
-                              ADataType: byte;
-                              AStream: TStream): TBaseItem;
 
 implementation
 
@@ -1353,92 +1350,9 @@ begin
   result := AStream.Read(DataType, SizeOf(DataType));
 end;
 
-//Future use
-function CreateItemFromObject(ATripList: TTripList;
-                              AKeyName: ShortString;
-                              ATrip2AddObject: TTrip2AddObject = nil): TBaseDataItem;
-var
-  RegisteredClassName: string;
-  APersistentClass: TPersistentClass;
+function GetClassFromKeyName(const AKeyName: ShortString): TPersistentClass;
 begin
-  result := nil;
-  RegisteredClassName := Format('T%s', [AKeyName]);
-  APersistentClass := GetClass(RegisteredClassName);
-  if (Assigned(APersistentClass)) then
-  begin
-    result := TBaseDataItem(APersistentClass.Create);
-    result.FName := AKeyName;
-    result.FLenName := Length(AKeyName);
-    result.SetTripList(ATripList);
-    result.InitFromObject(ATrip2AddObject);
-  end
-end;
-
-// Create, and Initialize from stream, class by name
-function CreateItemFromStream(ATripList: TTripList;
-                              AKeyName: ShortString;
-                              AValueLen: Cardinal;
-                              ADataType: byte;
-                              AStream: TStream): TBaseItem;
-var
-  RegisteredClassName: string;
-  APersistentClass: TPersistentClass;
-  AByte: byte;
-  ACardinal: Cardinal;
-  ASingle: Single;
-  ABoolean: boolean;
-begin
-  RegisteredClassName := Format('T%s', [AKeyName]);
-  APersistentClass := GetClass(RegisteredClassName);
-  if (Assigned(APersistentClass)) then
-  begin
-    result := TBaseItem(APersistentClass.Create);
-    result.SetTripList(ATripList);
-    result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
-  end
-  else
-  begin
-    // Create class by known (basic) datatype
-    case ADataType of
-      dtByte:
-        begin
-          AStream.Read(AByte, SizeOf(AByte));
-          result := TByteItem.Create(AKeyName, AByte);
-          result.SetTripList(ATripList);
-        end;
-      dtCardinal:
-        begin;
-          AStream.Read(ACardinal, SizeOf(ACardinal));
-          result := TCardinalItem.Create(AKeyName, Swap32(ACardinal));
-          result.SetTripList(ATripList);
-        end;
-      dtSingle:
-        begin;
-          AStream.Read(ASingle, SizeOf(ASingle));
-          result := TSingleItem.Create(AKeyName, Swap32(ASingle));
-          result.SetTripList(ATripList);
-        end;
-      dtBoolean:
-        begin;
-          AStream.Read(ABoolean, SizeOf(ABoolean));
-          result := TBooleanItem.Create(AKeyName, ABoolean);
-          result.SetTripList(ATripList);
-        end;
-      dtString:
-        begin;
-          result := TStringItem.Create(AKeyName);
-          result.SetTripList(ATripList);
-          TStringItem(result).InitFromStream(AKeyName, AValueLen, dtString, AStream);
-        end;
-      else
-      begin
-        // Create a Raw data item. Only holds bytes
-        result := TRawDataItem.Create;
-        result.SetTripList(ATripList);
-        result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
-      end;
-    end;
-  end;
+  result := GetClass(Format('T%s', [AKeyName]));
 end;
 
 {*** Baseitem ***}
@@ -1601,7 +1515,7 @@ begin
 end;
 
 {*** Byte ***}
-constructor TByteItem.Create(AName: ShortString; AValue: byte);
+constructor TByteItem.Create(AName: ShortString; AValue: byte = 0);
 begin
   inherited Create(AName, SizeOf(FValue), dtByte);
   FValue := AValue;
@@ -3408,7 +3322,8 @@ begin
   for LinkCnt := 0 to TmpItemCount -1 do
   begin
     ALink := Tlink.Create;
-
+    ALink.SetTripList(TripList);
+    
     // To get the count of items for this Link
     AStream.Read(ALinkValue, SizeOf(ALinkValue));
     ALinkValue.SwapCardinals;
@@ -3424,9 +3339,8 @@ begin
       if (BytesRead = 0) then
         break;
       SavePos := AStream.Position;
-      ABaseItem := CreateItemFromStream(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      ABaseItem := TripList.CreateItemFromStream(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
       ALink.Add(ABaseItem);
-      ABaseItem.SetTripList(TripList);
 
       // Should not occur
       if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
@@ -3697,9 +3611,8 @@ begin
       if (BytesRead = 0) then
         break;
       SavePos := AStream.Position;
-      ABaseItem := CreateItemFromStream(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      ABaseItem := TripList.CreateItemFromStream(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
       Add(ABaseItem);
-      ABaseItem.SetTripList(TripList);
 
       // Should not occur
       if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
@@ -5192,7 +5105,7 @@ begin
 
       if (KeyName = AKeyName) then
       begin
-        result := CreateItemFromStream(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+        result := CreateItemFromStream(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
         exit;
       end;
 
@@ -5264,9 +5177,8 @@ begin
     if (BytesRead = 0) then
       break;
     SavePos := AStream.Position;
-    ABaseItem := CreateItemFromStream(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+    ABaseItem := CreateItemFromStream(KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
     Add(ABaseItem);
-    ABaseItem.SetTripList(Self);
 
     // Should not occur
     if (AStream.Position <> SavePos + ValueLen - SizeOf(Initiator)) then
@@ -6649,6 +6561,57 @@ begin
       FreeAndNil(AnUdbHandle);
     TmAllRoutes(result).Items.Clear;
   end;
+end;
+
+//Future use
+function TTripList.CreateItemFromObject(AKeyName: ShortString;
+                                        ATrip2AddObject: TTrip2AddObject): TBaseDataItem;
+var
+  APersistentClass: TPersistentClass;
+begin
+  result := nil;
+  APersistentClass := GetClassFromKeyName(AKeyName);
+  if (Assigned(APersistentClass)) then
+  begin
+    result := TBaseDataItem(APersistentClass.Create);
+    result.FName := AKeyName;
+    result.FLenName := Length(AKeyName);
+    result.SetTripList(Self);
+    result.InitFromObject(ATrip2AddObject);
+  end
+end;
+
+// Create, and Initialize from stream, class by name
+function TTripList.CreateItemFromStream(AKeyName: ShortString;
+                                        AValueLen: Cardinal;
+                                        ADataType: byte;
+                                        AStream: TStream): TBaseItem;
+var
+  APersistentClass: TPersistentClass;
+begin
+  APersistentClass := GetClassFromKeyName(AKeyName);
+  if (Assigned(APersistentClass)) then
+    result := TBaseItem(APersistentClass.Create)
+  else
+  begin
+    // Create class by known (basic) datatype
+    case ADataType of
+      dtByte:
+        result := TByteItem.Create(AKeyName);
+      dtCardinal:
+        result := TCardinalItem.Create(AKeyName);
+      dtSingle:
+        result := TSingleItem.Create(AKeyName);
+      dtBoolean:
+        result := TBooleanItem.Create(AKeyName);
+      dtString:
+        result := TStringItem.Create(AKeyName);
+      else
+        result := TRawDataItem.Create; // Create a Raw data item. Only holds bytes
+    end;
+  end;
+  result.SetTripList(Self);
+  result.InitFromStream(AKeyName, AValueLen, ADataType, AStream);
 end;
 
 // The order of the items may be changed. EG Move mTripName after Theader does also work.
