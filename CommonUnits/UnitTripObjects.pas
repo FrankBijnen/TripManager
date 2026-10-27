@@ -684,7 +684,8 @@ type
     procedure WriteValue(AStream: TMemoryStream); override;
   public
     constructor Create; reintroduce; overload;
-    constructor Create(ARoutePref: TRoutePreference;
+    constructor Create(ATripList: TTripList;
+                       ARoutePref: TRoutePreference;
                        ATransportMode: TTransportMode); reintroduce; overload;
     destructor Destroy; override;
     procedure Add(ANitem: TBaseItem);
@@ -1371,6 +1372,7 @@ end;
 
 procedure TBaseItem.SetTripList(const ATripList: TTripList);
 begin
+  Assert(ATripList <> nil, 'SetTripList. ATripList = nil');
   FTripList := ATripList;
 end;
 
@@ -3239,10 +3241,12 @@ begin
   FItemList := TItemList.Create;
 end;
 
-constructor TLink.Create(ARoutePref: TRoutePreference;
+constructor TLink.Create(ATripList: TTripList;
+                         ARoutePref: TRoutePreference;
                          ATransportMode: TTransportMode);
 begin
   Create;
+  SetTripList(ATripList);
   Add(TmRoutePreference.Create(dtDWordRoutePref, ARoutePref));
   Add(TmTransportationMode.Create(ATransportMode));
 end;
@@ -3322,8 +3326,8 @@ begin
   for LinkCnt := 0 to TmpItemCount -1 do
   begin
     ALink := Tlink.Create;
-    ALink.SetTripList(TripList);
-    
+    AddLink(ALink);
+
     // To get the count of items for this Link
     AStream.Read(ALinkValue, SizeOf(ALinkValue));
     ALinkValue.SwapCardinals;
@@ -3348,9 +3352,7 @@ begin
         BreakPoint;
         AStream.Seek(SavePos + ValueLen - SizeOf(Initiator), TSeekOrigin.soBeginning);
       end;
-
     end;
-    AddLink(ALink);
   end;
 end;
 
@@ -5955,7 +5957,9 @@ begin
 
         // AllLinks
         if (Assigned(AllLinks)) then
-          TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
+          TmAllLinks(AllLinks).AddLink(Tlink.Create(Self,
+                                       TmAllLinks(AllLinks).DefRoutePref,
+                                       TmAllLinks(AllLinks).DefTransportMode));
 
         for RoutePntCnt := 0 to RoutePointList.Count -1 do
         begin
@@ -6100,8 +6104,9 @@ begin
 
     // AllLinks
     if (Assigned(AllLinks)) then
-      TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
-
+      TmAllLinks(AllLinks).AddLink(Tlink.Create(Self,
+                                                TmAllLinks(AllLinks).DefRoutePref,
+                                                TmAllLinks(AllLinks).DefTransportMode));
     TotalTime := 0;
     TotalDist := 0;
     PrevUdbDir := nil;
@@ -6238,9 +6243,13 @@ begin
       if (Assigned(AllLinks)) then
       begin
         if (RoutePointList.Count > 0) then
-          TmAllLinks(AllLinks).AddLink(Tlink.Create(RoutePointList[0].FRoutePref, TmAllLinks(AllLinks).DefTransportMode))
+          TmAllLinks(AllLinks).AddLink(Tlink.Create(Self,
+                                                    RoutePointList[0].FRoutePref,
+                                                    TmAllLinks(AllLinks).DefTransportMode))
         else
-          TmAllLinks(AllLinks).AddLink(Tlink.Create(TmAllLinks(AllLinks).DefRoutePref, TmAllLinks(AllLinks).DefTransportMode));
+          TmAllLinks(AllLinks).AddLink(Tlink.Create(Self,
+                                                    TmAllLinks(AllLinks).DefRoutePref,
+                                                    TmAllLinks(AllLinks).DefTransportMode));
       end;
 
       AnUdbHandle.FValue.ShapingCount := RoutePointList.Count -2;

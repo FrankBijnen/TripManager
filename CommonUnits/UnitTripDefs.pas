@@ -515,7 +515,7 @@ const
     [tmAutoMotive,      tmMotorcycling],                    // Zumo 3x0
     [tmAutoMotive],                                         // Drive 51
     [tmAutoMotive],                                         // Drive 66
-    [tmAutoMotive,      tmPedestrian],                      // Nuvi 2595
+    [tmDriving,         tmAutoMotive,        tmPedestrian], // Nuvi 2595
     [tmAutoMotive],                                         // Nuvi 2599 57
     []                                                      // Unknown
   );
