@@ -98,6 +98,12 @@ type
     Highways: byte;
   end;
 
+  TTrip2Add = record
+    TripName: string;
+    CalculationMode: string;
+    TransportMode: string;
+  end;
+
   TLocation2Add = record
     RoutePoint: TRoutePoint;
     RoutePref: TRoutePreference;
@@ -106,6 +112,12 @@ type
     DepartureDate: TDateTime;
     Name: string;
     Address: string;
+  end;
+
+  TTrip2AddObject = class(TObject)
+    ATrip2Add: TTrip2Add;
+    ALocation2Add: TLocation2Add;
+    AProcessOptions: TObject;
   end;
 
   TTripVersion = packed record
@@ -166,6 +178,7 @@ const
   dtVersion         = 8;
   dtPosn            = 8;
   dtDWordRoutePref  = 8;
+  dtShapingCenter   = 8;
   dtHeader          = 10;
   dtUdbHandle       = 11;
   dtRaw             = 12;

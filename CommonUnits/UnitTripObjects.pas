@@ -28,9 +28,9 @@ type
     function SubLength: Cardinal; virtual;
     function GetPickList: string; virtual;
     function GetItemEditMode: TItemEditMode; virtual;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); virtual;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); virtual;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); virtual;
     procedure SetTripList(const ATripList: TTripList);
     class function GetKey: ShortString;
     property SelStart: Cardinal read FStartPos;
@@ -57,10 +57,11 @@ type
     function GetOffSetLenValue: integer;
     function GetOffSetDataType: integer;
     function GetOffSetValue: integer; virtual;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); virtual;
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
     destructor Destroy; override;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     property DisplayName: string read GetName;
     property AsString: string read GetValue write SetValue;
     property LenName: Cardinal read FLenName;
@@ -81,10 +82,11 @@ type
     function GetItemEditMode: TItemEditMode; override;
     procedure SetByte(AByte: byte); virtual;
     procedure SetValue(NewValue: string); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AName: ShortString; AValue: byte); reintroduce;
     destructor Destroy; override;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     property AsByte: byte read FValue write SetByte;
   end;
 
@@ -96,10 +98,11 @@ type
     function GetValue: string; override;
     function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AName: ShortString; AValue: Cardinal); reintroduce;
     destructor Destroy; override;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     property AsCardinal: Cardinal read FValue write FValue;
   end;
 
@@ -111,27 +114,29 @@ type
     function GetValue: string; override;
     function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AName: ShortString; AValue: Single); reintroduce;
     destructor Destroy; override;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     property AsSingle: single read FValue write FValue;
   end;
 
   // Type 07
   TBooleanItem = class(TBaseDataItem)
   private
-    Value:            boolean;
+    FValue:            boolean;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
     function GetPickList: string; override;
     function GetItemEditMode: TItemEditMode; override;
     procedure SetValue(NewValue: string); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AName: ShortString; AValue: boolean); reintroduce;
     destructor Destroy; override;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
-    property AsBoolean: boolean read Value write Value;
+    property AsBoolean: boolean read FValue write FValue;
   end;
 
   // Type 08 (Version)
@@ -148,10 +153,11 @@ type
     FValue:           TVersionValue;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetValue: string; override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(ATripVersion: TTripVersion); reintroduce;
     destructor Destroy; override;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
   end;
 
   // Type 08 (ScPosn)
@@ -189,9 +195,10 @@ type
     function GetMapCoords: string;
     function CoordsAsPosnValue(const LatLon: string): TPosnValue;
     procedure SetMapCoords(ACoords: string);
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(ALat, ALon: double; ASize: Cardinal); reintroduce;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     property Unknown1: Cardinal read FValue.Unknown1;
     property MapCoords: string read GetMapCoords write SetMapCoords;
@@ -215,10 +222,11 @@ type
     procedure ToUCS4RawBytes(AString: string);
     procedure ToWideRawBytes(AString: string);
     procedure ToRawBytes;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     // Create from String
     constructor Create(AName: ShortString; AValue: string); reintroduce; overload;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
   end;
 
@@ -239,9 +247,11 @@ type
   private
     FBytes:            TBytes;
     procedure WriteValue(AStream: TMemoryStream); override;
-  public
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     destructor Destroy; override;
+    procedure Clear(Size: integer);
   end;
 
 {*** General Trip info ***}
@@ -256,6 +266,8 @@ type
   end;
 
   TmDayNumber = class(TByteItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: byte = $ff);
   end;
@@ -266,6 +278,8 @@ type
   end;
 
   TmIsDisplayable = class(TBooleanItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: boolean = True);
   end;
@@ -281,44 +295,66 @@ type
   end;
 
   TmParentTripName = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: string);
   end;
 
   TmIsDeviceRoute = class(TBooleanItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: boolean = true);
   end;
 
   TmExploreUuid = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: string);
   end;
 
   TmVehicleProfileTruckType = class(TByteItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     constructor Create(AValue: byte);
   end;
 
   TmVehicleProfileGuid = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     constructor Create(AValue: string);
   end;
 
   TmVehicleProfileName = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     constructor Create(AValue: string);
   end;
 
   TmVehicleProfileHash = class(TCardinalItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     constructor Create(AValue: Cardinal);
   end;
 
   TmVehicleId = class(TCardinalItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     constructor Create(AValue: Cardinal);
   end;
 
   TmAvoidancesChangedTimeAtSave = class(TUnixDate)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
-    constructor Create(AValue: TDateTime = 0); overload;
-    constructor Create(AValue: cardinal); overload;
+    constructor Create(AValue: cardinal);
   end;
 
   TmOptimized = class(TBooleanItem)
@@ -339,7 +375,6 @@ type
   end;
 
   TmImported = class(TBooleanItem)
-  private
   public
     constructor Create(AValue: boolean = false);
   end;
@@ -358,9 +393,10 @@ type
     procedure SetValue(AValue: string); override;
     function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(ADataType: byte; AValue: TRoutePreference = rmFasterTime);
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     class function RoutePreference(AValue: string; AModel: TTripmodel): TRoutePreference;
     class function AdvLevel(AValue: string): TAdvlevel;
     class function ModelEditMode(AModel: TTripmodel): TItemEditMode;
@@ -373,6 +409,7 @@ type
     procedure SetValue(AValue: string); override;
     function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: TTransportMode = tmMotorcycling);
     class function TransPortMethod(AValue: string): TTransportMode;
@@ -388,6 +425,8 @@ type
   end;
 
   TmFileName = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: string);
   end;
@@ -398,6 +437,8 @@ type
   end;
 
   TmTripName = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: string);
   end;
@@ -409,6 +450,7 @@ type
     function GetItemEditMode: TItemEditMode; override;
     function GetPickList: string; override;
     function GetRoutePoint: TRoutePoint;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(ARoutePoint: TRoutePoint);
     class function RoutePoint(AValue: string): TRoutePoint;
@@ -421,6 +463,8 @@ type
   end;
 
   TmDuration = class(TCardinalItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: integer = -1);
   end;
@@ -444,6 +488,7 @@ type
   private
     function GetValue: string; override;
     function GetItemEditMode: TItemEditMode; override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: Cardinal = Trip_Dummy_Value);
   end;
@@ -451,11 +496,14 @@ type
   TmShapingCenter = class(TRawDataItem)
   private
     function GetValue: string; override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
   end;
 
   TmName = class(TStringItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: string);
   end;
@@ -466,6 +514,8 @@ type
   end;
 
   TmShaping = class(TBooleanItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create(AValue: boolean = false);
   end;
@@ -476,6 +526,7 @@ type
   private
     function GetIntToIdent(const Value: word): string; virtual;
     function GetCount: Cardinal;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     function GetValue: string; override;
     function GetRoutePrefByte(ViaPt: cardinal): byte;
@@ -519,23 +570,27 @@ type
   end;
 
 {*** XT3 ***}
-  TmSerializedRoutePrefRoundTripRoadType = class(TRawDataItem)
+  TBaseSerializedRoutePref = class(TRawDataItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  end;
+  TmSerializedRoutePrefRoundTripRoadType = class(TBaseSerializedRoutePref)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
-  TmSerializedRoutePrefRoundTripDirection = class(TRawDataItem)
+  TmSerializedRoutePrefRoundTripDirection = class(TBaseSerializedRoutePref)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
-  TmSerializedRoutePrefRoundTripMethod  = class(TRawDataItem)
+  TmSerializedRoutePrefRoundTripMethod  = class(TBaseSerializedRoutePref)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
-  TmSerializedRoutePrefRoundTripUnits = class(TRawDataItem)
+  TmSerializedRoutePrefRoundTripUnits = class(TBaseSerializedRoutePref)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
-  TmSerializedRoutePrefRoundTripLength = class(TRawDataItem)
+  TmSerializedRoutePrefRoundTripLength = class(TBaseSerializedRoutePref)
   public
     constructor Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0); override;
   end;
@@ -581,16 +636,20 @@ type
 
   TmTrackToRouteInfoMap = class(TRawDataItem)
   private
-  public
     FTrackHeader: TTrackHeader;
-    constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
     procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
-    procedure Clear;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
+    constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
     procedure InitFromGpxxRpt(RtePts: TObject);
     function GetCoords(Color: string = ''): string;
+    property TrackHeader: TTrackHeader read FTrackHeader;
   end;
 
   TmGreatRidesInfoMap = class(TRawDataItem)
+  private
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
+  public
     constructor Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream); reintroduce;
   end;
 
@@ -643,9 +702,10 @@ type
     FDefTransportMode: TTransportMode;
     procedure Calculate(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create; reintroduce;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure Clear;
     procedure AddLink(ALink: Tlink);
@@ -691,9 +751,10 @@ type
     procedure Calculate(AStream: TMemoryStream); override;
     procedure WriteValue(AStream: TMemoryStream); override;
     function GetViaPointCount: integer;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create; reintroduce;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure Clear;
     procedure AddLocation(ALocation: TLocation);
@@ -970,9 +1031,10 @@ type
     function ModelFromUnknown3Size(AModel: TTripModel; AnUdbHandle: TmUdbDataHndl; AStream: TStream): TTripModel;
     procedure WriteValue(AStream: TMemoryStream); override;
     procedure EndWrite(AStream: TMemoryStream); override;
+    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
+    procedure InitFromObject(ATrip2AddObject: TTrip2AddObject); override;
   public
     constructor Create; reintroduce;
-    procedure InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream); override;
     destructor Destroy; override;
     procedure AddUdbHandle(AnUdbHandle: TmUdbDataHndl);
     procedure CountAndResetUdbs(var RoutePointCount, UdbHandleCount: integer);
@@ -1112,6 +1174,15 @@ type
     property TripFileVersion: TTripVersion read FTripFileVersion write SetTripFileVersion;
     property RouteCnt: Cardinal read FRouteCnt write FRouteCnt;
   end;
+
+function CreateItemFromObject(ATripList: TTripList;
+                              AKeyName: ShortString;
+                              ATrip2AddObject: TTrip2AddObject = nil): TBaseDataItem;
+function CreateItemFromStream(ATripList: TTripList;
+                              AKeyName: ShortString;
+                              AValueLen: Cardinal;
+                              ADataType: byte;
+                              AStream: TStream): TBaseItem;
 
 implementation
 
@@ -1282,8 +1353,29 @@ begin
   result := AStream.Read(DataType, SizeOf(DataType));
 end;
 
+//Future use
+function CreateItemFromObject(ATripList: TTripList;
+                              AKeyName: ShortString;
+                              ATrip2AddObject: TTrip2AddObject = nil): TBaseDataItem;
+var
+  RegisteredClassName: string;
+  APersistentClass: TPersistentClass;
+begin
+  result := nil;
+  RegisteredClassName := Format('T%s', [AKeyName]);
+  APersistentClass := GetClass(RegisteredClassName);
+  if (Assigned(APersistentClass)) then
+  begin
+    result := TBaseDataItem(APersistentClass.Create);
+    result.FName := AKeyName;
+    result.FLenName := Length(AKeyName);
+    result.SetTripList(ATripList);
+    result.InitFromObject(ATrip2AddObject);
+  end
+end;
+
 // Create, and Initialize from stream, class by name
-function CreateBaseItemByName(ATripList: TTripList;
+function CreateItemFromStream(ATripList: TTripList;
                               AKeyName: ShortString;
                               AValueLen: Cardinal;
                               ADataType: byte;
@@ -1502,6 +1594,12 @@ begin
   result := GetOffSetDataType + SizeOf(DataType);
 end;
 
+procedure TBaseDataItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  FInitiator := #9;
+  FCalculated := false;
+end;
+
 {*** Byte ***}
 constructor TByteItem.Create(AName: ShortString; AValue: byte);
 begin
@@ -1518,6 +1616,14 @@ procedure TByteItem.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADat
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
   AStream.Read(FValue, SizeOf(FValue));
+end;
+
+procedure TByteItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtByte;
+  FLenValue := SizeOf(FValue);
+  FValue := 0;
 end;
 
 procedure TByteItem.WriteValue(AStream: TMemoryStream);
@@ -1564,6 +1670,14 @@ begin
   FValue := Swap32(FValue);
 end;
 
+procedure TCardinalItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtCardinal;
+  FLenValue := SizeOf(FValue);
+  FValue := 0;
+end;
+
 destructor TCardinalItem.Destroy;
 begin
   inherited Destroy;
@@ -1606,6 +1720,14 @@ begin
   FValue := Swap32(FValue);
 end;
 
+procedure TSingleItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtSingle;
+  FLenValue := SizeOf(FValue);
+  FValue := 0;
+end;
+
 destructor TSingleItem.Destroy;
 begin
   inherited Destroy;
@@ -1637,8 +1759,8 @@ end;
 {*** Boolean ***}
 constructor TBooleanItem.Create(AName: ShortString; AValue: boolean);
 begin
-  inherited Create(AName, SizeOf(Value), dtBoolean);
-  Value := AValue;
+  inherited Create(AName, SizeOf(FValue), dtBoolean);
+  FValue := AValue;
 end;
 
 destructor TBooleanItem.Destroy;
@@ -1648,13 +1770,21 @@ end;
 
 procedure TBooleanItem.WriteValue(AStream: TMemoryStream);
 begin
-  AStream.Write(Value, SizeOf(Value));
+  AStream.Write(FValue, SizeOf(FValue));
 end;
 
 procedure TBooleanItem.InitFromStream(AName: ShortString; ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 begin
   inherited InitFromStream(AName, ALenValue, ADataType, AStream);
-  AStream.Read(Value, SizeOf(Value));
+  AStream.Read(FValue, SizeOf(FValue));
+end;
+
+procedure TBooleanItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtBoolean;
+  FLenValue := SizeOf(FValue);
+  FValue := false;
 end;
 
 procedure TBooleanItem.SetValue(NewValue: string);
@@ -1662,14 +1792,14 @@ var
   BoolValue: integer;
 begin
   if not (IdentToInt(NewValue, BoolValue, BooleanMap)) then
-    Value := false
+    FValue := false
   else
-    Value := boolean(BoolValue);
+    FValue := boolean(BoolValue);
 end;
 
 function TBooleanItem.GetValue: string;
 begin
-  if not IntToIdent(Ord(Value), result, BooleanMap) then
+  if not IntToIdent(Ord(FValue), result, BooleanMap) then
      IntToIdent(Ord(false), result, BooleanMap);
 end;
 
@@ -1711,6 +1841,25 @@ begin
     AStream.Read(FValue.VersionB, SizeOf(FValue.VersionB))
   else
     AStream.Read(FValue.VersionC, SizeOf(FValue.VersionC));
+end;
+
+procedure TmVersionNumber.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtVersion;
+  FValue.Size := TripList.TripFileVersion.Size;
+  case FValue.Size of
+    1:
+      begin
+        FLenValue := Swap32(SizeOf(FValue.Size) + SizeOf(FValue.VersionB));
+        FValue.VersionB := TripList.TripFileVersion.Version;
+      end
+    else
+    begin
+      FLenValue := Swap32(FValue.Size);
+      FValue.VersionC := TripList.TripFileVersion.Version;
+    end;
+  end;
 end;
 
 destructor TmVersionNumber.Destroy;
@@ -1800,6 +1949,39 @@ begin
         AStream.Read(FValue.Lat, SizeOf(FValue.Lat));
         AStream.Read(FValue.Lon, SizeOf(FValue.Lon));
       end;
+  end;
+end;
+
+procedure TmScPosn.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtPosn;
+  FValue.ScnSize := ScPosnSize[TripList.TripModel];
+  case FValue.ScnSize of
+    PosnSmall:
+      begin
+        FValue.ScnSize    := Sizeof(FValue.Lat_8) + SizeOf(FValue.Lon_8);
+        FLenValue         :=  SizeOf(FValue.ScnSize) + FValue.ScnSize;
+        FValue.Lat_8      := (CoordAsInt(ATrip2AddObject.ALocation2Add.Lat));
+        FValue.Lon_8      := (CoordAsInt(ATrip2AddObject.ALocation2Add.Lon));
+      end;
+    PosnLarge:
+      begin
+        FValue.ScnSize    := SizeOf(FValue.Unknown1_16) + Sizeof(FValue.Lat_16) + SizeOf(FValue.Lon_16);
+        FLenValue         :=  SizeOf(FValue.ScnSize) + FValue.ScnSize;
+        FValue.Unknown1_16[0] := $00000000;
+        FValue.Unknown1_16[1] := $00000000;
+        FValue.Lat_16     := (CoordAsInt(ATrip2AddObject.ALocation2Add.Lat));
+        FValue.Lon_16     := (CoordAsInt(ATrip2AddObject.ALocation2Add.Lon));
+      end;
+    else
+    begin
+      FValue.ScnSize      := SizeOf(FValue.Unknown1) + Sizeof(FValue.Lat) + SizeOf(FValue.Lon);
+      FLenValue           :=  SizeOf(FValue.ScnSize) + FValue.ScnSize;
+      FValue.Unknown1     := $00000000;
+      FValue.Lat          := (CoordAsInt(ATrip2AddObject.ALocation2Add.Lat));
+      FValue.Lon          := (CoordAsInt(ATrip2AddObject.ALocation2Add.Lon));
+    end;
   end;
 end;
 
@@ -2022,6 +2204,15 @@ begin
   FRawBytesValid := true;
 end;
 
+procedure TStringItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtString;
+  FLenValue := 0;
+  SetLength(FValue, FLenValue);
+  FRawBytesValid := false;  // Force conversion to raw bytes.
+end;
+
 destructor TStringItem.Destroy;
 begin
   inherited Destroy;
@@ -2095,10 +2286,25 @@ begin
   AStream.ReadBuffer(FBytes, FLenValue);
 end;
 
+procedure TRawDataItem.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtRaw;
+  FLenValue := 0;
+  SetLength(FBytes, FLenValue);
+end;
+
 destructor TRawDataItem.Destroy;
 begin
   SetLength(FBytes, 0);
   inherited Destroy;
+end;
+
+procedure TRawDataItem.Clear(Size: integer);
+begin
+  SetLength(FBytes, 0); // Force zeroes
+  FLenValue := Size;
+  SetLength(FBytes, FLenValue);
 end;
 
 procedure TRawDataItem.WriteValue(AStream: TMemoryStream);
@@ -2122,6 +2328,12 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+procedure TmDayNumber.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsByte := $ff;
+end;
+
 constructor TmTripDate.Create(AValue: integer = -1);
 begin
   inherited Create(GetKey, AValue);
@@ -2130,6 +2342,12 @@ end;
 constructor TmIsDisplayable.Create(AValue: boolean = true);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmIsDisplayable.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsBoolean := true;
 end;
 
 constructor TmAvoidancesChanged.Create(AValue: boolean = false);
@@ -2147,9 +2365,21 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+procedure TmParentTripName.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsString := ATrip2AddObject.ATrip2Add.TripName;
+end;
+
 constructor TmIsDeviceRoute.Create(AValue: boolean = true);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmIsDeviceRoute.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsBoolean := true;
 end;
 
 constructor TmExploreUuid.Create(AValue: string);
@@ -2157,9 +2387,24 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+procedure TmExploreUuid.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+var
+  Uuid: TGuid;
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  CheckHRGuid(CreateGUID(Uuid));
+  AsString := ReplaceAll(LowerCase(GuidToString(Uuid)), ['{','}'], ['',''], [rfReplaceAll]);
+end;
+
 constructor TmVehicleProfileTruckType.Create(AValue: byte);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmVehicleProfileTruckType.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsByte := TProcessOptions(ATrip2AddObject.AProcessOptions).VehicleProfileTruckType;
 end;
 
 constructor TmVehicleProfileGuid.Create(AValue: string);
@@ -2167,9 +2412,21 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+procedure TmVehicleProfileGuid.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsString := TProcessOptions(ATrip2AddObject.AProcessOptions).VehicleProfileGuid;
+end;
+
 constructor TmVehicleProfileName.Create(AValue: string);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmVehicleProfileName.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsString := TProcessOptions(ATrip2AddObject.AProcessOptions).VehicleProfileName;
 end;
 
 constructor TmVehicleProfileHash.Create(AValue: Cardinal);
@@ -2177,19 +2434,32 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+procedure TmVehicleProfileHash.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsCardinal := TProcessOptions(ATrip2AddObject.AProcessOptions).VehicleProfileHash;
+end;
+
 constructor TmVehicleId.Create(AValue: Cardinal);
 begin
   inherited Create(GetKey, AValue);
 end;
 
-constructor TmAvoidancesChangedTimeAtSave.Create(AValue: TDateTime = 0);
+procedure TmVehicleId.InitFromObject(ATrip2AddObject: TTrip2AddObject);
 begin
-  inherited Create(GetKey, AValue);
+  inherited InitFromObject(ATrip2AddObject);
+  AsCardinal := TProcessOptions(ATrip2AddObject.AProcessOptions).VehicleId;
 end;
 
 constructor TmAvoidancesChangedTimeAtSave.Create(AValue: cardinal);
 begin
   inherited Create(GetKey, TUnixDateConv.CardinalAsDateTime(AValue));
+end;
+
+procedure TmAvoidancesChangedTimeAtSave.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsCardinal := TProcessOptions(ATrip2AddObject.AProcessOptions).AvoidancesChangedTimeAtSave;
 end;
 
 constructor TmOptimized.Create(AValue: boolean = false);
@@ -2252,6 +2522,13 @@ begin
     FDWordRoutePref.SwapCardinals;
     FValue := FDWordRoutePref.RoutePref;
   end;
+end;
+
+procedure TmRoutePreference.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := RoutePrefType[TripList.TripModel];
+  AsByte := Ord(TmRoutePreference.RoutePreference(ATrip2AddObject.ATrip2Add.CalculationMode, TripList.TripModel));
 end;
 
 class function TmRoutePreference.RoutePreference(AValue: string; AModel: TTripmodel): TRoutePreference;
@@ -2361,7 +2638,7 @@ end;
 
 procedure TmTransportationMode.SetValue(AValue: string);
 begin
-  FValue := Ord(TmTransportationMode.TransPortMethod(AValue));
+  AsByte := Ord(TmTransportationMode.TransPortMethod(AValue));
 end;
 
 class function TmTransportationMode.ModelEditMode(AModel: TTripmodel): TItemEditMode;
@@ -2401,6 +2678,12 @@ begin
     result := TmTransportationMode.ModelPickList(Triplist.TripModel);
 end;
 
+procedure TmTransportationMode.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsByte := Ord(TmTransportationMode.TransPortMethod(ATrip2AddObject.ATrip2Add.TransportMode));
+end;
+
 constructor TmTotalTripDistance.Create(AValue: single = 0);
 begin
   inherited Create(GetKey, AValue);
@@ -2417,6 +2700,12 @@ begin
   inherited Create(GetKey, AValue);
 end;
 
+procedure TmFileName.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsString := Format(Trip_TripFileName, [ATrip2AddObject.ATrip2Add.TripName]);
+end;
+
 constructor TmPartOfSplitRoute.Create(AValue: boolean = false);
 begin
   inherited Create(GetKey, AValue);
@@ -2425,6 +2714,12 @@ end;
 constructor TmTripName.Create(AValue: string);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmTripName.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsString := ATrip2AddObject.ATrip2Add.TripName;
 end;
 
 {*** Location Info classes ***}
@@ -2474,6 +2769,12 @@ begin
   result := TRoutePoint(FValue);
 end;
 
+procedure TmAttr.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsCardinal := Ord(ATrip2AddObject.ALocation2Add.RoutePoint);
+end;
+
 { TmIsDFSPoint }
 constructor TmIsDFSPoint.Create(AValue: boolean = false);
 begin
@@ -2483,6 +2784,12 @@ end;
 constructor TmDuration.Create(AValue: integer = -1);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmDuration.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsCardinal := Cardinal(-1);
 end;
 
 { TmArrival }
@@ -2521,6 +2828,12 @@ begin
   result := TItemEditMode.emNone;
 end;
 
+procedure TmShapingRadius.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsCardinal := Trip_Dummy_Value;
+end;
+
 { TmShapingCenter }
 constructor TmShapingCenter.Create(ALenValue: Cardinal; ADataType: byte; AStream: TStream);
 begin
@@ -2548,10 +2861,33 @@ begin
   end;
 end;
 
+procedure TmShapingCenter.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+var
+  TmpStream : TMemoryStream;
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  TmpStream := TMemoryStream.Create;
+  FDataType := dtShapingCenter;
+  try
+    PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
+    FLenValue := TmpStream.Size;
+    SetLength(FBytes, FLenValue);
+    TmpStream.ReadBuffer(FBytes, FLenValue);
+  finally
+    TmpStream.Free;
+  end;
+end;
+
 { TmName }
 constructor TmName.Create(AValue: string);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmName.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsString := ATrip2AddObject.ALocation2Add.Name;
 end;
 
 { TmPhoneNumber, only for Zumo3X0}
@@ -2564,6 +2900,12 @@ end;
 constructor TmShaping.Create(AValue: boolean = false);
 begin
   inherited Create(GetKey, AValue);
+end;
+
+procedure TmShaping.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  AsBoolean := (ATrip2AddObject.ALocation2Add.RoutePoint <> TRoutePoint.rpVia);
 end;
 
 { TBaseRoutePreferences }
@@ -2583,6 +2925,12 @@ begin
   finally
     Stream.Free;
   end;
+end;
+
+procedure TBaseRoutePreferences.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtList;
 end;
 
 function TBaseRoutePreferences.GetValue: string;
@@ -2665,7 +3013,7 @@ end;
 
 constructor TmRoutePreferences.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 function TmRoutePreferences.GetIntToIdent(const Value: word): string;
@@ -2693,7 +3041,7 @@ end;
 
 constructor TmRoutePreferencesAdventurousMode.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 function TmRoutePreferencesAdventurousMode.GetIntToIdent(const Value: word): string;
@@ -2716,43 +3064,49 @@ end;
 
 constructor TmRoutePreferencesAdventurousHillsAndCurves.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 constructor TmRoutePreferencesAdventurousPopularPaths.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 constructor TmRoutePreferencesAdventurousScenicRoads.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 {*** XT3 ***}
+procedure TBaseSerializedRoutePref.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtList;
+end;
+
 constructor TmSerializedRoutePrefRoundTripRoadType.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 constructor TmSerializedRoutePrefRoundTripDirection.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 constructor TmSerializedRoutePrefRoundTripMethod.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 constructor TmSerializedRoutePrefRoundTripUnits.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 constructor TmSerializedRoutePrefRoundTripLength.Create(AName: ShortString = ''; ALenValue: Cardinal = 0; ADataType: byte = 0);
 begin
-  inherited Create(GetKey, 0 , $80);
+  inherited Create(GetKey, 0, dtList);
 end;
 
 (*** TripTrack ***)
@@ -2799,6 +3153,12 @@ begin
     Move(FBytes[0], FTrackHeader, SizeOf(FTrackHeader));
 end;
 
+procedure TmTrackToRouteInfoMap.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  Clear(SizeOf(Cardinal));
+end;
+
 function TmTrackToRouteInfoMap.GetCoords(Color: string = ''): string;
 var
   Offset: integer;
@@ -2825,13 +3185,6 @@ begin
   end;
   if (Color <> '') then
     result := result + #10 + Format('  CreateTrack(''%s'', ''%s'');', [Name, Color]);
-end;
-
-procedure TmTrackToRouteInfoMap.Clear;
-begin
-  SetLength(FBytes, 0); // Force zeroes
-  FLenValue := SizeOf(Cardinal);
-  SetLength(FBytes, FLenValue);
 end;
 
 procedure TmTrackToRouteInfoMap.InitFromGpxxRpt(RtePts: TObject);
@@ -2914,6 +3267,12 @@ constructor TmGreatRidesInfoMap.Create(ALenValue: Cardinal; ADataType: byte; ASt
 begin
   inherited Create;
   InitFromStream(GetKey, ALenValue, ADataType, AStream);
+end;
+
+procedure TmGreatRidesInfoMap.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  Clear(SizeOf(Cardinal));
 end;
 
 {*** CommonHeader ***}
@@ -3065,7 +3424,7 @@ begin
       if (BytesRead = 0) then
         break;
       SavePos := AStream.Position;
-      ABaseItem := CreateBaseItemByName(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      ABaseItem := CreateItemFromStream(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
       ALink.Add(ABaseItem);
       ABaseItem.SetTripList(TripList);
 
@@ -3079,6 +3438,17 @@ begin
     end;
     AddLink(ALink);
   end;
+end;
+
+procedure TmAllLinks.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtList;
+  FLenValue := SizeOf(FItemCount);
+  FItemList := TItemList.Create;
+  FItemCount := 0;
+  FDefRoutePref := TRoutePreference.rmFasterTime;
+  FDefTransportMode := TTransportMode.tmAutoMotive;
 end;
 
 destructor TmAllLinks.Destroy;
@@ -3327,7 +3697,7 @@ begin
       if (BytesRead = 0) then
         break;
       SavePos := AStream.Position;
-      ABaseItem := CreateBaseItemByName(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+      ABaseItem := CreateItemFromStream(TripList, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
       Add(ABaseItem);
       ABaseItem.SetTripList(TripList);
 
@@ -3340,6 +3710,15 @@ begin
 
     end;
   end;
+end;
+
+procedure TmLocations.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtList;
+  FLenValue := SizeOf(FItemCount);
+  FItemList := TItemList.Create;
+  FItemCount := 0;
 end;
 
 destructor TmLocations.Destroy;
@@ -4364,6 +4743,14 @@ begin
   end;
 end;
 
+procedure TmAllRoutes.InitFromObject(ATrip2AddObject: TTrip2AddObject);
+begin
+  inherited InitFromObject(ATrip2AddObject);
+  FDataType := dtList;
+  FValue := Default(TmAllRoutesValue);
+  FUdBList := TUdbHandleList.Create;
+end;
+
 destructor TmAllRoutes.Destroy;
 var
   AnItem: TmUdbDataHndl;
@@ -4770,7 +5157,6 @@ begin
   ExportTripInfoToCSV(FTripInfoList, AFile);
 end;
 
-// Gets an item scanning the stream. Future use.
 function TTripList.ScanStream(AStream: TStream; AKeyName: ShortString): TBaseItem;
 var
   AHeader: TGenericHeaderValue;
@@ -4806,7 +5192,7 @@ begin
 
       if (KeyName = AKeyName) then
       begin
-        result := CreateBaseItemByName(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+        result := CreateItemFromStream(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
         exit;
       end;
 
@@ -4878,7 +5264,7 @@ begin
     if (BytesRead = 0) then
       break;
     SavePos := AStream.Position;
-    ABaseItem := CreateBaseItemByName(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
+    ABaseItem := CreateItemFromStream(Self, KeyName, ValueLen - SizeOf(Initiator), DataType, AStream);
     Add(ABaseItem);
     ABaseItem.SetTripList(Self);
 
@@ -5369,7 +5755,6 @@ begin
   end;
 end;
 
-
 procedure TTripList.AddLocation_XT(const Locations: TmLocations;
                                    const Location2Add: TLocation2Add);
 begin
@@ -5399,7 +5784,7 @@ begin
     Locations.AddLocation(TLocation.Create(Location2Add.RoutePref, Location2Add.AdvLevel));
 
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
+    Locations.Add(TmShapingCenter.Create(TmpStream.Size, dtShapingCenter, TmpStream));
     Locations.Add(TmAttr.Create(Location2Add.RoutePoint));
     Locations.Add(TmIsDFSPoint.Create);
     Locations.Add(TmDuration.Create);
@@ -5427,7 +5812,7 @@ begin
     Locations.Add(TmIsTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
+    Locations.Add(TmShapingCenter.Create(TmpStream.Size, dtShapingCenter, TmpStream));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
     Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
@@ -5451,7 +5836,7 @@ begin
     Locations.Add(TmIsTravelapseDestination.Create);
     Locations.Add(TmShapingRadius.Create);
     PrepStream(TmpStream, [Swap32($00000008), Swap32($00000080), Swap32($00000080)]);
-    Locations.Add(TmShapingCenter.Create(TmpStream.Size, $08, TmpStream));
+    Locations.Add(TmShapingCenter.Create(TmpStream.Size, dtShapingCenter, TmpStream));
     Locations.Add(TmDuration.Create);
     Locations.Add(TmArrival.Create(Location2Add.DepartureDate));
     Locations.Add(TmScPosn.Create(Location2Add.Lat, Location2Add.Lon, ScPosnSize[TripModel]));
@@ -5679,7 +6064,7 @@ begin
 
     // Recreate RoutePreferences
     if (GetItem(TmTrackToRouteInfoMap.GetKey) <> nil) then
-      TmTrackToRouteInfoMap(GetItem(TmTrackToRouteInfoMap.GetKey)).Clear;
+      TmTrackToRouteInfoMap(GetItem(TmTrackToRouteInfoMap.GetKey)).Clear(SizeOf(Cardinal));
     SetSegmentRoutePrefs(TmLocations(Locations), ProcessOptions);
   finally
     RoutePointList.Free;
@@ -6622,6 +7007,7 @@ end;
 procedure TTripList.CreateTemplate_nuvi2599_57(const TripName, CalculationMode, TransportMode: string);
 begin
   SetHeader(THeader.Create);
+
   Add(TmAllRoutes.Create);
   Add(TmAvoidancesChanged.Create);
   Add(TmFileName.Create(Format(Trip_TripFileName, [TripName])));

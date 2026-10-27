@@ -3304,7 +3304,7 @@ begin
     OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s%s', [App_Prefix, Id, GetTracksExt]));
     TrackToRouteInfoMap := CurrentTrip.GetItem(TmTrackToRouteInfoMap.GetKey) as TmTrackToRouteInfoMap;
     if (Assigned(TrackToRouteInfoMap)) and
-       (TrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt > 0)  then
+       (TrackToRouteInfoMap.TrackHeader.TrackPoints.TrkPntCnt > 0)  then
     begin
       OsmTrack.Text := TrackToRouteInfoMap.GetCoords(ProcessOptions.TripTrackColor);
       OsmTrack.SaveToFile(GetOSMTemp + Format('\%s_%s_track%s', [App_Prefix, Id, GetTracksExt]));
@@ -3849,22 +3849,22 @@ var
       VlTripInfo.Strings.AddPair('*** mTrackToRouteInfoMap', DupeString('-', DupeCount),
                                  TGridSelItem.Create(ATrackToRouteInfoMap));
 
-      if (ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt > 0) then
+      if (ATrackToRouteInfoMap.TrackHeader.TrackPoints.TrkPntCnt > 0) then
       begin
-        Offset := ATrackToRouteInfoMap.OffsetValue + OffsetInRecord(ATrackToRouteInfoMap.FTrackHeader,
-                                                                    ATrackToRouteInfoMap.FTrackHeader.TrackPoints.ValueLen);
-        VlTripInfo.Strings.AddPair('Track size', Format('%d', [Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.ValueLen)]),
+        Offset := ATrackToRouteInfoMap.OffsetValue + OffsetInRecord(ATrackToRouteInfoMap.TrackHeader,
+                                                                    ATrackToRouteInfoMap.TrackHeader.TrackPoints.ValueLen);
+        VlTripInfo.Strings.AddPair('Track size', Format('%d', [Swap32(ATrackToRouteInfoMap.TrackHeader.TrackPoints.ValueLen)]),
                                    TGridSelItem.Create(ATrackToRouteInfoMap,
-                                                       SizeOf(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.ValueLen), Offset));
+                                                       SizeOf(ATrackToRouteInfoMap.TrackHeader.TrackPoints.ValueLen), Offset));
 
-        Offset := ATrackToRouteInfoMap.OffsetValue + OffsetInRecord(ATrackToRouteInfoMap.FTrackHeader,
-                                                                    ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt);
-        VlTripInfo.Strings.AddPair('Track points', Format('%d', [Swap32(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt)]),
+        Offset := ATrackToRouteInfoMap.OffsetValue + OffsetInRecord(ATrackToRouteInfoMap.TrackHeader,
+                                                                    ATrackToRouteInfoMap.TrackHeader.TrackPoints.TrkPntCnt);
+        VlTripInfo.Strings.AddPair('Track points', Format('%d', [Swap32(ATrackToRouteInfoMap.TrackHeader.TrackPoints.TrkPntCnt)]),
                                    TGridSelItem.Create(ATrackToRouteInfoMap,
-                                                       SizeOf(ATrackToRouteInfoMap.FTrackHeader.TrackPoints.TrkPntCnt), Offset));
+                                                       SizeOf(ATrackToRouteInfoMap.TrackHeader.TrackPoints.TrkPntCnt), Offset));
 
         CoordsList.Text := ATrackToRouteInfoMap.GetCoords;
-        Offset := SizeOf(ATrackToRouteInfoMap.FTrackHeader);
+        Offset := SizeOf(ATrackToRouteInfoMap.TrackHeader);
         for ACoord in CoordsList do
         begin
           VlTripInfo.Strings.AddPair('trkpt', ACoord,

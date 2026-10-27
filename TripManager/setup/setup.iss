@@ -18,6 +18,7 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={#DefaultDirName}
 DisableDirPage=no
+LicenseFile=License.rtf
 DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#ExeName}
 OutputDir=.
