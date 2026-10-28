@@ -181,7 +181,8 @@ begin
   RegionalFormatSettings := TFormatSettings.Create(GetThreadLocale);
   FloatFormatSettings.ThousandSeparator := ',';
   FloatFormatSettings.DecimalSeparator := '.';
-  SetPickLists(nil);
+  FRoutePickList := '';
+  FTransportPickList := '';
 end;
 
 procedure TDmRoutePoints.DoRoutePointUpdated;
@@ -537,15 +538,13 @@ end;
 
 procedure TDmRoutePoints.SetPickLists(const ATripList: TObject);
 begin
-  with TmRoutePreference.Create(dtByte, TRoutePreference.rmFasterTime) do
+  with TmRoutePreference.Create(TTriplist(ATripList), dtByte, TRoutePreference.rmFasterTime) do
   begin
-    SetTripList(TTripList(ATripList));
     FRoutePickList := PickList;
     Free;
   end;
-  with TmTransportationMode.Create(TTransportMode.tmMotorcycling) do
+  with TmTransportationMode.Create(TTriplist(ATripList), TTransportMode.tmMotorcycling) do
   begin
-    SetTripList(TTripList(ATripList));
     FTransportPickList := PickList;
     Free;
   end;
