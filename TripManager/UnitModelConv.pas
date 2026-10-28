@@ -498,46 +498,42 @@ class function TModelConv.GetModelFromGarminDevice(const GarminDevice: TGarminDe
 var
   AGarminModel: TGarminModel;
   DevIndex: integer;
+  MatchPartNr, ContainsModelDesc: TGarminModel;
 begin
   result := TGarminModel.Unknown;
+  MatchPartNr := TGarminModel.Unknown;
+  ContainsModelDesc := TGarminModel.Unknown;
   for DevIndex := 0 to KnownDevices.Count -1 do
   begin
     AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
+    if (AGarminModel = TGarminModel.Unknown) then
+      continue;
 
-    // Check possibly overriden Device Name
+    // Overriden matches?
     if (SameText(GarminDevice.ModelDescription, KnownDevices[DevIndex])) then
       exit(AGarminModel);
 
-    // Check for known PartNumbers and Device Name
-    if (Model_Tab[AGarminModel].PartNumber = '') then
-      continue;
-
-    if (SameText(GarminDevice.PartNumber, Model_Tab[AGarminModel].PartNumber))  and
+    // Part Number + Model description matches?
+    if (Model_Tab[AGarminModel].PartNumber <> '') and
+       (SameText(GarminDevice.PartNumber, Model_Tab[AGarminModel].PartNumber))  and
        (SameText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
       exit(AGarminModel);
-  end;
 
-  // Check for PartNumber only.
-  for DevIndex := 0 to KnownDevices.Count -1 do
-  begin
-    AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
-
-    // Check for known PartNumbers
     if (Model_Tab[AGarminModel].PartNumber <> '') and
        (SameText(GarminDevice.PartNumber, Model_Tab[AGarminModel].PartNumber)) then
-      exit(AGarminModel);
-  end;
-
-  // Check for known Device Name. If the PartNumber did not match.
-  // EG: Garmin Generic, Edge, ForeRunner etc.
-  // High to Low, because of ContainsText. Dont Identify the XT3, XT2 as XT
-  for DevIndex := KnownDevices.Count -1 downto 0 do
-  begin
-    AGarminModel := TGarminModel(KnownDevices.Objects[DevIndex]);
+      MatchPartNr := AGarminModel;
 
     if (ContainsText(GarminDevice.ModelDescription, Model_Tab[AGarminModel].DeviceName)) then
-      exit(AGarminModel);
+      ContainsModelDesc := AGarminModel;
   end;
+
+  // Return matching Part number
+  if (MatchPartNr <> TGarminModel.Unknown) then
+    exit(MatchPartNr);
+
+  // Return containing Model description
+  if (ContainsModelDesc <> TGarminModel.Unknown) then
+    exit(ContainsModelDesc);
 
   // Return Unknown
 end;

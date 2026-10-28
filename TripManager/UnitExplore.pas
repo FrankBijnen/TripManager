@@ -427,8 +427,9 @@ var
   JSONPartNbr: TJSONValue;
   TmpGarminDevice: TGarminDevice;
 begin
-  // Init with currently selected model
-  result := TModelConv.Display2Garmin(TModelConv.GetCurrentDevice);
+  result := TGarminModel.Unknown;
+
+  // Lookup model from part number
   MetaData := CdsExploreDb.FindField('Metadata');
   if (MetaData <> nil) then
   begin
@@ -448,6 +449,9 @@ begin
       TmpGarminDevice.Free;
     end;
   end;
+  // Use currently selected model as fallback
+  if (result = TGarminModel.Unknown) then
+    result := TModelConv.Display2Garmin(TModelConv.GetCurrentDevice);
 end;
 
 procedure ShowTrkWarning(var ShowWarning: boolean);

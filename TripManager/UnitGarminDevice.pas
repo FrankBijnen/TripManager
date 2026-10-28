@@ -827,7 +827,7 @@ end;
 initialization
   System.Classes.RegisterClasses([TMTP_Data, TGarminMTP_Device, TGarminDrv_Device]);
   DefaultGarminDevice := TGarminDevice.Create;
-  DefaultGarminDevice.init;
+  DefaultGarminDevice.Init;
 
 finalization
   DefaultGarminDevice.Free;
