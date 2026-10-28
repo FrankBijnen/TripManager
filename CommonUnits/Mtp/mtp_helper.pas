@@ -344,7 +344,6 @@ const
   PORTABLE_DEVICE_DELETE_WITH_RECURSION  = 1;
   E_WPD_DEVICE_ALREADY_OPENED            = HRESULT($802A0001);
 
-
 function MTP_FirstStorageIDs(PortableDev: IPortableDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;
 function MTP_GetFirstStorageID(PortableDev: IPortableDevice): WideString;
 function MTP_ReadFilesFromDevice(PortableDev: IPortableDevice;
@@ -386,6 +385,8 @@ uses
   System.SysUtils, System.Variants, System.Masks, System.Win.ComObj,
   Winapi.Windows, Winapi.ActiveX,
   UnitStringUtils;
+
+{$i IPortableDeviceDataStream.inc}
 
 { Helper methods }
 
@@ -891,7 +892,8 @@ begin
 
   // Determine how many WPD devices are connected
   IDevCount := 0;
-  if PMan.GetDevices(PWideChar(nil^), IDevCount) <> S_OK then
+  PDevs := nil;
+  if PMan.GetDevices(PDevs[0], IDevCount) <> S_OK then
     exit;
 
   if (IDevCount = 0) then
@@ -934,7 +936,11 @@ begin
     ABase_Device.Serial        := GetSerial(ABase_Device.Device);
     ABase_Device.PortableDev   := nil;
     DeviceList.Add(ABase_Device);
+
+    // Free memory allocated by PMan.GetDevices
+    CoTaskMemFree(PDevs[Index]);
   end;
+
 end;
 
 function MTP_FirstStorageIDs(PortableDev: IPortableDevice; DeviceRoot: string = WPD_DEVICE_OBJECT_ID): IEnumPortableDeviceObjectIDs;

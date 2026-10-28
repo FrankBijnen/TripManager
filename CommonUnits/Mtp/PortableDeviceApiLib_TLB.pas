@@ -11,11 +11,11 @@ unit PortableDeviceApiLib_TLB;
 // manual modifications will be lost.                                         
 // ************************************************************************ //
 
-// $Rev: 98336 $
-// File generated on 6/2/2023 10:50:01 PM from Type Library described below.
+// $Rev: 122765 $
+// File generated on 28-10-2026 15:11:24 from Type Library described below.
 
 // ************************************************************************  //
-// Type Lib: C:\Windows\SysWOW64\PortableDeviceApi.dll (1)
+// Type Lib: C:\Windows\syswow64\PortableDeviceApi.dll (1)
 // LIBID: {1F001332-1A57-4934-BE31-AFFC99F4EE0A}
 // LCID: 0
 // Helpfile: 
@@ -26,6 +26,15 @@ unit PortableDeviceApiLib_TLB;
 // Errors:
 //   Hint: Symbol 'type' renamed to 'type_'
 //   Hint: Parameter 'Property' of IPortableDeviceServiceCapabilities.GetFormatPropertyAttributes changed to 'Property_'
+//   Error creating palette bitmap of (TPortableDevice) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+//   Error creating palette bitmap of (TPortableDeviceManager) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+//   Error creating palette bitmap of (TPortableDeviceService) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+//   Error creating palette bitmap of (TPortableDeviceDispatchFactory) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+//   Error creating palette bitmap of (TPortableDeviceFTM) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+//   Error creating palette bitmap of (TPortableDeviceServiceFTM) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+//   Error creating palette bitmap of (TPortableDeviceWebControl) : Server C:\Windows\SysWOW64\PortableDeviceApi.dll contains no icons
+// Cmdline:
+//   tlibimp  -P C:\Windows\syswow64\PortableDeviceApi.dll
 // ************************************************************************ //
 {$TYPEDADDRESS OFF} // Unit must be compiled without type-checked pointers. 
 {$WARN SYMBOL_PLATFORM OFF}
@@ -35,15 +44,14 @@ unit PortableDeviceApiLib_TLB;
 
 interface
 
-uses Winapi.Windows, System.Classes, System.Variants, System.Win.StdVCL, Vcl.Graphics, Vcl.OleServer,
-  Winapi.ActiveX;
+uses Winapi.Windows, System.Classes, System.Variants, System.Win.StdVCL, Vcl.Graphics, Vcl.OleServer, Winapi.ActiveX;
   
 
 // *********************************************************************//
 // GUIDS declared in the TypeLibrary. Following prefixes are used:        
 //   Type Libraries     : LIBID_xxxx                                      
 //   CoClasses          : CLASS_xxxx                                      
-//   DISPInterfaces     : DIID_xxxx
+//   DISPInterfaces     : DIID_xxxx                                       
 //   Non-DISP interfaces: IID_xxxx                                        
 // *********************************************************************//
 const
@@ -558,15 +566,13 @@ type
     pElems: ^PWideChar;
   end;
 
+
   tagCAPROPVARIANT = record
     cElems: LongWord;
     pElems: PUserType2;
   end;
 
 {$ALIGN 8}
-
-{$IFNDEF USE_WINAPI_PROPVARIANT}
-
   __MIDL___MIDL_itf_PortableDeviceApi_0001_0000_0001 = record
     case Integer of
       0: (cVal: Shortint);
@@ -582,7 +588,7 @@ type
       10: (fltVal: Single);
       11: (dblVal: Double);
       12: (boolVal: WordBool);
-      13: (bool: WordBool);
+      13: (__OBSOLETE__VARIANT_BOOL: WordBool);
       14: (scode: SCODE);
       15: (cyVal: Currency);
       16: (date: TDateTime);
@@ -643,11 +649,8 @@ type
       71: (pparray: ^wirePSAFEARRAY);
       72: (pvarVal: PUserType2);
   end;
-{$ENDIF}
 
-{$IFDEF USE_WINAPI_PROPVARIANT}
-  tag_inner_PROPVARIANT = TPropVariant;
-{$ELSE}
+
   tag_inner_PROPVARIANT = record
     vt: Word;
     wReserved1: Byte;
@@ -655,7 +658,7 @@ type
     wReserved3: LongWord;
     __MIDL____MIDL_itf_PortableDeviceApi_0001_00000001: __MIDL___MIDL_itf_PortableDeviceApi_0001_0000_0001;
   end;
-{$ENDIF}
+
 
   __MIDL_IOleAutomationTypes_0004 = record
     case Integer of
@@ -801,7 +804,6 @@ type
 // Flags:     (0)
 // GUID:      {6848F6F2-3155-4F86-B6F5-263EEEAB3143}
 // *********************************************************************//
-
   IPortableDeviceValues = interface(IUnknown)
     ['{6848F6F2-3155-4F86-B6F5-263EEEAB3143}']
     function GetCount(var pcelt: LongWord): HResult; stdcall;
@@ -832,21 +834,21 @@ type
     function GetGuidValue(var key: _tagpropertykey; out pValue: TGUID): HResult; stdcall;
     function SetBufferValue(var key: _tagpropertykey; var pValue: Byte; cbValue: LongWord): HResult; stdcall;
     function GetBufferValue(var key: _tagpropertykey; out ppValue: PByte1; out pcbValue: LongWord): HResult; stdcall;
-    function SetIPortableDeviceValuesValue(var key: _tagpropertykey;
+    function SetIPortableDeviceValuesValue(var key: _tagpropertykey; 
                                            const pValue: IPortableDeviceValues): HResult; stdcall;
-    function GetIPortableDeviceValuesValue(var key: _tagpropertykey;
+    function GetIPortableDeviceValuesValue(var key: _tagpropertykey; 
                                            out ppValue: IPortableDeviceValues): HResult; stdcall;
-    function SetIPortableDevicePropVariantCollectionValue(var key: _tagpropertykey;
+    function SetIPortableDevicePropVariantCollectionValue(var key: _tagpropertykey; 
                                                           const pValue: IPortableDevicePropVariantCollection): HResult; stdcall;
-    function GetIPortableDevicePropVariantCollectionValue(var key: _tagpropertykey;
+    function GetIPortableDevicePropVariantCollectionValue(var key: _tagpropertykey; 
                                                           out ppValue: IPortableDevicePropVariantCollection): HResult; stdcall;
-    function SetIPortableDeviceKeyCollectionValue(var key: _tagpropertykey;
+    function SetIPortableDeviceKeyCollectionValue(var key: _tagpropertykey; 
                                                   const pValue: IPortableDeviceKeyCollection): HResult; stdcall;
-    function GetIPortableDeviceKeyCollectionValue(var key: _tagpropertykey;
+    function GetIPortableDeviceKeyCollectionValue(var key: _tagpropertykey; 
                                                   out ppValue: IPortableDeviceKeyCollection): HResult; stdcall;
-    function SetIPortableDeviceValuesCollectionValue(var key: _tagpropertykey;
+    function SetIPortableDeviceValuesCollectionValue(var key: _tagpropertykey; 
                                                      const pValue: IPortableDeviceValuesCollection): HResult; stdcall;
-    function GetIPortableDeviceValuesCollectionValue(var key: _tagpropertykey;
+    function GetIPortableDeviceValuesCollectionValue(var key: _tagpropertykey; 
                                                      out ppValue: IPortableDeviceValuesCollection): HResult; stdcall;
     function RemoveValue(var key: _tagpropertykey): HResult; stdcall;
     function CopyValuesFromPropertyStore(const pStore: IPropertyStore): HResult; stdcall;
@@ -861,7 +863,7 @@ type
 // *********************************************************************//
   IStorage = interface(IUnknown)
     ['{0000000B-0000-0000-C000-000000000046}']
-    function CreateStream(pwcsName: PWideChar; grfMode: LongWord; reserved1: LongWord;
+    function CreateStream(pwcsName: PWideChar; grfMode: LongWord; reserved1: LongWord; 
                           reserved2: LongWord; out ppstm: IStream): HResult; stdcall;
     function RemoteOpenStream(pwcsName: PWideChar; cbReserved1: LongWord; var reserved1: Byte; 
                               grfMode: LongWord; reserved2: LongWord; out ppstm: IStream): HResult; stdcall;
@@ -990,7 +992,7 @@ type
     function RemoteGetDocumentation(index: SYSINT; refPtrFlags: LongWord; 
                                     out pbstrName: WideString; out pBstrDocString: WideString; 
                                     out pdwHelpContext: LongWord; out pBstrHelpFile: WideString): HResult; stdcall;
-    function RemoteIsName(szNameBuf: PWideChar; lHashVal: LongWord; out pfName: Integer;
+    function RemoteIsName(szNameBuf: PWideChar; lHashVal: LongWord; out pfName: Integer; 
                           out pBstrLibName: WideString): HResult; stdcall;
     function RemoteFindName(szNameBuf: PWideChar; lHashVal: LongWord; out ppTInfo: ITypeInfo; 
                             out rgMemId: Integer; var pcFound: Word; out pBstrLibName: WideString): HResult; stdcall;
@@ -1108,9 +1110,9 @@ type
   IPortableDeviceProperties = interface(IUnknown)
     ['{7F6D695C-03DF-4439-A809-59266BEEE3A6}']
     function GetSupportedProperties(pszObjectID: PWideChar; out ppKeys: IPortableDeviceKeyCollection): HResult; stdcall;
-    function GetPropertyAttributes(pszObjectID: PWideChar; var key: _tagpropertykey;
+    function GetPropertyAttributes(pszObjectID: PWideChar; var key: _tagpropertykey; 
                                    out ppAttributes: IPortableDeviceValues): HResult; stdcall;
-    function GetValues(pszObjectID: PWideChar; const pKeys: IPortableDeviceKeyCollection;
+    function GetValues(pszObjectID: PWideChar; const pKeys: IPortableDeviceKeyCollection; 
                        out ppValues: IPortableDeviceValues): HResult; stdcall;
     function SetValues(pszObjectID: PWideChar; const pValues: IPortableDeviceValues; 
                        out ppResults: IPortableDeviceValues): HResult; stdcall;
@@ -1128,7 +1130,7 @@ type
     function GetSupportedResources(pszObjectID: PWideChar; out ppKeys: IPortableDeviceKeyCollection): HResult; stdcall;
     function GetResourceAttributes(pszObjectID: PWideChar; var key: _tagpropertykey; 
                                    out ppResourceAttributes: IPortableDeviceValues): HResult; stdcall;
-    function GetStream(pszObjectID: PWideChar; var key: _tagpropertykey; dwMode: LongWord;
+    function GetStream(pszObjectID: PWideChar; var key: _tagpropertykey; dwMode: LongWord; 
                        var pdwOptimalBufferSize: LongWord; out ppStream: IStream): HResult; stdcall;
     function Delete(pszObjectID: PWideChar; const pKeys: IPortableDeviceKeyCollection): HResult; stdcall;
     function Cancel: HResult; stdcall;
@@ -1230,7 +1232,7 @@ type
     function GetFormatAttributes(var Format: TGUID; out ppAttributes: IPortableDeviceValues): HResult; stdcall;
     function GetSupportedFormatProperties(var Format: TGUID; 
                                           out ppKeys: IPortableDeviceKeyCollection): HResult; stdcall;
-    function GetFormatPropertyAttributes(var Format: TGUID; var Property_: _tagpropertykey;
+    function GetFormatPropertyAttributes(var Format: TGUID; var Property_: _tagpropertykey; 
                                          out ppAttributes: IPortableDeviceValues): HResult; stdcall;
     function GetSupportedEvents(out ppEvents: IPortableDevicePropVariantCollection): HResult; stdcall;
     function GetEventAttributes(var Event: TGUID; out ppAttributes: IPortableDeviceValues): HResult; stdcall;
@@ -1300,7 +1302,7 @@ type
   IPortableDeviceWebControl = interface(IDispatch)
     ['{94FC7953-5CA1-483A-8AEE-DF52E7747D00}']
     function GetDeviceFromId(const deviceId: WideString): IDispatch; safecall;
-    procedure GetDeviceFromIdAsync(const deviceId: WideString; const pCompletionHandler: IDispatch;
+    procedure GetDeviceFromIdAsync(const deviceId: WideString; const pCompletionHandler: IDispatch; 
                                    const pErrorHandler: IDispatch); safecall;
   end;
 
@@ -1312,31 +1314,57 @@ type
   IPortableDeviceWebControlDisp = dispinterface
     ['{94FC7953-5CA1-483A-8AEE-DF52E7747D00}']
     function GetDeviceFromId(const deviceId: WideString): IDispatch; dispid 1;
-    procedure GetDeviceFromIdAsync(const deviceId: WideString; const pCompletionHandler: IDispatch;
+    procedure GetDeviceFromIdAsync(const deviceId: WideString; const pCompletionHandler: IDispatch; 
                                    const pErrorHandler: IDispatch); dispid 2;
-  end;
-
-// *********************************************************************//
-// Interface: IPortableDeviceDataStream
-// Flags:     (0)
-// GUID:      {88e04db3-1012-4d64-9996-f703a950d3f4}
-// *********************************************************************//
-  IPortableDeviceDataStream = interface(IStream)
-    ['{88e04db3-1012-4d64-9996-f703a950d3f4}']
-    function GetObjectID(var ppszObjectID : PWideChar): HResult; stdcall;
-    function Cancel: HResult; stdcall;
   end;
 
 // *********************************************************************//
 // The Class CoPortableDevice provides a Create and CreateRemote method to          
 // create instances of the default interface IPortableDevice exposed by              
 // the CoClass PortableDevice. The functions are intended to be used by             
-// clients wishing to automate the CoClass objects exposed by the
+// clients wishing to automate the CoClass objects exposed by the         
 // server of this typelibrary.                                            
 // *********************************************************************//
   CoPortableDevice = class
     class function Create: IPortableDevice;
     class function CreateRemote(const MachineName: string): IPortableDevice;
+  end;
+
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDevice
+// Help String      : PortableDevice Class
+// Default Interface: IPortableDevice
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDevice = class(TOleServer)
+  private
+    FIntf: IPortableDevice;
+    function GetDefaultInterface: IPortableDevice;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDevice);
+    procedure Disconnect; override;
+    function Open(pszPnPDeviceID: PWideChar; const pClientInfo: IPortableDeviceValues): HResult;
+    function SendCommand(dwFlags: LongWord; const pParameters: IPortableDeviceValues; 
+                         out ppResults: IPortableDeviceValues): HResult;
+    function Content(out ppContent: IPortableDeviceContent): HResult;
+    function Capabilities(out ppCapabilities: IPortableDeviceCapabilities): HResult;
+    function Cancel: HResult;
+    function Close: HResult;
+    function Advise(dwFlags: LongWord; const pCallback: IPortableDeviceEventCallback; 
+                    const pParameters: IPortableDeviceValues; out ppszCookie: PWideChar): HResult;
+    function Unadvise(pszCookie: PWideChar): HResult;
+    function GetPnPDeviceID(out ppszPnPDeviceID: PWideChar): HResult;
+    property DefaultInterface: IPortableDevice read GetDefaultInterface;
+  published
   end;
 
 // *********************************************************************//
@@ -1351,6 +1379,43 @@ type
     class function CreateRemote(const MachineName: string): IPortableDeviceManager;
   end;
 
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDeviceManager
+// Help String      : PortableDeviceManager Class
+// Default Interface: IPortableDeviceManager
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDeviceManager = class(TOleServer)
+  private
+    FIntf: IPortableDeviceManager;
+    function GetDefaultInterface: IPortableDeviceManager;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDeviceManager);
+    procedure Disconnect; override;
+    function GetDevices(var pPnPDeviceIDs: PWideChar; var pcPnPDeviceIDs: LongWord): HResult;
+    function RefreshDeviceList: HResult;
+    function GetDeviceFriendlyName(pszPnPDeviceID: PWideChar; var pDeviceFriendlyName: Word; 
+                                   var pcchDeviceFriendlyName: LongWord): HResult;
+    function GetDeviceDescription(pszPnPDeviceID: PWideChar; var pDeviceDescription: Word; 
+                                  var pcchDeviceDescription: LongWord): HResult;
+    function GetDeviceManufacturer(pszPnPDeviceID: PWideChar; var pDeviceManufacturer: Word; 
+                                   var pcchDeviceManufacturer: LongWord): HResult;
+    function GetDeviceProperty(pszPnPDeviceID: PWideChar; pszDevicePropertyName: PWideChar; 
+                               var pData: Byte; var pcbData: LongWord; var pdwType: LongWord): HResult;
+    function GetPrivateDevices(var pPnPDeviceIDs: PWideChar; var pcPnPDeviceIDs: LongWord): HResult;
+    property DefaultInterface: IPortableDeviceManager read GetDefaultInterface;
+  published
+  end;
+
 // *********************************************************************//
 // The Class CoPortableDeviceService provides a Create and CreateRemote method to          
 // create instances of the default interface IPortableDeviceService exposed by              
@@ -1361,6 +1426,45 @@ type
   CoPortableDeviceService = class
     class function Create: IPortableDeviceService;
     class function CreateRemote(const MachineName: string): IPortableDeviceService;
+  end;
+
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDeviceService
+// Help String      : PortableDeviceService Class
+// Default Interface: IPortableDeviceService
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDeviceService = class(TOleServer)
+  private
+    FIntf: IPortableDeviceService;
+    function GetDefaultInterface: IPortableDeviceService;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDeviceService);
+    procedure Disconnect; override;
+    function Open(pszPnPServiceID: PWideChar; const pClientInfo: IPortableDeviceValues): HResult;
+    function Capabilities(out ppCapabilities: IPortableDeviceServiceCapabilities): HResult;
+    function Content(out ppContent: IPortableDeviceContent2): HResult;
+    function Methods(out ppMethods: IPortableDeviceServiceMethods): HResult;
+    function Cancel: HResult;
+    function Close: HResult;
+    function GetServiceObjectID(out ppszServiceObjectID: PWideChar): HResult;
+    function GetPnPServiceID(out ppszPnPServiceID: PWideChar): HResult;
+    function Advise(dwFlags: LongWord; const pCallback: IPortableDeviceEventCallback; 
+                    const pParameters: IPortableDeviceValues; out ppszCookie: PWideChar): HResult;
+    function Unadvise(pszCookie: PWideChar): HResult;
+    function SendCommand(dwFlags: LongWord; const pParameters: IPortableDeviceValues; 
+                         out ppResults: IPortableDeviceValues): HResult;
+    property DefaultInterface: IPortableDeviceService read GetDefaultInterface;
+  published
   end;
 
 // *********************************************************************//
@@ -1375,6 +1479,33 @@ type
     class function CreateRemote(const MachineName: string): IPortableDeviceDispatchFactory;
   end;
 
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDeviceDispatchFactory
+// Help String      : PortableDeviceDispatchFactory Class
+// Default Interface: IPortableDeviceDispatchFactory
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDeviceDispatchFactory = class(TOleServer)
+  private
+    FIntf: IPortableDeviceDispatchFactory;
+    function GetDefaultInterface: IPortableDeviceDispatchFactory;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDeviceDispatchFactory);
+    procedure Disconnect; override;
+    function GetDeviceDispatch(pszPnPDeviceID: PWideChar; out ppDeviceDispatch: IDispatch): HResult;
+    property DefaultInterface: IPortableDeviceDispatchFactory read GetDefaultInterface;
+  published
+  end;
+
 // *********************************************************************//
 // The Class CoPortableDeviceFTM provides a Create and CreateRemote method to          
 // create instances of the default interface IPortableDevice exposed by              
@@ -1385,6 +1516,43 @@ type
   CoPortableDeviceFTM = class
     class function Create: IPortableDevice;
     class function CreateRemote(const MachineName: string): IPortableDevice;
+  end;
+
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDeviceFTM
+// Help String      : PortableDeviceFTM Class
+// Default Interface: IPortableDevice
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDeviceFTM = class(TOleServer)
+  private
+    FIntf: IPortableDevice;
+    function GetDefaultInterface: IPortableDevice;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDevice);
+    procedure Disconnect; override;
+    function Open(pszPnPDeviceID: PWideChar; const pClientInfo: IPortableDeviceValues): HResult;
+    function SendCommand(dwFlags: LongWord; const pParameters: IPortableDeviceValues; 
+                         out ppResults: IPortableDeviceValues): HResult;
+    function Content(out ppContent: IPortableDeviceContent): HResult;
+    function Capabilities(out ppCapabilities: IPortableDeviceCapabilities): HResult;
+    function Cancel: HResult;
+    function Close: HResult;
+    function Advise(dwFlags: LongWord; const pCallback: IPortableDeviceEventCallback; 
+                    const pParameters: IPortableDeviceValues; out ppszCookie: PWideChar): HResult;
+    function Unadvise(pszCookie: PWideChar): HResult;
+    function GetPnPDeviceID(out ppszPnPDeviceID: PWideChar): HResult;
+    property DefaultInterface: IPortableDevice read GetDefaultInterface;
+  published
   end;
 
 // *********************************************************************//
@@ -1399,6 +1567,45 @@ type
     class function CreateRemote(const MachineName: string): IPortableDeviceService;
   end;
 
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDeviceServiceFTM
+// Help String      : PortableDeviceServiceFTM Class
+// Default Interface: IPortableDeviceService
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDeviceServiceFTM = class(TOleServer)
+  private
+    FIntf: IPortableDeviceService;
+    function GetDefaultInterface: IPortableDeviceService;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDeviceService);
+    procedure Disconnect; override;
+    function Open(pszPnPServiceID: PWideChar; const pClientInfo: IPortableDeviceValues): HResult;
+    function Capabilities(out ppCapabilities: IPortableDeviceServiceCapabilities): HResult;
+    function Content(out ppContent: IPortableDeviceContent2): HResult;
+    function Methods(out ppMethods: IPortableDeviceServiceMethods): HResult;
+    function Cancel: HResult;
+    function Close: HResult;
+    function GetServiceObjectID(out ppszServiceObjectID: PWideChar): HResult;
+    function GetPnPServiceID(out ppszPnPServiceID: PWideChar): HResult;
+    function Advise(dwFlags: LongWord; const pCallback: IPortableDeviceEventCallback; 
+                    const pParameters: IPortableDeviceValues; out ppszCookie: PWideChar): HResult;
+    function Unadvise(pszCookie: PWideChar): HResult;
+    function SendCommand(dwFlags: LongWord; const pParameters: IPortableDeviceValues; 
+                         out ppResults: IPortableDeviceValues): HResult;
+    property DefaultInterface: IPortableDeviceService read GetDefaultInterface;
+  published
+  end;
+
 // *********************************************************************//
 // The Class CoPortableDeviceWebControl provides a Create and CreateRemote method to          
 // create instances of the default interface IPortableDeviceWebControl exposed by              
@@ -1410,6 +1617,42 @@ type
     class function Create: IPortableDeviceWebControl;
     class function CreateRemote(const MachineName: string): IPortableDeviceWebControl;
   end;
+
+
+// *********************************************************************//
+// OLE Server Proxy class declaration
+// Server Object    : TPortableDeviceWebControl
+// Help String      : Dispatch Class for Web Host Applications
+// Default Interface: IPortableDeviceWebControl
+// Def. Intf. DISP? : No
+// Event   Interface: 
+// TypeFlags        : (2) CanCreate
+// *********************************************************************//
+  TPortableDeviceWebControl = class(TOleServer)
+  private
+    FIntf: IPortableDeviceWebControl;
+    function GetDefaultInterface: IPortableDeviceWebControl;
+  protected
+    procedure InitServerData; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor  Destroy; override;
+    procedure Connect; override;
+    procedure ConnectTo(svrIntf: IPortableDeviceWebControl);
+    procedure Disconnect; override;
+    function GetDeviceFromId(const deviceId: WideString): IDispatch;
+    procedure GetDeviceFromIdAsync(const deviceId: WideString; const pCompletionHandler: IDispatch; 
+                                   const pErrorHandler: IDispatch);
+    property DefaultInterface: IPortableDeviceWebControl read GetDefaultInterface;
+  published
+  end;
+
+procedure Register;
+
+resourcestring
+  dtlServerPage = 'Servers';
+
+  dtlOcxPage = 'ActiveX';
 
 implementation
 
@@ -1425,6 +1668,108 @@ begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDevice) as IPortableDevice;
 end;
 
+procedure TPortableDevice.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{728A21C5-3D9E-48D7-9810-864848F0F404}';
+    IntfIID:   '{625E2DF8-6392-4CF0-9AD1-3CFA5F17775C}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDevice.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDevice;
+  end;
+end;
+
+procedure TPortableDevice.ConnectTo(svrIntf: IPortableDevice);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDevice.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDevice.GetDefaultInterface: IPortableDevice;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDevice.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDevice.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDevice.Open(pszPnPDeviceID: PWideChar; const pClientInfo: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.Open(pszPnPDeviceID, pClientInfo);
+end;
+
+function TPortableDevice.SendCommand(dwFlags: LongWord; const pParameters: IPortableDeviceValues; 
+                                     out ppResults: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.SendCommand(dwFlags, pParameters, ppResults);
+end;
+
+function TPortableDevice.Content(out ppContent: IPortableDeviceContent): HResult;
+begin
+  Result := DefaultInterface.Content(ppContent);
+end;
+
+function TPortableDevice.Capabilities(out ppCapabilities: IPortableDeviceCapabilities): HResult;
+begin
+  Result := DefaultInterface.Capabilities(ppCapabilities);
+end;
+
+function TPortableDevice.Cancel: HResult;
+begin
+  Result := DefaultInterface.Cancel;
+end;
+
+function TPortableDevice.Close: HResult;
+begin
+  Result := DefaultInterface.Close;
+end;
+
+function TPortableDevice.Advise(dwFlags: LongWord; const pCallback: IPortableDeviceEventCallback; 
+                                const pParameters: IPortableDeviceValues; out ppszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Advise(dwFlags, pCallback, pParameters, ppszCookie);
+end;
+
+function TPortableDevice.Unadvise(pszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Unadvise(pszCookie);
+end;
+
+function TPortableDevice.GetPnPDeviceID(out ppszPnPDeviceID: PWideChar): HResult;
+begin
+  Result := DefaultInterface.GetPnPDeviceID(ppszPnPDeviceID);
+end;
+
 class function CoPortableDeviceManager.Create: IPortableDeviceManager;
 begin
   Result := CreateComObject(CLASS_PortableDeviceManager) as IPortableDeviceManager;
@@ -1433,6 +1778,111 @@ end;
 class function CoPortableDeviceManager.CreateRemote(const MachineName: string): IPortableDeviceManager;
 begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDeviceManager) as IPortableDeviceManager;
+end;
+
+procedure TPortableDeviceManager.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{0AF10CEC-2ECD-4B92-9581-34F6AE0637F3}';
+    IntfIID:   '{A1567595-4C2F-4574-A6FA-ECEF917B9A40}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDeviceManager.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDeviceManager;
+  end;
+end;
+
+procedure TPortableDeviceManager.ConnectTo(svrIntf: IPortableDeviceManager);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDeviceManager.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDeviceManager.GetDefaultInterface: IPortableDeviceManager;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDeviceManager.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDeviceManager.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDeviceManager.GetDevices(var pPnPDeviceIDs: PWideChar; 
+                                           var pcPnPDeviceIDs: LongWord): HResult;
+begin
+  Result := DefaultInterface.GetDevices(pPnPDeviceIDs, pcPnPDeviceIDs);
+end;
+
+function TPortableDeviceManager.RefreshDeviceList: HResult;
+begin
+  Result := DefaultInterface.RefreshDeviceList;
+end;
+
+function TPortableDeviceManager.GetDeviceFriendlyName(pszPnPDeviceID: PWideChar; 
+                                                      var pDeviceFriendlyName: Word; 
+                                                      var pcchDeviceFriendlyName: LongWord): HResult;
+begin
+  Result := DefaultInterface.GetDeviceFriendlyName(pszPnPDeviceID, pDeviceFriendlyName, 
+                                                   pcchDeviceFriendlyName);
+end;
+
+function TPortableDeviceManager.GetDeviceDescription(pszPnPDeviceID: PWideChar; 
+                                                     var pDeviceDescription: Word; 
+                                                     var pcchDeviceDescription: LongWord): HResult;
+begin
+  Result := DefaultInterface.GetDeviceDescription(pszPnPDeviceID, pDeviceDescription, 
+                                                  pcchDeviceDescription);
+end;
+
+function TPortableDeviceManager.GetDeviceManufacturer(pszPnPDeviceID: PWideChar; 
+                                                      var pDeviceManufacturer: Word; 
+                                                      var pcchDeviceManufacturer: LongWord): HResult;
+begin
+  Result := DefaultInterface.GetDeviceManufacturer(pszPnPDeviceID, pDeviceManufacturer, 
+                                                   pcchDeviceManufacturer);
+end;
+
+function TPortableDeviceManager.GetDeviceProperty(pszPnPDeviceID: PWideChar; 
+                                                  pszDevicePropertyName: PWideChar; 
+                                                  var pData: Byte; var pcbData: LongWord; 
+                                                  var pdwType: LongWord): HResult;
+begin
+  Result := DefaultInterface.GetDeviceProperty(pszPnPDeviceID, pszDevicePropertyName, pData, 
+                                               pcbData, pdwType);
+end;
+
+function TPortableDeviceManager.GetPrivateDevices(var pPnPDeviceIDs: PWideChar; 
+                                                  var pcPnPDeviceIDs: LongWord): HResult;
+begin
+  Result := DefaultInterface.GetPrivateDevices(pPnPDeviceIDs, pcPnPDeviceIDs);
 end;
 
 class function CoPortableDeviceService.Create: IPortableDeviceService;
@@ -1445,6 +1895,122 @@ begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDeviceService) as IPortableDeviceService;
 end;
 
+procedure TPortableDeviceService.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{EF5DB4C2-9312-422C-9152-411CD9C4DD84}';
+    IntfIID:   '{D3BD3A44-D7B5-40A9-98B7-2FA4D01DEC08}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDeviceService.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDeviceService;
+  end;
+end;
+
+procedure TPortableDeviceService.ConnectTo(svrIntf: IPortableDeviceService);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDeviceService.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDeviceService.GetDefaultInterface: IPortableDeviceService;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDeviceService.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDeviceService.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDeviceService.Open(pszPnPServiceID: PWideChar; 
+                                     const pClientInfo: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.Open(pszPnPServiceID, pClientInfo);
+end;
+
+function TPortableDeviceService.Capabilities(out ppCapabilities: IPortableDeviceServiceCapabilities): HResult;
+begin
+  Result := DefaultInterface.Capabilities(ppCapabilities);
+end;
+
+function TPortableDeviceService.Content(out ppContent: IPortableDeviceContent2): HResult;
+begin
+  Result := DefaultInterface.Content(ppContent);
+end;
+
+function TPortableDeviceService.Methods(out ppMethods: IPortableDeviceServiceMethods): HResult;
+begin
+  Result := DefaultInterface.Methods(ppMethods);
+end;
+
+function TPortableDeviceService.Cancel: HResult;
+begin
+  Result := DefaultInterface.Cancel;
+end;
+
+function TPortableDeviceService.Close: HResult;
+begin
+  Result := DefaultInterface.Close;
+end;
+
+function TPortableDeviceService.GetServiceObjectID(out ppszServiceObjectID: PWideChar): HResult;
+begin
+  Result := DefaultInterface.GetServiceObjectID(ppszServiceObjectID);
+end;
+
+function TPortableDeviceService.GetPnPServiceID(out ppszPnPServiceID: PWideChar): HResult;
+begin
+  Result := DefaultInterface.GetPnPServiceID(ppszPnPServiceID);
+end;
+
+function TPortableDeviceService.Advise(dwFlags: LongWord; 
+                                       const pCallback: IPortableDeviceEventCallback; 
+                                       const pParameters: IPortableDeviceValues; 
+                                       out ppszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Advise(dwFlags, pCallback, pParameters, ppszCookie);
+end;
+
+function TPortableDeviceService.Unadvise(pszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Unadvise(pszCookie);
+end;
+
+function TPortableDeviceService.SendCommand(dwFlags: LongWord; 
+                                            const pParameters: IPortableDeviceValues; 
+                                            out ppResults: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.SendCommand(dwFlags, pParameters, ppResults);
+end;
+
 class function CoPortableDeviceDispatchFactory.Create: IPortableDeviceDispatchFactory;
 begin
   Result := CreateComObject(CLASS_PortableDeviceDispatchFactory) as IPortableDeviceDispatchFactory;
@@ -1453,6 +2019,67 @@ end;
 class function CoPortableDeviceDispatchFactory.CreateRemote(const MachineName: string): IPortableDeviceDispatchFactory;
 begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDeviceDispatchFactory) as IPortableDeviceDispatchFactory;
+end;
+
+procedure TPortableDeviceDispatchFactory.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{43232233-8338-4658-AE01-0B4AE830B6B0}';
+    IntfIID:   '{5E1EAFC3-E3D7-4132-96FA-759C0F9D1E0F}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDeviceDispatchFactory.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDeviceDispatchFactory;
+  end;
+end;
+
+procedure TPortableDeviceDispatchFactory.ConnectTo(svrIntf: IPortableDeviceDispatchFactory);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDeviceDispatchFactory.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDeviceDispatchFactory.GetDefaultInterface: IPortableDeviceDispatchFactory;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDeviceDispatchFactory.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDeviceDispatchFactory.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDeviceDispatchFactory.GetDeviceDispatch(pszPnPDeviceID: PWideChar; 
+                                                          out ppDeviceDispatch: IDispatch): HResult;
+begin
+  Result := DefaultInterface.GetDeviceDispatch(pszPnPDeviceID, ppDeviceDispatch);
 end;
 
 class function CoPortableDeviceFTM.Create: IPortableDevice;
@@ -1465,6 +2092,111 @@ begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDeviceFTM) as IPortableDevice;
 end;
 
+procedure TPortableDeviceFTM.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{F7C0039A-4762-488A-B4B3-760EF9A1BA9B}';
+    IntfIID:   '{625E2DF8-6392-4CF0-9AD1-3CFA5F17775C}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDeviceFTM.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDevice;
+  end;
+end;
+
+procedure TPortableDeviceFTM.ConnectTo(svrIntf: IPortableDevice);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDeviceFTM.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDeviceFTM.GetDefaultInterface: IPortableDevice;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDeviceFTM.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDeviceFTM.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDeviceFTM.Open(pszPnPDeviceID: PWideChar; const pClientInfo: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.Open(pszPnPDeviceID, pClientInfo);
+end;
+
+function TPortableDeviceFTM.SendCommand(dwFlags: LongWord; 
+                                        const pParameters: IPortableDeviceValues; 
+                                        out ppResults: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.SendCommand(dwFlags, pParameters, ppResults);
+end;
+
+function TPortableDeviceFTM.Content(out ppContent: IPortableDeviceContent): HResult;
+begin
+  Result := DefaultInterface.Content(ppContent);
+end;
+
+function TPortableDeviceFTM.Capabilities(out ppCapabilities: IPortableDeviceCapabilities): HResult;
+begin
+  Result := DefaultInterface.Capabilities(ppCapabilities);
+end;
+
+function TPortableDeviceFTM.Cancel: HResult;
+begin
+  Result := DefaultInterface.Cancel;
+end;
+
+function TPortableDeviceFTM.Close: HResult;
+begin
+  Result := DefaultInterface.Close;
+end;
+
+function TPortableDeviceFTM.Advise(dwFlags: LongWord; 
+                                   const pCallback: IPortableDeviceEventCallback; 
+                                   const pParameters: IPortableDeviceValues; 
+                                   out ppszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Advise(dwFlags, pCallback, pParameters, ppszCookie);
+end;
+
+function TPortableDeviceFTM.Unadvise(pszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Unadvise(pszCookie);
+end;
+
+function TPortableDeviceFTM.GetPnPDeviceID(out ppszPnPDeviceID: PWideChar): HResult;
+begin
+  Result := DefaultInterface.GetPnPDeviceID(ppszPnPDeviceID);
+end;
+
 class function CoPortableDeviceServiceFTM.Create: IPortableDeviceService;
 begin
   Result := CreateComObject(CLASS_PortableDeviceServiceFTM) as IPortableDeviceService;
@@ -1473,6 +2205,122 @@ end;
 class function CoPortableDeviceServiceFTM.CreateRemote(const MachineName: string): IPortableDeviceService;
 begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDeviceServiceFTM) as IPortableDeviceService;
+end;
+
+procedure TPortableDeviceServiceFTM.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{1649B154-C794-497A-9B03-F3F0121302F3}';
+    IntfIID:   '{D3BD3A44-D7B5-40A9-98B7-2FA4D01DEC08}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDeviceServiceFTM.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDeviceService;
+  end;
+end;
+
+procedure TPortableDeviceServiceFTM.ConnectTo(svrIntf: IPortableDeviceService);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDeviceServiceFTM.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDeviceServiceFTM.GetDefaultInterface: IPortableDeviceService;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDeviceServiceFTM.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDeviceServiceFTM.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDeviceServiceFTM.Open(pszPnPServiceID: PWideChar; 
+                                        const pClientInfo: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.Open(pszPnPServiceID, pClientInfo);
+end;
+
+function TPortableDeviceServiceFTM.Capabilities(out ppCapabilities: IPortableDeviceServiceCapabilities): HResult;
+begin
+  Result := DefaultInterface.Capabilities(ppCapabilities);
+end;
+
+function TPortableDeviceServiceFTM.Content(out ppContent: IPortableDeviceContent2): HResult;
+begin
+  Result := DefaultInterface.Content(ppContent);
+end;
+
+function TPortableDeviceServiceFTM.Methods(out ppMethods: IPortableDeviceServiceMethods): HResult;
+begin
+  Result := DefaultInterface.Methods(ppMethods);
+end;
+
+function TPortableDeviceServiceFTM.Cancel: HResult;
+begin
+  Result := DefaultInterface.Cancel;
+end;
+
+function TPortableDeviceServiceFTM.Close: HResult;
+begin
+  Result := DefaultInterface.Close;
+end;
+
+function TPortableDeviceServiceFTM.GetServiceObjectID(out ppszServiceObjectID: PWideChar): HResult;
+begin
+  Result := DefaultInterface.GetServiceObjectID(ppszServiceObjectID);
+end;
+
+function TPortableDeviceServiceFTM.GetPnPServiceID(out ppszPnPServiceID: PWideChar): HResult;
+begin
+  Result := DefaultInterface.GetPnPServiceID(ppszPnPServiceID);
+end;
+
+function TPortableDeviceServiceFTM.Advise(dwFlags: LongWord; 
+                                          const pCallback: IPortableDeviceEventCallback; 
+                                          const pParameters: IPortableDeviceValues; 
+                                          out ppszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Advise(dwFlags, pCallback, pParameters, ppszCookie);
+end;
+
+function TPortableDeviceServiceFTM.Unadvise(pszCookie: PWideChar): HResult;
+begin
+  Result := DefaultInterface.Unadvise(pszCookie);
+end;
+
+function TPortableDeviceServiceFTM.SendCommand(dwFlags: LongWord; 
+                                               const pParameters: IPortableDeviceValues; 
+                                               out ppResults: IPortableDeviceValues): HResult;
+begin
+  Result := DefaultInterface.SendCommand(dwFlags, pParameters, ppResults);
 end;
 
 class function CoPortableDeviceWebControl.Create: IPortableDeviceWebControl;
@@ -1485,5 +2333,77 @@ begin
   Result := CreateRemoteComObject(MachineName, CLASS_PortableDeviceWebControl) as IPortableDeviceWebControl;
 end;
 
+procedure TPortableDeviceWebControl.InitServerData;
+const
+  CServerData: TServerData = (
+    ClassID:   '{186DD02C-2DEC-41B5-A7D4-B59056FADE51}';
+    IntfIID:   '{94FC7953-5CA1-483A-8AEE-DF52E7747D00}';
+    EventIID:  '';
+    LicenseKey: nil;
+    Version: 500);
+begin
+  ServerData := @CServerData;
+end;
+
+procedure TPortableDeviceWebControl.Connect;
+var
+  punk: IUnknown;
+begin
+  if FIntf = nil then
+  begin
+    punk := GetServer;
+    Fintf:= punk as IPortableDeviceWebControl;
+  end;
+end;
+
+procedure TPortableDeviceWebControl.ConnectTo(svrIntf: IPortableDeviceWebControl);
+begin
+  Disconnect;
+  FIntf := svrIntf;
+end;
+
+procedure TPortableDeviceWebControl.DisConnect;
+begin
+  if Fintf <> nil then
+  begin
+    FIntf := nil;
+  end;
+end;
+
+function TPortableDeviceWebControl.GetDefaultInterface: IPortableDeviceWebControl;
+begin
+  if FIntf = nil then
+    Connect;
+  Assert(FIntf <> nil, 'DefaultInterface is NULL. Component is not connected to Server. You must call "Connect" or "ConnectTo" before this operation');
+  Result := FIntf;
+end;
+
+constructor TPortableDeviceWebControl.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+end;
+
+destructor TPortableDeviceWebControl.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TPortableDeviceWebControl.GetDeviceFromId(const deviceId: WideString): IDispatch;
+begin
+  Result := DefaultInterface.GetDeviceFromId(deviceId);
+end;
+
+procedure TPortableDeviceWebControl.GetDeviceFromIdAsync(const deviceId: WideString; 
+                                                         const pCompletionHandler: IDispatch; 
+                                                         const pErrorHandler: IDispatch);
+begin
+  DefaultInterface.GetDeviceFromIdAsync(deviceId, pCompletionHandler, pErrorHandler);
+end;
+
+procedure Register;
+begin
+  RegisterComponents(dtlServerPage, [TPortableDevice, TPortableDeviceManager, TPortableDeviceService, TPortableDeviceDispatchFactory, 
+    TPortableDeviceFTM, TPortableDeviceServiceFTM, TPortableDeviceWebControl]);
+end;
 
 end.
