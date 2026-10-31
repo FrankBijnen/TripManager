@@ -10,24 +10,26 @@
   body {
   background-color: #FFFFFF;
   }
-  span.c22 {font-family: Calibri; font-size: 120%; font-weight: bold}
-  span.c21 {color: #010101; font-family: Courier New; font-size: 11pt}
-  span.c20 {color: #010101; font-family: Courier New; font-size: 12pt}
-  span.c19 {color: #010101; font-family: Courier New; font-size: 120%}
-  b.c18 {text-decoration: underline}
-  span.c17 {color: #010101; font-family: Courier New; font-size: 120%; font-weight: bold}
-  table.c16 {border-collapse: collapse; border: none}
-  td.c15 {border: solid #010101 1px;}
-  span.c14 {font-family: Courier New; font-size: 12pt}
+  span.c24 {font-family: Courier New; font-size: 11pt}
+  span.c23 {font-family: Courier New; font-size: 12pt}
+  span.c22 {font-family: Courier New; font-size: 120%}
+  b.c21 {text-decoration: underline}
+  span.c20 {font-family: Courier New; font-size: 120%; font-weight: bold}
+  table.c19 {border-collapse: collapse; border: none}
+  td.c18 {border: solid #010101 1px;}
+  span.c17 {color: #010101; font-family: Courier New; font-size: 12pt}
+  a.c16 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c15 {font-size: 14pt; text-decoration: underline}
+  span.c14 {color: #010101; font-family: Symbol; font-size: 12pt}
   span.c13 {color: #010101}
   br.c12 {page-break-before:always}
-  a.c11 {color: #0000FF; font-family: Calibri; font-size: 120%}
-  span.c10 {font-size: 14pt; text-decoration: underline}
-  span.c9 {font-family: Calibri; font-size: 120%}
-  div.c8 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  span.c7 {color: #010101; font-family: Symbol; font-size: 120%}
-  span.c6 {color: #010101; font-family: Calibri; font-size: 120%}
-  span.c5 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c11 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c10 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  div.c9 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c8 {font-family: Symbol; font-size: 12pt}
+  span.c7 {color: #010101; font-family: Calibri; font-size: 120%}
+  span.c6 {font-family: Calibri; font-size: 120%; font-style: italic}
+  span.c5 {font-family: Calibri; font-size: 120%}
   table.c4 {background-color: #FFFFFF}
   span.c3 {color: #0000FF; font-family: Calibri; font-size: 150%; font-weight: bold}
   td.c2 {font-weight: bold}
@@ -39,7 +41,7 @@
   cellpadding="2">
     <tr>
       <td class="c2" align="left"><span class="c1"><a href=
-      "checkexploredb.html">Previous</a>&nbsp;<a href=
+      "explorefuncs.html">Previous</a>&nbsp;<a href=
       "toc.html">Top</a>&nbsp;</span></td>
       <td align="center" width="75%">
         <div align="center">
@@ -50,151 +52,203 @@
   </table>
   <hr>
   <div align="left">
-    <span class="c5">Warning. This info applies to firmware V3.50
-    or earlier.</span>
+    <span class="c5">The <b>XT3</b> features vehicle profiles.
+    Taken from the Garmin website:</span>
+  </div>
+  <div align="left">
+    <span class="c6">By using different vehicle profiles, you can
+    quickly change several device settings, such as which map
+    layers are enabled and which route calculation mode is used by
+    default.</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
-    <span class="c6">The XT3 features Vehicle Profiles. Something
-    that was already observed for the Tread2. In the Trip files
-    these items must be filled, or the XT3 will not accept it as a
-    valid trip file.</span>
+    <span class="c5">Other models:</span>
   </div>
   <div align="left">
-    <br>
+    <span class="c7">The <b>XT</b> does not have profiles.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c6">mVehicleProfileTruckType</span>
+  <div align="left">
+    <span class="c7">The <b>XT2</b> only has two profiles
+    (metric/imperial) that can not be changed by the user.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c6">mVehicleProfileName</span>
-  </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c5">mVehicleProfileHash</span>
-  </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c6">mVehicleId</span>
-  </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c6">mVehicleProfileGuid</span>
+  <div align="left">
+    <span class="c7">The <b>Tread 2</b> works similarly to the
+    <b>XT3,</b> but the profiles allow more configuration options,
+    and the <b>Tread 2</b> has its own methods to compute hash
+    values.</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
-    <span class="c6">The data for these items can be found in the
+    <span class="c7">The <b>XT3:</b></span>
+  </div>
+  <div align="left">
+    <span class="c5">In the Trip files these items must be filled,
+    or the <b>XT3</b> will not accept it as a valid trip
+    file.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left" class="c9">
+    <span class="c8">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileTruckType</span>
+  </div>
+  <div align="left" class="c9">
+    <span class="c8">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileName</span>
+  </div>
+  <div align="left" class="c9">
+    <span class="c8">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c10">mVehicleProfileHash</span>
+  </div>
+  <div align="left" class="c9">
+    <span class="c8">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleId</span>
+  </div>
+  <div align="left" class="c9">
+    <span class="c8">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">mVehicleProfileGuid</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">The data for these items can be found in the
     vehicle_profile.db, except for</span> <span class=
-    "c9"><b>mVehicleProfileHash.</b> Only recently, using a lot of
-    tests, it has been discovered how this Hash value can be
-    computed. The calculation is only valid for the XT3. The XT
-    does not have profiles, the XT2 only has two profiles
-    (metric/imperial), and accepts a value 0. The Tread2 may be
-    working similarly, but the profiles allow more configuration
-    options, and the computed values do not match.</span>
+    "c11">mVehicleProfileHash.</span>
+  </div>
+  <div align="left">
+    <span class="c7">If a correct Hash is not supplied in the trip
+    file, the <b>XT3</b> will popup a message when opening the
+    trip, that the selected profile is out of date, often resulting
+    in duplicated profile names, causing confusion.</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
-    <span class="c9">If a correct Hash is not supplied in the trip
-    file, the XT3 will popup a message when opening the trip, that
-    the selected profile is out of date, often resulting in
-    duplicated profile names, causing confusion.</span>
+    <span class="c7">An effort was made, using extensive testing,
+    to discover how this Hash value can be computed. For firmware
+    <b>V3.50</b> and earlier most of the calculation was
+    identified. Unfortunately Garmin changed the calculation with
+    firmware <b>V4.30.</b> To minimize the amount of required
+    rework a different approach was chosen.</span>
   </div>
   <div align="left">
     <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <span class="c10">Firmware V4.30</span>
+  </div>
+  <div align="left" class="c9">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c7">Only identify how the default motorcycle and car profiles
+    can be computed.</span>
+  </div>
+  <div align="left" class="c9">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c7">For profiles that can not be computed take the hash value
+    from routes found in Explore.db. This requires creating a
+    sample route by the user, and use the computed value by the
+    unit. As described in</span> <a class="c16" href=
+    "1initialtasks.html#setup_profile"><span class="c15">Initial
+    tasks</span></a>
   </div>
   <div align="left">
-    <span class="c9">Known limitations:</span>
+    <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <span class="c10">Firmware V3.50 or earlier.</span>
   </div>
   <div align="left">
-    <span class="c9">- Road use. 'Street Legal' should be enabled.
+    <span class="c7">Known limitations:</span>
+  </div>
+  <div align="left">
+    <span class="c7">- Road use. 'Street Legal' should be enabled.
     ('Highway Legal' does not need to be enabled)</span>
   </div>
   <div align="left">
-    <span class="c9">- The 'Traction Method' should only be set to
+    <span class="c7">- The 'Traction Method' should only be set to
     '...2WD', or&nbsp; '...4WD' for cars.</span>
   </div>
   <div align="left">
-    <span class="c9">- Width's specified should be in the range 96-
+    <span class="c7">- Width's specified should be in the range 96-
     223 cm for bikes and 96- 239 cm for cars.</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
-    <span class="c9">Tested for Locales: NL, DE, UK and US.</span>
+    <span class="c7">Tested for Locales: NL, DE, UK and US.</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
-    <span class="c9">This calculation has been implemented
-    in</span> <a class="c11" href=
+    <span class="c7">This calculation has been implemented
+    in</span> <a class="c16" href=
     "https://github.com/FrankBijnen/TripManager/blob/main/TripManager/UnitVehProfile.pas/"
     target="_blank"><span class=
-    "c10">UnitVehProfile.pas.</span></a><span class=
+    "c15">UnitVehProfile.pas.</span></a><span class=
     "c13"><br clear="all" class="c12"></span>
   </div>
   <div align="left">
     <br>
   </div><br clear="all" class="c12">
   <table border="1" width="1308" cellpadding="4" cellspacing="0"
-  class="c16">
+  class="c19">
     <tr>
-      <td valign="top" width="969" height="600" class="c15">
+      <td valign="top" width="969" height="600" class="c18">
         <div align="left">
-          <span class="c9">1. Execute SQL statement to get the data
+          <span class="c7">1. Execute SQL statement to get the data
           from the active profile</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c14">select</span>
+          <span class="c17">select</span>
         </div>
         <div align="left">
-          <span class="c14">(select act."description:1" from
+          <span class="c17">(select act."description:1" from
           properties_dbg act where act.value = v.vehicle_id and
           act."description:1" = 'active_profile' ) as
           Status,</span>
         </div>
         <div align="left">
-          <span class="c14">Hex(g.description) as GUID,</span>
+          <span class="c17">Hex(g.description) as GUID,</span>
         </div>
         <div align="left">
-          <span class="c14">e.value as Environmental,</span>
+          <span class="c17">e.value as Environmental,</span>
         </div>
         <div align="left">
-          <span class="c14">0 as Proposed_Hash,</span>
+          <span class="c17">0 as Proposed_Hash,</span>
         </div>
         <div align="left">
-          <span class="c14">0 as Overridden_Hash,</span>
+          <span class="c17">0 as Overridden_Hash,</span>
         </div>
         <div align="left">
-          <span class="c14">v.*</span>
+          <span class="c17">v.*</span>
         </div>
         <div align="left">
-          <span class="c14">from vehicle_profile v</span>
+          <span class="c17">from vehicle_profile v</span>
         </div>
         <div align="left">
-          <span class="c14">join properties_dbg g on (g.value =
+          <span class="c17">join properties_dbg g on (g.value =
           v.vehicle_id and g."description:1" = 'guid')</span>
         </div>
         <div align="left">
-          <span class="c14">join properties_dbg e on (e.key_id =
+          <span class="c17">join properties_dbg e on (e.key_id =
           g.key_id and e."description:1" like
           'environmental%')</span>
         </div>
         <div align="left">
-          <span class="c14">order by Status desc, v.vehicle_id
+          <span class="c17">order by Status desc, v.vehicle_id
           asc;</span>
         </div>
         <div align="left">
@@ -203,16 +257,16 @@
         <div align="left"><img src="vehicleprofilehashxt3b1.JPG"
         width="767" height="278" border="0" alt="graphic"></div>
       </td>
-      <td valign="top" width="321" height="600" class="c15">
+      <td valign="top" width="321" height="600" class="c18">
         <div align="left">
-          <span class="c9">Fields Vehicle_Id, Truck_Type, Name,
+          <span class="c7">Fields Vehicle_Id, Truck_Type, Name,
           GUID_Data are copied into the corresponding items.</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c9">Fields Truck_Type,
+          <span class="c7">Fields Truck_Type,
           Adventurous_Route_Mode, Environmental, Calc_Method,
           Max_Vehicle_Speed, Traction, Clearance, Width,
           Width_Metric, Road_Legality are needed to compute the
@@ -234,37 +288,37 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c9">Results:</span>
+          <span class="c7">Results:</span>
         </div>
         <div align="left">
-          <span class="c9">Truck_Type: 7 (Bike)</span>
+          <span class="c7">Truck_Type: 7 (Bike)</span>
         </div>
         <div align="left">
-          <span class="c9">Adventurous_Route_Mode: 0 (N/A)</span>
+          <span class="c7">Adventurous_Route_Mode: 0 (N/A)</span>
         </div>
         <div align="left">
-          <span class="c9">Environmental: 1 (Allow)</span>
+          <span class="c7">Environmental: 1 (Allow)</span>
         </div>
         <div align="left">
-          <span class="c9">Calc_Method: 0 (Faster)</span>
+          <span class="c7">Calc_Method: 0 (Faster)</span>
         </div>
         <div align="left">
-          <span class="c9">Max_Vehicle_Speed: 0 (N/A)</span>
+          <span class="c7">Max_Vehicle_Speed: 0 (N/A)</span>
         </div>
         <div align="left">
-          <span class="c9">Traction: 4 (2 Wheels)</span>
+          <span class="c7">Traction: 4 (2 Wheels)</span>
         </div>
         <div align="left">
-          <span class="c9">Clearance: 0 (Normal Clearance)</span>
+          <span class="c7">Clearance: 0 (Normal Clearance)</span>
         </div>
         <div align="left">
-          <span class="c9">Width: 120 (Cm)</span>
+          <span class="c7">Width: 120 (Cm)</span>
         </div>
         <div align="left">
-          <span class="c9">Width_Metric: 1 (Imperial=false)</span>
+          <span class="c7">Width_Metric: 1 (Imperial=false)</span>
         </div>
         <div align="left">
-          <span class="c9">Road_Legality: 2 (Road + Highway
+          <span class="c7">Road_Legality: 2 (Road + Highway
           legal)</span>
         </div>
       </td>
@@ -274,154 +328,154 @@
     <br>
   </div><br clear="all" class="c12">
   <table border="1" width="1308" cellpadding="4" cellspacing="0"
-  class="c16">
+  class="c19">
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c9">2. Lookup the 'base value' in the table
+          <span class="c7">2. Lookup the 'base value' in the table
           'XT3_Base_Hashes' using the fields <b>Calc_method,
           Adventurous_Route_mode,</b> and
           <b>Traction/Clearance</b></span>
         </div>
         <div align="left">
-          <span class="c14">XT3_Base_Hashes: array[0..6] of
+          <span class="c17">XT3_Base_Hashes: array[0..6] of
           TKnownHash = (</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmFaster;</span>
+          <span class="c17">&nbsp; (CM: cmFaster;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           <b>$0A4F0000;</b> HashT3: $0A1F0000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $023F0000;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $023F0000;
           Hash2WDHClear: $02000000; Hash4WD: $026F0000;
           Hash4WDHClear: $02700000),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmShorter;</span>
+          <span class="c17">&nbsp; (CM: cmShorter;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           $07E00000; HashT3: $07D00000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $00300010;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $00300010;
           Hash2WDHClear: $002F0010; Hash4WD: $0FC00000;
           Hash4WDHClear: $0FFF0000),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmStraight;</span>
+          <span class="c17">&nbsp; (CM: cmStraight;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           $079B0000; HashT3: $07CB0000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $002B0010;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $002B0010;
           Hash2WDHClear: $002C0010; Hash4WD: $0FFB0000;
           Hash4WDHClear: $0FFC0000),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmAdv; AdvLvl:
+          <span class="c17">&nbsp; (CM: cmAdv; AdvLvl:
           advL1;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           $0A4A0000; HashT3: $0A1A0000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $023A0000;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $023A0000;
           Hash2WDHClear: $02390000; Hash4WD: $026A0000;
           Hash4WDHClear: $02690000),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmAdv; AdvLvl:
+          <span class="c17">&nbsp; (CM: cmAdv; AdvLvl:
           advL2;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           $0A7A0000; HashT3: $0A6A0000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $020A0000;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $020A0000;
           Hash2WDHClear: $02090000; Hash4WD: $021A0000;
           Hash4WDHClear: $02190000),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmAdv; AdvLvl:
+          <span class="c17">&nbsp; (CM: cmAdv; AdvLvl:
           advL3;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           $0AAA0000; HashT3: $0A3A0000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $021A0000;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $021A0000;
           Hash2WDHClear: $02190000; Hash4WD: $020A0000;
           Hash4WDHClear: $02090000),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (CM: cmAdv; AdvLvl:
+          <span class="c17">&nbsp; (CM: cmAdv; AdvLvl:
           advL4;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; HashT2:&nbsp;
           $0A5A0000; HashT3: $0A0A0000;</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; Hash2WD: $026A0000;
+          <span class="c17">&nbsp;&nbsp;&nbsp; Hash2WD: $026A0000;
           Hash2WDHClear: $02690000; Hash4WD: $023A0000;
           Hash4WDHClear: $02390000)</span>
         </div>
         <div align="left">
-          <span class="c14">);</span>
+          <span class="c17">);</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15">
+      <td valign="top" width="321" class="c18">
         <div align="left">
-          <span class="c9">TProfCalcMethod&nbsp; = (cmFaster = 0,
+          <span class="c7">TProfCalcMethod&nbsp; = (cmFaster = 0,
           cmShorter = 1, cmStraight = 4, cmAdv = 7);</span>
         </div>
         <div align="left">
-          <span class="c9">For this example:</span>
+          <span class="c7">For this example:</span>
         </div>
         <div align="left">
-          <span class="c9">Adventurous_Route_mode is not
+          <span class="c7">Adventurous_Route_mode is not
           used.</span>
         </div>
         <div align="left">
-          <span class="c9">Clearance is not used.</span>
+          <span class="c7">Clearance is not used.</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c9">TTraction = (tr2WD = 1, tr4WD = 2,
+          <span class="c7">TTraction = (tr2WD = 1, tr4WD = 2,
           tr3Wheels = 3, tr2Wheels = 4);</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c9">HashT2 = Bike 2 Wheels</span>
+          <span class="c7">HashT2 = Bike 2 Wheels</span>
         </div>
         <div align="left">
-          <span class="c9">HashT3 = Bike 3 Wheels</span>
+          <span class="c7">HashT3 = Bike 3 Wheels</span>
         </div>
         <div align="left">
-          <span class="c9">Hash2WD = Car 2WD</span>
+          <span class="c7">Hash2WD = Car 2WD</span>
         </div>
         <div align="left">
-          <span class="c9">Hash2WDClear = Car 2WD High
+          <span class="c7">Hash2WDClear = Car 2WD High
           Clearance</span>
         </div>
         <div align="left">
-          <span class="c9">Hash4WD = Car 4WD</span>
+          <span class="c7">Hash4WD = Car 4WD</span>
         </div>
         <div align="left">
-          <span class="c9">Hash4WDClear = Car 4WD High
+          <span class="c7">Hash4WDClear = Car 4WD High
           Clearance</span>
         </div>
         <div align="left">
@@ -431,150 +485,150 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c9">This gives the base value:</span>
-          <span class="c17">$0A4F0000</span>
+          <span class="c7">This gives the base value:</span>
+          <span class="c20">$0A4F0000</span>
         </div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c9">3. Use the high nibble of Width,
+          <span class="c7">3. Use the high nibble of Width,
           Env_Data and Road_Legality to add the value for
           'Legal_Environments' to the Base_Hash.</span>
         </div>
         <div align="left">
-          <span class="c14">XT3_Legal_Environments: array[0..$f,
+          <span class="c17">XT3_Legal_Environments: array[0..$f,
           TRoadLegality, TProfEnvironment] of Cardinal =</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; (</span>
+          <span class="c17">&nbsp; (</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; // Not legal, Not
+          <span class="c17">&nbsp;&nbsp;&nbsp; // Not legal, Not
           impl.&nbsp;&nbsp;&nbsp;&nbsp; Not Highway
           legal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Legal</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; // Avoid&nbsp;&nbsp;
+          <span class="c17">&nbsp;&nbsp;&nbsp; // Avoid&nbsp;&nbsp;
           Allow&nbsp; Ask&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           Avoid&nbsp; Allow&nbsp; Ask&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           Avoid&nbsp; Allow&nbsp; Ask</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($9000, $8000, $b000), ($a000, $b000,
           $8000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($8000, $9000, $a000), ($b000, <b class=
-          "c18">$a000,</b> $9000) ),</span>
+          "c21">$a000,</b> $9000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($7000, $6000, $5000), ($4000, $5000,
           $6000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($6000, $7000, $4000), ($5000, $4000,
           $7000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($5000, $4000, $7000), ($6000, $7000,
           $4000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($4000, $5000, $6000), ($7000, $6000,
           $5000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($3000, $2000, $1000), ($0000, $1000,
           $2000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($2000, $3000, $0000), ($1000, $0000,
           $3000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($1000, $0000, $3000), ($2000, $3000,
           $0000) ),</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
+          <span class="c17">&nbsp;&nbsp;&nbsp; ( ($0000, $0000,
           $0000),&nbsp; ($0000, $0000, $0000), ($0000, $0000,
           $0000) )</span>
         </div>
         <div align="left">
-          <span class="c14">&nbsp; );</span>
+          <span class="c17">&nbsp; );</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15">
+      <td valign="top" width="321" class="c18">
         <div align="left">
-          <span class="c9">For Width use only the high
+          <span class="c7">For Width use only the high
           nibble.</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c9">TRoadLegality = (rlNone = 0, rlNoHighway
+          <span class="c7">TRoadLegality = (rlNone = 0, rlNoHighway
           = 1, rlLegal = 2);</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c9">TProfEnvironment = (enAvoid = 0, enAllow
+          <span class="c7">TProfEnvironment = (enAvoid = 0, enAllow
           = 1, enAsk = 2);</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c9">Width: 120 = 0x78 =&gt; 7</span>
+          <span class="c7">Width: 120 = 0x78 =&gt; 7</span>
         </div>
         <div align="left">
-          <span class="c9">Legal: 2</span>
+          <span class="c7">Legal: 2</span>
         </div>
         <div align="left">
-          <span class="c9">Environment: 1</span>
+          <span class="c7">Environment: 1</span>
         </div>
         <div align="left">
           <br>
@@ -598,8 +652,8 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c17">$0A4F0000+$A000</span><span class=
-          "c6">=</span><span class="c17">$0A4FA000</span>
+          <span class="c20">$0A4F0000+$A000</span><span class=
+          "c5">=</span><span class="c20">$0A4FA000</span>
         </div>
       </td>
     </tr>
@@ -608,11 +662,11 @@
     <br>
   </div><br clear="all" class="c12">
   <table border="1" width="1308" cellpadding="4" cellspacing="0"
-  class="c16">
+  class="c19">
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c9">4. Use the values of the low nibble of
+          <span class="c7">4. Use the values of the low nibble of
           <b>Width</b> and <b>Max_Vehicle_Speed,</b> to complete
           the calculation.</span>
         </div>
@@ -620,8 +674,8 @@
           <br>
         </div>
         <div align="left">
-          <span class="c9">Background info. The value</span>
-          <span class="c6"><b>Max_Vehicle_Speed</b> in the Vehicle
+          <span class="c7">Background info. The value</span>
+          <span class="c5"><b>Max_Vehicle_Speed</b> in the Vehicle
           profile is expressed as Decimeters/Sec. In the Sample
           data <b>Max_Vehicle_Speed</b> = 0, meaning no
           restriction. See below for an example of max speed 60
@@ -631,167 +685,167 @@
           <br>
         </div>
         <div align="left">
-          <span class="c6">Step 1: Write the value as 3
+          <span class="c5">Step 1: Write the value as 3
           nibbles.</span>
         </div>
         <div align="left">
-          <span class="c6">0 = &gt; 0x000</span>
+          <span class="c5">0 = &gt; 0x000</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15"></td>
+      <td valign="top" width="321" class="c18"></td>
     </tr>
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c6">Nibble1: 0. Add this to the 2nd Nibble
+          <span class="c5">Nibble1: 0. Add this to the 2nd Nibble
           of HashValue:</span> <span class=
-          "c19">$0<b>A</b>4FA000</span>
+          "c22">$0<b>A</b>4FA000</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c6">Note: Need values 90kmh or higher for a
+          <span class="c5">Note: Need values 90kmh or higher for a
           value &gt; 0.</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15">
+      <td valign="top" width="321" class="c18">
         <div align="left">
-          <span class="c6">Nibble 1 Speed: 0</span>
+          <span class="c5">Nibble 1 Speed: 0</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
           <span class=
-          "c19">$0<b>A</b>4FA000+<b>$0</b>=$0<b>A</b>4FA000</span>
+          "c22">$0<b>A</b>4FA000+<b>$0</b>=$0<b>A</b>4FA000</span>
         </div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="969" height="67" class="c15">
+      <td valign="top" width="969" height="67" class="c18">
         <div align="left">
-          <span class="c6">Nibble:2 0. Use the</span> <span class=
-          "c9">low nibble of <b>Width</b> and the 2nd nibble
-          of&nbsp;</span> <span class="c9"><b>Max_Vehicle_Speed</b>
-          to</span> <span class="c6">lookup the value in table
+          <span class="c5">Nibble:2 0. Use the</span> <span class=
+          "c7">low nibble of <b>Width</b> and the 2nd nibble
+          of&nbsp;</span> <span class="c7"><b>Max_Vehicle_Speed</b>
+          to</span> <span class="c5">lookup the value in table
           Speed2Tab and add that value to the 6th Nibble:</span>
-          <span class="c19">$0A4FA<b>0</b>00</span>
+          <span class="c22">$0A4FA<b>0</b>00</span>
         </div>
         <div align="left">
-          <span class="c20">Speed2Tab: array[0..$f, 0..$f] of byte
+          <span class="c23">Speed2Tab: array[0..$f, 0..$f] of byte
           =</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp; (</span>
+          <span class="c23">&nbsp; (</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($7&nbsp; ,$6&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($7&nbsp; ,$6&nbsp;
           ,$5&nbsp; ,$4&nbsp; ,$3&nbsp; ,$2&nbsp; ,$1&nbsp;
           ,$0&nbsp; ,$f&nbsp; ,$e&nbsp; ,$d&nbsp; ,$c&nbsp;
           ,$b&nbsp; ,$a&nbsp; ,$9&nbsp; ,$8),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($6&nbsp; ,$7&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($6&nbsp; ,$7&nbsp;
           ,$4&nbsp; ,$5&nbsp; ,$2&nbsp; ,$3&nbsp; ,$0&nbsp;
           ,$1&nbsp; ,$e&nbsp; ,$f&nbsp; ,$c&nbsp; ,$d&nbsp;
           ,$a&nbsp; ,$b&nbsp; ,$8&nbsp; ,$9),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($5&nbsp; ,$4&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($5&nbsp; ,$4&nbsp;
           ,$7&nbsp; ,$6&nbsp; ,$1&nbsp; ,$0&nbsp; ,$3&nbsp;
           ,$2&nbsp; ,$d&nbsp; ,$c&nbsp; ,$f&nbsp; ,$e&nbsp;
           ,$9&nbsp; ,$8&nbsp; ,$b&nbsp; ,$a),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($4&nbsp; ,$5&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($4&nbsp; ,$5&nbsp;
           ,$6&nbsp; ,$7&nbsp; ,$0&nbsp; ,$1&nbsp; ,$2&nbsp;
           ,$3&nbsp; ,$c&nbsp; ,$d&nbsp; ,$e&nbsp; ,$f&nbsp;
           ,$8&nbsp; ,$9&nbsp; ,$a&nbsp; ,$b),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($3&nbsp; ,$2&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($3&nbsp; ,$2&nbsp;
           ,$1&nbsp; ,$0&nbsp; ,$7&nbsp; ,$6&nbsp; ,$5&nbsp;
           ,$4&nbsp; ,$b&nbsp; ,$a&nbsp; ,$9&nbsp; ,$8&nbsp;
           ,$f&nbsp; ,$e&nbsp; ,$d&nbsp; ,$c),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($2&nbsp; ,$3&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($2&nbsp; ,$3&nbsp;
           ,$0&nbsp; ,$1&nbsp; ,$6&nbsp; ,$7&nbsp; ,$4&nbsp;
           ,$5&nbsp; ,$a&nbsp; ,$b&nbsp; ,$8&nbsp; ,$9&nbsp;
           ,$e&nbsp; ,$f&nbsp; ,$c&nbsp; ,$d),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($1&nbsp; ,$0&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($1&nbsp; ,$0&nbsp;
           ,$3&nbsp; ,$2&nbsp; ,$5&nbsp; ,$4&nbsp; ,$7&nbsp;
           ,$6&nbsp; ,$9&nbsp; ,$8&nbsp; ,$b&nbsp; ,$a&nbsp;
           ,$d&nbsp; ,$c&nbsp; ,$f&nbsp; ,$e),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($0&nbsp; ,$1&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($0&nbsp; ,$1&nbsp;
           ,$2&nbsp; ,$3&nbsp; ,$4&nbsp; ,$5&nbsp; ,$6&nbsp;
           ,$7&nbsp; ,$8&nbsp; ,$9&nbsp; ,$a&nbsp; ,$b&nbsp;
           ,$c&nbsp; ,$d&nbsp; ,$e&nbsp; ,$f),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; <b class=
-          "c18">($f</b>&nbsp; ,$e&nbsp; ,$d&nbsp; ,$c&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; <b class=
+          "c21">($f</b>&nbsp; ,$e&nbsp; ,$d&nbsp; ,$c&nbsp;
           ,$b&nbsp; ,$a&nbsp; ,$9&nbsp; ,$8&nbsp; ,$7&nbsp;
           ,$6&nbsp; ,$5&nbsp; ,$4&nbsp; ,$3&nbsp; ,$2&nbsp;
           ,$1&nbsp; ,$0),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($e&nbsp; ,$f&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($e&nbsp; ,$f&nbsp;
           ,$c&nbsp; ,$d&nbsp; ,$a&nbsp; ,$b&nbsp; ,$8&nbsp;
           ,$9&nbsp; ,$6&nbsp; ,$7&nbsp; ,$4&nbsp; ,$5&nbsp;
           ,$2&nbsp; ,$3&nbsp; ,$0&nbsp; ,$1),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($d&nbsp; ,$c&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($d&nbsp; ,$c&nbsp;
           ,$f&nbsp; ,$e&nbsp; ,$9&nbsp; ,$8&nbsp; ,$b&nbsp;
           ,$a&nbsp; ,$5&nbsp; ,$4&nbsp; ,$7&nbsp; ,$6&nbsp;
           ,$1&nbsp; ,$0&nbsp; ,$3&nbsp; ,$2),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($c&nbsp; ,$d&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($c&nbsp; ,$d&nbsp;
           ,$e&nbsp; ,$f&nbsp; ,$8&nbsp; ,$9&nbsp; ,$a&nbsp;
           ,$b&nbsp; ,$4&nbsp; ,$5&nbsp; ,$6&nbsp; ,$7&nbsp;
           ,$0&nbsp; ,$1&nbsp; ,$2&nbsp; ,$3),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($b&nbsp; ,$a&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($b&nbsp; ,$a&nbsp;
           ,$9&nbsp; ,$8&nbsp; ,$f&nbsp; ,$e&nbsp; ,$d&nbsp;
           ,$c&nbsp; ,$3&nbsp; ,$2&nbsp; ,$1&nbsp; ,$0&nbsp;
           ,$7&nbsp; ,$6&nbsp; ,$5&nbsp; ,$4),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($a&nbsp; ,$b&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($a&nbsp; ,$b&nbsp;
           ,$8&nbsp; ,$9&nbsp; ,$e&nbsp; ,$f&nbsp; ,$c&nbsp;
           ,$d&nbsp; ,$2&nbsp; ,$3&nbsp; ,$0&nbsp; ,$1&nbsp;
           ,$6&nbsp; ,$7&nbsp; ,$4&nbsp; ,$5),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($9&nbsp; ,$8&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($9&nbsp; ,$8&nbsp;
           ,$b&nbsp; ,$a&nbsp; ,$d&nbsp; ,$c&nbsp; ,$f&nbsp;
           ,$e&nbsp; ,$1&nbsp; ,$0&nbsp; ,$3&nbsp; ,$2&nbsp;
           ,$5&nbsp; ,$4&nbsp; ,$7&nbsp; ,$6),</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp;&nbsp; ($8&nbsp; ,$9&nbsp;
+          <span class="c23">&nbsp;&nbsp;&nbsp; ($8&nbsp; ,$9&nbsp;
           ,$a&nbsp; ,$b&nbsp; ,$c&nbsp; ,$d&nbsp; ,$e&nbsp;
           ,$f&nbsp; ,$0&nbsp; ,$1&nbsp; ,$2&nbsp; ,$3&nbsp;
           ,$4&nbsp; ,$5&nbsp; ,$6&nbsp; ,$7)</span>
         </div>
         <div align="left">
-          <span class="c21">&nbsp; )<b>;</b></span>
+          <span class="c24">&nbsp; )<b>;</b></span>
         </div>
       </td>
-      <td valign="top" width="321" height="67" class="c15">
+      <td valign="top" width="321" height="67" class="c18">
         <div align="left">
-          <span class="c6">Low nibble Width: 8</span>
+          <span class="c5">Low nibble Width: 8</span>
         </div>
         <div align="left">
-          <span class="c6">Nibble 2 Speed: 0</span>
+          <span class="c5">Nibble 2 Speed: 0</span>
         </div>
         <div align="left">
           <br>
@@ -839,62 +893,62 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c19">$0A4FA<b>0</b>00</span><span class=
-          "c22">+$F00=</span><span class=
-          "c19">$0A4FA<b>F</b>00</span>
+          <span class="c22">$0A4FA<b>0</b>00</span><span class=
+          "c11">+$F00=</span><span class=
+          "c22">$0A4FA<b>F</b>00</span>
         </div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c6">Nibble:3 0. Use the values for <b>Bike,
+          <span class="c5">Nibble:3 0. Use the values for <b>Bike,
           Imperial</b> and the <b>3rd</b> nibble of <b>speed</b> to
           lookup the nibble the value in table Speed3Tab and add
           that value to the 7th nibble:</span> <span class=
-          "c19">$0A4FA0<b>0</b>0</span>
+          "c22">$0A4FA0<b>0</b>0</span>
         </div>
         <div align="left">
-          <span class="c20">Speed3Tab: array[boolean, boolean,
+          <span class="c23">Speed3Tab: array[boolean, boolean,
           0..$f] of byte =</span>
         </div>
         <div align="left">
-          <span class="c20">(</span>
+          <span class="c23">(</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp; (($1, $0, $3, $2, $5, $4, $7,
+          <span class="c23">&nbsp; (($1, $0, $3, $2, $5, $4, $7,
           $6, $9, $8, $b, $a, $d, $c, $f, $e),&nbsp;&nbsp;
           //Car,&nbsp; Metric</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp; ($d, $c, $f, $e, $9, $8,
+          <span class="c23">&nbsp;&nbsp; ($d, $c, $f, $e, $9, $8,
           $b, $a, $5, $4, $7, $6, $1, $0, $3, $2)),&nbsp;
           //Car,&nbsp; Imperial</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp; ((<b>$2</b>, $3, $0, $1, $6, $7,
+          <span class="c23">&nbsp; ((<b>$2</b>, $3, $0, $1, $6, $7,
           $4, $5, $a, $b, $8, $9, $e, $f, $c, $d),&nbsp;&nbsp;
           //Bike, Metric</span>
         </div>
         <div align="left">
-          <span class="c20">&nbsp;&nbsp; ($e, $f, $c, $d, $a, $b,
+          <span class="c23">&nbsp;&nbsp; ($e, $f, $c, $d, $a, $b,
           $8, $9, $6, $7, $4, $5, $2, $3, $0, $1))&nbsp;&nbsp;
           //Bike, Imperial</span>
         </div>
         <div align="left">
-          <span class="c20">);</span>
+          <span class="c23">);</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15">
+      <td valign="top" width="321" class="c18">
         <div align="left">
-          <span class="c6">Bike: true (Truck_Type: 7=Bike,
+          <span class="c5">Bike: true (Truck_Type: 7=Bike,
           11=Car)</span>
         </div>
         <div align="left">
-          <span class="c6">Imperial: false (Width_metric=1)</span>
+          <span class="c5">Imperial: false (Width_metric=1)</span>
         </div>
         <div align="left">
-          <span class="c6">Nibble 3 speed: 0</span>
+          <span class="c5">Nibble 3 speed: 0</span>
         </div>
         <div align="left">
           <br>
@@ -909,63 +963,63 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c19">$0A4FAF<b>0</b>0</span><span class=
-          "c5">+ $20=</span><span class=
-          "c19">$0A4FAF<b>2</b>0</span>
+          <span class="c22">$0A4FAF<b>0</b>0</span><span class=
+          "c10">+ $20=</span><span class=
+          "c22">$0A4FAF<b>2</b>0</span>
         </div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c6">4<b>. 60 kmh example.</b></span>
+          <span class="c5">4<b>. 60 kmh example.</b></span>
         </div>
         <div align="left">
-          <span class="c6">60 kmh corresponds to <b>166</b> Dm/sec
+          <span class="c5">60 kmh corresponds to <b>166</b> Dm/sec
           in the vehicle profile.</span>
         </div>
         <div align="left">
-          <span class="c6">166 =&gt; 0x0a6</span>
+          <span class="c5">166 =&gt; 0x0a6</span>
         </div>
         <div align="left">
-          <span class="c6">Width 120 =&gt; 0x78</span>
+          <span class="c5">Width 120 =&gt; 0x78</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15"></td>
+      <td valign="top" width="321" class="c18"></td>
     </tr>
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c6">Nibble 1 speed: 0</span>
+          <span class="c5">Nibble 1 speed: 0</span>
         </div>
         <div align="left"></div>
       </td>
-      <td valign="top" width="321" class="c15">
+      <td valign="top" width="321" class="c18">
         <div align="left">
           <br>
         </div>
         <div align="left">
           <span class=
-          "c19">$0<b>A</b>4FA000+<b>$0</b>=$0<b>A</b>4FA000</span>
+          "c22">$0<b>A</b>4FA000+<b>$0</b>=$0<b>A</b>4FA000</span>
         </div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="969" height="45" class="c15">
+      <td valign="top" width="969" height="45" class="c18">
         <div align="left">
-          <span class="c6">Low nibble width: 0x08</span>
+          <span class="c5">Low nibble width: 0x08</span>
         </div>
         <div align="left">
-          <span class="c6">Nibble 2 speed: 0x0a</span>
+          <span class="c5">Nibble 2 speed: 0x0a</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c6">Speed2Tab[0x08, 0x0a] = 5</span>
+          <span class="c5">Speed2Tab[0x08, 0x0a] = 5</span>
         </div>
       </td>
-      <td valign="top" width="321" height="45" class="c15">
+      <td valign="top" width="321" height="45" class="c18">
         <div align="left">
           <br>
         </div>
@@ -976,26 +1030,26 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c19">$0A4FA<b>0</b>00</span><span class=
-          "c5">+$500=</span><span class=
-          "c19">$0A4FA<b>5</b>00</span>
+          <span class="c22">$0A4FA<b>0</b>00</span><span class=
+          "c10">+$500=</span><span class=
+          "c22">$0A4FA<b>5</b>00</span>
         </div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="969" class="c15">
+      <td valign="top" width="969" class="c18">
         <div align="left">
-          <span class="c6">Bike: true, Imperial: false, Nibble 3
+          <span class="c5">Bike: true, Imperial: false, Nibble 3
           speed: 0x06</span>
         </div>
         <div align="left">
           <br>
         </div>
         <div align="left">
-          <span class="c6">Speed3Tab[true, false, 0x06] = 4</span>
+          <span class="c5">Speed3Tab[true, false, 0x06] = 4</span>
         </div>
       </td>
-      <td valign="top" width="321" class="c15">
+      <td valign="top" width="321" class="c18">
         <div align="left">
           <br>
         </div>
@@ -1003,56 +1057,56 @@
           <span class="c13"><br></span>
         </div>
         <div align="left">
-          <span class="c19">$0A4FA5<b>0</b>0</span><span class=
-          "c5">+$40 =</span><span class=
-          "c19">$0A4FA5<b>4</b>0</span>
+          <span class="c22">$0A4FA5<b>0</b>0</span><span class=
+          "c10">+$40 =</span><span class=
+          "c22">$0A4FA5<b>4</b>0</span>
         </div>
       </td>
     </tr>
   </table>
   <div align="left">
-    <span class="c22">Screenshots defining the profile</span>
+    <span class="c11">Screenshots defining the profile</span>
   </div>
   <table border="1" width="648" cellpadding="4" cellspacing="0"
-  class="c16">
+  class="c19">
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b2.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b3.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b4.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b5.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b6.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b7.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>
     </tr>
     <tr>
-      <td valign="top" width="639" class="c15">
+      <td valign="top" width="639" class="c18">
         <div align="left"><img src="vehicleprofilehashxt3b8.PNG"
         width="640" height="360" border="0" alt="graphic"></div>
       </td>

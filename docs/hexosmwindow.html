@@ -15,7 +15,7 @@
   span.c14 {font-size: 14pt; text-decoration: underline}
   span.c13 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
   div.c12 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  span.c11 {color: #010101; font-family: Symbol; font-size: 120%}
+  span.c11 {font-family: Symbol; font-size: 120%}
   span.c10 {font-family: Calibri; font-size: 120%; font-weight: bold}
   span.c9 {color: #010101}
   br.c8 {page-break-before:always}
@@ -83,42 +83,48 @@
     <br>
   </div>
   <div align="left">
-    <span class="c7">The OSM shows the selected trip. Shaping
+    <span class="c7">The OSM Map shows the selected trip. Shaping
     points are blue bullets, Via points are red. Lines between
     points are drawn in the color specified in settings. (default:
     Magenta) If the trip is calculated lines are drawn between
     UdbDir’s and follow the road more precisely. If you select a
-    Location, or an mUdbDataHndle a popup is shown on the map. You
-    can add routes/tracks from a gpx to the map as an overlay, to
-    compare the calculated trip with.</span>
+    Location, or an mUdbDataHndle in the Treeview, a popup is shown
+    on the map. You can add routes/tracks from a gpx to the map as
+    an overlay, to compare the calculated trip
+    with.</span><span class="c9"><br clear="all" class="c8"></span>
   </div>
   <div align="left">
     <br>
-  </div><span class="c9"><br clear="all" class="c8"></span>
+  </div>
   <div align="left">
     <span class="c10">Tips:</span>
   </div>
   <div align="left" class="c12">
     <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c7">Hold, and move the left mouse button to position the
-    map.Use the Mouse wheel to zoom.</span>
+    "c5">Hold, and move the left mouse button to position the map.
+    Use the Mouse wheel to zoom.</span>
   </div>
   <div align="left" class="c12">
     <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c7">Use CTRL + Mouse wheel to change the font size.</span>
+    "c7">Move the mouse while pressing Shift to zoom in on the
+    selected rectangle.</span>
   </div>
   <div align="left" class="c12">
     <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
-    "c7">Use CTRL + Left Click to get the exact gps coordinates in
+    "c5">Use CTRL + Mouse wheel to change the font size.</span>
+  </div>
+  <div align="left" class="c12">
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c5">Use CTRL + Left Click to get the exact gps coordinates in
     the edit box.</span>
   </div>
   <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c7">If
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c5">If
     you hover the mouse above a line, it shows the trip name in the
     edit box.</span>
   </div>
   <div align="left" class="c12">
-    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c7">If
+    <span class="c11">·&nbsp;&nbsp;&nbsp;</span><span class="c5">If
     you hover the mouse above a blue/red point, it shows the
     via/shaping point name in the edit box.</span>
   </div>
@@ -162,11 +168,61 @@
   </div>
   <div align="left">
     <span class="c5">Enabled if a <b>mScnPosn</b> item is selected
-    in the grid, or the <b>TripEditor</b> (See</span> <a class=
+    in the grid, or the <b>Trip Editor</b> (See</span> <a class=
     "c15" href="12usingtripeditor.html"><span class="c14">12. Using
     TripEditor</span></a><span class="c5">) is active. Copies the
     currently selected coordinates from the map to the trip.</span>
   </div>
+  <div align="left">
+    <br>
+  </div><span class="c9"><br clear="all" class="c8"></span>
+  <div align="left">
+    <span class="c10">Integration with the Trip Editor</span>
+    <a name="integrate_map_editor" id="integrate_map_editor"></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">The Trip Editor and the map cooperate,
+    improving the Trip Editor visually.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Selecting a route point in the Trip Editor
+    shows a popup of the selected route point.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">If you hold the CTRL key and move over a route
+    point in the map, that route point will get selected in the
+    Trip Editor.</span>
+  </div>
+  <div align="left">
+    <span class="c5">To change the location of a route point, CTRL
+    + Click on the map to set the exact location and press 'Apply
+    Coordinates', or the small button in the Trip Editor.</span>
+  </div>
+  <div align="left">
+    <span class="c5">Holding the CTRL while Right clicking on the
+    map brings up a context menu allowing you to Insert/Move/Delete
+    a route point. Or update the route preview.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table width="1116" cellpadding="4" cellspacing="0" class="c6">
+    <tr>
+      <td valign="top" width="1108">
+        <div align="left"><img src="hexosmwindowb3.JPG" width=
+        "1094" height="582" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
   <div align="left">
     <br>
   </div><span class="c9"><br clear="all" class="c8"></span>
@@ -187,7 +243,7 @@
   <table width="666" cellpadding="4" cellspacing="0" class="c6">
     <tr>
       <td valign="top" width="658">
-        <div align="left"><img src="hexosmwindowb3.JPG" width="640"
+        <div align="left"><img src="hexosmwindowb4.JPG" width="640"
         height="687" border="0" alt="graphic"></div>
       </td>
     </tr>
@@ -205,7 +261,7 @@
         <div align="left">
           <br>
         </div>
-        <div align="left"><img src="hexosmwindowb4.JPG" width="806"
+        <div align="left"><img src="hexosmwindowb5.JPG" width="806"
         height="453" border="0" alt="graphic"></div>
         <div align="left"></div>
       </td>

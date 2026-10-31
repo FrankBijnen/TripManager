@@ -10,21 +10,23 @@
   body {
   background-color: #FFFFFF;
   }
-  span.c21 {font-size:14pt;background:#ffffff}
-  span.c20 {font-size:14pt;background:#ff00ff}
-  a.c19 {color: #0000FF; font-family: Calibri; font-size: 120%}
-  span.c18 {font-size: 14pt; text-decoration: underline}
-  span.c17 {font-family: Calibri; font-size: 120%}
-  div.c16 {margin-left:13mm; margin-right:0mm; text-indent:0mm;}
-  span.c15 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
-  td.c14 {border: solid #010101 1px;}
-  table.c13 {border-collapse: collapse; border: none}
-  span.c12 {color: #010101}
-  br.c11 {page-break-before:always}
-  div.c10 {margin-left:13mm; margin-right:0mm; text-indent:-6mm;}
-  span.c9 {color: #010101; font-family: Symbol; font-size: 120%}
-  div.c8 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
-  span.c7 {color: #010101; font-family: Symbol; font-size: 12pt}
+  span.c23 {font-family: Calibri; font-size: 120%; font-weight: bold}
+  span.c22 {font-size:14pt;background:#ffffff}
+  span.c21 {font-size:14pt;background:#ff00ff}
+  span.c20 {font-family: Calibri; font-size: 120%}
+  div.c19 {margin-left:13mm; margin-right:0mm; text-indent:0mm;}
+  span.c18 {color: #010101; font-family: Calibri; font-size: 120%; font-weight: bold}
+  td.c17 {border: solid #010101 1px;}
+  table.c16 {border-collapse: collapse; border: none}
+  div.c15 {margin-left:13mm; margin-right:0mm; text-indent:-6mm;}
+  span.c14 {color: #010101; font-family: Symbol; font-size: 12pt}
+  span.c13 {color: #010101}
+  br.c12 {page-break-before:always}
+  div.c11 {margin-left:6mm; margin-right:0mm; text-indent:-6mm;}
+  span.c10 {color: #010101; font-family: Symbol; font-size: 120%}
+  a.c9 {color: #0000FF; font-family: Calibri; font-size: 120%}
+  span.c8 {font-size: 14pt; text-decoration: underline}
+  span.c7 {color: #010101; font-family: Calibri; font-size: 120%; font-style: italic}
   span.c6 {color: #010101; font-family: Calibri; font-size: 120%}
   span.c5 {color: #0000FF; font-family: Calibri; font-size: 120%; font-weight: bold}
   table.c4 {background-color: #FFFFFF}
@@ -58,74 +60,131 @@
   </div>
   <div align="left">
     <span class="c6">The Trip Editor should not be considered a
-    full-blown trip planner tool. It can not, and probably never
-    will, calculate a route. The trip file format has not been
-    decoded enough, TripManager does not know anything about
-    routing algorithms in general and more importantly used on the
-    Zumo.</span>
+    full-blown trip planner tool.</span>
   </div>
   <div align="left">
     <br>
   </div>
   <div align="left">
+    <span class="c6">From the pre V1.9 help file:</span>
+  </div>
+  <div align="left">
+    <span class="c7">It can not, and probably never will, calculate
+    a route. The trip file format has not been decoded enough,
+    TripManager does not know anything about routing algorithms in
+    general and more importantly used on the Zumo.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c6">This has changed with V1.9! The Trip Editor
+    can now calculate a route using the route points of the loaded
+    trip. The result can be shown on the map to give a preview
+    which roads will be used, and saved to a GPX file containing a
+    track, and a route containing automatically added shaping
+    points. See</span> <a class="c9" href=
+    "12usingtripeditor.html#routecalculation"><span class=
+    "c8">Route calculation</span></a><span class="c6">.</span>
+  </div>
+  <div align="left">
+    <span class="c6">Notes:</span>
+  </div>
+  <div align="left" class="c11">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The calculation is done using</span> <a class="c9" href=
+    "https://www.geoapify.com/?" target="_blank"><span class=
+    "c8">GeoApify</span></a><span class="c6">'s webservice. Their
+    webservice requires an Api Key, and has different plans,
+    including a</span> <a class="c9" href=
+    "https://www.geoapify.com/pricing/?" target=
+    "_blank"><span class="c8">free plan</span></a><span class=
+    "c6">.</span>
+  </div>
+  <div align="left" class="c11">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The Api Key should be entered in</span> <a class="c9"
+    href="1initialtasks.html#geoapify"><span class="c8">Advanced
+    Settings.</span></a>
+  </div>
+  <div align="left" class="c11">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The route calculation produced by GeoApify is not
+    necessarily the same as on the Zumo. An obvious reason is that
+    Geoapify uses (apparently) OpenStreetMap data to calculate the
+    route, but surely more reasons come in to play.</span>
+  </div>
+  <div align="left" class="c11">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Despite that warning the produced track, together with the
+    route points could actually be used. To put it&nbsp; in
+    perspective, routes created by MyRouteApp, Kurviger, as many
+    other route planners will also recalculate on import, producing
+    something different than planned.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
     <span class="c6">What it can do:</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Review the results of a calculated trip, and make minor
     modifications.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Change general parameters. Trip name, Routing preferences,
     Transport method and Departure date.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Add, or Delete a route point.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Move a route point to a new location.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Reorder the route points.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Create a new empty trip. Add route points from map
     coordinates.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Lookup address information for selected route points and
     save that in the Address field. That info will also be
     available in the Trip planner on the Zumo XT(2)(3). Note that
     the route planner on the XT2/XT3 will only show addresses for
     Via points.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Import/Export route points from/to GPX/CSV files.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Import can read Via and Shaping points from a route in the
     GPX, or Way points. The GPX can be processed by Trk2Rt first to
     automatically add more shaping points.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Export can create a GPX from a trip file, that you can
     import in BC.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    Trip can be opened in Kurviger, for route planning.</span>
+  <div align="left" class="c11">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The Trip can be opened in Kurviger, for route
+    planning.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">It
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">It
     can read/write trip files in folders on your computer’s hard
     drive, and on the Device Zumo XT(2)(3).</span>
   </div>
@@ -138,25 +197,25 @@
     next time it is opened.</span>
   </div><br>
   <br>
-  <span class="c12"><br clear="all" class="c11"></span>
+  <span class="c13"><br clear="all" class="c12"></span>
   <div align="left">
     <span class="c5">Editing an existing trip</span>
   </div>
   <div align="left">
     <br>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Open a trip, from your hard drive, or the device</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Click on <b>Trip Editor</b>, <b>Edit</b></span>
   </div>
   <div align="left">
     <br>
   </div>
-  <table width="1254" cellpadding="7" cellspacing="0" class="c13">
+  <table width="1254" cellpadding="7" cellspacing="0" class="c16">
     <tr>
       <td valign="top" width="1240" height="166">
         <div align="left"><img src="12usingtripeditorb1.JPG" width=
@@ -164,7 +223,7 @@
       </td>
     </tr>
   </table>
-  <table width="438" cellpadding="7" cellspacing="0" class="c13">
+  <table width="438" cellpadding="7" cellspacing="0" class="c16">
     <tr>
       <td valign="top" width="424" height="17">
         <div align="left">
@@ -177,13 +236,13 @@
   </table>
   <div align="left">
     <br>
-  </div><span class="c12"><br clear="all" class="c11"></span>
+  </div><span class="c13"><br clear="all" class="c12"></span>
   <div align="left">
     <span class="c6">The Trip Editor opens up on the left, leaving
     space for the map. Selecting a Route point will update the
     map.</span>
   </div>
-  <table width="1572" cellpadding="4" cellspacing="0" class="c13">
+  <table width="1572" cellpadding="4" cellspacing="0" class="c16">
     <tr>
       <td valign="top" width="1564">
         <div align="left"><img src="12usingtripeditorb3.JPG" width=
@@ -193,7 +252,7 @@
   </table>
   <div align="left">
     <br>
-  </div><span class="c12"><br clear="all" class="c11"></span>
+  </div><span class="c13"><br clear="all" class="c12"></span>
   <div align="left">
     <span class="c5">Creating a new trip</span>
   </div><br>
@@ -209,8 +268,8 @@
   <div align="left">
     <span class="c6">Notes:</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Make sure the selected model matches the model you want to
     create the trip file for. XT, XT2 and XT3 trip files are not
     compatible.</span>
@@ -218,7 +277,7 @@
   <div align="left">
     <br>
   </div>
-  <table width="678" cellpadding="4" cellspacing="0" class="c13">
+  <table width="678" cellpadding="4" cellspacing="0" class="c16">
     <tr>
       <td valign="top" width="670">
         <div align="left"><img src="12usingtripeditorb4.JPG" width=
@@ -229,15 +288,15 @@
   <div align="left">
     <br>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">MTP
-    device will normally be an XT(2)(3), but it is possible to use
-    any MTP device that allows storing files. Hence the term ‘MTP
-    device’ is used.</span>
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">MTP device will normally be an XT(2)(3), but it is
+    possible to use any MTP device that allows storing files. Hence
+    the term ‘MTP device’ is used.</span>
   </div>
-  <div align="left" class="c8">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">New
-    trip (MTP device) is only enabled if an MTP device is
+  <div align="left" class="c11">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">New trip (MTP device) is only enabled if an MTP device is
     connected.</span>
   </div>
   <div align="left">
@@ -246,7 +305,7 @@
   <div align="left">
     <br>
   </div>
-  <table width="648" cellpadding="4" cellspacing="0" class="c13">
+  <table width="648" cellpadding="4" cellspacing="0" class="c16">
     <tr>
       <td valign="top" width="640">
         <div align="left"><img src="12usingtripeditorb5.JPG" width=
@@ -256,14 +315,14 @@
   </table>
   <div align="left">
     <br>
-  </div><span class="c12"><br clear="all" class="c11"></span>
+  </div><span class="c13"><br clear="all" class="c12"></span>
   <div align="left">
     <span class="c6">A blank Trip Editor window opens:</span>
   </div>
   <table border="1" width="1572" cellpadding="4" cellspacing="0"
-  class="c13">
+  class="c16">
     <tr>
-      <td valign="top" width="1563" class="c14">
+      <td valign="top" width="1563" class="c17">
         <div align="left"><img src="12usingtripeditorb6.JPG" width=
         "1354" height="770" border="0" alt="graphic"></div>
       </td>
@@ -276,13 +335,13 @@
     <span class="c5">Trip editor controls</span>
   </div>
   <table border="1" width="1104" cellpadding="4" cellspacing="0"
-  class="c13">
+  class="c16">
     <tr>
-      <td valign="top" width="579" height="56" class="c14">
+      <td valign="top" width="579" height="56" class="c17">
         <div align="left"><img src="12usingtripeditorb7.JPG" width=
         "564" height="587" border="0" alt="graphic"></div>
       </td>
-      <td valign="top" width="507" height="56" class="c14">
+      <td valign="top" width="507" height="56" class="c17">
         <div align="left">
           <span class="c6">Edit boxes <b>TripName, RoutePreference,
           Transportation</b> and <b>Departure</b> can be
@@ -319,29 +378,29 @@
           right:</span>
         </div>
         <div align="left">
-          <span class="c15">Move Up</span>
+          <span class="c18">Move Up</span>
         </div>
         <div align="left">
-          <span class="c15">Insert</span>
+          <span class="c18">Insert</span>
         </div>
         <div align="left">
-          <span class="c15">Delete</span>
+          <span class="c18">Delete</span>
         </div>
         <div align="left">
-          <span class="c15">Move down</span>
+          <span class="c18">Move down</span>
         </div>
         <div align="left">
           <span class="c6"><b>Lookup address</b> (if
           configured)</span>
         </div>
         <div align="left">
-          <span class="c15">GPX</span>
+          <span class="c18">GPX</span>
         </div>
         <div align="left">
           <span class=
           "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Import</span>
         </div>
-        <div align="left" class="c16">
+        <div align="left" class="c19">
           <span class="c6">Trk2RT + Import</span>
         </div>
         <div align="left">
@@ -349,7 +408,7 @@
           "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Export</span>
         </div>
         <div align="left">
-          <span class="c15">CSV</span>
+          <span class="c18">CSV</span>
         </div>
         <div align="left">
           <span class=
@@ -360,9 +419,9 @@
           "c6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Export</span>
         </div>
         <div align="left">
-          <span class="c15">Kurviger</span>
+          <span class="c18">Kurviger</span>
         </div>
-        <div align="left" class="c16">
+        <div align="left" class="c19">
           <span class="c6">Opens the trip in Kurviger</span>
         </div>
         <div align="left">
@@ -396,17 +455,18 @@
   <div align="left">
     <span class="c6">Change a route point:</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">You
-    can change the name and address to something meaningful.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">You can change the name and address to something
+    meaningful.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Change from <b>Shape</b> to <b>Via</b> or vice
     versa.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
     change to GPS position you can overtype the Lat/Lon values, but
     it is easier to use the button ‘Apply coordinates’ from the
     map.</span>
@@ -419,25 +479,26 @@
     <span class="c6">Insert a route point:&nbsp;
     <b>Ctrl+Ins</b></span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    route point will get a default name: ‘RtePt’ + Id</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The route point will get a default name: ‘RtePt’ +
+    Id</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">All
-    route points with default names will be renumbered when (other)
-    route points are inserted.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">All route points with default names will be renumbered
+    when (other) route points are inserted.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    route point will be set to <b>Shape.</b> When saving the trip
-    file, the first and last route point are automatically reset to
-    <b>Via.</b></span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The route point will be set to <b>Shape.</b> When saving
+    the trip file, the first and last route point are automatically
+    reset to <b>Via.</b></span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    route point will get the GPS coordinates from the currently
-    selected point on the map.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The route point will get the GPS coordinates from the
+    currently selected point on the map.</span>
   </div>
   <div align="left">
     <span class="c6">Moving a route point: <b>Alt+Up</b>, or
@@ -446,17 +507,17 @@
   <div align="left">
     <span class="c6">Moving multiple route points:</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Mark the lines to move, using Shift + Cursor keys, or
     Shift/Ctrl+Left mouse button.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">Cut
-    the lines to the clipboard, using Ctrl+X.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">Cut the lines to the clipboard, using Ctrl+X.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Select the line where the route points should be moved to,
     and Paste using Ctrl+V.</span>
   </div>
@@ -467,86 +528,86 @@
   <div align="left">
     <span class="c6">Adding route points using the Map.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Locate the point you want to insert on the map.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">You
-    can use the <b>Search</b> button, or use <b>Ctrl+Left</b> mouse
-    button.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">You can use the <b>Search</b> button, or use
+    <b>Ctrl+Left</b> mouse button.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Select the route point where the new point should be
     inserted after.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Click on the <b>Plus</b> button, or use
-    <b>Ctrl+Ins</b>.</span><span class="c12"><br clear="all" class=
-    "c11"></span>
+    <b>Ctrl+Ins</b>.</span><span class="c13"><br clear="all" class=
+    "c12"></span>
   </div>
   <div align="left">
-    <span class="c17">Updating the Address</span>
+    <span class="c20">Updating the Address</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Select the route points to update, or use CTRL+A to select
     all route points</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Click on the Lookup Address button.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    requests will be throttled, meaning TripManager will issue no
-    more requests/second than specified.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The requests will be throttled, meaning TripManager will
+    issue no more requests/second than specified.</span>
   </div>
   <div align="left">
     <span class="c6">Import route points from a GPX, or CSV</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Click on the GPX/CSV button, and choose Import. Open the
     file.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">A
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">A
     dialog will be shown with the Waypoints and Routes found in the
     GPX.&nbsp; Check what to import.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class="c6">To
     automatically add more shaping points use Trk2Rt + Import. More
     shaping point will create a trip that matches the original
     route closer.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    newly created route points will be added after any existing
-    route points.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The newly created route points will be added after any
+    existing route points.</span>
   </div>
   <div align="left">
     <span class="c6">Export route points to a GPX, or CSV</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Click on the GPX/CSV button, and choose Export.</span>
   </div>
-  <div align="left" class="c10">
-    <span class="c7">·&nbsp;&nbsp;&nbsp;</span><span class="c6">The
-    saved GPX contains only route points. In BC you will need to
-    recalculate.</span>
+  <div align="left" class="c15">
+    <span class="c14">·&nbsp;&nbsp;&nbsp;</span><span class=
+    "c6">The saved GPX contains only route points. In BC you will
+    need to recalculate.</span>
   </div>
   <div align="left">
-    <span class="c6">Open the trip in</span> <a class="c19" href=
+    <span class="c6">Open the trip in</span> <a class="c9" href=
     "https://kurviger.com/en/plan" target="_blank"><span class=
-    "c18">Kurviger</span></a>
+    "c8">Kurviger</span></a>
   </div>
-  <div align="left" class="c10">
-    <span class="c9">·&nbsp;&nbsp;&nbsp;</span><span class=
+  <div align="left" class="c15">
+    <span class="c10">·&nbsp;&nbsp;&nbsp;</span><span class=
     "c6">Click on the blue globe button.</span>
   </div>
   <div align="left">
@@ -568,13 +629,190 @@
   <div align="left">
     <span class="c6">The map will reflect the changes made, and
     connect the route points using straight</span> <span class=
-    "c6"><span class="c20">magenta</span><span class=
-    "c21">.</span></span> <span class="c6">lines.</span>
+    "c6"><span class="c21">magenta</span><span class=
+    "c22">.</span></span> <span class="c6">lines.</span>
   </div>
   <div align="left">
     <span class="c6">You can turn on/off zooming in on a selected
     route point using the checkbox <b>Zoom in on point</b> at the
-    bottom of the map.</span>
+    bottom of the map.</span> <span class="c13"><br clear="all"
+    class="c12"></span>
+  </div>
+  <div align="left">
+    <a name="routecalculation" id="routecalculation"></a>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Route calculation</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c20">Route calculation should be enabled by
+    entering an Api Key in</span> <a class="c9" href=
+    "1initialtasks.html#geoapify"><span class=
+    "c8">Advanced/Setting/Kurviger/GeoApify</span></a><span class=
+    "c6">.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5">Route preview</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c20">With a trip containing route points loaded
+    Right Click and choose Route preview, or CTRL+R.</span>
+  </div>
+  <table bordercolor="#000000" width="612" cellpadding="4"
+  cellspacing="0" class="c16">
+    <tr>
+      <td valign="top" width="604">
+        <div align="left"><img src="12usingtripeditorb8.JPG" width=
+        "587" height="664" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <span class="c6">The calculated route is shown on the map in
+    the color (red) configured in settings.</span>
+  </div>
+  <table bordercolor="#000000" width="708" cellpadding="4"
+  cellspacing="0" class="c16">
+    <tr>
+      <td valign="top" width="700">
+        <div align="left"><img src="12usingtripeditorb9.JPG" width=
+        "693" height="635" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <span class="c6">To limit the calculation to only the route
+    points you're interested in, and thereby not exhausting your
+    credits, select those route points first. (Use Shift, or Ctrl +
+    Left Click)</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table bordercolor="#000000" width="1542" cellpadding="4"
+  cellspacing="0" class="c16">
+    <tr>
+      <td valign="top" width="1534">
+        <div align="left"><img src="12usingtripeditorb10.JPG"
+        width="1523" height="608" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <br>
+  </div><span class="c13"><br clear="all" class="c12"></span>
+  <div align="left">
+    <span class="c6">The route calculation can also be exported to
+    a GPX on Windows, or sent to a connected device. Use the GPX
+    button and select one of the 'calculated' menu options.</span>
+  </div>
+  <div align="left">
+    <span class="c6">The GPX file will contain a track with the
+    calculation result and a route with the route points as loaded
+    in the Trip Editor. There is no guarantee that importing the
+    GPX in your route planner, or Zumo, will produce the same
+    result as GeoApify!</span>
+  </div>
+  <div align="left">
+    <span class="c6">When you set 'Add shaping points in calculated
+    routes' to true, TripManager will add shaping points to the
+    route, in an effort to make the route follow the track closer,
+    but you should always check the result.</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <table bordercolor="#000000" width="954" cellpadding="4"
+  cellspacing="0" class="c16">
+    <tr>
+      <td valign="top" width="946">
+        <div align="left"><img src="12usingtripeditorb11.JPG"
+        width="911" height="584" border="0" alt="graphic"></div>
+      </td>
+    </tr>
+  </table>
+  <div align="left">
+    <span class="c13"><br clear="all" class="c12"></span>
+  </div>
+  <div align="left">
+    <span class="c5">Webservice API</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c20">This is a link to</span> <a class="c9" href=
+    "https://apidocs.geoapify.com/docs/routing//" target=
+    "_blank"><span class="c8">GeoApify documentation</span></a>
+    <span class="c20">describing all the parameters. TripManager
+    uses only these parameters:</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c23">apikey=</span>
+  </div>
+  <div align="left">
+    <span class="c23">waypoints=</span>
+  </div>
+  <div align="left">
+    <span class="c23">mode=motorcycling/drive</span>
+  </div>
+  <div align="left">
+    <span class="c20">taken from the trip file. If automative then
+    drive else motorcycling</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c23">type=balanced/short</span>
+  </div>
+  <div align="left">
+    <span class="c20">taken from the trip file. If shorterdistance
+    then short else balanced</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class=
+    "c23">intermediate_waypoint_mode=through_stop/pass_through</span>
+  </div>
+  <div align="left">
+    <span class="c20">For the export to GPX through_stop else
+    pass_through</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c23">avoid=tolls/ferries/highways</span>
+  </div>
+  <div align="left">
+    <span class="c20">Taken from the settings</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c13"><br></span>
   </div>
   <div align="left"></div>
   <div align="left"></div>

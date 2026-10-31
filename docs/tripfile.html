@@ -3316,7 +3316,7 @@
       </td>
       <td valign="top" width="199" class="c12">
         <div align="left">
-          <span class="c5">1288</span>
+          <span class="c5">1286</span>
         </div>
       </td>
     </tr>
@@ -3333,7 +3333,7 @@
       </td>
       <td valign="top" width="199" class="c12">
         <div align="left">
-          <span class="c5">1448</span>
+          <span class="c5">1446</span>
         </div>
       </td>
     </tr>
@@ -3350,7 +3350,7 @@
       </td>
       <td valign="top" width="199" class="c12">
         <div align="left">
-          <span class="c5">1452</span>
+          <span class="c5">1450</span>
         </div>
       </td>
     </tr>
@@ -3367,7 +3367,7 @@
       </td>
       <td valign="top" width="199" class="c12">
         <div align="left">
-          <span class="c5">1348</span>
+          <span class="c5">1346</span>
         </div>
       </td>
     </tr>
@@ -3393,8 +3393,14 @@
     <span class="c5"><b>UdbDir count</b>: 0x0354=852</span>
   </div>
   <div align="left">
-    <span class="c5"><b>Unknown3:</b> 1288 (XT) 1448 (XT2),
-    1452(XT3) 1348 (Tread 2) bytes</span>
+    <span class="c5"><b>Shaping point count:</b> 0x002d=45</span>
+  </div>
+  <div align="left">
+    <br>
+  </div>
+  <div align="left">
+    <span class="c5"><b>Unknown3:</b> 1286 (XT) 1446 (XT2),
+    1450(XT3) 1346 (Tread 2) bytes</span>
   </div>
   <div align="left">
     <span class="c5">These items have been identified in the
@@ -3403,8 +3409,10 @@
   </div>
   <div align="left">
     <span class="c5">This tables shows the offsets for the XT(2)(3)
-    and Tread 2. For the offsets of other models see:
-    UnitTripDefs.pas</span>
+    and Tread 2. For the offsets of other models see:</span>
+    <a class="c8" href=
+    "https://github.com/FrankBijnen/TripManager/blob/main/CommonUnits/UnitTripDefs.pas/"
+    target="_blank"><span class="c7">UnitTripDefs.pas</span></a>
   </div>
   <div align="left">
     <br>
@@ -3419,7 +3427,7 @@
       </td>
       <td valign="top" width="261" height="35" class="c12">
         <div align="left">
-          <span class="c5">Offset 0x04</span>
+          <span class="c5">Offset 0x02</span>
         </div>
       </td>
       <td valign="top" width="231" height="35" class="c12">
@@ -3442,7 +3450,7 @@
       </td>
       <td valign="top" width="261" height="35" class="c12">
         <div align="left">
-          <span class="c5">Offset 0x14</span>
+          <span class="c5">Offset 0x12</span>
         </div>
       </td>
       <td valign="top" width="231" height="35" class="c12">
@@ -3465,7 +3473,7 @@
       </td>
       <td valign="top" width="261" class="c12">
         <div align="left">
-          <span class="c5">Offset 0x18</span>
+          <span class="c5">Offset 0x16</span>
         </div>
       </td>
       <td valign="top" width="231" class="c12">
@@ -3481,6 +3489,29 @@
       </td>
     </tr>
     <tr>
+      <td valign="top" width="135" height="27" class="c12">
+        <div align="left">
+          <span class="c5">Routepref</span>
+        </div>
+      </td>
+      <td valign="top" width="261" height="27" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x1A</span>
+        </div>
+      </td>
+      <td valign="top" width="231" height="27" class="c12">
+        <div align="left">
+          <span class="c5">1 byte</span>
+        </div>
+      </td>
+      <td valign="top" width="477" height="27" class="c12">
+        <div align="left">
+          <span class="c5">The route preferences (Faster, Shorter,
+          Straight, Adventurous_</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
       <td valign="top" width="135" class="c12">
         <div align="left">
           <span class="c5">9 floats</span>
@@ -3488,7 +3519,7 @@
       </td>
       <td valign="top" width="261" class="c12">
         <div align="left">
-          <span class="c5">Offset 0x20</span>
+          <span class="c5">Offset 0x1E</span>
         </div>
       </td>
       <td valign="top" width="231" class="c12">
@@ -3506,12 +3537,35 @@
     <tr>
       <td valign="top" width="135" class="c12">
         <div align="left">
+          <span class="c5">TransportMode</span>
+        </div>
+      </td>
+      <td valign="top" width="261" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x52</span>
+        </div>
+      </td>
+      <td valign="top" width="231" class="c12">
+        <div align="left">
+          <span class="c5">1 byte</span>
+        </div>
+      </td>
+      <td valign="top" width="477" class="c12">
+        <div align="left">
+          <span class="c5">Transportmode (Automotive,
+          Driving)</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="135" class="c12">
+        <div align="left">
           <span class="c5">Magic</span>
         </div>
       </td>
       <td valign="top" width="261" class="c12">
         <div align="left">
-          <span class="c5">Offset 0x58</span>
+          <span class="c5">Offset 0x56</span>
         </div>
       </td>
       <td valign="top" width="231" class="c12">
@@ -3521,7 +3575,8 @@
       </td>
       <td valign="top" width="477" class="c12">
         <div align="left">
-          <span class="c5">'uVAN'. Not always present</span>
+          <span class="c5">'uVAN'. Only present when calculated byt
+          the Zumo.</span>
         </div>
       </td>
     </tr>
@@ -3550,15 +3605,38 @@
     <tr>
       <td valign="top" width="135" class="c12">
         <div align="left">
+          <span class="c5">TimeStamp</span>
+        </div>
+      </td>
+      <td valign="top" width="261" class="c12">
+        <div align="left">
+          <span class="c5">Offset 0x6a</span>
+        </div>
+      </td>
+      <td valign="top" width="231" class="c12">
+        <div align="left">
+          <span class="c5">4 bytes</span>
+        </div>
+      </td>
+      <td valign="top" width="477" class="c12">
+        <div align="left">
+          <span class="c5">Timestamp of calculation. Appears to be
+          ahead of the current time by a few minutes.</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top" width="135" class="c12">
+        <div align="left">
           <span class="c5">ShapeBitmap</span>
         </div>
       </td>
       <td valign="top" width="261" class="c12">
         <div align="left">
-          <span class="c5">Offset 0x90 for XT</span>
+          <span class="c5">Offset 0x8E for XT</span>
         </div>
         <div align="left">
-          <span class="c5">Offset 0xC0 for XT2, XT3, Tread 2</span>
+          <span class="c5">Offset 0xBE for XT2, XT3, Tread 2</span>
         </div>
       </td>
       <td valign="top" width="231" class="c12">
@@ -3574,7 +3652,7 @@
         </div>
         <div align="left">
           <span class="c5">If the bit is zero a red flag is shown,
-          else a blue bullet on the Zumo</span>
+          else a blue bullet, on the Zumo</span>
         </div>
       </td>
     </tr>
@@ -3825,14 +3903,14 @@
   </div>
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;
-    Prefix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Header&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;
     13|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    unknown&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp;
     4|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -3889,7 +3967,7 @@
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;
     Datatype&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    byte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Byte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |&nbsp;&nbsp;&nbsp; 1|
     0x0b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
@@ -3936,6 +4014,14 @@
   </div>
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;
+    ShapingCount:&nbsp;&nbsp;&nbsp;&nbsp;
+    WORD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;
+    2|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;
     Unknown3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;
     var|
@@ -3949,29 +4035,79 @@
   <div align="left">
     <span class="c33">|Identified fields of
     Unknown3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp;&nbsp; |
+    TripFileVersion&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Unknown3Dist:&nbsp;
-    Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp; 4| TripFileVersion.Unknown3DistOffset&nbsp;
+    Unknown3Bounds:&nbsp;&nbsp;&nbsp;&nbsp; Cardinal&nbsp;
+    |&nbsp;&nbsp; 16|&nbsp;&nbsp;&nbsp;
+    .Unknown3BoundsOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Unknown3Time:&nbsp;
-    Cardinal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    |&nbsp;&nbsp;&nbsp; 4| TripFileVersion.Unknown3TimeOffset&nbsp;
+    Unknown3Dist:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Cardinal&nbsp; |&nbsp;&nbsp;&nbsp; 4|&nbsp;&nbsp;&nbsp;
+    .Unknown3DistOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     |</span>
   </div>
   <div align="left">
     <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Unknown3Shape:
-    TBytes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;
-    var| TripFileVersion.Unknown3ShapeOffset |</span>
+    Unknown3Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Cardinal&nbsp; |&nbsp;&nbsp;&nbsp; 4|&nbsp;&nbsp;&nbsp;
+    .Unknown3TimeOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3RoutePreference&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp; 1|&nbsp;&nbsp;&nbsp;
+    .Unknown3RoutePrefOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3Floats&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp; 36|&nbsp;&nbsp;&nbsp;
+    .Unknown3FloatOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3TransportMode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp; 1|&nbsp;&nbsp;&nbsp;
+    .Unknown3TransportModeOffset&nbsp;&nbsp;&nbsp;&nbsp; |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3Magic:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;
+    .Unknown3MagicOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3Avoidances: Byte&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |&nbsp;&nbsp;&nbsp; 1|&nbsp;&nbsp;&nbsp; .Unknown3MagicOffset
+    +4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3TimeStamp:&nbsp; Cardinal&nbsp; |&nbsp;&nbsp;&nbsp;
+    4|&nbsp;&nbsp;&nbsp;
+    .Unknown3TimeStampOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
+  </div>
+  <div align="left">
+    <span class="c33">|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Unknown3Shape:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    TBytes&nbsp;&nbsp;&nbsp; |&nbsp; var|&nbsp;&nbsp;&nbsp;
+    .Unknown3ShapeOffset&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    |</span>
   </div>
   <div align="left">
     <span class=
