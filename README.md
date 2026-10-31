@@ -5,7 +5,7 @@ Manage the trips on the z&#0361;mo XT, XT2, XT3 and the Tread 2.<br>
 <html>
 <body bgcolor="#FFFFFF">
   <div align="left">
-    <font face="Calibri" color="#010101" size="4"><span style="font-size:14pt">TripManager can be characterized as a <b>toolbox</b> for</span></font> <a href="https://frankbijnen.github.io/TripManager/modelinfo.html"><font face="Calibri" color="#0000FF" size="4"><span style="font-size:14pt"><u>Garmin Zumo models</u></span></font></a><font face="Calibri" color="#010101" size="4"><span style="font-size:14pt">. Targeted at models: <b>XT,&nbsp; XT2, XT3 and Tread 2</b></span></font>
+    <font face="Calibri" color="#010101" size="4"><span style="font-size:14pt">TripManager can be characterized as a <b>toolbox</b> for</span></font> <a href="https://frankbijnen.github.io/TripManager/modelinfo.html"><font face="Calibri" color="#0000FF" size="4"><span style="font-size:14pt"><u>Garmin Zumo models</u></span></font></a><font face="Calibri" color="#010101" size="4"><span style="font-size:14pt">. Targeted at models: <b>XT,&nbsp; XT2, XT3 and Tread&nbsp;2</b></span></font>
   </div>
   <div align="left">
     <br>
