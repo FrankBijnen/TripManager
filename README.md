@@ -103,8 +103,6 @@ Manage the trips on the z&#0361;mo XT, XT2, XT3 and the Tread 2.<br>
 </body>
 </html>
 
-[In more detail:](https://frankbijnen.github.io/TripManager/topicintro.html)
-
 # Credits
 - John Heath and Steve Follen for their work on the XT2.<br>
 - ProofResistant for his work on the Tread 2 and XT2, good idea's, and testing.<br>
