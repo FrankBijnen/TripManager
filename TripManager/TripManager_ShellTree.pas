@@ -38,7 +38,7 @@ begin
     IFolder.BindToObject(PIDL, nil, IID_IShellFolder, Pointer(Result));
 end;
 
-function HasDirAttribute(ADir: string): boolean;
+function ValidFolder(ADir: string): boolean;
 var
   Attrs: DWORD;
 begin
@@ -68,7 +68,7 @@ begin
 
   // Archives (TAR, ZIP TGZ etc.) may be reported as folders in TCustomShellTreeView.PopulateNode
   // Resulting in needlessly scanning large files
-  if (HasDirAttribute(NewShellFolder.PathName) = false) then
+  if (ValidFolder(NewShellFolder.PathName) = false) then
     NewNode.Delete // AFolder does not have Directory Attribute. Dont show in Treeview
   else
   begin
@@ -114,7 +114,7 @@ begin
      (Node.Data <> nil) and
      ((Node.StateIndex and sfsNeedsCheck) = sfsNeedsCheck) then
   begin
-    if (TreeView_GetItemRect(Handle, Node.ItemId, prc, false)) and
+    if (TreeView_GetItemRect(Handle, Node.ItemId, Prc, false)) and
        (Prc.Top >= 0) and
        ((Prc.Bottom - Prc.Height) <= Self.Height) then // Only check items in view
     begin

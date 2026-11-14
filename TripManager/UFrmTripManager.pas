@@ -2067,8 +2067,6 @@ begin
   begin
     if (FrmTripEditor.Showing) then
     begin
-      if (Parm1 <> FMapZoom) then
-        breakpoint;
       FMapZoom := Parm1;
       Lat := Parm2;
       Lon := Parm3;

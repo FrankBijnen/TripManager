@@ -249,6 +249,7 @@ begin
   try
     try
       Throttle(GeoSettings.ThrottleGeoCode);
+      RESTRequest.Client.UserAgent := UserAgent;
       RESTRequest.Execute;
       LastQuery := Now;
       if (RESTRequest.Response.StatusCode >= 400) then

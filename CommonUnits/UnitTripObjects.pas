@@ -785,7 +785,7 @@ type
 |    Initiator         Char           |    1| Tab 0x09                            |
 |    NameLen           Cardinal       |    4|                                     |
 |    Name              string         |   12| 'mUdbDataHndl'                      |
-|    Datatype          byte           |    1| 0x0b                                |
+|    Datatype          Byte           |    1| 0x0b                                |
 |    UdbHandleSize:    Cardinal       |    4|                                     |
 |    CalcStatus:       Cardinal       |    4| CalculationMagic[TTripModel]        |
 |---------------------------------------------------------------------------------|
@@ -799,10 +799,13 @@ type
 |       Unknown3Bounds:     Cardinal  |   16|    .Unknown3BoundsOffset            |
 |       Unknown3Dist:       Cardinal  |    4|    .Unknown3DistOffset              |
 |       Unknown3Time:       Cardinal  |    4|    .Unknown3TimeOffset              |
-|       Unknown3Floats                |   36|    .Unknown3FloatOffset             |
-|       Unknown3Magic:      Char      |    4|    .Unknown3MagicOffset             |
-|       Unknown3Avoidances: byte      |    1|    .Unknown3MagicOffset +4          |
-|       Unknown3Shape:      TBytes    |  var|    .Unknown3ShapeOffset             |
+|       Unknown3RoutePreference Byte  |    1|    .Unknown3RoutePrefOffset         |
+|       Unknown3Floats    Single x 9  |   36|    .Unknown3FloatOffset             |
+|       Unknown3TransportMode   Byte  |    1|    .Unknown3TransportModeOffset     |
+|       Unknown3Magic:          Char  |    4|    .Unknown3MagicOffset             |
+|       Unknown3Avoidances:     Byte  |    1|    .Unknown3MagicOffset +4          |
+|       Unknown3TimeStamp:  Cardinal  |    4|    .Unknown3TimeStampOffset         |
+|       Unknown3Shape:        TBytes  |  var|    .Unknown3ShapeOffset             |
 |---------------------------------------------------------------------------------|
 |Variable part UdbHandle              |     |                                     |
 |    UdbDir 1                         |     |                                     |
@@ -819,8 +822,8 @@ type
 |                                     |     |                                     |
 |   TUdbDirFixedValue = packed record |     |                                     |
 |     SubClass:         TSubClass     |   30|                                     |
-|     Lat:              integer       |    4|                                     |
-|     Lon:              integer       |    4|                                     |
+|     Lat:              Integer       |    4|                                     |
+|     Lon:              Integer       |    4|                                     |
 |     UdbDirMagic:      Cardinal      |    4| $51590469                           |
 |     Time:             WORD          |    2|                                     |
 |---------------------------------------------------------------------------------|
@@ -4438,7 +4441,7 @@ begin
   Fmt := '%1.6f';
   for Index := Low(TmpFloats) to High(TmpFloats) do
   begin
-    result := result + Format(Fmt, [TmpFloats[Index]]);
+    result := result + Format(Fmt, [TmpFloats[Index]], FloatFormatSettings);
     if (Index = Low(TmpFloats)) then
       Fmt := ', ' + Fmt;
   end;
